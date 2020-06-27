@@ -1042,12 +1042,13 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het aan/uit-menu wilt kunnen gebruiken"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je via het aan/uit-menu wilt kunnen gebruiken"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Andere apps bekijken"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Bedieningselementen kunnen niet worden geladen. Check de <xliff:g id="APP">%s</xliff:g>-app om na te gaan of de app-instellingen niet zijn gewijzigd."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Geen geschikte bedieningselementen beschikbaar."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Geen geschikte bedieningselementen beschikbaar"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Overig"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Toevoegen aan apparaatbediening"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Toevoegen"</string>

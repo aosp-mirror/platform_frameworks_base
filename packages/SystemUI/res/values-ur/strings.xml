@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"کنٹرولز کو دوبارہ ترتیب دینے کے ليے پکڑیں اور گھسیٹیں"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"سبھی کنٹرولز ہٹا دیے گئے"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تبدیلیاں محفوظ نہیں ہوئیں"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"دیگر ایپس دیکھیں"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"کنٹرولز کو لوڈ نہیں کیا جا سکا۔ یہ یقینی بنانے کے لیے <xliff:g id="APP">%s</xliff:g> ایپ کو چیک کریں کہ ایپ کی ترتیبات تبدیل نہیں ہوئی ہیں۔"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"موافق کنٹرولز دستیاب نہیں ہیں"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"دیگر"</string>

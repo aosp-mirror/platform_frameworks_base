@@ -551,8 +551,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Deaktivovat VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Odpojit VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Zobrazit zásady"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne administrátor IT."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zařízení patří organizaci.\n\nAdministrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne administrátor IT."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne váš administrátor IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zařízení patří vaší organizaci\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne váš administrátor IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizace do tohoto zařízení nainstalovala certifikační autoritu. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizace do vašeho pracovního profilu nainstalovala certifikační autoritu. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V zařízení je nainstalována certifikační autorita. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
@@ -1058,6 +1058,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládací prvky můžete uspořádat podržením a přetažením"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všechny ovládací prvky byly odstraněny"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Změny nebyly uloženy"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Zobrazit další aplikace"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Ovládací prvky se nepodařilo načíst. V aplikaci <xliff:g id="APP">%s</xliff:g> zkontrolujte, zda se nezměnilo nastavení."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilní ovládání není k dispozici"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Jiné"</string>

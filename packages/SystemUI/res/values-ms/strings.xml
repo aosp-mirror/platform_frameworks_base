@@ -523,19 +523,19 @@
     <string name="branded_vpn_footer" msgid="816930186313188514">"Rangkaian mungkin dipantau"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasi anda memiliki peranti ini dan mungkin memantau trafik rangkaian"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> memiliki peranti ini dan mungkin memantau trafik rangkaian"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Peranti ini milik organisasi anda dan bersambung dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan bersambung dengan <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Peranti ini milik organisasi anda dan dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan dihubungkan dengan <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Peranti ini milik organisasi anda"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Peranti ini milik organisasi anda dan bersambung dengan VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan bersambung dengan VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Peranti ini milik organisasi anda dan dihubungkan dengan VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan dihubungkan dengan VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organisasi anda mungkin memantau trafik rangkaian dalam profil kerja anda"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> mungkin memantau trafik rangkaian dalam profil kerja anda"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Rangkaian mungkin dipantau"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Peranti ini bersambung dengan VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profil kerja anda bersambung dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profil peribadi anda bersambung dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Peranti ini bersambung dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Peranti ini dihubungkan dengan VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profil kerja anda dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profil peribadi anda dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Peranti ini dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Pengurusan peranti"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Pemantauan profil"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Pemantauan rangkaian"</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; seret untuk mengatur semula kawalan"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kawalan dialih keluar"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Perubahan tidak disimpan"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Lihat apl lain"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kawalan tidak dapat dimuatkan. Semak apl <xliff:g id="APP">%s</xliff:g> untuk memastikan bahawa tetapan apl tidak berubah."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kawalan serasi tidak tersedia"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lain-lain"</string>

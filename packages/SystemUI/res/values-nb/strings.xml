@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Hold og dra for å flytte kontroller"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle kontroller er fjernet"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Endringene er ikke lagret"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Se andre apper"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kunne ikke laste inn kontrollene. Sjekk <xliff:g id="APP">%s</xliff:g>-appen for å sjekke at appinnstillingene ikke er endret."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatible kontroller er ikke tilgjengelige"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Annet"</string>

@@ -166,8 +166,8 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"तपाईंले अर्को पटक पनि गलत ढाँचा प्रविष्टि गर्नुभयो भने यो कार्य प्रोफाइल र त्यहाँको डेटा मेटाइने छ।"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"तपाईंले अर्को पटक पनि गलत PIN प्रविष्टि गर्नुभयो भने तपाईंको कार्य प्रोफाइल र त्यहाँको डेटा मेटाइने छ।"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"तपाईंले अर्को पटक पनि गलत पासवर्ड प्रविष्टि गर्नुभयो भने तपाईंको कार्य प्रोफाइल र त्यहाँको डेटा मेटाइने छ।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"अनलक गर्ने अत्याधिक गलत प्रयासहरू भए। यो यन्त्रको डेटा मेटाइने छ।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"अनलक गर्ने अत्याधिक गलत प्रयासहरू भए। यो प्रयोगकर्तालाई हटाइने छ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"अनलक गर्ने अत्यधिक गलत प्रयासहरू भए। यो यन्त्रको डेटा मेटाइने छ।"</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"अनलक गर्ने अत्यधिक गलत प्रयासहरू भए। यो प्रयोगकर्तालाई हटाइने छ।"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"अनलक गर्ने अत्यधिक गलत प्रयासहरू भए। यो कार्यलयको प्रोफाइल र यसको डेटा मेटाइने छ।"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"हटाउनुहोस्"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिन्ट सेन्सरमा छुनुहोस्‌"</string>
@@ -545,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"विच्छेद VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतिहरू हेर्नुहोस्"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"यो यन्त्र <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारी निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"यो यन्त्र तपाईंको सङ्गठनको स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारी निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"यो यन्त्र <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"यो यन्त्र तपाईंको सङ्गठनको स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापित गऱ्यो। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरेको छ। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"यस यन्त्रमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरिएको छ। तपाईंको सुरक्षित नेटवर्कको ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
@@ -1046,7 +1046,9 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियन्त्रणहरूको क्रम मिलाउन तिनलाई थिचेर ड्र्याग गर्नुहोस्"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सबै नियन्त्रणहरू हटाइए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"परिवर्तनहरू सुरक्षित गरिएका छैनन्"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न यो एप जाँच्नुहोस्।"</string>
+    <!-- no translation found for controls_favorite_see_other_apps (7709087332255283460) -->
+    <skip />
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न उक्त एप जाँच्नुहोस्।"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"मिल्दा नियन्त्रण सुविधाहरू उपलब्ध छैनन्"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्र नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>

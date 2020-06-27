@@ -1058,6 +1058,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Каб змяніць парадак элементаў кіравання, утрымлівайце і перацягвайце іх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усе элементы кіравання выдалены"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Змяненні не захаваны"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Паказаць іншыя праграмы"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не ўдалося загрузіць элементы кіравання. Праверце, ці не змяніліся налады праграмы \"<xliff:g id="APP">%s</xliff:g>\"."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Сумяшчальныя элементы кіравання недаступныя"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Іншае"</string>

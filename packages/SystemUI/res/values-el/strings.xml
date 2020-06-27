@@ -455,7 +455,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Σύρετε προς τα επάνω για άνοιγμα"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Σύρετε προς τα πάνω για να δοκιμάσετε ξανά"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Αυτή η συσκευή ανήκει στον οργανισμό σας."</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Σύρετε προς τα έξω για τηλέφωνο"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Σύρετε προς τα έξω για voice assist"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Σύρετε προς τα έξω για κάμερα"</string>
@@ -526,7 +526,7 @@
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Αυτή η συσκευή ανήκει στον οργανισμό σας και είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Αυτή η συσκευή ανήκει στον οργανισμό σας."</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Αυτή η συσκευή ανήκει στον οργανισμό σας και είναι συνδεδεμένη σε ορισμένα VPN."</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και είναι συνδεδεμένη σε ορισμένα VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ο οργανισμός σας μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου στο προφίλ εργασίας σας"</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Κρατήστε και σύρετε για αναδιάταξη των στοιχείων ελέγχου"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Όλα τα στοιχεία ελέγχου καταργήθηκαν"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Οι αλλαγές δεν αποθηκεύτηκαν"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Εμφάνιση άλλων εφαρμογών"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Δεν ήταν δυνατή η φόρτωση των στοιχείων ελέγχου. Ελέγξτε την εφαρμογή <xliff:g id="APP">%s</xliff:g> για να βεβαιωθείτε ότι δεν έχουν αλλάξει οι ρυθμίσεις της εφαρμογής."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Μη διαθέσιμα συμβατά στοιχεία ελέγχου"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>

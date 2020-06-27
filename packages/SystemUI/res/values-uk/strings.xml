@@ -552,7 +552,7 @@
     <string name="disconnect_vpn" msgid="26286850045344557">"Від’єднатися від мережі VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Переглянути правила"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Цей пристрій належить організації \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nIT-адміністратор може відстежувати й контролювати налаштування, корпоративний доступ, додатки, дані пристрою та інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв\'яжіться з IT-адміністратором."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Цей пристрій належить вашій організації.\n\nIT-адміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки, дані пристрою й інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв\'яжіться з IT-адміністратором."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Цей пристрій належить вашій організації.\n\nІТ-адміністратор може відстежувати й контролювати налаштування, корпоративний доступ, додатки, дані пристрою та інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв\'яжіться з ІТ-адміністратором."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Адміністратор організації встановив центр сертифікації на цьому пристрої. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Адміністратор організації встановив центр сертифікації у вашому робочому профілі. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На цьому пристрої встановлено центр сертифікації. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
@@ -1058,6 +1058,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Щоб змінити порядок елементів керування, перетягуйте їх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усі елементи керування вилучено"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Зміни не збережено"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Переглянути інші додатки"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не вдалося завантажити елементи керування. Перевірте в додатку <xliff:g id="APP">%s</xliff:g>, чи його налаштування не змінились."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Сумісні елементи керування недоступні"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Інше"</string>
