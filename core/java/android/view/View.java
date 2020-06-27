@@ -26372,6 +26372,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 .setParent(root.getSurfaceControl())
                 .setBufferSize(shadowSize.x, shadowSize.y)
                 .setFormat(PixelFormat.TRANSLUCENT)
+                .setCallsite("View.startDragAndDrop")
                 .build();
         final Surface surface = new Surface();
         surface.copyFrom(surfaceControl);

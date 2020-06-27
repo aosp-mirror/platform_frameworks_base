@@ -413,7 +413,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
-        setSurfaceControl(b.build());
+        setSurfaceControl(b.setCallsite("WindowContainer.setInitialSurfaceControlProperties").build());
         getSyncTransaction().show(mSurfaceControl);
         onSurfaceShown(getSyncTransaction());
         updateSurfacePosition();
