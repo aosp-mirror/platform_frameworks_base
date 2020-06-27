@@ -243,7 +243,7 @@ class MediaCarouselScrollHandler(
             }
             val rotation = (1.0f - settingsOffset) * 50
             settingsButton.rotation = rotation * -Math.signum(contentTranslation)
-            val alpha = MathUtils.map(0.5f, 1.0f, 0.0f, 1.0f, settingsOffset)
+            val alpha = MathUtils.saturate(MathUtils.map(0.5f, 1.0f, 0.0f, 1.0f, settingsOffset))
             settingsButton.alpha = alpha
             settingsButton.visibility = if (alpha != 0.0f) View.VISIBLE else View.INVISIBLE
             settingsButton.translationX = newTranslationX
