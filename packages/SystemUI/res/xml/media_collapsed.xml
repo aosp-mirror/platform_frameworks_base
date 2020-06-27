@@ -42,10 +42,11 @@
 
     <Constraint
         android:id="@+id/media_seamless"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="60dp"
         app:layout_constraintStart_toEndOf="@id/center_vertical_guideline"
         app:layout_constraintHorizontal_bias="1"
