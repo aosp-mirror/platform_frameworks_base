@@ -454,10 +454,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"អូសឡើងលើ​ដើម្បីបើក"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
-    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
-    <skip />
-    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
-    <skip />
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"ឧបករណ៍នេះ​គឺជា​កម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"អូសចេញពីរូបតំណាងដើម្បីប្រើទូរស័ព្ទ"</string>
     <string name="voice_hint" msgid="7476017460191291417">"អូសចេញពីរូបតំណាងដើម្បីប្រើជំនួយសំឡេង"</string>
     <string name="camera_hint" msgid="4519495795000658637">"អូសចេញពីរូបតំណាងដើម្បីប្រើកាមេរ៉ា"</string>
@@ -523,33 +521,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"ប្រវត្តិរូបអាចត្រូវបានតាមដាន"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"បណ្ដាញ​អាច​ត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"បណ្ដាញអាចត្រូវបានត្រួតពិនិត្យ"</string>
-    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ស្ថាប័ន​របស់អ្នក​ជាម្ចាស់​ឧបករណ៍​នេះ ហើយ​អាចនឹង​តាមដាន​ចរាចរណ៍បណ្តាញ"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ជាម្ចាស់​ឧបករណ៍​នេះ ហើយ​អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័នអ្នក និងត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ឧបករណ៍នេះ​គឺជា​កម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័នអ្នក និងត្រូវបានភ្ជាប់ទៅ VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់ទៅ VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ស្ថាប័ន​របស់អ្នក​អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ​របស់​អ្នក"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"បណ្ដាញ​អាច​ត្រូវ​តាមដាន"</string>
-    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
-    <skip />
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ឧបករណ៍នេះ​ត្រូវបានភ្ជាប់ទៅ VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"កម្រងព័ត៌មានការងារ​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"កម្រងព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ឧបករណ៍នេះ​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ការ​គ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"តាមដានប្រវត្ថិរូប"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ការ​ត្រួតពិនិត្យ​បណ្ដាញ"</string>
@@ -559,10 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"បិទ VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"ផ្ដាច់ VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"មើល​គោលការណ៍"</string>
-    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"ឧបករណ៍នេះ​ជាគឺកម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>។\n\nអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​អាចតាមដាន និងគ្រប់គ្រង​ការកំណត់ ការចូលប្រើជាលក្ខណៈក្រុមហ៊ុន កម្មវិធី ទិន្នន័យដែលពាក់ព័ន្ធ​នឹង​ឧបករណ៍​របស់អ្នក និងព័ត៌មាន​ទីតាំង​របស់​ឧបករណ៍​អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក។"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"ឧបករណ៍នេះ​គឺជាកម្មសិទ្ធិ​របស់ស្ថាប័នអ្នក។\n\nអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​អាចតាមដាន និងគ្រប់គ្រង​ការកំណត់ ការចូលប្រើជាលក្ខណៈក្រុមហ៊ុន កម្មវិធី ទិន្នន័យដែលពាក់ព័ន្ធ​នឹង​ឧបករណ៍​របស់អ្នក និងព័ត៌មាន​ទីតាំង​របស់ឧបករណ៍​អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក។"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ស្ថាប័ន​របស់អ្នក​បានដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រនៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមាន​សុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ស្ថាប័នរបស់អ្នក​បានដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ។ ចរាចរណ៍​បណ្តាញដែលមាន​សុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"បាន​ដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមានសុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
@@ -1062,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ផ្ទាំងគ្រប់គ្រង​ឡើងវិញ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"បាន​ដកផ្ទាំងគ្រប់គ្រងទាំងអស់ហើយ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"មិនបាន​រក្សាទុក​ការផ្លាស់ប្ដូរទេ"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"មើល​កម្មវិធី​ផ្សេងទៀត"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"មិនអាចផ្ទុក​ការគ្រប់គ្រង​បានទេ។ សូមពិនិត្យមើល​កម្មវិធី <xliff:g id="APP">%s</xliff:g> ដើម្បីធ្វើឱ្យប្រាកដថា​ការកំណត់កម្មវិធី​មិនបានផ្លាស់ប្ដូរ។"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"មិនអាចប្រើ​ការគ្រប់គ្រង​ដែលត្រូវគ្នា​បានទេ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ផ្សេងៗ"</string>
@@ -1079,15 +1064,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"បញ្ជាក់​ការផ្លាស់ប្ដូរ​សម្រាប់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"អូសដើម្បី​មើលច្រើនទៀត"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"មេឌៀ"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"លាក់វគ្គ​បច្ចុប្បន្ន។"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"លាក់"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"ការកំណត់"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"បញ្ហា កំពុងព្យាយាម​ម្ដងទៀត…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>
