@@ -37,6 +37,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
@@ -146,6 +147,29 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         // Ensure stacks have swapped tasks.
         ensureStackPlacement(pinnedStack, secondActivity);
         ensureStackPlacement(mFullscreenStack, firstActivity);
+    }
+
+    @Test
+    public void testMovingBottomMostStackActivityToPinnedStack() {
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final Task task = firstActivity.getTask();
+
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(task)
+                .setStack(mFullscreenStack).build();
+
+        mFullscreenStack.moveTaskToBack(task);
+
+        // Ensure full screen stack has both tasks.
+        ensureStackPlacement(mFullscreenStack, firstActivity, secondActivity);
+        assertEquals(task.getTopMostActivity(), secondActivity);
+        firstActivity.setState(STOPPED, "testMovingBottomMostStackActivityToPinnedStack");
+
+
+        // Move first activity to pinned stack.
+        mRootWindowContainer.moveActivityToPinnedStack(secondActivity, "initialMove");
+
+        assertTrue(firstActivity.mRequestForceTransition);
     }
 
     private static void ensureStackPlacement(ActivityStack stack, ActivityRecord... activities) {
