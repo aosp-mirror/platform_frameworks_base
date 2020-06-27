@@ -2718,7 +2718,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             Settings.Global.THEATER_MODE_ON, 0) == 0;
             boolean canTurnScreenOn = mActivityRecord == null || mActivityRecord.currentLaunchCanTurnScreenOn();
 
-            if (allowTheaterMode && canTurnScreenOn && !mPowerManagerWrapper.isInteractive()) {
+            if (allowTheaterMode && canTurnScreenOn
+                        && (mWmService.mAtmInternal.isDreaming()
+                        || !mPowerManagerWrapper.isInteractive())) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
                     Slog.v(TAG, "Relayout window turning screen on: " + this);
                 }
