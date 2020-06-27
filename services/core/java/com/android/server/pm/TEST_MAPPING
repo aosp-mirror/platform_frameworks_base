@@ -71,7 +71,12 @@
       ]
     },
     {
-      "name": "PackageManagerServiceHostTests"
+      "name": "PackageManagerServiceHostTests",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ]
     }
   ],
   "postsubmit": [
@@ -87,6 +92,9 @@
     // {
     //   "name": "CtsAppSecurityHostTestCases"
     // },
+    {
+      "name": "PackageManagerServiceHostTests"
+    },
     {
       "name": "FrameworksServicesTests",
       "options": [
