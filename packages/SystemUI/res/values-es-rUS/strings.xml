@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se guardaron los cambios"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver otras apps"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"No se pudieron cargar los controles. Revisa la app de <xliff:g id="APP">%s</xliff:g> para asegurarte de que su configuración no haya cambiado."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"No hay ningún control compatible disponible"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Otros"</string>

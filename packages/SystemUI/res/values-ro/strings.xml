@@ -524,7 +524,7 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profilul poate fi monitorizat"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Rețeaua poate fi monitorizată"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Este posibil ca rețeaua să fie monitorizată"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația dvs. gestionează acest dispozitiv și poate monitoriza traficul de rețea"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația dvs. deține acest dispozitiv și poate monitoriza traficul de rețea"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Dispozitivul aparține organizației dvs. și este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
@@ -1052,6 +1052,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Țineți apăsat și trageți pentru a rearanja comenzile"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Au fost șterse toate comenzile"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modificările nu au fost salvate"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Vedeți alte aplicații"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Comenzile nu au putut fi încărcate. Accesați aplicația <xliff:g id="APP">%s</xliff:g> pentru a vă asigura că setările aplicației nu s-au schimbat."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nu sunt disponibile comenzi compatibile"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altul"</string>
@@ -1069,15 +1070,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirmați schimbarea pentru <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Glisați pentru a vedea mai multe"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Se încarcă recomandările"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Ascunde sesiunea actuală."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ascunde"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Eroare, se încearcă din nou…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nu s-a găsit"</string>

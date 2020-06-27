@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задръжте и плъзнете, за да пренаредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Всички контроли са премахнати"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не са запазени"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Преглед на други приложения"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Контролите не се заредиха. Отворете приложението <xliff:g id="APP">%s</xliff:g> и проверете дали настройките му не са променени."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Не са налице съвместими контроли"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>

@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ລຶບການຄວບຄຸມທັງໝົດອອກແລ້ວ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງໄວ້"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ເບິ່ງແອັບອື່ນໆ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"ບໍ່ສາມາດໂຫຼດການຄວບຄຸມໄດ້. ກວດສອບແອັບ <xliff:g id="APP">%s</xliff:g> ເພື່ອໃຫ້ແນ່ໃຈວ່າຍັງບໍ່ມີການປ່ຽນແປງການຕັ້ງຄ່າແອັບເທື່ອ."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"ບໍ່ມີການຄວບຄຸມທີ່ໃຊ້ຮ່ວມກັນທີ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ອື່ນໆ"</string>

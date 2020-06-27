@@ -1349,7 +1349,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Нажмите, чтобы отключить отладку по USB."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Отладка по Wi-Fi активна"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Отладка по Wi-Fi включена"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Нажмите, чтобы отключить отладку по Wi-Fi."</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Нажмите, чтобы отключить отладку по Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Тестовый режим включен"</string>
@@ -1667,7 +1667,7 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Использовать быстрое включение?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Чтобы использовать функцию специальных возможностей, когда она включена, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Включить специальные возможности?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Чтобы включить специальные возможности, нажмите обе кнопки регулировки громкости на несколько секунд. Обратите внимание, что в работе устройства могут произойти изменения.\n\nТекущие функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nЧтобы изменить выбранные функции, перейдите в настройки и нажмите \"Специальные возможности\"."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Чтобы включить специальные возможности, нажмите обе кнопки регулировки громкости и удерживайте несколько секунд. Обратите внимание, что в работе устройства могут произойти изменения.\n\nТекущие функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nЧтобы изменить выбранные функции, перейдите в настройки и нажмите \"Специальные возможности\"."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Включить функцию \"<xliff:g id="SERVICE">%1$s</xliff:g>\"?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Чтобы включить функцию \"<xliff:g id="SERVICE">%1$s</xliff:g>\", нажмите обе кнопки регулировки громкости на несколько секунд. Обратите внимание, что в работе устройства могут произойти изменения.\n\nЧтобы назначить это сочетание клавиш другой функции, перейдите в настройки и выберите \"Специальные возможности\"."</string>

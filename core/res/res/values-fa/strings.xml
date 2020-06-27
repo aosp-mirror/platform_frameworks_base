@@ -514,8 +514,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در رایانهٔ لوحی را مشاهده کند و اتصال با دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"‏به برنامه اجازه می‌دهد پیکربندی بلوتوث را در دستگاه Android TV شما ببیند، و اتصالات با دستگاه‌های مرتبط‌شده را بپذیرد یا این اتصالات را برقرار کند."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در تلفن را مشاهده کند، و اتصالات دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی «سرویس پولی NFC»، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های «ارتباط میدان نزدیک» (NFC)، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"غیرفعال کردن قفل صفحه شما"</string>

@@ -1123,14 +1123,10 @@
     <string name="checked" msgid="9179896827054513119">"जाँच गरिएको"</string>
     <string name="not_checked" msgid="7972320087569023342">"जाँच गरिएको छैन"</string>
     <string name="whichApplication" msgid="5432266899591255759">"प्रयोग गरेर कारबाही पुरा गर्नुहोस्"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"निम्न एपको प्रयोग गरी कारबाही पुरा गर्नुहोस्: %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"पूर्ण कारबाही"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"निम्नबाट खोल्नुहोस्"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichViewApplicationNamed (415164730629690105) -->
-    <skip />
+    <string name="whichViewApplicationNamed" msgid="415164730629690105">"निम्न एपमा खोल्नुहोस्: %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"खोल्नुहोस्"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"निम्नमार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"निम्नमार्फत लिंकहरू खोल्नुहोस्"</string>

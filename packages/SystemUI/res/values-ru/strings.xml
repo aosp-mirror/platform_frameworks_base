@@ -551,7 +551,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Отключить VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Просмотреть политику"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Этим устройством управляет организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nВаш системный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nВаш системный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Это устройство принадлежит вашей организации.\n\nСистемный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ваша организация установила сертификат ЦС на устройство. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ваша организация установила сертификат ЦС в рабочем профиле. Она может отслеживать и изменять защищенный сетевой трафик."</string>
@@ -1039,7 +1039,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте виджеты для управления устройствами."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройте виджеты управления устройствами"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Чтобы перейти к элементам управления, удерживайте кнопку питания."</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Чтобы добавить элементы управления, выберите приложение"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Чтобы добавить виджеты управления, выберите приложение"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Добавлен <xliff:g id="NUMBER_1">%s</xliff:g> элемент управления.</item>
       <item quantity="few">Добавлено <xliff:g id="NUMBER_1">%s</xliff:g> элемента управления.</item>
@@ -1054,12 +1054,13 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"удалить из избранного"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Переместить на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберите элементы управления, которые будут доступны в меню кнопки питания."</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок элементов управления, перетащите их"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Все элементы управления удалены"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберите виджеты управления, которые будут доступны в меню кнопки питания."</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок виджетов, перетащите их."</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Все виджеты управления удалены."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Изменения не сохранены."</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не удалось загрузить список доступных для управления устройств. Проверьте, не изменились ли настройки приложения \"<xliff:g id="APP">%s</xliff:g>\"."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Управление недоступно"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Показать другие приложения"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не удалось загрузить список виджетов для управления устройствами. Проверьте, не изменились ли настройки приложения \"<xliff:g id="APP">%s</xliff:g>\"."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Управление недоступно."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Другое"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Добавьте виджеты управления устройствами"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Добавить"</string>
@@ -1075,15 +1076,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Подтвердите изменения для устройства \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Проведите по экрану, чтобы увидеть больше"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загрузка рекомендаций…"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Скрыть текущий сеанс?"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скрыть"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Возобновить"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Ошибка. Повторная попытка…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
@@ -1094,6 +1091,6 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Ошибка. Повторите попытку."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Выполняется"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Удерживайте кнопку питания, чтобы увидеть новые элементы управления"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Добавить эл-ты управления"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Изменить эл-ты управления"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Добавить виджеты"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Изменить виджеты"</string>
 </resources>

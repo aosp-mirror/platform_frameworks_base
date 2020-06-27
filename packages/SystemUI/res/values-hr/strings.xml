@@ -1052,6 +1052,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve su kontrole uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu spremljene"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Pogledajte ostale aplikacije"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrole se ne mogu učitati. U aplikaciji <xliff:g id="APP">%s</xliff:g> provjerite da se postavke aplikacije nisu promijenile."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole nisu dostupne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>

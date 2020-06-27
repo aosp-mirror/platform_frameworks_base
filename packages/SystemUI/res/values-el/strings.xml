@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Κρατήστε και σύρετε για αναδιάταξη των στοιχείων ελέγχου"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Όλα τα στοιχεία ελέγχου καταργήθηκαν"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Οι αλλαγές δεν αποθηκεύτηκαν"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Εμφάνιση άλλων εφαρμογών"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Δεν ήταν δυνατή η φόρτωση των στοιχείων ελέγχου. Ελέγξτε την εφαρμογή <xliff:g id="APP">%s</xliff:g> για να βεβαιωθείτε ότι δεν έχουν αλλάξει οι ρυθμίσεις της εφαρμογής."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Μη διαθέσιμα συμβατά στοιχεία ελέγχου"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>
