@@ -1062,6 +1062,7 @@
     <!-- Shutdown and restart actions are larger in power options dialog -->
     <dimen name="global_actions_power_dialog_item_height">190dp</dimen>
     <dimen name="global_actions_power_dialog_item_width">255dp</dimen>
+    <dimen name="global_actions_power_dialog_item_bottom_margin">45dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
@@ -1221,9 +1222,9 @@
     <!-- Padding of bubble overflow empty state subtitle -->
     <dimen name="bubble_empty_overflow_subtitle_padding">50dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_height">4dp</dimen>
+    <dimen name="bubble_pointer_height">8dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_width">6dp</dimen>
+    <dimen name="bubble_pointer_width">12dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
@@ -1269,6 +1270,7 @@
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_album_size">52dp</dimen>
+    <dimen name="qs_center_guideline_padding">10dp</dimen>
     <dimen name="qs_seamless_icon_size">20dp</dimen>
     <dimen name="qs_seamless_fallback_icon_size">20dp</dimen>
     <dimen name="qs_seamless_fallback_top_margin">18dp</dimen>

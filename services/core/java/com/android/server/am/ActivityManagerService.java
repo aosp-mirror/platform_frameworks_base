@@ -8055,6 +8055,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     int checkContentProviderUriPermission(Uri uri, int userId, int callingUid, int modeFlags) {
+        if (Thread.holdsLock(mActivityTaskManager.getGlobalLock())) {
+            Slog.wtf(TAG, new IllegalStateException("Unable to check Uri permission"
+                    + " because caller is holding WM lock; assuming permission denied"));
+            return PackageManager.PERMISSION_DENIED;
+        }
+
         final String name = uri.getAuthority();
         final long ident = Binder.clearCallingIdentity();
         ContentProviderHolder holder = null;

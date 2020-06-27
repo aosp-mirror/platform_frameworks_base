@@ -68,6 +68,8 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_UNREGISTER_PHONE_ACCOUNT = "unregister-phone-account";
     private static final String COMMAND_SET_DEFAULT_DIALER = "set-default-dialer";
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
+    private static final String COMMAND_STOP_BLOCK_SUPPRESSION = "stop-block-suppression";
+
     /**
      * Change the system dialer package name if a package name was specified,
      * Example: adb shell telecom set-system-dialer <PACKAGE>
@@ -115,6 +117,8 @@ public final class Telecom extends BaseCommand {
                 + "usage: telecom set-sim-count <COUNT>\n"
                 + "usage: telecom get-sim-config\n"
                 + "usage: telecom get-max-phones\n"
+                + "usage: telecom stop-block-suppression: Stop suppressing the blocked number"
+                        + " provider after a call to emergency services.\n"
                 + "usage: telecom set-emer-phone-account-filter <PACKAGE>\n"
                 + "\n"
                 + "telecom set-phone-account-enabled: Enables the given phone account, if it has"
@@ -206,6 +210,9 @@ public final class Telecom extends BaseCommand {
                 break;
             case COMMAND_UNREGISTER_PHONE_ACCOUNT:
                 runUnregisterPhoneAccount();
+                break;
+            case COMMAND_STOP_BLOCK_SUPPRESSION:
+                runStopBlockSuppression();
                 break;
             case COMMAND_SET_DEFAULT_DIALER:
                 runSetDefaultDialer();
@@ -324,8 +331,13 @@ public final class Telecom extends BaseCommand {
         System.out.println("Success - " + handle + " unregistered.");
     }
 
+    private void runStopBlockSuppression() throws RemoteException {
+        mTelecomService.stopBlockSuppression();
+    }
+
     private void runSetDefaultDialer() throws RemoteException {
-        final String packageName = nextArgRequired();
+        String packageName = nextArg();
+        if ("default".equals(packageName)) packageName = null;
         mTelecomService.setTestDefaultDialer(packageName);
         System.out.println("Success - " + packageName + " set as override default dialer.");
     }

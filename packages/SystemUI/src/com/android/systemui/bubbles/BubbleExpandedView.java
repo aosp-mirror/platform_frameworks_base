@@ -496,12 +496,9 @@ public class BubbleExpandedView extends LinearLayout {
         }
         final float alpha = visibility ? 1f : 0f;
 
-        if (alpha == mActivityView.getAlpha()) {
-            return;
-        }
-
         mPointerView.setAlpha(alpha);
-        if (mActivityView != null) {
+
+        if (mActivityView != null && alpha != mActivityView.getAlpha()) {
             mActivityView.setAlpha(alpha);
             mActivityView.bringToFront();
         }

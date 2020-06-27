@@ -1555,7 +1555,6 @@ class MediaRouter2ServiceImpl {
             long managerRequestId = (matchingRequest == null)
                     ? MediaRoute2ProviderService.REQUEST_ID_NONE
                     : matchingRequest.mManagerRequestId;
-            // Managers should know created session even if it's not requested.
             notifySessionCreatedToManagers(managerRequestId, sessionInfo);
 
             if (matchingRequest == null) {
@@ -1575,18 +1574,6 @@ class MediaRouter2ServiceImpl {
                         + "session=" + matchingRequest.mOldSession);
             }
 
-            String originalRouteId = matchingRequest.mRoute.getId();
-            RouterRecord routerRecord = matchingRequest.mRouterRecord;
-
-            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)) {
-                Slog.w(TAG, "Created session doesn't match the original request."
-                        + " originalRouteId=" + originalRouteId
-                        + ", uniqueRequestId=" + uniqueRequestId + ", sessionInfo=" + sessionInfo);
-                notifySessionCreationFailedToRouter(matchingRequest.mRouterRecord,
-                        toOriginalRequestId(uniqueRequestId));
-                return;
-            }
-
             // Succeeded
             if (sessionInfo.isSystemSession()
                     && !matchingRequest.mRouterRecord.mHasModifyAudioRoutingPermission) {
@@ -1597,7 +1584,7 @@ class MediaRouter2ServiceImpl {
                 notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
                         toOriginalRequestId(uniqueRequestId), sessionInfo);
             }
-            mSessionToRouterMap.put(sessionInfo.getId(), routerRecord);
+            mSessionToRouterMap.put(sessionInfo.getId(), matchingRequest.mRouterRecord);
         }
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,

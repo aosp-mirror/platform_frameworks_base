@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.test
+package com.android.systemui.controls.management
 
-import java.nio.file.Path
-import java.nio.file.Paths
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.controller.ControlsController
 
-// Unfortunately no easy way to access PMS SystemPartitions, so mock them here
-internal enum class Partition(val baseAppFolder: Path) {
-    SYSTEM("/system/app"),
-    VENDOR("/vendor/app"),
-    PRODUCT("/product/app"),
-    SYSTEM_EXT("/system_ext/app")
-    ;
-
-    constructor(baseFolder: String) : this(Paths.get(baseFolder))
-}
+class TestControlsRequestDialog(
+    controller: ControlsController,
+    dispatcher: BroadcastDispatcher,
+    listingController: ControlsListingController
+) : ControlsRequestDialog(controller, dispatcher, listingController)

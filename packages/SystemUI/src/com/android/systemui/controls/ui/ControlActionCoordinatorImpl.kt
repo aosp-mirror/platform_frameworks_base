@@ -128,15 +128,22 @@ class ControlActionCoordinatorImpl @Inject constructor(
         }
 
     private fun bouncerOrRun(action: Action) {
-        if (!keyguardStateController.isUnlocked()) {
-            context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+        if (keyguardStateController.isShowing()) {
+            var closeGlobalActions = !keyguardStateController.isUnlocked()
+            if (closeGlobalActions) {
+                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
 
-            // pending actions will only run after the control state has been refreshed
-            pendingAction = action
+                // pending actions will only run after the control state has been refreshed
+                pendingAction = action
+            }
 
             activityStarter.dismissKeyguardThenExecute({
                 Log.d(ControlsUiController.TAG, "Device unlocked, invoking controls action")
-                globalActionsComponent.handleShowGlobalActionsMenu()
+                if (closeGlobalActions) {
+                    globalActionsComponent.handleShowGlobalActionsMenu()
+                } else {
+                    action.invoke()
+                }
                 true
             }, { pendingAction = null }, true /* afterKeyguardGone */)
         } else {

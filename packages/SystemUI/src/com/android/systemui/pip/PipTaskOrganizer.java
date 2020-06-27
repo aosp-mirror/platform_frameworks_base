@@ -224,8 +224,21 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         return new Rect(mLastReportedBounds);
     }
 
+    public Rect getCurrentOrAnimatingBounds() {
+        PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null && animator.isRunning()) {
+            return new Rect(animator.getDestinationBounds());
+        }
+        return getLastReportedBounds();
+    }
+
     public boolean isInPip() {
         return mInPip;
+    }
+
+    public boolean isDeferringEnterPipAnimation() {
+        return mInPip && mShouldDeferEnteringPip;
     }
 
     /**
@@ -406,7 +419,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     private void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
-        mMainHandler.post(() -> {
+        runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
                 callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction);
@@ -416,7 +429,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     private void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
-        mMainHandler.post(() -> {
+        runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
                 callback.onPipTransitionFinished(mTaskInfo.baseActivity, direction);
@@ -426,12 +439,20 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     private void sendOnPipTransitionCancelled(
             @PipAnimationController.TransitionDirection int direction) {
-        mMainHandler.post(() -> {
+        runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
                 callback.onPipTransitionCanceled(mTaskInfo.baseActivity, direction);
             }
         });
+    }
+
+    private void runOnMainHandler(Runnable r) {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            r.run();
+        } else {
+            mMainHandler.post(r);
+        }
     }
 
     /**
@@ -505,15 +526,33 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      */
     @SuppressWarnings("unchecked")
     public void onMovementBoundsChanged(Rect destinationBoundsOut, boolean fromRotation,
-            boolean fromImeAdjustment, boolean fromShelfAdjustment) {
+            boolean fromImeAdjustment, boolean fromShelfAdjustment,
+            WindowContainerTransaction wct) {
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
             if (mInPip && fromRotation) {
-                // this could happen if rotation finishes before the animation
+                // If we are rotating while there is a current animation, immediately cancel the
+                // animation (remove the listeners so we don't trigger the normal finish resize
+                // call that should only happen on the update thread)
+                int direction = TRANSITION_DIRECTION_NONE;
+                if (animator != null) {
+                    direction = animator.getTransitionDirection();
+                    animator.removeAllUpdateListeners();
+                    animator.removeAllListeners();
+                    animator.cancel();
+                    // Do notify the listeners that this was canceled
+                    sendOnPipTransitionCancelled(direction);
+                    sendOnPipTransitionFinished(direction);
+                }
                 mLastReportedBounds.set(destinationBoundsOut);
-                scheduleFinishResizePip(mLastReportedBounds);
+
+                // Create a reset surface transaction for the new bounds and update the window
+                // container transaction
+                final SurfaceControl.Transaction tx = createFinishResizeSurfaceTransaction(
+                        destinationBoundsOut);
+                prepareFinishResizeTransaction(destinationBoundsOut, direction, tx, wct);
             } else  {
                 // There could be an animation on-going. If there is one on-going, last-reported
                 // bounds isn't yet updated. We'll use the animator's bounds instead.
@@ -580,7 +619,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             @PipAnimationController.TransitionDirection int direction, int durationMs,
             Consumer<Rect> updateBoundsCallback) {
         if (!mInPip) {
-            // can be initiated in other component, ignore if we are no longer in PIP
+            // TODO: tend to use shouldBlockResizeRequest here as well but need to consider
+            // the fact that when in exitPip, scheduleAnimateResizePip is executed in the window
+            // container transaction callback and we want to set the mExitingPip immediately.
             return;
         }
 
@@ -622,7 +663,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      * {@link #scheduleResizePip}.
      */
     public void scheduleFinishResizePip(Rect destinationBounds) {
-        scheduleFinishResizePip(destinationBounds, null);
+        scheduleFinishResizePip(destinationBounds, null /* updateBoundsCallback */);
     }
 
     /**
@@ -630,28 +671,33 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      */
     public void scheduleFinishResizePip(Rect destinationBounds,
             Consumer<Rect> updateBoundsCallback) {
+        scheduleFinishResizePip(destinationBounds, TRANSITION_DIRECTION_NONE, updateBoundsCallback);
+    }
+
+    private void scheduleFinishResizePip(Rect destinationBounds,
+            @PipAnimationController.TransitionDirection int direction,
+            Consumer<Rect> updateBoundsCallback) {
+        if (shouldBlockResizeRequest()) {
+            return;
+        }
+
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = updateBoundsCallback;
+        args.arg2 = createFinishResizeSurfaceTransaction(
+                destinationBounds);
+        args.arg3 = destinationBounds;
+        args.argi1 = direction;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_FINISH_RESIZE, args));
+    }
+
+    private SurfaceControl.Transaction createFinishResizeSurfaceTransaction(
+            Rect destinationBounds) {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
                 .resetScale(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mInPip);
-        scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE,
-                updateBoundsCallback);
-    }
-
-    private void scheduleFinishResizePip(SurfaceControl.Transaction tx,
-            Rect destinationBounds, @PipAnimationController.TransitionDirection int direction,
-            Consumer<Rect> updateBoundsCallback) {
-        if (!mInPip) {
-            // can be initiated in other component, ignore if we are no longer in PIP
-            return;
-        }
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = updateBoundsCallback;
-        args.arg2 = tx;
-        args.arg3 = destinationBounds;
-        args.argi1 = direction;
-        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_FINISH_RESIZE, args));
+        return tx;
     }
 
     /**
@@ -659,8 +705,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      */
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (!mInPip) {
-            // can be initiated in other component, ignore if we are no longer in PIP
+        if (shouldBlockResizeRequest()) {
             return;
         }
         if (mShouldDeferEnteringPip) {
@@ -741,7 +786,15 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             return;
         }
 
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        prepareFinishResizeTransaction(destinationBounds, direction, tx, wct);
+        applyFinishBoundsResize(wct, direction);
+    }
+
+    private void prepareFinishResizeTransaction(Rect destinationBounds,
+            @PipAnimationController.TransitionDirection int direction,
+            SurfaceControl.Transaction tx,
+            WindowContainerTransaction wct) {
         final Rect taskBounds;
         if (isInPipDirection(direction)) {
             // If we are animating from fullscreen using a bounds animation, then reset the
@@ -762,7 +815,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
         wct.setBounds(mToken, taskBounds);
         wct.setBoundsChangeTransaction(mToken, tx);
-        applyFinishBoundsResize(wct, direction);
     }
 
     /**
@@ -819,9 +871,19 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     }
 
     private float getAspectRatioOrDefault(@Nullable PictureInPictureParams params) {
-        return params == null
+        return params == null || !params.hasSetAspectRatio()
                 ? mPipBoundsHandler.getDefaultAspectRatio()
                 : params.getAspectRatio();
+    }
+
+    /**
+     * Resize request can be initiated in other component, ignore if we are no longer in PIP
+     * or we're exiting from it.
+     *
+     * @return {@code true} if the resize request should be blocked/ignored.
+     */
+    private boolean shouldBlockResizeRequest() {
+        return !mInPip || mExitingPip;
     }
 
     /**

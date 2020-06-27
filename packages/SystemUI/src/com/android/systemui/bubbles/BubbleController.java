@@ -1308,7 +1308,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             for (Pair<Bubble, Integer> removed : removedBubbles) {
                 final Bubble bubble = removed.first;
                 @DismissReason final int reason = removed.second;
-                mStackView.removeBubble(bubble);
+
+                if (mStackView != null) {
+                    mStackView.removeBubble(bubble);
+                }
 
                 // If the bubble is removed for user switching, leave the notification in place.
                 if (reason == DISMISS_USER_CHANGED) {

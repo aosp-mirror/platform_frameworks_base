@@ -177,6 +177,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_TIMEZONE_UPDATE = 339;
     private static final int MSG_USER_STOPPED = 340;
     private static final int MSG_USER_REMOVED = 341;
+    private static final int MSG_KEYGUARD_GOING_AWAY = 342;
 
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
@@ -251,7 +252,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mDeviceProvisioned;
 
     // Battery status
-    private BatteryStatus mBatteryStatus;
+    @VisibleForTesting
+    BatteryStatus mBatteryStatus;
 
     private StrongAuthTracker mStrongAuthTracker;
 
@@ -531,7 +533,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is goingAway
+     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is going away.
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
@@ -1521,6 +1523,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mUserTrustIsUsuallyManaged.delete(userId);
     }
 
+    private void handleKeyguardGoingAway(boolean goingAway) {
+        Assert.isMainThread();
+        setKeyguardGoingAway(goingAway);
+    }
+
     @VisibleForTesting
     protected void setStrongAuthTracker(@NonNull StrongAuthTracker tracker) {
         if (mStrongAuthTracker != null) {
@@ -1661,6 +1668,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_TELEPHONY_CAPABLE:
                         updateTelephonyCapable((boolean) msg.obj);
                         break;
+                    case MSG_KEYGUARD_GOING_AWAY:
+                        handleKeyguardGoingAway((boolean) msg.obj);
+                        break;
                     default:
                         super.handleMessage(msg);
                         break;
@@ -1698,6 +1708,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     .getServiceStateForSubscriber(subId);
             mHandler.sendMessage(
                     mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
+
+            // Get initial state. Relying on Sticky behavior until API for getting info.
+            if (mBatteryStatus == null) {
+                Intent intent = mContext.registerReceiver(
+                        null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                );
+                if (intent != null && mBatteryStatus == null) {
+                    mBroadcastReceiver.onReceive(mContext, intent);
+                }
+            }
         });
 
         mHandler.post(this::registerRingerTracker);
@@ -2800,6 +2821,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     public void dispatchDreamingStopped() {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DREAMING_STATE_CHANGED, 0, 0));
+    }
+
+    /**
+     * Sends a message to update the keyguard going away state on the main thread.
+     *
+     * @param goingAway Whether the keyguard is going away.
+     */
+    public void dispatchKeyguardGoingAway(boolean goingAway) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_KEYGUARD_GOING_AWAY, goingAway));
     }
 
     public boolean isDeviceInteractive() {
