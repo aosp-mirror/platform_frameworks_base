@@ -60,7 +60,10 @@ public class ShellRoot {
         mToken = new WindowToken(
                 dc.mWmService, client.asBinder(), windowType, true, dc, true, false);
         mSurfaceControl = mToken.makeChildSurface(null)
-                .setContainerLayer().setName("Shell Root Leash " + dc.getDisplayId()).build();
+                .setContainerLayer()
+                .setName("Shell Root Leash " + dc.getDisplayId())
+                .setCallsite("ShellRoot")
+                .build();
         mToken.getPendingTransaction().show(mSurfaceControl);
     }
 
