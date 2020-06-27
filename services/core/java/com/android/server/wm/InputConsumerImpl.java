@@ -89,8 +89,10 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.inputFeatures = 0;
         mWindowHandle.scaleFactor = 1.0f;
 
-        mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
-                .getSession()).setContainerLayer().setName("Input Consumer " + name)
+        mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId).getSession())
+                .setContainerLayer()
+                .setName("Input Consumer " + name)
+                .setCallsite("InputConsumerImpl")
                 .build();
     }
 
