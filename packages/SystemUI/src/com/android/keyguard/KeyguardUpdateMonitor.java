@@ -251,7 +251,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mDeviceProvisioned;
 
     // Battery status
-    private BatteryStatus mBatteryStatus;
+    @VisibleForTesting
+    BatteryStatus mBatteryStatus;
 
     private StrongAuthTracker mStrongAuthTracker;
 
@@ -1698,6 +1699,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     .getServiceStateForSubscriber(subId);
             mHandler.sendMessage(
                     mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
+
+            // Get initial state. Relying on Sticky behavior until API for getting info.
+            if (mBatteryStatus == null) {
+                Intent intent = mContext.registerReceiver(
+                        null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                );
+                if (intent != null && mBatteryStatus == null) {
+                    mBroadcastReceiver.onReceive(mContext, intent);
+                }
+            }
         });
 
         mHandler.post(this::registerRingerTracker);

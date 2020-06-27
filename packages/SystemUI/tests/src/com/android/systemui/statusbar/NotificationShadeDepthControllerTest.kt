@@ -31,13 +31,13 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.eq
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -68,6 +68,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var shadeAnimation: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var brightnessSpring: NotificationShadeDepthController.DepthAnimation
+    @Mock private lateinit var listener: NotificationShadeDepthController.DepthListener
     @Mock private lateinit var dozeParameters: DozeParameters
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
@@ -103,7 +104,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun setupListeners() {
-        verify(dumpManager).registerDumpable(anyString(), safeEq(notificationShadeDepthController))
+        verify(dumpManager).registerDumpable(anyString(), eq(notificationShadeDepthController))
     }
 
     @Test
@@ -171,7 +172,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Test
     fun updateGlobalDialogVisibility_animatesBlur() {
         notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
-        verify(globalActionsSpring).animateTo(eq(maxBlur / 2), safeEq(root))
+        verify(globalActionsSpring).animateTo(eq(maxBlur / 2), eq(root))
     }
 
     @Test
@@ -191,8 +192,10 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun updateBlurCallback_setsBlurAndZoom() {
+        notificationShadeDepthController.addListener(listener)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
+        verify(listener).onWallpaperZoomOutChanged(anyFloat())
         verify(blurUtils).applyBlur(any(), anyInt())
     }
 
@@ -245,7 +248,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(notificationShadeWindowController).setBackgroundBlurRadius(0)
-        verify(blurUtils).applyBlur(safeEq(viewRootImpl), eq(0))
+        verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0))
     }
 
     @Test
@@ -266,9 +269,5 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
         verify(shadeSpring, never()).animateTo(anyInt(), any())
         verify(shadeAnimation, never()).animateTo(anyInt(), any())
-    }
-
-    private fun <T : Any> safeEq(value: T): T {
-        return eq(value) ?: value
     }
 }
