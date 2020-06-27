@@ -62,11 +62,4 @@ interface InsetsControlTarget {
         return false;
     }
 
-    /**
-     * Returns {@code true} if the object controlling the insets is on client.
-     */
-    default boolean isClientControlled() {
-        return true;
-    }
-
 }
