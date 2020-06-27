@@ -344,7 +344,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
-    private boolean mResizeForBlastSyncReported;
+    private boolean mRedrawForSyncReported;
 
     /**
      * Special mode that is intended only for the rounded corner overlay: during rotation
@@ -1424,7 +1424,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || configChanged
                 || dragResizingChanged
                 || mReportOrientationChanged
-                || requestResizeForBlastSync()) {
+                || shouldSendRedrawForSync()) {
             ProtoLog.v(WM_DEBUG_RESIZE,
                         "Resize reasons for w=%s:  %s surfaceResized=%b configChanged=%b "
                                 + "dragResizingChanged=%b reportOrientationChanged=%b",
@@ -3587,7 +3587,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mReportOrientationChanged = false;
         mDragResizingChangeReported = true;
         mWinAnimator.mSurfaceResized = false;
-        mResizeForBlastSyncReported = true;
         mWindowFrames.resetInsetsChanged();
 
         final Rect frame = mWindowFrames.mCompatFrame;
@@ -3595,10 +3594,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Rect visibleInsets = mWindowFrames.mLastVisibleInsets;
         final Rect stableInsets = mWindowFrames.mLastStableInsets;
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
-        final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING || useBLASTSync();
-        final boolean forceRelayout = reportOrientation || isDragResizeChanged();
+        final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING || useBLASTSync() || !mRedrawForSyncReported;
+        final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
         final int displayId = getDisplayId();
         final DisplayCutout displayCutout = getWmDisplayCutout().getDisplayCutout();
+
+        mRedrawForSyncReported = true;
 
         try {
             mClient.resized(frame, contentInsets, visibleInsets, stableInsets, reportDraw,
@@ -5847,7 +5848,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!willSync) {
             return false;
         }
-        mResizeForBlastSyncReported = false;
+        requestRedrawForSync();
 
         mLocalSyncId = mBLASTSyncEngine.startSyncSet(this);
         addChildrenToSyncSet(mLocalSyncId);
@@ -5908,7 +5909,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         notifyBlastSyncTransaction();
     }
 
-    private boolean requestResizeForBlastSync() {
-        return useBLASTSync() && !mResizeForBlastSyncReported;
+    /**
+     * When using the two WindowOrganizer sync-primitives (BoundsChangeTransaction, BLASTSync)
+     * it can be a little difficult to predict whether your change will actually trigger redrawing
+     * on the client side. To ease the burden on shell developers, we force send MSG_RESIZED
+     * for Windows involved in these Syncs
+     */
+    private boolean shouldSendRedrawForSync() {
+        final Task task = getTask();
+        if (task != null && task.getMainWindowSizeChangeTransaction() != null)
+            return !mRedrawForSyncReported;
+        return useBLASTSync() && !mRedrawForSyncReported;
+    }
+
+    void requestRedrawForSync() {
+        mRedrawForSyncReported = false;
     }
 }
