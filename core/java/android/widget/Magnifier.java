@@ -998,6 +998,7 @@ public final class Magnifier {
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
                     .setParent(parentSurfaceControl)
+                    .setCallsite("InternalPopupWindow")
                     .build();
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);

@@ -167,9 +167,10 @@ public class SurfaceControlViewHost {
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
             @Nullable IBinder hostToken) {
         mSurfaceControl = new SurfaceControl.Builder()
-            .setContainerLayer()
-            .setName("SurfaceControlViewHost")
-            .build();
+                .setContainerLayer()
+                .setName("SurfaceControlViewHost")
+                .setCallsite("SurfaceControlViewHost")
+                .build();
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
         mViewRoot = new ViewRootImpl(context, display, mWm);

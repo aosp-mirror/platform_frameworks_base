@@ -117,7 +117,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
-                    SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl());
+                    SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl(),
+                            "TaskOrganizerController.onTaskAppeared");
                     if (!task.mCreatedByOrganizer && !visible) {
                         // To prevent flashes, we hide the task prior to sending the leash to the
                         // task org if the task has previously hidden (ie. when entering PIP)
