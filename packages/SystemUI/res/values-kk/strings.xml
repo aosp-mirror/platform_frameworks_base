@@ -454,7 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ашу үшін қайта түртіңіз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ашу үшін жоғары қарай сырғытыңыз."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Әрекетті қайталау үшін жоғары сырғытыңыз."</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"Бұл құрылғы ұйымға тиесілі."</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Бұл құрылғы ұйымыңызға тиесілі."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ұйымына тиесілі."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Телефонды ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Дауыс көмекшісін ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
@@ -525,15 +525,15 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> осы құрылғыны басқарады және желі трафигін бақылауы мүмкін."</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Бұл құрылғы ұйымыңызға тиесілі және <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және <xliff:g id="VPN_APP">%2$s</xliff:g> қолданбасына қосылған."</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Бұл құрылғы ұйымға тиесілі."</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Бұл құрылғы ұйымыңызға тиесілі."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Бұл құрылғы ұйымыңызға тиесілі және VPN желілеріне қосылған."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және VPN желілеріне қосылған."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Бұл құрылғы ұйымыңызға тиесілі және VPN-дерге қосылған."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және VPN-дерге қосылған."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ұйымыңыз жұмыс профиліңіздегі желі трафигін бақылауы мүмкін"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> жұмыс профиліңіздегі желі трафигін бақылауы мүмкін"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Желі бақылануы мүмкін"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Бұл құрылғы VPN желілеріне қосылған."</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Жұмыс профилі <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Бұл құрылғы VPN-дерге қосылған."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Жұмыс профиліңіз <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Жеке профиліңіз <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Бұл құрылғы <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Құрылғыны басқару"</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері өшірілді."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Басқа қолданбаларды көру"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Басқару элементтері жүктелмеді. Қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APP">%s</xliff:g> қолданбасын қараңыз."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>

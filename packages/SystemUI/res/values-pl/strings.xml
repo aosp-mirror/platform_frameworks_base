@@ -459,7 +459,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Przesuń w górę, by otworzyć"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Przesuń w górę, by spróbować ponownie"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"To urządzenie należy do Twojej organizacji"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Właścicielem tego urządzenia jest <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Właściciel tego urządzenia: <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Aby włączyć telefon, przesuń palcem od ikony"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Aby uzyskać pomoc głosową, przesuń palcem od ikony"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Przesuń palcem od ikony, by włączyć aparat"</string>
@@ -532,13 +532,13 @@
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"To urządzenie należy do Twojej organizacji i jest połączone z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z siecią <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"To urządzenie należy do Twojej organizacji"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Właścicielem tego urządzenia jest <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Właściciel tego urządzenia: <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"To urządzenie należy do Twojej organizacji i jest połączone z sieciami VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z siecią VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z sieciami VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Twoja organizacja może monitorować ruch w sieci w Twoim profilu do pracy"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> może monitorować ruch w sieci w Twoim profilu do pracy"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Sieć może być monitorowana"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"To urządzenie jest połączone z siecią VPN"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"To urządzenie jest połączone z sieciami VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Twój profil służbowy jest połączony z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Twój profil osobisty jest połączony z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"To urządzenie jest połączone z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -1058,6 +1058,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Przytrzymaj i przeciągnij, aby przestawić elementy sterujące"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Usunięto wszystkie elementy sterujące"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmiany nie zostały zapisane"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Wyświetl pozostałe aplikacje"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nie udało się wczytać elementów sterujących. Sprawdź aplikację <xliff:g id="APP">%s</xliff:g>, aby upewnić się, że jej ustawienia się nie zmieniły."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Zgodne elementy sterujące niedostępne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Inne"</string>

@@ -545,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Disattiva VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Scollega VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Visualizza le norme"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nL\'amministratore IT può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo.\n\nPer ulteriori informazioni, contatta l\'amministratore IT."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Questo dispositivo appartiene alla tua organizzazione.\n\nL\'amministratore IT può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo.\n\nPer ulteriori informazioni, contatta l\'amministratore IT."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIl tuo amministratore IT può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo.\n\nPer ulteriori informazioni, contatta il tuo amministratore IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Questo dispositivo appartiene alla tua organizzazione.\n\nIl tuo amministratore IT può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo.\n\nPer ulteriori informazioni, contatta il tuo amministratore IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"La tua organizzazione ha installato un\'autorità di certificazione sul dispositivo. Il tuo traffico di rete protetto potrebbe essere monitorato o modificato."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"La tua organizzazione ha installato un\'autorità di certificazione nel tuo profilo di lavoro. Il tuo traffico di rete protetto potrebbe essere monitorato o modificato."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Sul dispositivo è installata un\'autorità di certificazione. Il tuo traffico di rete protetto potrebbe essere monitorato o modificato."</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tieni premuto e trascina per riordinare i controlli"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tutti i controlli sono stati rimossi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modifiche non salvate"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Mostra altre app"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Impossibile caricare i controlli. Verifica nell\'app <xliff:g id="APP">%s</xliff:g> che le relative impostazioni non siano cambiate."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Controlli compatibili non disponibili"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altro"</string>

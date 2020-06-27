@@ -1046,8 +1046,9 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Boshqaruv elementlarini qayta tartiblash uchun ushlab torting"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Barcha boshqaruv elementlari olib tashlandi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Oʻzgarishlar saqlanmadi"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Boshqa ilovalar"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Boshqaruvlar yuklanmadi. <xliff:g id="APP">%s</xliff:g> ilovasining sozlamalari oʻzgarmaganini tekshiring."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Mos boshqaruvlar mavjud emas"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Mos boshqaruv elementlari mavjud emas"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Boshqa"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Qurilma boshqaruv elementlariga kiritish"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Kiritish"</string>

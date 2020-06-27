@@ -455,7 +455,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Բացելու համար սահեցրեք վերև"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> կազմակերպությանը"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպությանը"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Սահահարվածեք հեռախոսի պատկերակից"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Սահահարվածեք ձայնային հուշման պատկերակից"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Սահահարվածեք խցիկի պատկերակից"</string>
@@ -523,19 +523,19 @@
     <string name="branded_vpn_footer" msgid="816930186313188514">"Ցանցը կարող է վերահսկվել"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ձեր կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"«<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Այս սարքը պատկանում է ձեր կազմակերպությանը և միացված է «<xliff:g id="VPN_APP">%1$s</xliff:g>» հավելվածին"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը և միացված է «<xliff:g id="VPN_APP">%2$s</xliff:g>» հավելվածին"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Այս սարքը պատկանում է ձեր կազմակերպությանը և միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը և միացված է <xliff:g id="VPN_APP">%2$s</xliff:g> ցանցին"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Այս սարքը պատկանում է ձեր կազմակերպությանը և միացված է վիրտուալ մասնավոր ցանցի համար հավելվածների"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը և միացված է VPN հավելվածների"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Այս սարքը պատկանում է ձեր կազմակերպությանը և միացված է վիրտուալ մասնավոր ցանցերի"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը և միացված է վիրտուալ մասնավոր ցանցերի"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ձեր կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Ցանցը կարող է վերահսկվել"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Այս սարքը միացված է VPN հավելվածների"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Ձեր աշխատանքային պրոֆիլը միացված է «<xliff:g id="VPN_APP">%1$s</xliff:g>» հավելվածին"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Ձեր անձնական պրոֆիլը միացված է «<xliff:g id="VPN_APP">%1$s</xliff:g>» հավելվածին"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Այս սարքը միացված է «<xliff:g id="VPN_APP">%1$s</xliff:g>» հավելվածին"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Այս սարքը միացված է վիրտուալ մասնավոր ցանցերի"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Ձեր աշխատանքային պրոֆիլը միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Ձեր անձնական պրոֆիլը միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Այս սարքը միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Սարքերի կառավարում"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Պրոֆիլի վերահսկում"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Ցանցի մշտադիտարկում"</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Պահեք և քաշեք՝ կառավարման տարրերը վերադասավորելու համար"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Կառավարման բոլոր տարրերը հեռացվեցին"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Փոփոխությունները չեն պահվել"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Տեսնել այլ հավելվածներ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Չհաջողվեց բեռնել կառավարման տարրերը։ Ստուգեք <xliff:g id="APP">%s</xliff:g> հավելվածը՝ համոզվելու, որ հավելվածի կարգավորումները չեն փոխվել։"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Համատեղելի կառավարման տարրերը հասանելի չեն"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Այլ"</string>

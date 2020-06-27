@@ -457,7 +457,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Glisați în sus pentru a deschide"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Glisați pentru a încerca din nou"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dispozitivul aparține organizației dvs."</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Glisați dinspre telefon"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Glisați dinspre pictogramă pentru asistentul vocal"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Glisați pentru a fotografia"</string>
@@ -524,12 +524,12 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profilul poate fi monitorizat"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Rețeaua poate fi monitorizată"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Este posibil ca rețeaua să fie monitorizată"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația dvs. gestionează acest dispozitiv și poate monitoriza traficul de rețea"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația dvs. deține acest dispozitiv și poate monitoriza traficul de rețea"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Dispozitivul aparține organizației dvs. și este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Dispozitivul aparține organizației dvs."</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Dispozitivul aparține organizației dvs. și este conectat la VPN-uri"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la VPN-uri"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Este posibil ca organizația dvs. să monitorizeze traficul de rețea în profilul dvs. de serviciu"</string>
@@ -1052,6 +1052,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Țineți apăsat și trageți pentru a rearanja comenzile"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Au fost șterse toate comenzile"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modificările nu au fost salvate"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Vedeți alte aplicații"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Comenzile nu au putut fi încărcate. Accesați aplicația <xliff:g id="APP">%s</xliff:g> pentru a vă asigura că setările aplicației nu s-au schimbat."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nu sunt disponibile comenzi compatibile"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altul"</string>

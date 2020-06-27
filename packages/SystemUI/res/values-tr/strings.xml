@@ -527,15 +527,15 @@
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Bu cihaz, <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kuruluşuna ait olup <xliff:g id="VPN_APP">%2$s</xliff:g> uygulamasına bağlı"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Bu cihaz, kuruluşunuza ait"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Bu cihaz, kuruluşunuza ait olup VPN\'lere bağlı"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Bu cihaz, <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kuruluşuna ait olup VPN\'lere bağlı"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Bu cihaz, kuruluşunuza ait olup VPN\'lere bağlı."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kuruluşuna ait olup VPN\'lere bağlı"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Kuruluşunuz, iş profilinizdeki ağ trafiğini izleyebilir"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, iş profilinizdeki ağ trafiğini izleyebilir"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Ağ trafiği izlenebilir"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Bu cihaz VPN\'lere bağlı"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"İş profiliniz, <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Kişisel profiliniz, <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Bu cihaz, <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"İş profiliniz <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Kişisel profiliniz <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Cihaz yönetimi"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profil izleme"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Ağ izleme"</string>
@@ -545,7 +545,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN\'yi devre dışı bırak"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN bağlantısını kes"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Politikaları Göster"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Bu cihaz, <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait.\n\nBT yöneticiniz cihazınızın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait.\n\nBT yöneticiniz cihazınızın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Bu cihaz kuruluşunuza ait.\n\nBT yöneticiniz cihazın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Kuruluşunuz bu cihaza bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Kuruluşunuz iş profilinize bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Değişiklikler kaydedilmedi"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Tüm uygulamaları göster"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontroller yüklenemedi. Uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APP">%s</xliff:g> uygulamasını kontrol edin."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Uyumlu kontrol bulunamadı"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Diğer"</string>

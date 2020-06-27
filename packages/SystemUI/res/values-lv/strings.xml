@@ -1052,6 +1052,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Lai pārkārtotu vadīklas, turiet un velciet tās"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Visas vadīklas ir noņemtas"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Izmaiņas nav saglabātas."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Skatīt citas lietotnes"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nevarēja ielādēt vadīklas. Lietotnē <xliff:g id="APP">%s</xliff:g> pārbaudiet, vai nav mainīti lietotnes iestatījumi."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nav pieejamas saderīgas vadīklas"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Cita"</string>

@@ -1046,7 +1046,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange vidhibiti upya"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Umeondoa vidhibiti vyote"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Mabadiliko hayajahifadhiwa"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Imeshindwa kupakia vidhibiti. Angalia programu ya <xliff:g id="APP">%s</xliff:g> ili uhakikishe kuwa mipangilio ya programu haijabadilika."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Angalia programu zingine"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Imeshindwa kupakia vidhibiti. Angalia programu ya <xliff:g id="APP">%s</xliff:g> ili uhakikishe kuwa mipangilio yake haijabadilika."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Vidhibiti vinavyooana havipatikani"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Nyingine"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Weka kwenye vidhibiti vya vifaa"</string>

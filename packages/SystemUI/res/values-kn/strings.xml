@@ -454,8 +454,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿರುತ್ತದೆ"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"ಈ ಸಾಧನ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ಗೆ ಸೇರಿದ್ದು"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ಗೆ ಸೇರಿದೆ"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ಫೋನ್‌ಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="voice_hint" msgid="7476017460191291417">"ಧ್ವನಿ ಸಹಾಯಕ್ಕಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"ಕ್ಯಾಮರಾಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
@@ -523,18 +523,18 @@
     <string name="branded_vpn_footer" msgid="816930186313188514">"ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದಾಗಿರುತ್ತದೆ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನದ ಮಾಲೀಕತ್ವವನ್ನು ಹೊಂದಿದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಈ ಸಾಧನದ ಮಾಲೀಕತ್ವವನ್ನು ಹೊಂದಿದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ಈ ಸಾಧನ ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸಂಬಂಧಿಸಿದೆ ಮತ್ತು ಬಹು ಇದು VPN <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಸಂಬಂಧಿಸಿದೆ"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ ಮತ್ತು <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಗೆ ಸೇರಿದೆ ಮತ್ತು <xliff:g id="VPN_APP">%2$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿರುತ್ತದೆ"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ಈ ಸಾಧನ ಇವರಿಗೆ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ಗೆ ಸೇರಿದ್ದು"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಮಾಲೀಕತ್ವದಲ್ಲಿದೆ ಮತ್ತು ಬಹು VPN ಗೆ ಸಂಪರ್ಕ ಹೊಂದಿದೆ"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಗೆ ಸೇರಿದೆ"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ ಮತ್ತು VPN ಗಳಿಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಗೆ ಸೇರಿದೆ ಮತ್ತು VPN ಗಳಿಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ನೆಟ್‌ವರ್ಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದಾಗಿದೆ"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ಈ ಸಾಧನವು VPN ಗಳಿಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್ ಅನ್ನು <xliff:g id="VPN_APP">%1$s</xliff:g> ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್ <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ಈ ಸಾಧನವು <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ಸಾಧನ ನಿರ್ವಹಣೆ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ಪ್ರೊಫೈಲ್ ಮೇಲ್ವಿಚಾರಣೆ"</string>
@@ -1046,6 +1046,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ನಿಯಂತ್ರಣಗಳನ್ನು ಮರುಹೊಂದಿಸಲು ಹೋಲ್ಡ್ ಮಾಡಿ ಮತ್ತು ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ"</string>
+    <!-- no translation found for controls_favorite_see_other_apps (7709087332255283460) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"ನಿಯಂತ್ರಣಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಆ್ಯಪ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಬದಲಾಗಿಲ್ಲ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು <xliff:g id="APP">%s</xliff:g> ಆ್ಯಪ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"ಹೊಂದಾಣಿಕೆಯ ನಿಯಂತ್ರಣಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ಇತರ"</string>
