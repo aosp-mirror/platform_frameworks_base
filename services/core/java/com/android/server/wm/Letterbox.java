@@ -261,8 +261,12 @@ public class Letterbox {
         }
 
         private void createSurface(SurfaceControl.Transaction t) {
-            mSurface = mSurfaceControlFactory.get().setName("Letterbox - " + mType)
-                    .setFlags(HIDDEN).setColorLayer().build();
+            mSurface = mSurfaceControlFactory.get()
+                    .setName("Letterbox - " + mType)
+                    .setFlags(HIDDEN)
+                    .setColorLayer()
+                    .setCallsite("LetterboxSurface.createSurface")
+                    .build();
             t.setLayer(mSurface, -1)
                     .setColor(mSurface, new float[]{0, 0, 0})
                     .setColorSpaceAgnostic(mSurface, true);
