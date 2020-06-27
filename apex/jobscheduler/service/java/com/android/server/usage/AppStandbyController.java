@@ -463,9 +463,6 @@ public class AppStandbyController implements AppStandbyInternal {
                 userFileExists = mAppIdleHistory.userFileExists(UserHandle.USER_SYSTEM);
             }
 
-            // Offload to handler thread to avoid boottime impact.
-            mHandler.post(this::loadHeadlessSystemAppCache);
-
             if (mPendingInitializeDefaults || !userFileExists) {
                 initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
             }
@@ -475,6 +472,10 @@ public class AppStandbyController implements AppStandbyInternal {
             }
         } else if (phase == PHASE_BOOT_COMPLETED) {
             setChargingState(mInjector.isCharging());
+
+            // Offload to handler thread after boot completed to avoid boot time impact. This means
+            // that headless system apps may be put in a lower bucket until boot has completed.
+            mHandler.post(this::loadHeadlessSystemAppCache);
         }
     }
 

@@ -227,6 +227,11 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return sOverrides.isQuietModeEnabled;
     }
 
+    @Override
+    protected boolean isUserRunning(UserHandle userHandle) {
+        return sOverrides.isWorkProfileUserRunning;
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -252,6 +257,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public UserHandle workProfileUserHandle;
         public boolean hasCrossProfileIntents;
         public boolean isQuietModeEnabled;
+        public boolean isWorkProfileUserRunning;
         public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
         public PackageManager packageManager;
 
@@ -274,6 +280,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             workProfileUserHandle = null;
             hasCrossProfileIntents = true;
             isQuietModeEnabled = false;
+            isWorkProfileUserRunning = true;
             packageManager = null;
             multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
                 @Override

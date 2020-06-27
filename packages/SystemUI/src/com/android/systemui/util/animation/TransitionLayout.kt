@@ -80,6 +80,8 @@ class TransitionLayout @JvmOverloads constructor(
      */
     private fun applyCurrentState() {
         val childCount = childCount
+        val contentTranslationX = currentState.contentTranslation.x.toInt()
+        val contentTranslationY = currentState.contentTranslation.y.toInt()
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             val widgetState = currentState.widgetStates.get(child.id) ?: continue
@@ -92,8 +94,8 @@ class TransitionLayout @JvmOverloads constructor(
                 child.measure(measureWidthSpec, measureHeightSpec)
                 child.layout(0, 0, child.measuredWidth, child.measuredHeight)
             }
-            val left = widgetState.x.toInt()
-            val top = widgetState.y.toInt()
+            val left = widgetState.x.toInt() + contentTranslationX
+            val top = widgetState.y.toInt() + contentTranslationY
             child.setLeftTopRightBottom(left, top, left + widgetState.width,
                     top + widgetState.height)
             child.scaleX = widgetState.scale
@@ -109,6 +111,9 @@ class TransitionLayout @JvmOverloads constructor(
             }
         }
         updateBounds()
+        translationX = currentState.translation.x
+        translationY = currentState.translation.y
+        CrossFadeHelper.fadeIn(this, currentState.alpha)
     }
 
     private fun applyCurrentStateOnPredraw() {
@@ -161,9 +166,7 @@ class TransitionLayout @JvmOverloads constructor(
         val layoutTop = top
         setLeftTopRightBottom(layoutLeft, layoutTop, layoutLeft + currentState.width,
                 layoutTop + currentState.height)
-        translationX = currentState.translation.x
-        translationY = currentState.translation.y
-        boundsRect.set(0, 0, (width + translationX).toInt(), (height + translationY).toInt())
+        boundsRect.set(0, 0, width.toInt(), height.toInt())
     }
 
     /**
@@ -247,13 +250,17 @@ class TransitionViewState {
     var widgetStates: MutableMap<Int, WidgetState> = mutableMapOf()
     var width: Int = 0
     var height: Int = 0
+    var alpha: Float = 1.0f
     val translation = PointF()
+    val contentTranslation = PointF()
     fun copy(reusedState: TransitionViewState? = null): TransitionViewState {
         // we need a deep copy of this, so we can't use a data class
         val copy = reusedState ?: TransitionViewState()
         copy.width = width
         copy.height = height
+        copy.alpha = alpha
         copy.translation.set(translation.x, translation.y)
+        copy.contentTranslation.set(contentTranslation.x, contentTranslation.y)
         for (entry in widgetStates) {
             copy.widgetStates[entry.key] = entry.value.copy()
         }
@@ -272,6 +279,8 @@ class TransitionViewState {
         width = transitionLayout.measuredWidth
         height = transitionLayout.measuredHeight
         translation.set(0.0f, 0.0f)
+        contentTranslation.set(0.0f, 0.0f)
+        alpha = 1.0f
     }
 }
 

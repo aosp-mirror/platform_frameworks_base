@@ -663,13 +663,6 @@ public final class MediaRouter2 {
         if (sessionInfo == null) {
             notifyTransferFailure(requestedRoute);
             return;
-        } else if (!sessionInfo.getSelectedRoutes().contains(requestedRoute.getId())) {
-            Log.w(TAG, "The session does not contain the requested route. "
-                    + "(requestedRouteId=" + requestedRoute.getId()
-                    + ", actualRoutes=" + sessionInfo.getSelectedRoutes()
-                    + ")");
-            notifyTransferFailure(requestedRoute);
-            return;
         } else if (!TextUtils.equals(requestedRoute.getProviderId(),
                 sessionInfo.getProviderId())) {
             Log.w(TAG, "The session's provider ID does not match the requested route's. "
