@@ -395,7 +395,8 @@ class SurfaceAnimator {
                 // doesn't work, you will can see the 2/3 button nav bar flicker during seamless
                 // rotation.
                 .setHidden(hidden)
-                .setEffectLayer();
+                .setEffectLayer()
+                .setCallsite("SurfaceAnimator.createAnimationLeash");
         final SurfaceControl leash = builder.build();
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);

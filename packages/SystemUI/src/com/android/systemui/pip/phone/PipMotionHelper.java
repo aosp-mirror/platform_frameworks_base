@@ -365,6 +365,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void flingToSnapTarget(
             float velocityX, float velocityY,
             @Nullable Runnable updateAction, @Nullable Runnable endAction) {
+        // If we're flinging to a snap target now, we're not springing to catch up to the touch
+        // location now.
+        mSpringingToTouch = false;
+
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_WIDTH, mBounds.width(), mSpringConfig)
                 .spring(FloatProperties.RECT_HEIGHT, mBounds.height(), mSpringConfig)
@@ -529,8 +533,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 && !mSpringingToTouch
                 && !mMagnetizedPip.getObjectStuckToTarget()) {
             mBounds.set(mTemporaryBounds);
-            mPipTaskOrganizer.scheduleFinishResizePip(mBounds);
-
+            if (!mDismissalPending) {
+                // do not schedule resize if PiP is dismissing, which may cause app re-open to
+                // mBounds instead of it's normal bounds.
+                mPipTaskOrganizer.scheduleFinishResizePip(mBounds);
+            }
             mTemporaryBounds.setEmpty();
         }
 

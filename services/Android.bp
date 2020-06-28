@@ -125,7 +125,6 @@ droidstubs {
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
         // TODO: remove the --hide options below
         " --hide-package com.google.android.startop.iorap" +
-        " --hide ReferencesHidden" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//visibility:private"],

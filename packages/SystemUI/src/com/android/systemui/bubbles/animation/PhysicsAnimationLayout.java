@@ -441,7 +441,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         // Cancel physics animations on the view.
         for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
-            getAnimationFromView(property, view).cancel();
+            final DynamicAnimation animationFromView = getAnimationFromView(property, view);
+            if (animationFromView != null) {
+                animationFromView.cancel();
+            }
         }
     }
 
@@ -499,13 +502,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
      * Retrieves the animation of the given property from the view at the given index via the view
      * tag system.
      */
-    private SpringAnimation getAnimationAtIndex(
+    @Nullable private SpringAnimation getAnimationAtIndex(
             DynamicAnimation.ViewProperty property, int index) {
         return getAnimationFromView(property, getChildAt(index));
     }
 
     /** Retrieves the animation of the given property from the view via the view tag system. */
-    private SpringAnimation getAnimationFromView(
+    @Nullable private SpringAnimation getAnimationFromView(
             DynamicAnimation.ViewProperty property, View view) {
         return (SpringAnimation) view.getTag(getTagIdForProperty(property));
     }
@@ -536,8 +539,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             final float offset = mController.getOffsetForChainedPropertyAnimation(property);
             if (nextAnimInChain < getChildCount()) {
-                getAnimationAtIndex(property, nextAnimInChain)
-                        .animateToFinalPosition(value + offset);
+                final SpringAnimation nextAnim = getAnimationAtIndex(property, nextAnimInChain);
+                if (nextAnim != null) {
+                    nextAnim.animateToFinalPosition(value + offset);
+                }
             }
         });
 

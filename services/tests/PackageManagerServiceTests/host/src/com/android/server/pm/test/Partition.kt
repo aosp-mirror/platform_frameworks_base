@@ -20,7 +20,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 // Unfortunately no easy way to access PMS SystemPartitions, so mock them here
-internal enum class Partition(val baseFolder: Path) {
+internal enum class Partition(val baseAppFolder: Path) {
     SYSTEM("/system/app"),
     VENDOR("/vendor/app"),
     PRODUCT("/product/app"),

@@ -640,13 +640,10 @@ class ActivityStarter {
             }
 
             // If the caller hasn't already resolved the activity, we're willing
-            // to do so here, but because that may require acquiring the AM lock
-            // as part of calculating the NeededUriGrants, we must never hold
-            // the WM lock here to avoid deadlocking.
+            // to do so here. If the caller is already holding the WM lock here,
+            // and we need to check dynamic Uri permissions, then we're forced
+            // to assume those permissions are denied to avoid deadlocking.
             if (mRequest.activityInfo == null) {
-                if (Thread.holdsLock(mService.mGlobalLock)) {
-                    Slog.wtf(TAG, new IllegalStateException("Caller must not hold WM lock"));
-                }
                 mRequest.resolveActivity(mSupervisor);
             }
 
@@ -1668,6 +1665,12 @@ class ActivityStarter {
                     mTargetStack.setAlwaysOnTop(true);
                 }
             }
+            if (!mTargetStack.isTopStackInDisplayArea() && mService.mInternal.isDreaming()) {
+                // Launching underneath dream activity (fullscreen, always-on-top). Run the launch-
+                // -behind transition so the Activity gets created and starts in visible state.
+                mLaunchTaskBehind = true;
+                r.mLaunchTaskBehind = true;
+            }
         }
 
         mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
@@ -1915,6 +1918,12 @@ class ActivityStarter {
 
         if (mAddingToTask) {
             return START_SUCCESS;
+        }
+
+        // At this point we are certain we want the task moved to the front. If we need to dismiss
+        // any other always-on-top stacks, now is the time to do it.
+        if (targetTaskTop.canTurnScreenOn() && mService.mInternal.isDreaming()) {
+            targetTaskTop.mStackSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
         }
 
         if (mMovedToFront) {

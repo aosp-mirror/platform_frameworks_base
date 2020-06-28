@@ -993,6 +993,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         .setFormat(mFormat)
                         .setParent(viewRoot.getBoundsLayer())
                         .setFlags(mSurfaceFlags)
+                        .setCallsite("SurfaceView.updateSurface")
                         .build();
                     mBackgroundControl = new SurfaceControl.Builder(mSurfaceSession)
                         .setName("Background for -" + name)
@@ -1000,6 +1001,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         .setOpaque(true)
                         .setColorLayer()
                         .setParent(mSurfaceControl)
+                        .setCallsite("SurfaceView.updateSurface")
                         .build();
 
                 } else if (mSurfaceControl == null) {

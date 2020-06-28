@@ -499,14 +499,12 @@ public final class SurfaceControl implements Parcelable {
     private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
     private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
 
-    private void assignNativeObject(long nativeObject) {
+    private void assignNativeObject(long nativeObject, String callsite) {
         if (mNativeObject != 0) {
             release();
         }
         if (nativeObject != 0) {
-            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "closeGuard");
-            mCloseGuard.open("release");
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+            mCloseGuard.openWithCallSite("release", callsite);
         }
         mNativeObject = nativeObject;
         mNativeHandle = mNativeObject != 0 ? nativeGetHandle(nativeObject) : 0;
@@ -515,12 +513,12 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void copyFrom(@NonNull SurfaceControl other) {
+    public void copyFrom(@NonNull SurfaceControl other, String callsite) {
         mName = other.mName;
         mWidth = other.mWidth;
         mHeight = other.mHeight;
         mLocalOwnerView = other.mLocalOwnerView;
-        assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject));
+        assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject), callsite);
     }
 
     /**
@@ -615,6 +613,7 @@ public final class SurfaceControl implements Parcelable {
         private WeakReference<View> mLocalOwnerView;
         private SurfaceControl mParent;
         private SparseIntArray mMetadata;
+        private String mCallsite = "SurfaceControl.Builder";
 
         /**
          * Begin building a SurfaceControl with a given {@link SurfaceSession}.
@@ -648,7 +647,7 @@ public final class SurfaceControl implements Parcelable {
             }
             return new SurfaceControl(
                     mSession, mName, mWidth, mHeight, mFormat, mFlags, mParent, mMetadata,
-                    mLocalOwnerView);
+                    mLocalOwnerView, mCallsite);
         }
 
         /**
@@ -906,6 +905,18 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the callsite this SurfaceControl is constructed from.
+         *
+         * @param callsite String uniquely identifying callsite that created this object. Used for
+         *                 leakage tracking.
+         * @hide
+         */
+        public Builder setCallsite(String callsite) {
+            mCallsite = callsite;
+            return this;
+        }
+
         private Builder setFlags(int flags, int mask) {
             mFlags = (mFlags & ~mask) | flags;
             return this;
@@ -937,10 +948,13 @@ public final class SurfaceControl implements Parcelable {
      * @param h        The surface initial height.
      * @param flags    The surface creation flags.
      * @param metadata Initial metadata.
+     * @param callsite String uniquely identifying callsite that created this object. Used for
+     *                 leakage tracking.
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
-            SurfaceControl parent, SparseIntArray metadata, WeakReference<View> localOwnerView)
+            SurfaceControl parent, SparseIntArray metadata, WeakReference<View> localOwnerView,
+            String callsite)
                     throws OutOfResourcesException, IllegalArgumentException {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
@@ -972,18 +986,20 @@ public final class SurfaceControl implements Parcelable {
                     "Couldn't allocate SurfaceControl native object");
         }
         mNativeHandle = nativeGetHandle(mNativeObject);
-        mCloseGuard.open("release");
+        mCloseGuard.openWithCallSite("release", callsite);
     }
 
     /**
      * Copy constructor. Creates a new native object pointing to the same surface as {@code other}.
      *
      * @param other The object to copy the surface from.
+     * @param callsite String uniquely identifying callsite that created this object. Used for
+     *                 leakage tracking.
      * @hide
      */
     @TestApi
-    public SurfaceControl(@NonNull SurfaceControl other) {
-        copyFrom(other);
+    public SurfaceControl(@NonNull SurfaceControl other, @NonNull String callsite) {
+        copyFrom(other, callsite);
     }
 
     private SurfaceControl(Parcel in) {
@@ -1009,7 +1025,7 @@ public final class SurfaceControl implements Parcelable {
         if (in.readInt() != 0) {
             object = nativeReadFromParcel(in);
         }
-        assignNativeObject(object);
+        assignNativeObject(object, "readFromParcel");
     }
 
     @Override
@@ -2203,7 +2219,7 @@ public final class SurfaceControl implements Parcelable {
     public static SurfaceControl mirrorSurface(SurfaceControl mirrorOf) {
         long nativeObj = nativeMirrorSurface(mirrorOf.mNativeObject);
         SurfaceControl sc = new SurfaceControl();
-        sc.assignNativeObject(nativeObj);
+        sc.assignNativeObject(nativeObj, "mirrorSurface");
         return sc;
     }
 

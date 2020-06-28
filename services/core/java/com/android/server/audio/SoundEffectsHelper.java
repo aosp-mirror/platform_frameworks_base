@@ -90,6 +90,10 @@ class SoundEffectsHelper {
             mFileName = fileName;
             mSampleId = EFFECT_NOT_IN_SOUND_POOL;
         }
+        void unload() {
+            mSampleId = EFFECT_NOT_IN_SOUND_POOL;
+            mLoaded = false;
+        }
     }
     // All the fields below are accessed by the worker thread exclusively
     private final List<Resource> mResources = new ArrayList<Resource>();
@@ -230,6 +234,7 @@ class SoundEffectsHelper {
         for (Resource res : mResources) {
             if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL) {
                 mSoundPool.unload(res.mSampleId);
+                res.unload();
             }
         }
         mSoundPool.release();
@@ -247,7 +252,7 @@ class SoundEffectsHelper {
         }
 
         Resource res = mResources.get(mEffects[effect]);
-        if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL && res.mLoaded) {
+        if (mSoundPool != null && res.mSampleId != EFFECT_NOT_IN_SOUND_POOL && res.mLoaded) {
             mSoundPool.play(res.mSampleId, volFloat, volFloat, 0, 0, 1.0f);
         } else {
             MediaPlayer mediaPlayer = new MediaPlayer();
@@ -511,7 +516,9 @@ class SoundEffectsHelper {
         }
 
         void onComplete(boolean success) {
-            mSoundPool.setOnLoadCompleteListener(null);
+            if (mSoundPool != null) {
+                mSoundPool.setOnLoadCompleteListener(null);
+            }
             for (OnEffectsLoadCompleteHandler handler : mLoadCompleteHandlers) {
                 handler.run(success);
             }

@@ -498,32 +498,27 @@ public abstract class AccessibilityService extends Service {
     /**
      * Action to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer/hang up calls and
      * play/stop media
-     * @hide
      */
     public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10;
 
     /**
      * Action to trigger the Accessibility Button
-     * @hide
      */
     public static final int GLOBAL_ACTION_ACCESSIBILITY_BUTTON = 11;
 
     /**
      * Action to bring up the Accessibility Button's chooser menu
-     * @hide
      */
     public static final int GLOBAL_ACTION_ACCESSIBILITY_BUTTON_CHOOSER = 12;
 
     /**
      * Action to trigger the Accessibility Shortcut. This shortcut has a hardware trigger and can
      * be activated by holding down the two volume keys.
-     * @hide
      */
     public static final int GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT = 13;
 
     /**
      * Action to show Launcher's all apps.
-     * @hide
      */
     public static final int GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS = 14;
 
@@ -1906,6 +1901,11 @@ public abstract class AccessibilityService extends Service {
      * at any moment regardless of the current application or user
      * location in that application. For example going back, going
      * home, opening recents, etc.
+     *
+     * <p>
+     * Note: The global action ids themselves give no information about the current availability
+     * of their corresponding actions. To determine if a global action is available, use
+     * {@link #getSystemActions()}
      *
      * @param action The action to perform.
      * @return Whether the action was successfully performed.
