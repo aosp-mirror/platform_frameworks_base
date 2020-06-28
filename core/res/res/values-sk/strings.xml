@@ -2063,8 +2063,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofón"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sa zobrazuje cez ďalšie aplikácie na obrazovke"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Poskytnúť spätnú väzbu"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Upozornenie s informáciami o rutinnom režime"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batéria sa môže vybiť pred obvyklým nabitím"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bol aktivovaný šetrič batérie na predĺženie výdrže batérie"</string>

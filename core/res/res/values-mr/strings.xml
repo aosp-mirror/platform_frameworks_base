@@ -1651,7 +1651,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केला आहे."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तुम्ही अ‍ॅक्सेसिबिलिटी बटणावर टॅप केल्यास वापरण्यासाठी एक वैशिष्ट्य निवडा:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (दोन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"कॅमेरा"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"मायक्रोफोन"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"तुमच्‍या स्‍क्रीनवर इतर ॲप्‍सवर डिस्‍प्‍ले करत आहे"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"फीडबॅक द्या"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>
