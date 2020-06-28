@@ -203,7 +203,7 @@
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossibile usare l\'app di amministrazione. Il dispositivo verrà resettato.\n\nPer eventuali domande, contatta l\'amministratore della tua organizzazione."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Stampa disattivata da <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Attiva il profilo di lavoro"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Le tue app personali sono bloccate fino all\'attivazione del tuo profilo di lavoro"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Le tue app personali saranno bloccate finché non attivi il tuo profilo di lavoro."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Le app personali verranno bloccate il giorno <xliff:g id="DATE">%1$s</xliff:g> alle ore <xliff:g id="TIME">%2$s</xliff:g>. L\'amministratore IT non consente di mantenere disattivato il profilo di lavoro per più di <xliff:g id="NUMBER">%3$d</xliff:g> giorni."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Attiva"</string>
     <string name="me" msgid="6207584824693813140">"Io"</string>
@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotocamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"si sovrappone ad altre app sullo schermo"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Fornisci feedback"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>

@@ -1314,7 +1314,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB orqali nosozliklarni tuzatishni o‘chirib qo‘yish uchun bosing."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Wi-Fi orqali debagging yoqildi"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Wi-Fi orqali debagging uzilishi uchun bosing"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Wi-Fi orqali debaggingni faolsizlantirish uchun bosing."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Uni faolsizlantirish uchun bosing."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Xavfsizlik sinovi rejimi yoqildi"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Xavfsizlik sinovi rejimini faolsizlantirish uchun zavod sozlamalariga qaytaring."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Ketma-ket port konsoli yoqildi"</string>
@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ekranda boshqa ilovalar ustidan ochiladi"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Fikr-mulohaza yuborish"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvati uzoqroq ishlashi uchun Tejamkor rejim yoqildi"</string>

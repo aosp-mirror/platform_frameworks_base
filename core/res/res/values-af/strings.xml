@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofoon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"wys tans bo-oor ander programme op jou skerm"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Gee terugvoer"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Roetinemodus-inligtingkennisgewing"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery kan afloop voordat dit normaalweg gelaai word"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterybespaarder is geaktiveer om batterylewe te verleng"</string>

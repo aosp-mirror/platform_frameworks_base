@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Κάμερα"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Μικρόφωνο"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"εμφανίζεται πάνω σε άλλες εφαρμογές στην οθόνη σας"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Υποβολή σχολίων"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ειδοποίηση πληροφοριών λειτουργίας Ρουτίνας"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>

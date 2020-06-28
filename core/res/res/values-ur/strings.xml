@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"کیمرا"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"مائیکروفون"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"آپ کی اسکرین پر دیگر ایپس پر دکھایا جا رہا ہے"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"تاثرات فراہم کریں"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"معمول چارج سے پہلے بیٹری ختم ہو سکتی ہے"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو فعال کر دیا گیا ہے"</string>
