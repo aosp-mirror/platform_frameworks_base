@@ -1126,9 +1126,7 @@
     <string name="checked" msgid="9179896827054513119">"បានធីក​"</string>
     <string name="not_checked" msgid="7972320087569023342">"មិន​បាន​ធីក​"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
@@ -1999,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"កាមេរ៉ា"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"មីក្រូហ្វូន"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"កំពុងបង្ហាញ​ពីលើកម្មវិធីផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"ផ្ដល់​មតិកែលម្អ"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>

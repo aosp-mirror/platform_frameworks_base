@@ -202,9 +202,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Les données de votre appareil vont être effacées"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossible d\'utiliser l\'application d\'administration. Les données de votre appareil vont maintenant être effacées.\n\nSi vous avez des questions, contactez l\'administrateur de votre organisation."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impression désactivée par <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activez profil professionnel"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applications personnelles sont bloquées jusqu\'à ce que vous activiez votre profil professionnel"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Les applications personnelles seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre administrateur informatique ne vous autorise pas à désactiver votre profil professionnel pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activez votre profil pro"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applications personnelles seront bloquées jusqu\'à ce que vous activiez votre profil professionnel"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Vos applications personnelles seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre administrateur informatique ne vous autorise pas à désactiver votre profil professionnel pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activer"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Caméra"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micro"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se superpose aux autres applications sur l\'écran"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Envoyer des commentaires"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>

@@ -1997,8 +1997,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"කැමරාව"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"මයික්‍රෆෝනය"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ඔබගේ තිරය මත වෙනත් යෙදුම්වලට උඩින් සංදර්ශනය කරමින්"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"ප්‍රතිපෝෂණ සපයන්න"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>

@@ -2063,8 +2063,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparat"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prekriva druge aplikacije na zaslonu"</string>
-    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
-    <skip />
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Pošlji povratne informacije"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se bo morda izpraznila, preden jo običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo baterije za podaljšanje časa delovanja baterije"</string>
