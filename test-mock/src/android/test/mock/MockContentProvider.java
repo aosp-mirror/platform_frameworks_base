@@ -29,6 +29,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
@@ -282,7 +283,7 @@ public class MockContentProvider extends ContentProvider {
      * @hide
      */
     public IBinder getIContentProviderBinder() {
-        throw new UnsupportedOperationException("unimplemented mock method");
+        return new Binder();
     }
 
     /**
