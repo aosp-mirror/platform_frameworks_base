@@ -14,11 +14,14 @@ java_library_host {
 
     static_libs: [
         "//external/error_prone:error_prone_core",
-        "//external/dagger2:dagger2-auto-service",
+    ],
+
+    libs: [
+        "//external/auto:auto_service_annotations",
     ],
 
     plugins: [
-        "//external/dagger2:dagger2-auto-service",
+        "//external/auto:auto_service_plugin",
     ],
 }
 
