@@ -81,6 +81,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
@@ -2369,6 +2370,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (inPinnedWindowingMode()) {
+            return false;
+        }
+
+        if (mAttrs.type == TYPE_SCREENSHOT) {
+            // Disallow screenshot windows from being IME targets
             return false;
         }
 
