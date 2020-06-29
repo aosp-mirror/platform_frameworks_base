@@ -61,11 +61,12 @@ public class NetworkStagedRollbackTest {
     private static final TestApp NETWORK_STACK = new TestApp("NetworkStack",
             getNetworkStackPackageName(), -1, false, findNetworkStackApk());
 
-    private static File findNetworkStackApk() {
+    private static File[] findNetworkStackApk() {
         for (String name : NETWORK_STACK_APK_NAMES) {
             final File apk = new File("/system/priv-app/" + name + "/" + name + ".apk");
             if (apk.isFile()) {
-                return apk;
+                final File dir = new File("/system/priv-app/" + name);
+                return dir.listFiles((d, f) -> f.startsWith(name));
             }
         }
         throw new RuntimeException("Can't find NetworkStackApk");
