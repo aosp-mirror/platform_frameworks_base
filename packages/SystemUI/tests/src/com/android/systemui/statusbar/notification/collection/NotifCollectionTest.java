@@ -1273,8 +1273,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mInterceptor3, never()).shouldInterceptDismissal(clearable);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testClearNotificationThrowsIfMissing() {
+    @Test
+    public void testClearNotificationDoesntThrowIfMissing() {
         // GIVEN that enough time has passed that we're beyond the forgiveness window
         mClock.advanceTime(5001);
 
@@ -1287,7 +1287,8 @@ public class NotifCollectionTest extends SysuiTestCase {
                 container.getSbn(),
                 new RankingMap(new Ranking[]{ container.getRanking() }));
 
-        // THEN an exception is thrown
+        // THEN the event is ignored
+        verify(mCollectionListener, never()).onEntryRemoved(any(NotificationEntry.class), anyInt());
     }
 
     @Test
