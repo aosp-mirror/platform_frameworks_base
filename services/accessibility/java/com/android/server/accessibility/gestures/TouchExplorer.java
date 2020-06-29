@@ -309,14 +309,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public void onDoubleTapAndHold(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        // Try to use the standard accessibility API to long click
-        if (!mAms.performActionOnAccessibilityFocusedItem(
-                AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)) {
-            Slog.e(LOG_TAG, "ACTION_LONG_CLICK failed.");
-            if (mDispatcher.longPressWithTouchEvents(event, policyFlags)) {
-                sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-                mState.startDelegating();
-            }
+        if (mDispatcher.longPressWithTouchEvents(event, policyFlags)) {
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+            mState.startDelegating();
         }
     }
 
