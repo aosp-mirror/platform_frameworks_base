@@ -347,7 +347,9 @@ public class BlobStoreManager {
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param description a short description string that can be surfaced
-     *                    to the user explaining what the blob is used for.
+     *                    to the user explaining what the blob is used for. It is recommended to
+     *                    keep this description brief. This may be truncated and ellipsized
+     *                    if it is too long to be displayed to the user.
      * @param leaseExpiryTimeMillis the time in milliseconds after which the lease can be
      *                              automatically released, in {@link System#currentTimeMillis()}
      *                              timebase. If its value is {@code 0}, then the behavior of this
@@ -458,7 +460,9 @@ public class BlobStoreManager {
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param description a short description string that can be surfaced
-     *                    to the user explaining what the blob is used for.
+     *                    to the user explaining what the blob is used for. It is recommended to
+     *                    keep this description brief. This may be truncated and
+     *                    ellipsized if it is too long to be displayed to the user.
      *
      * @throws IOException when there is an I/O error while acquiring a lease to the blob.
      * @throws SecurityException when the blob represented by the {@code blobHandle} does not
