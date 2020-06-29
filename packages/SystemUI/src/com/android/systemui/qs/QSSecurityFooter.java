@@ -265,9 +265,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
     private void createDialog() {
         final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
+        boolean isProfileOwnerOfOrganizationOwnedDevice =
+                mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
         final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
         final CharSequence deviceOwnerOrganization =
                 mSecurityController.getDeviceOwnerOrganizationName();
+        final CharSequence workProfileOrganizationName =
+                mSecurityController.getWorkProfileOrganizationName();
         final boolean hasCACerts = mSecurityController.hasCACertInCurrentUser();
         final boolean hasCACertsInWorkProfile = mSecurityController.hasCACertInWorkProfile();
         final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
@@ -284,7 +288,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
         // device management section
         CharSequence managementMessage = getManagementMessage(isDeviceManaged,
-                deviceOwnerOrganization);
+                deviceOwnerOrganization, isProfileOwnerOfOrganizationOwnedDevice,
+                workProfileOrganizationName);
         if (managementMessage == null) {
             dialogView.findViewById(R.id.device_management_disclosures).setVisibility(View.GONE);
         } else {
@@ -292,7 +297,11 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             TextView deviceManagementWarning =
                     (TextView) dialogView.findViewById(R.id.device_management_warning);
             deviceManagementWarning.setText(managementMessage);
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
+            // Don't show the policies button for profile owner of org owned device, because there
+            // is no policies settings screen for it
+            if (!isProfileOwnerOfOrganizationOwnedDevice) {
+                mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
+            }
         }
 
         // ca certificate section
@@ -382,11 +391,18 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     }
 
     protected CharSequence getManagementMessage(boolean isDeviceManaged,
-            CharSequence organizationName) {
-        if (!isDeviceManaged) return null;
-        if (organizationName != null)
+            CharSequence organizationName, boolean isProfileOwnerOfOrganizationOwnedDevice,
+            CharSequence workProfileOrganizationName) {
+        if (!isDeviceManaged && !isProfileOwnerOfOrganizationOwnedDevice) {
+            return null;
+        }
+        if (isDeviceManaged && organizationName != null) {
             return mContext.getString(
                     R.string.monitoring_description_named_management, organizationName);
+        } else if (isProfileOwnerOfOrganizationOwnedDevice && workProfileOrganizationName != null) {
+            return mContext.getString(
+                    R.string.monitoring_description_named_management, workProfileOrganizationName);
+        }
         return mContext.getString(R.string.monitoring_description_management);
     }
 
