@@ -273,8 +273,9 @@ public class TetheringNotificationUpdater {
                 mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
                 0 /* requestCode */,
                 new Intent(Settings.ACTION_TETHER_SETTINGS)
-                        .setPackage(getSettingsPackageName(mContext.getPackageManager())),
-                Intent.FLAG_ACTIVITY_NEW_TASK | PendingIntent.FLAG_IMMUTABLE,
+                        .setPackage(getSettingsPackageName(mContext.getPackageManager()))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                PendingIntent.FLAG_IMMUTABLE,
                 null /* options */);
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
@@ -317,8 +318,9 @@ public class TetheringNotificationUpdater {
                 mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
                 0 /* requestCode */,
                 new Intent(Settings.ACTION_TETHER_SETTINGS)
-                        .setPackage(getSettingsPackageName(mContext.getPackageManager())),
-                Intent.FLAG_ACTIVITY_NEW_TASK | PendingIntent.FLAG_IMMUTABLE,
+                        .setPackage(getSettingsPackageName(mContext.getPackageManager()))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                PendingIntent.FLAG_IMMUTABLE,
                 null /* options */);
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
