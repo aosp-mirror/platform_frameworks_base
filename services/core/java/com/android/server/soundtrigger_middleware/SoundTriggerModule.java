@@ -429,7 +429,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         private void checkValid() {
             if (mCallback == null) {
-                throw new ServiceSpecificException(Status.DEAD_OBJECT);
+                throw new RecoverableException(Status.DEAD_OBJECT);
             }
         }
 
