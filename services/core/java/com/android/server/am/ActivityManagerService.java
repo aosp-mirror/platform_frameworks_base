@@ -18333,11 +18333,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        // Now safely dispatch changes to device idle controller.
-        for (int i = 0; i < N; i++) {
-            PendingTempWhitelist ptw = list[i];
-            mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                    ptw.duration, true, ptw.tag);
+        // Now safely dispatch changes to device idle controller.  Skip this if we're early
+        // in boot and the controller hasn't yet been brought online:  we do not apply
+        // device idle policy anyway at this phase.
+        if (mLocalDeviceIdleController != null) {
+            for (int i = 0; i < N; i++) {
+                PendingTempWhitelist ptw = list[i];
+                mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
+                        ptw.duration, true, ptw.tag);
+            }
         }
 
         // And now we can safely remove them from the map.
