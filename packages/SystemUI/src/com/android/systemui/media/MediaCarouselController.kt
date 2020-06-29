@@ -39,9 +39,8 @@ class MediaCarouselController @Inject constructor(
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val activityStarter: ActivityStarter,
     @Main executor: DelayableExecutor,
-    mediaManager: MediaDataCombineLatest,
+    mediaManager: MediaDataFilter,
     configurationController: ConfigurationController,
-    mediaDataManager: MediaDataManager,
     falsingManager: FalsingManager
 ) {
     /**
@@ -148,7 +147,7 @@ class MediaCarouselController @Inject constructor(
         mediaCarousel = mediaFrame.requireViewById(R.id.media_carousel_scroller)
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
         mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
-                executor, mediaDataManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
+                executor, mediaManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
                 falsingManager)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()

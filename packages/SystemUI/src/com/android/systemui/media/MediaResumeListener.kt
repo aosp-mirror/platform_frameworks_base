@@ -56,7 +56,7 @@ class MediaResumeListener @Inject constructor(
     private lateinit var mediaDataManager: MediaDataManager
 
     private var mediaBrowser: ResumeMediaBrowser? = null
-    private var currentUserId: Int
+    private var currentUserId: Int = context.userId
 
     private val userChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -65,7 +65,6 @@ class MediaResumeListener @Inject constructor(
             } else if (Intent.ACTION_USER_SWITCHED == intent.action) {
                 currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
                 loadSavedComponents()
-                loadMediaResumptionControls()
             }
         }
     }
@@ -89,13 +88,12 @@ class MediaResumeListener @Inject constructor(
             }
 
             Log.d(TAG, "Adding resume controls $desc")
-            mediaDataManager.addResumptionControls(desc, resumeAction, token, appName.toString(),
-                appIntent, component.packageName)
+            mediaDataManager.addResumptionControls(currentUserId, desc, resumeAction, token,
+                appName.toString(), appIntent, component.packageName)
         }
     }
 
     init {
-        currentUserId = context.userId
         if (useMediaResumption) {
             val unlockFilter = IntentFilter()
             unlockFilter.addAction(Intent.ACTION_USER_UNLOCKED)
@@ -117,6 +115,8 @@ class MediaResumeListener @Inject constructor(
             }
         }, Settings.Secure.MEDIA_CONTROLS_RESUME)
     }
+
+    fun isResumptionEnabled() = useMediaResumption
 
     private fun loadSavedComponents() {
         // Make sure list is empty (if we switched users)
