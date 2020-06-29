@@ -22,8 +22,8 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_marginStart="18dp"
-        android:layout_marginTop="22dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/app_name"
+        app:layout_constraintBottom_toBottomOf="@id/app_name"
         app:layout_constraintStart_toStartOf="parent"
         />
 
