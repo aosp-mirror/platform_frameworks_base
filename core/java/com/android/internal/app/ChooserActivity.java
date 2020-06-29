@@ -3127,6 +3127,10 @@ public class ChooserActivity extends ResolverActivity implements
         ChooserGridAdapter currentRootAdapter =
                 mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
         currentRootAdapter.updateDirectShareExpansion();
+        // This fixes an edge case where after performing a variety of gestures, vertical scrolling
+        // ends up disabled. That's because at some point the old tab's vertical scrolling is
+        // disabled and the new tab's is enabled. For context, see b/159997845
+        setVerticalScrollEnabled(true);
     }
 
     @Override
