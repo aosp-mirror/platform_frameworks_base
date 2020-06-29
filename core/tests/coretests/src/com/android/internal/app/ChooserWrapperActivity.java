@@ -229,7 +229,18 @@ public class ChooserWrapperActivity extends ChooserActivity {
 
     @Override
     protected boolean isUserRunning(UserHandle userHandle) {
+        if (userHandle.equals(UserHandle.SYSTEM)) {
+            return super.isUserRunning(userHandle);
+        }
         return sOverrides.isWorkProfileUserRunning;
+    }
+
+    @Override
+    protected boolean isUserUnlocked(UserHandle userHandle) {
+        if (userHandle.equals(UserHandle.SYSTEM)) {
+            return super.isUserUnlocked(userHandle);
+        }
+        return sOverrides.isWorkProfileUserUnlocked;
     }
 
     /**
@@ -258,6 +269,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public boolean hasCrossProfileIntents;
         public boolean isQuietModeEnabled;
         public boolean isWorkProfileUserRunning;
+        public boolean isWorkProfileUserUnlocked;
         public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
         public PackageManager packageManager;
 
@@ -281,6 +293,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             hasCrossProfileIntents = true;
             isQuietModeEnabled = false;
             isWorkProfileUserRunning = true;
+            isWorkProfileUserUnlocked = true;
             packageManager = null;
             multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
                 @Override
