@@ -10,8 +10,8 @@ toddke@android.com
 toddke@google.com
 
 # apex support
-per-file ApexManager.java = dariofreni@google.com
-per-file StagingManager.java = dariofreni@google.com
+per-file ApexManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
+per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
 
 # dex
 per-file AbstractStatsBase.java = agampe@google.com, calin@google.com, ngeoffray@google.com
