@@ -21,13 +21,20 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +52,7 @@ public final class ShutdownCheckPoints {
     private static final ShutdownCheckPoints INSTANCE = new ShutdownCheckPoints();
 
     private static final int MAX_CHECK_POINTS = 100;
+    private static final int MAX_DUMP_FILES = 20;
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
 
@@ -61,6 +69,11 @@ public final class ShutdownCheckPoints {
             @Override
             public int maxCheckPoints() {
                 return MAX_CHECK_POINTS;
+            }
+
+            @Override
+            public int maxDumpFiles() {
+                return MAX_DUMP_FILES;
             }
 
             @Override
@@ -94,6 +107,15 @@ public final class ShutdownCheckPoints {
     /** Serializes the recorded check points and writes them to given {@code printWriter}. */
     public static void dump(PrintWriter printWriter) {
         INSTANCE.dumpInternal(printWriter);
+    }
+
+    /**
+     * Creates a {@link Thread} that calls {@link #dump(PrintWriter)} on a rotating file created
+     * from given {@code baseFile} and a timestamp suffix. Older dump files are also deleted by this
+     * thread.
+     */
+    public static Thread newDumpThread(File baseFile) {
+        return INSTANCE.newDumpThreadInternal(baseFile);
     }
 
     @VisibleForTesting
@@ -138,12 +160,20 @@ public final class ShutdownCheckPoints {
         }
     }
 
+    @VisibleForTesting
+    Thread newDumpThreadInternal(File baseFile) {
+        return new FileDumperThread(this, baseFile, mInjector.maxDumpFiles());
+    }
+
     /** Injector used by {@link ShutdownCheckPoints} for testing purposes. */
     @VisibleForTesting
     interface Injector {
+
         long currentTimeMillis();
 
         int maxCheckPoints();
+
+        int maxDumpFiles();
 
         IActivityManager activityManager();
     }
@@ -294,6 +324,76 @@ public final class ShutdownCheckPoints {
             printWriter.println(mIntentName);
             printWriter.print("Package: ");
             printWriter.println(mPackageName);
+        }
+    }
+
+    /**
+     * Thread that writes {@link ShutdownCheckPoints#dumpInternal(PrintWriter)} to a new file and
+     * deletes old ones to keep the total number of files down to a given limit.
+     */
+    private static final class FileDumperThread extends Thread {
+
+        private final ShutdownCheckPoints mInstance;
+        private final File mBaseFile;
+        private final int mFileCountLimit;
+
+        FileDumperThread(ShutdownCheckPoints instance, File baseFile, int fileCountLimit) {
+            mInstance = instance;
+            mBaseFile = baseFile;
+            mFileCountLimit = fileCountLimit;
+        }
+
+        @Override
+        public void run() {
+            mBaseFile.getParentFile().mkdirs();
+            File[] checkPointFiles = listCheckPointsFiles();
+
+            int filesToDelete = checkPointFiles.length - mFileCountLimit + 1;
+            for (int i = 0; i < filesToDelete; i++) {
+                checkPointFiles[i].delete();
+            }
+
+            File nextCheckPointsFile = new File(String.format("%s-%d",
+                    mBaseFile.getAbsolutePath(), System.currentTimeMillis()));
+            writeCheckpoints(nextCheckPointsFile);
+        }
+
+        private File[] listCheckPointsFiles() {
+            String filePrefix = mBaseFile.getName() + "-";
+            File[] files = mBaseFile.getParentFile().listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    if (!name.startsWith(filePrefix)) {
+                        return false;
+                    }
+                    try {
+                        Long.valueOf(name.substring(filePrefix.length()));
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                    return true;
+                }
+            });
+            Arrays.sort(files);
+            return files;
+        }
+
+        private void writeCheckpoints(File file) {
+            AtomicFile tmpFile = new AtomicFile(mBaseFile);
+            FileOutputStream fos = null;
+            try {
+                fos = tmpFile.startWrite();
+                PrintWriter pw = new PrintWriter(fos);
+                mInstance.dumpInternal(pw);
+                pw.flush();
+                tmpFile.finishWrite(fos); // This also closes the output stream.
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to write shutdown checkpoints", e);
+                if (fos != null) {
+                    tmpFile.failWrite(fos); // This also closes the output stream.
+                }
+            }
+            mBaseFile.renameTo(file);
         }
     }
 }

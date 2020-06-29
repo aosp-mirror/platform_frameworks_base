@@ -33,9 +33,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -59,7 +65,7 @@ public class ShutdownCheckPointsTest {
     public void setUp() {
         Locale.setDefault(Locale.UK);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        mTestInjector = new TestInjector(0, 100, mActivityManager);
+        mTestInjector = new TestInjector(mActivityManager);
         mInstance = new ShutdownCheckPoints(mTestInjector);
     }
 
@@ -207,6 +213,67 @@ public class ShutdownCheckPointsTest {
                 dumpToString(limitedInstance));
     }
 
+    @Test
+    public void testDumpToFile() throws Exception {
+        File tempDir = createTempDir();
+        File baseFile = new File(tempDir, "checkpoints");
+
+        mTestInjector.setCurrentTime(1000);
+        mInstance.recordCheckPointInternal("first.intent", "first.app");
+        dumpToFile(baseFile);
+
+        mTestInjector.setCurrentTime(2000);
+        mInstance.recordCheckPointInternal("second.intent", "second.app");
+        dumpToFile(baseFile);
+
+        File[] dumpFiles = tempDir.listFiles();
+        Arrays.sort(dumpFiles);
+
+        assertEquals(2, dumpFiles.length);
+        assertEquals(
+                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                        + "Intent: first.intent\n"
+                        + "Package: first.app\n\n",
+                readFileAsString(dumpFiles[0].getAbsolutePath()));
+        assertEquals(
+                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                        + "Intent: first.intent\n"
+                        + "Package: first.app\n\n"
+                        + "Shutdown request from INTENT at 1970-01-01 00:00:02.000 UTC (epoch=2000)"
+                        + "\n"
+                        + "Intent: second.intent\n"
+                        + "Package: second.app\n\n",
+                readFileAsString(dumpFiles[1].getAbsolutePath()));
+    }
+
+    @Test
+    public void testTooManyFilesDropsOlderOnes() throws Exception {
+        mTestInjector.setDumpFilesLimit(1);
+        ShutdownCheckPoints instance = new ShutdownCheckPoints(mTestInjector);
+        File tempDir = createTempDir();
+        File baseFile = new File(tempDir, "checkpoints");
+
+        mTestInjector.setCurrentTime(1000);
+        instance.recordCheckPointInternal("first.intent", "first.app");
+        dumpToFile(instance, baseFile);
+
+        mTestInjector.setCurrentTime(2000);
+        instance.recordCheckPointInternal("second.intent", "second.app");
+        dumpToFile(instance, baseFile);
+
+        File[] dumpFiles = tempDir.listFiles();
+        assertEquals(1, dumpFiles.length);
+        assertEquals(
+                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                        + "Intent: first.intent\n"
+                        + "Package: first.app\n\n"
+                        + "Shutdown request from INTENT at 1970-01-01 00:00:02.000 UTC (epoch=2000)"
+                        + "\n"
+                        + "Intent: second.intent\n"
+                        + "Package: second.app\n\n",
+                readFileAsString(dumpFiles[0].getAbsolutePath()));
+    }
+
     private String dumpToString() {
         return dumpToString(mInstance);
     }
@@ -218,15 +285,39 @@ public class ShutdownCheckPointsTest {
         return sw.toString();
     }
 
+    private void dumpToFile(File baseFile) throws InterruptedException {
+        dumpToFile(mInstance, baseFile);
+    }
+
+    private void dumpToFile(ShutdownCheckPoints instance, File baseFile)
+            throws InterruptedException {
+        Thread dumpThread = instance.newDumpThreadInternal(baseFile);
+        dumpThread.start();
+        dumpThread.join();
+    }
+
+    private String readFileAsString(String absolutePath) throws IOException {
+        return new String(Files.readAllBytes(Paths.get(absolutePath)), StandardCharsets.UTF_8);
+    }
+
+    private File createTempDir() throws IOException {
+        File tempDir = File.createTempFile("checkpoints", "out");
+        tempDir.delete();
+        tempDir.mkdir();
+        return tempDir;
+    }
+
     /** Fake system dependencies for testing. */
     private final class TestInjector implements ShutdownCheckPoints.Injector {
         private long mNow;
-        private int mLimit;
+        private int mCheckPointsLimit;
+        private int mDumpFilesLimit;
         private IActivityManager mActivityManager;
 
-        TestInjector(long now, int limit, IActivityManager activityManager) {
-            mNow = now;
-            mLimit = limit;
+        TestInjector(IActivityManager activityManager) {
+            mNow = 0;
+            mCheckPointsLimit = 100;
+            mDumpFilesLimit = 2;
             mActivityManager = activityManager;
         }
 
@@ -237,7 +328,12 @@ public class ShutdownCheckPointsTest {
 
         @Override
         public int maxCheckPoints() {
-            return mLimit;
+            return mCheckPointsLimit;
+        }
+
+        @Override
+        public int maxDumpFiles() {
+            return mDumpFilesLimit;
         }
 
         @Override
@@ -250,7 +346,11 @@ public class ShutdownCheckPointsTest {
         }
 
         void setCheckPointsLimit(int limit) {
-            mLimit = limit;
+            mCheckPointsLimit = limit;
+        }
+
+        void setDumpFilesLimit(int dumpFilesLimit) {
+            mDumpFilesLimit = dumpFilesLimit;
         }
     }
 }
