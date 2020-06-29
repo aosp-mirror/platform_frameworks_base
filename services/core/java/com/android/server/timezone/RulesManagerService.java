@@ -37,6 +37,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.i18n.timezone.TimeZoneDataFiles;
+import com.android.i18n.timezone.TzDataSetVersion;
+import com.android.i18n.timezone.ZoneInfoDb;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
@@ -46,10 +49,7 @@ import com.android.timezone.distro.StagedDistroOperation;
 import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
-import libcore.timezone.TimeZoneDataFiles;
 import libcore.timezone.TimeZoneFinder;
-import libcore.timezone.TzDataSetVersion;
-import libcore.timezone.ZoneInfoDb;
 
 import java.io.File;
 import java.io.FileDescriptor;

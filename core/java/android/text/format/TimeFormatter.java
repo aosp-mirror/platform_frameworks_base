@@ -22,8 +22,9 @@ package android.text.format;
 
 import android.content.res.Resources;
 
+import com.android.i18n.timezone.ZoneInfoData;
+
 import libcore.icu.LocaleData;
-import libcore.util.ZoneInfo;
 
 import java.nio.CharBuffer;
 import java.time.Instant;
@@ -94,8 +95,8 @@ class TimeFormatter {
      * incorrect digit localization behavior.
      */
     String formatMillisWithFixedFormat(long timeMillis) {
-        // This method is deliberately not a general purpose replacement for
-        // format(String, ZoneInfo.WallTime, ZoneInfo): It hard-codes the pattern used; many of the
+        // This method is deliberately not a general purpose replacement for format(String,
+        // ZoneInfoData.WallTime, ZoneInfoData): It hard-codes the pattern used; many of the
         // pattern characters supported by Time.format() have unusual behavior which would make
         // using java.time.format or similar packages difficult. It would be a lot of work to share
         // behavior and many internal Android usecases can be covered by this common pattern
@@ -144,7 +145,8 @@ class TimeFormatter {
     /**
      * Format the specified {@code wallTime} using {@code pattern}. The output is returned.
      */
-    public String format(String pattern, ZoneInfo.WallTime wallTime, ZoneInfo zoneInfo) {
+    public String format(String pattern, ZoneInfoData.WallTime wallTime,
+            ZoneInfoData zoneInfoData) {
         try {
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -153,7 +155,7 @@ class TimeFormatter {
             // and locale sensitive strings are output directly using outputBuilder.
             numberFormatter = new Formatter(stringBuilder, Locale.US);
 
-            formatInternal(pattern, wallTime, zoneInfo);
+            formatInternal(pattern, wallTime, zoneInfoData);
             String result = stringBuilder.toString();
             // The localizeDigits() behavior is the source of a bug since some formats are defined
             // as being in ASCII and not localized.
@@ -186,13 +188,14 @@ class TimeFormatter {
      * Format the specified {@code wallTime} using {@code pattern}. The output is written to
      * {@link #outputBuilder}.
      */
-    private void formatInternal(String pattern, ZoneInfo.WallTime wallTime, ZoneInfo zoneInfo) {
+    private void formatInternal(String pattern, ZoneInfoData.WallTime wallTime,
+            ZoneInfoData zoneInfoData) {
         CharBuffer formatBuffer = CharBuffer.wrap(pattern);
         while (formatBuffer.remaining() > 0) {
             boolean outputCurrentChar = true;
             char currentChar = formatBuffer.get(formatBuffer.position());
             if (currentChar == '%') {
-                outputCurrentChar = handleToken(formatBuffer, wallTime, zoneInfo);
+                outputCurrentChar = handleToken(formatBuffer, wallTime, zoneInfoData);
             }
             if (outputCurrentChar) {
                 outputBuilder.append(formatBuffer.get(formatBuffer.position()));
@@ -201,8 +204,8 @@ class TimeFormatter {
         }
     }
 
-    private boolean handleToken(CharBuffer formatBuffer, ZoneInfo.WallTime wallTime,
-            ZoneInfo zoneInfo) {
+    private boolean handleToken(CharBuffer formatBuffer, ZoneInfoData.WallTime wallTime,
+            ZoneInfoData zoneInfoData) {
 
         // The char at formatBuffer.position() is expected to be '%' at this point.
         int modifier = 0;
@@ -247,10 +250,10 @@ class TimeFormatter {
                     outputYear(wallTime.getYear(), true, false, modifier);
                     return false;
                 case 'c':
-                    formatInternal(dateTimeFormat, wallTime, zoneInfo);
+                    formatInternal(dateTimeFormat, wallTime, zoneInfoData);
                     return false;
                 case 'D':
-                    formatInternal("%m/%d/%y", wallTime, zoneInfo);
+                    formatInternal("%m/%d/%y", wallTime, zoneInfoData);
                     return false;
                 case 'd':
                     numberFormatter.format(getFormat(modifier, "%02d", "%2d", "%d", "%02d"),
@@ -272,7 +275,7 @@ class TimeFormatter {
                             wallTime.getMonthDay());
                     return false;
                 case 'F':
-                    formatInternal("%Y-%m-%d", wallTime, zoneInfo);
+                    formatInternal("%Y-%m-%d", wallTime, zoneInfoData);
                     return false;
                 case 'H':
                     numberFormatter.format(getFormat(modifier, "%02d", "%2d", "%d", "%02d"),
@@ -315,21 +318,21 @@ class TimeFormatter {
                             : localeData.amPm[0], FORCE_LOWER_CASE);
                     return false;
                 case 'R':
-                    formatInternal("%H:%M", wallTime, zoneInfo);
+                    formatInternal("%H:%M", wallTime, zoneInfoData);
                     return false;
                 case 'r':
-                    formatInternal("%I:%M:%S %p", wallTime, zoneInfo);
+                    formatInternal("%I:%M:%S %p", wallTime, zoneInfoData);
                     return false;
                 case 'S':
                     numberFormatter.format(getFormat(modifier, "%02d", "%2d", "%d", "%02d"),
                             wallTime.getSecond());
                     return false;
                 case 's':
-                    int timeInSeconds = wallTime.mktime(zoneInfo);
+                    int timeInSeconds = wallTime.mktime(zoneInfoData);
                     outputBuilder.append(Integer.toString(timeInSeconds));
                     return false;
                 case 'T':
-                    formatInternal("%H:%M:%S", wallTime, zoneInfo);
+                    formatInternal("%H:%M:%S", wallTime, zoneInfoData);
                     return false;
                 case 't':
                     outputBuilder.append('\t');
@@ -383,7 +386,7 @@ class TimeFormatter {
                     return false;
                 }
                 case 'v':
-                    formatInternal("%e-%b-%Y", wallTime, zoneInfo);
+                    formatInternal("%e-%b-%Y", wallTime, zoneInfoData);
                     return false;
                 case 'W':
                     int n = (wallTime.getYearDay() + DAYSPERWEEK - (
@@ -395,10 +398,10 @@ class TimeFormatter {
                     numberFormatter.format("%d", wallTime.getWeekDay());
                     return false;
                 case 'X':
-                    formatInternal(timeOnlyFormat, wallTime, zoneInfo);
+                    formatInternal(timeOnlyFormat, wallTime, zoneInfoData);
                     return false;
                 case 'x':
-                    formatInternal(dateOnlyFormat, wallTime, zoneInfo);
+                    formatInternal(dateOnlyFormat, wallTime, zoneInfoData);
                     return false;
                 case 'y':
                     outputYear(wallTime.getYear(), false, true, modifier);
@@ -411,7 +414,8 @@ class TimeFormatter {
                         return false;
                     }
                     boolean isDst = wallTime.getIsDst() != 0;
-                    modifyAndAppend(zoneInfo.getDisplayName(isDst, TimeZone.SHORT), modifier);
+                    modifyAndAppend(TimeZone.getTimeZone(zoneInfoData.getID())
+                            .getDisplayName(isDst, TimeZone.SHORT), modifier);
                     return false;
                 case 'z': {
                     if (wallTime.getIsDst() < 0) {
@@ -432,7 +436,7 @@ class TimeFormatter {
                     return false;
                 }
                 case '+':
-                    formatInternal("%a %b %e %H:%M:%S %Z %Y", wallTime, zoneInfo);
+                    formatInternal("%a %b %e %H:%M:%S %Z %Y", wallTime, zoneInfoData);
                     return false;
                 case '%':
                     // If conversion char is undefined, behavior is undefined. Print out the
