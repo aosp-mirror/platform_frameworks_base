@@ -49,6 +49,7 @@ import com.android.server.power.batterysaver.BatterySaverPolicy.Policy;
 import com.android.server.power.batterysaver.BatterySavingStats.BatterySaverState;
 import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
 import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
+import com.android.server.power.batterysaver.BatterySavingStats.PlugState;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -551,17 +552,14 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                         : DozeState.NOT_DOZING;
 
         synchronized (mLock) {
-            if (mIsPluggedIn) {
-                mBatterySavingStats.startCharging();
-                return;
-            }
             mBatterySavingStats.transitionState(
                     getFullEnabledLocked() ? BatterySaverState.ON :
                             (getAdaptiveEnabledLocked() ? BatterySaverState.ADAPTIVE :
                             BatterySaverState.OFF),
                             isInteractive ? InteractiveState.INTERACTIVE :
                             InteractiveState.NON_INTERACTIVE,
-                            dozeMode);
+                            dozeMode,
+                    mIsPluggedIn ? PlugState.PLUGGED : PlugState.UNPLUGGED);
         }
     }
 
