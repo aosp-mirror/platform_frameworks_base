@@ -216,8 +216,8 @@
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
         android:tint="@color/media_primary_text"
-        android:layout_width="20dp"
-        android:layout_height="20dp" />
+        android:layout_width="@dimen/qs_media_icon_size"
+        android:layout_height="@dimen/qs_media_icon_size" />
 
     <!-- Buttons to remove this view when no longer needed -->
     <include

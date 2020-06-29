@@ -19,8 +19,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <Constraint
         android:id="@+id/icon"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="@dimen/qs_media_icon_size"
+        android:layout_height="@dimen/qs_media_icon_size"
         android:layout_marginStart="18dp"
         app:layout_constraintTop_toTopOf="@id/app_name"
         app:layout_constraintBottom_toBottomOf="@id/app_name"
@@ -58,14 +58,14 @@
         android:id="@+id/media_seamless_fallback"
         android:layout_width="@dimen/qs_seamless_fallback_icon_size"
         android:layout_height="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_marginTop="@dimen/qs_seamless_fallback_top_margin"
         android:layout_marginEnd="@dimen/qs_seamless_fallback_end_margin"
         android:layout_marginStart="@dimen/qs_center_guideline_padding"
         android:alpha="0.5"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/app_name"
+        app:layout_constraintBottom_toBottomOf="@id/app_name"
         app:layout_constraintStart_toEndOf="@id/center_vertical_guideline"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1"
         />
 
