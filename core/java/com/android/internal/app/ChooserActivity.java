@@ -2021,6 +2021,9 @@ public class ChooserActivity extends ResolverActivity implements
         if (!isUserRunning(userHandle)) {
             return false;
         }
+        if (!isUserUnlocked(userHandle)) {
+            return false;
+        }
         if (isQuietModeEnabled(userHandle)) {
             return false;
         }
@@ -2870,6 +2873,12 @@ public class ChooserActivity extends ResolverActivity implements
     protected boolean isUserRunning(UserHandle userHandle) {
         UserManager userManager = getSystemService(UserManager.class);
         return userManager.isUserRunning(userHandle);
+    }
+
+    @VisibleForTesting
+    protected boolean isUserUnlocked(UserHandle userHandle) {
+        UserManager userManager = getSystemService(UserManager.class);
+        return userManager.isUserUnlocked(userHandle);
     }
 
     @VisibleForTesting
