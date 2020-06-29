@@ -4049,4 +4049,13 @@
   <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
 
   <java-symbol type="array" name="config_notificationMsgPkgsAllowedAsConvos" />
+
+  <!-- Binder heavy hitter watcher configs -->
+  <java-symbol type="bool" name="config_defaultBinderHeavyHitterWatcherEnabled" />
+  <java-symbol type="integer" name="config_defaultBinderHeavyHitterWatcherBatchSize" />
+  <java-symbol type="dimen" name="config_defaultBinderHeavyHitterWatcherThreshold" />
+  <java-symbol type="bool" name="config_defaultBinderHeavyHitterAutoSamplerEnabled" />
+  <java-symbol type="integer" name="config_defaultBinderHeavyHitterAutoSamplerBatchSize" />
+  <java-symbol type="dimen" name="config_defaultBinderHeavyHitterAutoSamplerThreshold" />
+
 </resources>

@@ -4363,4 +4363,27 @@
     <bool name="config_pdp_reject_enable_retry">false</bool>
     <!-- pdp data reject retry delay in ms -->
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
+
+    <!-- Whether or not to enable the binder heavy hitter watcher by default -->
+    <bool name="config_defaultBinderHeavyHitterWatcherEnabled">true</bool>
+
+    <!-- The default batch size for the binder heavy hitter watcher -->
+    <integer name="config_defaultBinderHeavyHitterWatcherBatchSize">2000</integer>
+
+    <!-- The default threshold for the binder heavy hitter watcher -->
+    <item name="config_defaultBinderHeavyHitterWatcherThreshold" format="float" type="dimen">
+        0.333
+    </item>
+
+    <!-- Whether or not to enable the binder heavy hitter auto sampler by default -->
+    <bool name="config_defaultBinderHeavyHitterAutoSamplerEnabled">true</bool>
+
+    <!-- The default batch size for the binder heavy hitter auto sampler -->
+    <integer name="config_defaultBinderHeavyHitterAutoSamplerBatchSize">400</integer>
+
+    <!-- The default threshold for the binder heavy hitter auto sampler -->
+    <item name="config_defaultBinderHeavyHitterAutoSamplerThreshold" format="float" type="dimen">
+        0.333
+    </item>
+
 </resources>
