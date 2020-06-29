@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class AnrHelperTest {
-    private final AnrHelper mAnrHelper = new AnrHelper();
+    private final AnrHelper mAnrHelper = new AnrHelper(mock(ActivityManagerService.class));
 
     private ProcessRecord mAnrApp;
 
