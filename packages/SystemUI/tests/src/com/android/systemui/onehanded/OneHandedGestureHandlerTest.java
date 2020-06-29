@@ -16,6 +16,8 @@
 
 package com.android.systemui.onehanded;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +45,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class OneHandedTouchHandlerTest extends OneHandedTestCase {
+public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     Instrumentation mInstrumentation;
     OneHandedTouchHandler mTouchHandler;
     OneHandedGestureHandler mGestureHandler;
@@ -51,19 +53,18 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
     @Mock
     DisplayController mMockDisplayController;
     @Mock
-    NavigationModeController mMockNavigationModeController;
-    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
     SysUiState mMockSysUiState;
-
+    @Mock
+    NavigationModeController mMockNavigationModeController;
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mTouchHandler = Mockito.spy(new OneHandedTouchHandler());
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
-                mMockNavigationModeController);
+        mGestureHandler = Mockito.spy(new OneHandedGestureHandler(
+                mContext, mMockDisplayController, mMockNavigationModeController));
         mOneHandedManagerImpl = new OneHandedManagerImpl(mInstrumentation.getContext(),
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
@@ -74,35 +75,44 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOneHandedManager_registerForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer, times(1)).registerTransitionCallback(mTouchHandler);
+        verify(mMockDisplayAreaOrganizer, times(1)).registerTransitionCallback(mGestureHandler);
     }
 
     @Test
-    public void testOneHandedManager_registerTouchEventListener() {
-        verify(mTouchHandler).registerTouchEventListener(any());
-        assertThat(mTouchHandler.mTouchEventCallback).isNotNull();
-    }
+    public void testOneHandedManager_setGestureEventListener() {
+        verify(mGestureHandler).setGestureEventListener(any());
 
-    @Test
-    public void testOneHandedDisabled_shouldDisposeInputChannel() {
-        mOneHandedManagerImpl.setOneHandedEnabled(false);
-        assertThat(mTouchHandler.mInputMonitor).isNull();
-        assertThat(mTouchHandler.mInputEventReceiver).isNull();
-    }
-
-    @Test
-    public void testOneHandedEnabled_monitorInputChannel() {
-        mOneHandedManagerImpl.setOneHandedEnabled(true);
-        assertThat(mTouchHandler.mInputMonitor).isNotNull();
-        assertThat(mTouchHandler.mInputEventReceiver).isNotNull();
+        assertThat(mGestureHandler.mGestureEventCallback).isNotNull();
     }
 
     @Test
     public void testReceiveNewConfig_whenSetOneHandedEnabled() {
         // 1st called at init
-        verify(mTouchHandler).onOneHandedEnabled(true);
+        verify(mGestureHandler).onOneHandedEnabled(true);
         mOneHandedManagerImpl.setOneHandedEnabled(true);
         // 2nd called by setOneHandedEnabled()
-        verify(mTouchHandler, times(2)).onOneHandedEnabled(true);
+        verify(mGestureHandler, times(2)).onOneHandedEnabled(true);
+    }
+
+    @Test
+    public void testOneHandedDisabled_shouldDisposeInputChannel() {
+        mOneHandedManagerImpl.setOneHandedEnabled(false);
+
+        assertThat(mGestureHandler.mInputMonitor).isNull();
+        assertThat(mGestureHandler.mInputEventReceiver).isNull();
+    }
+
+    @Test
+    public void testChangeNavBarTo2Button_shouldDisposeInputChannel() {
+        // 1st called at init
+        verify(mGestureHandler).onOneHandedEnabled(true);
+        mOneHandedManagerImpl.setOneHandedEnabled(true);
+        // 2nd called by setOneHandedEnabled()
+        verify(mGestureHandler, times(2)).onOneHandedEnabled(true);
+
+        mGestureHandler.onNavigationModeChanged(NAV_BAR_MODE_2BUTTON);
+
+        assertThat(mGestureHandler.mInputMonitor).isNull();
+        assertThat(mGestureHandler.mInputEventReceiver).isNull();
     }
 }
