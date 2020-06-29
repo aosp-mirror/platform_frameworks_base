@@ -43,7 +43,6 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
-import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
@@ -57,7 +56,6 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 public final class ShutdownThread extends Thread {
@@ -428,7 +426,9 @@ public final class ShutdownThread extends Thread {
         metricStarted(METRIC_SYSTEM_SERVER);
 
         // Start dumping check points for this shutdown in a separate thread.
-        Thread dumpCheckPointsThread = startCheckPointsDump();
+        Thread dumpCheckPointsThread = ShutdownCheckPoints.newDumpThread(
+                new File(CHECK_POINTS_FILE_BASENAME));
+        dumpCheckPointsThread.start();
 
         BroadcastReceiver br = new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
@@ -726,25 +726,6 @@ public final class ShutdownThread extends Thread {
         if (saved) {
             tmp.renameTo(new File(METRICS_FILE_BASENAME + ".txt"));
         }
-    }
-
-    private Thread startCheckPointsDump() {
-        Thread thread = new Thread() {
-            public void run() {
-                // Writes to a file with .new suffix and then renames it to final file name.
-                // The final file won't be left with partial data if this thread is interrupted.
-                AtomicFile file = new AtomicFile(new File(CHECK_POINTS_FILE_BASENAME));
-                try (FileOutputStream fos = file.startWrite()) {
-                    PrintWriter pw = new PrintWriter(fos);
-                    ShutdownCheckPoints.dump(pw);
-                    file.finishWrite(fos);
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot save shutdown checkpoints", e);
-                }
-            }
-        };
-        thread.start();
-        return thread;
     }
 
     private void uncrypt() {
