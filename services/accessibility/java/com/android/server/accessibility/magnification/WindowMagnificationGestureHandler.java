@@ -100,7 +100,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
      */
     public WindowMagnificationGestureHandler(Context context,
             WindowMagnificationManager windowMagnificationMgr,
-            MagnificationGestureHandler.ScaleChangedListener listener, boolean detectTripleTap,
+            ScaleChangedListener listener, boolean detectTripleTap,
             boolean detectShortcutTrigger, int displayId) {
         super(listener);
         if (DEBUG_ALL) {

@@ -17,7 +17,10 @@
 package com.android.server.accessibility.magnification;
 
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -52,16 +55,27 @@ public class WindowMagnificationManager implements
     static final float MAX_SCALE = FullScreenMagnificationController.MAX_SCALE;
     static final float MIN_SCALE = FullScreenMagnificationController.MIN_SCALE;
 
-    private final Object mLock = new Object();;
+    private final Object mLock = new Object();
     private final Context mContext;
     @VisibleForTesting
     @GuardedBy("mLock")
-    @Nullable WindowMagnificationConnectionWrapper mConnectionWrapper;
+    @Nullable
+    WindowMagnificationConnectionWrapper mConnectionWrapper;
     @GuardedBy("mLock")
     private ConnectionCallback mConnectionCallback;
     @GuardedBy("mLock")
     private SparseArray<WindowMagnifier> mWindowMagnifiers = new SparseArray<>();
     private int mUserId;
+
+    @VisibleForTesting
+    protected final BroadcastReceiver mScreenStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int displayId = context.getDisplayId();
+            removeMagnificationButton(displayId);
+            disableWindowMagnification(displayId);
+        }
+    };
 
     public WindowMagnificationManager(Context context, int userId) {
         mContext = context;
@@ -133,8 +147,12 @@ public class WindowMagnificationManager implements
             if (connect == isConnected()) {
                 return false;
             }
-            if (!connect) {
+            if (connect) {
+                final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+                mContext.registerReceiver(mScreenStateReceiver, intentFilter);
+            } else {
                 disableAllWindowMagnifiers();
+                mContext.unregisterReceiver(mScreenStateReceiver);
             }
         }
 
