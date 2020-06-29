@@ -1081,6 +1081,49 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
               std::ceil(1.0 * event6.GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec));
 }
 
+TEST(ValueMetricProducerTest, TestAnomalyDetectionMultipleBucketsSkipped) {
+    sp<AlarmMonitor> alarmMonitor;
+    Alert alert;
+    alert.set_id(101);
+    alert.set_metric_id(metricId);
+    alert.set_trigger_if_sum_gt(100);
+    alert.set_num_buckets(1);
+    const int32_t refPeriodSec = 3;
+    alert.set_refractory_period_secs(refPeriodSec);
+
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 1);  // Condition change to true time.
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 1, 0));
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs,
+                          bucket3StartTimeNs + 100);  // Condition changed to false time.
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 100, 120));
+                return true;
+            }));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric,
+                                                                            ConditionState::kFalse);
+    sp<AnomalyTracker> anomalyTracker = valueProducer->addAnomalyTracker(alert, alarmMonitor);
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 1);
+
+    // multiple buckets should be skipped here.
+    valueProducer->onConditionChanged(false, bucket3StartTimeNs + 100);
+
+    // No alert is fired when multiple buckets are skipped.
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY), 0U);
+}
+
 // Test value metric no condition, the pull on bucket boundary come in time and too late
 TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();

@@ -219,6 +219,8 @@ private:
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
 
+    bool multipleBucketsSkipped(const int64_t numBucketsForward);
+
     void accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs);
 
