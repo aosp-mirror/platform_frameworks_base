@@ -43,13 +43,13 @@ import android.app.timezone.RulesManager;
 import android.app.timezone.RulesState;
 import android.os.ParcelFileDescriptor;
 
+import com.android.i18n.timezone.TzDataSetVersion;
 import com.android.timezone.distro.DistroVersion;
 import com.android.timezone.distro.StagedDistroOperation;
 import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
 import libcore.io.IoUtils;
-import libcore.timezone.TzDataSetVersion;
 
 import org.junit.Before;
 import org.junit.Test;
