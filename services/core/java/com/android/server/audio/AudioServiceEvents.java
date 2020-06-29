@@ -27,28 +27,82 @@ import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 public class AudioServiceEvents {
 
     final static class PhoneStateEvent extends AudioEventLogger.Event {
+        static final int MODE_SET = 0;
+        static final int MODE_IN_COMMUNICATION_TIMEOUT = 1;
+
+        final int mOp;
         final String mPackage;
         final int mOwnerPid;
         final int mRequesterPid;
         final int mRequestedMode;
         final int mActualMode;
 
+        /** used for MODE_SET */
         PhoneStateEvent(String callingPackage, int requesterPid, int requestedMode,
                         int ownerPid, int actualMode) {
+            mOp = MODE_SET;
             mPackage = callingPackage;
             mRequesterPid = requesterPid;
             mRequestedMode = requestedMode;
             mOwnerPid = ownerPid;
             mActualMode = actualMode;
+            logMetricEvent();
+        }
+
+        /** used for MODE_IN_COMMUNICATION_TIMEOUT */
+        PhoneStateEvent(String callingPackage, int ownerPid) {
+            mOp = MODE_IN_COMMUNICATION_TIMEOUT;
+            mPackage = callingPackage;
+            mOwnerPid = ownerPid;
+            mRequesterPid = 0;
+            mRequestedMode = 0;
+            mActualMode = 0;
+            logMetricEvent();
         }
 
         @Override
         public String eventToString() {
-            return new StringBuilder("setMode(").append(AudioSystem.modeToString(mRequestedMode))
-                    .append(") from package=").append(mPackage)
-                    .append(" pid=").append(mRequesterPid)
-                    .append(" selected mode=").append(AudioSystem.modeToString(mActualMode))
-                    .append(" by pid=").append(mOwnerPid).toString();
+            switch (mOp) {
+                case MODE_SET:
+                    return new StringBuilder("setMode(")
+                            .append(AudioSystem.modeToString(mRequestedMode))
+                            .append(") from package=").append(mPackage)
+                            .append(" pid=").append(mRequesterPid)
+                            .append(" selected mode=")
+                            .append(AudioSystem.modeToString(mActualMode))
+                            .append(" by pid=").append(mOwnerPid).toString();
+                case MODE_IN_COMMUNICATION_TIMEOUT:
+                    return new StringBuilder("mode IN COMMUNICATION timeout")
+                            .append(" for package=").append(mPackage)
+                            .append(" pid=").append(mOwnerPid).toString();
+                default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
+            }
+        }
+
+        /**
+         * Audio Analytics unique Id.
+         */
+        private static final String mMetricsId = MediaMetrics.Name.AUDIO_MODE;
+
+        private void logMetricEvent() {
+            switch (mOp) {
+                case MODE_SET:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "set")
+                            .set(MediaMetrics.Property.REQUESTED_MODE,
+                                    AudioSystem.modeToString(mRequestedMode))
+                            .set(MediaMetrics.Property.MODE, AudioSystem.modeToString(mActualMode))
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mPackage)
+                            .record();
+                    return;
+                case MODE_IN_COMMUNICATION_TIMEOUT:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "inCommunicationTimeout")
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mPackage)
+                            .record();
+                    return;
+                default: return;
+            }
         }
     }
 

@@ -215,6 +215,25 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         dispatchCallbacks(updateSnapshot(AudioManager.RECORD_CONFIG_EVENT_RELEASE, riid, null));
     }
 
+    /**
+     * Returns true if a recorder belonging to the app with given uid is active.
+     *
+     * @param uid the app uid
+     * @return true if a recorder is active, false otherwise
+     */
+    public boolean isRecordingActiveForUid(int uid) {
+        synchronized (mRecordStates) {
+            for (RecordingState state : mRecordStates) {
+                // Note: isActiveConfiguration() == true => state.getConfig() != null
+                if (state.isActiveConfiguration()
+                        && state.getConfig().getClientUid() == uid) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void dispatchCallbacks(List<AudioRecordingConfiguration> configs) {
         if (configs == null) { // null means "no changes"
             return;
