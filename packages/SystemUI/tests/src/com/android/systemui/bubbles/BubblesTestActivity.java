@@ -20,7 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.systemui.tests.R;
+import com.android.systemui.R;
 
 /**
  * Referenced by NotificationTestHelper#makeBubbleMetadata
