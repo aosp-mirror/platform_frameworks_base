@@ -1615,6 +1615,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSeparateChallengeLock) {
             if (!setLockCredentialInternal(credential, savedCredential,
                     userId, /* isLockTiedToParent= */ false)) {
+                scheduleGc();
                 return false;
             }
             setSeparateProfileChallengeEnabledLocked(userId, true, /* unused */ null);
@@ -1625,6 +1626,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setDeviceUnlockedForUser(userId);
         }
         notifySeparateProfileChallengeChanged(userId);
+        scheduleGc();
         return true;
     }
 
@@ -1964,7 +1966,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     public VerifyCredentialResponse checkCredential(LockscreenCredential credential, int userId,
             ICheckCredentialProgressCallback progressCallback) {
         checkPasswordReadPermission(userId);
-        return doVerifyCredential(credential, CHALLENGE_NONE, 0, userId, progressCallback);
+        try {
+            return doVerifyCredential(credential, CHALLENGE_NONE, 0, userId, progressCallback);
+        } finally {
+            scheduleGc();
+        }
     }
 
     @Override
@@ -1977,8 +1983,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             challengeType = CHALLENGE_NONE;
 
         }
-        return doVerifyCredential(credential, challengeType, challenge, userId,
-                null /* progressCallback */);
+        try {
+            return doVerifyCredential(credential, challengeType, challenge, userId,
+                    null /* progressCallback */);
+        } finally {
+            scheduleGc();
+        }
     }
 
     private VerifyCredentialResponse doVerifyCredential(LockscreenCredential credential,
@@ -2069,6 +2079,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 | BadPaddingException | CertificateException | IOException e) {
             Slog.e(TAG, "Failed to decrypt child profile key", e);
             throw new IllegalStateException("Unable to get tied profile token");
+        } finally {
+            scheduleGc();
         }
     }
 
@@ -2980,27 +2992,31 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] getHashFactor(LockscreenCredential currentCredential, int userId) {
         checkPasswordReadPermission(userId);
-        if (isManagedProfileWithUnifiedLock(userId)) {
-            try {
-                currentCredential = getDecryptedPasswordForTiedProfile(userId);
-            } catch (Exception e) {
-                Slog.e(TAG, "Failed to get work profile credential", e);
-                return null;
+        try {
+            if (isManagedProfileWithUnifiedLock(userId)) {
+                try {
+                    currentCredential = getDecryptedPasswordForTiedProfile(userId);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to get work profile credential", e);
+                    return null;
+                }
             }
-        }
-        synchronized (mSpManager) {
-            if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
-                Slog.w(TAG, "Synthetic password not enabled");
-                return null;
+            synchronized (mSpManager) {
+                if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
+                    Slog.w(TAG, "Synthetic password not enabled");
+                    return null;
+                }
+                long handle = getSyntheticPasswordHandleLocked(userId);
+                AuthenticationResult auth = mSpManager.unwrapPasswordBasedSyntheticPassword(
+                        getGateKeeperService(), handle, currentCredential, userId, null);
+                if (auth.authToken == null) {
+                    Slog.w(TAG, "Current credential is incorrect");
+                    return null;
+                }
+                return auth.authToken.derivePasswordHashFactor();
             }
-            long handle = getSyntheticPasswordHandleLocked(userId);
-            AuthenticationResult auth = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                    getGateKeeperService(), handle, currentCredential, userId, null);
-            if (auth.authToken == null) {
-                Slog.w(TAG, "Current credential is incorrect");
-                return null;
-            }
-            return auth.authToken.derivePasswordHashFactor();
+        } finally {
+            scheduleGc();
         }
     }
 
@@ -3282,6 +3298,22 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (isSyntheticPasswordBasedCredentialLocked(userId)) {
             mSpManager.destroyEscrowData(userId);
         }
+    }
+
+    /**
+     * Schedules garbage collection to sanitize lockscreen credential remnants in memory.
+     *
+     * One source of leftover lockscreen credentials is the unmarshalled binder method arguments.
+     * Since this method will be called within the binder implementation method, a small delay is
+     * added before the GC operation to allow the enclosing binder proxy code to complete and
+     * release references to the argument.
+     */
+    private void scheduleGc() {
+        mHandler.postDelayed(() -> {
+            System.gc();
+            System.runFinalization();
+            System.gc();
+        }, 2000);
     }
 
     private class DeviceProvisionedObserver extends ContentObserver {
