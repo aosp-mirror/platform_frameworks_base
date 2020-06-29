@@ -47,12 +47,29 @@ class TransitionLayout @JvmOverloads constructor(
     private var currentState: TransitionViewState = TransitionViewState()
     private var updateScheduled = false
 
+    private var desiredMeasureWidth = 0
+    private var desiredMeasureHeight = 0
     /**
      * The measured state of this view which is the one we will lay ourselves out with. This
      * may differ from the currentState if there is an external animation or transition running.
      * This state will not be used to measure the widgets, where the current state is preferred.
      */
     var measureState: TransitionViewState = TransitionViewState()
+        set(value) {
+            val newWidth = value.width
+            val newHeight = value.height
+            if (newWidth != desiredMeasureWidth || newHeight != desiredMeasureHeight) {
+                desiredMeasureWidth = newWidth
+                desiredMeasureHeight = newHeight
+                // We need to make sure next time we're measured that our onMeasure will be called.
+                // Otherwise our parent thinks we still have the same height
+                if (isInLayout()) {
+                    forceLayout()
+                } else {
+                    requestLayout()
+                }
+            }
+        }
     private val preDrawApplicator = object : ViewTreeObserver.OnPreDrawListener {
         override fun onPreDraw(): Boolean {
             updateScheduled = false
@@ -158,7 +175,7 @@ class TransitionLayout @JvmOverloads constructor(
                         MeasureSpec.EXACTLY)
                 child.measure(measureWidthSpec, measureHeightSpec)
             }
-            setMeasuredDimension(measureState.width, measureState.height)
+            setMeasuredDimension(desiredMeasureWidth, desiredMeasureHeight)
         }
     }
 
