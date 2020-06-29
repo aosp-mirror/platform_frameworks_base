@@ -124,6 +124,9 @@ public class NotificationInlineImageResolver implements ImageResolver {
      */
     Drawable resolveImage(Uri uri) throws IOException {
         BitmapDrawable image = resolveImageInternal(uri);
+        if (image == null || image.getBitmap() == null) {
+            throw new IOException("resolveImageInternal returned null for uri: " + uri);
+        }
         Bitmap bitmap = image.getBitmap();
         image.setBitmap(Icon.scaleDownIfNecessary(bitmap, mMaxImageWidth, mMaxImageHeight));
         return image;
