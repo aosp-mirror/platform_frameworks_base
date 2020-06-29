@@ -55,7 +55,9 @@ import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.util.DeviceConfigProxy;
 
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -94,7 +96,7 @@ public class PipResizeGestureHandler {
     private final Rect mTmpBottomLeftCorner = new Rect();
     private final Rect mTmpBottomRightCorner = new Rect();
     private final Rect mDisplayBounds = new Rect();
-    private final Supplier<Rect> mMovementBoundsSupplier;
+    private final Function<Rect, Rect> mMovementBoundsSupplier;
     private final Runnable mUpdateMovementBoundsRunnable;
 
     private int mDelta;
@@ -113,7 +115,7 @@ public class PipResizeGestureHandler {
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
-            PipTaskOrganizer pipTaskOrganizer, Supplier<Rect> movementBoundsSupplier,
+            PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
             Runnable updateMovementBoundsRunnable, SysUiState sysUiState) {
         mContext = context;
         mDisplayId = context.getDisplayId();
@@ -244,10 +246,15 @@ public class PipResizeGestureHandler {
         return mTmpRegion.contains(x, y);
     }
 
+    public boolean willStartResizeGesture(MotionEvent ev) {
+        return mEnableUserResize && isInValidSysUiState()
+                && isWithinTouchRegion((int) ev.getRawX(), (int) ev.getRawY());
+    }
+
     private void setCtrlType(int x, int y) {
         final Rect currentPipBounds = mMotionHelper.getBounds();
 
-        Rect movementBounds = mMovementBoundsSupplier.get();
+        Rect movementBounds = mMovementBoundsSupplier.apply(currentPipBounds);
         mDisplayBounds.set(movementBounds.left,
                 movementBounds.top,
                 movementBounds.right + currentPipBounds.width(),
@@ -351,6 +358,16 @@ public class PipResizeGestureHandler {
 
     void updateMinSize(int minX, int minY) {
         mMinSize.set(minX, minY);
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mAllowGesture=" + mAllowGesture);
+        pw.println(innerPrefix + "mIsAttached=" + mIsAttached);
+        pw.println(innerPrefix + "mIsEnabled=" + mIsEnabled);
+        pw.println(innerPrefix + "mEnableUserResize=" + mEnableUserResize);
+        pw.println(innerPrefix + "mThresholdCrossed=" + mThresholdCrossed);
     }
 
     class SysUiInputEventReceiver extends BatchedInputEventReceiver {
