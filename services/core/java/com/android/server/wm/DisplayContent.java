@@ -2684,6 +2684,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
     @Override
     void removeImmediately() {
         mRemovingDisplay = true;
+        mDeferredRemoval = false;
         try {
             if (mParentWindow != null) {
                 mParentWindow.removeEmbeddedDisplayContent(this);
@@ -2717,31 +2718,14 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
 
     /** Returns true if a removal action is still being deferred. */
     @Override
-    boolean checkCompleteDeferredRemoval() {
-        boolean stillDeferringRemoval = false;
-
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final DisplayArea child = getChildAt(i);
-            stillDeferringRemoval |= child.checkCompleteDeferredRemoval();
-            if (getChildCount() == 0) {
-                // If this display is pending to be removed because it contains an activity with
-                // {@link ActivityRecord#mIsExiting} is true, this display may be removed when
-                // completing the removal of the last activity from
-                // {@link ActivityRecord#checkCompleteDeferredRemoval}.
-                return false;
-            }
-        }
+    boolean handleCompleteDeferredRemoval() {
+        final boolean stillDeferringRemoval = super.handleCompleteDeferredRemoval();
 
         if (!stillDeferringRemoval && mDeferredRemoval) {
             removeImmediately();
             return false;
         }
-        return true;
-    }
-
-    /** @return 'true' if removal of this display content is deferred due to active animation. */
-    boolean isRemovalDeferred() {
-        return mDeferredRemoval;
+        return stillDeferringRemoval;
     }
 
     void adjustForImeIfNeeded() {
