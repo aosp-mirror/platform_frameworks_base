@@ -121,6 +121,14 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
+    fun logNoNotificationToRemoveWithKey(key: String) {
+        buffer.log(TAG, ERROR, {
+            str1 = key
+        }, {
+            "No notification to remove with key $str1"
+        })
+    }
+
     fun logRankingMissing(key: String, rankingMap: RankingMap) {
         buffer.log(TAG, WARNING, { str1 = key }, { "Ranking update is missing ranking for $str1" })
         buffer.log(TAG, DEBUG, {}, { "Ranking map contents:" })
