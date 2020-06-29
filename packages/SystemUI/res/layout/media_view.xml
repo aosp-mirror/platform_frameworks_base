@@ -65,25 +65,16 @@
 
     <!--  Actions must be ordered left-to-right even in RTL layout.  However, they appear in a chain
     with the album art and the title, and must as a group appear at the end of that chain.  This is
-    accomplished by having the guidebox (an invisible view that is positioned around all 5 actions)
-    in the chain with the album art and the title.  The actions are in a LTR chain bounded by that
-    guidebox, and the ambiguity of how wide the guidebox should be is resolved by using a barrier
-    which forces it's starting edge to be as far to the end as possible while fitting the actions.
-    -->
+    accomplished by having all actions appear in a LTR chain within the parent, and then biasing it
+    to the right side, then this barrier is used to bound the text views.  -->
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/media_action_barrier"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
         app:barrierDirection="start"
-        />
-
-    <View
-        android:id="@+id/media_action_guidebox"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="16dp"
-        android:visibility="invisible"
+        app:constraint_referenced_ids="action0,action1,action2,action3,action4"
         />
 
     <ImageButton
@@ -201,7 +192,6 @@
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
         android:textColor="@color/media_primary_text"
-        android:textDirection="locale"
         android:textSize="16sp" />
 
     <!-- Artist name -->
@@ -212,7 +202,6 @@
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
         android:textColor="@color/media_secondary_text"
-        android:textDirection="locale"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
