@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
@@ -72,6 +73,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
@@ -87,6 +89,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
@@ -220,6 +223,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
     private MediaActionSound mCameraSound;
 
+    private int mNavMode;
+    private int mLeftInset;
+    private int mRightInset;
+
     // standard material ease
     private final Interpolator mFastOutSlowIn;
 
@@ -301,6 +308,15 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mDismissButton.getBoundsOnScreen(dismissRect);
         touchRegion.op(dismissRect, Region.Op.UNION);
 
+        if (QuickStepContract.isGesturalMode(mNavMode)) {
+            // Receive touches in gesture insets such that they don't cause TOUCH_OUTSIDE
+            Rect inset = new Rect(0, 0, mLeftInset, mDisplayMetrics.heightPixels);
+            touchRegion.op(inset, Region.Op.UNION);
+            inset.set(mDisplayMetrics.widthPixels - mRightInset, 0, mDisplayMetrics.widthPixels,
+                    mDisplayMetrics.heightPixels);
+            touchRegion.op(inset, Region.Op.UNION);
+        }
+
         inoutInfo.touchableRegion.set(touchRegion);
     }
 
@@ -356,6 +372,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         if (needsUpdate) {
             reloadAssets();
         }
+
+        mNavMode = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode);
     }
 
     /**
@@ -370,6 +389,25 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         // Inflate the screenshot layout
         mScreenshotLayout = LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
+        // TODO(159460485): Remove this when focus is handled properly in the system
+        mScreenshotLayout.setOnTouchListener((v, event) -> {
+            if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
+                // Once the user touches outside, stop listening for input
+                setWindowFocusable(false);
+            }
+            return false;
+        });
+        mScreenshotLayout.setOnApplyWindowInsetsListener((v, insets) -> {
+            if (QuickStepContract.isGesturalMode(mNavMode)) {
+                Insets gestureInsets = insets.getInsets(
+                        WindowInsets.Type.systemGestures());
+                mLeftInset = gestureInsets.left;
+                mRightInset = gestureInsets.right;
+            } else {
+                mLeftInset = mRightInset = 0;
+            }
+            return mScreenshotLayout.onApplyWindowInsets(insets);
+        });
         mScreenshotLayout.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -432,6 +470,21 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         }
     }
 
+    /**
+     * Updates the window focusability.  If the window is already showing, then it updates the
+     * window immediately, otherwise the layout params will be applied when the window is next
+     * shown.
+     */
+    private void setWindowFocusable(boolean focusable) {
+        if (focusable) {
+            mWindowLayoutParams.flags &= ~FLAG_NOT_FOCUSABLE;
+        } else {
+            mWindowLayoutParams.flags |= FLAG_NOT_FOCUSABLE;
+        }
+        if (mScreenshotLayout.isAttachedToWindow()) {
+            mWindowManager.updateViewLayout(mScreenshotLayout, mWindowLayoutParams);
+        }
+    }
 
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
@@ -500,6 +553,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
             mDismissAnimation.cancel();
         }
+
+        // The window is focusable by default
+        setWindowFocusable(true);
+
         // Start the post-screenshot animation
         startAnimation(finisher, screenRect, screenInsets, showFlash);
     }
