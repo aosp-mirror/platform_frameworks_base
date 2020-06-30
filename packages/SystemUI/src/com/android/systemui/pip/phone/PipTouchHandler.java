@@ -644,12 +644,12 @@ public class PipTouchHandler {
         }
 
         MotionEvent ev = (MotionEvent) inputEvent;
-        if (!mTouchState.isDragging()
-                && !mMagnetizedPip.getObjectStuckToTarget()
-                && !mMotionHelper.isAnimating()
-                && mPipResizeGestureHandler.isWithinTouchRegion(
-                        (int) ev.getRawX(), (int) ev.getRawY())) {
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN
+                && mPipResizeGestureHandler.willStartResizeGesture(ev)) {
+            // Initialize the touch state for the gesture, but immediately reset to invalidate the
+            // gesture
             mTouchState.onTouchEvent(ev);
+            mTouchState.reset();
             return true;
         }
 
@@ -1032,8 +1032,11 @@ public class PipTouchHandler {
                 isMenuExpanded  && willResizeMenu() ? mExpandedShortestEdgeSize : 0);
     }
 
-    private Rect getMovementBounds() {
-        return mMovementBounds;
+    private Rect getMovementBounds(Rect curBounds) {
+        Rect movementBounds = new Rect();
+        mSnapAlgorithm.getMovementBounds(curBounds, mInsetBounds,
+                movementBounds, mIsImeShowing ? mImeHeight : 0);
+        return movementBounds;
     }
 
     /**
@@ -1065,6 +1068,9 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mMovementBoundsExtraOffsets=" + mMovementBoundsExtraOffsets);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);
+        if (mPipResizeGestureHandler != null) {
+            mPipResizeGestureHandler.dump(pw, innerPrefix);
+        }
     }
 
 }
