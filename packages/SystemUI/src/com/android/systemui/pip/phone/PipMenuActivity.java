@@ -162,9 +162,10 @@ public class PipMenuActivity extends Activity {
                     break;
                 case MESSAGE_UPDATE_ACTIONS: {
                     final Bundle data = (Bundle) msg.obj;
-                    final ParceledListSlice actions = data.getParcelable(EXTRA_ACTIONS);
+                    final ParceledListSlice<RemoteAction> actions = data.getParcelable(
+                            EXTRA_ACTIONS);
                     setActions(data.getParcelable(EXTRA_STACK_BOUNDS), actions != null
-                            ? actions.getList() : Collections.EMPTY_LIST);
+                            ? actions.getList() : Collections.emptyList());
                     break;
                 }
                 case MESSAGE_UPDATE_DISMISS_FRACTION: {
@@ -496,7 +497,7 @@ public class PipMenuActivity extends Activity {
         }
         notifyActivityCallback(mMessenger);
 
-        ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
+        ParceledListSlice<RemoteAction> actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {
             mActions.clear();
             mActions.addAll(actions.getList());

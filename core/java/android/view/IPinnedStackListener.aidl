@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
@@ -51,9 +52,9 @@ oneway interface IPinnedStackListener {
 
     /**
      * Called when the set of actions for the current PiP activity changes, or when the listener
-     * is first registered to allow the listener to synchronized its state with the controller.
+     * is first registered to allow the listener to synchronize its state with the controller.
      */
-    void onActionsChanged(in ParceledListSlice actions);
+    void onActionsChanged(in ParceledListSlice<RemoteAction> actions);
 
     /**
      * Called by the window manager to notify the listener that Activity (was or is in pinned mode)

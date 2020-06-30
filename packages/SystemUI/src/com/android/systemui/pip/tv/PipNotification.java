@@ -19,6 +19,7 @@ package com.android.systemui.pip.tv;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -89,7 +90,7 @@ public class PipNotification {
         }
 
         @Override
-        public void onPipMenuActionsChanged(ParceledListSlice actions) {
+        public void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions) {
             // no-op.
         }
 

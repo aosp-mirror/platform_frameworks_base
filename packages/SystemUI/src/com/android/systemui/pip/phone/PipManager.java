@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -209,7 +210,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice actions) {
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
             mHandler.post(() -> mMenuController.setAppActions(actions));
         }
 
