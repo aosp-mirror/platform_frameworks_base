@@ -4386,4 +4386,6 @@
         0.333
     </item>
 
+    <!-- Component names of the services which will keep critical code path warm -->
+    <string-array name="config_keep_warming_services" translatable="false" />
 </resources>

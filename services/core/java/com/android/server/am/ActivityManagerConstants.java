@@ -19,6 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 
 import android.app.ActivityThread;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -336,6 +337,11 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     public int PENDINGINTENT_WARNING_THRESHOLD =  DEFAULT_PENDINGINTENT_WARNING_THRESHOLD;
 
+    /**
+     * Component names of the services which will keep critical code path of the host warm
+     */
+    public final ArraySet<ComponentName> KEEP_WARMING_SERVICES = new ArraySet<ComponentName>();
+
     private List<String> mDefaultImperceptibleKillExemptPackages;
     private List<Integer> mDefaultImperceptibleKillExemptProcStates;
 
@@ -496,6 +502,10 @@ final class ActivityManagerConstants extends ContentObserver {
         BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE = mDefaultBinderHeavyHitterAutoSamplerBatchSize;
         BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD = mDefaultBinderHeavyHitterAutoSamplerThreshold;
         service.scheduleUpdateBinderHeavyHitterWatcherConfig();
+        KEEP_WARMING_SERVICES.addAll(Arrays.stream(
+                context.getResources().getStringArray(
+                        com.android.internal.R.array.config_keep_warming_services))
+                .map(ComponentName::unflattenFromString).collect(Collectors.toSet()));
     }
 
     public void start(ContentResolver resolver) {
