@@ -422,6 +422,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   application_action.Action(OptionalNameIsJavaClassName);
 
   application_action["uses-library"].Action(RequiredNameIsNotEmpty);
+  application_action["uses-native-library"].Action(RequiredNameIsNotEmpty);
   application_action["library"].Action(RequiredNameIsNotEmpty);
   application_action["profileable"];
 
