@@ -118,6 +118,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
@@ -645,6 +646,19 @@ class ActivityStarter {
             // to assume those permissions are denied to avoid deadlocking.
             if (mRequest.activityInfo == null) {
                 mRequest.resolveActivity(mSupervisor);
+            }
+
+            // Add checkpoint for this shutdown or reboot attempt, so we can record the original
+            // intent action and package name.
+            if (mRequest.intent != null) {
+                String intentAction = mRequest.intent.getAction();
+                String callingPackage = mRequest.callingPackage;
+                if (intentAction != null && callingPackage != null
+                        && (Intent.ACTION_REQUEST_SHUTDOWN.equals(intentAction)
+                                || Intent.ACTION_SHUTDOWN.equals(intentAction)
+                                || Intent.ACTION_REBOOT.equals(intentAction))) {
+                    ShutdownCheckPoints.recordCheckPoint(intentAction, callingPackage, null);
+                }
             }
 
             int res;

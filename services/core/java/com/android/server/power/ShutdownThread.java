@@ -65,7 +65,7 @@ public final class ShutdownThread extends Thread {
     private static final int RADIOS_STATE_POLL_SLEEP_MS = 100;
     // maximum time we wait for the shutdown broadcast before going on.
     private static final int MAX_BROADCAST_TIME = 10 * 1000;
-    private static final int MAX_CHECK_POINTS_DUMP_WAIT_TIME = 20 * 1000;
+    private static final int MAX_CHECK_POINTS_DUMP_WAIT_TIME = 10 * 1000;
     private static final int MAX_RADIO_WAIT_TIME = 12 * 1000;
     private static final int MAX_UNCRYPT_WAIT_TIME = 15 * 60 * 1000;
     // constants for progress bar. the values are roughly estimated based on timeout.
@@ -164,6 +164,10 @@ public final class ShutdownThread extends Thread {
                 return;
             }
         }
+
+        // Add checkpoint for this shutdown attempt. The user might still cancel the dialog, but
+        // this point preserves the system trace of the trigger point of the ShutdownThread.
+        ShutdownCheckPoints.recordCheckPoint(/* reason= */ null);
 
         final int longPressBehavior = context.getResources().getInteger(
                         com.android.internal.R.integer.config_longPressOnPowerBehavior);
