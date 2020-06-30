@@ -268,7 +268,6 @@ class MediaViewController @Inject constructor(
     fun attach(transitionLayout: TransitionLayout) {
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
-        ensureAllMeasurements()
         if (currentEndLocation == -1) {
             return
         }
@@ -414,13 +413,16 @@ class MediaViewController @Inject constructor(
      * Clear all existing measurements and refresh the state to match the view.
      */
     fun refreshState() {
-        if (!firstRefresh) {
-            // Let's clear all of our measurements and recreate them!
-            viewStates.clear()
-            setCurrentState(currentStartLocation, currentEndLocation, currentTransitionProgress,
-                    applyImmediately = true)
+        // Let's clear all of our measurements and recreate them!
+        viewStates.clear()
+        if (firstRefresh) {
+            // This is the first bind, let's ensure we pre-cache all measurements. Otherwise
+            // We'll just load these on demand.
+            ensureAllMeasurements()
+            firstRefresh = false
         }
-        firstRefresh = false
+        setCurrentState(currentStartLocation, currentEndLocation, currentTransitionProgress,
+                applyImmediately = true)
     }
 }
 
