@@ -243,7 +243,7 @@ public class PipControlsViewController {
     /**
      * Updates the set of activity-defined actions.
      */
-    public void setActions(List<RemoteAction> actions) {
+    public void setActions(List<? extends RemoteAction> actions) {
         mCustomActions.clear();
         mCustomActions.addAll(actions);
         updateUserActions();

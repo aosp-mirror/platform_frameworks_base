@@ -19,6 +19,7 @@ package com.android.systemui.pip.tv;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.Activity;
+import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
@@ -149,12 +150,12 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     }
 
     @Override
-    public void onPipMenuActionsChanged(ParceledListSlice actions) {
+    public void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions) {
         if (DEBUG) Log.d(TAG, "onPipMenuActionsChanged()");
 
         boolean hasCustomActions = actions != null && !actions.getList().isEmpty();
         mPipControlsViewController.setActions(
-                hasCustomActions ? actions.getList() : Collections.EMPTY_LIST);
+                hasCustomActions ? actions.getList() : Collections.emptyList());
     }
 
     @Override
