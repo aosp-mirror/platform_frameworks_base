@@ -16,17 +16,14 @@
 
 package com.android.server.biometrics.sensors;
 
-import android.hardware.biometrics.BiometricAuthenticator;
-
 /**
- * Interface that {@link ClientMonitor} subclasses eligible/interested in removal callbacks should
+ * Interface that {@link ClientMonitor} subclasses eligible/interested in error callbacks should
  * implement.
  */
-public interface RemovalConsumer {
+public interface ErrorConsumer {
     /**
-     * @param identifier Fingerprint, face, etc that was removed.
-     * @param remaining number of templates that still need to be removed before the operation in
-     *                  the HAL is complete (e.g. when removing all templates).
+     * @param errorCode defined by the HIDL interface
+     * @param vendorCode defined by the vendor
      */
-    void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining);
+    void onError(int errorCode, int vendorCode);
 }

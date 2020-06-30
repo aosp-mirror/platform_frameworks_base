@@ -17,7 +17,6 @@
 package com.android.server.biometrics.sensors;
 
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -37,19 +36,17 @@ import java.util.List;
 @Presubmit
 @SmallTest
 public class BiometricServiceBaseTest {
-    private static class TestableBiometricServiceBase extends
-            com.android.server.biometrics.sensors.BiometricServiceBase {
+    private static class TestableBiometricServiceBase extends BiometricServiceBase {
         TestableBiometricServiceBase(Context context) {
             super(context);
         }
 
         @Override
-        protected String getTag() {
-            return null;
+        protected void doTemplateCleanupForUser(int userId) {
         }
 
         @Override
-        protected DaemonWrapper getDaemonWrapper() {
+        protected String getTag() {
             return null;
         }
 
@@ -130,15 +127,5 @@ public class BiometricServiceBaseTest {
     @Test
     public void testHandleEnumerate_doesNotCrash_withNullClient() {
         mBiometricServiceBase.handleEnumerate(mIdentifier, 0 /* remaining */);
-    }
-
-    @Test
-    public void testStartClient_sendsErrorAndRemovesClient_onNonzeroErrorCode() {
-        when(mClient.start()).thenReturn(1);
-
-        mBiometricServiceBase.startClient(mClient, false /* initiatedByClient */);
-
-        verify(mClient).onError(anyInt(), anyInt());
-        verify(mClient).destroy();
     }
 }

@@ -16,17 +16,12 @@
 
 package com.android.server.biometrics.sensors;
 
-import android.hardware.biometrics.BiometricAuthenticator;
-
 /**
- * Interface that {@link ClientMonitor} subclasses eligible/interested in removal callbacks should
- * implement.
+ * Interface that cancellable {@link ClientMonitor} subclasses should implement.
  */
-public interface RemovalConsumer {
+public interface Cancellable {
     /**
-     * @param identifier Fingerprint, face, etc that was removed.
-     * @param remaining number of templates that still need to be removed before the operation in
-     *                  the HAL is complete (e.g. when removing all templates).
+     * Requests to end the ClientMonitor's lifecycle.
      */
-    void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining);
+    void cancel();
 }
