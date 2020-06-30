@@ -170,12 +170,6 @@ public class SystemConfig {
     // URL-handling state upon factory reset.
     final ArraySet<String> mLinkedApps = new ArraySet<>();
 
-    // These are the packages that are whitelisted to be able to run as system user
-    final ArraySet<String> mSystemUserWhitelistedApps = new ArraySet<>();
-
-    // These are the packages that should not run under system user
-    final ArraySet<String> mSystemUserBlacklistedApps = new ArraySet<>();
-
     // These are the components that are enabled by default as VR mode listener services.
     final ArraySet<ComponentName> mDefaultVrComponents = new ArraySet<>();
 
@@ -307,14 +301,6 @@ public class SystemConfig {
 
     public ArraySet<String> getLinkedApps() {
         return mLinkedApps;
-    }
-
-    public ArraySet<String> getSystemUserWhitelistedApps() {
-        return mSystemUserWhitelistedApps;
-    }
-
-    public ArraySet<String> getSystemUserBlacklistedApps() {
-        return mSystemUserBlacklistedApps;
     }
 
     public ArraySet<String> getHiddenApiWhitelistedApps() {
@@ -889,34 +875,6 @@ public class SystemConfig {
                                         + " at " + parser.getPositionDescription());
                             } else {
                                 mLinkedApps.add(pkgname);
-                            }
-                        } else {
-                            logNotAllowedInPartition(name, permFile, parser);
-                        }
-                        XmlUtils.skipCurrentTag(parser);
-                    } break;
-                    case "system-user-whitelisted-app": {
-                        if (allowAppConfigs) {
-                            String pkgname = parser.getAttributeValue(null, "package");
-                            if (pkgname == null) {
-                                Slog.w(TAG, "<" + name + "> without package in "
-                                        + permFile + " at " + parser.getPositionDescription());
-                            } else {
-                                mSystemUserWhitelistedApps.add(pkgname);
-                            }
-                        } else {
-                            logNotAllowedInPartition(name, permFile, parser);
-                        }
-                        XmlUtils.skipCurrentTag(parser);
-                    } break;
-                    case "system-user-blacklisted-app": {
-                        if (allowAppConfigs) {
-                            String pkgname = parser.getAttributeValue(null, "package");
-                            if (pkgname == null) {
-                                Slog.w(TAG, "<" + name + "> without package in "
-                                        + permFile + " at " + parser.getPositionDescription());
-                            } else {
-                                mSystemUserBlacklistedApps.add(pkgname);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
