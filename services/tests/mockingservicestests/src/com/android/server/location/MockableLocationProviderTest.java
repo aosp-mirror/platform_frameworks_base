@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 import android.location.Criteria;
 import android.location.Location;
+import android.location.util.identity.CallerIdentity;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -68,8 +69,8 @@ public class MockableLocationProviderTest {
                 true,
                 true,
                 Criteria.POWER_LOW,
-                Criteria.ACCURACY_FINE)
-        ));
+                Criteria.ACCURACY_FINE),
+                CallerIdentity.forTest(0, 1, "testpackage", "test")));
 
         mProvider = new MockableLocationProvider(lock, mListener);
         mProvider.setRealProvider(mRealProvider);

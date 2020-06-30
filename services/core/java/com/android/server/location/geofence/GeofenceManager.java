@@ -112,10 +112,9 @@ public class GeofenceManager extends
         }
 
         @Override
-        protected boolean onPendingIntentRegister(Object key) {
+        protected void onPendingIntentListenerRegister() {
             mGeofenceState = STATE_UNKNOWN;
             mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(), PERMISSION_FINE);
-            return true;
         }
 
         @Override

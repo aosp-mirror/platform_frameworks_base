@@ -25,8 +25,8 @@ import android.util.IndentingPrintWriter;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.listeners.ListenerRegistration.ListenerOperation;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -186,9 +186,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
     /**
      * Adds a new registration with the given key. Registration may fail if
-     * {@link ListenerRegistration#onRegister(Object)} returns false, in which case the
-     * registration will not be added. This method cannot be called to add a registration
-     * re-entrantly.
+     * {@link ListenerRegistration#onRegister(Object)} returns false, in which case the registration
+     * will not be added. This method cannot be called to add a registration re-entrantly.
      */
     protected final void addRegistration(@NonNull TKey key, @NonNull TRegistration registration) {
         Objects.requireNonNull(key);
@@ -203,22 +202,12 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             // callbacks. further, we buffer service updates since adding a registration may
             // involve removing a prior registration. note that try-with-resources ordering is
             // meaningful here as well. we want to close the reentrancy guard first, as this may
-            // generate addition service updates, then close the update service buffer.
+            // generate additional service updates, then close the update service buffer.
             long identity = Binder.clearCallingIdentity();
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
-                if (mRegistrations.isEmpty()) {
-                    onRegister();
-                }
-
-                if (!registration.onRegister(key)) {
-                    if (mRegistrations.isEmpty()) {
-                        onUnregister();
-                    }
-
-                    return;
-                }
+                boolean wasEmpty = mRegistrations.isEmpty();
 
                 int index = mRegistrations.indexOfKey(key);
                 if (index >= 0) {
@@ -228,6 +217,11 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                     mRegistrations.put(key, registration);
                 }
 
+
+                if (wasEmpty) {
+                    onRegister();
+                }
+                registration.onRegister(key);
                 onRegistrationAdded(key, registration);
                 onRegistrationActiveChanged(registration);
             } finally {
@@ -270,7 +264,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             // callbacks. further, we buffer service updates since chains of removeLater()
             // invocations could result in multiple service updates. note that try-with-resources
             // ordering is meaningful here as well. we want to close the reentrancy guard first, as
-            // this may generate addition service updates, then close the update service buffer.
+            // this may generate additional service updates, then close the update service buffer.
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
@@ -327,8 +321,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
         // callbacks themselves do not re-enter, as this could lead to out-of-order callbacks.
         // further, we buffer service updates since chains of removeLater() invocations could result
         // in multiple service updates. note that try-with-resources ordering is meaningful here as
-        // well. we want to close the reentrancy guard first, as this may generate addition service
-        // updates, then close the update service buffer.
+        // well. we want to close the reentrancy guard first, as this may generate additional
+        // service updates, then close the update service buffer.
         long identity = Binder.clearCallingIdentity();
         try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
              ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
@@ -393,6 +387,28 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     }
 
     /**
+     * Evaluates the given predicate for all registrations, and forces an {@link #updateService()}
+     * if any predicate returns true for an active registration. The predicate will always be
+     * evaluated for all registrations, even inactive registrations, or if it has already returned
+     * true for a prior registration.
+     */
+    protected final void updateService(Predicate<TRegistration> predicate) {
+        synchronized (mRegistrations) {
+            boolean updateService = false;
+            for (int i = 0; i < mRegistrations.size(); i++) {
+                TRegistration registration = mRegistrations.valueAt(i);
+                if (predicate.test(registration) && registration.isActive()) {
+                    updateService = true;
+                }
+            }
+
+            if (updateService) {
+                updateService();
+            }
+        }
+    }
+
+    /**
      * Begins buffering calls to {@link #updateService()} until {@link UpdateServiceLock#close()}
      * is called. This is useful to prevent extra work when combining multiple calls (for example,
      * buffering {@code updateService()} until after multiple adds/removes/updates occur.
@@ -412,7 +428,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             // since updating a registration can invoke a variety of callbacks, we need to ensure
             // those callbacks themselves do not re-enter, as this could lead to out-of-order
             // callbacks. note that try-with-resources ordering is meaningful here as well. we want
-            // to close the reentrancy guard first, as this may generate addition service updates,
+            // to close the reentrancy guard first, as this may generate additional service updates,
             // then close the update service buffer.
             long identity = Binder.clearCallingIdentity();
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
@@ -441,7 +457,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             // since updating a registration can invoke a variety of callbacks, we need to ensure
             // those callbacks themselves do not re-enter, as this could lead to out-of-order
             // callbacks. note that try-with-resources ordering is meaningful here as well. we want
-            // to close the reentrancy guard first, as this may generate addition service updates,
+            // to close the reentrancy guard first, as this may generate additional service updates,
             // then close the update service buffer.
             long identity = Binder.clearCallingIdentity();
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
@@ -511,8 +527,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     }
 
     /**
-     * Executes the given delivery operation for all active listeners. This is a convenience
-     * function equivalent to:
+     * Executes the given operation for all active listeners. This is a convenience function
+     * equivalent to:
      * <pre>
      * deliverToListeners(registration -> operation);
      * </pre>

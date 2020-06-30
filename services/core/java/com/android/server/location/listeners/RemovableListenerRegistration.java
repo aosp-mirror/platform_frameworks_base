@@ -47,7 +47,7 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
      * with. Often this is easiest to accomplish by defining registration subclasses as non-static
      * inner classes of the multiplexer they are to be used with.
      */
-    protected abstract ListenerMultiplexer<?, TRequest, TListener, ?, ?> getOwner();
+    protected abstract ListenerMultiplexer<?, ? super TRequest, ? super TListener, ?, ?> getOwner();
 
     /**
      * Returns the key associated with this registration. May not be invoked before
@@ -58,50 +58,41 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
     }
 
     /**
-     * Removes this registration. May not be invoked before {@link #onRegister(Object)} or after
-     * {@link #onUnregister()}.
+     * Removes this registration. Does nothing if invoked before {@link #onRegister(Object)} or
+     * after {@link #onUnregister()}. It is safe to invoke this from within either function.
      */
-    public final void remove() {
-        getOwner().removeRegistration(Objects.requireNonNull(mKey), this);
+    public void remove() {
+        Object key = mKey;
+        if (key != null) {
+            getOwner().removeRegistration(key, this);
+        }
     }
 
     @Override
-    protected void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
-        if (e instanceof RuntimeException) {
-            throw (RuntimeException) e;
-        } else {
-            Log.w(mTag,
-                    "registration " + getIdentity() + " removed due to unexpected exception",
-                    e);
-            remove();
-        }
+    public <Listener> void onOperationFailure(ListenerOperation<Listener> operation, Exception e) {
+        Log.w(mTag, "registration " + getIdentity() + " removed due to unexpected exception", e);
+        remove();
+    }
+
+    @Override
+    protected final void onRegister(Object key) {
+        mKey = Objects.requireNonNull(key);
+        onRemovableListenerRegister();
+    }
+
+    @Override
+    protected final void onUnregister() {
+        onRemovableListenerUnregister();
+        mKey = null;
     }
 
     /**
      * May be overridden in place of {@link #onRegister(Object)}.
      */
-    protected boolean onRemovableRegister(Object key) {
-        return true;
-    }
+    protected void onRemovableListenerRegister() {}
 
     /**
      * May be overridden in place of {@link #onUnregister()}.
      */
-    protected void onRemovableUnregister(Object key) {}
-
-    @Override
-    protected final boolean onRegister(Object key) {
-        mKey = Objects.requireNonNull(key);
-        if (!onRemovableRegister(key)) {
-            mKey = null;
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    protected final void onUnregister() {
-        onRemovableUnregister(mKey);
-        mKey = null;
-    }
+    protected void onRemovableListenerUnregister() {}
 }
