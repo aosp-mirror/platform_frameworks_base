@@ -20,9 +20,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.PointF
 import android.graphics.Rect
+import android.text.Layout
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -45,12 +47,29 @@ class TransitionLayout @JvmOverloads constructor(
     private var currentState: TransitionViewState = TransitionViewState()
     private var updateScheduled = false
 
+    private var desiredMeasureWidth = 0
+    private var desiredMeasureHeight = 0
     /**
      * The measured state of this view which is the one we will lay ourselves out with. This
      * may differ from the currentState if there is an external animation or transition running.
      * This state will not be used to measure the widgets, where the current state is preferred.
      */
     var measureState: TransitionViewState = TransitionViewState()
+        set(value) {
+            val newWidth = value.width
+            val newHeight = value.height
+            if (newWidth != desiredMeasureWidth || newHeight != desiredMeasureHeight) {
+                desiredMeasureWidth = newWidth
+                desiredMeasureHeight = newHeight
+                // We need to make sure next time we're measured that our onMeasure will be called.
+                // Otherwise our parent thinks we still have the same height
+                if (isInLayout()) {
+                    forceLayout()
+                } else {
+                    requestLayout()
+                }
+            }
+        }
     private val preDrawApplicator = object : ViewTreeObserver.OnPreDrawListener {
         override fun onPreDraw(): Boolean {
             updateScheduled = false
@@ -85,6 +104,23 @@ class TransitionLayout @JvmOverloads constructor(
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             val widgetState = currentState.widgetStates.get(child.id) ?: continue
+
+            // TextViews which are measured and sized differently should be handled with a
+            // "clip mode", which means we clip explicitly rather than implicitly by passing
+            // different sizes to measure/layout than setLeftTopRightBottom.
+            // Then to accommodate RTL text, we need a "clip shift" which allows us to have the
+            // clipBounds be attached to the right side of the view instead of the left.
+            val clipModeShift =
+                    if (child is TextView && widgetState.width < widgetState.measureWidth) {
+                if (child.layout.getParagraphDirection(0) == Layout.DIR_RIGHT_TO_LEFT) {
+                    widgetState.measureWidth - widgetState.width
+                } else {
+                    0
+                }
+            } else {
+                null
+            }
+
             if (child.measuredWidth != widgetState.measureWidth ||
                     child.measuredHeight != widgetState.measureHeight) {
                 val measureWidthSpec = MeasureSpec.makeMeasureSpec(widgetState.measureWidth,
@@ -94,14 +130,17 @@ class TransitionLayout @JvmOverloads constructor(
                 child.measure(measureWidthSpec, measureHeightSpec)
                 child.layout(0, 0, child.measuredWidth, child.measuredHeight)
             }
-            val left = widgetState.x.toInt() + contentTranslationX
+            val clipShift = clipModeShift ?: 0
+            val left = widgetState.x.toInt() + contentTranslationX - clipShift
             val top = widgetState.y.toInt() + contentTranslationY
-            child.setLeftTopRightBottom(left, top, left + widgetState.width,
-                    top + widgetState.height)
+            val clipMode = clipModeShift != null
+            val boundsWidth = if (clipMode) widgetState.measureWidth else widgetState.width
+            val boundsHeight = if (clipMode) widgetState.measureHeight else widgetState.height
+            child.setLeftTopRightBottom(left, top, left + boundsWidth, top + boundsHeight)
             child.scaleX = widgetState.scale
             child.scaleY = widgetState.scale
             val clipBounds = child.clipBounds ?: Rect()
-            clipBounds.set(0, 0, widgetState.width, widgetState.height)
+            clipBounds.set(clipShift, 0, widgetState.width + clipShift, widgetState.height)
             child.clipBounds = clipBounds
             CrossFadeHelper.fadeIn(child, widgetState.alpha)
             child.visibility = if (widgetState.gone || widgetState.alpha == 0.0f) {
@@ -136,7 +175,7 @@ class TransitionLayout @JvmOverloads constructor(
                         MeasureSpec.EXACTLY)
                 child.measure(measureWidthSpec, measureHeightSpec)
             }
-            setMeasuredDimension(measureState.width, measureState.height)
+            setMeasuredDimension(desiredMeasureWidth, desiredMeasureHeight)
         }
     }
 

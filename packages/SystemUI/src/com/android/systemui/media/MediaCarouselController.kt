@@ -299,6 +299,7 @@ class MediaCarouselController @Inject constructor(
         if (numPages == 1) {
             pageIndicator.setLocation(0f)
         }
+        updatePageIndicatorAlpha()
     }
 
     /**
@@ -464,7 +465,7 @@ class MediaCarouselController @Inject constructor(
         val width = desiredHostState?.measurementInput?.width ?: 0
         val height = desiredHostState?.measurementInput?.height ?: 0
         if (width != carouselMeasureWidth && width != 0 ||
-                height != carouselMeasureWidth && height != 0) {
+                height != carouselMeasureHeight && height != 0) {
             carouselMeasureWidth = width
             carouselMeasureHeight = height
             val playerWidthPlusPadding = carouselMeasureWidth +

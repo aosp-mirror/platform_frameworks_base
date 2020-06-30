@@ -94,7 +94,7 @@ public class ResumeMediaBrowser {
             // a request with EXTRA_RECENT; if they don't, no resume controls
             MediaBrowser.MediaItem child = children.get(0);
             MediaDescription desc = child.getDescription();
-            if (child.isPlayable()) {
+            if (child.isPlayable() && mMediaBrowser != null) {
                 mCallback.addTrack(desc, mMediaBrowser.getServiceComponent(),
                         ResumeMediaBrowser.this);
             } else {
@@ -129,7 +129,7 @@ public class ResumeMediaBrowser {
         @Override
         public void onConnected() {
             Log.d(TAG, "Service connected for " + mComponentName);
-            if (mMediaBrowser.isConnected()) {
+            if (mMediaBrowser != null && mMediaBrowser.isConnected()) {
                 String root = mMediaBrowser.getRoot();
                 if (!TextUtils.isEmpty(root)) {
                     mCallback.onConnected();
@@ -187,7 +187,7 @@ public class ResumeMediaBrowser {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "Connected for restart " + mMediaBrowser.isConnected());
-                        if (!mMediaBrowser.isConnected()) {
+                        if (mMediaBrowser == null || !mMediaBrowser.isConnected()) {
                             mCallback.onError();
                             return;
                         }
@@ -246,7 +246,7 @@ public class ResumeMediaBrowser {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "connected");
-                        if (!mMediaBrowser.isConnected()
+                        if (mMediaBrowser == null || !mMediaBrowser.isConnected()
                                 || TextUtils.isEmpty(mMediaBrowser.getRoot())) {
                             mCallback.onError();
                         } else {

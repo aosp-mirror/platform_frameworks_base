@@ -65,6 +65,13 @@ public final class CompanionDeviceManager {
     /**
      * A device, returned in the activity result of the {@link IntentSender} received in
      * {@link Callback#onDeviceFound}
+     *
+     * Type is:
+     * <ul>
+     *     <li>for classic Bluetooth - {@link android.bluetooth.BluetoothDevice}</li>
+     *     <li>for Bluetooth LE - {@link android.bluetooth.le.ScanResult}</li>
+     *     <li>for WiFi - {@link android.net.wifi.ScanResult}</li>
+     * </ul>
      */
     public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
 
