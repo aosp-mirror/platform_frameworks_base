@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Избриши"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Не може да се додаде приспособена мелодија"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Не може да се избрише приспособена мелодија"</string>
+    <string name="app_label" msgid="3091611356093417332">"Звуци"</string>
 </resources>

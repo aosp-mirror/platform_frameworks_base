@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"លុប"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"មិន​អាច​បន្ថែម​សំឡេង​រោទ៍​ផ្ទាល់ខ្លួន​បាន"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"មិន​អាច​លុប​សំឡេង​រោទ៍​ផ្ទាល់ខ្លួន​បាន​ទេ"</string>
+    <string name="app_label" msgid="3091611356093417332">"សំឡេង"</string>
 </resources>

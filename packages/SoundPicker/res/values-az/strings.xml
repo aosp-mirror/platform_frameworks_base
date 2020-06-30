@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Silin"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Fərdi zəng səsi əlavə etmək mümkün deyil"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Fərdi zəng səsini silmək mümkün deyil"</string>
+    <string name="app_label" msgid="3091611356093417332">"Səslər"</string>
 </resources>
