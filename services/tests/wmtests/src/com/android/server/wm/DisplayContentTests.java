@@ -583,6 +583,58 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSetForcedSize() {
+        // Prevent base display metrics for test from being updated to the value of real display.
+        final DisplayContent displayContent = createDisplayNoUpdateDisplayInfo();
+        final int baseWidth = 1280;
+        final int baseHeight = 720;
+        final int baseDensity = 320;
+
+        displayContent.mInitialDisplayWidth = baseWidth;
+        displayContent.mInitialDisplayHeight = baseHeight;
+        displayContent.mInitialDisplayDensity = baseDensity;
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+
+        final int forcedWidth = 1920;
+        final int forcedHeight = 1080;
+
+        // Verify that forcing the size is honored and the density doesn't change.
+        displayContent.setForcedSize(forcedWidth, forcedHeight);
+        verifySizes(displayContent, forcedWidth, forcedHeight, baseDensity);
+
+        // Verify that forcing the size is idempotent.
+        displayContent.setForcedSize(forcedWidth, forcedHeight);
+        verifySizes(displayContent, forcedWidth, forcedHeight, baseDensity);
+    }
+
+    @Test
+    public void testSetForcedSize_WithMaxUiWidth() {
+        // Prevent base display metrics for test from being updated to the value of real display.
+        final DisplayContent displayContent = createDisplayNoUpdateDisplayInfo();
+        final int baseWidth = 1280;
+        final int baseHeight = 720;
+        final int baseDensity = 320;
+
+        displayContent.mInitialDisplayWidth = baseWidth;
+        displayContent.mInitialDisplayHeight = baseHeight;
+        displayContent.mInitialDisplayDensity = baseDensity;
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+
+        displayContent.setMaxUiWidth(baseWidth);
+
+        final int forcedWidth = 1920;
+        final int forcedHeight = 1080;
+
+        // Verify that forcing bigger size doesn't work and density doesn't change.
+        displayContent.setForcedSize(forcedWidth, forcedHeight);
+        verifySizes(displayContent, baseWidth, baseHeight, baseDensity);
+
+        // Verify that forcing the size is idempotent.
+        displayContent.setForcedSize(forcedWidth, forcedHeight);
+        verifySizes(displayContent, baseWidth, baseHeight, baseDensity);
+    }
+
+    @Test
     public void testDisplayCutout_rot0() {
         final DisplayContent dc = createNewDisplay();
         dc.mInitialDisplayWidth = 200;
@@ -1466,9 +1518,9 @@ public class DisplayContentTests extends WindowTestsBase {
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
                              int expectedBaseHeight, int expectedBaseDensity) {
-        assertEquals(displayContent.mBaseDisplayWidth, expectedBaseWidth);
-        assertEquals(displayContent.mBaseDisplayHeight, expectedBaseHeight);
-        assertEquals(displayContent.mBaseDisplayDensity, expectedBaseDensity);
+        assertEquals(expectedBaseWidth, displayContent.mBaseDisplayWidth);
+        assertEquals(expectedBaseHeight, displayContent.mBaseDisplayHeight);
+        assertEquals(expectedBaseDensity, displayContent.mBaseDisplayDensity);
     }
 
     private void updateFocusedWindow() {
