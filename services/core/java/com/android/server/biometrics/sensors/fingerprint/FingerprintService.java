@@ -65,9 +65,11 @@ import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.GenerateChallengeClient;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -105,15 +107,36 @@ public class FingerprintService extends BiometricServiceBase {
          */
 
         @Override // Binder call
-        public long preEnroll(IBinder token) {
+        public void generateChallenge(IBinder token, IFingerprintServiceReceiver receiver,
+                String opPackageName) throws RemoteException {
             checkPermission(MANAGE_FINGERPRINT);
-            return startPreEnroll(token);
+
+            final IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to generateChallenge, daemon null");
+                receiver.onChallengeGenerated(0L);
+                return;
+            }
+
+            final GenerateChallengeClient client = new FingerprintGenerateChallengeClient(
+                    mClientFinishCallback, getContext(), daemon, token,
+                    new ClientMonitorCallbackConverter(receiver), opPackageName, getSensorId());
+            generateChallengeInternal(client);
         }
 
         @Override // Binder call
-        public int postEnroll(IBinder token) {
+        public void revokeChallenge(IBinder token, String owner) {
             checkPermission(MANAGE_FINGERPRINT);
-            return startPostEnroll(token);
+
+            final IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "startPostEnroll: no fingerprint HAL!");
+                return;
+            }
+
+            final RevokeChallengeClient client = new FingerprintRevokeChallengeClient(
+                    mClientFinishCallback, getContext(), daemon, token, owner, getSensorId());
+            revokeChallengeInternal(client);
         }
 
         @Override // Binder call
@@ -672,34 +695,6 @@ public class FingerprintService extends BiometricServiceBase {
             }
         }
         return mDaemon;
-    }
-
-    private long startPreEnroll(IBinder token) {
-        IBiometricsFingerprint daemon = getFingerprintDaemon();
-        if (daemon == null) {
-            Slog.w(TAG, "startPreEnroll: no fingerprint HAL!");
-            return 0;
-        }
-        try {
-            return daemon.preEnroll();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startPreEnroll failed", e);
-        }
-        return 0;
-    }
-
-    private int startPostEnroll(IBinder token) {
-        IBiometricsFingerprint daemon = getFingerprintDaemon();
-        if (daemon == null) {
-            Slog.w(TAG, "startPostEnroll: no fingerprint HAL!");
-            return 0;
-        }
-        try {
-            return daemon.postEnroll();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startPostEnroll failed", e);
-        }
-        return 0;
     }
 
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);
