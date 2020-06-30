@@ -188,10 +188,10 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
-    public void testAfterDisplayChange_ModesAreUpdated() throws Exception {
-        SurfaceControl.DisplayConfig displayInfo = createFakeDisplayConfig(1920, 1080, 60f);
+    public void testAfterDisplayChange_DisplayModesAreUpdated() throws Exception {
+        SurfaceControl.DisplayConfig displayConfig = createFakeDisplayConfig(1920, 1080, 60f);
         SurfaceControl.DisplayConfig[] configs =
-                new SurfaceControl.DisplayConfig[]{displayInfo};
+                new SurfaceControl.DisplayConfig[]{displayConfig};
         FakeDisplay display = new FakeDisplay(PORT_A, configs, 0);
         setUpDisplay(display);
         updateAvailableDisplays();
@@ -205,20 +205,20 @@ public class LocalDisplayAdapterTest {
                 0).getDisplayDeviceInfoLocked();
 
         assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(configs.length);
-        assertModeIsSupported(displayDeviceInfo.supportedModes, displayInfo);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayConfig);
 
         Display.Mode defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
-        assertThat(defaultMode.matches(displayInfo.width, displayInfo.height,
-                displayInfo.refreshRate)).isTrue();
+        assertThat(defaultMode.matches(displayConfig.width, displayConfig.height,
+                displayConfig.refreshRate)).isTrue();
 
         Display.Mode activeMode = getModeById(displayDeviceInfo, displayDeviceInfo.modeId);
-        assertThat(activeMode.matches(displayInfo.width, displayInfo.height,
-                displayInfo.refreshRate)).isTrue();
+        assertThat(activeMode.matches(displayConfig.width, displayConfig.height,
+                displayConfig.refreshRate)).isTrue();
 
         // Change the display
         SurfaceControl.DisplayConfig addedDisplayInfo = createFakeDisplayConfig(3840, 2160,
                 60f);
-        configs = new SurfaceControl.DisplayConfig[]{displayInfo, addedDisplayInfo};
+        configs = new SurfaceControl.DisplayConfig[]{displayConfig, addedDisplayInfo};
         display.configs = configs;
         display.activeConfig = 1;
         setUpDisplay(display);
@@ -236,7 +236,7 @@ public class LocalDisplayAdapterTest {
         displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
 
         assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(configs.length);
-        assertModeIsSupported(displayDeviceInfo.supportedModes, displayInfo);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayConfig);
         assertModeIsSupported(displayDeviceInfo.supportedModes, addedDisplayInfo);
 
         activeMode = getModeById(displayDeviceInfo, displayDeviceInfo.modeId);
@@ -246,6 +246,80 @@ public class LocalDisplayAdapterTest {
         defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
         assertThat(defaultMode.matches(addedDisplayInfo.width, addedDisplayInfo.height,
                 addedDisplayInfo.refreshRate)).isTrue();
+    }
+
+    @Test
+    public void testAfterDisplayChange_HdrCapabilitiesAreUpdated() throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        Display.HdrCapabilities initialHdrCapabilities = new Display.HdrCapabilities(new int[0],
+                1000, 1000, 0);
+        display.hdrCapabilities = initialHdrCapabilities;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(
+                0).getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.hdrCapabilities).isEqualTo(initialHdrCapabilities);
+
+        // Change the display
+        Display.HdrCapabilities changedHdrCapabilities = new Display.HdrCapabilities(
+                new int[Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS], 1000, 1000, 0);
+        display.hdrCapabilities = changedHdrCapabilities;
+        setUpDisplay(display);
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.hdrCapabilities).isEqualTo(changedHdrCapabilities);
+    }
+
+    @Test
+    public void testAfterDisplayChange_ColorModesAreUpdated() throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        final int[] initialColorModes = new int[]{Display.COLOR_MODE_BT709};
+        display.colorModes = initialColorModes;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(0)
+                .getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.colorMode).isEqualTo(Display.COLOR_MODE_BT709);
+        assertThat(displayDeviceInfo.supportedColorModes).isEqualTo(initialColorModes);
+
+        // Change the display
+        final int[] changedColorModes = new int[]{Display.COLOR_MODE_DEFAULT};
+        display.colorModes = changedColorModes;
+        setUpDisplay(display);
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.colorMode).isEqualTo(Display.COLOR_MODE_DEFAULT);
+        assertThat(displayDeviceInfo.supportedColorModes).isEqualTo(changedColorModes);
     }
 
     private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,
@@ -279,6 +353,9 @@ public class LocalDisplayAdapterTest {
         public final SurfaceControl.DisplayInfo info;
         public SurfaceControl.DisplayConfig[] configs;
         public int activeConfig;
+        public int[] colorModes = new int[]{ Display.COLOR_MODE_DEFAULT };
+        public Display.HdrCapabilities hdrCapabilities = new Display.HdrCapabilities(new int[0],
+                1000, 1000, 0);
 
         private FakeDisplay(int port) {
             this.address = createDisplayAddress(port);
@@ -306,8 +383,10 @@ public class LocalDisplayAdapterTest {
                 () -> SurfaceControl.getDisplayConfigs(display.token));
         doReturn(display.activeConfig).when(() -> SurfaceControl.getActiveConfig(display.token));
         doReturn(0).when(() -> SurfaceControl.getActiveColorMode(display.token));
-        doReturn(new int[] { 0 }).when(
+        doReturn(display.colorModes).when(
                 () -> SurfaceControl.getDisplayColorModes(display.token));
+        doReturn(display.hdrCapabilities).when(
+                () -> SurfaceControl.getHdrCapabilities(display.token));
         doReturn(new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f, 60.f, 60.f))
                 .when(() -> SurfaceControl.getDesiredDisplayConfigSpecs(display.token));
     }
