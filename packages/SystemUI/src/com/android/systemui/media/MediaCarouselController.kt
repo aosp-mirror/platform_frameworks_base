@@ -299,6 +299,7 @@ class MediaCarouselController @Inject constructor(
         if (numPages == 1) {
             pageIndicator.setLocation(0f)
         }
+        updatePageIndicatorAlpha()
     }
 
     /**
