@@ -96,7 +96,9 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         if (!mPipTaskOrganizer.isInPip() || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
-            // Skip if we aren't in PIP or haven't actually entered PIP yet
+            // Skip if we aren't in PIP or haven't actually entered PIP yet. We still need to update
+            // the display layout in the bounds handler in this case.
+            mPipBoundsHandler.onDisplayRotationChangedNotInPip(toRotation);
             return;
         }
         // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
