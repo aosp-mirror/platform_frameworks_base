@@ -79,6 +79,16 @@ class MediaViewController @Inject constructor(
     private val tmpState = TransitionViewState()
 
     /**
+     * A temporary state used to store intermediate measurements.
+     */
+    private val tmpState2 = TransitionViewState()
+
+    /**
+     * A temporary state used to store intermediate measurements.
+     */
+    private val tmpState3 = TransitionViewState()
+
+    /**
      * A temporary cache key to be used to look up cache entries
      */
     private val tmpKey = CacheKey()
@@ -304,8 +314,8 @@ class MediaViewController @Inject constructor(
         // Obtain the view state that we'd want to be at the end
         // The view might not be bound yet or has never been measured and in that case will be
         // reset once the state is fully available
-        val endViewState = obtainViewState(endHostState) ?: return
-
+        var endViewState = obtainViewState(endHostState) ?: return
+        endViewState = updateViewStateToCarouselSize(endViewState, endLocation, tmpState2)!!
         layoutController.setMeasureState(endViewState)
 
         // If the view isn't bound, we can drop the animation, otherwise we'll execute it
@@ -315,7 +325,8 @@ class MediaViewController @Inject constructor(
         }
 
         val result: TransitionViewState
-        val startViewState = obtainViewState(startHostState)
+        var startViewState = obtainViewState(startHostState)
+        startViewState = updateViewStateToCarouselSize(startViewState, startLocation, tmpState3)
 
         if (!endHostState.visible) {
             // Let's handle the case where the end is gone first. In this case we take the
@@ -348,6 +359,22 @@ class MediaViewController @Inject constructor(
         }
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
+    }
+
+    private fun updateViewStateToCarouselSize(
+        viewState: TransitionViewState?,
+        location: Int,
+        outState: TransitionViewState
+    ) : TransitionViewState? {
+        val result = viewState?.copy(outState) ?: return null
+        val overrideSize = mediaHostStatesManager.carouselSizes[location]
+        overrideSize?.let {
+            // To be safe we're using a maximum here. The override size should always be set
+            // properly though.
+            result.height = Math.max(it.measuredHeight, result.height)
+            result.width = Math.max(it.measuredWidth, result.width)
+        }
+        return result
     }
 
     /**
