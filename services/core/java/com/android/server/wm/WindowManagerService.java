@@ -5606,28 +5606,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final DisplayContent displayContent = mRoot.getDisplayContent(mFrozenDisplayId);
-        final int numOpeningApps;
-        final boolean waitingForConfig;
-        final boolean waitingForRemoteRotation;
-        if (displayContent != null) {
-            numOpeningApps = displayContent.mOpeningApps.size();
-            waitingForConfig = displayContent.mWaitingForConfig;
-            waitingForRemoteRotation =
-                    displayContent.getDisplayRotation().isWaitingForRemoteRotation();
-        } else {
-            waitingForConfig = waitingForRemoteRotation = false;
-            numOpeningApps = 0;
-        }
-        if (waitingForConfig || waitingForRemoteRotation || mAppsFreezingScreen > 0
+        final boolean waitingForConfig = displayContent != null && displayContent.mWaitingForConfig;
+        final int numOpeningApps = displayContent != null ? displayContent.mOpeningApps.size() : 0;
+        if (waitingForConfig || mAppsFreezingScreen > 0
                 || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
                 || mClientFreezingScreen || numOpeningApps > 0) {
-            ProtoLog.d(WM_DEBUG_ORIENTATION, "stopFreezingDisplayLocked: Returning "
-                    + "waitingForConfig=%b, waitingForRemoteRotation=%b, "
-                    + "mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, "
-                    + "mClientFreezingScreen=%b, mOpeningApps.size()=%d",
-                    waitingForConfig, waitingForRemoteRotation,
-                    mAppsFreezingScreen, mWindowsFreezingScreen,
-                    mClientFreezingScreen, numOpeningApps);
+            ProtoLog.d(WM_DEBUG_ORIENTATION,
+                                "stopFreezingDisplayLocked: Returning mWaitingForConfig=%b, "
+                                        + "mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, "
+                                        + "mClientFreezingScreen=%b, mOpeningApps.size()=%d",
+                                waitingForConfig, mAppsFreezingScreen, mWindowsFreezingScreen,
+                                mClientFreezingScreen, numOpeningApps);
             return;
         }
 
@@ -5638,6 +5627,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // We must make a local copy of the displayId as it can be potentially overwritten later on
         // in this method. For example, {@link startFreezingDisplayLocked} may be called as a result
         // of update rotation, but we reference the frozen display after that call in this method.
+        final int displayId = mFrozenDisplayId;
         mFrozenDisplayId = INVALID_DISPLAY;
         mDisplayFrozen = false;
         mInputManagerCallback.thawInputDispatchingLw();
