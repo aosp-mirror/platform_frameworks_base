@@ -1704,13 +1704,6 @@ public class PackageParser {
                         minSdkVersion = attrs.getAttributeIntValue(i, DEFAULT_MIN_SDK_VERSION);
                     }
                 }
-            } else if (TAG_PROFILEABLE.equals(parser.getName())) {
-                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
-                    final String attr = attrs.getAttributeName(i);
-                    if ("shell".equals(attr)) {
-                        profilableByShell = attrs.getAttributeBooleanValue(i, profilableByShell);
-                    }
-                }
             }
         }
 
