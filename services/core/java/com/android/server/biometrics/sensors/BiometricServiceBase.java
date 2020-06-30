@@ -51,7 +51,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -77,7 +76,6 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected static final boolean DEBUG = true;
 
-    private static final boolean CLEANUP_UNKNOWN_TEMPLATES = true;
     private static final int MSG_USER_SWITCHING = 10;
     private static final long CANCEL_TIMEOUT_LIMIT = 3000; // max wait for onCancel() from HAL,in ms
 
@@ -123,11 +121,6 @@ public abstract class BiometricServiceBase extends SystemService
      * @return the log tag.
      */
     protected abstract String getTag();
-
-    /**
-     * @return wrapper for the HAL
-     */
-    protected abstract DaemonWrapper getDaemonWrapper();
 
     /**
      * @return the biometric utilities for a specific implementation.
@@ -186,22 +179,6 @@ public abstract class BiometricServiceBase extends SystemService
      * @return one of the AuthenticationClient LOCKOUT constants
      */
     protected abstract @LockoutTracker.LockoutMode int getLockoutMode(int userId);
-
-    /**
-     * Wraps a portion of the interface from Service -> Daemon that is used by the ClientMonitor
-     * subclasses.
-     */
-    public interface DaemonWrapper {
-        int ERROR_ESRCH = 3; // Likely HAL is dead. see errno.h.
-        int authenticate(long operationId, int groupId, Surface surface)
-                throws RemoteException;
-        int cancel() throws RemoteException;
-        int remove(int groupId, int biometricId) throws RemoteException;
-        int enumerate() throws RemoteException;
-        int enroll(byte[] token, int groupId, int timeout,
-                ArrayList<Integer> disabledFeatures, Surface surface) throws RemoteException;
-        void resetLockout(byte[] token) throws RemoteException;
-    }
 
     private final Runnable mOnTaskStackChangedRunnable = new Runnable() {
         @Override
@@ -636,6 +613,10 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected void cleanupInternal(InternalCleanupClient client) {
         mHandler.post(() -> {
+            if (DEBUG) {
+                Slog.v(getTag(), "Cleaning up templates for user("
+                        + client.getTargetUserId() + ")");
+            }
             startClient(client, true /* initiatedByClient */);
         });
     }
@@ -925,7 +906,7 @@ public abstract class BiometricServiceBase extends SystemService
         return false;
     }
 
-    /***
+    /**
      * @return authenticator id for the calling user
      */
     protected long getAuthenticatorId(int callingUserId) {
@@ -935,23 +916,8 @@ public abstract class BiometricServiceBase extends SystemService
 
     /**
      * This method should be called upon connection to the daemon, and when user switches.
-     * @param userId
      */
-    protected void doTemplateCleanupForUser(int userId) {
-        if (CLEANUP_UNKNOWN_TEMPLATES) {
-            if (DEBUG) Slog.v(getTag(), "Cleaning up templates for user(" + userId + ")");
-
-            final boolean restricted = !hasPermission(getManageBiometricPermission());
-            final List<? extends BiometricAuthenticator.Identifier> enrolledList =
-                    getEnrolledTemplates(userId);
-
-            InternalCleanupClient client = new InternalCleanupClient(getContext(),
-                    getDaemonWrapper(), null /* serviceListener */, userId, userId,
-                    restricted, getContext().getOpPackageName(), getSensorId(), statsModality(),
-                    enrolledList, getBiometricUtils());
-            cleanupInternal(client);
-        }
-    }
+    protected abstract void doTemplateCleanupForUser(int userId);
 
     /**
      * This method is called when the user switches. Implementations should probably notify the

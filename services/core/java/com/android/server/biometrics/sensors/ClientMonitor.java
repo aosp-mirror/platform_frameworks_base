@@ -16,8 +16,11 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -32,8 +35,6 @@ import java.util.NoSuchElementException;
 public abstract class ClientMonitor extends LoggableMonitor implements IBinder.DeathRecipient {
 
     private static final String TAG = "Biometrics/ClientMonitor";
-
-    static final int ERROR_ESRCH = 3; // Likely HAL is dead. See errno.h.
     protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
 
     private final Context mContext;
@@ -42,7 +43,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     // True if client does not have MANAGE_FINGERPRINT permission
     private final boolean mIsRestricted;
     private final String mOwner;
-    private final BiometricServiceBase.DaemonWrapper mDaemon;
     private final int mSensorId; // sensorId as configured by the framework
 
     private IBinder mToken;
@@ -55,23 +55,26 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     boolean mAlreadyDone;
 
     /**
-     * @param context context of BiometricService
-     * @param daemon interface to call back to a specific biometric's daemon
-     * @param token a unique token for the client
-     * @param listener recipient of related events (e.g. authentication)
-     * @param userId target user id for operation
-     * @param groupId groupId for the fingerprint set
+     * @param context    system_server context
+     * @param token      a unique token for the client
+     * @param listener   recipient of related events (e.g. authentication)
+     * @param userId     target user id for operation
+     * @param groupId    groupId for the fingerprint set
      * @param restricted whether or not client has the MANAGE_* permission
-     * permission
-     * @param owner name of the client that owns this
+     *                   permission
+     * @param owner      name of the client that owns this
+     * @param cookie     BiometricPrompt authentication cookie (to be moved into a subclass soon)
+     * @param sensorId   ID of the sensor that the operation should be requested of
+     * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants
+     * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
+     * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
-    public ClientMonitor(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, boolean restricted,
-            String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
+    public ClientMonitor(@NonNull Context context, IBinder token,
+            @Nullable ClientMonitorCallbackConverter listener, int userId, int groupId,
+            boolean restricted, @NonNull String owner, int cookie, int sensorId, int statsModality,
+            int statsAction, int statsClient) {
         super(statsModality, statsAction, statsClient);
         mContext = context;
-        mDaemon = daemon;
         mToken = token;
         mListener = listener;
         mTargetUserId = userId;
@@ -95,16 +98,34 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     }
 
     /**
-     * Contacts the biometric's HAL to start the client.
+     * Starts the ClientMonitor's lifecycle. Invokes {@link #startHalOperation()} when internal book
+     * keeping is complete.
      * @return 0 on success, errno from driver on failure
      */
     public abstract int start();
 
     /**
-     * Contacts the biometric's HAL to stop the client.
+     * Requests to end the ClientMonitor's lifecycle. Invokes {@link #stopHalOperation()} when
+     * internal book keeping is complete.
      * @param initiatedByClient whether the operation is at the request of a client
      */
     public abstract int stop(boolean initiatedByClient);
+
+    /**
+     * Starts the HAL operation specific to the ClientMonitor subclass.
+     * @return status code specific to the HIDL interface. ClientMonitor subclasses currently
+     * assume that non-zero codes are errors, and 0 == success.
+     * @throws RemoteException
+     */
+    protected abstract int startHalOperation() throws RemoteException;
+
+    /**
+     * Stops the HAL operation specific to the ClientMonitor subclass.
+     * @return status code specific to the HIDL interface. ClientMonitor subclasses currently
+     * assume that non-zero codes are errors, and 0 == success.
+     * @throws RemoteException
+     */
+    protected abstract int stopHalOperation() throws RemoteException;
 
     public boolean isAlreadyDone() {
         return mAlreadyDone;
@@ -178,10 +199,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     public final ClientMonitorCallbackConverter getListener() {
         return mListener;
-    }
-
-    public final BiometricServiceBase.DaemonWrapper getDaemonWrapper() {
-        return mDaemon;
     }
 
     public final boolean getIsRestricted() {

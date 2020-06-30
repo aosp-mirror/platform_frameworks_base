@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  * Internal class to help clean up unknown templates in the HAL and Framework
  */
-public class InternalEnumerateClient extends EnumerateClient {
+public abstract class InternalEnumerateClient extends EnumerateClient {
 
     private static final String TAG = "Biometrics/InternalEnumerateClient";
 
@@ -41,13 +42,14 @@ public class InternalEnumerateClient extends EnumerateClient {
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    InternalEnumerateClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
-            IBinder token, ClientMonitorCallbackConverter listener, int groupId, int userId,
-            boolean restricted, String owner,
-            List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, daemon, token, listener, groupId, userId, restricted, owner, sensorId,
-                statsModality);
+    protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int groupId,
+            int userId, boolean restricted, @NonNull String owner,
+            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
+            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
+        // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
+        // is all done internally.
+        super(context, token, null /* ClientMonitorCallbackConverter */, groupId, userId,
+                restricted, owner, sensorId, statsModality);
         mEnrolledList = enrolledList;
         mUtils = utils;
     }

@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -31,19 +33,19 @@ public abstract class EnumerateClient extends ClientMonitor implements Enumerate
 
     private static final String TAG = "Biometrics/EnumerateClient";
 
-    public EnumerateClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
-            IBinder token, ClientMonitorCallbackConverter listener, int groupId, int userId,
-            boolean restricted, String owner, int sensorId, int statsModality) {
-        super(context, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
+    public EnumerateClient(@NonNull Context context, @NonNull IBinder token,
+            @Nullable ClientMonitorCallbackConverter listener, int groupId, int userId,
+            boolean restricted, @NonNull String owner, int sensorId, int statsModality) {
+        super(context, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
+                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override
     public int start() {
         // The biometric template ids will be removed when we get confirmation from the HAL
         try {
-            final int result = getDaemonWrapper().enumerate();
+            final int result = startHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "start enumerate for user " + getTargetUserId()
                     + " failed, result=" + result);
@@ -64,14 +66,14 @@ public abstract class EnumerateClient extends ClientMonitor implements Enumerate
         }
 
         try {
-            final int result = getDaemonWrapper().cancel();
+            final int result = stopHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "stop enumeration failed, result=" + result);
                 return result;
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "stopEnumeration failed", e);
-            return ERROR_ESRCH;
+            return BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS;
         }
 
         // We don't actually stop enumerate, but inform the client that the cancel operation

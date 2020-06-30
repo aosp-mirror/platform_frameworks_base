@@ -37,19 +37,17 @@ import java.util.List;
 @Presubmit
 @SmallTest
 public class BiometricServiceBaseTest {
-    private static class TestableBiometricServiceBase extends
-            com.android.server.biometrics.sensors.BiometricServiceBase {
+    private static class TestableBiometricServiceBase extends BiometricServiceBase {
         TestableBiometricServiceBase(Context context) {
             super(context);
         }
 
         @Override
-        protected String getTag() {
-            return null;
+        protected void doTemplateCleanupForUser(int userId) {
         }
 
         @Override
-        protected DaemonWrapper getDaemonWrapper() {
+        protected String getTag() {
             return null;
         }
 

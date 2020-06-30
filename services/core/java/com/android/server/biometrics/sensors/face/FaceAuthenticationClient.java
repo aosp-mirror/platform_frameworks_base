@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,14 +28,15 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
-import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -46,6 +48,7 @@ import java.util.ArrayList;
  */
 class FaceAuthenticationClient extends AuthenticationClient {
 
+    private final IBiometricsFace mDaemon;
     private final NotificationManager mNotificationManager;
     private final UsageStats mUsageStats;
 
@@ -60,15 +63,17 @@ class FaceAuthenticationClient extends AuthenticationClient {
     // but not started yet. The user shouldn't receive the error haptics in this case.
     private boolean mStarted;
 
-    FaceAuthenticationClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
-            IBinder token, ClientMonitorCallbackConverter listener, int targetUserId, long opId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
-            boolean isStrongBiometric, int statsClient, TaskStackListener taskStackListener,
-            LockoutTracker lockoutTracker, UsageStats usageStats) {
-        super(context, daemon, token, listener, targetUserId, 0 /* groupId */, opId,
+    FaceAuthenticationClient(@NonNull Context context, @NonNull IBiometricsFace daemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
+            int targetUserId, long opId, boolean restricted, String owner, int cookie,
+            boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsClient,
+            @NonNull TaskStackListener taskStackListener,
+            @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
+        super(context, token, listener, targetUserId, 0 /* groupId */, opId,
                 restricted, owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
-                lockoutTracker, null /* surface */);
+                lockoutTracker);
+        mDaemon = daemon;
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mUsageStats = usageStats;
 
@@ -84,15 +89,25 @@ class FaceAuthenticationClient extends AuthenticationClient {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    public int start() {
         mStarted = true;
+        return super.start();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    public int stop(boolean initiatedByClient) {
         mStarted = false;
+        return super.stop(initiatedByClient);
+    }
+
+    @Override
+    protected int startHalOperation() throws RemoteException {
+        return mDaemon.authenticate(mOperationId);
+    }
+
+    @Override
+    protected int stopHalOperation() throws RemoteException {
+        return mDaemon.cancel();
     }
 
     private boolean wasUserDetected() {
@@ -106,6 +121,10 @@ class FaceAuthenticationClient extends AuthenticationClient {
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         final boolean result = super.onAuthenticated(identifier, authenticated, token);
+
+        if (authenticated) {
+            mStarted = false;
+        }
 
         mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
                 getStartTimeMs(),
