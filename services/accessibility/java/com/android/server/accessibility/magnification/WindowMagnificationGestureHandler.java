@@ -44,9 +44,11 @@ import java.util.Queue;
  * This class handles window magnification in response to touch events and shortcut.
  *
  * The behavior is as follows:
-
+ *
  * <ol>
- *   <li> Window magnification can be "toggled" by tapping shortcut. It is triggered via
+ *   <li> 1. Toggle Window magnification by triple-tap gesture shortcut. It is triggered via
+ *   {@link #onTripleTap(MotionEvent)}.
+ *   <li> 2. Toggle Window magnification by tapping shortcut. It is triggered via
  *   {@link #notifyShortcutTriggered()}.
  *   <li> When the window magnifier is visible, pinching with any number of additional fingers
  *   would adjust the magnification scale .<strong>Note</strong> that this operation is valid only
@@ -72,7 +74,6 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     private static final float MAX_SCALE = WindowMagnificationManager.MAX_SCALE;
 
     private final WindowMagnificationManager mWindowMagnificationMgr;
-
     @VisibleForTesting
     final DelegatingState mDelegatingState;
     @VisibleForTesting
@@ -84,6 +85,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     State mCurrentState;
     @VisibleForTesting
     State mPreviousState;
+
+    final boolean mDetectShortcutTrigger;
 
     private MotionEventDispatcherDelegate mMotionEventDispatcherDelegate;
     private final int mDisplayId;
@@ -97,7 +100,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
      */
     public WindowMagnificationGestureHandler(Context context,
             WindowMagnificationManager windowMagnificationMgr,
-            MagnificationGestureHandler.ScaleChangedListener listener, int displayId) {
+            MagnificationGestureHandler.ScaleChangedListener listener, boolean detectTripleTap,
+            boolean detectShortcutTrigger, int displayId) {
         super(listener);
         if (DEBUG_ALL) {
             Slog.i(LOG_TAG,
@@ -105,12 +109,13 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         }
 
         mWindowMagnificationMgr = windowMagnificationMgr;
+        mDetectShortcutTrigger = detectShortcutTrigger;
         mDisplayId = displayId;
         mMotionEventDispatcherDelegate = new MotionEventDispatcherDelegate(context,
                 (event, rawEvent, policyFlags) -> super.onMotionEvent(
                         event, rawEvent, policyFlags));
         mDelegatingState = new DelegatingState(mMotionEventDispatcherDelegate);
-        mDetectingState = new DetectingState(context);
+        mDetectingState = new DetectingState(context, detectTripleTap);
         mObservePanningScalingState = new PanningScalingGestureState(
                 new PanningScalingHandler(context, MAX_SCALE, MIN_SCALE, true,
                         new PanningScalingHandler.MagnificationDelegate() {
@@ -176,11 +181,10 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         if (DEBUG_ALL) {
             Slog.i(LOG_TAG, "notifyShortcutTriggered():");
         }
-        if (mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)) {
-            disableWindowMagnifier();
-        } else {
-            enableWindowMagnifier(Float.NaN, Float.NaN);
+        if (!mDetectShortcutTrigger) {
+            return;
         }
+        toggleMagnification(Float.NaN, Float.NaN);
     }
 
     @Override
@@ -204,6 +208,21 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(LOG_TAG, "disableWindowMagnifier()");
         }
         mWindowMagnificationMgr.disableWindowMagnifier(mDisplayId, false);
+    }
+
+    private void toggleMagnification(float centerX, float centerY) {
+        if (mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)) {
+            disableWindowMagnifier();
+        } else {
+            enableWindowMagnifier(centerX, centerY);
+        }
+    }
+
+    private void onTripleTap(MotionEvent up) {
+        if (DEBUG_DETECTING) {
+            Slog.i(LOG_TAG, "onTripleTap()");
+        }
+        toggleMagnification(up.getX(), up.getY());
     }
 
     void resetToDetectState() {
@@ -348,8 +367,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     /**
      * This class handles motion events in a duration to determine if the user is going to
-     *  manipulate the window magnifier or want to interact with current UI. The rule of leaving
-     *  this state is as follows:
+     * manipulate the window magnifier or want to interact with current UI. The rule of leaving
+     * this state is as follows:
      * <ol>
      *   <li> If {@link MagnificationGestureMatcher#GESTURE_TWO_FINGER_DOWN} is detected,
      *   {@link State} will be transited to {@link PanningScalingGestureState}.</li>
@@ -363,11 +382,28 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
         private final MagnificationGesturesObserver mGesturesObserver;
 
-        DetectingState(Context context) {
-            mGesturesObserver = new MagnificationGesturesObserver(this, new SimpleSwipe(context),
-                    new MultiTap(context, 1, MagnificationGestureMatcher.GESTURE_SINGLE_TAP, null),
-                    new MultiTapAndHold(context, 1,
-                            MagnificationGestureMatcher.GESTURE_SINGLE_TAP_AND_HOLD, null),
+        /**
+         * {@code true} if this detector should detect and respond to triple-tap
+         * gestures for engaging and disengaging magnification,
+         * {@code false} if it should ignore such gestures
+         */
+        private final boolean mDetectTripleTap;
+
+        DetectingState(Context context, boolean detectTripleTap) {
+            mDetectTripleTap = detectTripleTap;
+            final MultiTap multiTap = new MultiTap(context, mDetectTripleTap ? 3 : 1,
+                    mDetectTripleTap
+                            ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP
+                            : MagnificationGestureMatcher.GESTURE_SINGLE_TAP, null);
+            final MultiTapAndHold multiTapAndHold = new MultiTapAndHold(context,
+                    mDetectTripleTap ? 3 : 1,
+                    mDetectTripleTap
+                            ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD
+                            : MagnificationGestureMatcher.GESTURE_SINGLE_TAP_AND_HOLD, null);
+            mGesturesObserver = new MagnificationGesturesObserver(this,
+                    new SimpleSwipe(context),
+                    multiTap,
+                    multiTapAndHold,
                     new TwoFingersDown(context));
         }
 
@@ -395,7 +431,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
         @Override
         public boolean shouldStopDetection(MotionEvent motionEvent) {
-            return !mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId);
+            return !mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)
+                    && !mDetectTripleTap;
         }
 
         @Override
@@ -412,6 +449,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             if (gestureId == MagnificationGestureMatcher.GESTURE_TWO_FINGER_DOWN
                     && mWindowMagnificationMgr.pointersInWindow(mDisplayId, motionEvent) > 0) {
                 transitionTo(mObservePanningScalingState);
+            } else if (gestureId == MagnificationGestureMatcher.GESTURE_TRIPLE_TAP) {
+                onTripleTap(motionEvent);
             } else {
                 mMotionEventDispatcherDelegate.sendDelayedMotionEvents(delayedEventQueue,
                         lastDownEventTime);

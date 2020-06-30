@@ -476,6 +476,9 @@ public class BubbleData {
                 if (DEBUG_BUBBLE_DATA) {
                     Log.d(TAG, "Cancel overflow bubble: " + b);
                 }
+                if (b != null) {
+                    b.stopInflation();
+                }
                 mLogger.logOverflowRemove(b, reason);
                 mStateChange.bubbleRemoved(b, reason);
                 mOverflowBubbles.remove(b);
@@ -483,6 +486,7 @@ public class BubbleData {
             return;
         }
         Bubble bubbleToRemove = mBubbles.get(indexToRemove);
+        bubbleToRemove.stopInflation();
         if (mBubbles.size() == 1) {
             // Going to become empty, handle specially.
             setExpandedInternal(false);

@@ -1996,7 +1996,7 @@ public class ChooserActivityTest {
     }
 
     @Test
-    public void testWorkTab_selectingWorkTabWithLockedWorkUser_directShareTargetsNotQueried() {
+    public void testWorkTab_selectingWorkTabWithNotRunningWorkUser_directShareTargetsNotQueried() {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         markWorkProfileUserAvailable();
@@ -2006,6 +2006,70 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(3);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         sOverrides.isWorkProfileUserRunning = false;
+        boolean[] isQueryDirectShareCalledOnWorkProfile = new boolean[] { false };
+        sOverrides.onQueryDirectShareTargets = chooserListAdapter -> {
+            isQueryDirectShareCalledOnWorkProfile[0] =
+                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
+            return null;
+        };
+        boolean[] isQueryTargetServicesCalledOnWorkProfile = new boolean[] { false };
+        sOverrides.onQueryTargetServices = chooserListAdapter -> {
+            isQueryTargetServicesCalledOnWorkProfile[0] =
+                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
+            return null;
+        };
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        assertFalse("Direct share targets were queried on a locked work profile user",
+                isQueryDirectShareCalledOnWorkProfile[0]);
+        assertFalse("Target services were queried on a locked work profile user",
+                isQueryTargetServicesCalledOnWorkProfile[0]);
+    }
+
+    @Test
+    public void testWorkTab_workUserNotRunning_workTargetsShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+        sOverrides.isWorkProfileUserRunning = false;
+
+        final ChooserWrapperActivity activity =
+                mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        assertEquals(3, activity.getWorkListAdapter().getCount());
+    }
+
+    @Test
+    public void testWorkTab_selectingWorkTabWithLockedWorkUser_directShareTargetsNotQueried() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        sOverrides.isWorkProfileUserUnlocked = false;
         boolean[] isQueryDirectShareCalledOnWorkProfile = new boolean[] { false };
         sOverrides.onQueryDirectShareTargets = chooserListAdapter -> {
             isQueryDirectShareCalledOnWorkProfile[0] =
@@ -2046,7 +2110,7 @@ public class ChooserActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
-        sOverrides.isWorkProfileUserRunning = false;
+        sOverrides.isWorkProfileUserUnlocked = false;
 
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));

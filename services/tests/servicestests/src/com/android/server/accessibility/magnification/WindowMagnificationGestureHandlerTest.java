@@ -56,16 +56,17 @@ public class WindowMagnificationGestureHandlerTest {
     public static final int STATE_IDLE = 1;
     public static final int STATE_SHOW_MAGNIFIER = 2;
     public static final int STATE_TWO_FINGERS_DOWN = 3;
+    public static final int STATE_SHOW_MAGNIFIER_TRIPLE_TAP = 4;
     //TODO: Test it after can injecting Handler to GestureMatcher is available.
 
     public static final int FIRST_STATE = STATE_IDLE;
-    public static final int LAST_STATE = STATE_TWO_FINGERS_DOWN;
+    public static final int LAST_STATE = STATE_SHOW_MAGNIFIER_TRIPLE_TAP;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_X = 301;
     public static final float DEFAULT_Y = 299;
     //Assume first pointer position (DEFAULT_X,DEFAULT_Y) is in the window.
-    public static Rect DEFAULT_WINDOW_FRAME = new Rect(0, 0, 500,  500);
+    public static Rect DEFAULT_WINDOW_FRAME = new Rect(0, 0, 500, 500);
     private static final int DISPLAY_0 = 0;
 
     private Context mContext;
@@ -79,7 +80,8 @@ public class WindowMagnificationGestureHandlerTest {
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0);
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
-                mContext, mWindowMagnificationManager, mock(ScaleChangedListener.class), DISPLAY_0);
+                mContext, mWindowMagnificationManager, mock(ScaleChangedListener.class),
+                /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mMockConnection.getConnectionCallback().onWindowMagnifierBoundsChanged(DISPLAY_0,
                 DEFAULT_WINDOW_FRAME);
@@ -108,7 +110,9 @@ public class WindowMagnificationGestureHandlerTest {
      *     <br> IDLE -> SHOW_MAGNIFIER [label="a11y\nbtn"]
      *     <br> SHOW_MAGNIFIER -> TWO_FINGER_DOWN [label="2hold"]
      *     <br> TWO_FINGER_DOWN -> SHOW_MAGNIFIER [label="release"]
-     *     <br> SHOW_MAGNIFIER -> IDLE [label="a11y\nbtn"]*
+     *     <br> SHOW_MAGNIFIER -> IDLE [label="a11y\nbtn"]
+     *     <br> IDLE -> SHOW_MAGNIFIER_TRIPLE_TAP [label="3tap"]
+     *     <br> SHOW_MAGNIFIER_TRIPLE_TAP -> IDLE [label="3tap"]
      * </p>
      * This navigates between states using "canonical" paths, specified in
      * {@link #goFromStateIdleTo} (for traversing away from {@link #STATE_IDLE}) and
@@ -167,20 +171,24 @@ public class WindowMagnificationGestureHandlerTest {
                 check(!isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
                         == mWindowMagnificationGestureHandler.mDetectingState, state);
-            } break;
-            case STATE_SHOW_MAGNIFIER: {
+            }
+            break;
+            case STATE_SHOW_MAGNIFIER:
+            case STATE_SHOW_MAGNIFIER_TRIPLE_TAP: {
                 check(isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
                         == mWindowMagnificationGestureHandler.mDetectingState, state);
-            } break;
+            }
+                break;
             case STATE_TWO_FINGERS_DOWN: {
                 check(isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
                                 == mWindowMagnificationGestureHandler.mObservePanningScalingState,
                         state);
-            } break;
-
-            default: throw new IllegalArgumentException("Illegal state: " + state);
+            }
+            break;
+            default:
+                throw new IllegalArgumentException("Illegal state: " + state);
         }
     }
 
@@ -192,17 +200,27 @@ public class WindowMagnificationGestureHandlerTest {
             switch (state) {
                 case STATE_IDLE: {
                     // no op
-                } break;
+                }
+                break;
                 case STATE_SHOW_MAGNIFIER: {
                     triggerShortcut();
-                } break;
+                }
+                break;
                 case STATE_TWO_FINGERS_DOWN: {
                     goFromStateIdleTo(STATE_SHOW_MAGNIFIER);
                     send(downEvent());
                     //Second finger is outside the window.
                     send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_WINDOW_FRAME.right + 10,
                             DEFAULT_WINDOW_FRAME.bottom + 10));
-                } break;
+                }
+                break;
+                case STATE_SHOW_MAGNIFIER_TRIPLE_TAP: {
+                    // Perform triple tap gesture
+                    tap();
+                    tap();
+                    tap();
+                }
+                break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);
             }
@@ -218,15 +236,25 @@ public class WindowMagnificationGestureHandlerTest {
         switch (state) {
             case STATE_IDLE: {
                 // no op
-            } break;
+            }
+            break;
             case STATE_SHOW_MAGNIFIER: {
                 mWindowMagnificationManager.disableWindowMagnifier(DISPLAY_0, false);
-            } break;
+            }
+            break;
             case STATE_TWO_FINGERS_DOWN: {
                 send(upEvent());
                 returnToNormalFrom(STATE_SHOW_MAGNIFIER);
-            } break;
-            default: throw new IllegalArgumentException("Illegal state: " + state);
+            }
+            break;
+            case STATE_SHOW_MAGNIFIER_TRIPLE_TAP: {
+                tap();
+                tap();
+                tap();
+            }
+            break;
+            default:
+                throw new IllegalArgumentException("Illegal state: " + state);
         }
     }
 
@@ -268,6 +296,11 @@ public class WindowMagnificationGestureHandlerTest {
 
     private MotionEvent upEvent(float x, float y) {
         return TouchEventGenerator.upEvent(DISPLAY_0, x, y);
+    }
+
+    private void tap() {
+        send(downEvent());
+        send(upEvent());
     }
 
     private MotionEvent pointerEvent(int action, float x, float y) {

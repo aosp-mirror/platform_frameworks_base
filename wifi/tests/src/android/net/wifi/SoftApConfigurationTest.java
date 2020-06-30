@@ -35,6 +35,7 @@ import java.util.Random;
 @SmallTest
 public class SoftApConfigurationTest {
     private static final String TEST_CHAR_SET_AS_STRING = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String TEST_BSSID = "aa:22:33:aa:bb:cc";
 
     private SoftApConfiguration parcelUnparcel(SoftApConfiguration configIn) {
         Parcel parcel = Parcel.obtain();
@@ -67,12 +68,13 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testBasicSettings() {
+        MacAddress testBssid = MacAddress.fromString(TEST_BSSID);
         SoftApConfiguration original = new SoftApConfiguration.Builder()
                 .setSsid("ssid")
-                .setBssid(MacAddress.fromString("11:22:33:44:55:66"))
+                .setBssid(testBssid)
                 .build();
         assertThat(original.getSsid()).isEqualTo("ssid");
-        assertThat(original.getBssid()).isEqualTo(MacAddress.fromString("11:22:33:44:55:66"));
+        assertThat(original.getBssid()).isEqualTo(testBssid);
         assertThat(original.getPassphrase()).isNull();
         assertThat(original.getSecurityType()).isEqualTo(SoftApConfiguration.SECURITY_TYPE_OPEN);
         assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
@@ -218,6 +220,20 @@ public class SoftApConfigurationTest {
         assertThat(copy).isNotSameAs(original);
         assertThat(copy).isEqualTo(original);
         assertThat(copy.hashCode()).isEqualTo(original.hashCode());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidBroadcastBssid() {
+        SoftApConfiguration original = new SoftApConfiguration.Builder()
+                .setBssid(MacAddress.BROADCAST_ADDRESS)
+                .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidMulticastBssid() {
+        SoftApConfiguration original = new SoftApConfiguration.Builder()
+                .setBssid(MacAddress.fromString("01:aa:bb:cc:dd:ee"))
+                .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
