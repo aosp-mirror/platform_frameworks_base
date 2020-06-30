@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Κατάργηση"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Η υπηρεσία στο προσκήνιο που ξεκίνησε από το παρασκήνιο από το πακέτο <xliff:g id="PACKAGENAME">%1$s</xliff:g> δεν θα έχει άδεια πρόσβασης μόνο κατά τη χρήση σε μελλοντικές εκδόσεις R. Ανατρέξτε στο go/r-bg-fgs-restriction και υποβάλετε αναφορά σφάλματος."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;\n\nΑν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Να χρησιμοποιείται η συντόμευση προσβασιμότητας;"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Όταν η συντόμευση είναι ενεργοποιημένη, το πάτημα και των δύο κουμπιών έντασης ήχου για 3 δευτερόλεπτα θα ξεκινήσει μια λειτουργία προσβασιμότητας."</string>
@@ -1652,7 +1651,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Αντιστροφή χρωμάτων"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Διόρθωση χρωμάτων"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ενεργοποιήθηκε."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> απενεργοποιήθηκε."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>: απενεργοποιημένο"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Πατήστε παρατεταμένα και τα δύο κουμπιά έντασης ήχου για τρία δευτερόλεπτα, ώστε να χρησιμοποιήσετε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Επιλέξτε μια λειτουργία που θα χρησιμοποιείται κατά το πάτημα του κουμπιού προσβασιμότητας:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Επιλέξτε μια λειτουργία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>

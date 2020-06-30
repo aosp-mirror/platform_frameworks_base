@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%1$d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%2$d</xliff:g> gale forsøk, blir du bedt om å låse opp telefonen via en e-postkonto.\n\n Prøv på nytt om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjern"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Forgrunnstjenesten fra <xliff:g id="PACKAGENAME">%1$s</xliff:g>, som ble startet i bakgrunnen, kommer ikke til å ha tillatelser mens den er i bruk i fremtidige R-delversjoner. Les go/r-bg-fgs-restriction og send inn en feilrapport."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du øke volumet til over anbefalt nivå?\n\nHvis du hører på et høyt volum over lengre perioder, kan det skade hørselen din."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruke tilgjengelighetssnarveien?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når snarveien er på, starter en tilgjengelighetsfunksjon når du trykker inn begge volumknappene i tre sekunder."</string>
