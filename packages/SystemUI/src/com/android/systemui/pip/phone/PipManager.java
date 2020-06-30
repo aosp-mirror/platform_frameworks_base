@@ -36,7 +36,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
-import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
 import com.android.systemui.Dependency;
@@ -176,7 +175,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         @Override
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-            if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
+            if (task.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_PINNED) {
                 return;
             }
