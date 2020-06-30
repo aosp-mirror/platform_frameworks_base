@@ -27,12 +27,14 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
@@ -47,6 +49,8 @@ import java.util.ArrayList;
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
 class FaceAuthenticationClient extends AuthenticationClient {
+
+    private static final String TAG = "FaceAuthenticationClient";
 
     private final IBiometricsFace mDaemon;
     private final NotificationManager mNotificationManager;
@@ -63,14 +67,15 @@ class FaceAuthenticationClient extends AuthenticationClient {
     // but not started yet. The user shouldn't receive the error haptics in this case.
     private boolean mStarted;
 
-    FaceAuthenticationClient(@NonNull Context context, @NonNull IBiometricsFace daemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId, long operationId, boolean restricted, String owner, int cookie,
-            boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsClient,
+    FaceAuthenticationClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBiometricsFace daemon, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            boolean isStrongBiometric, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
-        super(context, token, listener, targetUserId, operationId, restricted, owner, cookie,
-                requireConfirmation, sensorId, isStrongBiometric,
+        super(finishCallback, context, token, listener, targetUserId, operationId, restricted,
+                owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
                 lockoutTracker);
         mDaemon = daemon;
@@ -89,25 +94,37 @@ class FaceAuthenticationClient extends AuthenticationClient {
     }
 
     @Override
-    public int start() {
+    public void start() {
         mStarted = true;
-        return super.start();
+        super.start();
     }
 
     @Override
-    public int stop(boolean initiatedByClient) {
+    public void cancel() {
         mStarted = false;
-        return super.stop(initiatedByClient);
+        super.cancel();
     }
 
     @Override
-    protected int startHalOperation() throws RemoteException {
-        return mDaemon.authenticate(mOperationId);
+    protected void startHalOperation() {
+        try {
+            mDaemon.authenticate(mOperationId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting auth", e);
+            onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 
     @Override
-    protected int stopHalOperation() throws RemoteException {
-        return mDaemon.cancel();
+    protected void stopHalOperation() {
+        try {
+            mDaemon.cancel();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting cancel", e);
+            onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 
     private boolean wasUserDetected() {
@@ -118,9 +135,9 @@ class FaceAuthenticationClient extends AuthenticationClient {
     }
 
     @Override
-    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+    public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
-        final boolean result = super.onAuthenticated(identifier, authenticated, token);
+        super.onAuthenticated(identifier, authenticated, token);
 
         if (authenticated) {
             mStarted = false;
@@ -138,7 +155,7 @@ class FaceAuthenticationClient extends AuthenticationClient {
         // 1) Authenticated == true
         // 2) Error occurred
         // 3) Authenticated == false
-        return result || !authenticated;
+        mFinishCallback.onClientFinished(this);
     }
 
     @Override
@@ -187,7 +204,7 @@ class FaceAuthenticationClient extends AuthenticationClient {
     }
 
     @Override
-    public boolean onAcquired(int acquireInfo, int vendorCode) {
+    public void onAcquired(int acquireInfo, int vendorCode) {
 
         mLastAcquire = acquireInfo;
 
@@ -230,6 +247,6 @@ class FaceAuthenticationClient extends AuthenticationClient {
         }
 
         final boolean shouldSend = shouldSend(acquireInfo, vendorCode);
-        return onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
+        onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
     }
 }

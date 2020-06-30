@@ -60,20 +60,47 @@ public abstract class InternalCleanupClient extends ClientMonitor implements Enu
     private final List<? extends BiometricAuthenticator.Identifier> mEnrolledList;
     private ClientMonitor mCurrentTask;
 
-    protected abstract InternalEnumerateClient getEnumerateClient(Context context, IBinder token,
-            int userId, boolean restricted, String owner,
+    private final FinishCallback mEnumerateFinishCallback = clientMonitor -> {
+        final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
+                ((InternalEnumerateClient) mCurrentTask).getUnknownHALTemplates();
+
+        if (!unknownHALTemplates.isEmpty()) {
+            Slog.w(TAG, "Adding " + unknownHALTemplates.size() + " templates for deletion");
+        }
+        for (int i = 0; i < unknownHALTemplates.size(); i++) {
+            mUnknownHALTemplates.add(new UserTemplate(unknownHALTemplates.get(i),
+                    mCurrentTask.getTargetUserId()));
+        }
+
+        if (mUnknownHALTemplates.isEmpty()) {
+            // No unknown HAL templates. Unknown framework templates are already cleaned up in
+            // InternalEnumerateClient. Finish this client.
+            mFinishCallback.onClientFinished(this);
+        } else {
+            startCleanupUnknownHalTemplates();
+        }
+    };
+
+    private final FinishCallback mRemoveFinishCallback = clientMonitor -> {
+        mFinishCallback.onClientFinished(this);
+    };
+
+    protected abstract InternalEnumerateClient getEnumerateClient(FinishCallback finishCallback,
+            Context context, IBinder token, int userId, boolean restricted, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils,
             int sensorId, int statsModality);
-    protected abstract RemovalClient getRemovalClient(Context context, IBinder token,
-            int biometricId, int userId, boolean restricted, String owner, BiometricUtils utils,
-            int sensorId, int statsModality);
 
-    protected InternalCleanupClient(@NonNull Context context, int userId, boolean restricted,
+    protected abstract RemovalClient getRemovalClient(FinishCallback finishCallback,
+            Context context, IBinder token, int biometricId, int userId, boolean restricted,
+            String owner, BiometricUtils utils, int sensorId, int statsModality);
+
+    protected InternalCleanupClient(@NonNull FinishCallback finishCallback,
+            @NonNull Context context, int userId, boolean restricted,
             @NonNull String owner, int sensorId, int statsModality,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils) {
-        super(context, null /* token */, null /* ClientMonitorCallbackConverter */, userId,
-                restricted, owner, 0 /* cookie */, sensorId, statsModality,
+        super(finishCallback, context, null /* token */, null /* ClientMonitorCallbackConverter */,
+                userId, restricted, owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mEnrolledList = enrolledList;
@@ -82,7 +109,7 @@ public abstract class InternalCleanupClient extends ClientMonitor implements Enu
     private void startCleanupUnknownHalTemplates() {
         UserTemplate template = mUnknownHALTemplates.get(0);
         mUnknownHALTemplates.remove(template);
-        mCurrentTask = getRemovalClient(getContext(), getToken(),
+        mCurrentTask = getRemovalClient(mRemoveFinishCallback, getContext(), getToken(),
                 template.mIdentifier.getBiometricId(), template.mUserId, getIsRestricted(),
                 getContext().getPackageName(), mBiometricUtils, getSensorId(), mStatsModality);
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
@@ -92,74 +119,43 @@ public abstract class InternalCleanupClient extends ClientMonitor implements Enu
     }
 
     @Override
-    public int start() {
+    public void start() {
         // Start enumeration. Removal will start if necessary, when enumeration is completed.
-        mCurrentTask = getEnumerateClient(getContext(), getToken(), getTargetUserId(),
-                getIsRestricted(), getOwnerString(), mEnrolledList, mBiometricUtils, getSensorId(),
-                mStatsModality);
-        return mCurrentTask.start();
+        mCurrentTask = getEnumerateClient(mEnumerateFinishCallback, getContext(), getToken(),
+                getTargetUserId(), getIsRestricted(), getOwnerString(), mEnrolledList,
+                mBiometricUtils, getSensorId(), mStatsModality);
+        mCurrentTask.start();
     }
 
     @Override
-    public int stop(boolean initiatedByClient) {
-        return 0;
-    }
-
-    @Override
-    protected int startHalOperation() {
+    protected void startHalOperation() {
         // Internal cleanup's start method does not require a HAL operation, but rather
         // relies on its subtask's ClientMonitor to start the proper HAL operation.
-        return 0;
     }
 
     @Override
-    protected int stopHalOperation() {
+    protected void stopHalOperation() {
         // Internal cleanup's cannot be stopped.
-        return 0;
     }
 
     @Override
-    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
+    public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (!(mCurrentTask instanceof RemovalClient)) {
             Slog.e(TAG, "onRemoved received during client: "
                     + mCurrentTask.getClass().getSimpleName());
-            return false;
+            return;
         }
-        return ((RemovalClient) mCurrentTask).onRemoved(identifier, remaining);
+        ((RemovalClient) mCurrentTask).onRemoved(identifier, remaining);
     }
 
     @Override
-    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+    public void onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
         if (!(mCurrentTask instanceof InternalEnumerateClient)) {
             Slog.e(TAG, "onEnumerationResult received during client: "
                     + mCurrentTask.getClass().getSimpleName());
-            return false;
+            return;
         }
-
         ((EnumerateConsumer) mCurrentTask).onEnumerationResult(identifier, remaining);
-
-        if (remaining != 0) {
-            return false;
-        }
-
-        final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
-                ((InternalEnumerateClient) mCurrentTask).getUnknownHALTemplates();
-
-        if (!unknownHALTemplates.isEmpty()) {
-            Slog.w(TAG, "Adding " + unknownHALTemplates.size()
-                    + " templates for deletion");
-        }
-        for (int i = 0; i < unknownHALTemplates.size(); i++) {
-            mUnknownHALTemplates.add(new UserTemplate(unknownHALTemplates.get(i),
-                    mCurrentTask.getTargetUserId()));
-        }
-
-        if (mUnknownHALTemplates.isEmpty()) {
-            return true;
-        } else {
-            startCleanupUnknownHalTemplates();
-            return false;
-        }
     }
 }

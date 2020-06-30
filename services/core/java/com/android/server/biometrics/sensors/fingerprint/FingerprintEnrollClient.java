@@ -18,9 +18,11 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -32,26 +34,43 @@ import com.android.server.biometrics.sensors.EnrollClient;
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
 public class FingerprintEnrollClient extends EnrollClient {
+
+    private static final String TAG = "FingerprintEnrollClient";
     private final IBiometricsFingerprint mDaemon;
 
-    FingerprintEnrollClient(@NonNull Context context, @NonNull IBiometricsFingerprint daemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
+    FingerprintEnrollClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, boolean restricted, @NonNull String owner,
             @NonNull BiometricUtils utils, int timeoutSec, int statsModality,
             int sensorId, boolean shouldVibrate) {
-        super(context, token, listener, userId, hardwareAuthToken, restricted, owner, utils,
-                timeoutSec, statsModality, sensorId, shouldVibrate);
+        super(finishCallback, context, token, listener, userId, hardwareAuthToken, restricted,
+                owner, utils, timeoutSec, statsModality, sensorId, shouldVibrate);
         mDaemon = daemon;
     }
 
     @Override
-    protected int startHalOperation() throws RemoteException {
-        // GroupId was never used. In fact, groupId is always the same as userId.
-        return mDaemon.enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
+    protected void startHalOperation() {
+        try {
+            // GroupId was never used. In fact, groupId is always the same as userId.
+            mDaemon.enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting enroll", e);
+            onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                    0 /* vendorCode */);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 
     @Override
-    protected int stopHalOperation() throws RemoteException {
-        return mDaemon.cancel();
+    protected void stopHalOperation() {
+        try {
+            mDaemon.cancel();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting cancel", e);
+            onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                    0 /* vendorCode */);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 }
