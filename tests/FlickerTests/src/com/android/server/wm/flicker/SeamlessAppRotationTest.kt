@@ -52,7 +52,7 @@ class SeamlessAppRotationTest(
                 intentId = "BUSY_UI_THREAD"
             }
             return CommonTransitions.changeAppRotation(intent, intentId,
-                    InstrumentationRegistry.getContext(), uiDevice,
+                    InstrumentationRegistry.getContext(), instrumentation, uiDevice,
                     beginRotation, endRotation).build()
         }
 

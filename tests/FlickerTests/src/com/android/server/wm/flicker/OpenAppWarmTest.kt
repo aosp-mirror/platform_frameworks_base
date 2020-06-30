@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker
 
-import androidx.test.InstrumentationRegistry
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import org.junit.FixMethodOrder
@@ -38,12 +37,12 @@ class OpenAppWarmTest(
     beginRotation: Int
 ) : NonRotationTestBase(beginRotationName, beginRotation) {
     init {
-        testApp = StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.openAppWarm(testApp, uiDevice, beginRotation)
+        get() = CommonTransitions.openAppWarm(testApp, instrumentation, uiDevice, beginRotation)
                 .includeJankyRuns().build()
 
     @Test

@@ -27,7 +27,6 @@ import android.view.Surface
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.TransitionRunner.TransitionBuilder
 import com.android.server.wm.flicker.helpers.AutomationUtils
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.PipAppHelper
@@ -37,7 +36,6 @@ import com.android.server.wm.flicker.helpers.PipAppHelper
  */
 internal object CommonTransitions {
     private const val ITERATIONS = 1
-    private const val TAG = "FLICKER"
     private const val APP_LAUNCH_TIMEOUT: Long = 10000
     private fun setRotation(device: UiDevice, rotation: Int) {
         try {
@@ -62,9 +60,9 @@ internal object CommonTransitions {
      *
      * @return test tag with pattern <NAME>__<APP>__<ROTATION>
     </ROTATION></APP></NAME> */
-    private fun buildTestTag(testName: String, app: IAppHelper, rotation: Int): String? {
+    private fun buildTestTag(testName: String, app: IAppHelper, rotation: Int): String {
         return buildTestTag(
-                testName, app, /* app2 */null, rotation, rotation, /* description */"")
+                testName, app, rotation, rotation, app2 = null, extraInfo = "")
     }
 
     /**
@@ -81,9 +79,9 @@ internal object CommonTransitions {
         app: IAppHelper,
         beginRotation: Int,
         endRotation: Int
-    ): String? {
+    ): String {
         return buildTestTag(
-                testName, app, /* app2 */null, beginRotation, endRotation, /* description */"")
+                testName, app, beginRotation, endRotation, app2 = null, extraInfo = "")
     }
 
     /**
@@ -100,11 +98,11 @@ internal object CommonTransitions {
     private fun buildTestTag(
         testName: String,
         app: IAppHelper,
-        app2: IAppHelper?,
         beginRotation: Int,
         endRotation: Int,
+        app2: IAppHelper?,
         extraInfo: String
-    ): String? {
+    ): String {
         val testTag = StringBuilder()
         testTag.append(testName)
                 .append("__")
@@ -126,8 +124,13 @@ internal object CommonTransitions {
         return testTag.toString()
     }
 
-    fun openAppWarm(testApp: IAppHelper, device: UiDevice, beginRotation: Int): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    fun openAppWarm(
+        testApp: IAppHelper,
+        instrumentation: Instrumentation,
+        device: UiDevice,
+        beginRotation: Int
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("openAppWarm", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -144,10 +147,11 @@ internal object CommonTransitions {
 
     fun closeAppWithBackKey(
         testApp: IAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("closeAppWithBackKey", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -162,10 +166,11 @@ internal object CommonTransitions {
 
     fun closeAppWithHomeKey(
         testApp: IAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("closeAppWithHomeKey", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -180,10 +185,11 @@ internal object CommonTransitions {
 
     fun openAppCold(
         testApp: IAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("openAppCold", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -199,11 +205,12 @@ internal object CommonTransitions {
 
     fun changeAppRotation(
         testApp: IAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int,
         endRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("changeAppRotation", testApp, beginRotation, endRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -219,14 +226,15 @@ internal object CommonTransitions {
         intent: Intent,
         intentId: String,
         context: Context,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int,
         endRotation: Int
-    ): TransitionBuilder {
+    ): TransitionRunner.TransitionBuilder {
         val testTag = "changeAppRotation_" + intentId + "_" +
                 Surface.rotationToString(beginRotation) + "_" +
                 Surface.rotationToString(endRotation)
-        return TransitionRunner.newBuilder()
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(testTag)
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -244,10 +252,11 @@ internal object CommonTransitions {
 
     fun appToSplitScreen(
         testApp: IAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("appToSplitScreen", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -263,10 +272,11 @@ internal object CommonTransitions {
 
     fun splitScreenToLauncher(
         testApp: IAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("splitScreenToLauncher", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -280,10 +290,11 @@ internal object CommonTransitions {
 
     fun editTextSetFocus(
         testApp: ImeAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("editTextSetFocus", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -296,24 +307,24 @@ internal object CommonTransitions {
     }
 
     fun resizeSplitScreen(
-        instr: Instrumentation,
         testAppTop: IAppHelper,
         testAppBottom: ImeAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int,
         startRatio: Rational,
         stopRatio: Rational
-    ): TransitionBuilder {
+    ): TransitionRunner.TransitionBuilder {
         val description = (startRatio.toString().replace("/", "-") + "_to_" +
                 stopRatio.toString().replace("/", "-"))
-        val testTag = buildTestTag("resizeSplitScreen", testAppTop, testAppBottom,
-                beginRotation, beginRotation, description)
-        return TransitionRunner.newBuilder()
+        val testTag = buildTestTag("resizeSplitScreen", testAppTop, beginRotation,
+                beginRotation, testAppBottom, description)
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(testTag)
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
                 .runBeforeAll { setRotation(device, beginRotation) }
-                .runBeforeAll { AutomationUtils.clearRecents(instr) }
+                .runBeforeAll { AutomationUtils.clearRecents(instrumentation) }
                 .runBefore { testAppBottom.open() }
                 .runBefore { device.pressHome() }
                 .runBefore { testAppTop.open() }
@@ -337,10 +348,11 @@ internal object CommonTransitions {
 
     fun editTextLoseFocusToHome(
         testApp: ImeAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("editTextLoseFocusToHome", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -355,11 +367,12 @@ internal object CommonTransitions {
     }
 
     fun editTextLoseFocusToApp(
-        testApp: ImeAppHelper,
-        device: UiDevice,
-        beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+            testApp: ImeAppHelper,
+            instrumentation: Instrumentation,
+            device: UiDevice,
+            beginRotation: Int
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("editTextLoseFocusToApp", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -374,11 +387,12 @@ internal object CommonTransitions {
     }
 
     fun enterPipMode(
-        testApp: PipAppHelper,
-        device: UiDevice,
-        beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+            testApp: PipAppHelper,
+            instrumentation: Instrumentation,
+            device: UiDevice,
+            beginRotation: Int
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("enterPipMode", testApp, beginRotation))
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
                 .runBefore { device.pressHome() }
@@ -392,10 +406,11 @@ internal object CommonTransitions {
 
     fun exitPipModeToHome(
         testApp: PipAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("exitPipModeToHome", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }
@@ -411,10 +426,11 @@ internal object CommonTransitions {
 
     fun exitPipModeToApp(
         testApp: PipAppHelper,
+        instrumentation: Instrumentation,
         device: UiDevice,
         beginRotation: Int
-    ): TransitionBuilder {
-        return TransitionRunner.newBuilder()
+    ): TransitionRunner.TransitionBuilder {
+        return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("exitPipModeToApp", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll { AutomationUtils.wakeUpAndGoToHomeScreen() }

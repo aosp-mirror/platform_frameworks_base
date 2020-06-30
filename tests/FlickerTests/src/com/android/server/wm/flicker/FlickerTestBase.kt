@@ -20,7 +20,6 @@ import android.platform.helpers.IAppHelper
 import android.util.Log
 import androidx.test.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.android.server.wm.flicker.TransitionRunner.TransitionResult
 import com.android.server.wm.flicker.helpers.AutomationUtils
 import com.google.common.truth.Truth
 import org.junit.After
@@ -39,8 +38,11 @@ import org.junit.Before
  */
 abstract class FlickerTestBase {
     lateinit var testApp: IAppHelper
-    val uiDevice: UiDevice by lazy {
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    open val instrumentation by lazy {
+        InstrumentationRegistry.getInstrumentation()
+    }
+    val uiDevice by lazy {
+        UiDevice.getInstance(instrumentation)
     }
     lateinit var tesults: List<TransitionResult>
     private var lastResult: TransitionResult? = null

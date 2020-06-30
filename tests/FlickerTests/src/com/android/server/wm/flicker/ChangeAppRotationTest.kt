@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker
 
 import android.util.Log
-import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -40,12 +39,12 @@ class ChangeAppRotationTest(
     endRotation: Int
 ) : RotationTestBase(beginRotationName, endRotationName, beginRotation, endRotation) {
     init {
-        testApp = StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.changeAppRotation(testApp, uiDevice,
+        get() = CommonTransitions.changeAppRotation(testApp, instrumentation, uiDevice,
                 beginRotation, endRotation)
                 .includeJankyRuns().build()
 

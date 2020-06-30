@@ -39,17 +39,17 @@ import org.junit.runners.MethodSorters
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class DebugTest {
-    private val testApp: IAppHelper = StandardAppHelper(
-            InstrumentationRegistry.getInstrumentation(),
+    private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val testApp: IAppHelper = StandardAppHelper(instrumentation,
             "com.android.server.wm.flicker.testapp", "SimpleApp")
-    private val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    private val uiDevice = UiDevice.getInstance(instrumentation)
 
     /**
      * atest FlickerTests:DebugTest#openAppCold
      */
     @Test
     fun openAppCold() {
-        CommonTransitions.openAppCold(testApp, uiDevice, Surface.ROTATION_0)
+        CommonTransitions.openAppCold(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
                 .recordAllRuns().build().run()
     }
 
@@ -58,7 +58,7 @@ class DebugTest {
      */
     @Test
     fun openAppWarm() {
-        CommonTransitions.openAppWarm(testApp, uiDevice, Surface.ROTATION_0)
+        CommonTransitions.openAppWarm(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
                 .recordAllRuns().build().run()
     }
 
@@ -67,7 +67,7 @@ class DebugTest {
      */
     @Test
     fun changeOrientationFromNaturalToLeft() {
-        CommonTransitions.changeAppRotation(testApp, uiDevice, Surface.ROTATION_0,
+        CommonTransitions.changeAppRotation(testApp, instrumentation, uiDevice, Surface.ROTATION_0,
                 Surface.ROTATION_270).recordAllRuns().build().run()
     }
 
@@ -76,8 +76,8 @@ class DebugTest {
      */
     @Test
     fun closeAppWithBackKey() {
-        CommonTransitions.closeAppWithBackKey(testApp, uiDevice, Surface.ROTATION_0)
-                .recordAllRuns().build().run()
+        CommonTransitions.closeAppWithBackKey(testApp, instrumentation, uiDevice,
+                Surface.ROTATION_0).recordAllRuns().build().run()
     }
 
     /**
@@ -85,8 +85,8 @@ class DebugTest {
      */
     @Test
     fun closeAppWithHomeKey() {
-        CommonTransitions.closeAppWithHomeKey(testApp, uiDevice, Surface.ROTATION_0)
-                .recordAllRuns().build().run()
+        CommonTransitions.closeAppWithHomeKey(testApp, instrumentation, uiDevice,
+                Surface.ROTATION_0).recordAllRuns().build().run()
     }
 
     /**
@@ -94,7 +94,7 @@ class DebugTest {
      */
     @Test
     fun openAppToSplitScreen() {
-        CommonTransitions.appToSplitScreen(testApp, uiDevice,
+        CommonTransitions.appToSplitScreen(testApp, instrumentation, uiDevice,
                 Surface.ROTATION_0).includeJankyRuns().recordAllRuns()
                 .build().run()
     }
@@ -104,8 +104,8 @@ class DebugTest {
      */
     @Test
     fun splitScreenToLauncher() {
-        CommonTransitions.splitScreenToLauncher(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordAllRuns().build().run()
+        CommonTransitions.splitScreenToLauncher(testApp, instrumentation, uiDevice,
+                Surface.ROTATION_0).includeJankyRuns().recordAllRuns().build().run()
     }
 
     /**
@@ -113,11 +113,15 @@ class DebugTest {
      */
     @Test
     fun resizeSplitScreen() {
-        val instr = InstrumentationRegistry.getInstrumentation()
-        val bottomApp = ImeAppHelper(instr)
-        CommonTransitions.resizeSplitScreen(instr, testApp, bottomApp, uiDevice, Surface.ROTATION_0,
-                Rational(1, 3), Rational(2, 3))
-                .includeJankyRuns().build().run()
+        val bottomApp = ImeAppHelper(instrumentation)
+        CommonTransitions.resizeSplitScreen(
+                testApp,
+                bottomApp,
+                instrumentation,
+                uiDevice,
+                Surface.ROTATION_0,
+                Rational(1, 3), Rational(2, 3)
+        ).includeJankyRuns().build().run()
     }
     // IME tests
     /**
@@ -125,8 +129,8 @@ class DebugTest {
      */
     @Test
     fun editTextSetFocus() {
-        val testApp = ImeAppHelper(InstrumentationRegistry.getInstrumentation())
-        CommonTransitions.editTextSetFocus(testApp, uiDevice, Surface.ROTATION_0)
+        val testApp = ImeAppHelper(instrumentation)
+        CommonTransitions.editTextSetFocus(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
                 .includeJankyRuns()
                 .build().run()
     }
@@ -136,10 +140,9 @@ class DebugTest {
      */
     @Test
     fun editTextLoseFocusToHome() {
-        val testApp = ImeAppHelper(InstrumentationRegistry.getInstrumentation())
-        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns()
-                .build().run()
+        val testApp = ImeAppHelper(instrumentation)
+        CommonTransitions.editTextLoseFocusToHome(testApp, instrumentation, uiDevice,
+                Surface.ROTATION_0).includeJankyRuns().build().run()
     }
 
     /**
@@ -147,10 +150,9 @@ class DebugTest {
      */
     @Test
     fun editTextLoseFocusToApp() {
-        val testApp = ImeAppHelper(InstrumentationRegistry.getInstrumentation())
-        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns()
-                .build().run()
+        val testApp = ImeAppHelper(instrumentation)
+        CommonTransitions.editTextLoseFocusToHome(testApp, instrumentation, uiDevice,
+                Surface.ROTATION_0).includeJankyRuns().build().run()
     }
     // PIP tests
     /**
@@ -158,9 +160,9 @@ class DebugTest {
      */
     @Test
     fun enterPipMode() {
-        val testApp = PipAppHelper(InstrumentationRegistry.getInstrumentation())
-        CommonTransitions.enterPipMode(testApp, uiDevice, Surface.ROTATION_0).includeJankyRuns()
-                .build().run()
+        val testApp = PipAppHelper(instrumentation)
+        CommonTransitions.enterPipMode(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns().build().run()
     }
 
     /**
@@ -168,8 +170,8 @@ class DebugTest {
      */
     @Test
     fun exitPipModeToHome() {
-        val testApp = PipAppHelper(InstrumentationRegistry.getInstrumentation())
-        CommonTransitions.exitPipModeToHome(testApp, uiDevice, Surface.ROTATION_0)
+        val testApp = PipAppHelper(instrumentation)
+        CommonTransitions.exitPipModeToHome(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
                 .includeJankyRuns()
                 .build().run()
     }
@@ -179,8 +181,8 @@ class DebugTest {
      */
     @Test
     fun exitPipModeToApp() {
-        val testApp = PipAppHelper(InstrumentationRegistry.getInstrumentation())
-        CommonTransitions.exitPipModeToApp(testApp, uiDevice, Surface.ROTATION_0).includeJankyRuns()
-                .build().run()
+        val testApp = PipAppHelper(instrumentation)
+        CommonTransitions.exitPipModeToApp(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns().build().run()
     }
 }

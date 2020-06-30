@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker
 
-import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -36,14 +35,13 @@ class OpenAppToSplitScreenTest(
     beginRotation: Int
 ) : NonRotationTestBase(beginRotationName, beginRotation) {
     init {
-        testApp = StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.appToSplitScreen(testApp, uiDevice, beginRotation)
-                .includeJankyRuns()
-                .build()
+        get() = CommonTransitions.appToSplitScreen(testApp, instrumentation, uiDevice,
+                beginRotation).includeJankyRuns().build()
 
     @Test
     fun checkVisibility_navBarWindowIsAlwaysVisible() {

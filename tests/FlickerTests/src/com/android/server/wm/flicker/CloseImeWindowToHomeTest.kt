@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker
 
-import androidx.test.InstrumentationRegistry
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
@@ -39,12 +38,12 @@ open class CloseImeWindowToHomeTest(
     beginRotation: Int
 ) : NonRotationTestBase(beginRotationName, beginRotation) {
     init {
-        testApp = ImeAppHelper(InstrumentationRegistry.getInstrumentation())
+        testApp = ImeAppHelper(instrumentation)
     }
 
     override val transitionToRun: TransitionRunner
         get() = CommonTransitions.editTextLoseFocusToHome(testApp as ImeAppHelper,
-                uiDevice, beginRotation)
+                instrumentation, uiDevice, beginRotation)
                 .includeJankyRuns().build()
 
     @Test

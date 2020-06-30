@@ -42,7 +42,7 @@ class SplitScreenToLauncherTest : FlickerTestBase() {
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.splitScreenToLauncher(testApp, uiDevice, Surface.ROTATION_0)
+        get() = CommonTransitions.splitScreenToLauncher(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
                 .includeJankyRuns().build()
 
     @Test

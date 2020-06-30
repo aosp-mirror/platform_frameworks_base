@@ -40,7 +40,7 @@ class PipToHomeTest(
     beginRotation: Int
 ) : PipTestBase(beginRotationName, beginRotation) {
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.exitPipModeToHome(testApp as PipAppHelper,
+        get() = CommonTransitions.exitPipModeToHome(testApp as PipAppHelper, instrumentation,
                 uiDevice, beginRotation)
                 .includeJankyRuns().build()
 

@@ -40,7 +40,7 @@ class PipToAppTest(
     beginRotation: Int
 ) : PipTestBase(beginRotationName, beginRotation) {
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.exitPipModeToApp(testApp as PipAppHelper,
+        get() = CommonTransitions.exitPipModeToApp(testApp as PipAppHelper, instrumentation,
                 uiDevice, beginRotation)
                 .includeJankyRuns().build()
 

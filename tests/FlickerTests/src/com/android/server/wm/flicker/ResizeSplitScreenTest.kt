@@ -24,7 +24,6 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.UiDevice
-import com.android.server.wm.flicker.TransitionRunner.TransitionResult
 import com.android.server.wm.flicker.helpers.AutomationUtils
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.google.common.truth.Truth
@@ -48,15 +47,14 @@ import org.junit.runners.MethodSorters
 @Ignore("Waiting bug feedback")
 class ResizeSplitScreenTest : FlickerTestBase() {
     init {
-        testApp = StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
     }
 
     override val transitionToRun: TransitionRunner
         get() {
-            val instr = InstrumentationRegistry.getInstrumentation()
-            val bottomApp = ImeAppHelper(instr)
-            return CommonTransitions.resizeSplitScreen(instr, testApp, bottomApp,
+            val bottomApp = ImeAppHelper(instrumentation)
+            return CommonTransitions.resizeSplitScreen(testApp, bottomApp, instrumentation,
                     uiDevice, Surface.ROTATION_0,
                     Rational(1, 3), Rational(2, 3))
                     .includeJankyRuns().build()

@@ -36,7 +36,7 @@ abstract class PipTestBase(
     beginRotation: Int
 ) : NonRotationTestBase(beginRotationName, beginRotation) {
     init {
-        testApp = PipAppHelper(InstrumentationRegistry.getInstrumentation())
+        testApp = PipAppHelper(instrumentation)
     }
 
     @Test

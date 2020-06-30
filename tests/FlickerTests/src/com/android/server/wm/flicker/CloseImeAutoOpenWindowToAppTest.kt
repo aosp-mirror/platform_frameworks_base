@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker
 
-import androidx.test.InstrumentationRegistry
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
@@ -39,12 +38,12 @@ class CloseImeAutoOpenWindowToAppTest(
     beginRotation: Int
 ) : CloseImeWindowToAppTest(beginRotationName, beginRotation) {
     init {
-        testApp = ImeAppAutoFocusHelper(InstrumentationRegistry.getInstrumentation())
+        testApp = ImeAppAutoFocusHelper(instrumentation)
     }
 
     override val transitionToRun: TransitionRunner
         get() = CommonTransitions.editTextLoseFocusToApp(testApp as ImeAppAutoFocusHelper,
-                uiDevice, beginRotation)
+                instrumentation, uiDevice, beginRotation)
                 .includeJankyRuns().build()
 
     @FlakyTest(bugId = 141458352)
