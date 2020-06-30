@@ -2640,7 +2640,10 @@ public class ChooserActivity extends ResolverActivity implements
         }
         RecyclerView recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
         ChooserGridAdapter gridAdapter = mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
-        if (gridAdapter == null || recyclerView == null) {
+        // Skip height calculation if recycler view was scrolled to prevent it inaccurately
+        // calculating the height, as the logic below does not account for the scrolled offset.
+        if (gridAdapter == null || recyclerView == null
+                || recyclerView.computeVerticalScrollOffset() != 0) {
             return;
         }
 
