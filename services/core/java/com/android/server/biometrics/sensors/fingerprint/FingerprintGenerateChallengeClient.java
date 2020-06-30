@@ -31,18 +31,14 @@ import com.android.server.biometrics.sensors.GenerateChallengeClient;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-public class FingerprintGenerateChallengeClient extends GenerateChallengeClient {
+public class FingerprintGenerateChallengeClient
+        extends GenerateChallengeClient<IBiometricsFingerprint> {
 
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
-    private final IBiometricsFingerprint mDaemon;
-
-    FingerprintGenerateChallengeClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFingerprint daemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            @NonNull String owner, int sensorId) {
-        super(finishCallback, context, token, listener, owner, sensorId);
-        mDaemon = daemon;
+    FingerprintGenerateChallengeClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
+        super(context, token, listener, owner, sensorId);
     }
 
     @Override

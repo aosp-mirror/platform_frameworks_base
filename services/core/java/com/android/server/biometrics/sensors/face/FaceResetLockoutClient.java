@@ -31,21 +31,18 @@ import java.util.ArrayList;
  * Face-specific resetLockout client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceResetLockoutClient extends ClientMonitor {
+public class FaceResetLockoutClient extends ClientMonitor<IBiometricsFace> {
 
     private static final String TAG = "FaceResetLockoutClient";
 
-    private final IBiometricsFace mDaemon;
     private final ArrayList<Byte> mHardwareAuthToken;
 
-    FaceResetLockoutClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, int userId, String owner, int sensorId,
+    FaceResetLockoutClient(@NonNull Context context, int userId, String owner, int sensorId,
             byte[] hardwareAuthToken) {
-        super(finishCallback, context, null /* token */, null /* listener */, userId,
+        super(context, null /* token */, null /* listener */, userId,
                 false /* restricted */, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
-        mDaemon = daemon;
 
         mHardwareAuthToken = new ArrayList<>();
         for (byte b : hardwareAuthToken) {
@@ -54,7 +51,14 @@ public class FaceResetLockoutClient extends ClientMonitor {
     }
 
     @Override
-    public void start() {
+    public void unableToStart() {
+        // Nothing to do here
+    }
+
+    @Override
+    public void start(@NonNull IBiometricsFace daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         startHalOperation();
     }
 

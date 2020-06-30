@@ -34,19 +34,15 @@ import java.util.List;
  * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
  * HIDL interfaces.
  */
-class FaceInternalEnumerateClient extends InternalEnumerateClient {
+class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFace> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
-    private final IBiometricsFace mDaemon;
-
-    FaceInternalEnumerateClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, @NonNull IBinder token, int userId, boolean restricted,
-            @NonNull String owner,
+    FaceInternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
+            boolean restricted, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(finishCallback, context, token, userId, restricted, owner, enrolledList, utils,
+        super(context, token, userId, restricted, owner, enrolledList, utils,
                 sensorId, statsModality);
-        mDaemon = daemon;
     }
 
     @Override

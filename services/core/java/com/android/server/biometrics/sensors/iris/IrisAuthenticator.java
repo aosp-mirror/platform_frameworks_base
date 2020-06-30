@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.server.biometrics.SensorConfig;
+import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
  * TODO(b/141025588): Add JavaDoc.
@@ -60,6 +61,12 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     @Override
     public boolean hasEnrolledTemplates(int userId, String opPackageName) throws RemoteException {
         return false;
+    }
+
+    @Override
+    public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId)
+            throws RemoteException {
+        return LockoutTracker.LOCKOUT_NONE;
     }
 
     @Override

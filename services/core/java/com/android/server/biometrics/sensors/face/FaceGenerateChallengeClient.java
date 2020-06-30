@@ -31,18 +31,14 @@ import com.android.server.biometrics.sensors.GenerateChallengeClient;
  * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
  * HIDL interfaces.
  */
-public class FaceGenerateChallengeClient extends GenerateChallengeClient {
+public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiometricsFace> {
 
     private static final String TAG = "FaceGenerateChallengeClient";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
-    private final IBiometricsFace mDaemon;
-
-    FaceGenerateChallengeClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFace daemon, @NonNull IBinder token,
+    FaceGenerateChallengeClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
-        super(finishCallback, context, token, listener, owner, sensorId);
-        mDaemon = daemon;
+        super(context, token, listener, owner, sensorId);
     }
 
     @Override

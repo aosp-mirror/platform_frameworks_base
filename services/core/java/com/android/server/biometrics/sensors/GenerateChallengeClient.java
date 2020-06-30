@@ -16,27 +16,39 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-public abstract class GenerateChallengeClient extends ClientMonitor {
+public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
 
     private static final String TAG = "GenerateChallengeClient";
 
     protected long mChallenge;
 
-    public GenerateChallengeClient(FinishCallback finishCallback, Context context, IBinder token,
+    public GenerateChallengeClient(Context context, IBinder token,
             ClientMonitorCallbackConverter listener, String owner, int sensorId) {
-        super(finishCallback, context, token, listener, 0 /* userId */, false /* restricted */,
+        super(context, token, listener, 0 /* userId */, false /* restricted */,
                 owner, 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override
-    public void start() {
+    public void unableToStart() {
+        try {
+            getListener().onChallengeGenerated(0L);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to send error", e);
+        }
+    }
+
+    @Override
+    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         startHalOperation();
         try {
             getListener().onChallengeGenerated(mChallenge);

@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.server.biometrics.SensorConfig;
+import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
  * Shim that converts IFingerprintService into a common reusable IBiometricAuthenticator interface.
@@ -65,6 +66,12 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     @Override
     public boolean hasEnrolledTemplates(int userId, String opPackageName) throws RemoteException {
         return mFingerprintService.hasEnrolledFingerprints(userId, opPackageName);
+    }
+
+    @Override
+    public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId)
+            throws RemoteException {
+        return mFingerprintService.getLockoutModeForUser(userId);
     }
 
     @Override

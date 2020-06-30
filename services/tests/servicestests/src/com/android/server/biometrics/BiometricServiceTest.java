@@ -64,6 +64,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.biometrics.sensors.LockoutTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -825,6 +826,62 @@ public class BiometricServiceTest {
     }
 
     @Test
+    public void testBiometricAuth_whenBiometricLockoutTimed_sendsErrorAndModality()
+            throws Exception {
+        testBiometricAuth_whenLockout(LockoutTracker.LOCKOUT_TIMED,
+                BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT);
+    }
+
+    @Test
+    public void testBiometricAuth_whenBiometricLockoutPermanent_sendsErrorAndModality()
+            throws Exception {
+        testBiometricAuth_whenLockout(LockoutTracker.LOCKOUT_PERMANENT,
+                BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
+    }
+
+    private void testBiometricAuth_whenLockout(@LockoutTracker.LockoutMode int lockoutMode,
+            int biometricPromptError) throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
+                .thenReturn(lockoutMode);
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */, null /* authenticators */);
+        waitForIdle();
+
+        // Modality and error are sent
+        verify(mReceiver1).onError(eq(BiometricAuthenticator.TYPE_FINGERPRINT),
+                eq(biometricPromptError), eq(0) /* vendorCode */);
+    }
+
+    @Test
+    public void testBiometricOrCredentialAuth_whenBiometricLockout_showsCredential()
+            throws Exception {
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
+                .thenReturn(LockoutTracker.LOCKOUT_PERMANENT);
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_STRONG);
+        waitForIdle();
+
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
+        assertNotNull(mBiometricService.mCurrentAuthSession);
+        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(Authenticators.DEVICE_CREDENTIAL,
+                mBiometricService.mCurrentAuthSession.mPromptInfo.getAuthenticators());
+        verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
+                any(IBiometricSysuiReceiver.class),
+                eq(0 /* biometricModality */),
+                anyBoolean() /* requireConfirmation */,
+                anyInt() /* userId */,
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
+    }
+
+    @Test
     public void testCombineAuthenticatorBundles_withKeyDeviceCredential_andKeyAuthenticators() {
         final boolean allowDeviceCredential = false;
         final @Authenticators.Types int authenticators =
@@ -1199,6 +1256,29 @@ public class BiometricServiceTest {
     }
 
     @Test
+    public void testCanAuthenticate_whenLockoutTimed() throws Exception {
+        testCanAuthenticate_whenLockedOut(LockoutTracker.LOCKOUT_TIMED);
+    }
+
+    @Test
+    public void testCanAuthenticate_whenLockoutPermanent() throws Exception {
+        testCanAuthenticate_whenLockedOut(LockoutTracker.LOCKOUT_PERMANENT);
+    }
+
+    private void testCanAuthenticate_whenLockedOut(@LockoutTracker.LockoutMode int lockoutMode)
+            throws Exception {
+        // When only biometric is requested, and sensor is strong enough
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+
+        when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
+                .thenReturn(lockoutMode);
+
+        // Lockout is not considered an error for BiometricManager#canAuthenticate
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.BIOMETRIC_STRONG));
+    }
+
+    @Test
     public void testAuthenticatorActualStrength() {
         // Tuple of OEM config, updatedStrength, and expectedStrength
         final int[][] testCases = {
@@ -1497,6 +1577,8 @@ public class BiometricServiceTest {
             when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
                     .thenReturn(enrolled);
             when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
+            when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
+                    .thenReturn(LockoutTracker.LOCKOUT_NONE);
             mBiometricService.mImpl.registerAuthenticator(SENSOR_ID_FINGERPRINT, modality, strength,
                     mFingerprintAuthenticator);
         }
@@ -1504,6 +1586,8 @@ public class BiometricServiceTest {
         if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
             when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(enrolled);
             when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
+            when(mFaceAuthenticator.getLockoutModeForUser(anyInt()))
+                    .thenReturn(LockoutTracker.LOCKOUT_NONE);
             mBiometricService.mImpl.registerAuthenticator(SENSOR_ID_FACE, modality, strength,
                     mFaceAuthenticator);
         }

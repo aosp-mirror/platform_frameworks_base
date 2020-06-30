@@ -34,19 +34,15 @@ import java.util.List;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintInternalEnumerateClient extends InternalEnumerateClient {
+class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFingerprint> {
     private static final String TAG = "FingerprintInternalEnumerateClient";
 
-    private final IBiometricsFingerprint mDaemon;
-
-    FingerprintInternalEnumerateClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFingerprint daemon,
-            @NonNull IBinder token, int userId, boolean restricted, @NonNull String owner,
+    FingerprintInternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
+            boolean restricted, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(finishCallback, context, token, userId, restricted, owner, enrolledList, utils,
+        super(context, token, userId, restricted, owner, enrolledList, utils,
                 sensorId, statsModality);
-        mDaemon = daemon;
     }
 
     @Override

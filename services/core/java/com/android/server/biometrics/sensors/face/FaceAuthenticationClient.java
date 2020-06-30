@@ -48,11 +48,10 @@ import java.util.ArrayList;
  * Face-specific authentication client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-class FaceAuthenticationClient extends AuthenticationClient {
+class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
     private static final String TAG = "FaceAuthenticationClient";
 
-    private final IBiometricsFace mDaemon;
     private final NotificationManager mNotificationManager;
     private final UsageStats mUsageStats;
 
@@ -62,23 +61,17 @@ class FaceAuthenticationClient extends AuthenticationClient {
     private final int[] mKeyguardIgnoreListVendor;
 
     private int mLastAcquire;
-    // We need to track this state since it's possible for applications to request for
-    // authentication while the device is already locked out. In that case, the client is created
-    // but not started yet. The user shouldn't receive the error haptics in this case.
-    private boolean mStarted;
 
-    FaceAuthenticationClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, @NonNull IBinder token,
+    FaceAuthenticationClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
-        super(finishCallback, context, token, listener, targetUserId, operationId, restricted,
+        super(context, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
                 lockoutTracker);
-        mDaemon = daemon;
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mUsageStats = usageStats;
 
@@ -91,18 +84,6 @@ class FaceAuthenticationClient extends AuthenticationClient {
                 R.array.config_face_acquire_keyguard_ignorelist);
         mKeyguardIgnoreListVendor = resources.getIntArray(
                 R.array.config_face_acquire_vendor_keyguard_ignorelist);
-    }
-
-    @Override
-    public void start() {
-        mStarted = true;
-        super.start();
-    }
-
-    @Override
-    public void cancel() {
-        mStarted = false;
-        super.cancel();
     }
 
     @Override
@@ -139,10 +120,6 @@ class FaceAuthenticationClient extends AuthenticationClient {
             boolean authenticated, ArrayList<Byte> token) {
         super.onAuthenticated(identifier, authenticated, token);
 
-        if (authenticated) {
-            mStarted = false;
-        }
-
         mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
                 getStartTimeMs(),
                 System.currentTimeMillis() - getStartTimeMs() /* latency */,
@@ -176,7 +153,9 @@ class FaceAuthenticationClient extends AuthenticationClient {
                 }
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
-                if (mStarted) {
+                if (mAuthAttempted) {
+                    // Only vibrate if auth was attempted. If the user was already locked out prior
+                    // to starting authentication, do not vibrate.
                     vibrateError();
                 }
                 break;

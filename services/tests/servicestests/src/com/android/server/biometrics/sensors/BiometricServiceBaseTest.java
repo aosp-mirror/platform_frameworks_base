@@ -51,6 +51,11 @@ public class BiometricServiceBaseTest {
         }
 
         @Override
+        protected Object getDaemon() {
+            return null;
+        }
+
+        @Override
         protected BiometricUtils getBiometricUtils() {
             return null;
         }

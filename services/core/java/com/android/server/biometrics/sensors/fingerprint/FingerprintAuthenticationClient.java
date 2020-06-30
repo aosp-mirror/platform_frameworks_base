@@ -41,26 +41,22 @@ import java.util.ArrayList;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintAuthenticationClient extends AuthenticationClient {
+class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFingerprint> {
 
     private static final String TAG = "Biometrics/FingerprintAuthClient";
 
-    private final IBiometricsFingerprint mDaemon;
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
 
-    FingerprintAuthenticationClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFingerprint daemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            @Nullable Surface surface, int statsClient,
+    FingerprintAuthenticationClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, @Nullable Surface surface, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutFrameworkImpl lockoutTracker) {
-        super(finishCallback, context, token, listener, targetUserId, operationId, restricted,
+        super(context, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutTracker);
-        mDaemon = daemon;
         mLockoutFrameworkImpl = lockoutTracker;
     }
 

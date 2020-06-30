@@ -23,6 +23,8 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_DISABLED_BY_DE
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_HARDWARE_NOT_DETECTED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_INSUFFICIENT_STRENGTH;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_LOCKOUT_PERMANENT;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_LOCKOUT_TIMED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENABLED_FOR_APPS;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
@@ -235,6 +237,10 @@ public class Utils {
             case BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
                 break;
+            case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
+            case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
+                biometricManagerCode = BiometricManager.BIOMETRIC_SUCCESS;
+                break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
@@ -288,6 +294,12 @@ public class Utils {
 
             case CREDENTIAL_NOT_ENROLLED:
                 return BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL;
+
+            case BIOMETRIC_LOCKOUT_TIMED:
+                return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
+
+            case BIOMETRIC_LOCKOUT_PERMANENT:
+                return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
 
             case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
             case BIOMETRIC_HARDWARE_NOT_DETECTED:

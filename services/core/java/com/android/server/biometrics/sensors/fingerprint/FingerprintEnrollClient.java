@@ -33,20 +33,17 @@ import com.android.server.biometrics.sensors.EnrollClient;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-public class FingerprintEnrollClient extends EnrollClient {
+public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint> {
 
     private static final String TAG = "FingerprintEnrollClient";
-    private final IBiometricsFingerprint mDaemon;
 
-    FingerprintEnrollClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token,
+    FingerprintEnrollClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, boolean restricted, @NonNull String owner,
             @NonNull BiometricUtils utils, int timeoutSec, int statsModality,
             int sensorId, boolean shouldVibrate) {
-        super(finishCallback, context, token, listener, userId, hardwareAuthToken, restricted,
+        super(context, token, listener, userId, hardwareAuthToken, restricted,
                 owner, utils, timeoutSec, statsModality, sensorId, shouldVibrate);
-        mDaemon = daemon;
     }
 
     @Override

@@ -80,6 +80,9 @@ interface IFaceService {
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
 
+    // Return the LockoutTracker status for the specified user
+    int getLockoutModeForUser(int userId);
+
     // Gets the authenticator ID for face
     long getAuthenticatorId(int callingUserId);
 
