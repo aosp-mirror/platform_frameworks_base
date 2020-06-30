@@ -27,6 +27,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.textclassifier.IconsUriHelper.ResourceInfo;
@@ -34,6 +35,7 @@ import com.android.server.textclassifier.IconsUriHelper.ResourceInfo;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * A content provider that is used to access icons returned from the TextClassifier service.
@@ -46,32 +48,40 @@ import java.io.OutputStream;
 public final class IconsContentProvider extends ContentProvider {
 
     private static final String TAG = "IconsContentProvider";
+    private static final String MIME_TYPE = "image/png";
+
+    private final PipeDataWriter<Pair<ResourceInfo, Integer>> mWriter =
+            (writeSide, uri, mimeType, bundle, args) -> {
+                try (OutputStream out = new AutoCloseOutputStream(writeSide)) {
+                    final ResourceInfo res = args.first;
+                    final int userId = args.second;
+                    final Drawable drawable = Icon.createWithResource(res.packageName, res.id)
+                                .loadDrawableAsUser(getContext(), userId);
+                    getBitmap(drawable).compress(Bitmap.CompressFormat.PNG, 100, out);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error retrieving icon for uri: " + uri, e);
+                }
+            };
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) {
-        try {
-            final ResourceInfo res = IconsUriHelper.getInstance().getResourceInfo(uri);
-            final Drawable drawable = Icon.createWithResource(res.packageName, res.id)
-                    .loadDrawableAsUser(getContext(), UserHandle.getCallingUserId());
-            final byte[] data = getBitmapData(drawable);
-            final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
-            final ParcelFileDescriptor readSide = pipe[0];
-            final ParcelFileDescriptor writeSide = pipe[1];
-            try (OutputStream out = new AutoCloseOutputStream(writeSide)) {
-                out.write(data);
-                return readSide;
-            }
-        } catch (IOException | RuntimeException e) {
-            Log.e(TAG, "Error retrieving icon for uri: " + uri, e);
+        final ResourceInfo res = IconsUriHelper.getInstance().getResourceInfo(uri);
+        if (res == null) {
+            Log.e(TAG, "No icon found for uri: " + uri);
+            return null;
         }
+
+        try {
+            final Pair<ResourceInfo, Integer> args = new Pair(res, UserHandle.getCallingUserId());
+            return openPipeHelper(uri, MIME_TYPE, /* bundle= */ null, args, mWriter);
+        } catch (IOException e) {
+            Log.e(TAG, "Error opening pipe helper for icon at uri: " + uri, e);
+        }
+
         return null;
     }
 
-    /**
-     * Returns the bitmap data for the specified drawable.
-     */
-    @VisibleForTesting
-    public static byte[] getBitmapData(Drawable drawable) {
+    private static Bitmap getBitmap(Drawable drawable) {
         if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             throw new IllegalStateException("The icon is zero-sized");
         }
@@ -85,16 +95,24 @@ public final class IconsContentProvider extends ContentProvider {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
 
-        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        final byte[] byteArray = stream.toByteArray();
-        bitmap.recycle();
-        return byteArray;
+        return bitmap;
+    }
+
+    /**
+     * Returns true if the drawables are considered the same.
+     */
+    @VisibleForTesting
+    public static boolean sameIcon(Drawable one, Drawable two) {
+        final ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+        getBitmap(one).compress(Bitmap.CompressFormat.PNG, 100, stream1);
+        final ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
+        getBitmap(two).compress(Bitmap.CompressFormat.PNG, 100, stream2);
+        return Arrays.equals(stream1.toByteArray(), stream2.toByteArray());
     }
 
     @Override
     public String getType(Uri uri) {
-        return "image/png";
+        return MIME_TYPE;
     }
 
     @Override
