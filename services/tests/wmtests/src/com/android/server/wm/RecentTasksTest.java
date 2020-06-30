@@ -464,15 +464,19 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(task1);
         final Task task2 = taskBuilder.apply(true /* visible */);
         mRecentTasks.add(task2);
-        // Only the last task is kept in recents and the previous 2 tasks will becomes untracked
+        final Task task3 = createTaskBuilder(className).build();
+        mRecentTasks.add(task3);
+        // Only the last added task is kept in recents and the previous 2 tasks will become hidden
         // tasks because their intents are identical.
-        mRecentTasks.add(createTaskBuilder(className).build());
+        mRecentTasks.add(task1);
         // Go home to trigger the removal of untracked tasks.
         mRecentTasks.add(createTaskBuilder(".Home").setStack(mTaskContainer.getRootHomeTask())
                 .build());
 
+        // The task was added into recents again so it is not hidden and shouldn't be removed.
+        assertNotNull(task1.getTopNonFinishingActivity());
         // All activities in the invisible task should be finishing or removed.
-        assertNull(task1.getTopNonFinishingActivity());
+        assertNull(task3.getTopNonFinishingActivity());
         // The visible task should not be affected.
         assertNotNull(task2.getTopNonFinishingActivity());
     }
