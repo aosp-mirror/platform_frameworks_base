@@ -1,4 +1,12 @@
 // Signature format: 2.0
+package android.app {
+
+  public class AppOpsManager {
+    field public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
+  }
+
+}
+
 package android.content.rollback {
 
   public class RollbackManagerFrameworkInitializer {
