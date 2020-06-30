@@ -1498,7 +1498,6 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testEnsureActivitiesVisibleNotRecursive() {
         final TaskDisplayArea mockTda = mock(TaskDisplayArea.class);
-        doReturn(mockTda).when(mDisplayContent).getTaskDisplayAreaAt(anyInt());
         final boolean[] called = { false };
         doAnswer(invocation -> {
             // The assertion will fail if DisplayArea#ensureActivitiesVisible is called twice.
