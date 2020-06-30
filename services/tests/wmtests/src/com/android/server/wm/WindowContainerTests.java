@@ -27,6 +27,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -822,6 +823,31 @@ public class WindowContainerTests extends WindowTestsBase {
         assertEquals(newDc, stack.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
         assertEquals(newDc, activity.mDisplayContent);
+    }
+
+    @Test
+    public void testHandleCompleteDeferredRemoval() {
+        final DisplayContent displayContent = createNewDisplay();
+        // Do not reparent activity to default display when removing the display.
+        doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
+        final ActivityRecord r = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(displayContent).build().getTopMostActivity();
+        // Add a window and make the activity animating so the removal of activity is deferred.
+        createWindow(null, TYPE_BASE_APPLICATION, r, "win");
+        doReturn(true).when(r).isAnimating(anyInt(), anyInt());
+
+        displayContent.remove();
+        // Ensure that ActivityRecord#onRemovedFromDisplay is called.
+        r.destroyed("test");
+        // The removal is deferred, so the activity is still in the display.
+        assertEquals(r, displayContent.getTopMostActivity());
+
+        // Assume the animation is done so the deferred removal can continue.
+        doReturn(false).when(r).isAnimating(anyInt(), anyInt());
+
+        assertFalse(displayContent.handleCompleteDeferredRemoval());
+        assertFalse(displayContent.hasChild());
+        assertFalse(r.hasChild());
     }
 
     @Test
