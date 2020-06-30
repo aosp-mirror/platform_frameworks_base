@@ -1663,6 +1663,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
+    "1108406230": {
+      "message": "stopFreezingDisplayLocked: Returning mWaitingForConfig=%b, mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, mClientFreezingScreen=%b, mOpeningApps.size()=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "1112047265": {
       "message": "finishDrawingWindow: %s mDrawState=%s",
       "level": "DEBUG",
@@ -1721,12 +1727,6 @@
       "message": "checkBootAnimationComplete: Animation complete!",
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1246035185": {
-      "message": "stopFreezingDisplayLocked: Returning waitingForConfig=%b, waitingForRemoteRotation=%b, mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, mClientFreezingScreen=%b, mOpeningApps.size()=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "1254403969": {
@@ -1950,6 +1950,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "1591969812": {
+      "message": "updateImeControlTarget %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1628345525": {
       "message": "Now opening app %s",
