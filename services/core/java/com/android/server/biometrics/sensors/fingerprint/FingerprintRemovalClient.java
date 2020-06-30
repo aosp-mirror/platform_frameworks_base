@@ -37,16 +37,17 @@ class FingerprintRemovalClient extends RemovalClient {
 
     FingerprintRemovalClient(@NonNull Context context, @NonNull IBiometricsFingerprint daemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int groupId, int userId, boolean restricted, @NonNull String owner,
+            int biometricId, int userId, boolean restricted, @NonNull String owner,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, listener, biometricId, groupId, userId, restricted, owner, utils,
-                sensorId, statsModality);
+        super(context, token, listener, biometricId, userId, restricted, owner, utils, sensorId,
+                statsModality);
         mDaemon = daemon;
     }
 
     @Override
     protected int startHalOperation() throws RemoteException {
-        return mDaemon.remove(getGroupId(), mBiometricId);
+        // GroupId was never used. In fact, groupId is always the same as userId.
+        return mDaemon.remove(getTargetUserId(), mBiometricId);
     }
 
     @Override

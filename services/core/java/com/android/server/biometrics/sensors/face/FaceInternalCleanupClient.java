@@ -38,31 +38,30 @@ class FaceInternalCleanupClient extends InternalCleanupClient {
     private final IBiometricsFace mDaemon;
 
     FaceInternalCleanupClient(@NonNull Context context, @NonNull IBiometricsFace daemon, int userId,
-            int groupId, boolean restricted, String owner, int sensorId, int statsModality,
+            boolean restricted, String owner, int sensorId, int statsModality,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils) {
-        super(context, userId, groupId, restricted, owner, sensorId, statsModality, enrolledList,
-                utils);
+        super(context, userId, restricted, owner, sensorId, statsModality, enrolledList, utils);
         mDaemon = daemon;
     }
 
     @Override
-    protected InternalEnumerateClient getEnumerateClient(Context context, IBinder token,
-            int groupId, int userId, boolean restricted,
-            String owner, List<? extends BiometricAuthenticator.Identifier> enrolledList,
+    protected InternalEnumerateClient getEnumerateClient(Context context, IBinder token, int userId,
+            boolean restricted, String owner,
+            List<? extends BiometricAuthenticator.Identifier> enrolledList,
             BiometricUtils utils, int sensorId, int statsModality) {
-        return new FaceInternalEnumerateClient(context, mDaemon, token, groupId, userId, restricted,
-                owner, enrolledList, utils, sensorId, statsModality);
+        return new FaceInternalEnumerateClient(context, mDaemon, token, userId, restricted, owner,
+                enrolledList, utils, sensorId, statsModality);
     }
 
     @Override
     protected RemovalClient getRemovalClient(Context context, IBinder token, int biometricId,
-            int groupId, int userId, boolean restricted, String owner, BiometricUtils utils,
-            int sensorId, int statsModality) {
+            int userId, boolean restricted, String owner, BiometricUtils utils, int sensorId,
+            int statsModality) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         return new FaceRemovalClient(context, mDaemon, token,
-                null /* ClientMonitorCallbackConverter */, biometricId, groupId, userId, restricted,
+                null /* ClientMonitorCallbackConverter */, biometricId, userId, restricted,
                 owner, utils, sensorId, statsModality);
     }
 }

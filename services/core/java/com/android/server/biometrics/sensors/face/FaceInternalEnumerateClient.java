@@ -37,11 +37,10 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient {
     private final IBiometricsFace mDaemon;
 
     FaceInternalEnumerateClient(@NonNull Context context, @NonNull IBiometricsFace daemon,
-            @NonNull IBinder token, int groupId, int userId, boolean restricted,
-            @NonNull String owner,
+            @NonNull IBinder token, int userId, boolean restricted, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, groupId, userId, restricted, owner, enrolledList, utils, sensorId,
+        super(context, token, userId, restricted, owner, enrolledList, utils, sensorId,
                 statsModality);
         mDaemon = daemon;
     }

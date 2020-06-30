@@ -65,12 +65,12 @@ class FaceAuthenticationClient extends AuthenticationClient {
 
     FaceAuthenticationClient(@NonNull Context context, @NonNull IBiometricsFace daemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId, long opId, boolean restricted, String owner, int cookie,
+            int targetUserId, long operationId, boolean restricted, String owner, int cookie,
             boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
-        super(context, token, listener, targetUserId, 0 /* groupId */, opId,
-                restricted, owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
+        super(context, token, listener, targetUserId, operationId, restricted, owner, cookie,
+                requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
                 lockoutTracker);
         mDaemon = daemon;

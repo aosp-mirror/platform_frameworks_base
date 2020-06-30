@@ -558,7 +558,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mService != null) try {
             mRemovalCallback = callback;
             mRemovalFingerprint = fp;
-            mService.remove(mToken, fp.getBiometricId(), fp.getGroupId(), userId, mServiceReceiver,
+            mService.remove(mToken, fp.getBiometricId(), userId, mServiceReceiver,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception in remove: ", e);
@@ -777,12 +777,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         int reqFingerId = mRemovalFingerprint.getBiometricId();
         if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
             Slog.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
-            return;
-        }
-        int groupId = fingerprint.getGroupId();
-        int reqGroupId = mRemovalFingerprint.getGroupId();
-        if (groupId != reqGroupId) {
-            Slog.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
             return;
         }
 

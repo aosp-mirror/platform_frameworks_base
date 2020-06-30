@@ -63,8 +63,8 @@ interface IFingerprintService {
     void cancelEnrollment(IBinder token);
 
     // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int fingerId, int groupId, int userId,
-            IFingerprintServiceReceiver receiver, String opPackageName);
+    void remove(IBinder token, int fingerId, int userId, IFingerprintServiceReceiver receiver,
+            String opPackageName);
 
     // Rename the fingerprint specified by fingerId and userId to the given name
     void rename(int fingerId, int userId, String name);
