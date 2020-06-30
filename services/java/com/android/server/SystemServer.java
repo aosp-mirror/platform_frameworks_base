@@ -80,6 +80,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureManager;
 
+import com.android.i18n.timezone.ZoneInfoDb;
 import com.android.internal.R;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
@@ -179,8 +180,6 @@ import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
-
-import libcore.timezone.ZoneInfoDb;
 
 import dalvik.system.VMRuntime;
 
