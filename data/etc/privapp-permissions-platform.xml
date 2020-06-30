@@ -424,6 +424,8 @@ applications that come with the platform
         <permission name="android.permission.LOCATION_HARDWARE" />
         <!-- Permissions required for GTS test - GtsDialerAudioTestCases -->
         <permission name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+        <!-- Permissions required for CTS test - AdbManagerTest -->
+        <permission name="android.permission.MANAGE_DEBUGGING" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
