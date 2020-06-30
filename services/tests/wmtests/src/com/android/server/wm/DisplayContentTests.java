@@ -1328,9 +1328,10 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final DisplayRotation dr = dc.getDisplayRotation();
         doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
-        Mockito.doReturn(ROTATION_90).when(dr).rotationForOrientation(anyInt(), anyInt());
+        // Rotate 180 degree so the display doesn't have configuration change. This condition is
+        // used for the later verification of stop-freezing (without setting mWaitingForConfig).
+        doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
-        // TODO(display-merge): Remove cast
         doAnswer(
                 invocation -> {
                     continued[0] = true;
@@ -1356,9 +1357,16 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.setRotationAnimation(null);
 
         mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
+        // If remote rotation is not finished, the display should not be able to unfreeze.
+        mWm.stopFreezingDisplayLocked();
+        assertTrue(mWm.mDisplayFrozen);
+
         assertTrue(called[0]);
         waitUntilHandlersIdle();
         assertTrue(continued[0]);
+
+        mWm.stopFreezingDisplayLocked();
+        assertFalse(mWm.mDisplayFrozen);
     }
 
     @Test
