@@ -18,8 +18,8 @@ package android.text.format;
 
 import android.util.TimeFormatException;
 
-import libcore.timezone.ZoneInfoDb;
-import libcore.util.ZoneInfo;
+import com.android.i18n.timezone.ZoneInfoData;
+import com.android.i18n.timezone.ZoneInfoDb;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -1059,15 +1059,15 @@ public class Time {
      * to the enclosing object, but others do not: thus separate state is retained.
      */
     private static class TimeCalculator {
-        public final ZoneInfo.WallTime wallTime;
+        public final ZoneInfoData.WallTime wallTime;
         public String timezone;
 
         // Information about the current timezone.
-        private ZoneInfo zoneInfo;
+        private ZoneInfoData mZoneInfoData;
 
         public TimeCalculator(String timezoneId) {
-            this.zoneInfo = lookupZoneInfo(timezoneId);
-            this.wallTime = new ZoneInfo.WallTime();
+            this.mZoneInfoData = lookupZoneInfoData(timezoneId);
+            this.wallTime = new ZoneInfoData.WallTime();
         }
 
         public long toMillis(boolean ignoreDst) {
@@ -1075,7 +1075,7 @@ public class Time {
                 wallTime.setIsDst(-1);
             }
 
-            int r = wallTime.mktime(zoneInfo);
+            int r = wallTime.mktime(mZoneInfoData);
             if (r == -1) {
                 return -1;
             }
@@ -1087,7 +1087,7 @@ public class Time {
             int intSeconds = (int) (millis / 1000);
 
             updateZoneInfoFromTimeZone();
-            wallTime.localtime(intSeconds, zoneInfo);
+            wallTime.localtime(intSeconds, mZoneInfoData);
         }
 
         public String format(String format) {
@@ -1095,31 +1095,31 @@ public class Time {
                 format = "%c";
             }
             TimeFormatter formatter = new TimeFormatter();
-            return formatter.format(format, wallTime, zoneInfo);
+            return formatter.format(format, wallTime, mZoneInfoData);
         }
 
         private void updateZoneInfoFromTimeZone() {
-            if (!zoneInfo.getID().equals(timezone)) {
-                this.zoneInfo = lookupZoneInfo(timezone);
+            if (!mZoneInfoData.getID().equals(timezone)) {
+                this.mZoneInfoData = lookupZoneInfoData(timezone);
             }
         }
 
-        private static ZoneInfo lookupZoneInfo(String timezoneId) {
-            ZoneInfo zoneInfo = ZoneInfoDb.getInstance().makeTimeZone(timezoneId);
-            if (zoneInfo == null) {
-                zoneInfo = ZoneInfoDb.getInstance().makeTimeZone("GMT");
+        private static ZoneInfoData lookupZoneInfoData(String timezoneId) {
+            ZoneInfoData zoneInfoData = ZoneInfoDb.getInstance().makeZoneInfoData(timezoneId);
+            if (zoneInfoData == null) {
+                zoneInfoData = ZoneInfoDb.getInstance().makeZoneInfoData("GMT");
             }
-            if (zoneInfo == null) {
+            if (zoneInfoData == null) {
                 throw new AssertionError("GMT not found: \"" + timezoneId + "\"");
             }
-            return zoneInfo;
+            return zoneInfoData;
         }
 
         public void switchTimeZone(String timezone) {
-            int seconds = wallTime.mktime(zoneInfo);
+            int seconds = wallTime.mktime(mZoneInfoData);
             this.timezone = timezone;
             updateZoneInfoFromTimeZone();
-            wallTime.localtime(seconds, zoneInfo);
+            wallTime.localtime(seconds, mZoneInfoData);
         }
 
         public String format2445(boolean hasTime) {
