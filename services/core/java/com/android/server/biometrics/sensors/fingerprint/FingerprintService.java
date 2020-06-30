@@ -183,6 +183,14 @@ public class FingerprintService extends BiometricServiceBase {
                 return;
             }
 
+            final boolean isStrongBiometric;
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                isStrongBiometric = isStrongBiometric();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+
             final boolean restricted = isRestricted();
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
@@ -190,7 +198,7 @@ public class FingerprintService extends BiometricServiceBase {
                     mClientFinishCallback, getContext(), daemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, opId, restricted,
                     opPackageName, 0 /* cookie */, false /* requireConfirmation */, getSensorId(),
-                    isStrongBiometric(), surface, statsClient, mTaskStackListener, mLockoutTracker);
+                    isStrongBiometric, surface, statsClient, mTaskStackListener, mLockoutTracker);
             authenticateInternal(client, opPackageName);
         }
 
