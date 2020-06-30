@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
+
 /**
  * Interface that {@link ClientMonitor} subclasses eligible/interested in error callbacks should
  * implement.
@@ -27,8 +29,18 @@ public interface Interruptable {
     void cancel();
 
     /**
+     * Notifies the client of errors from the HAL.
      * @param errorCode defined by the HIDL interface
      * @param vendorCode defined by the vendor
      */
     void onError(int errorCode, int vendorCode);
+
+    /**
+     * Notifies the client that it needs to finish before
+     * {@link ClientMonitor#start(ClientMonitor.FinishCallback)} was invoked. This usually happens
+     * if the client is still waiting in the pending queue and got notified that a subsequent
+     * operation is preempting it.
+     * @param finishCallback invoked when the operation is completed.
+     */
+    void cancelWithoutStarting(@NonNull ClientMonitor.FinishCallback finishCallback);
 }

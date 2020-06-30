@@ -115,16 +115,6 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected void checkUseBiometricPermission() {
-
-    }
-
-    @Override
-    protected boolean checkAppOps(int uid, String opPackageName) {
-        return false;
-    }
-
-    @Override
     protected List<? extends BiometricAuthenticator.Identifier> getEnrolledTemplates(int userId) {
         return null;
     }
@@ -132,10 +122,5 @@ public class IrisService extends BiometricServiceBase {
     @Override
     protected int statsModality() {
         return BiometricsProtoEnums.MODALITY_IRIS;
-    }
-
-    @Override
-    protected int getLockoutMode(int userId) {
-        return LockoutTracker.LOCKOUT_NONE;
     }
 }

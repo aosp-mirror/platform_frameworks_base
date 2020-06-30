@@ -34,7 +34,8 @@ import com.android.server.biometrics.sensors.EnrollClient;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint> {
+public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint>
+        implements Udfps {
 
     private static final String TAG = "FingerprintEnrollClient";
 
@@ -71,5 +72,15 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
                     0 /* vendorCode */);
             mFinishCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public void onFingerDown(int x, int y, float minor, float major) {
+        UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+    }
+
+    @Override
+    public void onFingerUp() {
+        UdfpsHelper.onFingerUp(getFreshDaemon());
     }
 }
