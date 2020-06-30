@@ -24,6 +24,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
+import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -135,7 +136,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private MediaController mPipMediaController;
     private String[] mLastPackagesResourceGranted;
     private PipNotification mPipNotification;
-    private ParceledListSlice mCustomActions;
+    private ParceledListSlice<RemoteAction> mCustomActions;
     private int mResizeAnimationDuration;
 
     // Used to calculate the movement bounds
@@ -220,7 +221,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice actions) {
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
             mCustomActions = actions;
             mHandler.post(() -> {
                 for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -764,7 +765,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         /** Invoked when the PIP menu gets shown. */
         void onShowPipMenu();
         /** Invoked when the PIP menu actions change. */
-        void onPipMenuActionsChanged(ParceledListSlice actions);
+        void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions);
         /** Invoked when the PIPed activity is about to return back to the fullscreen. */
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */
