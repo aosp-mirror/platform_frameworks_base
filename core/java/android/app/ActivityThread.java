@@ -3631,7 +3631,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             TAG, "Handling launch of " + r);
 
         // Initialize before creating the activity
-        if (!ThreadedRenderer.sRendererDisabled
+        if (ThreadedRenderer.sRendererEnabled
                 && (r.activityInfo.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
             HardwareRenderer.preload();
         }
@@ -7417,14 +7417,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @UnsupportedAppUsage
     public static ActivityThread systemMain() {
-        // The system process on low-memory devices do not get to use hardware
-        // accelerated drawing, since this can add too much overhead to the
-        // process.
-        if (!ActivityManager.isHighEndGfx()) {
-            ThreadedRenderer.disable(true);
-        } else {
-            ThreadedRenderer.enableForegroundTrimming();
-        }
+        ThreadedRenderer.initForSystemProcess();
         ActivityThread thread = new ActivityThread();
         thread.attach(true, 0);
         return thread;
