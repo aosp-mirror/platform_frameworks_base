@@ -19,31 +19,33 @@ package com.android.systemui.accessibility;
 import android.annotation.MainThread;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
-import android.util.Log;
-import android.util.SparseArray;
 import android.view.Display;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import javax.inject.Singleton;
 
 /**
- * Class to control magnification mode switch button. Shows the button UI when both full-screen
- * and window magnification mode are capable, and when the magnification scale is changed. And
- * the button UI would automatically be dismissed after displaying for a period of time.
+ * A class to control {@link MagnificationModeSwitch}. It should show the button UI with following
+ * conditions:
+ * <ol>
+ *   <li> Both full-screen and window magnification mode are capable.</li>
+ *   <li> The magnification scale is changed by a user.</li>
+ * <ol>
  */
 @Singleton
 public class ModeSwitchesController {
 
-    private static final String TAG = "ModeSwitchesController";
-
-    private final Context mContext;
-    private final DisplayManager mDisplayManager;
-
-    private final SparseArray<MagnificationModeSwitch> mDisplaysToSwitches =
-            new SparseArray<>();
+    private final SwitchSupplier mSwitchSupplier;
 
     public ModeSwitchesController(Context context) {
-        mContext = context;
-        mDisplayManager = mContext.getSystemService(DisplayManager.class);
+        mSwitchSupplier = new SwitchSupplier(context,
+                context.getSystemService(DisplayManager.class));
+    }
+
+    @VisibleForTesting
+    ModeSwitchesController(SwitchSupplier switchSupplier) {
+        mSwitchSupplier = switchSupplier;
     }
 
     /**
@@ -52,20 +54,17 @@ public class ModeSwitchesController {
      *
      * @param displayId The logical display id
      * @param mode      The magnification mode
-     *
      * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
      * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
      */
     @MainThread
     void showButton(int displayId, int mode) {
-        if (mDisplaysToSwitches.get(displayId) == null) {
-            final MagnificationModeSwitch magnificationModeSwitch =
-                    createMagnificationSwitchController(displayId);
-            if (magnificationModeSwitch == null) {
-                return;
-            }
+        final MagnificationModeSwitch magnificationModeSwitch =
+                mSwitchSupplier.get(displayId);
+        if (magnificationModeSwitch == null) {
+            return;
         }
-        mDisplaysToSwitches.get(displayId).showButton(mode);
+        magnificationModeSwitch.showButton(mode);
     }
 
     /**
@@ -74,30 +73,34 @@ public class ModeSwitchesController {
      * @param displayId The logical display id
      */
     void removeButton(int displayId) {
-        if (mDisplaysToSwitches.get(displayId) == null) {
+        final MagnificationModeSwitch magnificationModeSwitch =
+                mSwitchSupplier.get(displayId);
+        if (magnificationModeSwitch == null) {
             return;
         }
-        mDisplaysToSwitches.get(displayId).removeButton();
+        magnificationModeSwitch.removeButton();
     }
 
-    private MagnificationModeSwitch createMagnificationSwitchController(int displayId) {
-        if (mDisplayManager.getDisplay(displayId) == null) {
-            Log.w(TAG, "createMagnificationSwitchController displayId is invalid.");
-            return null;
+    @VisibleForTesting
+    static class SwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {
+
+        private final Context mContext;
+
+        /**
+         * @param context        Context
+         * @param displayManager DisplayManager
+         */
+        SwitchSupplier(Context context, DisplayManager displayManager) {
+            super(displayManager);
+            mContext = context;
         }
-        final MagnificationModeSwitch
-                magnificationModeSwitch = new MagnificationModeSwitch(
-                getDisplayContext(displayId));
-        mDisplaysToSwitches.put(displayId, magnificationModeSwitch);
-        return magnificationModeSwitch;
-    }
 
-    private Context getDisplayContext(int displayId) {
-        final Display display = mDisplayManager.getDisplay(displayId);
-        final Context context = (displayId == Display.DEFAULT_DISPLAY)
-                ? mContext
-                : mContext.createDisplayContext(display);
-        return context;
+        @Override
+        protected MagnificationModeSwitch createInstance(Display display) {
+            final Context context = (display.getDisplayId() == Display.DEFAULT_DISPLAY)
+                    ? mContext
+                    : mContext.createDisplayContext(display);
+            return new MagnificationModeSwitch(context);
+        }
     }
-
 }
