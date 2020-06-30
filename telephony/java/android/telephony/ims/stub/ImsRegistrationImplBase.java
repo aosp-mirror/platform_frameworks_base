@@ -29,6 +29,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.util.RemoteCallbackListExt;
+import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -104,6 +105,11 @@ public class ImsRegistrationImplBase {
     private int mRegistrationState = REGISTRATION_STATE_UNKNOWN;
     // Locked on mLock, create unspecified disconnect cause.
     private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
+
+    // We hold onto the uris each time they change so that we can send it to a callback when its
+    // first added.
+    private Uri[] mUris = new Uri[0];
+    private boolean mUrisSet = false;
 
     /**
      * @hide
@@ -208,19 +214,27 @@ public class ImsRegistrationImplBase {
     }
 
     /**
-     * The this device's subscriber associated {@link Uri}s have changed, which are used to filter
-     * out this device's {@link Uri}s during conference calling.
-     * @param uris
+     * Invoked when the {@link Uri}s associated to this device's subscriber have changed.
+     * These {@link Uri}s' are filtered out during conference calls.
+     *
+     * The {@link Uri}s are not guaranteed to be different between subsequent calls.
+     * @param uris changed uris
      */
     public final void onSubscriberAssociatedUriChanged(Uri[] uris) {
-        mCallbacks.broadcastAction((c) -> {
-            try {
-                c.onSubscriberAssociatedUriChanged(uris);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " " + "onSubscriberAssociatedUriChanged() - Skipping " +
-                        "callback.");
-            }
-        });
+        synchronized (mLock) {
+            mUris = ArrayUtils.cloneOrNull(uris);
+            mUrisSet = true;
+        }
+        mCallbacks.broadcastAction((c) -> onSubscriberAssociatedUriChanged(c, uris));
+    }
+
+    private void onSubscriberAssociatedUriChanged(IImsRegistrationCallback callback, Uri[] uris) {
+        try {
+            callback.onSubscriberAssociatedUriChanged(uris);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, e + " " + "onSubscriberAssociatedUriChanged() - Skipping "
+                    + "callback.");
+        }
     }
 
     private void updateToState(@ImsRegistrationTech int connType, int newState) {
@@ -233,6 +247,10 @@ public class ImsRegistrationImplBase {
 
     private void updateToDisconnectedState(ImsReasonInfo info) {
         synchronized (mLock) {
+            //We don't want to send this info over if we are disconnected
+            mUrisSet = false;
+            mUris = null;
+
             updateToState(REGISTRATION_TECH_NONE,
                     RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
             if (info != null) {
@@ -260,12 +278,17 @@ public class ImsRegistrationImplBase {
      * @param c the newly registered callback that will be updated with the current registration
      *         state.
      */
-    private void updateNewCallbackWithState(IImsRegistrationCallback c) throws RemoteException {
+    private void updateNewCallbackWithState(IImsRegistrationCallback c)
+            throws RemoteException {
         int state;
         ImsReasonInfo disconnectInfo;
+        boolean urisSet;
+        Uri[] uris;
         synchronized (mLock) {
             state = mRegistrationState;
             disconnectInfo = mLastDisconnectCause;
+            urisSet = mUrisSet;
+            uris = mUris;
         }
         switch (state) {
             case RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED: {
@@ -284,6 +307,9 @@ public class ImsRegistrationImplBase {
                 // Do not callback if the state has not been updated yet by the ImsService.
                 break;
             }
+        }
+        if (urisSet) {
+            onSubscriberAssociatedUriChanged(c, uris);
         }
     }
 }
