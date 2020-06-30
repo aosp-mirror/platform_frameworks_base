@@ -100,12 +100,7 @@ public class NotificationMediaManager implements Dumpable {
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_PAUSED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
-    }
-    private static final HashSet<Integer> INACTIVE_MEDIA_STATES = new HashSet<>();
-    static {
-        INACTIVE_MEDIA_STATES.add(PlaybackState.STATE_NONE);
-        INACTIVE_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
-        INACTIVE_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_CONNECTING);
     }
 
     private final NotificationEntryManager mEntryManager;
@@ -260,15 +255,6 @@ public class NotificationMediaManager implements Dumpable {
      */
     public static boolean isPlayingState(int state) {
         return !PAUSED_MEDIA_STATES.contains(state);
-    }
-
-    /**
-     * Check if a state should be considered active (playing or paused)
-     * @param state a PlaybackState
-     * @return true if active
-     */
-    public static boolean isActiveState(int state) {
-        return !INACTIVE_MEDIA_STATES.contains(state);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
