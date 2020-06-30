@@ -251,7 +251,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     //TODO: Remove this hack
     private boolean mInitialized;
 
-    private Point mTempPoint;
+    private Point mTempPoint = new Point();
     private boolean mIsAccessibilityButtonShown;
 
     private AccessibilityUserState getCurrentUserStateLocked() {
