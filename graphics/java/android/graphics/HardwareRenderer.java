@@ -872,11 +872,6 @@ public class HardwareRenderer {
         }
     }
 
-    /** @hide */
-    public static void invokeFunctor(long functor, boolean waitForCompletion) {
-        nInvokeFunctor(functor, waitForCompletion);
-    }
-
     /**
      * b/68769804: For low FPS experiments.
      *
@@ -1245,8 +1240,6 @@ public class HardwareRenderer {
             long animatingNode);
 
     private static native void nRegisterVectorDrawableAnimator(long rootRenderNode, long animator);
-
-    private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
 
     private static native long nCreateTextureLayer(long nativeProxy);
 

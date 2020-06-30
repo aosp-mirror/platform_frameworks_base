@@ -82,7 +82,6 @@ public:
     int syncAndDrawFrame();
     void destroy();
 
-    static void invokeFunctor(Functor* functor, bool waitForCompletion);
     static void destroyFunctor(int functor);
 
     DeferredLayerUpdater* createTextureLayer();

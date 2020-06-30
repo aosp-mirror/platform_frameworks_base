@@ -132,23 +132,6 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     }
 }
 
-
-void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
-                                             uirenderer::GlFunctorLifecycleListener* listener) {
-#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
-    FunctorDrawable* functorDrawable;
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        functorDrawable = mDisplayList->allocateDrawable<VkInteropFunctorDrawable>(
-                functor, listener, asSkCanvas());
-    } else {
-        functorDrawable =
-                mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, listener, asSkCanvas());
-    }
-    mDisplayList->mChildFunctors.push_back(functorDrawable);
-    drawDrawable(functorDrawable);
-#endif
-}
-
 void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
 #ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
     FunctorDrawable* functorDrawable;

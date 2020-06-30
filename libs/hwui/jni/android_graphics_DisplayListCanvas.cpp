@@ -67,39 +67,7 @@ private:
     JavaVM* mVm;
     jobject mRunnable;
 };
-
-class GlFunctorReleasedCallbackBridge : public GlFunctorLifecycleListener {
-public:
-    GlFunctorReleasedCallbackBridge(JNIEnv* env, jobject javaCallback) {
-        mLooper = Looper::getForThread();
-        mMessage = new InvokeRunnableMessage(env, javaCallback);
-    }
-
-    virtual void onGlFunctorReleased(Functor* functor) override {
-        mLooper->sendMessage(mMessage, 0);
-    }
-
-private:
-    sp<Looper> mLooper;
-    sp<InvokeRunnableMessage> mMessage;
-};
 #endif
-
-// ---------------- @FastNative -----------------------------
-
-static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
-        jlong canvasPtr, jlong functorPtr, jobject releasedCallback) {
-#ifdef __ANDROID__ // Layoutlib does not support GL
-    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
-    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    sp<GlFunctorReleasedCallbackBridge> bridge;
-    if (releasedCallback) {
-        bridge = new GlFunctorReleasedCallbackBridge(env, releasedCallback);
-    }
-    canvas->callDrawGLFunction(functor, bridge.get());
-#endif
-}
-
 
 // ---------------- @CriticalNative -------------------------
 
@@ -183,12 +151,6 @@ static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAM
 const char* const kClassPathName = "android/graphics/RecordingCanvas";
 
 static JNINativeMethod gMethods[] = {
-
-    // ------------ @FastNative ------------------
-
-    { "nCallDrawGLFunction", "(JJLjava/lang/Runnable;)V",
-            (void*) android_view_DisplayListCanvas_callDrawGLFunction },
-
     // ------------ @CriticalNative --------------
     { "nCreateDisplayListCanvas", "(JII)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
     { "nResetDisplayListCanvas",  "(JJII)V",    (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },

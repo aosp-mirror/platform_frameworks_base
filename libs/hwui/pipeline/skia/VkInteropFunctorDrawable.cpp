@@ -155,11 +155,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (mAnyFunctor.index() == 0) {
-            std::get<0>(mAnyFunctor).handle->drawGl(info);
-        } else {
-            (*(std::get<1>(mAnyFunctor).functor))(DrawGlInfo::kModeDraw, &info);
-        }
+        mWebViewHandle->drawGl(info);
 
         EGLSyncKHR glDrawFinishedFence =
                 eglCreateSyncKHR(eglGetCurrentDisplay(), EGL_SYNC_FENCE_KHR, NULL);
@@ -188,15 +184,6 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
                                                          kBottomLeft_GrSurfaceOrigin);
     canvas->drawImage(functorImage, 0, 0, &paint);
     canvas->restore();
-}
-
-VkInteropFunctorDrawable::~VkInteropFunctorDrawable() {
-    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
-        if (lp->listener) {
-            ScopedDrawRequest _drawRequest{};
-            lp->listener->onGlFunctorReleased(lp->functor);
-        }
-    }
 }
 
 void VkInteropFunctorDrawable::syncFunctor(const WebViewSyncData& data) const {

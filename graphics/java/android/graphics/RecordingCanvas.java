@@ -17,11 +17,9 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.util.Pools.SynchronizedPool;
 
 import dalvik.annotation.optimization.CriticalNative;
-import dalvik.annotation.optimization.FastNative;
 
 /**
  * A Canvas implementation that records view system drawing operations for deferred rendering.
@@ -146,42 +144,8 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Functor
+    // WebView
     ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Records the functor specified with the drawGLFunction function pointer. This is
-     * functionality used by webview for calling into their renderer from our display lists.
-     *
-     * @param drawGLFunction A native function pointer
-     *
-     * @hide
-     * @deprecated Use {@link #drawWebViewFunctor(int)}
-     */
-    @Deprecated
-    public void callDrawGLFunction2(long drawGLFunction) {
-        nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction, null);
-    }
-
-    /**
-     * Records the functor specified with the drawGLFunction function pointer. This is
-     * functionality used by webview for calling into their renderer from our display lists.
-     *
-     * @param drawGLFunctor A native function pointer
-     * @param releasedCallback Called when the display list is destroyed, and thus
-     * the functor is no longer referenced by this canvas's display list.
-     *
-     * NOTE: The callback does *not* necessarily mean that there are no longer
-     * any references to the functor, just that the reference from this specific
-     * canvas's display list has been released.
-     *
-     * @hide
-     * @deprecated Use {@link #drawWebViewFunctor(int)}
-     */
-    @Deprecated
-    public void drawGLFunctor2(long drawGLFunctor, @Nullable Runnable releasedCallback) {
-        nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
-    }
 
     /**
      * Calls the provided functor that was created via WebViewFunctor_create()
@@ -271,13 +235,6 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
                     "Canvas: trying to draw too large(" + bitmapSize + "bytes) bitmap.");
         }
     }
-
-
-    // ------------------ Fast JNI ------------------------
-
-    @FastNative
-    private static native void nCallDrawGLFunction(long renderer,
-            long drawGLFunction, Runnable releasedCallback);
 
 
     // ------------------ Critical JNI ------------------------
