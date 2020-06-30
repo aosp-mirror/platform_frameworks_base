@@ -303,8 +303,11 @@ public class PipTouchHandler {
                     hideDismissTarget();
                 });
 
-                MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
-                        PipUtils.getTopPipActivity(mContext, mActivityManager));
+                Pair<ComponentName, Integer> topPipActivity = PipUtils.getTopPipActivity(mContext,
+                        mActivityManager);
+                if (topPipActivity.first != null) {
+                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext, topPipActivity);
+                }
             }
         });
 

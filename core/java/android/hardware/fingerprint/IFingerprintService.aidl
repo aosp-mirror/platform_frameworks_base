@@ -63,8 +63,8 @@ interface IFingerprintService {
     void cancelEnrollment(IBinder token);
 
     // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int fingerId, int groupId, int userId,
-            IFingerprintServiceReceiver receiver, String opPackageName);
+    void remove(IBinder token, int fingerId, int userId, IFingerprintServiceReceiver receiver,
+            String opPackageName);
 
     // Rename the fingerprint specified by fingerId and userId to the given name
     void rename(int fingerId, int userId, String name);
@@ -76,10 +76,10 @@ interface IFingerprintService {
     boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
-    long preEnroll(IBinder token);
+    void generateChallenge(IBinder token, IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    int postEnroll(IBinder token);
+    void revokeChallenge(IBinder token, String opPackageName);
 
     // Determine if a user has at least one enrolled fingerprint
     boolean hasEnrolledFingerprints(int userId, String opPackageName);

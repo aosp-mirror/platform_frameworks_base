@@ -3,5 +3,15 @@
     {
       "name" : "statsd_test"
     }
+  ],
+
+  "postsubmit" : [
+    {
+      "name" : "CtsStatsdHostTestCases"
+    },
+    {
+      "name" : "GtsStatsdHostTestCases"
+    }
   ]
+
 }

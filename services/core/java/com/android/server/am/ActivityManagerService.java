@@ -322,7 +322,10 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.BinderCallHeavyHitterWatcher.BinderCallHeavyHitterListener;
+import com.android.internal.os.BinderCallHeavyHitterWatcher.HeavyHitterContainer;
 import com.android.internal.os.BinderInternal;
+import com.android.internal.os.BinderTransactionNameResolver;
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
@@ -1525,7 +1528,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         void onOomAdjMessage(String msg);
     }
 
-    final AnrHelper mAnrHelper = new AnrHelper();
+    final AnrHelper mAnrHelper = new AnrHelper(this);
 
     /**
      * Runtime CPU use collection thread.  This object's lock is used to
@@ -1623,6 +1626,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int KILL_APP_ZYGOTE_MSG = 71;
+    static final int BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG = 72;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1667,6 +1671,21 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Used to notify activity lifecycle events.
      */
     @Nullable ContentCaptureManagerInternal mContentCaptureService;
+
+    /*
+     * The default duration for the binder heavy hitter auto sampler
+     */
+    private static final long BINDER_HEAVY_HITTER_AUTO_SAMPLER_DURATION_MS = 300000L;
+
+    /**
+     * The default throttling duration for the binder heavy hitter auto sampler
+     */
+    private static final long BINDER_HEAVY_HITTER_AUTO_SAMPLER_THROTTLE_MS = 3600000L;
+
+    /**
+     * The last time when the binder heavy hitter auto sampler started.
+     */
+    private long mLastBinderHeavyHitterAutoSamplerStart = 0L;
 
     final class UiHandler extends Handler {
         public UiHandler() {
@@ -1941,6 +1960,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mProcessList.handleAllTrustStorageUpdateLocked();
                 }
             } break;
+                case BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG: {
+                    handleBinderHeavyHitterAutoSamplerTimeOut();
+                } break;
             }
         }
     }
@@ -18311,11 +18333,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        // Now safely dispatch changes to device idle controller.
-        for (int i = 0; i < N; i++) {
-            PendingTempWhitelist ptw = list[i];
-            mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                    ptw.duration, true, ptw.tag);
+        // Now safely dispatch changes to device idle controller.  Skip this if we're early
+        // in boot and the controller hasn't yet been brought online:  we do not apply
+        // device idle policy anyway at this phase.
+        if (mLocalDeviceIdleController != null) {
+            for (int i = 0; i < N; i++) {
+                PendingTempWhitelist ptw = list[i];
+                mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
+                        ptw.duration, true, ptw.tag);
+            }
         }
 
         // And now we can safely remove them from the map.
@@ -20038,6 +20064,130 @@ public class ActivityManagerService extends IActivityManager.Stub
                 executor.execute(mWindowManager::onOverlayChanged);
             }
         }
+    }
+
+    /**
+     * Update the binder call heavy hitter watcher per the new configuration
+     */
+    void scheduleUpdateBinderHeavyHitterWatcherConfig() {
+        // There are two sets of configs: the default watcher and the auto sampler,
+        // the default one takes precedence. System would kick off auto sampler when there is
+        // an anomaly (i.e., consecutive ANRs), but it'll be stopped automatically after a while.
+        mHandler.post(() -> {
+            final boolean enabled;
+            final int batchSize;
+            final float threshold;
+            final BinderCallHeavyHitterListener listener;
+            synchronized (ActivityManagerService.this) {
+                if (mConstants.BINDER_HEAVY_HITTER_WATCHER_ENABLED) {
+                    // Default watcher takes precedence, ignore the auto sampler.
+                    mHandler.removeMessages(BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG);
+                    // Set the watcher with the default watcher's config
+                    enabled = true;
+                    batchSize = mConstants.BINDER_HEAVY_HITTER_WATCHER_BATCHSIZE;
+                    threshold = mConstants.BINDER_HEAVY_HITTER_WATCHER_THRESHOLD;
+                    listener = (a, b, c, d) -> mHandler.post(
+                            () -> handleBinderHeavyHitters(a, b, c, d));
+                } else if (mHandler.hasMessages(BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG)) {
+                    // There is an ongoing auto sampler session, update it
+                    enabled = mConstants.BINDER_HEAVY_HITTER_AUTO_SAMPLER_ENABLED;
+                    batchSize = mConstants.BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE;
+                    threshold = mConstants.BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD;
+                    listener = (a, b, c, d) -> mHandler.post(
+                            () -> handleBinderHeavyHitters(a, b, c, d));
+                } else {
+                    // Stop it
+                    enabled = false;
+                    batchSize = 0;
+                    threshold = 0.0f;
+                    listener = null;
+                }
+            }
+            Binder.setHeavyHitterWatcherConfig(enabled, batchSize, threshold, listener);
+        });
+    }
+
+    /**
+     * Kick off the watcher to run for given timeout, it could be throttled however.
+     */
+    void scheduleBinderHeavyHitterAutoSampler() {
+        mHandler.post(() -> {
+            final int batchSize;
+            final float threshold;
+            final long now;
+            synchronized (ActivityManagerService.this) {
+                if (!mConstants.BINDER_HEAVY_HITTER_AUTO_SAMPLER_ENABLED) {
+                    // It's configured OFF
+                    return;
+                }
+                if (mConstants.BINDER_HEAVY_HITTER_WATCHER_ENABLED) {
+                    // If the default watcher is active already, don't start the auto sampler
+                    return;
+                }
+                now = SystemClock.uptimeMillis();
+                if (mLastBinderHeavyHitterAutoSamplerStart
+                        + BINDER_HEAVY_HITTER_AUTO_SAMPLER_THROTTLE_MS > now) {
+                    // Too frequent, throttle it
+                    return;
+                }
+                batchSize = mConstants.BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE;
+                threshold = mConstants.BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD;
+            }
+            // No lock is needed because we are accessing these variables in handle thread only.
+            mLastBinderHeavyHitterAutoSamplerStart = now;
+            // Start the watcher with the auto sampler's config.
+            Binder.setHeavyHitterWatcherConfig(true, batchSize, threshold,
+                    (a, b, c, d) -> mHandler.post(() -> handleBinderHeavyHitters(a, b, c, d)));
+            // Schedule to stop it after given timeout.
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                    BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG),
+                    BINDER_HEAVY_HITTER_AUTO_SAMPLER_DURATION_MS);
+        });
+    }
+
+    /**
+     * Stop the binder heavy hitter auto sampler after given timeout.
+     */
+    private void handleBinderHeavyHitterAutoSamplerTimeOut() {
+        synchronized (ActivityManagerService.this) {
+            if (mConstants.BINDER_HEAVY_HITTER_WATCHER_ENABLED) {
+                // The default watcher is ON, don't bother to stop it.
+                return;
+            }
+        }
+        Binder.setHeavyHitterWatcherConfig(false, 0, 0.0f, null);
+    }
+
+    /**
+     * Handle the heavy hitters
+     */
+    private void handleBinderHeavyHitters(@NonNull final List<HeavyHitterContainer> hitters,
+            final int totalBinderCalls, final float threshold, final long timeSpan) {
+        final int size = hitters.size();
+        if (size == 0) {
+            return;
+        }
+        // Simply log it for now
+        final String pfmt = "%.1f%%";
+        final BinderTransactionNameResolver resolver = new BinderTransactionNameResolver();
+        final StringBuilder sb = new StringBuilder("Excessive incoming binder calls(>")
+                .append(String.format(pfmt, threshold * 100))
+                .append(',').append(totalBinderCalls)
+                .append(',').append(timeSpan)
+                .append("ms): ");
+        for (int i = 0; i < size; i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            final HeavyHitterContainer container = hitters.get(i);
+            sb.append('[').append(container.mUid)
+                    .append(',').append(container.mClass.getName())
+                    .append(',').append(resolver.getMethodName(container.mClass, container.mCode))
+                    .append(',').append(container.mCode)
+                    .append(',').append(String.format(pfmt, container.mFrequency * 100))
+                    .append(']');
+        }
+        Slog.w(TAG, sb.toString());
     }
 
     /**
