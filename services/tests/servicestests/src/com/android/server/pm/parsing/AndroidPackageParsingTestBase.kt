@@ -96,30 +96,29 @@ open class AndroidPackageParsingTestBase {
                     anyString(), anyInt())) { true }
         }
 
-        lateinit var oldPackages: List<PackageParser.Package>
+        val oldPackages = mutableListOf<PackageParser.Package>()
 
-        lateinit var newPackages: List<AndroidPackage>
+        val newPackages = mutableListOf<AndroidPackage>()
 
         @Suppress("ConstantConditionIf")
         @JvmStatic
         @BeforeClass
         fun setUpPackages() {
-            this.oldPackages = apks.mapNotNull {
+            apks.mapNotNull {
                 try {
-                    packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
-                } catch (ignored: Exception) {
-                    // Parsing issues will be caught by SystemPartitionParseTest
-                    null
-                }
-            }
-
-            this.newPackages = apks.mapNotNull {
-                try {
+                    packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false) to
                     packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
                 } catch (ignored: Exception) {
-                    // Parsing issues will be caught by SystemPartitionParseTest
+                    // It is intentional that a failure of either call here will result in failing
+                    // both. Having null on one side would mean nothing to compare. Due to the
+                    // nature of presubmit, this may not be caused by the change being tested, so
+                    // it's unhelpful to consider it a failure. Actual parsing issues will be
+                    // reported by SystemPartitionParseTest in postsubmit.
                     null
                 }
+            }.forEach { (old, new) ->
+                oldPackages += old
+                newPackages += new
             }
 
             if (DUMP_HPROF_TO_EXTERNAL) {
