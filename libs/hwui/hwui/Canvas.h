@@ -20,7 +20,6 @@
 #include <utils/Functor.h>
 
 #include <androidfw/ResourceTypes.h>
-#include "GlFunctorLifecycleListener.h"
 #include "Properties.h"
 #include "utils/Macros.h"
 
@@ -162,8 +161,7 @@ public:
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) = 0;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) = 0;
-    virtual void callDrawGLFunction(Functor* functor,
-                                    uirenderer::GlFunctorLifecycleListener* listener) = 0;
+
     virtual void drawWebViewFunctor(int /*functor*/) {
         LOG_ALWAYS_FATAL("Not supported");
     }

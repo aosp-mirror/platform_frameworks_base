@@ -256,12 +256,6 @@ static void android_view_ThreadedRenderer_registerVectorDrawableAnimator(JNIEnv*
     rootRenderNode->addVectorDrawableAnimator(animator);
 }
 
-static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
-        jlong functorPtr, jboolean waitForCompletion) {
-    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    RenderProxy::invokeFunctor(functor, waitForCompletion);
-}
-
 static jlong android_view_ThreadedRenderer_createTextureLayer(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -684,7 +678,6 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_registerAnimatingRenderNode},
         {"nRegisterVectorDrawableAnimator", "(JJ)V",
          (void*)android_view_ThreadedRenderer_registerVectorDrawableAnimator},
-        {"nInvokeFunctor", "(JZ)V", (void*)android_view_ThreadedRenderer_invokeFunctor},
         {"nCreateTextureLayer", "(J)J", (void*)android_view_ThreadedRenderer_createTextureLayer},
         {"nBuildLayer", "(JJ)V", (void*)android_view_ThreadedRenderer_buildLayer},
         {"nCopyLayerInto", "(JJJ)Z", (void*)android_view_ThreadedRenderer_copyLayerInto},
