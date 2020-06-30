@@ -50,8 +50,7 @@ public final class IconsContentProviderTest {
 
         final Drawable actual = Icon.createWithContentUri(uri).loadDrawable(context);
         assertThat(actual).isNotNull();
-        assertThat(IconsContentProvider.getBitmapData(actual))
-                .isEqualTo(IconsContentProvider.getBitmapData(expected));
+        assertThat(IconsContentProvider.sameIcon(actual, expected)).isTrue();
     }
 
     @Test
