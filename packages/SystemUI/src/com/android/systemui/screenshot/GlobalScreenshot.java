@@ -214,9 +214,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private Animator mScreenshotAnimation;
     private Runnable mOnCompleteRunnable;
     private Animator mDismissAnimation;
-    private boolean mInDarkMode = false;
-    private boolean mDirectionLTR = true;
-    private boolean mOrientationPortrait = true;
+    private boolean mInDarkMode;
+    private boolean mDirectionLTR;
+    private boolean mOrientationPortrait;
 
     private float mCornerSizeX;
     private float mDismissDeltaY;
@@ -245,9 +245,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         }
     };
 
-    /**
-     * @param context everything needs a context :(
-     */
     @Inject
     public GlobalScreenshot(
             Context context, @Main Resources resources,
@@ -318,6 +315,104 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         }
 
         inoutInfo.touchableRegion.set(touchRegion);
+    }
+
+    void takeScreenshotFullscreen(Consumer<Uri> finisher, Runnable onComplete) {
+        mOnCompleteRunnable = onComplete;
+
+        mDisplay.getRealMetrics(mDisplayMetrics);
+        takeScreenshotInternal(
+                finisher,
+                new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+    }
+
+    void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
+            Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
+            Consumer<Uri> finisher, Runnable onComplete) {
+        // TODO: use task Id, userId, topComponent for smart handler
+
+        mOnCompleteRunnable = onComplete;
+        if (aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
+            saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, false);
+        } else {
+            saveScreenshot(screenshot, finisher,
+                    new Rect(0, 0, screenshot.getWidth(), screenshot.getHeight()), Insets.NONE,
+                    true);
+        }
+    }
+
+    /**
+     * Displays a screenshot selector
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    void takeScreenshotPartial(final Consumer<Uri> finisher, Runnable onComplete) {
+        dismissScreenshot("new screenshot requested", true);
+        mOnCompleteRunnable = onComplete;
+
+        mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
+        mScreenshotSelectorView.setOnTouchListener((v, event) -> {
+            ScreenshotSelectorView view = (ScreenshotSelectorView) v;
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    view.startSelection((int) event.getX(), (int) event.getY());
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    view.updateSelection((int) event.getX(), (int) event.getY());
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    view.setVisibility(View.GONE);
+                    mWindowManager.removeView(mScreenshotLayout);
+                    final Rect rect = view.getSelectionRect();
+                    if (rect != null) {
+                        if (rect.width() != 0 && rect.height() != 0) {
+                            // Need mScreenshotLayout to handle it after the view disappears
+                            mScreenshotLayout.post(() -> takeScreenshotInternal(finisher, rect));
+                        }
+                    }
+
+                    view.stopSelection();
+                    return true;
+            }
+
+            return false;
+        });
+        mScreenshotLayout.post(() -> {
+            mScreenshotSelectorView.setVisibility(View.VISIBLE);
+            mScreenshotSelectorView.requestFocus();
+        });
+    }
+
+    /**
+     * Cancels screenshot request
+     */
+    void stopScreenshot() {
+        // If the selector layer still presents on screen, we remove it and resets its state.
+        if (mScreenshotSelectorView.getSelectionRect() != null) {
+            mWindowManager.removeView(mScreenshotLayout);
+            mScreenshotSelectorView.stopSelection();
+        }
+    }
+
+    /**
+     * Clears current screenshot
+     */
+    void dismissScreenshot(String reason, boolean immediate) {
+        Log.v(TAG, "clearing screenshot: " + reason);
+        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
+        mScreenshotLayout.getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        if (!immediate) {
+            mDismissAnimation = createScreenshotDismissAnimation();
+            mDismissAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    clearScreenshot();
+                }
+            });
+            mDismissAnimation.start();
+        } else {
+            clearScreenshot();
+        }
     }
 
     private void onConfigChanged(Configuration newConfig) {
@@ -408,15 +503,12 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             }
             return mScreenshotLayout.onApplyWindowInsets(insets);
         });
-        mScreenshotLayout.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    dismissScreenshot("back pressed", true);
-                    return true;
-                }
-                return false;
+        mScreenshotLayout.setOnKeyListener((v, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                dismissScreenshot("back pressed", true);
+                return true;
             }
+            return false;
         });
         // Get focus so that the key events go to the layout.
         mScreenshotLayout.setFocusableInTouchMode(true);
@@ -471,59 +563,19 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     /**
-     * Updates the window focusability.  If the window is already showing, then it updates the
-     * window immediately, otherwise the layout params will be applied when the window is next
-     * shown.
-     */
-    private void setWindowFocusable(boolean focusable) {
-        if (focusable) {
-            mWindowLayoutParams.flags &= ~FLAG_NOT_FOCUSABLE;
-        } else {
-            mWindowLayoutParams.flags |= FLAG_NOT_FOCUSABLE;
-        }
-        if (mScreenshotLayout.isAttachedToWindow()) {
-            mWindowManager.updateViewLayout(mScreenshotLayout, mWindowLayoutParams);
-        }
-    }
-
-    /**
-     * Creates a new worker thread and saves the screenshot to the media store.
-     */
-    private void saveScreenshotInWorkerThread(
-            Consumer<Uri> finisher, @Nullable ActionsReadyListener actionsReadyListener) {
-        SaveImageInBackgroundData data = new SaveImageInBackgroundData();
-        data.image = mScreenBitmap;
-        data.finisher = finisher;
-        data.mActionsReadyListener = actionsReadyListener;
-
-        if (mSaveInBgTask != null) {
-            // just log success/failure for the pre-existing screenshot
-            mSaveInBgTask.setActionsReadyListener(new ActionsReadyListener() {
-                @Override
-                void onActionsReady(SavedImageData imageData) {
-                    logSuccessOnActionsReady(imageData);
-                }
-            });
-        }
-
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data);
-        mSaveInBgTask.execute();
-    }
-
-    /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    private void takeScreenshot(Consumer<Uri> finisher, Rect crop) {
+    private void takeScreenshotInternal(Consumer<Uri> finisher, Rect crop) {
         // copy the input Rect, since SurfaceControl.screenshot can mutate it
         Rect screenRect = new Rect(crop);
         int rot = mDisplay.getRotation();
         int width = crop.width();
         int height = crop.height();
-        takeScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher, screenRect,
+        saveScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher, screenRect,
                 Insets.NONE, true);
     }
 
-    private void takeScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
+    private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, boolean showFlash) {
         dismissScreenshot("new screenshot requested", true);
 
@@ -561,85 +613,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         startAnimation(finisher, screenRect, screenInsets, showFlash);
     }
 
-    void takeScreenshot(Consumer<Uri> finisher, Runnable onComplete) {
-        mOnCompleteRunnable = onComplete;
-
-        mDisplay.getRealMetrics(mDisplayMetrics);
-        takeScreenshot(
-                finisher,
-                new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
-    }
-
-    void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
-            Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
-            Consumer<Uri> finisher, Runnable onComplete) {
-        // TODO: use task Id, userId, topComponent for smart handler
-
-        mOnCompleteRunnable = onComplete;
-        if (aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
-            takeScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, false);
-        } else {
-            takeScreenshot(screenshot, finisher,
-                    new Rect(0, 0, screenshot.getWidth(), screenshot.getHeight()), Insets.NONE,
-                    true);
-        }
-    }
-
-    /**
-     * Displays a screenshot selector
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    void takeScreenshotPartial(final Consumer<Uri> finisher, Runnable onComplete) {
-        dismissScreenshot("new screenshot requested", true);
-        mOnCompleteRunnable = onComplete;
-
-        mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
-        mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                ScreenshotSelectorView view = (ScreenshotSelectorView) v;
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        view.startSelection((int) event.getX(), (int) event.getY());
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
-                        view.updateSelection((int) event.getX(), (int) event.getY());
-                        return true;
-                    case MotionEvent.ACTION_UP:
-                        view.setVisibility(View.GONE);
-                        mWindowManager.removeView(mScreenshotLayout);
-                        final Rect rect = view.getSelectionRect();
-                        if (rect != null) {
-                            if (rect.width() != 0 && rect.height() != 0) {
-                                // Need mScreenshotLayout to handle it after the view disappears
-                                mScreenshotLayout.post(() -> takeScreenshot(finisher, rect));
-                            }
-                        }
-
-                        view.stopSelection();
-                        return true;
-                }
-
-                return false;
-            }
-        });
-        mScreenshotLayout.post(() -> {
-            mScreenshotSelectorView.setVisibility(View.VISIBLE);
-            mScreenshotSelectorView.requestFocus();
-        });
-    }
-
-    /**
-     * Cancels screenshot request
-     */
-    void stopScreenshot() {
-        // If the selector layer still presents on screen, we remove it and resets its state.
-        if (mScreenshotSelectorView.getSelectionRect() != null) {
-            mWindowManager.removeView(mScreenshotLayout);
-            mScreenshotSelectorView.stopSelection();
-        }
-    }
-
     /**
      * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
      * failure).
@@ -668,104 +641,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 }
             }
         });
-    }
-
-    private boolean isUserSetupComplete() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
-    }
-
-    /**
-     * Clears current screenshot
-     */
-    void dismissScreenshot(String reason, boolean immediate) {
-        Log.v(TAG, "clearing screenshot: " + reason);
-        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
-        mScreenshotLayout.getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
-        if (!immediate) {
-            mDismissAnimation = createScreenshotDismissAnimation();
-            mDismissAnimation.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    clearScreenshot();
-                }
-            });
-            mDismissAnimation.start();
-        } else {
-            clearScreenshot();
-        }
-    }
-
-    private void clearScreenshot() {
-        if (mScreenshotLayout.isAttachedToWindow()) {
-            mWindowManager.removeView(mScreenshotLayout);
-        }
-
-        // Clear any references to the bitmap
-        mScreenshotPreview.setImageDrawable(null);
-        mScreenshotAnimatedView.setImageDrawable(null);
-        mScreenshotAnimatedView.setVisibility(View.GONE);
-        mActionsContainerBackground.setVisibility(View.GONE);
-        mActionsContainer.setVisibility(View.GONE);
-        mBackgroundProtection.setAlpha(0f);
-        mDismissButton.setVisibility(View.GONE);
-        mScreenshotPreview.setVisibility(View.GONE);
-        mScreenshotPreview.setLayerType(View.LAYER_TYPE_NONE, null);
-        mScreenshotPreview.setContentDescription(
-                mContext.getResources().getString(R.string.screenshot_preview_description));
-        mScreenshotLayout.setAlpha(1);
-        mDismissButton.setTranslationY(0);
-        mActionsContainer.setTranslationY(0);
-        mActionsContainerBackground.setTranslationY(0);
-        mScreenshotPreview.setTranslationY(0);
-    }
-
-    /**
-     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
-     */
-    private void showUiOnActionsReady(SavedImageData imageData) {
-        logSuccessOnActionsReady(imageData);
-
-        AccessibilityManager accessibilityManager = (AccessibilityManager)
-                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        long timeoutMs = accessibilityManager.getRecommendedTimeoutMillis(
-                SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
-                AccessibilityManager.FLAG_CONTENT_CONTROLS);
-
-        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
-        mScreenshotHandler.sendMessageDelayed(
-                mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
-                timeoutMs);
-
-        if (imageData.uri != null) {
-            mScreenshotHandler.post(() -> {
-                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            createScreenshotActionsShadeAnimation(imageData).start();
-                        }
-                    });
-                } else {
-                    createScreenshotActionsShadeAnimation(imageData).start();
-                }
-            });
-        }
-    }
-
-    /**
-     * Logs success/failure of the screenshot saving task, and shows an error if it failed.
-     */
-    private void logSuccessOnActionsReady(SavedImageData imageData) {
-        if (imageData.uri == null) {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
-            mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
-        } else {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
-        }
     }
 
     /**
@@ -816,6 +691,77 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 mScreenshotAnimation.start();
             });
         });
+    }
+
+    /**
+     * Creates a new worker thread and saves the screenshot to the media store.
+     */
+    private void saveScreenshotInWorkerThread(
+            Consumer<Uri> finisher, @Nullable ActionsReadyListener actionsReadyListener) {
+        SaveImageInBackgroundData data = new SaveImageInBackgroundData();
+        data.image = mScreenBitmap;
+        data.finisher = finisher;
+        data.mActionsReadyListener = actionsReadyListener;
+
+        if (mSaveInBgTask != null) {
+            // just log success/failure for the pre-existing screenshot
+            mSaveInBgTask.setActionsReadyListener(new ActionsReadyListener() {
+                @Override
+                void onActionsReady(SavedImageData imageData) {
+                    logSuccessOnActionsReady(imageData);
+                }
+            });
+        }
+
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data);
+        mSaveInBgTask.execute();
+    }
+
+    /**
+     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
+     */
+    private void showUiOnActionsReady(SavedImageData imageData) {
+        logSuccessOnActionsReady(imageData);
+
+        AccessibilityManager accessibilityManager = (AccessibilityManager)
+                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        long timeoutMs = accessibilityManager.getRecommendedTimeoutMillis(
+                SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
+
+        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
+        mScreenshotHandler.sendMessageDelayed(
+                mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
+                timeoutMs);
+
+        if (imageData.uri != null) {
+            mScreenshotHandler.post(() -> {
+                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
+                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            createScreenshotActionsShadeAnimation(imageData).start();
+                        }
+                    });
+                } else {
+                    createScreenshotActionsShadeAnimation(imageData).start();
+                }
+            });
+        }
+    }
+
+    /**
+     * Logs success/failure of the screenshot saving task, and shows an error if it failed.
+     */
+    private void logSuccessOnActionsReady(SavedImageData imageData) {
+        if (imageData.uri == null) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
+            mNotificationsController.notifyScreenshotError(
+                    R.string.screenshot_failed_to_capture_text);
+        } else {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
+        }
     }
 
     private AnimatorSet createScreenshotDropInAnimation(Rect bounds, boolean showFlash) {
@@ -1070,11 +1016,56 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         return animSet;
     }
 
+    private void clearScreenshot() {
+        if (mScreenshotLayout.isAttachedToWindow()) {
+            mWindowManager.removeView(mScreenshotLayout);
+        }
+
+        // Clear any references to the bitmap
+        mScreenshotPreview.setImageDrawable(null);
+        mScreenshotAnimatedView.setImageDrawable(null);
+        mScreenshotAnimatedView.setVisibility(View.GONE);
+        mActionsContainerBackground.setVisibility(View.GONE);
+        mActionsContainer.setVisibility(View.GONE);
+        mBackgroundProtection.setAlpha(0f);
+        mDismissButton.setVisibility(View.GONE);
+        mScreenshotPreview.setVisibility(View.GONE);
+        mScreenshotPreview.setLayerType(View.LAYER_TYPE_NONE, null);
+        mScreenshotPreview.setContentDescription(
+                mContext.getResources().getString(R.string.screenshot_preview_description));
+        mScreenshotLayout.setAlpha(1);
+        mDismissButton.setTranslationY(0);
+        mActionsContainer.setTranslationY(0);
+        mActionsContainerBackground.setTranslationY(0);
+        mScreenshotPreview.setTranslationY(0);
+    }
+
     private void setAnimatedViewSize(int width, int height) {
         ViewGroup.LayoutParams layoutParams = mScreenshotAnimatedView.getLayoutParams();
         layoutParams.width = width;
         layoutParams.height = height;
         mScreenshotAnimatedView.setLayoutParams(layoutParams);
+    }
+
+    /**
+     * Updates the window focusability.  If the window is already showing, then it updates the
+     * window immediately, otherwise the layout params will be applied when the window is next
+     * shown.
+     */
+    private void setWindowFocusable(boolean focusable) {
+        if (focusable) {
+            mWindowLayoutParams.flags &= ~FLAG_NOT_FOCUSABLE;
+        } else {
+            mWindowLayoutParams.flags |= FLAG_NOT_FOCUSABLE;
+        }
+        if (mScreenshotLayout.isAttachedToWindow()) {
+            mWindowManager.updateViewLayout(mScreenshotLayout, mWindowLayoutParams);
+        }
+    }
+
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     /** Does the aspect ratio of the bitmap with insets removed match the bounds. */
@@ -1128,7 +1119,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         if (insets.left < 0 || insets.top < 0 || insets.right < 0 || insets.bottom < 0) {
             // Are any of the insets negative, meaning the bitmap is smaller than the bounds so need
             // to fill in the background of the drawable.
-            return new LayerDrawable(new Drawable[] {
+            return new LayerDrawable(new Drawable[]{
                     new ColorDrawable(Color.BLACK), insetDrawable});
         } else {
             return insetDrawable;
