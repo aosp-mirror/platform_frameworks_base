@@ -2642,6 +2642,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             shouldCheckLocationPermissions = true;
         }
 
+        boolean isPermissionCheckSuccessful = true;
+
         if (shouldCheckLocationPermissions) {
             LocationAccessPolicy.LocationPermissionResult result =
                     LocationAccessPolicy.checkLocationPermission(
@@ -2651,14 +2653,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     throw new SecurityException("Unable to listen for events " + events + " due to "
                             + "insufficient location permissions.");
                 case DENIED_SOFT:
-                    return false;
+                    isPermissionCheckSuccessful = false;
             }
         }
 
         if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
                     mContext, subId, callingPackage, callingFeatureId, message)) {
-                return false;
+                isPermissionCheckSuccessful = false;
             }
         }
 
@@ -2688,7 +2690,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
         }
 
-        return true;
+        return isPermissionCheckSuccessful;
     }
 
     private void handleRemoveListLocked() {
