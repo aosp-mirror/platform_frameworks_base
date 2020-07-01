@@ -24,6 +24,7 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NO
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -175,7 +176,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public NetworkControllerImpl(Context context, @Background Looper bgLooper,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher, ConnectivityManager connectivityManager,
-            TelephonyManager telephonyManager, WifiManager wifiManager,
+            TelephonyManager telephonyManager, @Nullable WifiManager wifiManager,
             NetworkScoreManager networkScoreManager) {
         this(context, connectivityManager,
                 telephonyManager,
