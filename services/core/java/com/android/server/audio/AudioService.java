@@ -9002,10 +9002,15 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) {
             Log.d(TAG, "Persisting Volume Behavior for DeviceType: " + deviceType);
         }
-        System.putIntForUser(mContentResolver,
-                getSettingsNameForDeviceVolumeBehavior(deviceType),
-                deviceVolumeBehavior,
-                UserHandle.USER_CURRENT);
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            System.putIntForUser(mContentResolver,
+                    getSettingsNameForDeviceVolumeBehavior(deviceType),
+                    deviceVolumeBehavior,
+                    UserHandle.USER_CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
     }
 
     @AudioManager.DeviceVolumeBehaviorState
