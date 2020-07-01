@@ -326,14 +326,6 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         final boolean moveToTop = position >= getChildCount() - 1;
         final boolean moveToBottom = (position == POSITION_BOTTOM || position == 0);
 
-        // Reset mPreferredTopFocusableStack before positioning to top or {@link
-        // ActivityStackSupervisor#updateTopResumedActivityIfNeeded()} won't update the top
-        // resumed activity.
-        final boolean wasContained = mChildren.contains(child);
-        if (moveToTop && wasContained && child.isFocusable()) {
-            mPreferredTopFocusableStack = null;
-        }
-
         if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
             // This stack is always-on-top, override the default behavior.
             Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
@@ -374,6 +366,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         } else if (mPreferredTopFocusableStack == child) {
             mPreferredTopFocusableStack = null;
         }
+
+        // Update the top resumed activity because the preferred top focusable task may be changed.
+        mAtmService.mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
     /**
