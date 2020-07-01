@@ -11080,6 +11080,21 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting.forceQueryableOverride = true;
         }
 
+        // If this is part of a standard install, set the initiating package name, else rely on
+        // previous device state.
+        if (reconciledPkg.installArgs != null) {
+            InstallSource installSource = reconciledPkg.installArgs.installSource;
+            if (installSource.initiatingPackageName != null) {
+                final PackageSetting ips = mSettings.mPackages.get(
+                        installSource.initiatingPackageName);
+                if (ips != null) {
+                    installSource = installSource.setInitiatingPackageSignatures(
+                            ips.signatures);
+                }
+            }
+            pkgSetting.setInstallSource(installSource);
+        }
+
         // TODO(toddke): Consider a method specifically for modifying the Package object
         // post scan; or, moving this stuff out of the Package object since it has nothing
         // to do with the package on disk.
@@ -16051,16 +16066,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
 
-                if (installSource.initiatingPackageName != null) {
-                    final PackageSetting ips = mSettings.mPackages.get(
-                            installSource.initiatingPackageName);
-                    if (ips != null) {
-                        installSource = installSource.setInitiatingPackageSignatures(
-                                ips.signatures);
-                    }
-                }
-                ps.setInstallSource(installSource);
-                mSettings.addInstallerPackageNames(installSource);
+                mSettings.addInstallerPackageNames(ps.installSource);
 
                 // When replacing an existing package, preserve the original install reason for all
                 // users that had the package installed before. Similarly for uninstall reasons.
