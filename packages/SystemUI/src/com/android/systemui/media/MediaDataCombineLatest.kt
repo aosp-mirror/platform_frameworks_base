@@ -62,9 +62,9 @@ class MediaDataCombineLatest @Inject constructor(
      */
     fun getData(): Map<String, MediaData> {
         return entries.filter {
-            (key, pair) -> pair.first != null
+            (key, pair) -> pair.first != null && pair.second != null
         }.mapValues {
-            (key, pair) -> pair.first!!
+            (key, pair) -> pair.first!!.copy(device = pair.second)
         }
     }
 
