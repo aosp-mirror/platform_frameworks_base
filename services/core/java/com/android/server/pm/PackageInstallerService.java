@@ -525,7 +525,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
-
+            // adb installs can override the installingPackageName, but not the
+            // initiatingPackageName
+            installerPackageName = null;
         } else {
             if (callingUid != Process.SYSTEM_UID) {
                 // The supplied installerPackageName must always belong to the calling app.
