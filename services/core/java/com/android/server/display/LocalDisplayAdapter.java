@@ -450,7 +450,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // Determine whether the active color mode is still there.
             if (!mSupportedColorModes.contains(mActiveColorMode)) {
-                if (mActiveColorMode != 0) {
+                if (mActiveColorMode != Display.COLOR_MODE_DEFAULT) {
                     Slog.w(TAG, "Active color mode no longer available, reverting"
                             + " to default mode.");
                     mActiveColorMode = Display.COLOR_MODE_DEFAULT;
