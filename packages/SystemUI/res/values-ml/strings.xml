@@ -1046,8 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"നിയന്ത്രണങ്ങൾ പുനഃക്രമീകരിക്കാൻ അമർത്തിപ്പിടിച്ച് വലിച്ചിടുക"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"എല്ലാ നിയന്ത്രണങ്ങളും നീക്കം ചെയ്തു"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"മാറ്റങ്ങൾ സംരക്ഷിച്ചിട്ടില്ല"</string>
-    <!-- no translation found for controls_favorite_see_other_apps (7709087332255283460) -->
-    <skip />
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"മറ്റ് ആപ്പുകൾ കാണുക"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"നിയന്ത്രണങ്ങൾ ലോഡ് ചെയ്യാനായില്ല. ആപ്പ് ക്രമീകരണം മാറ്റിയിട്ടില്ലെന്ന് ഉറപ്പാക്കാൻ <xliff:g id="APP">%s</xliff:g> ആപ്പ് പരിശോധിക്കുക."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"അനുയോജ്യമായ നിയന്ത്രണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>

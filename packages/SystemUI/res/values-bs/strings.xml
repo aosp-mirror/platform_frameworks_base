@@ -628,9 +628,7 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Isključi zvuk"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Na telefonu je uključena vibracija"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"Zvuk na telefonu je isključen"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for volume_stream_content_description_unmute (7729576371406792977) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Dodirnite da uključite zvukove."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Dodirnite za postavljanje vibracije. Zvukovi usluga pristupačnosti mogu biti isključeni."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Dodirnite da isključite zvuk. Zvukovi usluga pristupačnosti mogu biti isključeni."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Dodirnite da postavite vibraciju."</string>
