@@ -2840,4 +2840,11 @@
     <string name="controls_menu_add">Add controls</string>
     <!-- Controls menu, edit [CHAR_LIMIT=30] -->
     <string name="controls_menu_edit">Edit controls</string>
+
+    <!-- Device-specific path to the node for enabling/disabling the high-brightness mode -->
+    <string name="udfps_hbm_sysfs_path" translatable="false"></string>
+    <!-- Device-specific payload for enabling the high-brightness mode -->
+    <string name="udfps_hbm_enable_command" translatable="false"></string>
+    <!-- Device-specific payload for disabling the high-brightness mode -->
+    <string name="udfps_hbm_disable_command" translatable="false"></string>
 </resources>
