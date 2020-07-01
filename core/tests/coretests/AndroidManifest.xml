@@ -1511,12 +1511,6 @@
             android:process=":SlowProvider">
         </provider>
 
-        <provider
-            android:name="android.content.TimingOutProvider"
-            android:authorities="android.content.TimingOutProvider"
-            android:process=":TimingOutProvider">
-        </provider>
-
         <!-- Application components used for os tests -->
 
         <service android:name="android.os.MessengerService"
