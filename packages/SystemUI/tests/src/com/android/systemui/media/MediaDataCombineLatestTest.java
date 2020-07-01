@@ -52,6 +52,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     private static final String ARTIST = "ARTIST";
     private static final String TITLE = "TITLE";
     private static final String DEVICE_NAME = "DEVICE_NAME";
+    private static final int USER_ID = 0;
 
     private MediaDataCombineLatest mManager;
 
@@ -78,7 +79,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
 
         mManager.addListener(mListener);
 
-        mMediaData = new MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null,
+        mMediaData = new MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null,
                 new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null, true, null, false,
                 KEY, false);
         mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME);
