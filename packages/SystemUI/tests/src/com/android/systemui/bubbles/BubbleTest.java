@@ -71,7 +71,7 @@ public class BubbleTest extends SysuiTestCase {
                 .setNotification(mNotif)
                 .build();
 
-        mBubble = new Bubble(mEntry, mSuppressionListener);
+        mBubble = new Bubble(mEntry, mSuppressionListener, null);
 
         Intent target = new Intent(mContext, BubblesTestActivity.class);
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(

@@ -183,6 +183,9 @@ public class BubbleExpandedView extends LinearLayout {
                                 // Apply flags to make behaviour match documentLaunchMode=always.
                                 fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                                 fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                                if (mBubble != null) {
+                                    mBubble.setIntentActive();
+                                }
                                 mActivityView.startActivity(mPendingIntent, fillInIntent, options);
                             }
                         } catch (RuntimeException e) {
