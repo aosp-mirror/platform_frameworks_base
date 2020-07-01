@@ -102,9 +102,13 @@ public class ShortcutHelper {
             HashMap<String, String> shortcutBubbles = mActiveShortcutBubbles.get(packageName);
             ArrayList<String> bubbleKeysToRemove = new ArrayList<>();
             if (shortcutBubbles != null) {
+                // Copy to avoid a concurrent modification exception when we remove bubbles from
+                // shortcutBubbles.
+                final Set<String> shortcutIds = new HashSet<>(shortcutBubbles.keySet());
+
                 // If we can't find one of our bubbles in the shortcut list, that bubble needs
                 // to be removed.
-                for (String shortcutId : shortcutBubbles.keySet()) {
+                for (String shortcutId : shortcutIds) {
                     boolean foundShortcut = false;
                     for (int i = 0; i < shortcuts.size(); i++) {
                         if (shortcuts.get(i).getId().equals(shortcutId)) {
