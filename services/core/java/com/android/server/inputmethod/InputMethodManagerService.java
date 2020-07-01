@@ -4047,7 +4047,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // Send it to window manager to hide IME from IME target window.
                     // TODO(b/139861270): send to mCurClient.client once IMMS is aware of
                     // actual IME target.
-                    mWindowManagerInternal.hideIme(mHideRequestWindowMap.get(windowToken));
+                    mWindowManagerInternal.hideIme(
+                            mHideRequestWindowMap.get(windowToken),
+                            mCurClient.selfReportedDisplayId);
                 }
             } else {
                 // Send to window manager to show IME after IME layout finishes.
