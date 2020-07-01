@@ -102,7 +102,7 @@ import java.lang.reflect.InvocationTargetException;
  * While the Fragment API was introduced in
  * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, a version of the API
  * at is also available for use on older platforms through
- * {@link android.support.v4.app.FragmentActivity}.  See the blog post
+ * {@link androidx.fragment.app.FragmentActivity}.  See the blog post
  * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
  * Fragments For All</a> for more details.
  *
@@ -258,8 +258,8 @@ import java.lang.reflect.InvocationTargetException;
  * pressing back will pop it to return the user to whatever previous state
  * the activity UI was in.
  *
- * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link android.support.v4.app.Fragment} for consistent behavior across all devices
+ * @deprecated Use the <a href="{@docRoot}jetpack">Jetpack Fragment Library</a>
+ *      {@link androidx.fragment.app.Fragment} for consistent behavior across all devices
  *      and access to <a href="{@docRoot}topic/libraries/architecture/lifecycle.html">Lifecycle</a>.
  */
 @Deprecated
@@ -432,7 +432,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * through {@link FragmentManager#saveFragmentInstanceState(Fragment)
      * FragmentManager.saveFragmentInstanceState}.
      *
-     * @deprecated Use {@link android.support.v4.app.Fragment.SavedState}
+     * @deprecated Use {@link androidx.fragment.app.Fragment.SavedState}
      */
     @Deprecated
     public static class SavedState implements Parcelable {
@@ -479,7 +479,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * Thrown by {@link Fragment#instantiate(Context, String, Bundle)} when
      * there is an instantiation failure.
      *
-     * @deprecated Use {@link android.support.v4.app.Fragment.InstantiationException}
+     * @deprecated Use {@link androidx.fragment.app.Fragment.InstantiationException}
      */
     @Deprecated
     static public class InstantiationException extends AndroidRuntimeException {
@@ -1055,7 +1055,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Return the LoaderManager for this fragment, creating it if needed.
      *
-     * @deprecated Use {@link android.support.v4.app.Fragment#getLoaderManager()}
+     * @deprecated Use {@link androidx.fragment.app.Fragment#getLoaderManager()}
      */
     @Deprecated
     public LoaderManager getLoaderManager() {
