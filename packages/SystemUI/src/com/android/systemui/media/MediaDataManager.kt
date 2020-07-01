@@ -67,7 +67,7 @@ private const val DEFAULT_LUMINOSITY = 0.25f
 private const val LUMINOSITY_THRESHOLD = 0.05f
 private const val SATURATION_MULTIPLIER = 0.8f
 
-private val LOADING = MediaData(false, 0, null, null, null, null, null,
+private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
@@ -116,15 +116,6 @@ class MediaDataManager(
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
 
-    private val userChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (Intent.ACTION_USER_SWITCHED == intent.action) {
-                // Remove all controls, regardless of state
-                clearData()
-            }
-        }
-    }
-
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
@@ -152,9 +143,6 @@ class MediaDataManager(
         mediaResumeListener.setManager(this)
         addListener(mediaResumeListener)
 
-        val userFilter = IntentFilter(Intent.ACTION_USER_SWITCHED)
-        broadcastDispatcher.registerReceiver(userChangeReceiver, userFilter, null, UserHandle.ALL)
-
         val suspendFilter = IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED)
         broadcastDispatcher.registerReceiver(appChangeReceiver, suspendFilter, null, UserHandle.ALL)
 
@@ -169,7 +157,6 @@ class MediaDataManager(
 
     fun destroy() {
         context.unregisterReceiver(appChangeReceiver)
-        broadcastDispatcher.unregisterReceiver(userChangeReceiver)
     }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
@@ -187,20 +174,6 @@ class MediaDataManager(
             loadMediaData(key, sbn, oldKey)
         } else {
             onNotificationRemoved(key)
-        }
-    }
-
-    private fun clearData() {
-        // Called on user change. Remove all current MediaData objects and inform listeners
-        val listenersCopy = listeners.toSet()
-        val keyCopy = mediaEntries.keys.toMutableList()
-        // Clear the list first, to make sure callbacks from listeners if we have any entries
-        // are up to date
-        mediaEntries.clear()
-        keyCopy.forEach {
-            listenersCopy.forEach { listener ->
-                listener.onMediaDataRemoved(it)
-            }
         }
     }
 
@@ -224,6 +197,7 @@ class MediaDataManager(
     }
 
     fun addResumptionControls(
+        userId: Int,
         desc: MediaDescription,
         action: Runnable,
         token: MediaSession.Token,
@@ -238,7 +212,8 @@ class MediaDataManager(
             mediaEntries.put(packageName, resumeData)
         }
         backgroundExecutor.execute {
-            loadMediaDataInBgForResumption(desc, action, token, appName, appIntent, packageName)
+            loadMediaDataInBgForResumption(userId, desc, action, token, appName, appIntent,
+                packageName)
         }
     }
 
@@ -282,7 +257,7 @@ class MediaDataManager(
      * This will make the player not active anymore, hiding it from QQS and Keyguard.
      * @see MediaData.active
      */
-    private fun setTimedOut(token: String, timedOut: Boolean) {
+    internal fun setTimedOut(token: String, timedOut: Boolean) {
         mediaEntries[token]?.let {
             if (it.active == !timedOut) {
                 return
@@ -293,6 +268,7 @@ class MediaDataManager(
     }
 
     private fun loadMediaDataInBgForResumption(
+        userId: Int,
         desc: MediaDescription,
         resumeAction: Runnable,
         token: MediaSession.Token,
@@ -307,7 +283,7 @@ class MediaDataManager(
             return
         }
 
-        Log.d(TAG, "adding track from browser: $desc")
+        Log.d(TAG, "adding track for $userId from browser: $desc")
 
         // Album art
         var artworkBitmap = desc.iconBitmap
@@ -323,7 +299,7 @@ class MediaDataManager(
 
         val mediaAction = getResumeMediaAction(resumeAction)
         foregroundExecutor.execute {
-            onMediaDataLoaded(packageName, null, MediaData(true, bgColor, appName,
+            onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
@@ -439,10 +415,11 @@ class MediaDataManager(
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(key, oldKey, MediaData(true, bgColor, app, smallIconDrawable, artist,
-                    song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
-                    notif.contentIntent, null, active, resumeAction = resumeAction,
-                    notificationKey = key, hasCheckedForResume = hasCheckedForResume))
+            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
+                    smallIconDrawable, artist, song, artWorkIcon, actionIcons,
+                    actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
+                    active, resumeAction = resumeAction, notificationKey = key,
+                    hasCheckedForResume = hasCheckedForResume))
         }
     }
 
@@ -564,18 +541,6 @@ class MediaDataManager(
         }
     }
 
-    /**
-     * Are there any media notifications active?
-     */
-    fun hasActiveMedia() = mediaEntries.any { it.value.active }
-
-    /**
-     * Are there any media entries we should display?
-     * If resumption is enabled, this will include inactive players
-     * If resumption is disabled, we only want to show active players
-     */
-    fun hasAnyMedia() = if (useMediaResumption) mediaEntries.isNotEmpty() else hasActiveMedia()
-
     fun setMediaResumptionEnabled(isEnabled: Boolean) {
         if (useMediaResumption == isEnabled) {
             return
@@ -593,16 +558,6 @@ class MediaDataManager(
                     listener.onMediaDataRemoved(it.key)
                 }
             }
-        }
-    }
-
-    /**
-     * Invoked when the user has dismissed the media carousel
-     */
-    fun onSwipeToDismiss() {
-        val mediaKeys = mediaEntries.keys.toSet()
-        mediaKeys.forEach {
-            setTimedOut(it, timedOut = true)
         }
     }
 
