@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,10 +38,9 @@ class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
 
     FingerprintRemovalClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(context, token, listener, biometricId, userId, restricted, owner,
-                utils, sensorId, statsModality);
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
+        super(context, token, listener, biometricId, userId, owner, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override

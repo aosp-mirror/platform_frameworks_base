@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.face;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -36,10 +37,9 @@ class FaceRemovalClient extends RemovalClient<IBiometricsFace> {
 
     FaceRemovalClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(context, token, listener, biometricId, userId, restricted, owner,
-                utils, sensorId, statsModality);
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
+        super(context, token, listener, biometricId, userId, owner, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override

@@ -53,8 +53,6 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
 
     @NonNull private final Context mContext;
     private final int mTargetUserId;
-    // True if client does not have MANAGE_FINGERPRINT permission
-    private final boolean mIsRestricted;
     @NonNull private final String mOwner;
     private final int mSensorId; // sensorId as configured by the framework
 
@@ -73,8 +71,6 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      * @param token      a unique token for the client
      * @param listener   recipient of related events (e.g. authentication)
      * @param userId     target user id for operation
-     * @param restricted whether or not client has the MANAGE_* permission
-     *                   permission
      * @param owner      name of the client that owns this
      * @param cookie     BiometricPrompt authentication cookie (to be moved into a subclass soon)
      * @param sensorId   ID of the sensor that the operation should be requested of
@@ -83,15 +79,14 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
     public ClientMonitor(@NonNull Context context, @Nullable IBinder token,
-            @Nullable ClientMonitorCallbackConverter listener, int userId, boolean restricted,
-            @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
+            @Nullable ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
+            int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {
         super(statsModality, statsAction, statsClient);
         mContext = context;
         mToken = token;
         mListener = listener;
         mTargetUserId = userId;
-        mIsRestricted = restricted;
         mOwner = owner;
         mCookie = cookie;
         mSensorId = sensorId;
@@ -182,10 +177,6 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
 
     public final ClientMonitorCallbackConverter getListener() {
         return mListener;
-    }
-
-    public final boolean getIsRestricted() {
-        return mIsRestricted;
     }
 
     public final int getTargetUserId() {

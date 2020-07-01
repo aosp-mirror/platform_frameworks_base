@@ -48,11 +48,11 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
     private final VibrationEffect mErrorVibrationEffect;
 
     AcquisitionClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId, boolean restricted,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality,
             int statsAction, int statsClient) {
-        super(context, token, listener, userId, restricted, owner, cookie, sensorId,
-                statsModality, statsAction, statsClient);
+        super(context, token, listener, userId, owner, cookie, sensorId, statsModality, statsAction,
+                statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);

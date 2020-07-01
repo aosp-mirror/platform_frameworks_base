@@ -43,12 +43,11 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
 
     public EnrollClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, boolean restricted, String owner,
-            @NonNull BiometricUtils utils, int timeoutSec, int statsModality, int sensorId,
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
+            int timeoutSec, int statsModality, int sensorId,
             boolean shouldVibrate) {
-        super(context, token, listener, userId, restricted, owner, 0 /* cookie */,
-                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_ENROLL, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;

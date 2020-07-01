@@ -31,9 +31,9 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
 
     public GenerateChallengeClient(Context context, IBinder token,
             ClientMonitorCallbackConverter listener, String owner, int sensorId) {
-        super(context, token, listener, 0 /* userId */, false /* restricted */,
-                owner, 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, token, listener, 0 /* userId */, owner, 0 /* cookie */, sensorId,
+                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override

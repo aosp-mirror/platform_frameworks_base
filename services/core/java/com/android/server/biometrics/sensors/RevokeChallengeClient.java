@@ -24,9 +24,9 @@ import android.os.IBinder;
 public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
 
     public RevokeChallengeClient(Context context, IBinder token, String owner, int sensorId) {
-        super(context, token, null /* listener */, 0 /* userId */, false /* restricted */, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, token, null /* listener */, 0 /* userId */, owner, 0 /* cookie */, sensorId,
+                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override

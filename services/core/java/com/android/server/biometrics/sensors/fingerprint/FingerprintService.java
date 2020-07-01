@@ -133,11 +133,9 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
             checkPermission(MANAGE_FINGERPRINT);
             updateActiveGroup(userId);
 
-            final boolean restricted = isRestricted();
             final EnrollClient client = new FingerprintEnrollClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver), userId, cryptoToken, restricted,
-                    opPackageName, getBiometricUtils(), ENROLL_TIMEOUT_SEC, statsModality(),
-                    getSensorId(), true /* shouldVibrate */);
+                    new ClientMonitorCallbackConverter(receiver), userId, cryptoToken,
+                    opPackageName, getBiometricUtils(), ENROLL_TIMEOUT_SEC, getSensorId());
 
             enrollInternal(client, userId);
         }
@@ -224,10 +222,9 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
                 return;
             }
 
-            final boolean restricted = isRestricted();
             final RemovalClient client = new FingerprintRemovalClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver), fingerId, userId, restricted,
-                    opPackageName, getBiometricUtils(), getSensorId(), statsModality());
+                    new ClientMonitorCallbackConverter(receiver), fingerId, userId, opPackageName,
+                    getBiometricUtils(), getSensorId());
             removeInternal(client);
         }
 
@@ -609,12 +606,11 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
     @Override
     protected void doTemplateCleanupForUser(int userId) {
-        final boolean restricted = !hasPermission(getManageBiometricPermission());
         final List<? extends BiometricAuthenticator.Identifier> enrolledList =
                 getEnrolledTemplates(userId);
         final FingerprintInternalCleanupClient client = new FingerprintInternalCleanupClient(
-                getContext(), userId, restricted, getContext().getOpPackageName(), getSensorId(),
-                statsModality(), enrolledList, getBiometricUtils());
+                getContext(), userId, getContext().getOpPackageName(), getSensorId(), enrolledList,
+                getBiometricUtils());
         cleanupInternal(client);
     }
 

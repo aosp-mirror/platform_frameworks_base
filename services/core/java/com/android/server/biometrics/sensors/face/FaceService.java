@@ -149,11 +149,9 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
                         UserHandle.CURRENT);
             });
 
-            final boolean restricted = isRestricted();
             final EnrollClient client = new FaceEnrollClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver),
-                    userId, cryptoToken, restricted, opPackageName, getBiometricUtils(),
-                    disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
+                    new ClientMonitorCallbackConverter(receiver), userId, cryptoToken,
+                    opPackageName, getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC,
                     convertSurfaceToNativeHandle(surface), getSensorId());
 
             enrollInternal(client, userId);
@@ -241,10 +239,9 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
                 return;
             }
 
-            final boolean restricted = isRestricted();
             final RemovalClient client = new FaceRemovalClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver), faceId, userId,
-                    restricted, opPackageName, getBiometricUtils(), getSensorId(), statsModality());
+                    new ClientMonitorCallbackConverter(receiver), faceId, userId, opPackageName,
+                    getBiometricUtils(), getSensorId());
             removeInternal(client);
         }
 
@@ -697,12 +694,10 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
     @Override
     protected void doTemplateCleanupForUser(int userId) {
-        final boolean restricted = !hasPermission(getManageBiometricPermission());
         final List<? extends BiometricAuthenticator.Identifier> enrolledList =
                 getEnrolledTemplates(userId);
         final FaceInternalCleanupClient client = new FaceInternalCleanupClient(getContext(), userId,
-                restricted, getContext().getOpPackageName(), getSensorId(), statsModality(),
-                enrolledList, getBiometricUtils());
+                getContext().getOpPackageName(), getSensorId(), enrolledList, getBiometricUtils());
         cleanupInternal(client);
     }
 

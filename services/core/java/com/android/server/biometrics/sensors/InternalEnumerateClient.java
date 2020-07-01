@@ -44,12 +44,12 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
     protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
-            boolean restricted, @NonNull String owner,
+            @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
         // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        super(context, token, null /* ClientMonitorCallbackConverter */, userId, restricted, owner,
+        super(context, token, null /* ClientMonitorCallbackConverter */, userId, owner,
                 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mEnrolledList = enrolledList;
