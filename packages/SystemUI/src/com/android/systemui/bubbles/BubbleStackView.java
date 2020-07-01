@@ -290,6 +290,12 @@ public class BubbleStackView extends FrameLayout
     /** Whether we're in the middle of dragging the stack around by touch. */
     private boolean mIsDraggingStack = false;
 
+    /**
+     * The pointer index of the ACTION_DOWN event we received prior to an ACTION_UP. We'll ignore
+     * touches from other pointer indices.
+     */
+    private int mPointerIndexDown = -1;
+
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
@@ -2220,6 +2226,18 @@ public class BubbleStackView extends FrameLayout
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() != MotionEvent.ACTION_DOWN && ev.getActionIndex() != mPointerIndexDown) {
+            // Ignore touches from additional pointer indices.
+            return false;
+        }
+
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mPointerIndexDown = ev.getActionIndex();
+        } else if (ev.getAction() == MotionEvent.ACTION_UP
+                || ev.getAction() == MotionEvent.ACTION_CANCEL) {
+            mPointerIndexDown = -1;
+        }
+
         boolean dispatched = super.dispatchTouchEvent(ev);
 
         // If a new bubble arrives while the collapsed stack is being dragged, it will be positioned
