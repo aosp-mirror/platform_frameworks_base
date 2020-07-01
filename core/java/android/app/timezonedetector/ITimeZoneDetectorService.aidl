@@ -41,6 +41,7 @@ interface ITimeZoneDetectorService {
   TimeZoneConfiguration getConfiguration();
   boolean updateConfiguration(in TimeZoneConfiguration configuration);
   void addConfigurationListener(ITimeZoneConfigurationListener listener);
+  void removeConfigurationListener(ITimeZoneConfigurationListener listener);
 
   boolean suggestManualTimeZone(in ManualTimeZoneSuggestion timeZoneSuggestion);
   void suggestTelephonyTimeZone(in TelephonyTimeZoneSuggestion timeZoneSuggestion);

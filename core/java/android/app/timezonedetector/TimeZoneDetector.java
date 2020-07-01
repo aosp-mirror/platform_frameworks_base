@@ -74,11 +74,26 @@ public interface TimeZoneDetector {
     boolean updateConfiguration(@NonNull TimeZoneConfiguration configuration);
 
     /**
+     * An interface that can be used to listen for changes to the time zone detector configuration.
+     */
+    interface TimeZoneConfigurationListener {
+        /** Called when the configuration changes. There are no guarantees about the thread used. */
+        void onChange(@NonNull TimeZoneConfiguration configuration);
+    }
+
+    /**
      * Registers a listener that will be informed when the configuration changes. The complete
      * configuration is passed to the listener, not just the properties that have changed.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    void addConfigurationListener(@NonNull ITimeZoneConfigurationListener listener);
+    void addConfigurationListener(@NonNull TimeZoneConfigurationListener listener);
+
+    /**
+     * Removes a listener previously passed to
+     * {@link #addConfigurationListener(ITimeZoneConfigurationListener)}
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    void removeConfigurationListener(@NonNull TimeZoneConfigurationListener listener);
 
     /**
      * A shared utility method to create a {@link ManualTimeZoneSuggestion}.

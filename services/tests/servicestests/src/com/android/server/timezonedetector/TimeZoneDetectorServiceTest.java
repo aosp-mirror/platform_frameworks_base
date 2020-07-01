@@ -21,12 +21,16 @@ import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_POSSE
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.timezonedetector.ITimeZoneConfigurationListener;
@@ -158,10 +162,24 @@ public class TimeZoneDetectorServiceTest {
         }
     }
 
+    @Test(expected = SecurityException.class)
+    public void testRemoveConfigurationListener_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        ITimeZoneConfigurationListener mockListener = mock(ITimeZoneConfigurationListener.class);
+        try {
+            mTimeZoneDetectorService.removeConfigurationListener(mockListener);
+            fail();
+        } finally {
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
+                    anyString());
+        }
+    }
+
     @Test
     public void testConfigurationChangeListenerRegistrationAndCallbacks() throws Exception {
-        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
-
         TimeZoneConfiguration autoDetectDisabledConfiguration =
                 createTimeZoneConfiguration(false /* autoDetectionEnabled */);
 
@@ -169,22 +187,69 @@ public class TimeZoneDetectorServiceTest {
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeZoneConfigurationListener mockListener = mock(ITimeZoneConfigurationListener.class);
-        when(mockListener.asBinder()).thenReturn(mockListenerBinder);
 
-        mTimeZoneDetectorService.addConfigurationListener(mockListener);
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+            when(mockListener.asBinder()).thenReturn(mockListenerBinder);
 
-        verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
-                anyString());
-        verify(mockListenerBinder).linkToDeath(any(), eq(0));
+            mTimeZoneDetectorService.addConfigurationListener(mockListener);
 
-        // Simulate the configuration being changed and verify the mockListener was notified.
-        TimeZoneConfiguration autoDetectEnabledConfiguration =
-                createTimeZoneConfiguration(true /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategy.updateConfiguration(
-                ARBITRARY_USER_ID, autoDetectEnabledConfiguration);
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
+                    anyString());
+            verify(mockListener).asBinder();
+            verify(mockListenerBinder).linkToDeath(any(), anyInt());
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
 
-        verify(mockListener).onChange(autoDetectEnabledConfiguration);
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+            // Simulate the configuration being changed and verify the mockListener was notified.
+            TimeZoneConfiguration autoDetectEnabledConfiguration =
+                    createTimeZoneConfiguration(true /* autoDetectionEnabled */);
+
+            mTimeZoneDetectorService.updateConfiguration(autoDetectEnabledConfiguration);
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
+                    anyString());
+            verify(mockListener).onChange(autoDetectEnabledConfiguration);
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
+
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+            when(mockListener.asBinder()).thenReturn(mockListenerBinder);
+            when(mockListenerBinder.unlinkToDeath(any(), anyInt())).thenReturn(true);
+
+            // Now remove the listener, change the config again, and verify the listener is not
+            // called.
+            mTimeZoneDetectorService.removeConfigurationListener(mockListener);
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
+                    anyString());
+            verify(mockListener).asBinder();
+            verify(mockListenerBinder).unlinkToDeath(any(), eq(0));
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
+
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+            mTimeZoneDetectorService.updateConfiguration(autoDetectDisabledConfiguration);
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
+                    anyString());
+            verify(mockListener, never()).onChange(any());
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
     }
 
     @Test(expected = SecurityException.class)
