@@ -1494,12 +1494,12 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_ABORTED = -115;
 
     /**
-     * Installation failed return code: instant app installs are incompatible with some
-     * other installation flags supplied for the operation; or other circumstances such
-     * as trying to upgrade a system app via an instant app install.
+     * Installation failed return code: install type is incompatible with some other
+     * installation flags supplied for the operation; or other circumstances such as trying
+     * to upgrade a system app via an Incremental or instant app install.
      * @hide
      */
-    public static final int INSTALL_FAILED_INSTANT_APP_INVALID = -116;
+    public static final int INSTALL_FAILED_SESSION_INVALID = -116;
 
     /**
      * Installation parse return code: this is passed in the
@@ -7474,6 +7474,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_BAD_SIGNATURE: return "INSTALL_FAILED_BAD_SIGNATURE";
             case INSTALL_FAILED_WRONG_INSTALLED_VERSION: return "INSTALL_FAILED_WRONG_INSTALLED_VERSION";
             case INSTALL_FAILED_PROCESS_NOT_DEFINED: return "INSTALL_FAILED_PROCESS_NOT_DEFINED";
+            case INSTALL_FAILED_SESSION_INVALID: return "INSTALL_FAILED_SESSION_INVALID";
             default: return Integer.toString(status);
         }
     }

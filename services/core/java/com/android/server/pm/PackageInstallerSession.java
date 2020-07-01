@@ -606,14 +606,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (isIncrementalInstallation()) {
-            if (!IncrementalManager.isAllowed()) {
-                throw new IllegalArgumentException("Incremental installation not allowed.");
-            }
-            if (!isIncrementalInstallationAllowed(mPackageName)) {
-                throw new IllegalArgumentException(
-                        "Incremental installation of this package is not allowed.");
-            }
+        if (isIncrementalInstallation() && !IncrementalManager.isAllowed()) {
+            throw new IllegalArgumentException("Incremental installation not allowed.");
         }
     }
 
@@ -2152,6 +2146,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             "Couldn't obtain signatures from base APK");
                 }
             }
+        }
+
+        if (isIncrementalInstallation() && !isIncrementalInstallationAllowed(mPackageName)) {
+            throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_SESSION_INVALID,
+                    "Incremental installation of this package is not allowed.");
         }
 
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
