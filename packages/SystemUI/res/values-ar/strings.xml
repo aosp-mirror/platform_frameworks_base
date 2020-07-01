@@ -721,7 +721,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"إيقاف الإشعارات"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"صامتة"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"تلقائي"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"تلقائية"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"فقاعة"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
@@ -1052,7 +1052,7 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"الإعدادات"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"عناصر التحكم في نافذة التكبير"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"أدوات التحكم بالجهاز"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"أدوات التحكم بالأجهزة"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"إضافة عناصر تحكّم لأجهزتك المتصلة"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"إعداد أدوات التحكم بالجهاز"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"اضغط مع الاستمرار على زر التشغيل للوصول إلى عناصر التحكّم"</string>
