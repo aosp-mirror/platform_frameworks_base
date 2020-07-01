@@ -35,6 +35,7 @@ private const val PACKAGE_NAME = "com.android.systemui"
 private const val APP_NAME = "SystemUI"
 private const val SESSION_ARTIST = "artist"
 private const val SESSION_TITLE = "title"
+private const val USER_ID = 0
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -91,28 +92,15 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testHasActiveMedia() {
-        assertThat(mediaDataManager.hasActiveMedia()).isFalse()
-        val data = mock(MediaData::class.java)
-
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = data)
-        assertThat(mediaDataManager.hasActiveMedia()).isFalse()
-
-        whenever(data.active).thenReturn(true)
-        assertThat(mediaDataManager.hasActiveMedia()).isTrue()
-    }
-
-    @Test
-    fun testOnSwipeToDismiss_deactivatesMedia() {
-        val data = MediaData(initialized = true, backgroundColor = 0, app = null, appIcon = null,
-                artist = null, song = null, artwork = null, actions = emptyList(),
+    fun testSetTimedOut_deactivatesMedia() {
+        val data = MediaData(userId = USER_ID, initialized = true, backgroundColor = 0, app = null,
+                appIcon = null, artist = null, song = null, artwork = null, actions = emptyList(),
                 actionsToShowInCompact = emptyList(), packageName = "INVALID", token = null,
                 clickIntent = null, device = null, active = true, resumeAction = null)
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = data)
 
-        mediaDataManager.onSwipeToDismiss()
+        mediaDataManager.setTimedOut(KEY, timedOut = true)
         assertThat(data.active).isFalse()
     }
 
@@ -141,37 +129,6 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(listener.data!!.active).isTrue()
-
-        // Swiping away makes the notification not active
-        mediaDataManager.onSwipeToDismiss()
-        assertThat(mediaDataManager.hasActiveMedia()).isFalse()
-
-        // And when a notification is updated
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-
-        // MediaData should still be inactive
-        assertThat(mediaDataManager.hasActiveMedia()).isFalse()
-    }
-
-    @Test
-    fun testHasAnyMedia_whenAddingMedia() {
-        assertThat(mediaDataManager.hasAnyMedia()).isFalse()
-        val data = mock(MediaData::class.java)
-
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = data)
-        assertThat(mediaDataManager.hasAnyMedia()).isTrue()
-    }
-
-    @Test
-    fun testOnNotificationRemoved_doesntHaveMedia() {
-        val data = mock(MediaData::class.java)
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = data)
-        mediaDataManager.onNotificationRemoved(KEY)
-        assertThat(mediaDataManager.hasAnyMedia()).isFalse()
     }
 
     @Test
@@ -212,8 +169,8 @@ class MediaDataManagerTest : SysuiTestCase() {
             setTitle(SESSION_TITLE)
             build()
         }
-        mediaDataManager.addResumptionControls(desc, Runnable {}, session.sessionToken, APP_NAME,
-                pendingIntent, PACKAGE_NAME)
+        mediaDataManager.addResumptionControls(USER_ID, desc, Runnable {}, session.sessionToken,
+                APP_NAME, pendingIntent, PACKAGE_NAME)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         // THEN the media data indicates that it is for resumption
