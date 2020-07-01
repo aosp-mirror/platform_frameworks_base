@@ -49,7 +49,6 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.AndroidTimeoutException;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DeadObjectException;
@@ -2189,8 +2188,14 @@ public abstract class ContentResolver implements ContentInterface {
             return null;
         }
 
-        try (ContentProviderClient provider = acquireRequiredContentProviderClient(authority)) {
+        ContentProviderClient provider = acquireContentProviderClient(authority);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown authority " + authority);
+        }
+        try {
             return provider.applyBatch(operations);
+        } finally {
+            provider.release();
         }
     }
 
@@ -2392,7 +2397,10 @@ public abstract class ContentResolver implements ContentInterface {
             return null;
         }
 
-        IContentProvider provider = acquireRequiredProvider(authority);
+        IContentProvider provider = acquireProvider(authority);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown authority " + authority);
+        }
         try {
             final Bundle res = provider.call(mPackageName, mAttributionTag, authority, method, arg,
                     extras);
@@ -2411,9 +2419,7 @@ public abstract class ContentResolver implements ContentInterface {
      * Returns the content provider for the given content URI.
      *
      * @param uri The URI to a content provider
-     * @return The ContentProvider for the given URI, or null if the content provider initialization
-     * times out.
-     *
+     * @return The ContentProvider for the given URI, or null if no content provider is found.
      * @hide
      */
     @UnsupportedAppUsage
@@ -2423,29 +2429,9 @@ public abstract class ContentResolver implements ContentInterface {
         }
         final String auth = uri.getAuthority();
         if (auth != null) {
-            try {
-                return acquireProvider(mContext, auth);
-            } catch (AndroidTimeoutException ate) {
-                Log.e(TAG, ate.getMessage());
-                return null;
-            }
+            return acquireProvider(mContext, auth);
         }
         return null;
-    }
-
-    /**
-     * Same as {@link #acquireProvider(String)}, except it throws an exception
-     * if the content provider does not exist or times out on start.
-     *
-     * @hide
-     */
-    @NonNull
-    private IContentProvider acquireRequiredProvider(@NonNull String name) {
-        IContentProvider provider = acquireProvider(mContext, name);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown authority " + name);
-        }
-        return provider;
     }
 
     /**
@@ -2476,12 +2462,7 @@ public abstract class ContentResolver implements ContentInterface {
         if (name == null) {
             return null;
         }
-        try {
-            return acquireProvider(mContext, name);
-        } catch (AndroidTimeoutException ate) {
-            Log.e(TAG, ate.getMessage());
-            return null;
-        }
+        return acquireProvider(mContext, name);
     }
 
     /**
@@ -2553,19 +2534,6 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         return null;
-    }
-
-    /**
-     * Same as {@link #acquireContentProviderClient(String)}, except it throws an exception
-     * if the content provider does not exist or times out on start.
-     *
-     * @hide
-     */
-    private @NonNull ContentProviderClient acquireRequiredContentProviderClient(
-            @NonNull String name) {
-        Objects.requireNonNull(name, "name");
-        IContentProvider provider = acquireRequiredProvider(name);
-        return new ContentProviderClient(this, provider, name, true);
     }
 
     /**
