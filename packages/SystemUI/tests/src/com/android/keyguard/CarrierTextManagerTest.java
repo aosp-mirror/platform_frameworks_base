@@ -561,6 +561,66 @@ public class CarrierTextManagerTest extends SysuiTestCase {
                 captor.getValue().carrierText);
     }
 
+    @Test
+    public void testGetStatusForIccState() {
+        when(mKeyguardUpdateMonitor.isDeviceProvisioned()).thenReturn(false);
+        assertEquals(CarrierTextManager.StatusMode.SimMissingLocked,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_ABSENT));
+        assertEquals(CarrierTextManager.StatusMode.NetworkLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_NETWORK_LOCKED));
+        assertEquals(CarrierTextManager.StatusMode.SimNotReady,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_NOT_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PIN_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.SimPukLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PUK_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.Normal,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimMissingLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PERM_DISABLED));
+        assertEquals(CarrierTextManager.StatusMode.SimUnknown,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_UNKNOWN));
+        assertEquals(CarrierTextManager.StatusMode.SimIoError,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_IO_ERROR));
+        assertEquals(CarrierTextManager.StatusMode.SimRestricted,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_RESTRICTED));
+
+        when(mKeyguardUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+        assertEquals(CarrierTextManager.StatusMode.SimMissing,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_ABSENT));
+        assertEquals(CarrierTextManager.StatusMode.NetworkLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_NETWORK_LOCKED));
+        assertEquals(CarrierTextManager.StatusMode.SimNotReady,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_NOT_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PIN_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.SimPukLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PUK_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.Normal,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimPermDisabled,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PERM_DISABLED));
+        assertEquals(CarrierTextManager.StatusMode.SimUnknown,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_UNKNOWN));
+        assertEquals(CarrierTextManager.StatusMode.SimIoError,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_IO_ERROR));
+        assertEquals(CarrierTextManager.StatusMode.SimRestricted,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_RESTRICTED));
+    }
+
     private Context getContextSpyForStickyBroadcast(Intent returnVal) {
         Context contextSpy = spy(mContext);
         doReturn(returnVal).when(contextSpy).registerReceiver(eq(null), any(IntentFilter.class));
