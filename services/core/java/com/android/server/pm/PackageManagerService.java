@@ -51,7 +51,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTAL
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
@@ -59,6 +58,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_L
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PROCESS_NOT_DEFINED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
@@ -17135,7 +17135,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Sanity check
         if (instantApp && onExternal) {
             Slog.i(TAG, "Incompatible ephemeral install; external=" + onExternal);
-            throw new PrepareFailure(PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
+            throw new PrepareFailure(PackageManager.INSTALL_FAILED_SESSION_INVALID);
         }
 
         // Retrieve PackageSettings and parse package
@@ -17160,13 +17160,13 @@ public class PackageManagerService extends IPackageManager.Stub
             if (parsedPackage.getTargetSdkVersion() < Build.VERSION_CODES.O) {
                 Slog.w(TAG, "Instant app package " + parsedPackage.getPackageName()
                                 + " does not target at least O");
-                throw new PrepareFailure(INSTALL_FAILED_INSTANT_APP_INVALID,
+                throw new PrepareFailure(INSTALL_FAILED_SESSION_INVALID,
                         "Instant app package must target at least O");
             }
             if (parsedPackage.getSharedUserId() != null) {
                 Slog.w(TAG, "Instant app package " + parsedPackage.getPackageName()
                         + " may not declare sharedUserId.");
-                throw new PrepareFailure(INSTALL_FAILED_INSTANT_APP_INVALID,
+                throw new PrepareFailure(INSTALL_FAILED_SESSION_INVALID,
                         "Instant app package may not declare a sharedUserId");
             }
         }
@@ -17206,7 +17206,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 < SignatureSchemeVersion.SIGNING_BLOCK_V2) {
             Slog.w(TAG, "Instant app package " + parsedPackage.getPackageName()
                     + " is not signed with at least APK Signature Scheme v2");
-            throw new PrepareFailure(INSTALL_FAILED_INSTANT_APP_INVALID,
+            throw new PrepareFailure(INSTALL_FAILED_SESSION_INVALID,
                     "Instant app package must be signed with APK Signature Scheme v2 or greater");
         }
 
@@ -17412,7 +17412,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Cannot install updates to system apps on sdcard");
             } else if (instantApp) {
                 // Abort update; system app can't be replaced with an instant app
-                throw new PrepareFailure(INSTALL_FAILED_INSTANT_APP_INVALID,
+                throw new PrepareFailure(INSTALL_FAILED_SESSION_INVALID,
                         "Cannot update a system app with an instant app");
             }
         }
@@ -17604,7 +17604,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                             "Can't replace full app with instant app: " + pkgName11
                                                     + " for user: " + currentUser);
                                     throw new PrepareFailure(
-                                            PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
+                                            PackageManager.INSTALL_FAILED_SESSION_INVALID);
                                 }
                             }
                         } else if (!ps.getInstantApp(args.user.getIdentifier())) {
@@ -17612,7 +17612,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.w(TAG, "Can't replace full app with instant app: " + pkgName11
                                     + " for user: " + args.user.getIdentifier());
                             throw new PrepareFailure(
-                                    PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
+                                    PackageManager.INSTALL_FAILED_SESSION_INVALID);
                         }
                     }
                 }
