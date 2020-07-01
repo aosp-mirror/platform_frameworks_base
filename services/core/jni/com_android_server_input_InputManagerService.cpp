@@ -847,9 +847,8 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
     }
 
     bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
-    controller->setInactivityTimeout(lightsOut
-            ? PointerController::INACTIVITY_TIMEOUT_SHORT
-            : PointerController::INACTIVITY_TIMEOUT_NORMAL);
+    controller->setInactivityTimeout(lightsOut ? PointerController::InactivityTimeout::SHORT
+                                               : PointerController::InactivityTimeout::NORMAL);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {

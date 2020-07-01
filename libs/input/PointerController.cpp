@@ -83,10 +83,10 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 
     mLocked.animationPending = false;
 
-    mLocked.presentation = PRESENTATION_POINTER;
+    mLocked.presentation = Presentation::POINTER;
     mLocked.presentationChanged = false;
 
-    mLocked.inactivityTimeout = INACTIVITY_TIMEOUT_NORMAL;
+    mLocked.inactivityTimeout = InactivityTimeout::NORMAL;
 
     mLocked.pointerFadeDirection = 0;
     mLocked.pointerX = 0;
@@ -221,7 +221,7 @@ void PointerController::fade(Transition transition) {
     removeInactivityTimeoutLocked();
 
     // Start fading.
-    if (transition == TRANSITION_IMMEDIATE) {
+    if (transition == Transition::IMMEDIATE) {
         mLocked.pointerFadeDirection = 0;
         mLocked.pointerAlpha = 0.0f;
         updatePointerLocked();
@@ -238,7 +238,7 @@ void PointerController::unfade(Transition transition) {
     resetInactivityTimeoutLocked();
 
     // Start unfading.
-    if (transition == TRANSITION_IMMEDIATE) {
+    if (transition == Transition::IMMEDIATE) {
         mLocked.pointerFadeDirection = 0;
         mLocked.pointerAlpha = 1.0f;
         updatePointerLocked();
@@ -262,7 +262,7 @@ void PointerController::setPresentation(Presentation presentation) {
         return;
     }
 
-    if (presentation == PRESENTATION_POINTER) {
+    if (presentation == Presentation::POINTER) {
         if (mLocked.additionalMouseResources.empty()) {
             mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
                                                   &mLocked.animationResources,
@@ -624,7 +624,7 @@ bool PointerController::doBitmapAnimationLocked(nsecs_t timestamp) {
 }
 
 void PointerController::doInactivityTimeout() {
-    fade(TRANSITION_GRADUAL);
+    fade(Transition::GRADUAL);
 }
 
 void PointerController::startAnimationLocked() {
@@ -638,8 +638,9 @@ void PointerController::startAnimationLocked() {
 void PointerController::resetInactivityTimeoutLocked() {
     mLooper->removeMessages(mHandler, MSG_INACTIVITY_TIMEOUT);
 
-    nsecs_t timeout = mLocked.inactivityTimeout == INACTIVITY_TIMEOUT_SHORT
-            ? INACTIVITY_TIMEOUT_DELAY_TIME_SHORT : INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL;
+    nsecs_t timeout = mLocked.inactivityTimeout == InactivityTimeout::SHORT
+            ? INACTIVITY_TIMEOUT_DELAY_TIME_SHORT
+            : INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL;
     mLooper->sendMessageDelayed(timeout, mHandler, MSG_INACTIVITY_TIMEOUT);
 }
 
@@ -666,7 +667,7 @@ void PointerController::updatePointerLocked() REQUIRES(mLock) {
     }
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
-        if (mLocked.presentation == PRESENTATION_POINTER) {
+        if (mLocked.presentation == Presentation::POINTER) {
             if (mLocked.requestedPointerType == mPolicy->getDefaultPointerIconId()) {
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             } else {
@@ -783,7 +784,7 @@ void PointerController::loadResourcesLocked() REQUIRES(mLock) {
 
     mLocked.additionalMouseResources.clear();
     mLocked.animationResources.clear();
-    if (mLocked.presentation == PRESENTATION_POINTER) {
+    if (mLocked.presentation == Presentation::POINTER) {
         mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
                 &mLocked.animationResources, mLocked.viewport.displayId);
     }
