@@ -25,6 +25,7 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
+import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
@@ -14165,9 +14166,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             InstrumentationInfo ii = null;
             ApplicationInfo ai = null;
+
+            boolean noRestart = (flags & INSTR_FLAG_NO_RESTART) != 0;
+
             try {
                 ii = mContext.getPackageManager().getInstrumentationInfo(
-                    className, STOCK_PM_FLAGS);
+                        className, STOCK_PM_FLAGS);
                 ai = AppGlobals.getPackageManager().getApplicationInfo(
                         ii.targetPackage, STOCK_PM_FLAGS, userId);
             } catch (PackageManager.NameNotFoundException e) {
@@ -14183,24 +14187,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "Unable to find instrumentation target package: " + ii.targetPackage);
                 return false;
             }
-            if (!ai.hasCode()) {
+
+            if (ii.targetPackage.equals("android")) {
+                if (!noRestart) {
+                    reportStartInstrumentationFailureLocked(watcher, className,
+                            "Cannot instrument system server without 'no-restart'");
+                    return false;
+                }
+            } else if (!ai.hasCode()) {
                 reportStartInstrumentationFailureLocked(watcher, className,
                         "Instrumentation target has no code: " + ii.targetPackage);
                 return false;
             }
 
-            int match = mContext.getPackageManager().checkSignatures(
-                    ii.targetPackage, ii.packageName);
-            if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
-                String msg = "Permission Denial: starting instrumentation "
-                        + className + " from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingPid()
-                        + " not allowed because package " + ii.packageName
-                        + " does not have a signature matching the target "
-                        + ii.targetPackage;
-                reportStartInstrumentationFailureLocked(watcher, className, msg);
-                throw new SecurityException(msg);
+            if (!Build.IS_DEBUGGABLE) {
+                int match = mContext.getPackageManager().checkSignatures(
+                        ii.targetPackage, ii.packageName);
+                if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
+                    String msg = "Permission Denial: starting instrumentation "
+                            + className + " from pid="
+                            + Binder.getCallingPid()
+                            + ", uid=" + Binder.getCallingPid()
+                            + " not allowed because package " + ii.packageName
+                            + " does not have a signature matching the target "
+                            + ii.targetPackage;
+                    reportStartInstrumentationFailureLocked(watcher, className, msg);
+                    throw new SecurityException(msg);
+                }
             }
 
             ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
@@ -14223,6 +14236,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mHasBackgroundActivityStartsPermission = checkPermission(
                     START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
                             == PackageManager.PERMISSION_GRANTED;
+            activeInstr.mNoRestart = noRestart;
 
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
@@ -14238,18 +14252,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                     && (flags & INSTR_FLAG_DISABLE_ISOLATED_STORAGE) != 0;
 
             final long origId = Binder.clearCallingIdentity();
-            // Instrumentation can kill and relaunch even persistent processes
-            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
-                    "start instr");
-            // Inform usage stats to make the target package active
-            if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(ii.targetPackage, userId,
-                        UsageEvents.Event.SYSTEM_INTERACTION);
+
+            ProcessRecord app;
+            if (noRestart) {
+                app = getProcessRecordLocked(ai.processName, ai.uid, true);
+            } else {
+                // Instrumentation can kill and relaunch even persistent processes
+                forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
+                        "start instr");
+                // Inform usage stats to make the target package active
+                if (mUsageStatsService != null) {
+                    mUsageStatsService.reportEvent(ii.targetPackage, userId,
+                            UsageEvents.Event.SYSTEM_INTERACTION);
+                }
+                app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
+                        disableTestApiChecks, mountExtStorageFull, abiOverride,
+                        ZYGOTE_POLICY_FLAG_EMPTY);
             }
 
-            ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
-                    disableTestApiChecks, mountExtStorageFull, abiOverride,
-                    ZYGOTE_POLICY_FLAG_EMPTY);
+
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
             activeInstr.mSourceUid = callingUid;
@@ -14265,9 +14286,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ii.packageName, AppOpsManager.MODE_ALLOWED);
             }
             Binder.restoreCallingIdentity(origId);
+
+            if (noRestart) {
+                instrumentWithoutRestart(activeInstr, ai);
+            }
         }
 
         return true;
+    }
+
+    private void instrumentWithoutRestart(ActiveInstrumentation activeInstr,
+            ApplicationInfo targetInfo) {
+        ProcessRecord pr;
+        synchronized (this) {
+            pr = getProcessRecordLocked(targetInfo.processName, targetInfo.uid, true);
+        }
+
+        try {
+            pr.thread.instrumentWithoutRestart(
+                    activeInstr.mClass,
+                    activeInstr.mArguments,
+                    activeInstr.mWatcher,
+                    activeInstr.mUiAutomationConnection,
+                    targetInfo);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "RemoteException from instrumentWithoutRestart", e);
+        }
     }
 
     private boolean isCallerShell() {
@@ -14368,8 +14412,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         instr.removeProcess(app);
         app.setActiveInstrumentation(null);
 
-        forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false, app.userId,
-                "finished inst");
+        if (!instr.mNoRestart) {
+            forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
+                    app.userId,
+                    "finished inst");
+        }
     }
 
     public void finishInstrumentation(IApplicationThread target,

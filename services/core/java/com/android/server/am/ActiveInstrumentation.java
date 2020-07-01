@@ -70,6 +70,9 @@ class ActiveInstrumentation {
     // The uid of the process who started this instrumentation.
     int mSourceUid;
 
+    // True if instrumentation should take place without restarting the target process.
+    boolean mNoRestart;
+
     ActiveInstrumentation(ActivityManagerService service) {
         mService = service;
     }
