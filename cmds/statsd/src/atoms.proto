@@ -587,6 +587,8 @@ message Atom {
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
         DNDModeProto dnd_mode_rule = 10084 [(module) = "framework"];
+        GeneralExternalStorageAccessStats general_external_storage_access_stats =
+            10085 [(module) = "mediaprovider"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -4564,6 +4566,31 @@ message VmsClientConnectionStateChanged {
     }
 
     optional State state  = 2;
+}
+
+message MimeTypes {
+    repeated string mime_types = 1;
+}
+
+/**
+ * Logs statistics regarding accesses to external storage.
+ * All stats are normalized for one day period.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java
+ */
+message GeneralExternalStorageAccessStats {
+    optional int32 uid = 1 [(is_uid) = true];
+    // Total number of accesses like creation, open, delete and rename/update.
+    // Includes file path and ContentResolver accesses
+    optional uint32 total_accesses = 2;
+    // Number of file path accesses, as opposed to file path and ContentResolver.
+    optional uint32 file_path_accesses = 3;
+    // Number of accesses on secondary volumes like SD cards.
+    // Includes file path and ContentResolver accesses
+    optional uint32 secondary_storage_accesses = 4;
+    // Comma-separated list of mime types that were accessed.
+    optional MimeTypes mime_types_accessed = 5;
 }
 
 /**
