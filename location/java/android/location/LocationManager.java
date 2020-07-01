@@ -20,10 +20,8 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-import static android.app.AlarmManager.ELAPSED_REALTIME;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -34,7 +32,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.PropertyInvalidatedCache;
@@ -44,31 +41,30 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.util.LocationListenerTransportManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ICancellationSignal;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.listeners.ListenerExecutor;
 import com.android.internal.listeners.ListenerTransportMultiplexer;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledRunnable;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -305,11 +301,12 @@ public class LocationManager {
     public static final String METADATA_SETTINGS_FOOTER_STRING =
             "com.android.settings.location.FOOTER_STRING";
 
-    private static final long GET_CURRENT_LOCATION_MAX_TIMEOUT_MS = 30 * 1000;
 
-    @GuardedBy("mProviderLocationListeners")
-    private static final ArrayMap<String, LocationListenerTransportManager>
-            sProviderLocationListeners = new ArrayMap<>();
+    private static final long MAX_SINGLE_LOCATION_TIMEOUT_MS = 30 * 1000;
+
+    @GuardedBy("sLocationListeners")
+    private static final WeakHashMap<LocationListener, WeakReference<LocationListenerTransport>>
+            sLocationListeners = new WeakHashMap<>();
 
     final Context mContext;
     @UnsupportedAppUsage
@@ -643,12 +640,7 @@ public class LocationManager {
     @Nullable
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public Location getLastLocation() {
-        try {
-            return mService.getLastLocation(null, mContext.getPackageName(),
-                    mContext.getAttributionTag());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getLastKnownLocation(FUSED_PROVIDER);
     }
 
     /**
@@ -745,33 +737,19 @@ public class LocationManager {
     public void getCurrentLocation(@NonNull LocationRequest locationRequest,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Location> consumer) {
-        LocationRequest currentLocationRequest = new LocationRequest(locationRequest)
-                .setNumUpdates(1);
-        if (currentLocationRequest.getExpireIn() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
-            currentLocationRequest.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
-        }
-
-        GetCurrentLocationTransport transport = new GetCurrentLocationTransport(executor,
-                consumer);
+        ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
+        GetCurrentLocationTransport transport = new GetCurrentLocationTransport(executor, consumer,
+                remoteCancellationSignal);
 
         if (cancellationSignal != null) {
             cancellationSignal.throwIfCanceled();
+            cancellationSignal.setOnCancelListener(transport::cancel);
         }
 
-        ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
-
         try {
-            if (mService.getCurrentLocation(currentLocationRequest, remoteCancellationSignal,
+            mService.getCurrentLocation(locationRequest, remoteCancellationSignal,
                     transport, mContext.getPackageName(), mContext.getAttributionTag(),
-                    transport.getListenerId())) {
-                transport.register(mContext.getSystemService(AlarmManager.class),
-                        remoteCancellationSignal);
-                if (cancellationSignal != null) {
-                    cancellationSignal.setOnCancelListener(transport::cancel);
-                }
-            } else {
-                transport.fail();
-            }
+                    AppOpsManager.toReceiverId(consumer));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -803,7 +781,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
-        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
         requestLocationUpdates(request, listener, looper);
     }
 
@@ -835,7 +813,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
-        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
         requestLocationUpdates(request, listener, looper);
     }
 
@@ -862,7 +840,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
-        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
         requestLocationUpdates(request, pendingIntent);
     }
 
@@ -890,7 +868,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
-        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
         requestLocationUpdates(request, pendingIntent);
     }
 
@@ -1200,18 +1178,28 @@ public class LocationManager {
             locationRequest = new LocationRequest();
         }
 
-        String provider = locationRequest.getProvider();
+        synchronized (sLocationListeners) {
+            WeakReference<LocationListenerTransport> reference = sLocationListeners.get(listener);
+            LocationListenerTransport transport = reference != null ? reference.get() : null;
+            if (transport == null) {
+                transport = new LocationListenerTransport(listener, executor);
+                sLocationListeners.put(listener, new WeakReference<>(transport));
+            } else {
+                transport.setExecutor(executor);
+            }
 
-        LocationListenerTransportManager manager;
-        synchronized (sProviderLocationListeners) {
-            manager = sProviderLocationListeners.get(provider);
-            if (manager == null) {
-                manager = new LocationListenerTransportManager(mService);
-                sProviderLocationListeners.put(provider, manager);
+            try {
+                // making the service call while under lock is less than ideal since LMS must
+                // make sure that callbacks are not made on the same thread - however it is the
+                // easiest way to guarantee that clients will not receive callbacks after
+                // unregistration is complete.
+                mService.registerLocationListener(locationRequest, transport,
+                        mContext.getPackageName(), mContext.getAttributionTag(),
+                        AppOpsManager.toReceiverId(listener));
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
             }
         }
-
-        manager.addListener(mContext, locationRequest, executor, listener);
     }
 
     /**
@@ -1236,11 +1224,14 @@ public class LocationManager {
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
             @NonNull PendingIntent pendingIntent) {
-        Preconditions.checkArgument(locationRequest != null, "invalid null location request");
         Preconditions.checkArgument(pendingIntent != null, "invalid null pending intent");
         if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
             Preconditions.checkArgument(pendingIntent.isTargetedToPackage(),
                     "pending intent must be targeted to a package");
+        }
+
+        if (locationRequest == null) {
+            locationRequest = new LocationRequest();
         }
 
         try {
@@ -1294,24 +1285,23 @@ public class LocationManager {
     public void removeUpdates(@NonNull LocationListener listener) {
         Preconditions.checkArgument(listener != null, "invalid null listener");
 
-        RuntimeException exception = null;
-        synchronized (sProviderLocationListeners) {
-            for (int i = 0; i < sProviderLocationListeners.size(); i++) {
-                LocationListenerTransportManager manager = sProviderLocationListeners.valueAt(i);
+        synchronized (sLocationListeners) {
+            WeakReference<LocationListenerTransport> reference = sLocationListeners.remove(
+                    listener);
+            LocationListenerTransport transport = reference != null ? reference.get() : null;
+            if (transport != null) {
+                transport.unregister();
+
                 try {
-                    manager.removeListener(listener);
-                } catch (RuntimeException e) {
-                    if (exception == null) {
-                        exception = e;
-                    } else {
-                        exception.addSuppressed(e);
-                    }
+                    // making the service call while under lock is less than ideal since LMS must
+                    // make sure that callbacks are not made on the same thread - however it is the
+                    // easiest way to guarantee that clients will not receive callbacks after
+                    // unregistration is complete.
+                    mService.unregisterLocationListener(transport);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
                 }
             }
-        }
-
-        if (exception != null) {
-            throw exception;
         }
     }
 
@@ -2397,12 +2387,10 @@ public class LocationManager {
         }
     }
 
-    private static class GetCurrentLocationTransport extends ILocationListener.Stub implements
-            AlarmManager.OnAlarmListener {
+    private static class GetCurrentLocationTransport extends ILocationCallback.Stub implements
+            ListenerExecutor {
 
-        @GuardedBy("this")
-        @Nullable
-        private Executor mExecutor;
+        private final Executor mExecutor;
 
         @GuardedBy("this")
         @Nullable
@@ -2410,61 +2398,22 @@ public class LocationManager {
 
         @GuardedBy("this")
         @Nullable
-        private AlarmManager mAlarmManager;
-
-        @GuardedBy("this")
-        @Nullable
         private ICancellationSignal mRemoteCancellationSignal;
 
-        GetCurrentLocationTransport(Executor executor, Consumer<Location> consumer) {
+        GetCurrentLocationTransport(Executor executor, Consumer<Location> consumer,
+                ICancellationSignal remoteCancellationSignal) {
             Preconditions.checkArgument(executor != null, "illegal null executor");
             Preconditions.checkArgument(consumer != null, "illegal null consumer");
             mExecutor = executor;
             mConsumer = consumer;
-            mAlarmManager = null;
-            mRemoteCancellationSignal = null;
-        }
-
-        public String getListenerId() {
-            return AppOpsManager.toReceiverId(mConsumer);
-        }
-
-        public synchronized void register(AlarmManager alarmManager,
-                ICancellationSignal remoteCancellationSignal) {
-            if (mConsumer == null) {
-                return;
-            }
-
-            mAlarmManager = alarmManager;
-            mAlarmManager.set(
-                    ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + GET_CURRENT_LOCATION_MAX_TIMEOUT_MS,
-                    "GetCurrentLocation",
-                    this,
-                    null);
-
             mRemoteCancellationSignal = remoteCancellationSignal;
         }
 
         public void cancel() {
-            remove();
-        }
-
-        private Consumer<Location> remove() {
-            Consumer<Location> consumer;
             ICancellationSignal cancellationSignal;
             synchronized (this) {
-                mExecutor = null;
-                consumer = mConsumer;
-                mConsumer = null;
-
-                if (mAlarmManager != null) {
-                    mAlarmManager.cancel(this);
-                    mAlarmManager = null;
-                }
-
-                // ensure only one cancel event will go through
                 cancellationSignal = mRemoteCancellationSignal;
+                mConsumer = null;
                 mRemoteCancellationSignal = null;
             }
 
@@ -2472,72 +2421,76 @@ public class LocationManager {
                 try {
                     cancellationSignal.cancel();
                 } catch (RemoteException e) {
-                    // ignore
+                    e.rethrowFromSystemServer();
                 }
             }
-
-            return consumer;
-        }
-
-        public void fail() {
-            deliverResult(null);
         }
 
         @Override
-        public void onAlarm() {
+        public void onLocation(@Nullable Location location) {
+            Consumer<Location> consumer;
             synchronized (this) {
-                // save ourselves a pointless x-process call to cancel the alarm
-                mAlarmManager = null;
-            }
-
-            deliverResult(null);
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            synchronized (this) {
-                // save ourselves a pointless x-process call to cancel the location request
+                consumer = mConsumer;
+                mConsumer = null;
                 mRemoteCancellationSignal = null;
             }
 
-            deliverResult(location);
+            executeSafely(mExecutor, () -> consumer, listener -> listener.accept(location));
+        }
+    }
+
+    private static class LocationListenerTransport extends ILocationListener.Stub implements
+            ListenerExecutor {
+
+        private Executor mExecutor;
+        @Nullable private volatile LocationListener mListener;
+
+        LocationListenerTransport(LocationListener listener, Executor executor) {
+            Preconditions.checkArgument(listener != null, "invalid null listener/callback");
+            mListener = listener;
+            setExecutor(executor);
+        }
+
+        void setExecutor(Executor executor) {
+            Preconditions.checkArgument(executor != null, "invalid null executor");
+            mExecutor = executor;
+        }
+
+        void unregister() {
+            mListener = null;
         }
 
         @Override
-        public void onProviderEnabled(String provider) {}
+        public void onLocationChanged(Location location, IRemoteCallback onCompleteCallback) {
+            executeSafely(mExecutor, () -> mListener, new ListenerOperation<LocationListener>() {
+                @Override
+                public void operate(LocationListener listener) {
+                    listener.onLocationChanged(location);
+                }
 
-        @Override
-        public void onProviderDisabled(String provider) {
-            // in the event of the provider being disabled it is unlikely that we will get further
-            // locations, so fail early so the client isn't left waiting hopelessly
-            deliverResult(null);
+                @Override
+                public void onComplete(boolean success) {
+                    markComplete(onCompleteCallback);
+                }
+            });
         }
 
         @Override
-        public void onRemoved() {
-            deliverResult(null);
+        public void onProviderEnabledChanged(String provider, boolean enabled) {
+            executeSafely(mExecutor, () -> mListener, listener -> {
+                if (enabled) {
+                    listener.onProviderEnabled(provider);
+                } else {
+                    listener.onProviderDisabled(provider);
+                }
+            });
         }
 
-        private synchronized void deliverResult(@Nullable Location location) {
-            if (mExecutor == null) {
-                return;
-            }
-
-            PooledRunnable runnable =
-                    obtainRunnable(GetCurrentLocationTransport::acceptResult, this, location)
-                            .recycleOnUse();
+        private void markComplete(IRemoteCallback onCompleteCallback) {
             try {
-                mExecutor.execute(runnable);
-            } catch (RejectedExecutionException e) {
-                runnable.recycle();
-                throw e;
-            }
-        }
-
-        private void acceptResult(Location location) {
-            Consumer<Location> consumer = remove();
-            if (consumer != null) {
-                consumer.accept(location);
+                onCompleteCallback.sendResult(null);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
             }
         }
     }

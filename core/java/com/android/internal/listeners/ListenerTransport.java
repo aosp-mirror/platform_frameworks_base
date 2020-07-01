@@ -45,10 +45,6 @@ public class ListenerTransport<TListener> {
         mListener = listener;
     }
 
-    final boolean isRegistered() {
-        return mListener != null;
-    }
-
     /**
      * Prevents any listener invocations that happen-after this call.
      */

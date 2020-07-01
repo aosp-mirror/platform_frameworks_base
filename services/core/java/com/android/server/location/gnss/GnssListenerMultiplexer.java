@@ -89,10 +89,9 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         @Override
-        protected boolean onBinderRegister(Object key) {
+        protected void onBinderListenerRegister() {
             mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(), PERMISSION_FINE);
             mForeground = mAppForegroundHelper.isAppForeground(getIdentity().getUid());
-            return true;
         }
 
         boolean onAppOpsChanged(String packageName) {

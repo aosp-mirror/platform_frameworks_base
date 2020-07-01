@@ -54,11 +54,9 @@ public class SystemAppOpsHelper extends AppOpsHelper {
                 AppOpsManager.OP_COARSE_LOCATION,
                 null,
                 AppOpsManager.WATCH_FOREGROUND_CHANGES,
-                new AppOpsManager.OnOpChangedInternalListener() {
-                    public void onOpChanged(int op, String packageName) {
-                        // invoked on ui thread, move to fg thread so ui thread isn't blocked
-                        FgThread.getHandler().post(() -> notifyAppOpChanged(packageName));
-                    }
+                (op, packageName) -> {
+                    // invoked on ui thread, move to fg thread so ui thread isn't blocked
+                    FgThread.getHandler().post(() -> notifyAppOpChanged(packageName));
                 });
     }
 
