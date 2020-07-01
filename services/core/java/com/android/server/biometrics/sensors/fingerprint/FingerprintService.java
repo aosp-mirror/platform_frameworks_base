@@ -128,8 +128,8 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
         @Override // Binder call
         public void enroll(final IBinder token, final byte[] cryptoToken, final int userId,
-                final IFingerprintServiceReceiver receiver, final int flags,
-                final String opPackageName, Surface surface) {
+                final IFingerprintServiceReceiver receiver, final String opPackageName,
+                final Surface surface) {
             checkPermission(MANAGE_FINGERPRINT);
             updateActiveGroup(userId);
 
@@ -148,8 +148,8 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
         @Override // Binder call
         public void authenticate(final IBinder token, final long opId, final int userId,
-                final IFingerprintServiceReceiver receiver, final int flags,
-                final String opPackageName, Surface surface) {
+                final IFingerprintServiceReceiver receiver, final String opPackageName,
+                final Surface surface) {
             updateActiveGroup(userId);
 
             final boolean isStrongBiometric;
