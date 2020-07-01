@@ -23,6 +23,7 @@ import android.media.session.MediaSession
 
 /** State of a media view. */
 data class MediaData(
+    val userId: Int,
     val initialized: Boolean = false,
     val backgroundColor: Int,
     /**
