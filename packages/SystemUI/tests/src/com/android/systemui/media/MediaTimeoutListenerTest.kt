@@ -155,6 +155,22 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnMediaDataLoaded_migratesKeys_noTimeoutExtension() {
+        // From not playing
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        clearInvocations(mediaController)
+
+        // Migrate, still not playing
+        val playingState = mock(android.media.session.PlaybackState::class.java)
+        `when`(playingState.state).thenReturn(PlaybackState.STATE_PAUSED)
+        `when`(mediaController.playbackState).thenReturn(playingState)
+        mediaTimeoutListener.onMediaDataLoaded("NEWKEY", KEY, mediaData)
+
+        // Never cancels callback, or schedule another one
+        verify(cancellationRunnable, never()).run()
+    }
+
+    @Test
     fun testOnPlaybackStateChanged_schedulesTimeout_whenPaused() {
         // Assuming we're registered
         testOnMediaDataLoaded_registersPlaybackListener()
