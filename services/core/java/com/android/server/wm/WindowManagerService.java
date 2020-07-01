@@ -90,6 +90,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
@@ -7616,24 +7617,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void hideIme(IBinder imeTargetWindowToken) {
+        public void hideIme(IBinder imeTargetWindowToken, int displayId) {
             synchronized (mGlobalLock) {
                 WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
-                if (imeTarget == null) {
-                    // The target window no longer exists.
-                    return;
+                ProtoLog.d(WM_DEBUG_IME, "hideIme target: %s ", imeTarget);
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (imeTarget != null) {
+                    imeTarget = imeTarget.getImeControlTarget().getWindow();
+                    if (imeTarget != null) {
+                        dc = imeTarget.getDisplayContent();
+                    }
+                    // If there was a pending IME show(), reset it as IME has been
+                    // requested to be hidden.
+                    dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                 }
-                imeTarget = imeTarget.getImeControlTarget().getWindow();
-                final DisplayContent dc = imeTarget != null
-                        ? imeTarget.getDisplayContent() : getDefaultDisplayContentLocked();
-                // If there was a pending IME show(), reset it as IME has been
-                // requested to be hidden.
-                dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
-                if (dc.mInputMethodControlTarget == null) {
-                    return;
+                if (dc != null && dc.mInputMethodControlTarget != null) {
+                    ProtoLog.d(WM_DEBUG_IME, "hideIme Control target: %s ",
+                            dc.mInputMethodControlTarget);
+                    dc.mInputMethodControlTarget.hideInsets(
+                            WindowInsets.Type.ime(), true /* fromIme */);
                 }
-                dc.mInputMethodControlTarget.hideInsets(
-                        WindowInsets.Type.ime(), true /* fromIme */);
             }
         }
 
