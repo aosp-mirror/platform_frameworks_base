@@ -47,36 +47,27 @@ public abstract class PendingIntentListenerRegistration<TRequest, TListener> ext
         super(tag, request, callerIdentity, listener);
     }
 
-    /**
-     * May be overridden in place of {@link #onRegister(Object)}. Should return true if registration
-     * is successful, and false otherwise.
-     */
-    protected boolean onPendingIntentRegister(Object key) {
-        return true;
-    }
-
-    /**
-     * May be overridden in place of {@link #onUnregister()}.
-     */
-    protected void onPendingIntentUnregister(Object key) {}
-
     @Override
-    protected final boolean onRemovableRegister(Object key) {
-        PendingIntent pendingIntent = getPendingIntentFromKey(key);
-        pendingIntent.registerCancelListener(this);
-        if (!onPendingIntentRegister(key)) {
-            pendingIntent.unregisterCancelListener(this);
-            return false;
-        }
-        return true;
+    protected final void onRemovableListenerRegister() {
+        getPendingIntentFromKey(getKey()).registerCancelListener(this);
+        onPendingIntentListenerRegister();
     }
 
     @Override
-    protected final void onRemovableUnregister(Object key) {
-        PendingIntent pendingIntent = getPendingIntentFromKey(key);
-        onPendingIntentUnregister(key);
-        pendingIntent.unregisterCancelListener(this);
+    protected final void onRemovableListenerUnregister() {
+        onPendingIntentListenerUnregister();
+        getPendingIntentFromKey(getKey()).unregisterCancelListener(this);
     }
+
+    /**
+     * May be overridden in place of {@link #onRemovableListenerRegister()}.
+     */
+    protected void onPendingIntentListenerRegister() {}
+
+    /**
+     * May be overridden in place of {@link #onRemovableListenerUnregister()}.
+     */
+    protected void onPendingIntentListenerUnregister() {}
 
     @Override
     public void onCancelled(PendingIntent intent) {
