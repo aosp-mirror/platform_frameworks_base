@@ -59,7 +59,7 @@ import javax.inject.Singleton;
 @Singleton
 public class BubbleData {
 
-    BubbleLogger mLogger = new BubbleLoggerImpl();
+    private BubbleLogger mLogger = new BubbleLoggerImpl();
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
 
@@ -137,6 +137,7 @@ public class BubbleData {
 
     @Nullable
     private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
+    private BubbleController.PendingIntentCanceledListener mCancelledListener;
 
     /**
      * We track groups with summaries that aren't visibly displayed but still kept around because
@@ -165,6 +166,11 @@ public class BubbleData {
     public void setSuppressionChangedListener(
             BubbleController.NotificationSuppressionChangedListener listener) {
         mSuppressionListener = listener;
+    }
+
+    public void setPendingIntentCancelledListener(
+            BubbleController.PendingIntentCanceledListener listener) {
+        mCancelledListener = listener;
     }
 
     public boolean hasBubbles() {
@@ -236,7 +242,7 @@ public class BubbleData {
                 bubbleToReturn = mPendingBubbles.get(key);
             } else if (entry != null) {
                 // New bubble
-                bubbleToReturn = new Bubble(entry, mSuppressionListener);
+                bubbleToReturn = new Bubble(entry, mSuppressionListener, mCancelledListener);
             } else {
                 // Persisted bubble being promoted
                 bubbleToReturn = persistedBubble;
