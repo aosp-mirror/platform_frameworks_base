@@ -50,6 +50,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
+private const val USER_ID = 0
 
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
@@ -95,7 +96,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             setPlaybackState(playbackBuilder.build())
         }
         session.setActive(true)
-        mediaData = MediaData(true, 0, PACKAGE, null, null, SESSION_TITLE, null,
+        mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
             emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
             device = null, active = true, resumeAction = null)
     }
