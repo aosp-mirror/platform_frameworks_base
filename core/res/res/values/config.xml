@@ -3064,6 +3064,11 @@
          empty string is passed in -->
     <string name="config_wlan_data_service_package" translatable="false"></string>
 
+    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
+         tunnels across service restart. If iwlan tunnels are not persisted across restart,
+         Framework will clean up dangling data connections when service restarts -->
+    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
+
     <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
          empty string is passed in -->
     <string name="config_wwan_data_service_class" translatable="false"></string>
