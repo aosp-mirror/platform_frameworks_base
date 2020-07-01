@@ -49,7 +49,7 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
     }
 
     @Override
-    public void addDumpable(Dumpable dumpable) {
+    public void addDumpable(@NonNull Dumpable dumpable) {
         mTimeZoneDetectorStrategy.addDumpable(dumpable);
     }
 

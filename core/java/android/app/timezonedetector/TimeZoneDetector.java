@@ -29,7 +29,7 @@ import android.content.Context;
 @SystemService(Context.TIME_ZONE_DETECTOR_SERVICE)
 public interface TimeZoneDetector {
 
-   /**
+    /**
      * Returns the current user's time zone capabilities. See {@link TimeZoneCapabilities}.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)

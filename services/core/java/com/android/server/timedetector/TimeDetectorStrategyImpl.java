@@ -24,16 +24,15 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
+import android.util.IndentingPrintWriter;
 import android.util.LocalLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -203,8 +202,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
-    public synchronized void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+    public synchronized void dump(@NonNull IndentingPrintWriter ipw, @Nullable String[] args) {
         ipw.println("TimeDetectorStrategy:");
         ipw.increaseIndent(); // level 1
 
@@ -232,7 +230,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.decreaseIndent(); // level 2
 
         ipw.decreaseIndent(); // level 1
-        ipw.flush();
     }
 
     @GuardedBy("this")
