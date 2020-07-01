@@ -350,6 +350,11 @@ public abstract class ApexManager {
     public abstract boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds);
 
     /**
+     * Inform apexd that the boot has completed.
+     */
+    public abstract void markBootCompleted();
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -880,6 +885,15 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public void markBootCompleted() {
+            try {
+                waitForApexService().markBootCompleted();
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to contact apexservice", re);
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -1124,6 +1138,11 @@ public abstract class ApexManager {
         @Override
         public boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds) {
             return true;
+        }
+
+        @Override
+        public void markBootCompleted() {
+            // No-op
         }
 
         @Override
