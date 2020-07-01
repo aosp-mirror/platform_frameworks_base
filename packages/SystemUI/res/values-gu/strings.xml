@@ -1046,8 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"નિયંત્રણોને ફરીથી ગોઠવવા માટે તેમને હોલ્ડ કરીને ખેંચો"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"બધા નિયંત્રણો કાઢી નાખ્યા"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ફેરફારો સાચવ્યા નથી"</string>
-    <!-- no translation found for controls_favorite_see_other_apps (7709087332255283460) -->
-    <skip />
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"અન્ય બધી ઍપ જુઓ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"નિયંત્રણો લોડ કરી શકાયા નથી. ઍપના સેટિંગ બદલાયા નથી તેની ખાતરી કરવા માટે <xliff:g id="APP">%s</xliff:g> ઍપ ચેક કરો."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"સુસંગત નિયંત્રણો ઉપલબ્ધ નથી"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"અન્ય"</string>
