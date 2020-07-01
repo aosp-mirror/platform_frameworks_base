@@ -20,6 +20,7 @@ cc_binary_host {
         "libutils",
         "libcutils",
         "liblog",
+        "libui-types",
     ],
 
     // This tool is prebuilt if we're doing an app-only build.
