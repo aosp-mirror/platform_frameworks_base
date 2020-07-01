@@ -313,6 +313,14 @@ public final class MediaRoute2Info implements Parcelable {
     public static final String FEATURE_REMOTE_VIDEO_PLAYBACK =
             "android.media.route.feature.REMOTE_VIDEO_PLAYBACK";
 
+    /**
+     * Route feature: Remote group playback.
+     * <p>
+     * @hide
+     */
+    public static final String FEATURE_REMOTE_GROUP_PLAYBACK =
+            "android.media.route.feature.REMOTE_GROUP_PLAYBACK";
+
     final String mId;
     final CharSequence mName;
     final List<String> mFeatures;
