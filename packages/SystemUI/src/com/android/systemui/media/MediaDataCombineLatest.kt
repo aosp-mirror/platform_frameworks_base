@@ -58,6 +58,17 @@ class MediaDataCombineLatest @Inject constructor(
     }
 
     /**
+     * Get a map of all non-null data entries
+     */
+    fun getData(): Map<String, MediaData> {
+        return entries.filter {
+            (key, pair) -> pair.first != null
+        }.mapValues {
+            (key, pair) -> pair.first!!
+        }
+    }
+
+    /**
      * Add a listener for [MediaData] changes that has been combined with latest [MediaDeviceData].
      */
     fun addListener(listener: MediaDataManager.Listener) = listeners.add(listener)
