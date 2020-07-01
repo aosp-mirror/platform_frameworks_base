@@ -342,6 +342,9 @@ public class TestDrive {
                     .addPullAtomPackages(PullAtomPackages.newBuilder()
                             .setAtomId(Atom.TRAIN_INFO_FIELD_NUMBER)
                             .addPackages("AID_STATSD"))
+                    .addPullAtomPackages(PullAtomPackages.newBuilder()
+                            .setAtomId(Atom.GENERAL_EXTERNAL_STORAGE_ACCESS_STATS_FIELD_NUMBER)
+                            .addPackages("com.google.android.providers.media.module"))
                     .setHashStringsInMetricReport(false);
         }
     }
