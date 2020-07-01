@@ -119,12 +119,11 @@ public final class ClientMonitorCallbackConverter {
         }
     }
 
-    // The following are only used internally within system_server - specifically, within
-    // BiometricServiceBase and their <Biometric>Service implementations.
-
-    void onEnumerated(BiometricAuthenticator.Identifier identifier, int remaining)
-            throws RemoteException {
-        // Currently unused, BiometricServiceBase#handleEnumerate everything internally without
-        // needing to propagate this to any receiver.
+    public void onChallengeGenerated(long challenge) throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onChallengeGenerated(challenge);
+        } else if (mFingerprintServiceReceiver != null) {
+            mFingerprintServiceReceiver.onChallengeGenerated(challenge);
+        }
     }
 }

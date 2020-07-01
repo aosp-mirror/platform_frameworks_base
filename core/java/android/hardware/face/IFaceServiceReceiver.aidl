@@ -30,4 +30,5 @@ oneway interface IFaceServiceReceiver {
     void onRemoved(in Face face, int remaining);
     void onFeatureSet(boolean success, int feature);
     void onFeatureGet(boolean success, int feature, boolean value);
+    void onChallengeGenerated(long challenge);
 }

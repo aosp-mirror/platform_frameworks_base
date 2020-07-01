@@ -27,7 +27,6 @@ public interface RemovalConsumer {
      * @param identifier Fingerprint, face, etc that was removed.
      * @param remaining number of templates that still need to be removed before the operation in
      *                  the HAL is complete (e.g. when removing all templates).
-     * @return true if removal is completed (remaining == 0)
      */
-    boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining);
+    void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining);
 }

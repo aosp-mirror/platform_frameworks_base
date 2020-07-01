@@ -428,7 +428,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
 
         @Override
-        protected boolean isSticky() {
+        public boolean isSticky() {
             return super.isSticky() || mMenuShownPinned;
         }
 
@@ -567,6 +567,17 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                     removeAlertEntry(key);
                 }
                 mKeysToRemoveWhenLeavingKeyguard.clear();
+            }
+            if (wasKeyguard && !isKeyguard && mBypassController.getBypassEnabled()) {
+                ArrayList<String> keysToRemove = new ArrayList<>();
+                for (AlertEntry entry : mAlertEntries.values()) {
+                    if (entry.mEntry != null && entry.mEntry.isBubble() && !entry.isSticky()) {
+                        keysToRemove.add(entry.mEntry.getKey());
+                    }
+                }
+                for (String key : keysToRemove) {
+                    removeAlertEntry(key);
+                }
             }
         }
 

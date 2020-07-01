@@ -86,7 +86,6 @@ import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
-import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
 import static com.android.server.wm.TaskProto.DISPLAY_ID;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
@@ -246,11 +245,6 @@ class ActivityStack extends Task {
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
-
-    /** Detach this stack from its display when animation completes. */
-    // TODO: maybe tie this to WindowContainer#removeChild some how...
-    // TODO: This is no longer set. Okay to remove or was the set removed by accident?
-    private boolean mDeferRemoval;
 
     // If this is true, we are in the bounds animating mode. The task will be down or upscaled to
     // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
@@ -3204,9 +3198,6 @@ class ActivityStack extends Task {
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        if (mDeferRemoval) {
-            pw.println(prefix + "mDeferRemoval=true");
-        }
         super.dump(pw, prefix, dumpAll);
         if (!mExitingActivities.isEmpty()) {
             pw.println();
@@ -3276,15 +3267,12 @@ class ActivityStack extends Task {
     }
 
     /** Returns true if a removal action is still being deferred. */
-    boolean checkCompleteDeferredRemoval() {
+    boolean handleCompleteDeferredRemoval() {
         if (isAnimating(TRANSITION | CHILDREN)) {
             return true;
         }
-        if (mDeferRemoval) {
-            removeImmediately();
-        }
 
-        return super.checkCompleteDeferredRemoval();
+        return super.handleCompleteDeferredRemoval();
     }
 
     public DisplayInfo getDisplayInfo() {
@@ -3352,7 +3340,6 @@ class ActivityStack extends Task {
             mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
         }
 
-        proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(ANIMATING_BOUNDS, mBoundsAnimating);
 
         if (mSurfaceControl != null) {

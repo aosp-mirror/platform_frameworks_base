@@ -16,9 +16,9 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -27,18 +27,18 @@ import android.util.Slog;
 /**
  * A class to keep track of the remove state for a given client.
  */
-public class RemovalClient extends ClientMonitor implements RemovalConsumer {
+public abstract class RemovalClient extends ClientMonitor implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
-    private final int mBiometricId;
+    protected final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int biometricId, int groupId, int userId,
-            boolean restricted, String owner, BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(context, daemon, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
+    public RemovalClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
+            int biometricId, int userId, boolean restricted, @NonNull String owner,
+            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
+        super(finishCallback, context, token, listener, userId, restricted, owner, 0 /* cookie */,
                 sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
@@ -46,49 +46,18 @@ public class RemovalClient extends ClientMonitor implements RemovalConsumer {
     }
 
     @Override
-    public int start() {
+    public void start() {
         // The biometric template ids will be removed when we get confirmation from the HAL
-        try {
-            final int result = getDaemonWrapper().remove(getGroupId(), mBiometricId);
-            if (result != 0) {
-                Slog.w(TAG, "startRemove with id = " + mBiometricId + " failed, result=" +
-                        result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startRemove failed", e);
-        }
-        return 0;
+        startHalOperation();
     }
 
     @Override
-    public int stop(boolean initiatedByClient) {
-        if (mAlreadyCancelled) {
-            Slog.w(TAG, "stopRemove: already cancelled!");
-            return 0;
+    public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
+        if (identifier.getBiometricId() != 0) {
+            mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
+                    identifier.getBiometricId());
         }
 
-        try {
-            final int result = getDaemonWrapper().cancel();
-            if (result != 0) {
-                Slog.w(TAG, "stopRemoval failed, result=" + result);
-                return result;
-            }
-            if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is no longer removing");
-        } catch (RemoteException e) {
-            Slog.e(TAG, "stopRemoval failed", e);
-            return ERROR_ESRCH;
-        }
-        mAlreadyCancelled = true;
-        return 0; // success
-    }
-
-    /*
-     * @return true if we're done.
-     */
-    private boolean sendRemoved(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
         try {
             if (getListener() != null) {
                 getListener().onRemoved(identifier, remaining);
@@ -96,15 +65,9 @@ public class RemovalClient extends ClientMonitor implements RemovalConsumer {
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to notify Removed:", e);
         }
-        return remaining == 0;
-    }
 
-    @Override
-    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (identifier.getBiometricId() != 0) {
-            mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
-                    identifier.getBiometricId());
+        if (remaining == 0) {
+            mFinishCallback.onClientFinished(this);
         }
-        return sendRemoved(identifier, remaining);
     }
 }

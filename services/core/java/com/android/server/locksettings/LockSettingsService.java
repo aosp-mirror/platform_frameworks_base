@@ -2699,7 +2699,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // If there are multiple profiles in the same account, ensure we only generate the
             // challenge once.
             challengeType = CHALLENGE_INTERNAL;
-            challenge = mContext.getSystemService(FaceManager.class).generateChallenge();
+            challenge = mContext.getSystemService(FaceManager.class).generateChallengeBlocking();
         }
 
         final AuthenticationResult authResult;

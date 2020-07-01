@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -36,7 +37,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
-import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
 import com.android.systemui.Dependency;
@@ -96,7 +96,9 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         if (!mPipTaskOrganizer.isInPip() || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
-            // Skip if we aren't in PIP or haven't actually entered PIP yet
+            // Skip if we aren't in PIP or haven't actually entered PIP yet. We still need to update
+            // the display layout in the bounds handler in this case.
+            mPipBoundsHandler.onDisplayRotationChangedNotInPip(toRotation);
             return;
         }
         // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
@@ -174,7 +176,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         @Override
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-            if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
+            if (task.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_PINNED) {
                 return;
             }
@@ -207,7 +209,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice actions) {
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
             mHandler.post(() -> mMenuController.setAppActions(actions));
         }
 

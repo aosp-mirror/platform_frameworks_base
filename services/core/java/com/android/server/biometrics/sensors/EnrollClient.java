@@ -16,47 +16,42 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.Surface;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
  * A class to keep track of the enrollment state for a given client.
  */
-public class EnrollClient extends AcquisitionClient {
+public abstract class EnrollClient extends AcquisitionClient {
 
     private static final String TAG = "Biometrics/EnrollClient";
 
-    private final byte[] mCryptoToken;
+    protected final byte[] mHardwareAuthToken;
+    protected final int mTimeoutSec;
     private final BiometricUtils mBiometricUtils;
-    private final int[] mDisabledFeatures;
-    private final int mTimeoutSec;
-    private final Surface mSurface;
     private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
+    private boolean mAlreadyCancelled;
 
-    public EnrollClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, byte[] cryptoToken,
-            boolean restricted, String owner, BiometricUtils utils, final int[] disabledFeatures,
-            int timeoutSec, int statsModality, Surface surface, int sensorId,
+    public EnrollClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull byte[] hardwareAuthToken, boolean restricted, String owner,
+            @NonNull BiometricUtils utils, int timeoutSec, int statsModality, int sensorId,
             boolean shouldVibrate) {
-        super(context, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+        super(finishCallback, context, token, listener, userId, restricted, owner, 0 /* cookie */,
+                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
-        mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
-        mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
+        mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
-        mSurface = surface;
         mShouldVibrate = shouldVibrate;
     }
 
@@ -93,45 +88,20 @@ public class EnrollClient extends AcquisitionClient {
     }
 
     @Override
-    public int start() {
+    public void start() {
         mEnrollmentStartTimeMs = System.currentTimeMillis();
-        try {
-            final ArrayList<Integer> disabledFeatures = new ArrayList<>();
-            for (int i = 0; i < mDisabledFeatures.length; i++) {
-                disabledFeatures.add(mDisabledFeatures[i]);
-            }
-
-            final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), mTimeoutSec,
-                    disabledFeatures, mSurface);
-            if (result != 0) {
-                Slog.w(TAG, "startEnroll failed, result=" + result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startEnroll failed", e);
-        }
-        return 0; // success
+        startHalOperation();
     }
 
     @Override
-    public int stop(boolean initiatedByClient) {
+    public void cancel() {
         if (mAlreadyCancelled) {
             Slog.w(TAG, "stopEnroll: already cancelled!");
-            return 0;
+            return;
         }
 
-        try {
-            final int result = getDaemonWrapper().cancel();
-            if (result != 0) {
-                Slog.w(TAG, "startEnrollCancel failed, result = " + result);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "stopEnrollment failed", e);
-        }
+        stopHalOperation();
         mAlreadyCancelled = true;
-        return 0;
     }
 
     /**

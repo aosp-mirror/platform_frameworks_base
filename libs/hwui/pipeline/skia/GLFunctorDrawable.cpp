@@ -18,7 +18,6 @@
 #include <GrContext.h>
 #include <private/hwui/DrawGlInfo.h>
 #include "FunctorDrawable.h"
-#include "GlFunctorLifecycleListener.h"
 #include "GrBackendSurface.h"
 #include "GrRenderTarget.h"
 #include "GrRenderTargetContext.h"
@@ -31,14 +30,6 @@
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
-
-GLFunctorDrawable::~GLFunctorDrawable() {
-    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
-        if (lp->listener) {
-            lp->listener->onGlFunctorReleased(lp->functor);
-        }
-    }
-}
 
 static void setScissor(int viewportHeight, const SkIRect& clip) {
     SkASSERT(!clip.isEmpty());
@@ -195,11 +186,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         setScissor(info.height, clipRegion.getBounds());
     }
 
-    if (mAnyFunctor.index() == 0) {
-        std::get<0>(mAnyFunctor).handle->drawGl(info);
-    } else {
-        (*(std::get<1>(mAnyFunctor).functor))(DrawGlInfo::kModeDraw, &info);
-    }
+    mWebViewHandle->drawGl(info);
 
     if (clearStencilAfterFunctor) {
         // clear stencil buffer as it may be used by Skia

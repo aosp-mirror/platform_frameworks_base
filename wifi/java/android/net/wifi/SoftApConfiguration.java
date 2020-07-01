@@ -824,6 +824,9 @@ public final class SoftApConfiguration implements Parcelable {
          * Specifies the channel and associated band for the AP.
          *
          * The channel which AP resides on. Valid channels are country dependent.
+         * The {@link SoftApCapability#getSupportedChannelList(int)} can be used to obtain
+         * valid channels.
+         *
          * <p>
          * The default for the channel is a the special value 0 to have the framework
          * auto-select a valid channel from the band configured with

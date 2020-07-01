@@ -1,6 +1,5 @@
 package com.android.systemui.media
 
-import android.graphics.PointF
 import android.graphics.Rect
 import android.util.ArraySet
 import android.view.View
@@ -101,7 +100,7 @@ class MediaHost @Inject constructor(
                 }
                 // This will trigger a state change that ensures that we now have a state available
                 state.measurementInput = input
-                return mediaHostStatesManager.getPlayerDimensions(state)
+                return mediaHostStatesManager.updateCarouselDimensions(location, state)
             }
         }
 

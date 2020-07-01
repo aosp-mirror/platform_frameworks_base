@@ -72,8 +72,7 @@ public:
     virtual void enableZ(bool enableZ) override;
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
-    virtual void callDrawGLFunction(Functor* functor,
-                                    uirenderer::GlFunctorLifecycleListener* listener) override;
+
     void drawWebViewFunctor(int functor) override;
 
 private:

@@ -75,13 +75,13 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected String getTag() {
-        return TAG;
+    protected void doTemplateCleanupForUser(int userId) {
+
     }
 
     @Override
-    protected DaemonWrapper getDaemonWrapper() {
-        return null;
+    protected String getTag() {
+        return TAG;
     }
 
     @Override

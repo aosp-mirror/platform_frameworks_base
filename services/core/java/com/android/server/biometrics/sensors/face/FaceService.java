@@ -25,6 +25,7 @@ import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -60,9 +61,11 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.GenerateChallengeClient;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,7 +94,7 @@ public class FaceService extends BiometricServiceBase {
     private static final String FACE_DATA_DIR = "facedata";
     private static final String ACTION_LOCKOUT_RESET =
             "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
-    private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
+
 
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
@@ -107,33 +110,52 @@ public class FaceService extends BiometricServiceBase {
          */
 
         @Override // Binder call
-        public long generateChallenge(IBinder token) {
+        public void generateChallenge(IBinder token, IFaceServiceReceiver receiver,
+                String opPackageName) throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
-            return startGenerateChallenge(token);
+
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to generateChallenge, daemon null");
+                receiver.onChallengeGenerated(0L);
+                return;
+            }
+
+            final GenerateChallengeClient client = new FaceGenerateChallengeClient(
+                    mClientFinishCallback, getContext(), daemon, token,
+                    new ClientMonitorCallbackConverter(receiver), opPackageName, getSensorId());
+            generateChallengeInternal(client);
         }
 
         @Override // Binder call
-        public int revokeChallenge(IBinder token) {
+        public void revokeChallenge(IBinder token, String owner) {
             checkPermission(MANAGE_BIOMETRIC);
-            mHandler.post(() -> {
-                // TODO(b/137106905): Schedule binder calls in FaceService to avoid deadlocks.
-                if (getCurrentClient() == null) {
-                    // if we aren't handling any other HIDL calls (mCurrentClient == null), revoke
-                    // the challenge right away.
-                    startRevokeChallenge(token);
-                } else {
-                    // postpone revoking the challenge until we finish processing the current HIDL
-                    // call.
-                    mRevokeChallengePending = true;
-                }
-            });
-            return Status.OK;
+
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to revokeChallenge, daemon null");
+                return;
+            }
+
+            final RevokeChallengeClient client = new FaceRevokeChallengeClient(
+                    mClientFinishCallback, getContext(), daemon, token, owner, getSensorId());
+
+            // TODO(b/137106905): Schedule binder calls in FaceService to avoid deadlocks.
+            if (getCurrentClient() == null) {
+                // if we aren't handling any other HIDL calls (mCurrentClient == null), revoke
+                // the challenge right away.
+                revokeChallengeInternal(client);
+            } else {
+                // postpone revoking the challenge until we finish processing the current HIDL
+                // call.
+                mPendingRevokeChallenge = client;
+            }
         }
 
         @Override // Binder call
         public void enroll(int userId, final IBinder token, final byte[] cryptoToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
-                final int[] disabledFeatures, Surface surface) {
+                final int[] disabledFeatures, Surface surface) throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(userId, opPackageName);
 
@@ -142,14 +164,22 @@ public class FaceService extends BiometricServiceBase {
                         UserHandle.CURRENT);
             });
 
-            final boolean restricted = isRestricted();
-            final EnrollClient client = new FaceEnrollClient(getContext(),
-                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
-                    mCurrentUserId, 0 /* groupId */, cryptoToken, restricted, opPackageName,
-                    getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
-                    surface, getSensorId());
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to enroll, daemon null");
+                receiver.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                return;
+            }
 
-            enrollInternal(client, mCurrentUserId);
+            final boolean restricted = isRestricted();
+            final EnrollClient client = new FaceEnrollClient(mClientFinishCallback, getContext(),
+                    daemon, token, new ClientMonitorCallbackConverter(receiver),
+                    userId, cryptoToken, restricted, opPackageName, getBiometricUtils(),
+                    disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
+                    convertSurfaceToNativeHandle(surface), getSensorId());
+
+            enrollInternal(client, userId);
         }
 
         @Override // Binder call
@@ -169,37 +199,52 @@ public class FaceService extends BiometricServiceBase {
         @Override // Binder call
         public void authenticate(final IBinder token, final long opId, int userId,
                 final IFaceServiceReceiver receiver, final int flags,
-                final String opPackageName) {
+                final String opPackageName) throws RemoteException {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             updateActiveGroup(userId, opPackageName);
+
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to authenticate, daemon null");
+                receiver.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                return;
+            }
+
             final boolean restricted = isRestricted();
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_UNKNOWN;
-            final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
-                    mDaemonWrapper, token,
-                    new ClientMonitorCallbackConverter(receiver),
-                    mCurrentUserId, opId, restricted, opPackageName,
-                    0 /* cookie */, false /* requireConfirmation */, getSensorId(),
-                    isStrongBiometric(), statsClient,
-                    mTaskStackListener, mLockoutTracker, mUsageStats);
+            final AuthenticationClient client = new FaceAuthenticationClient(mClientFinishCallback,
+                    getContext(), daemon, token, new ClientMonitorCallbackConverter(receiver),
+                    userId, opId, restricted, opPackageName, 0 /* cookie */,
+                    false /* requireConfirmation */, getSensorId(), isStrongBiometric(),
+                    statsClient, mTaskStackListener, mLockoutTracker, mUsageStats);
             authenticateInternal(client, opPackageName);
         }
 
         @Override // Binder call
         public void prepareForAuthentication(boolean requireConfirmation, IBinder token, long opId,
-                int groupId, IBiometricSensorReceiver sensorReceiver,
+                int userId, IBiometricSensorReceiver sensorReceiver,
                 String opPackageName, int cookie, int callingUid, int callingPid,
-                int callingUserId) {
+                int callingUserId) throws RemoteException {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            updateActiveGroup(groupId, opPackageName);
+            updateActiveGroup(userId, opPackageName);
+
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to prepare for authentication, daemon null");
+                sensorReceiver.onError(getSensorId(), cookie,
+                        BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+                return;
+            }
+
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
-                    mDaemonWrapper, token,
-                    new ClientMonitorCallbackConverter(sensorReceiver),
-                    mCurrentUserId, opId, restricted, opPackageName, cookie,
-                    requireConfirmation, getSensorId(), isStrongBiometric(),
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mTaskStackListener, mLockoutTracker, mUsageStats);
+            final AuthenticationClient client = new FaceAuthenticationClient(mClientFinishCallback,
+                    getContext(), daemon, token, new ClientMonitorCallbackConverter(sensorReceiver),
+                    userId, opId, restricted, opPackageName, cookie, requireConfirmation,
+                    getSensorId(), isStrongBiometric(),
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, mTaskStackListener,
+                    mLockoutTracker, mUsageStats);
             authenticateInternal(client, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -227,7 +272,8 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public void remove(final IBinder token, final int faceId, final int userId,
-                final IFaceServiceReceiver receiver, final String opPackageName) {
+                final IFaceServiceReceiver receiver, final String opPackageName)
+                throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(userId, opPackageName);
 
@@ -236,11 +282,18 @@ public class FaceService extends BiometricServiceBase {
                 return;
             }
 
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to remove, daemon null");
+                receiver.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                return;
+            }
+
             final boolean restricted = isRestricted();
-            final RemovalClient client = new RemovalClient(getContext(),
-                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver), faceId,
-                    0 /* groupId */, userId, restricted, token.toString(), getBiometricUtils(),
-                    getSensorId(), statsModality());
+            final RemovalClient client = new FaceRemovalClient(mClientFinishCallback, getContext(),
+                    daemon, token, new ClientMonitorCallbackConverter(receiver), faceId, userId,
+                    restricted, opPackageName, getBiometricUtils(), getSensorId(), statsModality());
             removeInternal(client);
         }
 
@@ -335,7 +388,11 @@ public class FaceService extends BiometricServiceBase {
 
                 updateActiveGroup(userId, null /* opPackageName */);
                 try {
-                    mDaemonWrapper.resetLockout(hardwareAuthToken);
+                    final ArrayList<Byte> token = new ArrayList<>();
+                    for (int i = 0; i < hardwareAuthToken.length; i++) {
+                        token.add(hardwareAuthToken[i]);
+                    }
+                    mDaemon.resetLockout(token);
                 } catch (RemoteException e) {
                     Slog.e(getTag(), "Unable to reset lockout", e);
                 }
@@ -444,7 +501,7 @@ public class FaceService extends BiometricServiceBase {
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
     private UsageStats mUsageStats;
-    private boolean mRevokeChallengePending = false;
+    private RevokeChallengeClient mPendingRevokeChallenge;
 
     private NotificationManager mNotificationManager;
 
@@ -569,94 +626,6 @@ public class FaceService extends BiometricServiceBase {
         }
     };
 
-    /**
-     * Wraps the HAL-specific code and is passed to the ClientMonitor implementations so that they
-     * can be shared between the multiple biometric services.
-     */
-    private final DaemonWrapper mDaemonWrapper = new DaemonWrapper() {
-        @Override
-        public int authenticate(long operationId, int groupId, Surface surface)
-                throws RemoteException {
-            IBiometricsFace daemon = getFaceDaemon();
-            if (daemon == null) {
-                Slog.w(TAG, "authenticate(): no face HAL!");
-                return ERROR_ESRCH;
-            }
-            return daemon.authenticate(operationId);
-        }
-
-        @Override
-        public int cancel() throws RemoteException {
-            IBiometricsFace daemon = getFaceDaemon();
-            if (daemon == null) {
-                Slog.w(TAG, "cancel(): no face HAL!");
-                return ERROR_ESRCH;
-            }
-            return daemon.cancel();
-        }
-
-        @Override
-        public int remove(int groupId, int biometricId) throws RemoteException {
-            IBiometricsFace daemon = getFaceDaemon();
-            if (daemon == null) {
-                Slog.w(TAG, "remove(): no face HAL!");
-                return ERROR_ESRCH;
-            }
-            return daemon.remove(biometricId);
-        }
-
-        @Override
-        public int enumerate() throws RemoteException {
-            IBiometricsFace daemon = getFaceDaemon();
-            if (daemon == null) {
-                Slog.w(TAG, "enumerate(): no face HAL!");
-                return ERROR_ESRCH;
-            }
-            return daemon.enumerate();
-        }
-
-        @Override
-        public int enroll(byte[] cryptoToken, int groupId, int timeout,
-                ArrayList<Integer> disabledFeatures, Surface surface) throws RemoteException {
-            IBiometricsFace daemon = getFaceDaemon();
-            if (daemon == null) {
-                Slog.w(TAG, "enroll(): no face HAL!");
-                return ERROR_ESRCH;
-            }
-            final ArrayList<Byte> token = new ArrayList<>();
-            for (int i = 0; i < cryptoToken.length; i++) {
-                token.add(cryptoToken[i]);
-            }
-            android.hardware.biometrics.face.V1_1.IBiometricsFace daemon11 =
-                    android.hardware.biometrics.face.V1_1.IBiometricsFace.castFrom(
-                            daemon);
-            if (daemon11 != null) {
-                return daemon11.enroll_1_1(token, timeout, disabledFeatures,
-                        convertSurfaceToNativeHandle(surface));
-            } else if (surface == null) {
-                return daemon.enroll(token, timeout, disabledFeatures);
-            } else {
-                Slog.e(TAG, "enroll(): surface is only supported in @1.1 HAL");
-                return ERROR_ESRCH;
-            }
-        }
-
-        @Override
-        public void resetLockout(byte[] cryptoToken) throws RemoteException {
-            IBiometricsFace daemon = getFaceDaemon();
-            if (daemon == null) {
-                Slog.w(TAG, "resetLockout(): no face HAL!");
-                return;
-            }
-            final ArrayList<Byte> token = new ArrayList<>();
-            for (int i = 0; i < cryptoToken.length; i++) {
-                token.add(cryptoToken[i]);
-            }
-            daemon.resetLockout(token);
-        }
-    };
-
-
     public FaceService(Context context) {
         super(context);
         mLockoutTracker = new LockoutHalImpl();
@@ -667,9 +636,9 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected void removeClient(ClientMonitor client) {
         super.removeClient(client);
-        if (mRevokeChallengePending) {
-            startRevokeChallenge(null);
-            mRevokeChallengePending = false;
+        if (mPendingRevokeChallenge != null) {
+            revokeChallengeInternal(mPendingRevokeChallenge);
+            mPendingRevokeChallenge = null;
         }
     }
 
@@ -686,11 +655,6 @@ public class FaceService extends BiometricServiceBase {
     @Override
     public String getTag() {
         return TAG;
-    }
-
-    @Override
-    protected DaemonWrapper getDaemonWrapper() {
-        return mDaemonWrapper;
     }
 
     @Override
@@ -804,6 +768,25 @@ public class FaceService extends BiometricServiceBase {
         return mLockoutTracker.getLockoutModeForUser(userId);
     }
 
+    @Override
+    protected void doTemplateCleanupForUser(int userId) {
+        final IBiometricsFace daemon = getFaceDaemon();
+        if (daemon == null) {
+            Slog.e(TAG, "daemon null, skipping template cleanup");
+            return;
+        }
+
+        final boolean restricted = !hasPermission(getManageBiometricPermission());
+        final List<? extends BiometricAuthenticator.Identifier> enrolledList =
+                getEnrolledTemplates(userId);
+        final FaceInternalCleanupClient client = new FaceInternalCleanupClient(
+                mClientFinishCallback, getContext(), daemon, userId, restricted,
+                getContext().getOpPackageName(), getSensorId(), statsModality(), enrolledList,
+                getBiometricUtils());
+        cleanupInternal(client);
+    }
+
+
     /** Gets the face daemon */
     private synchronized IBiometricsFace getFaceDaemon() {
         if (mDaemon == null) {
@@ -842,38 +825,6 @@ public class FaceService extends BiometricServiceBase {
             }
         }
         return mDaemon;
-    }
-
-    private long startGenerateChallenge(IBinder token) {
-        IBiometricsFace daemon = getFaceDaemon();
-        if (daemon == null) {
-            Slog.w(TAG, "startGenerateChallenge: no face HAL!");
-            return 0;
-        }
-        try {
-            return daemon.generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startGenerateChallenge failed", e);
-        }
-        return 0;
-    }
-
-    private int startRevokeChallenge(IBinder token) {
-        IBiometricsFace daemon = getFaceDaemon();
-        if (daemon == null) {
-            Slog.w(TAG, "startRevokeChallenge: no face HAL!");
-            return 0;
-        }
-        try {
-            final int res = daemon.revokeChallenge();
-            if (res != Status.OK) {
-                Slog.e(TAG, "revokeChallenge returned " + res);
-            }
-            return res;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startRevokeChallenge failed", e);
-        }
-        return 0;
     }
 
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);

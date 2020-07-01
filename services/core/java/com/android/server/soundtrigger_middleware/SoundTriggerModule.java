@@ -216,7 +216,9 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      * Attached to the HAL service via factory.
      */
     private void attachToHal() {
-        mHalService = new SoundTriggerHw2Enforcer(new SoundTriggerHw2Compat(mHalFactory.create()));
+        mHalService = new SoundTriggerHw2Enforcer(
+                new SoundTriggerHw2Watchdog(
+                        new SoundTriggerHw2Compat(mHalFactory.create())));
         mHalService.linkToDeath(this, 0);
     }
 
@@ -429,7 +431,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         private void checkValid() {
             if (mCallback == null) {
-                throw new ServiceSpecificException(Status.DEAD_OBJECT);
+                throw new RecoverableException(Status.DEAD_OBJECT);
             }
         }
 

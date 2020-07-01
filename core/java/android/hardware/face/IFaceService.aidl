@@ -72,10 +72,10 @@ interface IFaceService {
     boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
-    long generateChallenge(IBinder token);
+    void generateChallenge(IBinder token, IFaceServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    int revokeChallenge(IBinder token);
+    void revokeChallenge(IBinder token, String opPackageName);
 
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);

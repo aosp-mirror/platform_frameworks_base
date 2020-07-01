@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-#pragma once
+package com.android.server.biometrics.sensors;
 
-#include <utils/Functor.h>
-#include <utils/RefBase.h>
-
-namespace android {
-namespace uirenderer {
-
-class GlFunctorLifecycleListener : public VirtualLightRefBase {
-public:
-    virtual ~GlFunctorLifecycleListener() {}
-    virtual void onGlFunctorReleased(Functor* functor) = 0;
-};
-
-}  // namespace uirenderer
-}  // namespace android
+/**
+ * Interface that {@link ClientMonitor} subclasses eligible/interested in error callbacks should
+ * implement.
+ */
+public interface ErrorConsumer {
+    /**
+     * @param errorCode defined by the HIDL interface
+     * @param vendorCode defined by the vendor
+     */
+    void onError(int errorCode, int vendorCode);
+}

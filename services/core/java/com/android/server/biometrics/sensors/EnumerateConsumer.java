@@ -27,7 +27,6 @@ public interface EnumerateConsumer {
      * @param identifier Fingerprint, face, etc template that exists in the HAL.
      * @param remaining number of templates that exist but have not been reported to the
      *                  framework yet.
-     * @return true if enumerate is completed (remaining == 0)
      */
-    boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier, int remaining);
+    void onEnumerationResult(BiometricAuthenticator.Identifier identifier, int remaining);
 }

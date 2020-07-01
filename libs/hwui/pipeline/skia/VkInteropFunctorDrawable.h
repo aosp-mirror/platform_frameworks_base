@@ -35,7 +35,7 @@ class VkInteropFunctorDrawable : public FunctorDrawable {
 public:
     using FunctorDrawable::FunctorDrawable;
 
-    virtual ~VkInteropFunctorDrawable();
+    virtual ~VkInteropFunctorDrawable() {}
 
     static void vkInvokeFunctor(Functor* functor);
 

@@ -28,4 +28,5 @@ oneway interface IFingerprintServiceReceiver {
     void onAuthenticationFailed();
     void onError(int error, int vendorCode);
     void onRemoved(in Fingerprint fp, int remaining);
+    void onChallengeGenerated(long challenge);
 }

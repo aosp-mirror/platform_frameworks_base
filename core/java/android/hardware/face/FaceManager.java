@@ -41,7 +41,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.Log;
 import android.util.Slog;
 import android.view.Surface;
 
@@ -49,6 +48,9 @@ import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A class that coordinates access to the face authentication hardware.
@@ -67,6 +69,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private static final int MSG_REMOVED = 105;
     private static final int MSG_GET_FEATURE_COMPLETED = 106;
     private static final int MSG_SET_FEATURE_COMPLETED = 107;
+    private static final int MSG_CHALLENGE_GENERATED = 108;
 
     private IFaceService mService;
     private final Context mContext;
@@ -76,6 +79,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private RemovalCallback mRemovalCallback;
     private SetFeatureCallback mSetFeatureCallback;
     private GetFeatureCallback mGetFeatureCallback;
+    private GenerateChallengeCallback mGenerateChallengeCallback;
     private CryptoObject mCryptoObject;
     private Face mRemovalFace;
     private Handler mHandler;
@@ -125,6 +129,17 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             args.argi1 = feature;
             args.arg2 = value;
             mHandler.obtainMessage(MSG_GET_FEATURE_COMPLETED, args).sendToTarget();
+        }
+
+        @Override
+        public void onChallengeGenerated(long challenge) {
+            if (mGenerateChallengeCallback instanceof InternalGenerateChallengeCallback) {
+                // Perform this on system_server thread, since the application's thread is
+                // blocked waiting for the result
+                mGenerateChallengeCallback.onGenerateChallengeResult(challenge);
+            } else {
+                mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, challenge).sendToTarget();
+            }
         }
     };
 
@@ -207,7 +222,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         if (cancel != null) {
             if (cancel.isCanceled()) {
-                Log.w(TAG, "authentication already canceled");
+                Slog.w(TAG, "authentication already canceled");
                 return;
             } else {
                 cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
@@ -224,7 +239,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mService.authenticate(mToken, operationId, userId, mServiceReceiver,
                         flags, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception while authenticating: ", e);
+                Slog.w(TAG, "Remote exception while authenticating: ", e);
                 if (callback != null) {
                     // Though this may not be a hardware issue, it will cause apps to give up or
                     // try again later.
@@ -278,7 +293,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         if (cancel != null) {
             if (cancel.isCanceled()) {
-                Log.w(TAG, "enrollment already canceled");
+                Slog.w(TAG, "enrollment already canceled");
                 return;
             } else {
                 cancel.setOnCancelListener(new OnEnrollCancelListener());
@@ -292,7 +307,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mService.enroll(userId, mToken, token, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures, surface);
             } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception in enroll: ", e);
+                Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
                 // try again later.
                 callback.onEnrollmentError(FACE_ERROR_HW_UNAVAILABLE,
@@ -330,7 +345,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         if (cancel != null) {
             if (cancel.isCanceled()) {
-                Log.w(TAG, "enrollRemotely is already canceled.");
+                Slog.w(TAG, "enrollRemotely is already canceled.");
                 return;
             } else {
                 cancel.setOnCancelListener(new OnEnrollCancelListener());
@@ -344,7 +359,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mService.enrollRemotely(userId, mToken, token, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception in enrollRemotely: ", e);
+                Slog.w(TAG, "Remote exception in enrollRemotely: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
                 // try again later.
                 callback.onEnrollmentError(FACE_ERROR_HW_UNAVAILABLE,
@@ -357,22 +372,56 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
-     * Requests an auth token to tie sensitive operations to the confirmation of
-     * existing device credentials (e.g. pin/pattern/password).
+     * Same as {@link #generateChallenge(GenerateChallengeCallback)}, except blocks until the
+     * TEE/hardware operation is complete.
+     * @return challenge generated in the TEE/hardware
+     * @hide
+     */
+    @RequiresPermission(MANAGE_BIOMETRIC)
+    public long generateChallengeBlocking() {
+        final AtomicReference<Long> result = new AtomicReference<>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        final GenerateChallengeCallback callback = new InternalGenerateChallengeCallback() {
+            @Override
+            public void onGenerateChallengeResult(long challenge) {
+                result.set(challenge);
+                latch.countDown();
+            }
+        };
+
+        generateChallenge(callback);
+
+        try {
+            latch.await(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Interrupted while generatingChallenge", e);
+            e.printStackTrace();
+        }
+        return result.get();
+    }
+
+    /**
+     * Generates a unique random challenge in the TEE. A typical use case is to have it wrapped in a
+     * HardwareAuthenticationToken, minted by Gatekeeper upon PIN/Pattern/Password verification.
+     * The HardwareAuthenticationToken can then be sent to the biometric HAL together with a
+     * request to perform sensitive operation(s) (for example enroll or setFeature), represented
+     * by the challenge. Doing this ensures that a the sensitive operation cannot be performed
+     * unless the user has entered confirmed PIN/Pattern/Password.
+     *
+     * @see com.android.server.locksettings.LockSettingsService
      *
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public long generateChallenge() {
-        long result = 0;
+    public void generateChallenge(GenerateChallengeCallback callback) {
         if (mService != null) {
             try {
-                result = mService.generateChallenge(mToken);
+                mGenerateChallengeCallback = callback;
+                mService.generateChallenge(mToken, mServiceReceiver, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return result;
     }
 
     /**
@@ -381,16 +430,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public int revokeChallenge() {
-        int result = 0;
+    public void revokeChallenge() {
         if (mService != null) {
             try {
-                result = mService.revokeChallenge(mToken);
+                mService.revokeChallenge(mToken, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return result;
     }
 
     /**
@@ -458,7 +505,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mService.remove(mToken, face.getBiometricId(), userId, mServiceReceiver,
                         mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception in remove: ", e);
+                Slog.w(TAG, "Remote exception in remove: ", e);
                 if (callback != null) {
                     callback.onRemovalError(face, FACE_ERROR_HW_UNAVAILABLE,
                             getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
@@ -546,7 +593,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "isFaceHardwareDetected(): Service not connected!");
+            Slog.w(TAG, "isFaceHardwareDetected(): Service not connected!");
         }
         return false;
     }
@@ -586,7 +633,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "addLockoutResetCallback(): Service not connected!");
+            Slog.w(TAG, "addLockoutResetCallback(): Service not connected!");
         }
     }
 
@@ -967,6 +1014,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         public abstract void onCompleted(boolean success, int feature, boolean value);
     }
 
+    /**
+     * @hide
+     */
+    public abstract static class GenerateChallengeCallback {
+        public abstract void onGenerateChallengeResult(long challenge);
+    }
+
+    private abstract static class InternalGenerateChallengeCallback
+            extends GenerateChallengeCallback {}
+
     private class OnEnrollCancelListener implements OnCancelListener {
         @Override
         public void onCancel() {
@@ -1030,8 +1087,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                             (boolean) args.arg2 /* value */);
                     args.recycle();
                     break;
+                case MSG_CHALLENGE_GENERATED:
+                    sendChallengeGenerated((long) msg.obj /* challenge */);
+                    break;
                 default:
-                    Log.w(TAG, "Unknown message: " + msg.what);
+                    Slog.w(TAG, "Unknown message: " + msg.what);
             }
             Trace.endSection();
         }
@@ -1051,12 +1111,19 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         mGetFeatureCallback.onCompleted(success, feature, value);
     }
 
+    private void sendChallengeGenerated(long challenge) {
+        if (mGenerateChallengeCallback == null) {
+            return;
+        }
+        mGenerateChallengeCallback.onGenerateChallengeResult(challenge);
+    }
+
     private void sendRemovedResult(Face face, int remaining) {
         if (mRemovalCallback == null) {
             return;
         }
         if (face == null) {
-            Log.e(TAG, "Received MSG_REMOVED, but face is null");
+            Slog.e(TAG, "Received MSG_REMOVED, but face is null");
             return;
         }
         mRemovalCallback.onRemovalSucceeded(face, remaining);

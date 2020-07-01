@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.media.AudioAttributes;
@@ -31,7 +32,8 @@ import android.util.Slog;
  * Abstract {@link ClientMonitor} subclass that operations eligible/interested in acquisition
  * messages should extend.
  */
-public abstract class AcquisitionClient extends ClientMonitor {
+public abstract class AcquisitionClient extends ClientMonitor
+        implements ErrorConsumer, Cancellable {
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 
@@ -45,30 +47,41 @@ public abstract class AcquisitionClient extends ClientMonitor {
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
 
-    AcquisitionClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, boolean restricted,
-            String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
-        super(context, daemon, token, listener, userId, groupId, restricted, owner, cookie,
-                sensorId,
+    AcquisitionClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
+            boolean restricted, @NonNull String owner, int cookie, int sensorId, int statsModality,
+            int statsAction, int statsClient) {
+        super(finishCallback, context, token, listener, userId, restricted, owner, cookie, sensorId,
                 statsModality, statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
     }
 
+    @Override
+    public void onError(int errorCode, int vendorCode) {
+        logOnError(getContext(), errorCode, vendorCode, getTargetUserId());
+        try {
+            if (getListener() != null) {
+                getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to invoke sendError", e);
+        }
+        mFinishCallback.onClientFinished(this);
+    }
+
     /**
      * Called when we get notification from the biometric's HAL that an image has been acquired.
      * Common to authenticate and enroll.
      * @param acquiredInfo info about the current image acquisition
-     * @return true if client should be removed
      */
-    public boolean onAcquired(int acquiredInfo, int vendorCode) {
+    public void onAcquired(int acquiredInfo, int vendorCode) {
         // Default is to always send acquire messages to clients.
-        return onAcquiredInternal(acquiredInfo, vendorCode, true /* shouldSend */);
+        onAcquiredInternal(acquiredInfo, vendorCode, true /* shouldSend */);
     }
 
-    protected final boolean onAcquiredInternal(int acquiredInfo, int vendorCode,
+    protected final void onAcquiredInternal(int acquiredInfo, int vendorCode,
             boolean shouldSend) {
         super.logOnAcquired(getContext(), acquiredInfo, vendorCode, getTargetUserId());
         if (DEBUG) {
@@ -76,19 +89,18 @@ public abstract class AcquisitionClient extends ClientMonitor {
                     + ", shouldSend: " + shouldSend);
         }
 
+        // Good scans will keep the device awake
+        if (acquiredInfo == BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
+            notifyUserActivity();
+        }
+
         try {
             if (getListener() != null && shouldSend) {
                 getListener().onAcquired(getSensorId(), acquiredInfo, vendorCode);
             }
-            return false; // acquisition continues...
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendAcquired", e);
-            return true;
-        } finally {
-            // Good scans will keep the device awake
-            if (acquiredInfo == BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-                notifyUserActivity();
-            }
+            mFinishCallback.onClientFinished(this);
         }
     }
 

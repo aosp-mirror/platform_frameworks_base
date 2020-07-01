@@ -368,7 +368,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         protected boolean expanded;
 
         @Override
-        protected boolean isSticky() {
+        public boolean isSticky() {
             return (mEntry.isRowPinned() && expanded)
                     || remoteInputActive || hasFullScreenIntent(mEntry);
         }

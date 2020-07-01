@@ -51,7 +51,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -77,7 +76,6 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected static final boolean DEBUG = true;
 
-    private static final boolean CLEANUP_UNKNOWN_TEMPLATES = true;
     private static final int MSG_USER_SWITCHING = 10;
     private static final long CANCEL_TIMEOUT_LIMIT = 3000; // max wait for onCancel() from HAL,in ms
 
@@ -112,6 +110,23 @@ public abstract class BiometricServiceBase extends SystemService
         }
     };
 
+    protected final ClientMonitor.FinishCallback mClientFinishCallback = clientMonitor -> {
+        if (clientMonitor instanceof RemovalConsumer) {
+            // When the last biometric of a group is removed, update the authenticator id.
+            // Note that 1) multiple ClientMonitors may be cause onRemoved (e.g. internal cleanup),
+            // and 2) updateActiveGroup updates/relies on global state, so there's no good way to
+            // compartmentalize this yet.
+            final int userId = clientMonitor.getTargetUserId();
+            if (!hasEnrolledBiometrics(userId)) {
+                Slog.d(getTag(), "Last biometric removed for user: " + userId
+                        + ", updating active group");
+                updateActiveGroup(userId, null);
+            }
+        }
+
+        removeClient(clientMonitor);
+    };
+
     private IBiometricService mBiometricService;
     private ClientMonitor mCurrentClient;
     private ClientMonitor mPendingClient;
@@ -123,11 +138,6 @@ public abstract class BiometricServiceBase extends SystemService
      * @return the log tag.
      */
     protected abstract String getTag();
-
-    /**
-     * @return wrapper for the HAL
-     */
-    protected abstract DaemonWrapper getDaemonWrapper();
 
     /**
      * @return the biometric utilities for a specific implementation.
@@ -187,22 +197,6 @@ public abstract class BiometricServiceBase extends SystemService
      */
     protected abstract @LockoutTracker.LockoutMode int getLockoutMode(int userId);
 
-    /**
-     * Wraps a portion of the interface from Service -> Daemon that is used by the ClientMonitor
-     * subclasses.
-     */
-    public interface DaemonWrapper {
-        int ERROR_ESRCH = 3; // Likely HAL is dead. see errno.h.
-        int authenticate(long operationId, int groupId, Surface surface)
-                throws RemoteException;
-        int cancel() throws RemoteException;
-        int remove(int groupId, int biometricId) throws RemoteException;
-        int enumerate() throws RemoteException;
-        int enroll(byte[] token, int groupId, int timeout,
-                ArrayList<Integer> disabledFeatures, Surface surface) throws RemoteException;
-        void resetLockout(byte[] token) throws RemoteException;
-    }
-
     private final Runnable mOnTaskStackChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -222,7 +216,7 @@ public abstract class BiometricServiceBase extends SystemService
                             && !mCurrentClient.isAlreadyDone()) {
                         Slog.e(getTag(), "Stopping background authentication, top: "
                                 + topPackage + " currentClient: " + currentClient);
-                        mCurrentClient.stop(false /* initiatedByClient */);
+                        ((AuthenticationClient) mCurrentClient).cancel();
                     }
                 }
             } catch (RemoteException e) {
@@ -414,9 +408,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         final AcquisitionClient acquisitionClient = (AcquisitionClient) client;
-        if (acquisitionClient.onAcquired(acquiredInfo, vendorCode)) {
-            removeClient(client);
-        }
+        acquisitionClient.onAcquired(acquiredInfo, vendorCode);
 
         if (client instanceof AuthenticationClient) {
             final int userId = client.getTargetUserId();
@@ -444,9 +436,8 @@ public abstract class BiometricServiceBase extends SystemService
         } else {
             mPerformanceTracker.incrementAuthForUser(userId, authenticated);
         }
-        if (authenticationClient.onAuthenticated(identifier, authenticated, token)) {
-            removeClient(authenticationClient);
-        }
+
+        authenticationClient.onAuthenticated(identifier, authenticated, token);
     }
 
     protected void handleEnrollResult(BiometricAuthenticator.Identifier identifier,
@@ -476,10 +467,13 @@ public abstract class BiometricServiceBase extends SystemService
         if (DEBUG) Slog.v(getTag(), "handleError(client="
                 + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
 
-        if (client != null) {
-            client.onError(error, vendorCode);
-            removeClient(client);
+        if (!(client instanceof ErrorConsumer)) {
+            Slog.e(getTag(), "error received for non-ErrorConsumer");
+            return;
         }
+
+        final ErrorConsumer errorConsumer = (ErrorConsumer) client;
+        errorConsumer.onError(error, vendorCode);
 
         if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
             mHandler.removeCallbacks(mResetClientState);
@@ -506,17 +500,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         final RemovalConsumer removalConsumer = (RemovalConsumer) client;
-        if (removalConsumer.onRemoved(identifier, remaining)) {
-            removeClient(client);
-            // When the last biometric of a group is removed, update the authenticator id
-            int userId = mCurrentUserId;
-            if (identifier instanceof Fingerprint) {
-                userId = ((Fingerprint) identifier).getGroupId();
-            }
-            if (!hasEnrolledBiometrics(userId)) {
-                updateActiveGroup(userId, null);
-            }
-        }
+        removalConsumer.onRemoved(identifier, remaining);
     }
 
     protected void handleEnumerate(BiometricAuthenticator.Identifier identifier, int remaining) {
@@ -529,9 +513,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
-        if (enumerateConsumer.onEnumerationResult(identifier, remaining)) {
-            removeClient(client);
-        }
+        enumerateConsumer.onEnumerationResult(identifier, remaining);
     }
 
     /**
@@ -559,8 +541,20 @@ public abstract class BiometricServiceBase extends SystemService
             ClientMonitor client = mCurrentClient;
             if (client instanceof EnrollClient && client.getToken() == token) {
                 if (DEBUG) Slog.v(getTag(), "Cancelling enrollment");
-                client.stop(client.getToken() == token);
+                ((EnrollClient) client).cancel();
             }
+        });
+    }
+
+    protected void generateChallengeInternal(GenerateChallengeClient client) {
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
+        });
+    }
+
+    protected void revokeChallengeInternal(RevokeChallengeClient client) {
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
         });
     }
 
@@ -616,7 +610,7 @@ public abstract class BiometricServiceBase extends SystemService
                             + ", fromClient: " + fromClient);
                     // If cancel was from BiometricService, it means the dialog was dismissed
                     // and authentication should be canceled.
-                    client.stop(client.getToken() == token);
+                    ((AuthenticationClient) client).cancel();
                 } else {
                     if (DEBUG) Slog.v(getTag(), "Can't stop client " + client.getOwnerString()
                             + " since tokens don't match. fromClient: " + fromClient);
@@ -636,6 +630,10 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected void cleanupInternal(InternalCleanupClient client) {
         mHandler.post(() -> {
+            if (DEBUG) {
+                Slog.v(getTag(), "Cleaning up templates for user("
+                        + client.getTargetUserId() + ")");
+            }
             startClient(client, true /* initiatedByClient */);
         });
     }
@@ -758,8 +756,6 @@ public abstract class BiometricServiceBase extends SystemService
         if (currentClient != null) {
             if (DEBUG) Slog.v(getTag(), "request stop current client " +
                     currentClient.getOwnerString());
-            // This check only matters for FingerprintService, since enumerate may call back
-            // multiple times.
             if (currentClient instanceof InternalCleanupClient) {
                 // This condition means we're currently running internal diagnostics to
                 // remove extra templates in the hardware and/or the software
@@ -770,8 +766,8 @@ public abstract class BiometricServiceBase extends SystemService
                             + "(" + newClient.getOwnerString() + ")"
                             + ", initiatedByClient = " + initiatedByClient);
                 }
-            } else {
-                currentClient.stop(initiatedByClient);
+            } else if (currentClient instanceof Cancellable) {
+                ((Cancellable) currentClient).cancel();
 
                 // Only post the reset runnable for non-cleanup clients. Cleanup clients should
                 // never be forcibly stopped since they ensure synchronization between HAL and
@@ -827,13 +823,8 @@ public abstract class BiometricServiceBase extends SystemService
             return;
         }
 
-        int status = mCurrentClient.start();
-        if (status == 0) {
-            notifyClientActiveCallbacks(true);
-        } else {
-            mCurrentClient.onError(BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-            removeClient(mCurrentClient);
-        }
+        mCurrentClient.start();
+        notifyClientActiveCallbacks(true);
     }
 
     protected void removeClient(ClientMonitor client) {
@@ -925,7 +916,7 @@ public abstract class BiometricServiceBase extends SystemService
         return false;
     }
 
-    /***
+    /**
      * @return authenticator id for the calling user
      */
     protected long getAuthenticatorId(int callingUserId) {
@@ -935,23 +926,8 @@ public abstract class BiometricServiceBase extends SystemService
 
     /**
      * This method should be called upon connection to the daemon, and when user switches.
-     * @param userId
      */
-    protected void doTemplateCleanupForUser(int userId) {
-        if (CLEANUP_UNKNOWN_TEMPLATES) {
-            if (DEBUG) Slog.v(getTag(), "Cleaning up templates for user(" + userId + ")");
-
-            final boolean restricted = !hasPermission(getManageBiometricPermission());
-            final List<? extends BiometricAuthenticator.Identifier> enrolledList =
-                    getEnrolledTemplates(userId);
-
-            InternalCleanupClient client = new InternalCleanupClient(getContext(),
-                    getDaemonWrapper(), null /* serviceListener */, userId, userId,
-                    restricted, getContext().getOpPackageName(), getSensorId(), statsModality(),
-                    enrolledList, getBiometricUtils());
-            cleanupInternal(client);
-        }
-    }
+    protected abstract void doTemplateCleanupForUser(int userId);
 
     /**
      * This method is called when the user switches. Implementations should probably notify the

@@ -32,6 +32,12 @@ class MediaHostStatesManager @Inject constructor() {
     private val controllers: MutableSet<MediaViewController> = mutableSetOf()
 
     /**
+     * The overall sizes of the carousel. This is needed to make sure all players in the carousel
+     * have equal size.
+     */
+    val carouselSizes: MutableMap<Int, MeasurementOutput> = mutableMapOf()
+
+    /**
      * A map with all media states of all locations.
      */
     val mediaHostStates: MutableMap<Int, MediaHostState> = mutableMapOf()
@@ -45,6 +51,7 @@ class MediaHostStatesManager @Inject constructor() {
         if (!hostState.equals(currentState)) {
             val newState = hostState.copy()
             mediaHostStates.put(location, newState)
+            updateCarouselDimensions(location, hostState)
             // First update all the controllers to ensure they get the chance to measure
             for (controller in controllers) {
                 controller.stateCallback.onHostStateChanged(location, newState)
@@ -61,7 +68,10 @@ class MediaHostStatesManager @Inject constructor() {
      * Get the dimensions of all players combined, which determines the overall height of the
      * media carousel and the media hosts.
      */
-    fun getPlayerDimensions(hostState: MediaHostState): MeasurementOutput {
+    fun updateCarouselDimensions(
+        @MediaLocation location: Int,
+        hostState: MediaHostState
+    ): MeasurementOutput {
         val result = MeasurementOutput(0, 0)
         for (controller in controllers) {
             val measurement = controller.getMeasurementsForState(hostState)
@@ -74,6 +84,7 @@ class MediaHostStatesManager @Inject constructor() {
                 }
             }
         }
+        carouselSizes[location] = result
         return result
     }
 
