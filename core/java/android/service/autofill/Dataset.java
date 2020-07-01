@@ -312,7 +312,12 @@ public final class Dataset implements Parcelable {
          * setting it to the {@link
          * android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra. If you
          * provide a dataset in the result, it will replace the authenticated dataset and
-         * will be immediately filled in. If you provide a response, it will replace the
+         * will be immediately filled in. An exception to this behavior is if the original
+         * dataset represents a pinned inline suggestion (i.e. any of the field in the dataset
+         * has a pinned inline presentation, see {@link InlinePresentation#isPinned()}), then
+         * the original dataset will not be replaced,
+         * so that it can be triggered as a pending intent again.
+         * If you provide a response, it will replace the
          * current response and the UI will be refreshed. For example, if you provided
          * credit card information without the CVV for the data set in the {@link FillResponse
          * response} then the returned data set should contain the CVV entry.

@@ -3146,11 +3146,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean checkCompleteDeferredRemoval() {
+    boolean handleCompleteDeferredRemoval() {
         if (mIsExiting) {
             removeIfPossible();
         }
-        return super.checkCompleteDeferredRemoval();
+        return super.handleCompleteDeferredRemoval();
     }
 
     void onRemovedFromDisplay() {

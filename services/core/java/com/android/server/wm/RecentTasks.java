@@ -1426,8 +1426,8 @@ class RecentTasks {
     private void removeUnreachableHiddenTasks(int windowingMode) {
         for (int i = mHiddenTasks.size() - 1; i >= 0; i--) {
             final Task hiddenTask = mHiddenTasks.get(i);
-            if (!hiddenTask.hasChild()) {
-                // The task was removed by other path.
+            if (!hiddenTask.hasChild() || hiddenTask.inRecents) {
+                // The task was removed by other path or it became reachable (added to recents).
                 mHiddenTasks.remove(i);
                 continue;
             }
@@ -1449,6 +1449,9 @@ class RecentTasks {
      * of task as the given one.
      */
     private void removeForAddTask(Task task) {
+        // The adding task will be in recents so it is not hidden.
+        mHiddenTasks.remove(task);
+
         final int removeIndex = findRemoveIndexForAddTask(task);
         if (removeIndex == -1) {
             // Nothing to trim
@@ -1460,8 +1463,6 @@ class RecentTasks {
         // callbacks here.
         final Task removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
-            // The added task is in recents so it is not hidden.
-            mHiddenTasks.remove(task);
             if (removedTask.hasChild()) {
                 // A non-empty task is replaced by a new task. Because the removed task is no longer
                 // managed by the recent tasks list, add it to the hidden list to prevent the task
