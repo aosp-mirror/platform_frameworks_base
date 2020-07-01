@@ -1053,8 +1053,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ਸਾਰੇ ਕੰਟਰੋਲ ਹਟਾਏ ਗਏ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ਤਬਦੀਲੀਆਂ ਨੂੰ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for controls_favorite_see_other_apps (7709087332255283460) -->
-    <skip />
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ਹੋਰ ਐਪਾਂ ਦੇਖੋ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ <xliff:g id="APP">%s</xliff:g> ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿ ਐਪ ਸੈਟਿੰਗਾਂ ਨਹੀਂ ਬਦਲੀਆਂ ਹਨ।"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"ਕੋਈ ਅਨੁਰੂਪ ਕੰਟਰੋਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ਹੋਰ"</string>
