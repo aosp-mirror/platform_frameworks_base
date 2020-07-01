@@ -32,7 +32,6 @@ import android.graphics.Color;
 import android.graphics.ImageDecoder;
 import android.graphics.Paint;
 import android.net.Uri;
-import android.os.AndroidTimeoutException;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
@@ -224,20 +223,6 @@ public class ContentResolverTest {
         long end = SystemClock.uptimeMillis();
         assertEquals("slow", type);
         assertThat(end).isLessThan(start + 5000);
-    }
-
-    @Test
-    public void testCall_timingOutProvider() {
-        try {
-            // This provider is running in a different process and is configured to time out
-            // on start. We acquire it as "unstable" to avoid getting killed by the timeout in the
-            // content provider process.
-            mResolver.acquireUnstableContentProviderClient(
-                    Uri.parse("content://android.content.TimingOutProvider"));
-            fail("AndroidTimeoutException expected");
-        } catch (AndroidTimeoutException t) {
-            assertThat(t).hasMessageThat().contains("android.content.TimingOutProvider");
-        }
     }
 
     @Test
