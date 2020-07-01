@@ -289,6 +289,24 @@ public class PipBoundsHandler {
     }
 
     /**
+     * Updatest the display info and display layout on rotation change. This is needed even when we
+     * aren't in PIP because the rotation layout is used to calculate the proper insets for the
+     * next enter animation into PIP.
+     */
+    public void onDisplayRotationChangedNotInPip(int toRotation) {
+        // Update the display layout, note that we have to do this on every rotation even if we
+        // aren't in PIP since we need to update the display layout to get the right resources
+        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
+
+        // Populate the new {@link #mDisplayInfo}.
+        // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
+        // therefore, the width/height may require a swap first.
+        // Moving forward, we should get the new dimensions after rotation from DisplayLayout.
+        mDisplayInfo.rotation = toRotation;
+        updateDisplayInfoIfNeeded();
+    }
+
+    /**
      * Updates the display info, calculating and returning the new stack and movement bounds in the
      * new orientation of the device if necessary.
      *

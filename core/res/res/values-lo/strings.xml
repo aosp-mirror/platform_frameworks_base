@@ -1311,7 +1311,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"ເລືອກເພື່ອປິດການດີບັກຜ່ານ USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ເຊື່ອມຕໍ່ການດີບັກໄຮ້ສາຍແລ້ວ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ແຕະເພື່ອປິດການດີບັກໄຮ້ສາຍ"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ເລືອກປິດການປິດການນຳໃຊ້ການດີບັກໄຮ້ສາຍ."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ເລືອກເພື່ອປິດການນຳໃຊ້ການດີບັກໄຮ້ສາຍ."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ເປີດໃຊ້ໂໝດ Test Harness ແລ້ວ"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ດຳເນີນການຣີເຊັດເປັນຄ່າຈາກໂຮງງານເພື່ອປິດການນຳໃຊ້ໂໝດ Test Harness."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"ເປີດນຳໃຊ້ຊີຣຽວຄອນໂຊແລ້ວ"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ລຶບອອກ"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"ບໍລິການພື້ນໜ້າທີ່ເລີ່ມຕົ້ນຈາກພື້ນຫຼັງຈາກ <xliff:g id="PACKAGENAME">%1$s</xliff:g> ຈະບໍ່ມີສິດອະນຸຍາດໃນຂະນະທີ່ໃຊ້ໃນ R builds ໃນອະນາຄົດ. ກະລຸນາອ່ານ go/r-bg-fgs-restriction ແລະ ລາຍງານຂໍ້ຜິດພາດ."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ເມື່ອເປີດໃຊ້ທາງລັດແລ້ວ, ການກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີຈະເປັນການເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ."</string>
