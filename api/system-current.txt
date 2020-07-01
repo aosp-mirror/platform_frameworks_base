@@ -2525,6 +2525,7 @@ package android.hardware.hdmi {
 
   public final class HdmiControlManager {
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHotplugEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method @Nullable public android.hardware.hdmi.HdmiClient getClient(int);
     method @NonNull public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevices();
     method public int getPhysicalAddress();
