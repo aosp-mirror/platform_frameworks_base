@@ -263,6 +263,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
+     * Listener to be notified when a pending intent has been canceled for a bubble.
+     */
+    public interface PendingIntentCanceledListener {
+        /**
+         * Called when the pending intent for a bubble has been canceled.
+         */
+        void onPendingIntentCanceled(Bubble bubble);
+    }
+
+    /**
      * Callback for when the BubbleController wants to interact with the notification pipeline to:
      * - Remove a previously bubbled notification
      * - Update the notification shade since bubbled notification should/shouldn't be showing
@@ -389,6 +399,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     // Bad things have happened
                 }
             }
+        });
+        mBubbleData.setPendingIntentCancelledListener(bubble -> {
+            if (bubble.getBubbleIntent() == null) {
+                return;
+            }
+            if (bubble.isIntentActive()) {
+                bubble.setPendingIntentCanceled();
+                return;
+            }
+            mHandler.post(
+                    () -> removeBubble(bubble.getKey(),
+                            BubbleController.DISMISS_INVALID_INTENT));
         });
 
         mNotificationEntryManager = entryManager;
@@ -1101,23 +1123,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         // Lazy init stack view when a bubble is created
         ensureStackViewCreated();
         bubble.setInflateSynchronously(mInflateSynchronously);
-        bubble.inflate(
-                b -> {
-                    mBubbleData.notificationEntryUpdated(b, suppressFlyout,
-                            showInShade);
-                    if (bubble.getBubbleIntent() == null) {
-                        return;
-                    }
-                    bubble.getBubbleIntent().registerCancelListener(pendingIntent -> {
-                        if (bubble.getWasAccessed()) {
-                            bubble.setPendingIntentCanceled();
-                            return;
-                        }
-                        mHandler.post(
-                                () -> removeBubble(bubble.getKey(),
-                                        BubbleController.DISMISS_INVALID_INTENT));
-                    });
-                },
+        bubble.inflate(b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
                 mContext, mStackView, mBubbleIconFactory, false /* skipInflation */);
     }
 
