@@ -686,4 +686,11 @@ interface IActivityManager {
      * Kills uid with the reason of permission change.
      */
     void killUidForPermissionChange(int appId, int userId, String reason);
+
+    /**
+     * Resets the state of the {@link com.android.server.am.AppErrors} instance.
+     * This is intended for testing within the CTS only and is protected by
+     * android.permission.RESET_APP_ERRORS.
+     */
+    void resetAppErrors();
 }

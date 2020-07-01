@@ -58,4 +58,8 @@ public class ProcessMap<E> {
     public int size() {
         return mMap.size();
     }
+
+    public void clear() {
+        mMap.clear();
+    }
 }

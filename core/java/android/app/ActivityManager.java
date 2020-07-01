@@ -4941,4 +4941,19 @@ public class ActivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Resets the state of the {@link com.android.server.am.AppErrors} instance.
+     * This is intended for use with CTS only.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.RESET_APP_ERRORS)
+    public void resetAppErrors() {
+        try {
+            getService().resetAppErrors();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

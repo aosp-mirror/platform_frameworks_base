@@ -108,6 +108,16 @@ class AppErrors {
         mPackageWatchdog = watchdog;
     }
 
+    /** Resets the current state but leaves the constructor-provided fields unchanged. */
+    public void resetStateLocked() {
+        Slog.i(TAG, "Resetting AppErrors");
+        mAppsNotReportingCrashes.clear();
+        mProcessCrashTimes.clear();
+        mProcessCrashTimesPersistent.clear();
+        mProcessCrashShowDialogTimes.clear();
+        mBadProcesses.clear();
+    }
+
     void dumpDebug(ProtoOutputStream proto, long fieldId, String dumpPackage) {
         if (mProcessCrashTimes.getMap().isEmpty() && mBadProcesses.getMap().isEmpty()) {
             return;
