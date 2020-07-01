@@ -40,6 +40,28 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Similarly to isShown but also excludes views that have 0 alpha
+ */
+val View.isShownNotFaded: Boolean
+    get() {
+        var current: View = this
+        while (true) {
+            if (current.visibility != View.VISIBLE) {
+                return false
+            }
+            if (current.alpha == 0.0f) {
+                return false
+            }
+            val parent = current.parent ?: return false // We are not attached to the view root
+            if (parent !is View) {
+                // we reached the viewroot, hurray
+                return true
+            }
+            current = parent
+        }
+    }
+
+/**
  * This manager is responsible for placement of the unique media view between the different hosts
  * and animate the positions of the views to achieve seamless transitions.
  */
@@ -368,7 +390,7 @@ class MediaHierarchyManager @Inject constructor(
             // non-trivial reattaching logic happening that will make the view not-shown earlier
             return true
         }
-        return mediaFrame.isShown || animator.isRunning || animationPending
+        return mediaFrame.isShownNotFaded || animator.isRunning || animationPending
     }
 
     private fun adjustAnimatorForTransition(desiredLocation: Int, previousLocation: Int) {
