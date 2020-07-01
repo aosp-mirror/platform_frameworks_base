@@ -67,6 +67,7 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
+import com.android.server.biometrics.sensors.LockoutResetTracker;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
@@ -96,6 +97,8 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
     protected static final String TAG = "FingerprintService";
     private static final boolean DEBUG = true;
     private static final String FP_DATA_DIR = "fpdata";
+
+    private final LockoutResetTracker mLockoutResetTracker;
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
@@ -230,10 +233,12 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
         }
 
         @Override
-        public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback)
-                throws RemoteException {
+        public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
+                final String opPackageName) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            FingerprintService.super.addLockoutResetCallback(callback);
+            mHandler.post(() -> {
+                mLockoutResetTracker.addCallback(callback, opPackageName);
+            });
         }
 
         @Override // Binder call
@@ -471,10 +476,6 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
 
-    private final LockoutFrameworkImpl.LockoutResetCallback mLockoutResetCallback = userId -> {
-        notifyLockoutResetMonitors();
-    };
-
     /**
      * Receives callbacks from the HAL.
      */
@@ -550,7 +551,11 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
     public FingerprintService(Context context) {
         super(context);
-        mLockoutTracker = new LockoutFrameworkImpl(context, mLockoutResetCallback);
+        mLockoutResetTracker = new LockoutResetTracker(context);
+        final LockoutFrameworkImpl.LockoutResetCallback lockoutResetCallback = userId -> {
+            mLockoutResetTracker.notifyLockoutResetCallbacks();
+        };
+        mLockoutTracker = new LockoutFrameworkImpl(context, lockoutResetCallback);
     }
 
     @Override

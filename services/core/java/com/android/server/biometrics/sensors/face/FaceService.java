@@ -60,6 +60,7 @@ import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
+import com.android.server.biometrics.sensors.LockoutResetTracker;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
@@ -96,6 +97,8 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
+
+    private final LockoutResetTracker mLockoutResetTracker;
 
     /**
      * Receives the incoming binder calls from FaceManager.
@@ -245,9 +248,12 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
         }
 
         @Override
-        public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback) {
+        public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
+                final String opPackageName) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            FaceService.super.addLockoutResetCallback(callback);
+            mHandler.post(() -> {
+                mLockoutResetTracker.addCallback(callback, opPackageName);
+            });
         }
 
         @Override // Binder call
@@ -539,7 +545,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
             mHandler.post(() -> {
                 if (duration == 0) {
-                    notifyLockoutResetMonitors();
+                    mLockoutResetTracker.notifyLockoutResetCallbacks();
                 }
             });
         }
@@ -547,6 +553,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
     public FaceService(Context context) {
         super(context);
+        mLockoutResetTracker = new LockoutResetTracker(context);
         mLockoutTracker = new LockoutHalImpl();
         mUsageStats = new UsageStats(context);
         mNotificationManager = getContext().getSystemService(NotificationManager.class);
