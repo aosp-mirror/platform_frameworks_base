@@ -316,7 +316,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          * of the timer and should be removed externally.
          * @return true if the notification is sticky
          */
-        protected boolean isSticky() {
+        public boolean isSticky() {
             return false;
         }
 

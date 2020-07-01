@@ -6150,6 +6150,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             case "root":
                 return Process.ROOT_UID;
             case "shell":
+            case "dumpstate":
                 return Process.SHELL_UID;
             case "media":
                 return Process.MEDIA_UID;

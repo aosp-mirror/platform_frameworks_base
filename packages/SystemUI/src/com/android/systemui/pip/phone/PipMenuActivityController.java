@@ -115,8 +115,8 @@ public class PipMenuActivityController {
     private InputConsumerController mInputConsumerController;
 
     private ArrayList<Listener> mListeners = new ArrayList<>();
-    private ParceledListSlice mAppActions;
-    private ParceledListSlice mMediaActions;
+    private ParceledListSlice<RemoteAction> mAppActions;
+    private ParceledListSlice<RemoteAction> mMediaActions;
     private int mMenuState;
 
     // The dismiss fraction update is sent frequently, so use a temporary bundle for the message
@@ -429,7 +429,7 @@ public class PipMenuActivityController {
     /**
      * Sets the menu actions to the actions provided by the current PiP activity.
      */
-    public void setAppActions(ParceledListSlice appActions) {
+    public void setAppActions(ParceledListSlice<RemoteAction> appActions) {
         mAppActions = appActions;
         updateMenuActions();
     }
@@ -437,7 +437,7 @@ public class PipMenuActivityController {
     /**
      * @return the best set of actions to show in the PiP menu.
      */
-    private ParceledListSlice resolveMenuActions() {
+    private ParceledListSlice<RemoteAction> resolveMenuActions() {
         if (isValidActions(mAppActions)) {
             return mAppActions;
         }
@@ -515,7 +515,7 @@ public class PipMenuActivityController {
     /**
      * Returns whether the set of actions are valid.
      */
-    private boolean isValidActions(ParceledListSlice actions) {
+    private static boolean isValidActions(ParceledListSlice<?> actions) {
         return actions != null && actions.getList().size() > 0;
     }
 

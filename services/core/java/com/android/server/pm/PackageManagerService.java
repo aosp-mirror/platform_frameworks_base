@@ -14479,13 +14479,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (ps != null && doSnapshotOrRestore) {
             final String seInfo = AndroidPackageUtils.getSeInfo(res.pkg, ps);
-            try {
-                rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
-                        appId, ceDataInode, seInfo, token);
-            } catch (RuntimeException re) {
-                Log.e(TAG, "Error snapshotting/restoring user data: " + re);
-                return false;
-            }
+            rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
+                    appId, ceDataInode, seInfo, token);
             return true;
         }
         return false;

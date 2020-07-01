@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.view.DisplayInfo;
@@ -66,7 +67,7 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     }
 
     @Override
-    public void onActionsChanged(ParceledListSlice actions) {
+    public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
         for (PinnedStackListener listener : mListeners) {
             listener.onActionsChanged(actions);
         }
@@ -111,7 +112,7 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
 
-        public void onActionsChanged(ParceledListSlice actions) {}
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {}
 
         public void onActivityHidden(ComponentName componentName) {}
 

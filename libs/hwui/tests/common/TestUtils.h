@@ -287,18 +287,6 @@ public:
 
     static std::unique_ptr<uint16_t[]> asciiToUtf16(const char* str);
 
-    class MockFunctor : public Functor {
-    public:
-        virtual status_t operator()(int what, void* data) {
-            mLastMode = what;
-            return DrawGlInfo::kStatusDone;
-        }
-        int getLastMode() const { return mLastMode; }
-
-    private:
-        int mLastMode = -1;
-    };
-
     static SkColor getColor(const sk_sp<SkSurface>& surface, int x, int y);
 
     static SkRect getClipBounds(const SkCanvas* canvas);
@@ -311,30 +299,32 @@ public:
         int glesDraw = 0;
     };
 
-    static void expectOnRenderThread() { EXPECT_EQ(gettid(), TestUtils::getRenderThreadTid()); }
+    static void expectOnRenderThread(const std::string_view& function = "unknown") {
+        EXPECT_EQ(gettid(), TestUtils::getRenderThreadTid()) << "Called on wrong thread: " << function;
+    }
 
     static WebViewFunctorCallbacks createMockFunctor(RenderMode mode) {
         auto callbacks = WebViewFunctorCallbacks{
                 .onSync =
                         [](int functor, void* client_data, const WebViewSyncData& data) {
-                            expectOnRenderThread();
+                            expectOnRenderThread("onSync");
                             sMockFunctorCounts[functor].sync++;
                         },
                 .onContextDestroyed =
                         [](int functor, void* client_data) {
-                            expectOnRenderThread();
+                            expectOnRenderThread("onContextDestroyed");
                             sMockFunctorCounts[functor].contextDestroyed++;
                         },
                 .onDestroyed =
                         [](int functor, void* client_data) {
-                            expectOnRenderThread();
+                            expectOnRenderThread("onDestroyed");
                             sMockFunctorCounts[functor].destroyed++;
                         },
         };
         switch (mode) {
             case RenderMode::OpenGL_ES:
                 callbacks.gles.draw = [](int functor, void* client_data, const DrawGlInfo& params) {
-                    expectOnRenderThread();
+                    expectOnRenderThread("draw");
                     sMockFunctorCounts[functor].glesDraw++;
                 };
                 break;

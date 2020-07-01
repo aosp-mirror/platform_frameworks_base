@@ -231,39 +231,41 @@ TEST(RenderNode, multiTreeValidity) {
 }
 
 TEST(RenderNode, releasedCallback) {
-    class DecRefOnReleased : public GlFunctorLifecycleListener {
-    public:
-        explicit DecRefOnReleased(int* refcnt) : mRefCnt(refcnt) {}
-        void onGlFunctorReleased(Functor* functor) override { *mRefCnt -= 1; }
-
-    private:
-        int* mRefCnt;
-    };
-
-    int refcnt = 0;
-    sp<DecRefOnReleased> listener(new DecRefOnReleased(&refcnt));
-    Functor noopFunctor;
+    int functor = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
 
     auto node = TestUtils::createNode(0, 0, 200, 400, [&](RenderProperties& props, Canvas& canvas) {
-        refcnt++;
-        canvas.callDrawGLFunction(&noopFunctor, listener.get());
+        canvas.drawWebViewFunctor(functor);
     });
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    EXPECT_EQ(1, refcnt);
+    TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
+        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    });
+    auto& counts = TestUtils::countsForFunctor(functor);
+    EXPECT_EQ(1, counts.sync);
+    EXPECT_EQ(0, counts.destroyed);
 
     TestUtils::recordNode(*node, [&](Canvas& canvas) {
-        refcnt++;
-        canvas.callDrawGLFunction(&noopFunctor, listener.get());
+        canvas.drawWebViewFunctor(functor);
     });
-    EXPECT_EQ(2, refcnt);
+    EXPECT_EQ(1, counts.sync);
+    EXPECT_EQ(0, counts.destroyed);
 
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    EXPECT_EQ(1, refcnt);
+    TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
+        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    });
+    EXPECT_EQ(2, counts.sync);
+    EXPECT_EQ(0, counts.destroyed);
+
+    WebViewFunctor_release(functor);
+    EXPECT_EQ(2, counts.sync);
+    EXPECT_EQ(0, counts.destroyed);
 
     TestUtils::recordNode(*node, [](Canvas& canvas) {});
-    EXPECT_EQ(1, refcnt);
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    EXPECT_EQ(0, refcnt);
+    TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
+        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    });
+    EXPECT_EQ(2, counts.sync);
+    EXPECT_EQ(1, counts.destroyed);
 }
 
 RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
