@@ -193,7 +193,7 @@ void PointerControllerTest::loopThread() {
 
 TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
     ensureDisplayViewportIsSet();
-    mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
 
     std::pair<float, float> hotspot = getHotSpotCoordinatesForType(CURSOR_TYPE_DEFAULT);
     EXPECT_CALL(*mPointerSprite, setVisible(true));
@@ -208,7 +208,7 @@ TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
 
 TEST_F(PointerControllerTest, updatePointerIcon) {
     ensureDisplayViewportIsSet();
-    mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
 
     int32_t type = CURSOR_TYPE_ADDITIONAL;
     std::pair<float, float> hotspot = getHotSpotCoordinatesForType(type);
@@ -224,7 +224,7 @@ TEST_F(PointerControllerTest, updatePointerIcon) {
 
 TEST_F(PointerControllerTest, setCustomPointerIcon) {
     ensureDisplayViewportIsSet();
-    mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
 
     int32_t style = CURSOR_TYPE_CUSTOM;
     float hotSpotX = 15;
@@ -246,13 +246,13 @@ TEST_F(PointerControllerTest, setCustomPointerIcon) {
 }
 
 TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
-    mPointerController->setPresentation(PointerController::PRESENTATION_POINTER);
+    mPointerController->setPresentation(PointerController::Presentation::POINTER);
     mPointerController->setSpots(nullptr, nullptr, BitSet32(), -1);
     mPointerController->clearSpots();
     mPointerController->setPosition(1.0f, 1.0f);
     mPointerController->move(1.0f, 1.0f);
-    mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
-    mPointerController->fade(PointerController::TRANSITION_IMMEDIATE);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
+    mPointerController->fade(PointerController::Transition::IMMEDIATE);
 
     EXPECT_TRUE(mPolicy->noResourcesAreLoaded());
 
