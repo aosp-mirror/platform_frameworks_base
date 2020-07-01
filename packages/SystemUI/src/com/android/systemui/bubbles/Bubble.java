@@ -124,8 +124,26 @@ class Bubble implements BubbleViewProvider {
     private int mNotificationId;
     private int mAppUid = -1;
 
+    /**
+     * A bubble is created and can be updated. This intent is updated until the user first
+     * expands the bubble. Once the user has expanded the contents, we ignore the intent updates
+     * to prevent restarting the intent & possibly altering UI state in the activity in front of
+     * the user.
+     *
+     * Once the bubble is overflowed, the activity is finished and updates to the
+     * notification are respected. Typically an update to an overflowed bubble would result in
+     * that bubble being added back to the stack anyways.
+     */
     @Nullable
     private PendingIntent mIntent;
+    private boolean mIntentActive;
+    @Nullable
+    private PendingIntent.CancelListener mIntentCancelListener;
+
+    /**
+     * Sent when the bubble & notification are no longer visible to the user (i.e. no
+     * notification in the shade, no bubble in the stack or overflow).
+     */
     @Nullable
     private PendingIntent mDeleteIntent;
 
@@ -150,13 +168,19 @@ class Bubble implements BubbleViewProvider {
         mShowBubbleUpdateDot = false;
     }
 
-    /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(@NonNull final NotificationEntry e,
-            @Nullable final BubbleController.NotificationSuppressionChangedListener listener) {
+            @Nullable final BubbleController.NotificationSuppressionChangedListener listener,
+            final BubbleController.PendingIntentCanceledListener intentCancelListener) {
         Objects.requireNonNull(e);
         mKey = e.getKey();
         mSuppressionListener = listener;
+        mIntentCancelListener = intent -> {
+            if (mIntent != null) {
+                mIntent.unregisterCancelListener(mIntentCancelListener);
+            }
+            intentCancelListener.onPendingIntentCanceled(this);
+        };
         setEntry(e);
     }
 
@@ -238,6 +262,10 @@ class Bubble implements BubbleViewProvider {
             mExpandedView = null;
         }
         mIconView = null;
+        if (mIntent != null) {
+            mIntent.unregisterCancelListener(mIntentCancelListener);
+        }
+        mIntentActive = false;
     }
 
     void setPendingIntentCanceled() {
@@ -371,11 +399,24 @@ class Bubble implements BubbleViewProvider {
             mDesiredHeight = entry.getBubbleMetadata().getDesiredHeight();
             mDesiredHeightResId = entry.getBubbleMetadata().getDesiredHeightResId();
             mIcon = entry.getBubbleMetadata().getIcon();
-            mIntent = entry.getBubbleMetadata().getIntent();
+
+            if (!mIntentActive || mIntent == null) {
+                if (mIntent != null) {
+                    mIntent.unregisterCancelListener(mIntentCancelListener);
+                }
+                mIntent = entry.getBubbleMetadata().getIntent();
+                if (mIntent != null) {
+                    mIntent.registerCancelListener(mIntentCancelListener);
+                }
+            } else if (mIntent != null && entry.getBubbleMetadata().getIntent() == null) {
+                // Was an intent bubble now it's a shortcut bubble... still unregister the listener
+                mIntent.unregisterCancelListener(mIntentCancelListener);
+                mIntent = null;
+            }
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
         mIsImportantConversation =
-                entry.getChannel() == null ? false : entry.getChannel().isImportantConversation();
+                entry.getChannel() != null && entry.getChannel().isImportantConversation();
     }
 
     @Nullable
@@ -395,10 +436,15 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * @return if the bubble was ever expanded
+     * Sets if the intent used for this bubble is currently active (i.e. populating an
+     * expanded view, expanded or not).
      */
-    boolean getWasAccessed() {
-        return mLastAccessed != 0L;
+    void setIntentActive() {
+        mIntentActive = true;
+    }
+
+    boolean isIntentActive() {
+        return mIntentActive;
     }
 
     /**
