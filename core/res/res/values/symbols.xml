@@ -302,6 +302,7 @@
   <java-symbol type="string" name="config_wlan_network_service_package" />
   <java-symbol type="string" name="config_wwan_network_service_class" />
   <java-symbol type="string" name="config_wlan_network_service_class" />
+  <java-symbol type="bool" name="config_wlan_data_service_conn_persistence_on_restart" />
   <java-symbol type="string" name="config_wwan_data_service_package" />
   <java-symbol type="string" name="config_wlan_data_service_package" />
   <java-symbol type="string" name="config_wwan_data_service_class" />
