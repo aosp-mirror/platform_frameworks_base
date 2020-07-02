@@ -138,7 +138,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
         }
 
         @Override // Binder call
-        public void enroll(int userId, final IBinder token, final byte[] cryptoToken,
+        public void enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures, Surface surface) {
             checkPermission(MANAGE_BIOMETRIC);
@@ -150,7 +150,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
             });
 
             final EnrollClient client = new FaceEnrollClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver), userId, cryptoToken,
+                    new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC,
                     convertSurfaceToNativeHandle(surface), getSensorId());
 
@@ -158,7 +158,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
         }
 
         @Override // Binder call
-        public void enrollRemotely(int userId, final IBinder token, final byte[] cryptoToken,
+        public void enrollRemotely(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures) {
             checkPermission(MANAGE_BIOMETRIC);
@@ -173,8 +173,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
         @Override // Binder call
         public void authenticate(final IBinder token, final long opId, int userId,
-                final IFaceServiceReceiver receiver, final int flags,
-                final String opPackageName) {
+                final IFaceServiceReceiver receiver, final String opPackageName) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             updateActiveGroup(userId);
 

@@ -277,7 +277,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
     /**
      * Callback structure provided to {@link FingerprintManager#enroll(byte[], CancellationSignal,
-     * int, int, EnrollmentCallback)} must provide an implementation of this for listening to
+     * int, EnrollmentCallback)} must provide an implementation of this for listening to
      * fingerprint events.
      *
      * @hide
@@ -387,7 +387,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
-        authenticate(crypto, cancel, flags, callback, handler, mContext.getUserId());
+        authenticate(crypto, cancel, callback, handler, mContext.getUserId());
     }
 
     /**
@@ -403,18 +403,18 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Defaults to {@link FingerprintManager#authenticate(CryptoObject, CancellationSignal, int,
+     * Defaults to {@link FingerprintManager#authenticate(CryptoObject, CancellationSignal,
      * AuthenticationCallback, Handler, int, Surface)} with {@code surface} set to null.
      *
-     * @see FingerprintManager#authenticate(CryptoObject, CancellationSignal, int,
+     * @see FingerprintManager#authenticate(CryptoObject, CancellationSignal,
      * AuthenticationCallback, Handler, int, Surface)
      *
      * @hide
      */
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId) {
-        authenticate(crypto, cancel, flags, callback, handler, userId, null /* surface */);
+            @NonNull AuthenticationCallback callback, Handler handler, int userId) {
+        authenticate(crypto, cancel, callback, handler, userId, null /* surface */);
     }
 
     /**
@@ -428,7 +428,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId,
+            @NonNull AuthenticationCallback callback, Handler handler, int userId,
             @Nullable Surface surface) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
@@ -449,7 +449,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
-                mService.authenticate(mToken, operationId, userId, mServiceReceiver, flags,
+                mService.authenticate(mToken, operationId, userId, mServiceReceiver,
                         mContext.getOpPackageName(), surface);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception while authenticating: ", e);
@@ -463,18 +463,18 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Defaults to {@link FingerprintManager#enroll(byte[], CancellationSignal, int, int,
+     * Defaults to {@link FingerprintManager#enroll(byte[], CancellationSignal, int,
      * EnrollmentCallback, Surface)} with {@code surface} set to null.
      *
-     * @see FingerprintManager#enroll(byte[], CancellationSignal, int, int, EnrollmentCallback,
+     * @see FingerprintManager#enroll(byte[], CancellationSignal, int, EnrollmentCallback,
      * Surface)
      *
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void enroll(byte [] token, CancellationSignal cancel, int flags,
-            int userId, EnrollmentCallback callback) {
-        enroll(token, cancel, flags, userId, callback, null /* surface */);
+    public void enroll(byte [] hardwareAuthToken, CancellationSignal cancel, int userId,
+            EnrollmentCallback callback) {
+        enroll(hardwareAuthToken, cancel, userId, callback, null /* surface */);
     }
 
     /**
@@ -488,14 +488,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @param token a unique token provided by a recent creation or verification of device
      * credentials (e.g. pin, pattern or password).
      * @param cancel an object that can be used to cancel enrollment
-     * @param flags optional flags
      * @param userId the user to whom this fingerprint will belong to
      * @param callback an object to receive enrollment events
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void enroll(byte [] token, CancellationSignal cancel, int flags,
-            int userId, EnrollmentCallback callback, @Nullable Surface surface) {
+    public void enroll(byte [] hardwareAuthToken, CancellationSignal cancel, int userId,
+            EnrollmentCallback callback, @Nullable Surface surface) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentUserId();
         }
@@ -515,7 +514,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
-                mService.enroll(mToken, token, userId, mServiceReceiver, flags,
+                mService.enroll(mToken, hardwareAuthToken, userId, mServiceReceiver,
                         mContext.getOpPackageName(), surface);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);

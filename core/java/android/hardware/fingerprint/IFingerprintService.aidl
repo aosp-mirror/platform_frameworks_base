@@ -33,8 +33,7 @@ interface IFingerprintService {
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
     // through FingerprintManager now.
     void authenticate(IBinder token, long operationId, int userId,
-            IFingerprintServiceReceiver receiver, int flags, String opPackageName,
-            in Surface surface);
+            IFingerprintServiceReceiver receiver, String opPackageName, in Surface surface);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
@@ -57,8 +56,8 @@ interface IFingerprintService {
             int callingUid, int callingPid, int callingUserId);
 
     // Start fingerprint enrollment
-    void enroll(IBinder token, in byte [] cryptoToken, int userId, IFingerprintServiceReceiver receiver,
-            int flags, String opPackageName, in Surface surface);
+    void enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
+            String opPackageName, in Surface surface);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
@@ -92,7 +91,7 @@ interface IFingerprintService {
     long getAuthenticatorId(int callingUserId);
 
     // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(int userId, in byte [] cryptoToken);
+    void resetLockout(int userId, in byte [] hardwareAuthToken);
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
