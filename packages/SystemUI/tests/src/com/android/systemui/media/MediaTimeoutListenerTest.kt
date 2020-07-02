@@ -32,7 +32,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -48,6 +50,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
+private const val USER_ID = 0
 
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
@@ -93,7 +96,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             setPlaybackState(playbackBuilder.build())
         }
         session.setActive(true)
-        mediaData = MediaData(true, 0, PACKAGE, null, null, SESSION_TITLE, null,
+        mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
             emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
             device = null, active = true, resumeAction = null)
     }
@@ -118,6 +121,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
         verify(executor).executeDelayed(capture(timeoutCaptor), anyLong())
+        verify(timeoutCallback, never()).invoke(anyString(), anyBoolean())
     }
 
     @Test
@@ -130,6 +134,24 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         clearInvocations(mediaController)
         mediaTimeoutListener.onMediaDataRemoved(KEY)
         verify(mediaController, never()).unregisterCallback(anyObject())
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_migratesKeys() {
+        // From not playing
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        clearInvocations(mediaController)
+
+        // To playing
+        val playingState = mock(android.media.session.PlaybackState::class.java)
+        `when`(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
+        `when`(mediaController.playbackState).thenReturn(playingState)
+        mediaTimeoutListener.onMediaDataLoaded("NEWKEY", KEY, mediaData)
+        verify(mediaController).unregisterCallback(anyObject())
+        verify(mediaController).registerCallback(anyObject())
+
+        // Enqueues callback
+        verify(executor).execute(anyObject())
     }
 
     @Test
