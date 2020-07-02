@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.face;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -31,18 +32,14 @@ import com.android.server.biometrics.sensors.RemovalClient;
  * Face-specific removal client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-class FaceRemovalClient extends RemovalClient {
+class FaceRemovalClient extends RemovalClient<IBiometricsFace> {
     private static final String TAG = "FaceRemovalClient";
-    private final IBiometricsFace mDaemon;
 
-    FaceRemovalClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, @NonNull IBinder token,
+    FaceRemovalClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(finishCallback, context, token, listener, biometricId, userId, restricted, owner,
-                utils, sensorId, statsModality);
-        mDaemon = daemon;
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
+        super(context, token, listener, biometricId, userId, owner, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override

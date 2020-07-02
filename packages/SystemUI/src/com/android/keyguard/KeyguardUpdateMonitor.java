@@ -2047,8 +2047,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mFingerprintCancelSignal.cancel();
             }
             mFingerprintCancelSignal = new CancellationSignal();
-            mFpm.authenticate(null, mFingerprintCancelSignal, 0, mFingerprintAuthenticationCallback,
-                    null, userId);
+            mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
+                    mFingerprintAuthenticationCallback, null /* handler */, userId);
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
         }
     }
@@ -2065,8 +2065,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mFaceCancelSignal.cancel();
             }
             mFaceCancelSignal = new CancellationSignal();
-            mFaceManager.authenticate(null, mFaceCancelSignal, 0,
-                    mFaceAuthenticationCallback, null, userId);
+            mFaceManager.authenticate(null /* crypto */, mFaceCancelSignal,
+                    mFaceAuthenticationCallback, null /* handler */, userId);
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }
     }

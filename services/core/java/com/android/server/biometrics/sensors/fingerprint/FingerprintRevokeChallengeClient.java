@@ -30,17 +30,14 @@ import com.android.server.biometrics.sensors.RevokeChallengeClient;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-public class FingerprintRevokeChallengeClient extends RevokeChallengeClient {
+public class FingerprintRevokeChallengeClient
+        extends RevokeChallengeClient<IBiometricsFingerprint> {
 
     private static final String TAG = "FingerprintRevokeChallengeClient";
 
-    private final IBiometricsFingerprint mDaemon;
-
-    FingerprintRevokeChallengeClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFingerprint daemon,
-            @NonNull IBinder token, @NonNull String owner, int sensorId) {
-        super(finishCallback, context, token, owner, sensorId);
-        mDaemon = daemon;
+    FingerprintRevokeChallengeClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull String owner, int sensorId) {
+        super(context, token, owner, sensorId);
     }
 
     @Override

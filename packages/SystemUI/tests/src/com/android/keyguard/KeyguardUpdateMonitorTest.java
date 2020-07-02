@@ -423,7 +423,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
         mTestableLooper.processAllMessages();
 
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
         verify(mFaceManager).isHardwareDetected();
         verify(mFaceManager).hasEnrolledTemplates(anyInt());
     }
@@ -433,7 +433,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -443,7 +443,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -455,7 +455,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -478,14 +478,14 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
 
         // Stop scanning when bouncer becomes visible
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true /* showingBouncer */);
         mTestableLooper.processAllMessages();
         clearInvocations(mFaceManager);
         mKeyguardUpdateMonitor.requestFaceAuth();
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -493,7 +493,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setKeyguardOccluded(true);
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -505,7 +505,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -515,7 +515,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -526,7 +526,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
 
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -537,7 +537,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT);
 
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     @Test
@@ -549,7 +549,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
         mTestableLooper.processAllMessages();
 
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any());
     }
 
     @Test

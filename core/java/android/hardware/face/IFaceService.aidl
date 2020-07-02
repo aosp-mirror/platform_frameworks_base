@@ -28,8 +28,8 @@ import android.view.Surface;
  */
 interface IFaceService {
     // Authenticate the given sessionId with a face
-    void authenticate(IBinder token, long operationId, int userid,
-            IFaceServiceReceiver receiver, int flags, String opPackageName);
+    void authenticate(IBinder token, long operationId, int userid, IFaceServiceReceiver receiver,
+            String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
@@ -51,11 +51,11 @@ interface IFaceService {
             int callingUid, int callingPid, int callingUserId);
 
     // Start face enrollment
-    void enroll(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
+    void enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures, in Surface surface);
 
     // Start remote face enrollment
-    void enrollRemotely(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
+    void enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures);
 
     // Cancel enrollment in progress
@@ -80,21 +80,23 @@ interface IFaceService {
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
 
+    // Return the LockoutTracker status for the specified user
+    int getLockoutModeForUser(int userId);
+
     // Gets the authenticator ID for face
     long getAuthenticatorId(int callingUserId);
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(int userId, in byte [] token);
+    void resetLockout(int userId, in byte [] hardwareAuthToken);
 
     // Add a callback which gets notified when the face lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
 
-    void setFeature(int userId, int feature, boolean enabled, in byte [] token,
-            IFaceServiceReceiver receiver, String opPackageName);
+    void setFeature(IBinder token, int userId, int feature, boolean enabled,
+            in byte [] hardwareAuthToken, IFaceServiceReceiver receiver, String opPackageName);
 
-    void getFeature(int userId, int feature, IFaceServiceReceiver receiver, String opPackageName);
-
-    void userActivity();
+    void getFeature(IBinder token, int userId, int feature, IFaceServiceReceiver receiver,
+            String opPackageName);
 
     // Give FaceService its ID. See AuthService.java
     void initializeConfiguration(int sensorId);
