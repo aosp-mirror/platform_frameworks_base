@@ -1121,13 +1121,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
         if (isMultiPackage()) {
-            final SparseIntArray remainingSessions = mChildSessionIds.clone();
+            final SparseIntArray remainingSessions;
+            final int[] childSessionIds;
+            synchronized (mLock) {
+                remainingSessions = mChildSessionIds.clone();
+                childSessionIds = mChildSessionIds.copyKeys();
+            }
             final IntentSender childIntentSender =
                     new ChildStatusIntentReceiver(remainingSessions, statusReceiver)
                             .getIntentSender();
             boolean sealFailed = false;
-            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
-                final int childSessionId = mChildSessionIds.keyAt(i);
+            for (int i = childSessionIds.length - 1; i >= 0; --i) {
+                final int childSessionId = childSessionIds[i];
                 // seal all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
                 if (!mSessionProvider.getSession(childSessionId)
@@ -1159,13 +1164,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (isMultiPackage()) {
-            int childCount = mChildSessionIds.size();
+            final int[] childSessionIds;
+            synchronized (mLock) {
+                childSessionIds = mChildSessionIds.copyKeys();
+            }
+            int childCount = childSessionIds.length;
 
             // This will contain all child sessions that do not encounter an unrecoverable failure
             ArrayList<PackageInstallerSession> nonFailingSessions = new ArrayList<>(childCount);
 
             for (int i = childCount - 1; i >= 0; --i) {
-                final int childSessionId = mChildSessionIds.keyAt(i);
+                final int childSessionId = childSessionIds[i];
                 // commit all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
                 try {
@@ -2551,7 +2560,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Adds a child session ID without any safety / sanity checks. This should only be used to
      * build a session from XML or similar.
      */
-    void addChildSessionIdInternal(int sessionId) {
+    @GuardedBy("mLock")
+    void addChildSessionIdLocked(int sessionId) {
         mChildSessionIds.put(sessionId, 0);
     }
 
@@ -2927,7 +2937,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public int[] getChildSessionIds() {
-        final int[] childSessionIds = mChildSessionIds.copyKeys();
+        final int[] childSessionIds;
+        synchronized (mLock) {
+            childSessionIds = mChildSessionIds.copyKeys();
+        }
         if (childSessionIds != null) {
             return childSessionIds;
         }
@@ -2953,7 +2966,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return;
             }
             childSession.setParentSessionId(this.sessionId);
-            addChildSessionIdInternal(childSessionId);
+            addChildSessionIdLocked(childSessionId);
         }
     }
 
