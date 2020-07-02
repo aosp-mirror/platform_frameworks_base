@@ -89,10 +89,10 @@ public:
 sp<StatsPullerManager> createPullerManagerAndRegister() {
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
     shared_ptr<FakePullAtomCallback> cb1 = SharedRefBase::make<FakePullAtomCallback>(uid1);
-    pullerManager->RegisterPullAtomCallback(uid1, pullTagId1, coolDownNs, timeoutNs, {}, cb1, true);
+    pullerManager->RegisterPullAtomCallback(uid1, pullTagId1, coolDownNs, timeoutNs, {}, cb1);
     shared_ptr<FakePullAtomCallback> cb2 = SharedRefBase::make<FakePullAtomCallback>(uid2);
-    pullerManager->RegisterPullAtomCallback(uid2, pullTagId1, coolDownNs, timeoutNs, {}, cb2, true);
-    pullerManager->RegisterPullAtomCallback(uid1, pullTagId2, coolDownNs, timeoutNs, {}, cb1, true);
+    pullerManager->RegisterPullAtomCallback(uid2, pullTagId1, coolDownNs, timeoutNs, {}, cb2);
+    pullerManager->RegisterPullAtomCallback(uid1, pullTagId2, coolDownNs, timeoutNs, {}, cb1);
     return pullerManager;
 }
 }  // anonymous namespace
@@ -101,14 +101,14 @@ TEST(StatsPullerManagerTest, TestPullInvalidUid) {
     sp<StatsPullerManager> pullerManager = createPullerManagerAndRegister();
 
     vector<shared_ptr<LogEvent>> data;
-    EXPECT_FALSE(pullerManager->Pull(pullTagId1, {unregisteredUid}, /*timestamp =*/1, &data, true));
+    EXPECT_FALSE(pullerManager->Pull(pullTagId1, {unregisteredUid}, /*timestamp =*/1, &data));
 }
 
 TEST(StatsPullerManagerTest, TestPullChoosesCorrectUid) {
     sp<StatsPullerManager> pullerManager = createPullerManagerAndRegister();
 
     vector<shared_ptr<LogEvent>> data;
-    EXPECT_TRUE(pullerManager->Pull(pullTagId1, {uid1}, /*timestamp =*/1, &data, true));
+    EXPECT_TRUE(pullerManager->Pull(pullTagId1, {uid1}, /*timestamp =*/1, &data));
     ASSERT_EQ(data.size(), 1);
     EXPECT_EQ(data[0]->GetTagId(), pullTagId1);
     ASSERT_EQ(data[0]->getValues().size(), 1);
@@ -121,7 +121,7 @@ TEST(StatsPullerManagerTest, TestPullInvalidConfigKey) {
     pullerManager->RegisterPullUidProvider(configKey, uidProvider);
 
     vector<shared_ptr<LogEvent>> data;
-    EXPECT_FALSE(pullerManager->Pull(pullTagId1, badConfigKey, /*timestamp =*/1, &data, true));
+    EXPECT_FALSE(pullerManager->Pull(pullTagId1, badConfigKey, /*timestamp =*/1, &data));
 }
 
 TEST(StatsPullerManagerTest, TestPullConfigKeyGood) {
@@ -130,7 +130,7 @@ TEST(StatsPullerManagerTest, TestPullConfigKeyGood) {
     pullerManager->RegisterPullUidProvider(configKey, uidProvider);
 
     vector<shared_ptr<LogEvent>> data;
-    EXPECT_TRUE(pullerManager->Pull(pullTagId1, configKey, /*timestamp =*/1, &data, true));
+    EXPECT_TRUE(pullerManager->Pull(pullTagId1, configKey, /*timestamp =*/1, &data));
     EXPECT_EQ(data[0]->GetTagId(), pullTagId1);
     ASSERT_EQ(data[0]->getValues().size(), 1);
     EXPECT_EQ(data[0]->getValues()[0].mValue.int_value, uid2);
@@ -142,7 +142,7 @@ TEST(StatsPullerManagerTest, TestPullConfigKeyNoPullerWithUid) {
     pullerManager->RegisterPullUidProvider(configKey, uidProvider);
 
     vector<shared_ptr<LogEvent>> data;
-    EXPECT_FALSE(pullerManager->Pull(pullTagId2, configKey, /*timestamp =*/1, &data, true));
+    EXPECT_FALSE(pullerManager->Pull(pullTagId2, configKey, /*timestamp =*/1, &data));
 }
 
 }  // namespace statsd
