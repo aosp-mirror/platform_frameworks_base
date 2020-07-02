@@ -402,7 +402,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private boolean mDataLoaderFinished = false;
 
-    // TODO(b/159663586): should be protected by mLock
+    @GuardedBy("mLock")
     private IncrementalFileStorages mIncrementalFileStorages;
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
@@ -3133,10 +3133,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             for (FileBridge bridge : mBridges) {
                 bridge.forceClose();
             }
-        }
-        if (mIncrementalFileStorages != null) {
-            mIncrementalFileStorages.cleanUp();
-            mIncrementalFileStorages = null;
+            if (mIncrementalFileStorages != null) {
+                mIncrementalFileStorages.cleanUp();
+                mIncrementalFileStorages = null;
+            }
         }
         // For staged sessions, we don't delete the directory where the packages have been copied,
         // since these packages are supposed to be read on reboot.
@@ -3173,9 +3173,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void cleanStageDir() {
-        if (mIncrementalFileStorages != null) {
-            mIncrementalFileStorages.cleanUp();
-            mIncrementalFileStorages = null;
+        synchronized (mLock) {
+            if (mIncrementalFileStorages != null) {
+                mIncrementalFileStorages.cleanUp();
+                mIncrementalFileStorages = null;
+            }
         }
         try {
             mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
