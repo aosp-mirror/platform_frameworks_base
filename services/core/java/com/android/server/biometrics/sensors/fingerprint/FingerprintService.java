@@ -686,7 +686,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
         if (userId != UserHandle.getCallingUserId()) {
             checkPermission(INTERACT_ACROSS_USERS);
         }
-        return getBiometricUtils().getBiometricsForUser(getContext(), userId);
+        return FingerprintUtils.getInstance().getBiometricsForUser(getContext(), userId);
     }
 
     @Override
@@ -714,8 +714,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
     @Override
     protected void doTemplateCleanupForUser(int userId) {
-        final List<? extends BiometricAuthenticator.Identifier> enrolledList =
-                getEnrolledTemplates(userId);
+        final List<Fingerprint> enrolledList = getEnrolledTemplates(userId);
         final FingerprintInternalCleanupClient client = new FingerprintInternalCleanupClient(
                 getContext(), mLazyDaemon, userId, getContext().getOpPackageName(), getSensorId(),
                 enrolledList, getBiometricUtils());

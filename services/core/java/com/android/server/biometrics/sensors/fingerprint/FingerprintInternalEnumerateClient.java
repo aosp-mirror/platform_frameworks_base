@@ -18,9 +18,9 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -40,8 +40,7 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiomet
 
     FingerprintInternalEnumerateClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            int userId, @NonNull String owner,
-            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
+            int userId, @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
             @NonNull BiometricUtils utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT);

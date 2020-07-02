@@ -683,7 +683,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
     @Override
     protected List<Face> getEnrolledTemplates(int userId) {
-        return getBiometricUtils().getBiometricsForUser(getContext(), userId);
+        return FaceUtils.getInstance().getBiometricsForUser(getContext(), userId);
     }
 
     @Override
@@ -703,8 +703,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
     @Override
     protected void doTemplateCleanupForUser(int userId) {
-        final List<? extends BiometricAuthenticator.Identifier> enrolledList =
-                getEnrolledTemplates(userId);
+        final List<Face> enrolledList = getEnrolledTemplates(userId);
         final FaceInternalCleanupClient client = new FaceInternalCleanupClient(getContext(),
                 mLazyDaemon, userId, getContext().getOpPackageName(), getSensorId(), enrolledList,
                 getBiometricUtils());

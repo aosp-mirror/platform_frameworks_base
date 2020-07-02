@@ -563,7 +563,8 @@ public abstract class BiometricServiceBase<T> extends SystemService
         });
     }
 
-    protected void cleanupInternal(InternalCleanupClient<T> client) {
+    protected void cleanupInternal(
+            InternalCleanupClient<? extends BiometricAuthenticator.Identifier, T> client) {
         mHandler.post(() -> {
             if (DEBUG) {
                 Slog.v(getTag(), "Cleaning up templates for user("

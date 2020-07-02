@@ -37,8 +37,8 @@ import java.util.List;
  * 2) The HAL and Framework are not in sync, and
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
-public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
-        implements EnumerateConsumer, RemovalConsumer {
+public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Identifier, T>
+        extends ClientMonitor<T> implements EnumerateConsumer, RemovalConsumer {
 
     private static final String TAG = "Biometrics/InternalCleanupClient";
 
@@ -57,7 +57,7 @@ public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
 
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
     private final BiometricUtils mBiometricUtils;
-    private final List<? extends BiometricAuthenticator.Identifier> mEnrolledList;
+    private final List<S> mEnrolledList;
     private ClientMonitor<T> mCurrentTask;
 
     private final FinishCallback mEnumerateFinishCallback = clientMonitor -> {
@@ -87,8 +87,7 @@ public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
 
     protected abstract InternalEnumerateClient<T> getEnumerateClient(Context context,
             LazyDaemon<T> lazyDaemon, IBinder token, int userId, String owner,
-            List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils,
-            int sensorId);
+            List<S> enrolledList, BiometricUtils utils, int sensorId);
 
     protected abstract RemovalClient<T> getRemovalClient(Context context, LazyDaemon<T> lazyDaemon,
             IBinder token, int biometricId, int userId, String owner, BiometricUtils utils,
@@ -96,8 +95,7 @@ public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
 
     protected InternalCleanupClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             int userId, @NonNull String owner, int sensorId, int statsModality,
-            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            @NonNull BiometricUtils utils) {
+            @NonNull List<S> enrolledList, @NonNull BiometricUtils utils) {
         super(context, lazyDaemon, null /* token */, null /* ClientMonitorCallbackConverter */,
                 userId, owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
