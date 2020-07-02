@@ -116,7 +116,6 @@ import static com.android.server.wm.ActivityRecordProto.DEFER_HIDING_CLIENT;
 import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
 import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.wm.ActivityRecordProto.FROZEN_BOUNDS;
-import static com.android.server.wm.ActivityRecordProto.IDENTIFIER;
 import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
@@ -7605,7 +7604,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             bounds.dumpDebug(proto, FROZEN_BOUNDS);
         }
 
-        writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
         proto.write(FRONT_OF_TASK, isRootOfTask());
         if (hasProcess()) {
