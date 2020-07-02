@@ -73,6 +73,12 @@ ActionValue: android.telephony.mbms.vendor.VendorUtils#EXTRA_TEMP_LIST:
 
 ArrayReturn: android.app.UiAutomation#executeShellCommandRw(String):
     
+ArrayReturn: android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel#KeyphraseSoundModel(java.util.UUID, java.util.UUID, byte[], android.hardware.soundtrigger.SoundTrigger.Keyphrase[]) parameter #3:
+    Method parameter should be Collection<Keyphrase> (or subclass) instead of raw array; was `android.hardware.soundtrigger.SoundTrigger.Keyphrase[]`
+ArrayReturn: android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel#KeyphraseSoundModel(java.util.UUID, java.util.UUID, byte[], android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int) parameter #3:
+    Method parameter should be Collection<Keyphrase> (or subclass) instead of raw array; was `android.hardware.soundtrigger.SoundTrigger.Keyphrase[]`
+ArrayReturn: android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel#getKeyphrases():
+    Method should return Collection<Keyphrase> (or subclass) instead of raw array; was `android.hardware.soundtrigger.SoundTrigger.Keyphrase[]`
 ArrayReturn: android.location.GnssMeasurementsEvent#GnssMeasurementsEvent(android.location.GnssClock, android.location.GnssMeasurement[]) parameter #1:
     
 ArrayReturn: android.media.AudioRecordingConfiguration#AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String, int, boolean, int, android.media.audiofx.AudioEffect.Descriptor[], android.media.audiofx.AudioEffect.Descriptor[]) parameter #10:
@@ -116,7 +122,7 @@ ArrayReturn: android.telephony.ims.ImsUtListener#onUtConfigurationCallWaitingQue
 ArrayReturn: android.telephony.ims.stub.ImsRegistrationImplBase#onSubscriberAssociatedUriChanged(android.net.Uri[]) parameter #0:
     
 ArrayReturn: android.view.Display#getSupportedWideColorGamut():
-    Method should return Collection<ColorSpace> (or subclass) instead of raw array; was `android.graphics.ColorSpace[]`
+    
 ArrayReturn: android.view.FocusFinder#sort(android.view.View[], int, int, android.view.ViewGroup, boolean) parameter #0:
     
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
@@ -209,6 +215,36 @@ BannedThrow: android.os.HwBinder#getService(String, String, boolean):
     
 BannedThrow: android.os.Process#getThreadScheduler(int):
     
+
+
+BuilderSetStyle: android.media.audiopolicy.AudioMixingRule.Builder#allowPrivilegedPlaybackCapture(boolean):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.media.audiopolicy.AudioMixingRule.Builder.allowPrivilegedPlaybackCapture(boolean)
+BuilderSetStyle: android.media.audiopolicy.AudioMixingRule.Builder#excludeMixRule(int, Object):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.media.audiopolicy.AudioMixingRule.Builder.excludeMixRule(int,Object)
+BuilderSetStyle: android.media.audiopolicy.AudioMixingRule.Builder#excludeRule(android.media.AudioAttributes, int):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.media.audiopolicy.AudioMixingRule.Builder.excludeRule(android.media.AudioAttributes,int)
+BuilderSetStyle: android.net.NetworkCapabilities.Builder#removeCapability(int):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.NetworkCapabilities.Builder.removeCapability(int)
+BuilderSetStyle: android.net.NetworkCapabilities.Builder#removeTransportType(int):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.NetworkCapabilities.Builder.removeTransportType(int)
+BuilderSetStyle: android.net.metrics.RaEvent.Builder#updateDnsslLifetime(long):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.metrics.RaEvent.Builder.updateDnsslLifetime(long)
+BuilderSetStyle: android.net.metrics.RaEvent.Builder#updatePrefixPreferredLifetime(long):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.metrics.RaEvent.Builder.updatePrefixPreferredLifetime(long)
+BuilderSetStyle: android.net.metrics.RaEvent.Builder#updatePrefixValidLifetime(long):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.metrics.RaEvent.Builder.updatePrefixValidLifetime(long)
+BuilderSetStyle: android.net.metrics.RaEvent.Builder#updateRdnssLifetime(long):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.metrics.RaEvent.Builder.updateRdnssLifetime(long)
+BuilderSetStyle: android.net.metrics.RaEvent.Builder#updateRouteInfoLifetime(long):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.metrics.RaEvent.Builder.updateRouteInfoLifetime(long)
+BuilderSetStyle: android.net.metrics.RaEvent.Builder#updateRouterLifetime(long):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.metrics.RaEvent.Builder.updateRouterLifetime(long)
+BuilderSetStyle: android.os.StrictMode.ThreadPolicy.Builder#detectExplicitGc():
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.os.StrictMode.ThreadPolicy.Builder.detectExplicitGc()
+BuilderSetStyle: android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse():
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.os.StrictMode.VmPolicy.Builder.detectIncorrectContextUse()
+BuilderSetStyle: android.os.StrictMode.VmPolicy.Builder#permitIncorrectContextUse():
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.os.StrictMode.VmPolicy.Builder.permitIncorrectContextUse()
 
 
 CallbackInterface: android.app.prediction.AppPredictor.Callback:
@@ -345,8 +381,12 @@ ExecutorRegistration: android.os.IncidentManager#requestAuthorization(int, Strin
     
 ExecutorRegistration: android.os.RemoteCallback#RemoteCallback(android.os.RemoteCallback.OnResultListener, android.os.Handler):
     
+ExecutorRegistration: android.permission.PermissionControllerManager#countPermissionApps(java.util.List<java.lang.String>, int, android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, android.os.Handler):
+    Registration methods should have overload that accepts delivery Executor: `countPermissionApps`
 ExecutorRegistration: android.permission.PermissionControllerManager#getAppPermissions(String, android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, android.os.Handler):
     
+ExecutorRegistration: android.service.watchdog.ExplicitHealthCheckService#setCallback(android.os.RemoteCallback):
+    Registration methods should have overload that accepts delivery Executor: `setCallback`
 ExecutorRegistration: android.telephony.ims.stub.ImsCallSessionImplBase#setListener(android.telephony.ims.ImsCallSessionListener):
     
 ExecutorRegistration: android.telephony.ims.stub.ImsUtImplBase#setListener(android.telephony.ims.ImsUtListener):
@@ -365,6 +405,8 @@ ExecutorRegistration: android.telephony.mbms.vendor.MbmsStreamingServiceBase#ini
     
 ExecutorRegistration: android.telephony.mbms.vendor.MbmsStreamingServiceBase#startStreaming(int, String, android.telephony.mbms.StreamingServiceCallback):
     
+ExecutorRegistration: android.window.WindowOrganizer#applySyncTransaction(android.window.WindowContainerTransaction, android.window.WindowContainerTransactionCallback):
+    Registration methods should have overload that accepts delivery Executor: `applySyncTransaction`
 
 
 ForbiddenSuperClass: android.app.AppDetailsActivity:
@@ -383,6 +425,12 @@ GenericException: android.service.autofill.ImageTransformation#apply(android.ser
     
 GenericException: android.service.autofill.augmented.FillWindow#finalize():
     
+
+
+GetterOnBuilder: android.hardware.display.BrightnessConfiguration.Builder#getMaxCorrectionsByCategory():
+    Getter should be on the built object, not the builder: method android.hardware.display.BrightnessConfiguration.Builder.getMaxCorrectionsByCategory()
+GetterOnBuilder: android.hardware.display.BrightnessConfiguration.Builder#getMaxCorrectionsByPackageName():
+    Getter should be on the built object, not the builder: method android.hardware.display.BrightnessConfiguration.Builder.getMaxCorrectionsByPackageName()
 
 
 GetterSetterNames: android.app.NotificationChannel#isBlockableSystem():
@@ -461,6 +509,8 @@ IntentBuilderName: android.app.backup.BackupManager#getConfigurationIntent(Strin
     
 IntentBuilderName: android.app.backup.BackupManager#getDataManagementIntent(String):
     
+IntentBuilderName: android.hardware.soundtrigger.KeyphraseEnrollmentInfo#getManageKeyphraseIntent(int, String, java.util.Locale):
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `getManageKeyphraseIntent`
 
 
 IntentName: android.provider.Settings.Secure#VOICE_INTERACTION_SERVICE:
@@ -509,6 +559,8 @@ ListenerLast: android.hardware.camera2.CameraDevice#createCustomCaptureSession(a
     
 ListenerLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper) parameter #2:
     
+ListenerLast: android.permission.PermissionControllerManager#countPermissionApps(java.util.List<java.lang.String>, int, android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, android.os.Handler) parameter #3:
+    Listeners should always be at end of argument list (method `countPermissionApps`)
 ListenerLast: android.permission.PermissionControllerManager#getAppPermissions(String, android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, android.os.Handler) parameter #2:
     
 ListenerLast: android.telephony.mbms.vendor.MbmsGroupCallServiceBase#initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) parameter #1:
@@ -539,6 +591,142 @@ MinMaxConstant: android.os.UserHandle#MIN_SECONDARY_USER_ID:
     
 MinMaxConstant: android.view.autofill.AutofillManager#MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS:
     
+
+
+MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setAttributionTag(String):
+    android.app.AppOpsManager.HistoricalOpsRequest does not declare a `getAttributionTag()` method matching method android.app.AppOpsManager.HistoricalOpsRequest.Builder.setAttributionTag(String)
+MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setFlags(int):
+    android.app.AppOpsManager.HistoricalOpsRequest does not declare a `getFlags()` method matching method android.app.AppOpsManager.HistoricalOpsRequest.Builder.setFlags(int)
+MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setOpNames(java.util.List<java.lang.String>):
+    android.app.AppOpsManager.HistoricalOpsRequest does not declare a `getOpNames()` method matching method android.app.AppOpsManager.HistoricalOpsRequest.Builder.setOpNames(java.util.List<java.lang.String>)
+MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setPackageName(String):
+    android.app.AppOpsManager.HistoricalOpsRequest does not declare a `getPackageName()` method matching method android.app.AppOpsManager.HistoricalOpsRequest.Builder.setPackageName(String)
+MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setUid(int):
+    android.app.AppOpsManager.HistoricalOpsRequest does not declare a `getUid()` method matching method android.app.AppOpsManager.HistoricalOpsRequest.Builder.setUid(int)
+MissingGetterMatchingBuilder: android.content.integrity.RuleSet.Builder#addRules(java.util.List<android.content.integrity.Rule>):
+    android.content.integrity.RuleSet does not declare a `getRuless()` method matching method android.content.integrity.RuleSet.Builder.addRules(java.util.List<android.content.integrity.Rule>)
+MissingGetterMatchingBuilder: android.hardware.display.BrightnessConfiguration.Builder#addCorrectionByCategory(int, android.hardware.display.BrightnessCorrection):
+    android.hardware.display.BrightnessConfiguration does not declare a `getCorrectionByCategorys()` method matching method android.hardware.display.BrightnessConfiguration.Builder.addCorrectionByCategory(int,android.hardware.display.BrightnessCorrection)
+MissingGetterMatchingBuilder: android.hardware.display.BrightnessConfiguration.Builder#addCorrectionByPackageName(String, android.hardware.display.BrightnessCorrection):
+    android.hardware.display.BrightnessConfiguration does not declare a `getCorrectionByPackageNames()` method matching method android.hardware.display.BrightnessConfiguration.Builder.addCorrectionByPackageName(String,android.hardware.display.BrightnessCorrection)
+MissingGetterMatchingBuilder: android.hardware.display.BrightnessConfiguration.Builder#setDescription(String):
+    android.hardware.display.BrightnessConfiguration does not declare a `getDescription()` method matching method android.hardware.display.BrightnessConfiguration.Builder.setDescription(String)
+MissingGetterMatchingBuilder: android.hardware.lights.LightsRequest.Builder#setLight(android.hardware.lights.Light, android.hardware.lights.LightState):
+    android.hardware.lights.LightsRequest does not declare a `getLight()` method matching method android.hardware.lights.LightsRequest.Builder.setLight(android.hardware.lights.Light,android.hardware.lights.LightState)
+MissingGetterMatchingBuilder: android.media.VolumeShaper.Configuration.Builder#setOptionFlags(int):
+    android.media.VolumeShaper.Configuration does not declare a `getOptionFlags()` method matching method android.media.VolumeShaper.Configuration.Builder.setOptionFlags(int)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioMix.Builder#setDevice(android.media.AudioDeviceInfo):
+    android.media.audiopolicy.AudioMix does not declare a `getDevice()` method matching method android.media.audiopolicy.AudioMix.Builder.setDevice(android.media.AudioDeviceInfo)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioMix.Builder#setFormat(android.media.AudioFormat):
+    android.media.audiopolicy.AudioMix does not declare a `getFormat()` method matching method android.media.audiopolicy.AudioMix.Builder.setFormat(android.media.AudioFormat)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioMix.Builder#setRouteFlags(int):
+    android.media.audiopolicy.AudioMix does not declare a `getRouteFlags()` method matching method android.media.audiopolicy.AudioMix.Builder.setRouteFlags(int)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioMixingRule.Builder#addMixRule(int, Object):
+    android.media.audiopolicy.AudioMixingRule does not declare a `getMixRules()` method matching method android.media.audiopolicy.AudioMixingRule.Builder.addMixRule(int,Object)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioMixingRule.Builder#addRule(android.media.AudioAttributes, int):
+    android.media.audiopolicy.AudioMixingRule does not declare a `getRules()` method matching method android.media.audiopolicy.AudioMixingRule.Builder.addRule(android.media.AudioAttributes,int)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#addMix(android.media.audiopolicy.AudioMix):
+    android.media.audiopolicy.AudioPolicy does not declare a `getMixs()` method matching method android.media.audiopolicy.AudioPolicy.Builder.addMix(android.media.audiopolicy.AudioMix)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#setAudioPolicyFocusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener):
+    android.media.audiopolicy.AudioPolicy does not declare a `getAudioPolicyFocusListener()` method matching method android.media.audiopolicy.AudioPolicy.Builder.setAudioPolicyFocusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#setAudioPolicyStatusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyStatusListener):
+    android.media.audiopolicy.AudioPolicy does not declare a `getAudioPolicyStatusListener()` method matching method android.media.audiopolicy.AudioPolicy.Builder.setAudioPolicyStatusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyStatusListener)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#setAudioPolicyVolumeCallback(android.media.audiopolicy.AudioPolicy.AudioPolicyVolumeCallback):
+    android.media.audiopolicy.AudioPolicy does not declare a `getAudioPolicyVolumeCallback()` method matching method android.media.audiopolicy.AudioPolicy.Builder.setAudioPolicyVolumeCallback(android.media.audiopolicy.AudioPolicy.AudioPolicyVolumeCallback)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#setIsAudioFocusPolicy(boolean):
+    android.media.audiopolicy.AudioPolicy does not declare a `isIsAudioFocusPolicy()` method matching method android.media.audiopolicy.AudioPolicy.Builder.setIsAudioFocusPolicy(boolean)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#setIsTestFocusPolicy(boolean):
+    android.media.audiopolicy.AudioPolicy does not declare a `isIsTestFocusPolicy()` method matching method android.media.audiopolicy.AudioPolicy.Builder.setIsTestFocusPolicy(boolean)
+MissingGetterMatchingBuilder: android.media.audiopolicy.AudioPolicy.Builder#setLooper(android.os.Looper):
+    android.media.audiopolicy.AudioPolicy does not declare a `getLooper()` method matching method android.media.audiopolicy.AudioPolicy.Builder.setLooper(android.os.Looper)
+MissingGetterMatchingBuilder: android.net.CaptivePortalData.Builder#setBytesRemaining(long):
+    android.net.CaptivePortalData does not declare a `getBytesRemaining()` method matching method android.net.CaptivePortalData.Builder.setBytesRemaining(long)
+MissingGetterMatchingBuilder: android.net.CaptivePortalData.Builder#setExpiryTime(long):
+    android.net.CaptivePortalData does not declare a `getExpiryTime()` method matching method android.net.CaptivePortalData.Builder.setExpiryTime(long)
+MissingGetterMatchingBuilder: android.net.CaptivePortalData.Builder#setRefreshTime(long):
+    android.net.CaptivePortalData does not declare a `getRefreshTime()` method matching method android.net.CaptivePortalData.Builder.setRefreshTime(long)
+MissingGetterMatchingBuilder: android.net.NetworkCapabilities.Builder#addCapability(int):
+    android.net.NetworkCapabilities does not declare a `getCapabilitys()` method matching method android.net.NetworkCapabilities.Builder.addCapability(int)
+MissingGetterMatchingBuilder: android.net.NetworkCapabilities.Builder#setRequestorPackageName(String):
+    android.net.NetworkCapabilities does not declare a `getRequestorPackageName()` method matching method android.net.NetworkCapabilities.Builder.setRequestorPackageName(String)
+MissingGetterMatchingBuilder: android.net.NetworkCapabilities.Builder#setRequestorUid(int):
+    android.net.NetworkCapabilities does not declare a `getRequestorUid()` method matching method android.net.NetworkCapabilities.Builder.setRequestorUid(int)
+MissingGetterMatchingBuilder: android.net.TetheringManager.TetheringRequest.Builder#setShouldShowEntitlementUi(boolean):
+    android.net.TetheringManager.TetheringRequest does not declare a `shouldShowEntitlementUi()` method matching method android.net.TetheringManager.TetheringRequest.Builder.setShouldShowEntitlementUi(boolean)
+MissingGetterMatchingBuilder: android.net.TetheringManager.TetheringRequest.Builder#setStaticIpv4Addresses(android.net.LinkAddress, android.net.LinkAddress):
+    android.net.TetheringManager.TetheringRequest does not declare a `getStaticIpv4Addresses()` method matching method android.net.TetheringManager.TetheringRequest.Builder.setStaticIpv4Addresses(android.net.LinkAddress,android.net.LinkAddress)
+MissingGetterMatchingBuilder: android.net.metrics.ApfProgramEvent.Builder#setActualLifetime(long):
+    android.net.metrics.ApfProgramEvent does not declare a `getActualLifetime()` method matching method android.net.metrics.ApfProgramEvent.Builder.setActualLifetime(long)
+MissingGetterMatchingBuilder: android.net.metrics.ApfProgramEvent.Builder#setCurrentRas(int):
+    android.net.metrics.ApfProgramEvent does not declare a `getCurrentRas()` method matching method android.net.metrics.ApfProgramEvent.Builder.setCurrentRas(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfProgramEvent.Builder#setFilteredRas(int):
+    android.net.metrics.ApfProgramEvent does not declare a `getFilteredRas()` method matching method android.net.metrics.ApfProgramEvent.Builder.setFilteredRas(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfProgramEvent.Builder#setFlags(boolean, boolean):
+    android.net.metrics.ApfProgramEvent does not declare a `isFlags()` method matching method android.net.metrics.ApfProgramEvent.Builder.setFlags(boolean,boolean)
+MissingGetterMatchingBuilder: android.net.metrics.ApfProgramEvent.Builder#setLifetime(long):
+    android.net.metrics.ApfProgramEvent does not declare a `getLifetime()` method matching method android.net.metrics.ApfProgramEvent.Builder.setLifetime(long)
+MissingGetterMatchingBuilder: android.net.metrics.ApfProgramEvent.Builder#setProgramLength(int):
+    android.net.metrics.ApfProgramEvent does not declare a `getProgramLength()` method matching method android.net.metrics.ApfProgramEvent.Builder.setProgramLength(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setDroppedRas(int):
+    android.net.metrics.ApfStats does not declare a `getDroppedRas()` method matching method android.net.metrics.ApfStats.Builder.setDroppedRas(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setDurationMs(long):
+    android.net.metrics.ApfStats does not declare a `getDurationMs()` method matching method android.net.metrics.ApfStats.Builder.setDurationMs(long)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setMatchingRas(int):
+    android.net.metrics.ApfStats does not declare a `getMatchingRas()` method matching method android.net.metrics.ApfStats.Builder.setMatchingRas(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setMaxProgramSize(int):
+    android.net.metrics.ApfStats does not declare a `getMaxProgramSize()` method matching method android.net.metrics.ApfStats.Builder.setMaxProgramSize(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setParseErrors(int):
+    android.net.metrics.ApfStats does not declare a `getParseErrors()` method matching method android.net.metrics.ApfStats.Builder.setParseErrors(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setProgramUpdates(int):
+    android.net.metrics.ApfStats does not declare a `getProgramUpdates()` method matching method android.net.metrics.ApfStats.Builder.setProgramUpdates(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setProgramUpdatesAll(int):
+    android.net.metrics.ApfStats does not declare a `getProgramUpdatesAll()` method matching method android.net.metrics.ApfStats.Builder.setProgramUpdatesAll(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setProgramUpdatesAllowingMulticast(int):
+    android.net.metrics.ApfStats does not declare a `getProgramUpdatesAllowingMulticast()` method matching method android.net.metrics.ApfStats.Builder.setProgramUpdatesAllowingMulticast(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setReceivedRas(int):
+    android.net.metrics.ApfStats does not declare a `getReceivedRas()` method matching method android.net.metrics.ApfStats.Builder.setReceivedRas(int)
+MissingGetterMatchingBuilder: android.net.metrics.ApfStats.Builder#setZeroLifetimeRas(int):
+    android.net.metrics.ApfStats does not declare a `getZeroLifetimeRas()` method matching method android.net.metrics.ApfStats.Builder.setZeroLifetimeRas(int)
+MissingGetterMatchingBuilder: android.net.metrics.DhcpClientEvent.Builder#setDurationMs(int):
+    android.net.metrics.DhcpClientEvent does not declare a `getDurationMs()` method matching method android.net.metrics.DhcpClientEvent.Builder.setDurationMs(int)
+MissingGetterMatchingBuilder: android.net.metrics.DhcpClientEvent.Builder#setMsg(String):
+    android.net.metrics.DhcpClientEvent does not declare a `getMsg()` method matching method android.net.metrics.DhcpClientEvent.Builder.setMsg(String)
+MissingGetterMatchingBuilder: android.net.metrics.ValidationProbeEvent.Builder#setDurationMs(long):
+    android.net.metrics.ValidationProbeEvent does not declare a `getDurationMs()` method matching method android.net.metrics.ValidationProbeEvent.Builder.setDurationMs(long)
+MissingGetterMatchingBuilder: android.net.metrics.ValidationProbeEvent.Builder#setProbeType(int, boolean):
+    android.net.metrics.ValidationProbeEvent does not declare a `getProbeType()` method matching method android.net.metrics.ValidationProbeEvent.Builder.setProbeType(int,boolean)
+MissingGetterMatchingBuilder: android.net.metrics.ValidationProbeEvent.Builder#setReturnCode(int):
+    android.net.metrics.ValidationProbeEvent does not declare a `getReturnCode()` method matching method android.net.metrics.ValidationProbeEvent.Builder.setReturnCode(int)
+MissingGetterMatchingBuilder: android.security.keystore.KeyGenParameterSpec.Builder#setUniqueIdIncluded(boolean):
+    android.security.keystore.KeyGenParameterSpec does not declare a `isUniqueIdIncluded()` method matching method android.security.keystore.KeyGenParameterSpec.Builder.setUniqueIdIncluded(boolean)
+MissingGetterMatchingBuilder: android.service.autofill.Dataset.Builder#setFieldInlinePresentation(android.view.autofill.AutofillId, android.view.autofill.AutofillValue, java.util.regex.Pattern, android.service.autofill.InlinePresentation):
+    android.service.autofill.Dataset does not declare a `getFieldInlinePresentation()` method matching method android.service.autofill.Dataset.Builder.setFieldInlinePresentation(android.view.autofill.AutofillId,android.view.autofill.AutofillValue,java.util.regex.Pattern,android.service.autofill.InlinePresentation)
+MissingGetterMatchingBuilder: android.service.autofill.augmented.FillResponse.Builder#setClientState(android.os.Bundle):
+    android.service.autofill.augmented.FillResponse does not declare a `getClientState()` method matching method android.service.autofill.augmented.FillResponse.Builder.setClientState(android.os.Bundle)
+MissingGetterMatchingBuilder: android.service.autofill.augmented.FillResponse.Builder#setFillWindow(android.service.autofill.augmented.FillWindow):
+    android.service.autofill.augmented.FillResponse does not declare a `getFillWindow()` method matching method android.service.autofill.augmented.FillResponse.Builder.setFillWindow(android.service.autofill.augmented.FillWindow)
+MissingGetterMatchingBuilder: android.service.autofill.augmented.FillResponse.Builder#setInlineSuggestions(java.util.List<android.service.autofill.Dataset>):
+    android.service.autofill.augmented.FillResponse does not declare a `getInlineSuggestions()` method matching method android.service.autofill.augmented.FillResponse.Builder.setInlineSuggestions(java.util.List<android.service.autofill.Dataset>)
+MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
+    android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
+MissingGetterMatchingBuilder: android.telecom.ConnectionRequest.Builder#setIsAdhocConferenceCall(boolean):
+    android.telecom.ConnectionRequest does not declare a `isIsAdhocConferenceCall()` method matching method android.telecom.ConnectionRequest.Builder.setIsAdhocConferenceCall(boolean)
+MissingGetterMatchingBuilder: android.telecom.ConnectionRequest.Builder#setRttPipeFromInCall(android.os.ParcelFileDescriptor):
+    android.telecom.ConnectionRequest does not declare a `getRttPipeFromInCall()` method matching method android.telecom.ConnectionRequest.Builder.setRttPipeFromInCall(android.os.ParcelFileDescriptor)
+MissingGetterMatchingBuilder: android.telecom.ConnectionRequest.Builder#setRttPipeToInCall(android.os.ParcelFileDescriptor):
+    android.telecom.ConnectionRequest does not declare a `getRttPipeToInCall()` method matching method android.telecom.ConnectionRequest.Builder.setRttPipeToInCall(android.os.ParcelFileDescriptor)
+MissingGetterMatchingBuilder: android.telecom.ConnectionRequest.Builder#setShouldShowIncomingCallUi(boolean):
+    android.telecom.ConnectionRequest does not declare a `shouldShowIncomingCallUi()` method matching method android.telecom.ConnectionRequest.Builder.setShouldShowIncomingCallUi(boolean)
+MissingGetterMatchingBuilder: android.telecom.PhoneAccount.Builder#setGroupId(String):
+    android.telecom.PhoneAccount does not declare a `getGroupId()` method matching method android.telecom.PhoneAccount.Builder.setGroupId(String)
+MissingGetterMatchingBuilder: android.telephony.NetworkRegistrationInfo.Builder#setEmergencyOnly(boolean):
+    android.telephony.NetworkRegistrationInfo does not declare a `isEmergencyOnly()` method matching method android.telephony.NetworkRegistrationInfo.Builder.setEmergencyOnly(boolean)
+MissingGetterMatchingBuilder: android.telephony.ims.ImsSsData.Builder#setCallForwardingInfo(java.util.List<android.telephony.ims.ImsCallForwardInfo>):
+    android.telephony.ims.ImsSsData does not declare a `getCallForwardingInfo()` method matching method android.telephony.ims.ImsSsData.Builder.setCallForwardingInfo(java.util.List<android.telephony.ims.ImsCallForwardInfo>)
+MissingGetterMatchingBuilder: android.telephony.ims.stub.ImsFeatureConfiguration.Builder#addFeature(int, int):
+    android.telephony.ims.stub.ImsFeatureConfiguration does not declare a `getFeatures()` method matching method android.telephony.ims.stub.ImsFeatureConfiguration.Builder.addFeature(int,int)
+MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    android.telephony.mbms.DownloadRequest does not declare a `getServiceId()` method matching method android.telephony.mbms.DownloadRequest.Builder.setServiceId(String)
 
 
 MissingNullability: android.app.Activity#onMovedToDisplay(int, android.content.res.Configuration) parameter #1:
@@ -2294,11 +2482,11 @@ NoClone: android.service.autofill.augmented.AugmentedAutofillService#dump(java.i
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
     
 NoClone: android.util.proto.ProtoOutputStream#ProtoOutputStream(java.io.FileDescriptor) parameter #0:
-
+    
 
 
 NoSettingsProvider: android.provider.Settings.Global#APP_OPS_CONSTANTS:
-    New setting keys are not allowed (Field: APP_OPS_CONSTANTS); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Global#AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
     
 NoSettingsProvider: android.provider.Settings.Global#AUTOMATIC_POWER_SAVE_MODE:
@@ -2312,7 +2500,7 @@ NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_ENABL
 NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_BLACKLIST_EXEMPTIONS:
     
 NoSettingsProvider: android.provider.Settings.Global#HIDE_ERROR_DIALOGS:
-    New setting keys are not allowed (Field: HIDE_ERROR_DIALOGS); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Global#LOCATION_GLOBAL_KILL_SWITCH:
     
 NoSettingsProvider: android.provider.Settings.Global#LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST:
@@ -2356,21 +2544,21 @@ NoSettingsProvider: android.provider.Settings.Secure#DOZE_ALWAYS_ON:
 NoSettingsProvider: android.provider.Settings.Secure#ENABLED_VR_LISTENERS:
     
 NoSettingsProvider: android.provider.Settings.Secure#IMMERSIVE_MODE_CONFIRMATIONS:
-    New setting keys are not allowed (Field: IMMERSIVE_MODE_CONFIRMATIONS); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Secure#LOCATION_ACCESS_CHECK_DELAY_MILLIS:
     
 NoSettingsProvider: android.provider.Settings.Secure#LOCATION_ACCESS_CHECK_INTERVAL_MILLIS:
     
 NoSettingsProvider: android.provider.Settings.Secure#LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS:
-    New setting keys are not allowed (Field: LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Secure#LOCK_SCREEN_SHOW_NOTIFICATIONS:
-    New setting keys are not allowed (Field: LOCK_SCREEN_SHOW_NOTIFICATIONS); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Secure#NFC_PAYMENT_DEFAULT_COMPONENT:
-    New setting keys are not allowed (Field: NFC_PAYMENT_DEFAULT_COMPONENT); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Secure#NOTIFICATION_BADGING:
     
 NoSettingsProvider: android.provider.Settings.Secure#POWER_MENU_LOCKED_SHOW_CONTENT:
-    New setting keys are not allowed (Field: POWER_MENU_LOCKED_SHOW_CONTENT); use getters/setters in relevant manager class
+    
 NoSettingsProvider: android.provider.Settings.Secure#SYNC_PARENT_SOUNDS:
     
 NoSettingsProvider: android.provider.Settings.Secure#USER_SETUP_COMPLETE:
@@ -2384,7 +2572,7 @@ NotCloseable: android.app.ActivityView:
 NotCloseable: android.app.prediction.AppPredictor:
     
 NotCloseable: android.net.EthernetManager.TetheredInterfaceRequest:
-    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.net.EthernetManager.TetheredInterfaceRequest
+    
 NotCloseable: android.os.HwParcel:
     
 NotCloseable: android.telephony.ims.stub.ImsUtImplBase:
@@ -2401,6 +2589,8 @@ OnNameExpected: android.service.notification.NotificationAssistantService#attach
     
 OnNameExpected: android.service.quicksettings.TileService#isQuickSettingsSupported():
     
+OnNameExpected: android.service.watchdog.ExplicitHealthCheckService#setCallback(android.os.RemoteCallback):
+    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
 OnNameExpected: android.telephony.ims.ImsService#createMmTelFeature(int):
     
 OnNameExpected: android.telephony.ims.ImsService#createRcsFeature(int):
@@ -2427,6 +2617,14 @@ OnNameExpected: android.telephony.mbms.vendor.MbmsGroupCallServiceBase#stopGroup
     
 OnNameExpected: android.telephony.mbms.vendor.MbmsGroupCallServiceBase#updateGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>):
     
+
+
+OptionalBuilderConstructorArgument: android.app.prediction.AppTargetEvent.Builder#Builder(android.app.prediction.AppTarget, int) parameter #0:
+    Builder constructor arguments must be mandatory (i.e. not @Nullable): parameter target in android.app.prediction.AppTargetEvent.Builder(android.app.prediction.AppTarget target, int actionType)
+OptionalBuilderConstructorArgument: android.net.CaptivePortalData.Builder#Builder(android.net.CaptivePortalData) parameter #0:
+    Builder constructor arguments must be mandatory (i.e. not @Nullable): parameter data in android.net.CaptivePortalData.Builder(android.net.CaptivePortalData data)
+OptionalBuilderConstructorArgument: android.os.VibrationAttributes.Builder#Builder(android.media.AudioAttributes, android.os.VibrationEffect) parameter #1:
+    Builder constructor arguments must be mandatory (i.e. not @Nullable): parameter effect in android.os.VibrationAttributes.Builder(android.media.AudioAttributes audio, android.os.VibrationEffect effect)
 
 
 PackageLayering: android.util.FeatureFlagUtils:
@@ -2625,6 +2823,8 @@ SamShouldBeLast: android.os.IHwBinder#linkToDeath(android.os.IHwBinder.DeathReci
     
 SamShouldBeLast: android.os.StrictMode.ViolationInfo#dump(android.util.Printer, String):
     
+SamShouldBeLast: android.permission.PermissionControllerManager#countPermissionApps(java.util.List<java.lang.String>, int, android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, android.os.Handler):
+    SAM-compatible parameters (such as parameter 3, "callback", in android.permission.PermissionControllerManager.countPermissionApps) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.permission.PermissionControllerManager#getAppPermissions(String, android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, android.os.Handler):
     
 SamShouldBeLast: android.permission.PermissionControllerManager#revokeRuntimePermissions(java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, java.util.concurrent.Executor, android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback):
@@ -2669,6 +2869,24 @@ SetterReturnsThis: android.media.audiopolicy.AudioPolicy.Builder#setAudioPolicyS
     
 
 
+StaticFinalBuilder: android.content.integrity.RuleSet.Builder:
+    Builder must be final: android.content.integrity.RuleSet.Builder
+StaticFinalBuilder: android.hardware.display.BrightnessConfiguration.Builder:
+    Builder must be final: android.hardware.display.BrightnessConfiguration.Builder
+StaticFinalBuilder: android.media.audiopolicy.AudioMix.Builder:
+    Builder must be final: android.media.audiopolicy.AudioMix.Builder
+StaticFinalBuilder: android.media.audiopolicy.AudioMixingRule.Builder:
+    Builder must be final: android.media.audiopolicy.AudioMixingRule.Builder
+StaticFinalBuilder: android.media.audiopolicy.AudioPolicy.Builder:
+    Builder must be final: android.media.audiopolicy.AudioPolicy.Builder
+StaticFinalBuilder: android.net.CaptivePortalData.Builder:
+    Builder must be final: android.net.CaptivePortalData.Builder
+StaticFinalBuilder: android.net.TetheringManager.TetheringRequest.Builder:
+    Builder must be final: android.net.TetheringManager.TetheringRequest.Builder
+StaticFinalBuilder: android.telephony.ims.stub.ImsFeatureConfiguration.Builder:
+    Builder must be final: android.telephony.ims.stub.ImsFeatureConfiguration.Builder
+
+
 StaticUtils: android.os.health.HealthKeys:
     
 StaticUtils: android.service.autofill.InternalTransformation:
@@ -2691,6 +2909,18 @@ StreamFiles: android.provider.MediaStore#scanFileFromShell(android.content.Conte
     
 StreamFiles: android.provider.MediaStore#scanVolume(android.content.Context, java.io.File):
     
+
+
+UseIcu: android.hardware.soundtrigger.KeyphraseEnrollmentInfo#getKeyphraseMetadata(String, java.util.Locale) parameter #1:
+    Type `java.util.Locale` should be replaced with richer ICU type `android.icu.util.ULocale`
+UseIcu: android.hardware.soundtrigger.KeyphraseEnrollmentInfo#getManageKeyphraseIntent(int, String, java.util.Locale) parameter #2:
+    Type `java.util.Locale` should be replaced with richer ICU type `android.icu.util.ULocale`
+UseIcu: android.hardware.soundtrigger.KeyphraseMetadata#supportsLocale(java.util.Locale) parameter #0:
+    Type `java.util.Locale` should be replaced with richer ICU type `android.icu.util.ULocale`
+UseIcu: android.hardware.soundtrigger.SoundTrigger.Keyphrase#Keyphrase(int, int, java.util.Locale, String, int[]) parameter #2:
+    Type `java.util.Locale` should be replaced with richer ICU type `android.icu.util.ULocale`
+UseIcu: android.hardware.soundtrigger.SoundTrigger.Keyphrase#getLocale():
+    Type `java.util.Locale` should be replaced with richer ICU type `android.icu.util.ULocale`
 
 
 UseParcelFileDescriptor: android.util.proto.ProtoOutputStream#ProtoOutputStream(java.io.FileDescriptor) parameter #0:
@@ -2720,7 +2950,7 @@ UserHandle: android.app.usage.StorageStatsManager#queryCratesForUser(java.util.U
 UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociated(String, android.net.MacAddress, android.os.UserHandle):
     
 UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociatedForWifiConnection(String, android.net.MacAddress, android.os.UserHandle):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 UserHandle: android.content.pm.PackageManager#getInstallReason(String, android.os.UserHandle):
     
 UserHandle: android.content.pm.PackageManager#getPermissionFlags(String, String, android.os.UserHandle):
@@ -2730,7 +2960,7 @@ UserHandle: android.content.pm.PackageManager#grantRuntimePermission(String, Str
 UserHandle: android.content.pm.PackageManager#revokeRuntimePermission(String, String, android.os.UserHandle):
     
 UserHandle: android.content.pm.PackageManager#revokeRuntimePermission(String, String, android.os.UserHandle, String):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 UserHandle: android.content.pm.PackageManager#updatePermissionFlags(String, String, int, int, android.os.UserHandle):
     
 UserHandle: android.location.LocationManager#setLocationEnabledForUser(boolean, android.os.UserHandle):
@@ -2742,7 +2972,7 @@ UserHandle: android.permission.PermissionControllerManager#getRuntimePermissionB
 UserHandle: android.permission.PermissionControllerManager#stageAndApplyRuntimePermissionsBackup(byte[], android.os.UserHandle):
     
 UserHandle: android.telecom.TelecomManager#getDefaultDialerPackage(android.os.UserHandle):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 
 
 UserHandleName: android.app.ActivityView#startActivity(android.content.Intent, android.os.UserHandle):
