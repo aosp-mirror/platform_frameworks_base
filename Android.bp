@@ -717,7 +717,6 @@ filegroup {
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/com/android/internal/util/TokenBucket.java",
-        "core/java/android/net/shared/*.java",
     ],
 }
 
@@ -727,7 +726,6 @@ java_library {
     name: "framework-wifi-util-lib",
     sdk_version: "module_current",
     srcs: [
-        "core/java/android/net/shared/Inet4AddressUtils.java",
         "core/java/com/android/internal/util/Preconditions.java",
     ],
     libs: [
@@ -744,7 +742,6 @@ filegroup {
     name: "framework-services-net-module-wifi-shared-srcs",
     srcs: [
         "core/java/android/net/DhcpResults.java",
-        "core/java/android/net/shared/InetAddressUtils.java",
         "core/java/android/net/util/IpUtils.java",
         "core/java/android/util/LocalLog.java",
     ],
@@ -761,7 +758,6 @@ filegroup {
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
     ],
 }
 
