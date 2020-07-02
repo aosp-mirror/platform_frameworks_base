@@ -32,6 +32,9 @@ import android.os.RemoteException;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.sensors.LockoutTracker;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -54,6 +57,8 @@ class PreAuthInfo {
     static final int BIOMETRIC_NOT_ENROLLED = 7;
     static final int BIOMETRIC_NOT_ENABLED_FOR_APPS = 8;
     static final int CREDENTIAL_NOT_ENROLLED = 9;
+    static final int BIOMETRIC_LOCKOUT_TIMED = 10;
+    static final int BIOMETRIC_LOCKOUT_PERMANENT = 11;
     @IntDef({AUTHENTICATOR_OK,
             BIOMETRIC_NO_HARDWARE,
             BIOMETRIC_DISABLED_BY_DEVICE_POLICY,
@@ -62,7 +67,9 @@ class PreAuthInfo {
             BIOMETRIC_HARDWARE_NOT_DETECTED,
             BIOMETRIC_NOT_ENROLLED,
             BIOMETRIC_NOT_ENABLED_FOR_APPS,
-            CREDENTIAL_NOT_ENROLLED})
+            CREDENTIAL_NOT_ENROLLED,
+            BIOMETRIC_LOCKOUT_TIMED,
+            BIOMETRIC_LOCKOUT_PERMANENT})
     @Retention(RetentionPolicy.SOURCE)
     @interface AuthenticatorStatus {}
 
@@ -73,7 +80,7 @@ class PreAuthInfo {
     // Sensors that can be used for this request (e.g. strong enough, enrolled, enabled).
     final List<BiometricSensor> eligibleSensors;
     // Sensors that cannot be used for this request. Pair<BiometricSensor, AuthenticatorStatus>
-    private final List<Pair<BiometricSensor, Integer>> mIneligibleSensors;
+    final List<Pair<BiometricSensor, Integer>> ineligibleSensors;
     final boolean credentialAvailable;
     final boolean confirmationRequested;
 
@@ -156,6 +163,14 @@ class PreAuthInfo {
             if (!sensor.impl.hasEnrolledTemplates(userId, opPackageName)) {
                 return BIOMETRIC_NOT_ENROLLED;
             }
+
+            final @LockoutTracker.LockoutMode int lockoutMode =
+                    sensor.impl.getLockoutModeForUser(userId);
+            if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
+                return BIOMETRIC_LOCKOUT_TIMED;
+            } else if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
+                return BIOMETRIC_LOCKOUT_PERMANENT;
+            }
         } catch (RemoteException e) {
             return BIOMETRIC_HARDWARE_NOT_DETECTED;
         }
@@ -232,7 +247,7 @@ class PreAuthInfo {
         this.credentialRequested = credentialRequested;
 
         this.eligibleSensors = eligibleSensors;
-        this.mIneligibleSensors = ineligibleSensors;
+        this.ineligibleSensors = ineligibleSensors;
         this.credentialAvailable = credentialAvailable;
         this.confirmationRequested = confirmationRequested;
     }
@@ -258,9 +273,9 @@ class PreAuthInfo {
                 }
             } else {
                 // Pick the first sensor error if it exists
-                if (!mIneligibleSensors.isEmpty()) {
-                    modality |= mIneligibleSensors.get(0).first.modality;
-                    status = mIneligibleSensors.get(0).second;
+                if (!ineligibleSensors.isEmpty()) {
+                    modality |= ineligibleSensors.get(0).first.modality;
+                    status = ineligibleSensors.get(0).second;
                 } else {
                     modality |= TYPE_CREDENTIAL;
                     status = CREDENTIAL_NOT_ENROLLED;
@@ -274,9 +289,9 @@ class PreAuthInfo {
                  }
             } else {
                 // Pick the first sensor error if it exists
-                if (!mIneligibleSensors.isEmpty()) {
-                    modality |= mIneligibleSensors.get(0).first.modality;
-                    status = mIneligibleSensors.get(0).second;
+                if (!ineligibleSensors.isEmpty()) {
+                    modality |= ineligibleSensors.get(0).first.modality;
+                    status = ineligibleSensors.get(0).second;
                 } else {
                     modality |= TYPE_NONE;
                     status = BIOMETRIC_NO_HARDWARE;
@@ -293,7 +308,7 @@ class PreAuthInfo {
         }
 
         Slog.d(TAG, "getCanAuthenticateInternal Modality: " + modality
-                + " AuthenticatorSatus: " + status);
+                + " AuthenticatorStatus: " + status);
         return new Pair<>(modality, status);
     }
 
@@ -325,6 +340,8 @@ class PreAuthInfo {
             case BIOMETRIC_HARDWARE_NOT_DETECTED:
             case BIOMETRIC_NOT_ENROLLED:
             case CREDENTIAL_NOT_ENROLLED:
+            case BIOMETRIC_LOCKOUT_TIMED:
+            case BIOMETRIC_LOCKOUT_PERMANENT:
                 break;
 
             case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
@@ -379,7 +396,7 @@ class PreAuthInfo {
         string.append("}");
 
         string.append("\nIneligible:{");
-        for (Pair<BiometricSensor, Integer> ineligible : mIneligibleSensors) {
+        for (Pair<BiometricSensor, Integer> ineligible : ineligibleSensors) {
             string.append(ineligible.first).append(":").append(ineligible.second).append(" ");
         }
         string.append("}");

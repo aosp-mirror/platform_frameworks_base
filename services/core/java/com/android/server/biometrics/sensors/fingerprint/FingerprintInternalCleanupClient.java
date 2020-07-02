@@ -34,35 +34,32 @@ import java.util.List;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintInternalCleanupClient extends InternalCleanupClient {
-    private final IBiometricsFingerprint mDaemon;
+class FingerprintInternalCleanupClient extends InternalCleanupClient<IBiometricsFingerprint> {
 
-    FingerprintInternalCleanupClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFingerprint daemon, int userId,
+    FingerprintInternalCleanupClient(@NonNull Context context,int userId,
             boolean restricted, @NonNull String owner, int sensorId, int statsModality,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils) {
-        super(finishCallback, context, userId, restricted, owner, sensorId, statsModality,
+        super(context, userId, restricted, owner, sensorId, statsModality,
                 enrolledList, utils);
-        mDaemon = daemon;
     }
 
     @Override
-    protected InternalEnumerateClient getEnumerateClient(FinishCallback finishCallback,
+    protected InternalEnumerateClient<IBiometricsFingerprint> getEnumerateClient(
             Context context, IBinder token, int userId, boolean restricted, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils,
             int sensorId, int statsModality) {
-        return new FingerprintInternalEnumerateClient(finishCallback, context, mDaemon, token,
+        return new FingerprintInternalEnumerateClient(context, token,
                 userId, restricted, owner, enrolledList, utils, sensorId, statsModality);
     }
 
     @Override
-    protected RemovalClient getRemovalClient(FinishCallback finishCallback, Context context,
+    protected RemovalClient<IBiometricsFingerprint> getRemovalClient(Context context,
             IBinder token, int biometricId, int userId, boolean restricted, String owner,
             BiometricUtils utils, int sensorId, int statsModality) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        return new FingerprintRemovalClient(finishCallback, context, mDaemon, token,
+        return new FingerprintRemovalClient(context, token,
                 null /* ClientMonitorCallbackConverter */, biometricId, userId, restricted,
                 owner, utils, sensorId, statsModality);
     }

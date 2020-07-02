@@ -34,36 +34,32 @@ import java.util.List;
  * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
  * HIDL interfaces.
  */
-class FaceInternalCleanupClient extends InternalCleanupClient {
-    private final IBiometricsFace mDaemon;
+class FaceInternalCleanupClient extends InternalCleanupClient<IBiometricsFace> {
 
-    FaceInternalCleanupClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, int userId, boolean restricted, String owner,
-            int sensorId, int statsModality,
+    FaceInternalCleanupClient(@NonNull Context context, int userId, boolean restricted,
+            @NonNull String owner, int sensorId, int statsModality,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils) {
-        super(finishCallback, context, userId, restricted, owner, sensorId, statsModality,
+        super(context, userId, restricted, owner, sensorId, statsModality,
                 enrolledList, utils);
-        mDaemon = daemon;
     }
 
     @Override
-    protected InternalEnumerateClient getEnumerateClient(FinishCallback finishCallback,
-            Context context, IBinder token, int userId, boolean restricted, String owner,
+    protected InternalEnumerateClient<IBiometricsFace> getEnumerateClient(Context context,
+            IBinder token, int userId, boolean restricted, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList,
             BiometricUtils utils, int sensorId, int statsModality) {
-        return new FaceInternalEnumerateClient(finishCallback, context, mDaemon, token, userId,
-                restricted, owner, enrolledList, utils, sensorId, statsModality);
+        return new FaceInternalEnumerateClient(context, token, userId, restricted, owner,
+                enrolledList, utils, sensorId, statsModality);
     }
 
     @Override
-    protected RemovalClient getRemovalClient(FinishCallback finishCallback, Context context,
-            IBinder token, int biometricId, int userId, boolean restricted, String owner,
-            BiometricUtils utils, int sensorId, int statsModality) {
+    protected RemovalClient<IBiometricsFace> getRemovalClient(Context context, IBinder token,
+            int biometricId, int userId, boolean restricted, String owner, BiometricUtils utils,
+            int sensorId, int statsModality) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        return new FaceRemovalClient(finishCallback, context, mDaemon, token,
-                null /* ClientMonitorCallbackConverter */, biometricId, userId, restricted,
-                owner, utils, sensorId, statsModality);
+        return new FaceRemovalClient(context, token, null /* ClientMonitorCallbackConverter */,
+                biometricId, userId, restricted, owner, utils, sensorId, statsModality);
     }
 }

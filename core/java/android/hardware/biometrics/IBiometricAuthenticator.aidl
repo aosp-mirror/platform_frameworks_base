@@ -50,6 +50,9 @@ interface IBiometricAuthenticator {
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledTemplates(int userId, String opPackageName);
 
+    // Return the LockoutTracker status for the specified user
+    int getLockoutModeForUser(int userId);
+
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(int userId, in byte [] hardwareAuthToken);
 

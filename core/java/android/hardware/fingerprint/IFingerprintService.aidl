@@ -85,6 +85,9 @@ interface IFingerprintService {
     // Determine if a user has at least one enrolled fingerprint
     boolean hasEnrolledFingerprints(int userId, String opPackageName);
 
+    // Return the LockoutTracker status for the specified user
+    int getLockoutModeForUser(int userId);
+
     // Gets the authenticator ID for fingerprint
     long getAuthenticatorId(int callingUserId);
 

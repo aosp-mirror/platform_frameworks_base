@@ -32,7 +32,7 @@ import android.util.Slog;
  * Abstract {@link ClientMonitor} subclass that operations eligible/interested in acquisition
  * messages should extend.
  */
-public abstract class AcquisitionClient extends ClientMonitor
+public abstract class AcquisitionClient<T> extends ClientMonitor<T>
         implements ErrorConsumer, Cancellable {
 
     private static final String TAG = "Biometrics/AcquisitionClient";
@@ -47,15 +47,25 @@ public abstract class AcquisitionClient extends ClientMonitor
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
 
-    AcquisitionClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            boolean restricted, @NonNull String owner, int cookie, int sensorId, int statsModality,
+    AcquisitionClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int userId, boolean restricted,
+            @NonNull String owner, int cookie, int sensorId, int statsModality,
             int statsAction, int statsClient) {
-        super(finishCallback, context, token, listener, userId, restricted, owner, cookie, sensorId,
+        super(context, token, listener, userId, restricted, owner, cookie, sensorId,
                 statsModality, statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+    }
+
+    @Override
+    public void unableToStart() {
+        try {
+            getListener().onError(getSensorId(), getCookie(),
+                    BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to send error", e);
+        }
     }
 
     @Override

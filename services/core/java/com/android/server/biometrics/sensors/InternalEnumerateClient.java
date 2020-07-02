@@ -31,7 +31,8 @@ import java.util.List;
 /**
  * Internal class to help clean up unknown templates in the HAL and Framework
  */
-public abstract class InternalEnumerateClient extends ClientMonitor implements EnumerateConsumer {
+public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
+        implements EnumerateConsumer {
 
     private static final String TAG = "Biometrics/InternalEnumerateClient";
 
@@ -42,16 +43,14 @@ public abstract class InternalEnumerateClient extends ClientMonitor implements E
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    protected InternalEnumerateClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBinder token, int userId, boolean restricted,
-            @NonNull String owner,
+    protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
+            boolean restricted, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
         // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        super(finishCallback, context, token, null /* ClientMonitorCallbackConverter */, userId,
-                restricted, owner, 0 /* cookie */, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_ENUMERATE,
+        super(context, token, null /* ClientMonitorCallbackConverter */, userId, restricted, owner,
+                0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mEnrolledList = enrolledList;
         mUtils = utils;
@@ -68,7 +67,14 @@ public abstract class InternalEnumerateClient extends ClientMonitor implements E
     }
 
     @Override
-    public void start() {
+    public void unableToStart() {
+        // Nothing to do here
+    }
+
+    @Override
+    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         // The biometric template ids will be removed when we get confirmation from the HAL
         startHalOperation();
     }

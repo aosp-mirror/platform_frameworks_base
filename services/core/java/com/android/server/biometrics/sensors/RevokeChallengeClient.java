@@ -16,22 +16,28 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 
-public abstract class RevokeChallengeClient extends ClientMonitor {
+public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
 
-    public RevokeChallengeClient(FinishCallback finishCallback, Context context, IBinder token,
-            String owner, int sensorId) {
-        super(finishCallback, context, token, null /* listener */, 0 /* userId */,
-                false /* restricted */, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+    public RevokeChallengeClient(Context context, IBinder token, String owner, int sensorId) {
+        super(context, token, null /* listener */, 0 /* userId */, false /* restricted */, owner,
+                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override
-    public void start() {
+    public void unableToStart() {
+        // Nothing to do here
+    }
+
+    @Override
+    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         startHalOperation();
         mFinishCallback.onClientFinished(this);
     }

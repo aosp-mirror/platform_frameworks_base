@@ -34,25 +34,22 @@ import java.util.ArrayList;
  * Face-specific setFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceSetFeatureClient extends ClientMonitor {
+public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
 
     private static final String TAG = "FaceSetFeatureClient";
 
-    private final IBiometricsFace mDaemon;
     private final int mFeature;
     private final boolean mEnabled;
     private final ArrayList<Byte> mHardwareAuthToken;
     private final int mFaceId;
 
-    FaceSetFeatureClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, @NonNull IBinder token,
+    FaceSetFeatureClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, int feature, boolean enabled,
             byte[] hardwareAuthToken, int faceId) {
-        super(finishCallback, context, token, listener, userId, false /* restricted */,
+        super(context, token, listener, userId, false /* restricted */,
                 owner, 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
-        mDaemon = daemon;
         mFeature = feature;
         mEnabled = enabled;
         mFaceId = faceId;
@@ -64,7 +61,18 @@ public class FaceSetFeatureClient extends ClientMonitor {
     }
 
     @Override
-    public void start() {
+    public void unableToStart() {
+        try {
+            getListener().onFeatureSet(false /* success */, mFeature);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to send error", e);
+        }
+    }
+
+    @Override
+    public void start(@NonNull IBiometricsFace daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         startHalOperation();
         mFinishCallback.onClientFinished(this);
     }
