@@ -64,6 +64,7 @@ import com.android.server.biometrics.fingerprint.PerformanceStatsProto;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
@@ -99,6 +100,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
     private static final String FP_DATA_DIR = "fpdata";
 
     private final LockoutResetTracker mLockoutResetTracker;
+    private final ClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
@@ -116,7 +118,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
             checkPermission(MANAGE_FINGERPRINT);
 
             final GenerateChallengeClient client = new FingerprintGenerateChallengeClient(
-                    getContext(), token, new ClientMonitorCallbackConverter(receiver),
+                    getContext(), mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver),
                     opPackageName, getSensorId());
             generateChallengeInternal(client);
         }
@@ -126,7 +128,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
             checkPermission(MANAGE_FINGERPRINT);
 
             final RevokeChallengeClient client = new FingerprintRevokeChallengeClient(getContext(),
-                    token, owner, getSensorId());
+                    mLazyDaemon, token, owner, getSensorId());
             revokeChallengeInternal(client);
         }
 
@@ -137,8 +139,8 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
             checkPermission(MANAGE_FINGERPRINT);
             updateActiveGroup(userId);
 
-            final EnrollClient client = new FingerprintEnrollClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver), userId, cryptoToken,
+            final EnrollClient client = new FingerprintEnrollClient(getContext(), mLazyDaemon,
+                    token, new ClientMonitorCallbackConverter(receiver), userId, cryptoToken,
                     opPackageName, getBiometricUtils(), ENROLL_TIMEOUT_SEC, getSensorId());
 
             enrollInternal(client, userId);
@@ -168,9 +170,10 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
             final AuthenticationClient client = new FingerprintAuthenticationClient(getContext(),
-                    token, new ClientMonitorCallbackConverter(receiver), userId, opId, restricted,
-                    opPackageName, 0 /* cookie */, false /* requireConfirmation */, getSensorId(),
-                    isStrongBiometric, surface, statsClient, mTaskStackListener, mLockoutTracker);
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId, opId,
+                    restricted, opPackageName, 0 /* cookie */, false /* requireConfirmation */,
+                    getSensorId(), isStrongBiometric, surface, statsClient, mTaskStackListener,
+                    mLockoutTracker);
             authenticateInternal(client, opPackageName);
         }
 
@@ -178,14 +181,14 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
         public void prepareForAuthentication(IBinder token, long opId, int userId,
                 IBiometricSensorReceiver sensorReceiver, String opPackageName,
                 int cookie, int callingUid, int callingPid, int callingUserId,
-                Surface surface) throws RemoteException {
+                Surface surface) {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(userId);
 
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClient client = new FingerprintAuthenticationClient(getContext(),
-                    token, new ClientMonitorCallbackConverter(sensorReceiver), userId, opId,
-                    restricted, opPackageName, cookie, false /* requireConfirmation */,
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(sensorReceiver), userId,
+                    opId, restricted, opPackageName, cookie, false /* requireConfirmation */,
                     getSensorId(), isStrongBiometric(), surface,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, mTaskStackListener,
                     mLockoutTracker);
@@ -226,9 +229,9 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
                 return;
             }
 
-            final RemovalClient client = new FingerprintRemovalClient(getContext(), token,
-                    new ClientMonitorCallbackConverter(receiver), fingerId, userId, opPackageName,
-                    getBiometricUtils(), getSensorId());
+            final RemovalClient client = new FingerprintRemovalClient(getContext(), mLazyDaemon,
+                    token, new ClientMonitorCallbackConverter(receiver), fingerId, userId,
+                    opPackageName, getBiometricUtils(), getSensorId());
             removeInternal(client);
         }
 
@@ -551,6 +554,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
     public FingerprintService(Context context) {
         super(context);
+        mLazyDaemon = FingerprintService.this::getFingerprintDaemon;
         mLockoutResetTracker = new LockoutResetTracker(context);
         final LockoutFrameworkImpl.LockoutResetCallback lockoutResetCallback = userId -> {
             mLockoutResetTracker.notifyLockoutResetCallbacks();
@@ -713,8 +717,8 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
         final List<? extends BiometricAuthenticator.Identifier> enrolledList =
                 getEnrolledTemplates(userId);
         final FingerprintInternalCleanupClient client = new FingerprintInternalCleanupClient(
-                getContext(), userId, getContext().getOpPackageName(), getSensorId(), enrolledList,
-                getBiometricUtils());
+                getContext(), mLazyDaemon, userId, getContext().getOpPackageName(), getSensorId(),
+                enrolledList, getBiometricUtils());
         cleanupInternal(client);
     }
 

@@ -37,28 +37,31 @@ import java.util.List;
  */
 class FaceInternalCleanupClient extends InternalCleanupClient<IBiometricsFace> {
 
-    FaceInternalCleanupClient(@NonNull Context context, int userId, @NonNull String owner,
+    FaceInternalCleanupClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils) {
-        super(context, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE, enrolledList,
-                utils);
+        super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
+                enrolledList, utils);
     }
 
     @Override
     protected InternalEnumerateClient<IBiometricsFace> getEnumerateClient(Context context,
-            IBinder token, int userId, String owner,
+            LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token, int userId, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList,
             BiometricUtils utils, int sensorId) {
-        return new FaceInternalEnumerateClient(context, token, userId, owner, enrolledList, utils,
-                sensorId);
+        return new FaceInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
+                enrolledList, utils, sensorId);
     }
 
     @Override
-    protected RemovalClient<IBiometricsFace> getRemovalClient(Context context, IBinder token,
+    protected RemovalClient<IBiometricsFace> getRemovalClient(Context context,
+            LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token,
             int biometricId, int userId, String owner, BiometricUtils utils, int sensorId) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        return new FaceRemovalClient(context, token, null /* ClientMonitorCallbackConverter */,
-                biometricId, userId, owner, utils, sensorId);
+        return new FaceRemovalClient(context, lazyDaemon, token,
+                null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
+                sensorId);
     }
 }

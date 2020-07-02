@@ -40,10 +40,10 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
     private final int mFeature;
     private final int mFaceId;
 
-    FaceGetFeatureClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
-            int sensorId, int feature, int faceId) {
-        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId,
+    FaceGetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull String owner, int sensorId, int feature, int faceId) {
+        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mFeature = feature;
@@ -61,15 +61,15 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull IBiometricsFace daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
         startHalOperation();
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            final OptionalBool result = mDaemon.getFeature(mFeature, mFaceId);
+            final OptionalBool result = getFreshDaemon().getFeature(mFeature, mFaceId);
             getListener().onFeatureGet(result.status == Status.OK, mFeature, result.value);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to getFeature", e);

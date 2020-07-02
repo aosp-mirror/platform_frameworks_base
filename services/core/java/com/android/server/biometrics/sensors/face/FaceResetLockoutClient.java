@@ -37,10 +37,11 @@ public class FaceResetLockoutClient extends ClientMonitor<IBiometricsFace> {
 
     private final ArrayList<Byte> mHardwareAuthToken;
 
-    FaceResetLockoutClient(@NonNull Context context, int userId, String owner, int sensorId,
-            byte[] hardwareAuthToken) {
-        super(context, null /* token */, null /* listener */, userId, owner, 0 /* cookie */,
-                sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
+    FaceResetLockoutClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, String owner, int sensorId,
+            @NonNull byte[] hardwareAuthToken) {
+        super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
+                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
 
         mHardwareAuthToken = new ArrayList<>();
@@ -55,16 +56,15 @@ public class FaceResetLockoutClient extends ClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull IBiometricsFace daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
-
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
         startHalOperation();
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.resetLockout(mHardwareAuthToken);
+            getFreshDaemon().resetLockout(mHardwareAuthToken);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to reset lockout", e);
         }

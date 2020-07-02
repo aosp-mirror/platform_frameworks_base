@@ -35,17 +35,18 @@ import com.android.server.biometrics.sensors.RemovalClient;
 class FaceRemovalClient extends RemovalClient<IBiometricsFace> {
     private static final String TAG = "FaceRemovalClient";
 
-    FaceRemovalClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
-        super(context, token, listener, biometricId, userId, owner, utils, sensorId,
+    FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
+            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils utils,
+            int sensorId) {
+        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
                 BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.remove(mBiometricId);
+            getFreshDaemon().remove(mBiometricId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
             mFinishCallback.onClientFinished(this);
@@ -55,7 +56,7 @@ class FaceRemovalClient extends RemovalClient<IBiometricsFace> {
     @Override
     protected void stopHalOperation() {
         try {
-            mDaemon.cancel();
+            getFreshDaemon().cancel();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             mFinishCallback.onClientFinished(this);

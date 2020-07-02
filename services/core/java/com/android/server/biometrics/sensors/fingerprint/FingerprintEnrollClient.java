@@ -38,19 +38,21 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     private static final String TAG = "FingerprintEnrollClient";
 
-    FingerprintEnrollClient(@NonNull Context context, @NonNull IBinder token,
+    FingerprintEnrollClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             int timeoutSec, int sensorId) {
-        super(context, token, listener, userId, hardwareAuthToken, owner, utils, timeoutSec,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId, true /* shouldVibrate */);
+        super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
+                timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
+                true /* shouldVibrate */);
     }
 
     @Override
     protected void startHalOperation() {
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
-            mDaemon.enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
+            getFreshDaemon().enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
@@ -62,7 +64,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     @Override
     protected void stopHalOperation() {
         try {
-            mDaemon.cancel();
+            getFreshDaemon().cancel();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,

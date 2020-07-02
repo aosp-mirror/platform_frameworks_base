@@ -23,10 +23,11 @@ import android.os.IBinder;
 
 public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
 
-    public RevokeChallengeClient(Context context, IBinder token, String owner, int sensorId) {
-        super(context, token, null /* listener */, 0 /* userId */, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+    public RevokeChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @NonNull IBinder token, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, null /* listener */, 0 /* userId */, owner,
+                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override
@@ -35,8 +36,8 @@ public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
     }
 
     @Override
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         startHalOperation();
         mFinishCallback.onClientFinished(this);

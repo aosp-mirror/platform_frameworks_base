@@ -43,13 +43,13 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
-            @NonNull String owner,
+    protected InternalEnumerateClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @NonNull IBinder token, int userId, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
         // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        super(context, token, null /* ClientMonitorCallbackConverter */, userId, owner,
+        super(context, lazyDaemon, token, null /* ClientMonitorCallbackConverter */, userId, owner,
                 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mEnrolledList = enrolledList;
@@ -72,8 +72,8 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
     }
 
     @Override
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL
         startHalOperation();

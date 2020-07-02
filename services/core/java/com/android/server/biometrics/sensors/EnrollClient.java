@@ -41,13 +41,14 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     private long mEnrollmentStartTimeMs;
     private boolean mAlreadyCancelled;
 
-    public EnrollClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
+    public EnrollClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             int timeoutSec, int statsModality, int sensorId,
             boolean shouldVibrate) {
-        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_ENROLL, BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
+                statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
@@ -87,8 +88,8 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     }
 
     @Override
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         mEnrollmentStartTimeMs = System.currentTimeMillis();
         startHalOperation();

@@ -36,15 +36,16 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
     private static final String TAG = "FaceGenerateChallengeClient";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
-    FaceGenerateChallengeClient(@NonNull Context context, @NonNull IBinder token,
+    FaceGenerateChallengeClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
-        super(context, token, listener, owner, sensorId);
+        super(context, lazyDaemon, token, listener, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mChallenge = mDaemon.generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
+            mChallenge = getFreshDaemon().generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
         } catch (RemoteException e) {
             Slog.e(TAG, "generateChallenge failed", e);
         }

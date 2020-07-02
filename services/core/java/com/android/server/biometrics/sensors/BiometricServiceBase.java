@@ -736,7 +736,7 @@ public abstract class BiometricServiceBase<T> extends SystemService
             return;
         }
 
-        final T daemon = getDaemon();
+        final T daemon = mCurrentClient.getFreshDaemon();
         if (daemon == null) {
             Slog.e(getTag(), "Daemon null, unable to start: "
                     + mCurrentClient.getClass().getSimpleName());
@@ -745,7 +745,7 @@ public abstract class BiometricServiceBase<T> extends SystemService
             return;
         }
 
-        mCurrentClient.start(daemon, mClientFinishCallback);
+        mCurrentClient.start(mClientFinishCallback);
         notifyClientActiveCallbacks(true);
     }
 

@@ -38,18 +38,19 @@ import java.util.List;
 class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFace> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
-    FaceInternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
+    FaceInternalEnumerateClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId) {
-        super(context, token, userId, owner, enrolledList, utils, sensorId,
+        super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
                 BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.enumerate();
+            getFreshDaemon().enumerate();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mFinishCallback.onClientFinished(this);
@@ -59,7 +60,7 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFac
     @Override
     protected void stopHalOperation() {
         try {
-            mDaemon.cancel();
+            getFreshDaemon().cancel();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             mFinishCallback.onClientFinished(this);

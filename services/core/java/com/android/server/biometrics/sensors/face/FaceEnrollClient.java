@@ -51,13 +51,14 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
     @NonNull private final int[] mEnrollIgnoreList;
     @NonNull private final int[] mEnrollIgnoreListVendor;
 
-    FaceEnrollClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
+    FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             @NonNull int[] disabledFeatures, int timeoutSec, @Nullable NativeHandle surfaceHandle,
             int sensorId) {
-        super(context, token, listener, userId, hardwareAuthToken, owner, utils, timeoutSec,
-                BiometricsProtoEnums.MODALITY_FACE, sensorId, false /* shouldVibrate */);
+        super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
+                timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
+                false /* shouldVibrate */);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mSurfaceHandle = surfaceHandle;
         mEnrollIgnoreList = getContext().getResources()
@@ -89,13 +90,13 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
         }
 
         android.hardware.biometrics.face.V1_1.IBiometricsFace daemon11 =
-                android.hardware.biometrics.face.V1_1.IBiometricsFace.castFrom(mDaemon);
+                android.hardware.biometrics.face.V1_1.IBiometricsFace.castFrom(getFreshDaemon());
         try {
             final int status;
             if (daemon11 != null) {
                 status = daemon11.enroll_1_1(token, mTimeoutSec, disabledFeatures, mSurfaceHandle);
             } else if (mSurfaceHandle == null) {
-                status = mDaemon.enroll(token, mTimeoutSec, disabledFeatures);
+                status = getFreshDaemon().enroll(token, mTimeoutSec, disabledFeatures);
             } else {
                 Slog.e(TAG, "enroll(): surface is only supported in @1.1 HAL");
                 status = BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS;
@@ -114,7 +115,7 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
     @Override
     protected void stopHalOperation() {
         try {
-            mDaemon.cancel();
+            getFreshDaemon().cancel();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);

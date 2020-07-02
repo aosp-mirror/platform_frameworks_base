@@ -34,11 +34,13 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
     protected final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_REMOVE, BiometricsProtoEnums.CLIENT_UNKNOWN);
+    public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
+            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils utils,
+            int sensorId, int statsModality) {
+        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
+                statsModality, BiometricsProtoEnums.ACTION_REMOVE,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
     }
@@ -49,8 +51,8 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
     }
 
     @Override
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL
         startHalOperation();

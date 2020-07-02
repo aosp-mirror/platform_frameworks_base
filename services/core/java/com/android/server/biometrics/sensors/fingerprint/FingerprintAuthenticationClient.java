@@ -47,13 +47,14 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
 
-    FingerprintAuthenticationClient(@NonNull Context context, @NonNull IBinder token,
+    FingerprintAuthenticationClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
             int sensorId, boolean isStrongBiometric, @Nullable Surface surface, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutFrameworkImpl lockoutTracker) {
-        super(context, token, listener, targetUserId, operationId, restricted,
+        super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutTracker);
@@ -102,7 +103,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     protected void startHalOperation() {
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
-            mDaemon.authenticate(mOperationId, getTargetUserId());
+            getFreshDaemon().authenticate(mOperationId, getTargetUserId());
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
@@ -114,7 +115,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     protected void stopHalOperation() {
         try {
-            mDaemon.cancel();
+            getFreshDaemon().cancel();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
