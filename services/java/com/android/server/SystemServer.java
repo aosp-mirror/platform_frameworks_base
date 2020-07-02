@@ -555,12 +555,6 @@ public final class SystemServer {
             }
         }
 
-        // Diagnostic to ensure that the system is in a base healthy state. Done here as a common
-        // non-zygote process.
-        if (!VMRuntime.hasBootImageSpaces()) {
-            Slog.wtf(TAG, "Runtime is not running with a boot image!");
-        }
-
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
