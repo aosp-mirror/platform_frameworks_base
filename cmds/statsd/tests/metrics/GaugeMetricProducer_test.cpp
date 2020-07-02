@@ -137,9 +137,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs, _))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, bucketStartTimeNs);
                 data->clear();
                 data->push_back(makeLogEvent(tagId, eventTimeNs + 10, 3, "some value", 11));
@@ -310,10 +310,10 @@ TEST_P(GaugeMetricProducerTest_PartialBucket, TestPulled) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             .WillOnce(Return(false))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, partialBucketSplitTimeNs);
                 data->clear();
                 data->push_back(CreateRepeatedValueLogEvent(tagId, eventTimeNs, 2));
@@ -388,7 +388,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs, _))
             .WillOnce(Return(false));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
@@ -440,9 +440,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, conditionChangeNs, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, conditionChangeNs, _))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 data->push_back(CreateRepeatedValueLogEvent(tagId, eventTimeNs + 10, 100));
                 return true;
@@ -527,9 +527,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, sliceConditionChangeNs, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, sliceConditionChangeNs, _))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 data->push_back(CreateTwoValueLogEvent(tagId, eventTimeNs + 10, 1000, 100));
                 return true;
@@ -566,7 +566,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs, _))
             .WillOnce(Return(false));
 
     GaugeMetric metric;
@@ -665,16 +665,16 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
                     atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10);
                 data->clear();
                 data->push_back(CreateRepeatedValueLogEvent(tagId, eventTimeNs, 4));
                 return true;
             }))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20);
                 data->clear();
                 data->push_back(CreateRepeatedValueLogEvent(tagId, eventTimeNs, 5));
@@ -737,23 +737,23 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
                     atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 3);
                 data->clear();
                 data->push_back(CreateTwoValueLogEvent(tagId, eventTimeNs, 3, 4));
                 return true;
             }))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10);
                 data->clear();
                 data->push_back(CreateTwoValueLogEvent(tagId, eventTimeNs, 4, 5));
                 return true;
             }))
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20);
                 data->clear();
                 data->push_back(CreateTwoValueLogEvent(tagId, eventTimeNs, 4, 6));
@@ -815,10 +815,10 @@ TEST(GaugeMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
                     atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs + 3, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, bucketStartTimeNs + 3, _))
             // Bucket start.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 data->push_back(CreateRepeatedValueLogEvent(tagId, eventTimeNs, 10));
                 return true;

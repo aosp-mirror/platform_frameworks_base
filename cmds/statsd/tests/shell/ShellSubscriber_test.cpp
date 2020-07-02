@@ -190,9 +190,9 @@ TEST(ShellSubscriberTest, testPulledSubscription) {
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     const vector<int32_t> uids = {AID_SYSTEM};
-    EXPECT_CALL(*pullerManager, Pull(10016, uids, _, _, _))
+    EXPECT_CALL(*pullerManager, Pull(10016, uids, _, _))
             .WillRepeatedly(Invoke([](int tagId, const vector<int32_t>&, const int64_t,
-                                      vector<std::shared_ptr<LogEvent>>* data, bool) {
+                                      vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid1, /*timeMillis=*/kCpuTime1));
                 data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid2, /*timeMillis=*/kCpuTime2));
