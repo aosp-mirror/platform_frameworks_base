@@ -1115,8 +1115,6 @@ public final class Debug
             if (outStream != null)
                 outStream.close();
         }
-
-        VMDebug.startEmulatorTracing();
     }
 
     /**
@@ -1130,8 +1128,6 @@ public final class Debug
      * region of code.</p>
      */
     public static void stopNativeTracing() {
-        VMDebug.stopEmulatorTracing();
-
         // Open the sysfs file for writing and write "0" to it.
         PrintWriter outStream = null;
         try {
@@ -1160,7 +1156,7 @@ public final class Debug
      * To temporarily enable tracing, use {@link #startNativeTracing()}.
      */
     public static void enableEmulatorTraceOutput() {
-        VMDebug.startEmulatorTracing();
+        Log.w(TAG, "Unimplemented");
     }
 
     /**
@@ -2095,25 +2091,6 @@ public final class Debug
      * exist in the current process.
      */
     public static final native int getBinderDeathObjectCount();
-
-    /**
-     * Primes the register map cache.
-     *
-     * Only works for classes in the bootstrap class loader.  Does not
-     * cause classes to be loaded if they're not already present.
-     *
-     * The classAndMethodDesc argument is a concatentation of the VM-internal
-     * class descriptor, method name, and method descriptor.  Examples:
-     *     Landroid/os/Looper;.loop:()V
-     *     Landroid/app/ActivityThread;.main:([Ljava/lang/String;)V
-     *
-     * @param classAndMethodDesc the method to prepare
-     *
-     * @hide
-     */
-    public static final boolean cacheRegisterMap(String classAndMethodDesc) {
-        return VMDebug.cacheRegisterMap(classAndMethodDesc);
-    }
 
     /**
      * Dumps the contents of VM reference tables (e.g. JNI locals and
