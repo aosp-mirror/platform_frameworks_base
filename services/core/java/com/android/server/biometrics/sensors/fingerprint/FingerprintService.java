@@ -40,6 +40,7 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
@@ -409,11 +410,109 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             initializeConfigurationInternal(sensorId);
         }
+
+        @Override
+        public void onFingerDown(int x, int y, float minor, float major) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "onFingerDown | daemon is null");
+            } else {
+                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
+                        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
+                                daemon);
+                if (extension == null) {
+                    Slog.v(TAG, "onFingerDown | failed to cast the HIDL to V2_3");
+                } else {
+                    try {
+                        extension.onFingerDown(x, y, minor, major);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "onFingerDown | RemoteException: ", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onFingerUp() {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "onFingerUp | daemon is null");
+            } else {
+                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
+                        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
+                                daemon);
+                if (extension == null) {
+                    Slog.v(TAG, "onFingerUp | failed to cast the HIDL to V2_3");
+                } else {
+                    try {
+                        extension.onFingerUp();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "onFingerUp | RemoteException: ", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean isUdfps(int sensorId) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "isUdfps | daemon is null");
+            } else {
+                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
+                        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
+                                daemon);
+                if (extension == null) {
+                    Slog.v(TAG, "isUdfps | failed to cast the HIDL to V2_3");
+                } else {
+                    try {
+                        return extension.isUdfps(sensorId);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "isUdfps | RemoteException: ", e);
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void showUdfpsOverlay() {
+            if (mUdfpsOverlayController == null) {
+                Slog.e(TAG, "showUdfpsOverlay | mUdfpsOverlayController is null");
+                return;
+            }
+            try {
+                mUdfpsOverlayController.showUdfpsOverlay();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "showUdfpsOverlay | RemoteException: ", e);
+            }
+        }
+
+        @Override
+        public void hideUdfpsOverlay() {
+            if (mUdfpsOverlayController == null) {
+                Slog.e(TAG, "hideUdfpsOverlay | mUdfpsOverlayController is null");
+                return;
+            }
+            try {
+                mUdfpsOverlayController.hideUdfpsOverlay();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "hideUdfpsOverlay | RemoteException: ", e);
+            }
+        }
+
+        public void setUdfpsOverlayController(IUdfpsOverlayController controller) {
+            mUdfpsOverlayController = controller;
+        }
     }
 
     private final LockoutFrameworkImpl mLockoutTracker;
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
+    private IUdfpsOverlayController mUdfpsOverlayController;
 
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;

@@ -68,7 +68,7 @@ public class SystemAppOpsHelperTest {
     @Mock private Context mContext;
     @Mock private AppOpsManager mAppOps;
 
-    private List<AppOpsManager.OnOpChangedInternalListener> mListeners = new ArrayList<>();
+    private List<AppOpsManager.OnOpChangedListener> mListeners = new ArrayList<>();
 
     private SystemAppOpsHelper mHelper;
 
@@ -82,15 +82,15 @@ public class SystemAppOpsHelperTest {
                         eq(AppOpsManager.OP_COARSE_LOCATION),
                         isNull(),
                         eq(AppOpsManager.WATCH_FOREGROUND_CHANGES),
-                        any(AppOpsManager.OnOpChangedInternalListener.class));
+                        any(AppOpsManager.OnOpChangedListener.class));
 
         mHelper = new SystemAppOpsHelper(mContext);
         mHelper.onSystemReady();
     }
 
     private void sendAppOp(String packageName) {
-        for (AppOpsManager.OnOpChangedInternalListener listener : mListeners) {
-            listener.onOpChanged(AppOpsManager.OP_COARSE_LOCATION, packageName);
+        for (AppOpsManager.OnOpChangedListener listener : mListeners) {
+            listener.onOpChanged(AppOpsManager.OPSTR_COARSE_LOCATION, packageName);
         }
     }
 

@@ -107,6 +107,9 @@ public class BubbleDataTest extends SysuiTestCase {
     @Mock
     private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
 
+    @Mock
+    private BubbleController.PendingIntentCanceledListener mPendingIntentCanceledListener;
+
     @Before
     public void setUp() throws Exception {
         mNotificationTestHelper = new NotificationTestHelper(
@@ -127,20 +130,20 @@ public class BubbleDataTest extends SysuiTestCase {
         modifyRanking(mEntryInterruptive)
                 .setVisuallyInterruptive(true)
                 .build();
-        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener);
+        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null);
 
         ExpandableNotificationRow row = mNotificationTestHelper.createBubble();
         mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d");
         mEntryDismissed.setRow(row);
-        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener);
+        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener, null);
 
-        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener);
-        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener);
-        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener);
-        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener);
-        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener);
-        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener);
-        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener);
+        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener);
 
         mBubbleData = new BubbleData(getContext());
 
@@ -845,14 +848,6 @@ public class BubbleDataTest extends SysuiTestCase {
 
     private void setPostTime(NotificationEntry entry, long postTime) {
         when(entry.getSbn().getPostTime()).thenReturn(postTime);
-    }
-
-    private void setOngoing(NotificationEntry entry, boolean ongoing) {
-        if (ongoing) {
-            entry.getSbn().getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        } else {
-            entry.getSbn().getNotification().flags &= ~Notification.FLAG_FOREGROUND_SERVICE;
-        }
     }
 
     /**

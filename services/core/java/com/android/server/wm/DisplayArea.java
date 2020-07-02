@@ -21,7 +21,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
-import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 
@@ -260,15 +259,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     DisplayArea getDisplayArea() {
         return this;
-    }
-
-    /**
-     * Root of the display area hierarchy.
-     */
-    public static class Root extends DisplayArea<DisplayArea> {
-        Root(WindowManagerService wms) {
-            super(wms, Type.ANY, "DisplayArea.Root", FEATURE_ROOT);
-        }
     }
 
     /**

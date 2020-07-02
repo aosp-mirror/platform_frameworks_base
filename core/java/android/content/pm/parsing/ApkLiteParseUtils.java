@@ -398,6 +398,30 @@ public class ApkLiteParseUtils {
                             break;
                     }
                 }
+
+                final int innerDepth = parser.getDepth();
+                int innerType;
+                while ((innerType = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && (innerType != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+                    if (innerType == XmlPullParser.END_TAG || innerType == XmlPullParser.TEXT) {
+                        continue;
+                    }
+
+                    if (parser.getDepth() != innerDepth + 1) {
+                        // Search only under <application>.
+                        continue;
+                    }
+
+                    if (PackageParser.TAG_PROFILEABLE.equals(parser.getName())) {
+                        for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                            final String attr = attrs.getAttributeName(i);
+                            if ("shell".equals(attr)) {
+                                profilableByShell = attrs.getAttributeBooleanValue(i,
+                                        profilableByShell);
+                            }
+                        }
+                    }
+                }
             } else if (PackageParser.TAG_OVERLAY.equals(parser.getName())) {
                 for (int i = 0; i < attrs.getAttributeCount(); ++i) {
                     final String attr = attrs.getAttributeName(i);
@@ -433,13 +457,6 @@ public class ApkLiteParseUtils {
                     }
                     if ("minSdkVersion".equals(attr)) {
                         minSdkVersion = attrs.getAttributeIntValue(i, DEFAULT_MIN_SDK_VERSION);
-                    }
-                }
-            } else if (PackageParser.TAG_PROFILEABLE.equals(parser.getName())) {
-                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
-                    final String attr = attrs.getAttributeName(i);
-                    if ("shell".equals(attr)) {
-                        profilableByShell = attrs.getAttributeBooleanValue(i, profilableByShell);
                     }
                 }
             }

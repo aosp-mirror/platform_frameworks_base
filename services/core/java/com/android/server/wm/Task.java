@@ -433,6 +433,13 @@ class Task extends WindowContainer<WindowContainer> {
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
     private int mForceHiddenFlags = 0;
 
+    // TODO(b/160201781): Revisit double invocation issue in Task#removeChild.
+    /**
+     * Skip {@link ActivityStackSupervisor#removeTask(Task, boolean, boolean, String)} execution if
+     * {@code true} to prevent double traversal of {@link #mChildren} in a loop.
+     */
+    boolean mInRemoveTask;
+
     // When non-null, this is a transaction that will get applied on the next frame returned after
     // a relayout is requested from the client. While this is only valid on a leaf task; since the
     // transaction can effect an ancestor task, this also needs to keep track of the ancestor task
@@ -1492,11 +1499,8 @@ class Task extends WindowContainer<WindowContainer> {
         return autoRemoveRecents || (!hasChild() && !getHasBeenVisible());
     }
 
-    /**
-     * Completely remove all activities associated with an existing
-     * task starting at a specified index.
-     */
-    private void performClearTaskAtIndexLocked(String reason) {
+    /** Completely remove all activities associated with an existing task. */
+    void performClearTask(String reason) {
         // Broken down into to cases to avoid object create due to capturing mStack.
         if (getStack() == null) {
             forAllActivities((r) -> {
@@ -1520,7 +1524,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTaskAtIndexLocked("clear-task-all");
+        performClearTask("clear-task-all");
         mReuseTask = false;
     }
 
@@ -1579,11 +1583,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         return false;
-    }
-
-    void removeTaskActivitiesLocked(String reason) {
-        // Just remove the entire task.
-        performClearTaskAtIndexLocked(reason);
     }
 
     String lockTaskAuthToString() {
