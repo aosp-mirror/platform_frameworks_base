@@ -69,7 +69,7 @@ public class DisplayAreaPolicyBuilderTest {
 
     private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy(null, null);
     private WindowManagerService mWms;
-    private DisplayArea.Root mRoot;
+    private RootDisplayArea mRoot;
     private DisplayArea<WindowContainer> mImeContainer;
     private DisplayContent mDisplayContent;
     private TaskDisplayArea mDefaultTaskDisplayArea;
@@ -91,27 +91,29 @@ public class DisplayAreaPolicyBuilderTest {
     public void testBuilder() {
         final Feature foo;
         final Feature bar;
-
+        DisplayAreaPolicyBuilder.HierarchyBuilder rootHierarchy =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .addFeature(foo = new Feature.Builder(mPolicy, "Foo", 0)
+                                .upTo(TYPE_STATUS_BAR)
+                                .and(TYPE_NAVIGATION_BAR)
+                                .build())
+                        .addFeature(bar = new Feature.Builder(mPolicy, "Bar", 1)
+                                .all()
+                                .except(TYPE_STATUS_BAR)
+                                .build())
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
         DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
-                .addFeature(foo = new Feature.Builder(mPolicy, "Foo", 0)
-                        .upTo(TYPE_STATUS_BAR)
-                        .and(TYPE_NAVIGATION_BAR)
-                        .build())
-                .addFeature(bar = new Feature.Builder(mPolicy, "Bar", 1)
-                        .all()
-                        .except(TYPE_STATUS_BAR)
-                        .build())
-                .build(mWms, mDisplayContent, mRoot, mImeContainer, mTaskDisplayAreaList);
+                .setRootHierarchy(rootHierarchy)
+                .build(mWms);
 
-        policy.attachDisplayAreas();
-
-        assertThat(policy.getDisplayAreas(foo)).isNotEmpty();
-        assertThat(policy.getDisplayAreas(bar)).isNotEmpty();
+        assertThat(policy.getDisplayAreas(foo.getId())).isNotEmpty();
+        assertThat(policy.getDisplayAreas(bar.getId())).isNotEmpty();
 
         Matcher<WindowContainer> fooDescendantMatcher = descendantOfOneOf(
-                policy.getDisplayAreas(foo));
+                policy.getDisplayAreas(foo.getId()));
         Matcher<WindowContainer> barDescendantMatcher = descendantOfOneOf(
-                policy.getDisplayAreas(bar));
+                policy.getDisplayAreas(bar.getId()));
 
         // There is a DA of TYPE_STATUS_BAR below foo, but not below bar
         assertThat(fooDescendantMatcher.matches(
@@ -128,7 +130,7 @@ public class DisplayAreaPolicyBuilderTest {
         assertThat(barDescendantMatcher.matches(mImeContainer)).isTrue();
 
         List<DisplayArea<?>> actualOrder = collectLeafAreas(mRoot);
-        Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, mRoot, mImeContainer,
+        Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, mImeContainer,
                 mDefaultTaskDisplayArea);
         actualOrder = actualOrder.stream().filter(zSets::containsKey).collect(toList());
 
@@ -162,18 +164,21 @@ public class DisplayAreaPolicyBuilderTest {
     public void testBuilder_createCustomizedDisplayAreaForFeature() {
         final Feature dimmable;
         final Feature other;
+        DisplayAreaPolicyBuilder.HierarchyBuilder rootHierarchy =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .addFeature(dimmable = new Feature.Builder(mPolicy, "Dimmable", 0)
+                                .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                                .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                                .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
+                                .build())
+                        .addFeature(other = new Feature.Builder(mPolicy, "Other", 1)
+                                .all()
+                                .build())
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
         DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
-                .addFeature(dimmable = new Feature.Builder(mPolicy, "Dimmable", 0)
-                        .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
-                        .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
-                        .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
-                        .build())
-                .addFeature(other = new Feature.Builder(mPolicy, "Other", 1)
-                        .all()
-                        .build())
-                .build(mWms, mDisplayContent, mRoot, mImeContainer, mTaskDisplayAreaList);
-
-        policy.attachDisplayAreas();
+                .setRootHierarchy(rootHierarchy)
+                .build(mWms);
 
         List<DisplayArea<? extends WindowContainer>> dimmableDAs =
                 policy.getDisplayAreas(dimmable.getId());
@@ -207,7 +212,7 @@ public class DisplayAreaPolicyBuilderTest {
     }
 
     private Map<DisplayArea<?>, Set<Integer>> calculateZSets(
-            DisplayAreaPolicyBuilder.Result policy, DisplayArea.Root root,
+            DisplayAreaPolicyBuilder.Result policy,
             DisplayArea<WindowContainer> ime,
             DisplayArea<ActivityStack> tasks) {
         Map<DisplayArea<?>, Set<Integer>> zSets = new HashMap<>();
@@ -285,7 +290,7 @@ public class DisplayAreaPolicyBuilderTest {
         }
     }
 
-    private static class SurfacelessDisplayAreaRoot extends DisplayArea.Root {
+    private static class SurfacelessDisplayAreaRoot extends RootDisplayArea {
 
         SurfacelessDisplayAreaRoot(WindowManagerService wms) {
             super(wms);

@@ -29,6 +29,7 @@ import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
+import android.location.ILocationCallback;
 import android.location.ILocationListener;
 import android.location.Location;
 import android.location.LocationRequest;
@@ -46,9 +47,7 @@ import com.android.internal.location.ProviderProperties;
 interface ILocationManager
 {
     Location getLastLocation(in LocationRequest request, String packageName, String attributionTag);
-    boolean getCurrentLocation(in LocationRequest request,
-            in ICancellationSignal cancellationSignal, in ILocationListener listener,
-            String packageName, String attributionTag, String listenerId);
+    void getCurrentLocation(in LocationRequest request, in ICancellationSignal cancellationSignal, in ILocationCallback callback, String packageName, String attributionTag, String listenerId);
 
     void registerLocationListener(in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
     void unregisterLocationListener(in ILocationListener listener);
@@ -115,11 +114,6 @@ interface ILocationManager
     LocationTime getGnssTimeMillis();
 
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
-
-    // --- internal ---
-
-    // for reporting callback completion
-    void locationCallbackFinished(ILocationListener listener);
 
     // used by gts tests to verify whitelists
     String[] getBackgroundThrottlingWhitelist();

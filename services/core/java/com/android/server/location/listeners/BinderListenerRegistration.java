@@ -49,40 +49,33 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
         super(tag, request, callerIdentity, listener);
     }
 
-    /**
-     * May be overridden in place of {@link #onRegister(Object)}. Should return true if registration
-     * is successful, and false otherwise.
-     */
-    protected boolean onBinderRegister(Object key) {
-        return true;
-    }
-
-    /**
-     * May be overridden in place of {@link #onUnregister()}.
-     */
-    protected void onBinderUnregister(Object key) {}
-
     @Override
-    protected final boolean onRemovableRegister(Object key) {
-        IBinder binder = getBinderFromKey(key);
+    protected final void onRemovableListenerRegister() {
+        IBinder binder = getBinderFromKey(getKey());
         try {
             binder.linkToDeath(this, 0);
-            if (!onBinderRegister(key)) {
-                binder.unlinkToDeath(this, 0);
-                return false;
-            }
-            return true;
         } catch (RemoteException e) {
-            return false;
+            remove();
         }
+
+        onBinderListenerRegister();
     }
 
     @Override
-    protected final void onRemovableUnregister(Object key) {
-        IBinder binder = getBinderFromKey(key);
-        onBinderUnregister(key);
-        binder.unlinkToDeath(this, 0);
+    protected final void onRemovableListenerUnregister() {
+        onBinderListenerUnregister();
+        getBinderFromKey(getKey()).unlinkToDeath(this, 0);
     }
+
+    /**
+     * May be overridden in place of {@link #onRemovableListenerRegister()}.
+     */
+    protected void onBinderListenerRegister() {}
+
+    /**
+     * May be overridden in place of {@link #onRemovableListenerUnregister()}.
+     */
+    protected void onBinderListenerUnregister() {}
 
     @Override
     public void binderDied() {
@@ -98,7 +91,7 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
         }
     }
 
-    private IBinder getBinderFromKey(Object key) {
+    private static IBinder getBinderFromKey(Object key) {
         if (key instanceof IBinder) {
             return (IBinder) key;
         } else if (key instanceof BinderKey) {

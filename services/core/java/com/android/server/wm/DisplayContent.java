@@ -231,7 +231,7 @@ import java.util.function.Predicate;
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
  * particular Display.
  */
-class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.DisplayContentInfo {
+class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -990,7 +990,6 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
         // Setup the policy and build the display area hierarchy.
         mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
                 mWmService, this /* content */, this /* root */, mImeWindowsContainers);
-        mDisplayAreaPolicy.attachDisplayAreas();
 
         // Sets the display content for the children.
         onDisplayChanged(this);

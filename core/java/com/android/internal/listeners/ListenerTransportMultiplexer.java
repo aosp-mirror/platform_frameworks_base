@@ -21,13 +21,12 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -38,8 +37,7 @@ import java.util.function.Consumer;
  * A listener multiplexer designed for use by client-side code. This class ensures that listeners
  * are never invoked while a lock is held. This class is only useful for multiplexing listeners -
  * if all client listeners can be combined into a single server request, and all server results will
- * be delivered to all clients. If this is not the case, see {@link ListenerTransportManager}
- * instead.
+ * be delivered to all clients.
  *
  * By default, the multiplexer will replace requests on the server simply by registering the new
  * request and trusting the server to know this is replacing the old request. If the server needs to
@@ -229,9 +227,7 @@ public abstract class ListenerTransportMultiplexer<TRequest, TListener> {
     /**
      * Dumps debug information.
      */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-
+    public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
         ArrayMap<Object, RequestListenerTransport<TRequest, TListener>> registrations;
         synchronized (mLock) {
             registrations = mRegistrations;
@@ -239,12 +235,12 @@ public abstract class ListenerTransportMultiplexer<TRequest, TListener> {
             ipw.print("service: ");
             if (mServiceRegistered) {
                 if (mCurrentRequest == null) {
-                    pw.print("request registered");
+                    ipw.print("request registered");
                 } else {
-                    pw.print("request registered - " + mCurrentRequest);
+                    ipw.print("request registered - " + mCurrentRequest);
                 }
             } else {
-                pw.print("unregistered");
+                ipw.print("unregistered");
             }
             ipw.println();
         }

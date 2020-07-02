@@ -29,6 +29,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -37,10 +38,12 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.IFingerprintService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -76,6 +79,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private WindowManager mWindowManager;
+    private UdfpsController mUdfpsController;
     @VisibleForTesting
     IActivityTaskManager mActivityTaskManager;
     @VisibleForTesting
@@ -242,6 +246,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         IActivityTaskManager getActivityTaskManager() {
             return ActivityTaskManager.getService();
         }
+
+        IFingerprintService getFingerprintService() {
+            return IFingerprintService.Stub.asInterface(
+                    ServiceManager.getService(Context.FINGERPRINT_SERVICE));
+        }
     }
 
     @Inject
@@ -266,6 +275,26 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCommandQueue.addCallback(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mActivityTaskManager = mInjector.getActivityTaskManager();
+
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            IFingerprintService fingerprintService = mInjector.getFingerprintService();
+            if (fingerprintService == null) {
+                Log.e(TAG, "FEATURE_FINGERPRINT is available, but FingerprintService is null");
+            } else {
+                boolean isUdfps = false;
+                try {
+                    // TODO(b/160024833): Enumerate through all of the sensors and check whether
+                    //  at least one of them is UDFPS.
+                    isUdfps = fingerprintService.isUdfps(0 /* sensorId */);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Unable to check whether the sensor is a UDFPS", e);
+                }
+                if (isUdfps) {
+                    mUdfpsController = new UdfpsController(mContext, fingerprintService,
+                            mWindowManager);
+                }
+            }
+        }
 
         try {
             mTaskStackListener = new BiometricTaskStackListener();

@@ -164,6 +164,7 @@ public class StagingManager {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_BOOT_COMPLETED && sStagingManager != null) {
                 sStagingManager.markStagedSessionsAsSuccessful();
+                sStagingManager.markBootCompleted();
             }
         }
     }
@@ -177,6 +178,10 @@ public class StagingManager {
                 mStagedSessions.put(sessionInfo.sessionId, sessionInfo);
             }
         }
+    }
+
+    private void markBootCompleted() {
+        mApexManager.markBootCompleted();
     }
 
     ParceledListSlice<PackageInstaller.SessionInfo> getSessions(int callingUid) {
@@ -522,13 +527,9 @@ public class StagingManager {
 
     private void snapshotAndRestoreApexUserData(
             String packageName, int[] allUsers, RollbackManagerInternal rm) {
-        try {
-            // appId, ceDataInode, and seInfo are not needed for APEXes
-            rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(allUsers), 0, 0,
-                    null, 0 /*token*/);
-        } catch (RuntimeException re) {
-            Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
-        }
+        // appId, ceDataInode, and seInfo are not needed for APEXes
+        rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(allUsers), 0, 0,
+                null, 0 /*token*/);
     }
 
     private void snapshotAndRestoreApkInApexUserData(
@@ -552,12 +553,8 @@ public class StagingManager {
             final int[] installedUsers = ps.queryInstalledUsers(allUsers, true);
 
             final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
-            try {
-                rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
-                        appId, ceDataInode, seInfo, 0 /*token*/);
-            } catch (RuntimeException re) {
-                Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
-            }
+            rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
+                    appId, ceDataInode, seInfo, 0 /*token*/);
         }
     }
 

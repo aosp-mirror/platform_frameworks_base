@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package android.os;
-
-import android.annotation.NonNull;
-import android.util.AndroidRuntimeException;
+package android.hardware.fingerprint;
 
 /**
- * An exception that indicates that the request timed out, for example because
- * the requested content provider took too long to initialize.
- *
+ * Interface for interacting with the under-display fingerprint sensor (UDFPS) overlay.
  * @hide
  */
-public final class AndroidTimeoutException extends AndroidRuntimeException {
+oneway interface IUdfpsOverlayController {
+    // Shows the overlay.
+    void showUdfpsOverlay();
 
-    public AndroidTimeoutException(@NonNull String message) {
-        super(message);
-    }
+    // Hides the overlay.
+    void hideUdfpsOverlay();
 }

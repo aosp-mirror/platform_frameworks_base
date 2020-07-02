@@ -39,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -52,6 +53,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     private static final String ARTIST = "ARTIST";
     private static final String TITLE = "TITLE";
     private static final String DEVICE_NAME = "DEVICE_NAME";
+    private static final int USER_ID = 0;
 
     private MediaDataCombineLatest mManager;
 
@@ -78,7 +80,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
 
         mManager.addListener(mListener);
 
-        mMediaData = new MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null,
+        mMediaData = new MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null,
                 new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null, true, null, false,
                 KEY, false);
         mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME);
@@ -156,6 +158,18 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         // THEN the listener gets a load event with the correct keys
         ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
         verify(mListener).onMediaDataLoaded(eq("NEW_KEY"), any(), captor.capture());
+    }
+
+    @Test
+    public void getDataIncludesDevice() {
+        // GIVEN that device and media events have been received
+        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
+
+        // THEN the result of getData includes device info
+        Map<String, MediaData> results = mManager.getData();
+        assertThat(results.get(KEY)).isNotNull();
+        assertThat(results.get(KEY).getDevice()).isEqualTo(mDeviceData);
     }
 
     private MediaDataManager.Listener captureDataListener() {

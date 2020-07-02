@@ -1606,7 +1606,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         packageUpdateFilter.addDataScheme("package");
 
-        mContext.registerReceiver(mOnPackageUpdatedReceiver, packageUpdateFilter);
+        mContext.registerReceiverAsUser(mOnPackageUpdatedReceiver, UserHandle.ALL,
+                packageUpdateFilter, null, null);
 
         synchronized (this) {
             for (int uidNum = mUidStates.size() - 1; uidNum >= 0; uidNum--) {
@@ -1649,7 +1650,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         final IntentFilter packageSuspendFilter = new IntentFilter();
         packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
         packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
-        mContext.registerReceiver(new BroadcastReceiver() {
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
@@ -1673,7 +1674,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
-        }, packageSuspendFilter);
+        }, UserHandle.ALL, packageSuspendFilter, null, null);
 
         final IntentFilter packageAddedFilter = new IntentFilter();
         packageAddedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -6150,6 +6151,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             case "root":
                 return Process.ROOT_UID;
             case "shell":
+            case "dumpstate":
                 return Process.SHELL_UID;
             case "media":
                 return Process.MEDIA_UID;
