@@ -1504,12 +1504,21 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void removeTask(Task task, boolean killProcess, boolean removeFromRecents, String reason) {
-        task.removeTaskActivitiesLocked(reason);
-        cleanUpRemovedTaskLocked(task, killProcess, removeFromRecents);
-        mService.getLockTaskController().clearLockedTask(task);
-        mService.getTaskChangeNotificationController().notifyTaskStackChanged();
-        if (task.isPersistable) {
-            mService.notifyTaskPersisterLocked(null, true);
+        if (task.mInRemoveTask) {
+            // Prevent recursion.
+            return;
+        }
+        task.mInRemoveTask = true;
+        try {
+            task.performClearTask(reason);
+            cleanUpRemovedTaskLocked(task, killProcess, removeFromRecents);
+            mService.getLockTaskController().clearLockedTask(task);
+            mService.getTaskChangeNotificationController().notifyTaskStackChanged();
+            if (task.isPersistable) {
+                mService.notifyTaskPersisterLocked(null, true);
+            }
+        } finally {
+            task.mInRemoveTask = false;
         }
     }
 
@@ -2177,7 +2186,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed(task.getStack());
+                taskDisplayArea.onSplitScreenModeDismissed((ActivityStack) task);
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }
