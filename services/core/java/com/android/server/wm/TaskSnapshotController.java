@@ -40,6 +40,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.WindowInsets;
@@ -480,7 +481,9 @@ class TaskSnapshotController {
                 task.getTaskDescription().getBackgroundColor(), 255);
         final LayoutParams attrs = mainWindow.getAttrs();
         final InsetsPolicy insetsPolicy = mainWindow.getDisplayContent().getInsetsPolicy();
-        final InsetsState insetsState = insetsPolicy.getInsetsForDispatch(mainWindow);
+        final InsetsState insetsState =
+                new InsetsState(insetsPolicy.getInsetsForDispatch(mainWindow));
+        mergeInsetsSources(insetsState, mainWindow.getRequestedInsetsState());
         final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrameLw(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription(),
@@ -598,6 +601,15 @@ class TaskSnapshotController {
             return topFullscreenOpaqueWindow.getSystemUiVisibility();
         }
         return 0;
+    }
+
+    static void mergeInsetsSources(InsetsState base, InsetsState other) {
+        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
+            final InsetsSource source = other.peekSource(type);
+            if (source != null) {
+                base.addSource(source);
+            }
+        }
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
