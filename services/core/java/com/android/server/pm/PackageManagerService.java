@@ -19165,9 +19165,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean systemApp = isSystemApp(ps);
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
-        if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
-            unsuspendForSuspendingPackage(packageName, userId);
-        }
+
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
                 && userId != UserHandle.USER_ALL) {
             // The caller is asking that the package only be deleted for a single
@@ -19223,6 +19221,20 @@ public class PackageManagerService extends IPackageManager.Stub
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
             deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings);
+        }
+
+        // If the package removed had SUSPEND_APPS, unset any restrictions that might have been in
+        // place for all affected users.
+        int[] affectedUserIds = (outInfo != null) ? outInfo.removedUsers : null;
+        if (affectedUserIds == null) {
+            affectedUserIds = resolveUserIds(userId);
+        }
+        for (final int affectedUserId : affectedUserIds) {
+            if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS,
+                    affectedUserId)) {
+                unsuspendForSuspendingPackage(packageName, affectedUserId);
+                removeAllDistractingPackageRestrictions(affectedUserId);
+            }
         }
 
         // Take a note whether we deleted the package for all users
