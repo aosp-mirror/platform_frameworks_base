@@ -654,6 +654,9 @@ public final class MediaCodecInfo {
          * <p>
          *
          * The following table summarizes the format keys considered by this method.
+         * This is especially important to consider when targeting a higher SDK version than the
+         * minimum SDK version, as this method will disregard some keys on devices below the target
+         * SDK version.
          *
          * <table style="width: 0%">
          *  <thead>
@@ -668,7 +671,7 @@ public final class MediaCodecInfo {
          *  </thead>
          *  <tbody>
          *   <tr>
-         *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</th>
+         *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</td>
          *    <td rowspan=3>{@link MediaFormat#KEY_MIME}<sup>*</sup>,<br>
          *        {@link MediaFormat#KEY_SAMPLE_RATE},<br>
          *        {@link MediaFormat#KEY_CHANNEL_COUNT},</td>
@@ -679,30 +682,51 @@ public final class MediaCodecInfo {
          *        {@link MediaFormat#KEY_WIDTH},<br>
          *        {@link MediaFormat#KEY_HEIGHT},<br>
          *        <strong>no</strong> {@code KEY_FRAME_RATE}</td>
-         *    <td rowspan=4>{@link MediaFormat#KEY_BITRATE_MODE},<br>
+         *    <td rowspan=10>as to the left, plus<br>
+         *        {@link MediaFormat#KEY_BITRATE_MODE},<br>
          *        {@link MediaFormat#KEY_PROFILE}
          *        (and/or {@link MediaFormat#KEY_AAC_PROFILE}<sup>~</sup>),<br>
          *        <!-- {link MediaFormat#KEY_QUALITY},<br> -->
          *        {@link MediaFormat#KEY_COMPLEXITY}
          *        (and/or {@link MediaFormat#KEY_FLAC_COMPRESSION_LEVEL}<sup>~</sup>)</td>
          *   </tr><tr>
-         *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}</th>
+         *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}</td>
          *    <td rowspan=2>as above, plus<br>
          *        {@link MediaFormat#KEY_FRAME_RATE}</td>
          *   </tr><tr>
-         *    <td>{@link android.os.Build.VERSION_CODES#M}</th>
+         *    <td>{@link android.os.Build.VERSION_CODES#M}</td>
          *   </tr><tr>
-         *    <td>{@link android.os.Build.VERSION_CODES#N}</th>
-         *    <td>as above, plus<br>
+         *    <td>{@link android.os.Build.VERSION_CODES#N}</td>
+         *    <td rowspan=2>as above, plus<br>
          *        {@link MediaFormat#KEY_PROFILE},<br>
          *        <!-- {link MediaFormat#KEY_MAX_BIT_RATE},<br> -->
          *        {@link MediaFormat#KEY_BIT_RATE}</td>
-         *    <td>as above, plus<br>
+         *    <td rowspan=2>as above, plus<br>
          *        {@link MediaFormat#KEY_PROFILE},<br>
          *        {@link MediaFormat#KEY_LEVEL}<sup>+</sup>,<br>
          *        <!-- {link MediaFormat#KEY_MAX_BIT_RATE},<br> -->
          *        {@link MediaFormat#KEY_BIT_RATE},<br>
          *        {@link CodecCapabilities#FEATURE_IntraRefresh}<sup>E</sup></td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#N_MR1}</td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#O}</td>
+         *    <td rowspan=3 colspan=2>as above, plus<br>
+         *        {@link CodecCapabilities#FEATURE_PartialFrame}<sup>D</sup></td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#O_MR1}</td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#P}</td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#Q}</td>
+         *    <td colspan=2>as above, plus<br>
+         *        {@link CodecCapabilities#FEATURE_FrameParsing}<sup>D</sup>,<br>
+         *        {@link CodecCapabilities#FEATURE_MultipleFrames},<br>
+         *        {@link CodecCapabilities#FEATURE_DynamicTimestamp}</td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#R}</td>
+         *    <td colspan=2>as above, plus<br>
+         *        {@link CodecCapabilities#FEATURE_LowLatency}<sup>D</sup></td>
          *   </tr>
          *   <tr>
          *    <td colspan=4>
