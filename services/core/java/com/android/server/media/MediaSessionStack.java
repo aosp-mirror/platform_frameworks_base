@@ -244,6 +244,10 @@ class MediaSessionStack {
     private MediaSessionRecordImpl findMediaButtonSession(int uid) {
         MediaSessionRecordImpl mediaButtonSession = null;
         for (MediaSessionRecordImpl session : mSessions) {
+            if (session instanceof MediaSession2Record) {
+                // TODO(jaewan): Make MediaSession2 to receive media key event
+                continue;
+            }
             if (uid == session.getUid()) {
                 if (session.checkPlaybackActiveState(
                         mAudioPlayerStateMonitor.isPlaybackActive(session.getUid()))) {
