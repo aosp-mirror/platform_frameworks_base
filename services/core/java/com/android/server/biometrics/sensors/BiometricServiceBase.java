@@ -751,7 +751,7 @@ public abstract class BiometricServiceBase extends SystemService
      * @param initiatedByClient true for authenticate, remove and enroll
      */
     @VisibleForTesting
-    void startClient(ClientMonitor newClient, boolean initiatedByClient) {
+    protected void startClient(ClientMonitor newClient, boolean initiatedByClient) {
         ClientMonitor currentClient = mCurrentClient;
         if (currentClient != null) {
             if (DEBUG) Slog.v(getTag(), "request stop current client " +

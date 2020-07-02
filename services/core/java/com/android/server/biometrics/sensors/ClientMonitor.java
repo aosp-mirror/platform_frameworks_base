@@ -84,7 +84,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
     public ClientMonitor(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
+            @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             boolean restricted, @NonNull String owner, int cookie, int sensorId, int statsModality,
             int statsAction, int statsClient) {
         super(statsModality, statsAction, statsClient);

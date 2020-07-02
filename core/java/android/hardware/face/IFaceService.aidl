@@ -89,12 +89,11 @@ interface IFaceService {
     // Add a callback which gets notified when the face lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
 
-    void setFeature(int userId, int feature, boolean enabled, in byte [] token,
-            IFaceServiceReceiver receiver, String opPackageName);
+    void setFeature(IBinder token, int userId, int feature, boolean enabled,
+            in byte [] hardwareAuthToken, IFaceServiceReceiver receiver, String opPackageName);
 
-    void getFeature(int userId, int feature, IFaceServiceReceiver receiver, String opPackageName);
-
-    void userActivity();
+    void getFeature(IBinder token, int userId, int feature, IFaceServiceReceiver receiver,
+            String opPackageName);
 
     // Give FaceService its ID. See AuthService.java
     void initializeConfiguration(int sensorId);
