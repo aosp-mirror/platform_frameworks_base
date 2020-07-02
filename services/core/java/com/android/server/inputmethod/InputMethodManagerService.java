@@ -211,6 +211,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_INITIALIZE_IME = 1040;
     static final int MSG_CREATE_SESSION = 1050;
     static final int MSG_REMOVE_IME_SURFACE = 1060;
+    static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
 
     static final int MSG_START_INPUT = 2000;
 
@@ -4000,6 +4001,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
     }
 
+    @Override
+    public void removeImeSurfaceFromWindow(IBinder windowToken) {
+        // No permission check, because we'll only execute the request if the calling window is
+        // also the current IME client.
+        mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
+    }
+
     @BinderThread
     private void notifyUserAction(@NonNull IBinder token) {
         if (DEBUG) {
@@ -4273,11 +4281,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
             }
             case MSG_REMOVE_IME_SURFACE: {
-                try {
-                    if (mEnabledSession != null && mEnabledSession.session != null) {
-                        mEnabledSession.session.removeImeSurface();
+                synchronized (mMethodMap) {
+                    try {
+                        if (mEnabledSession != null && mEnabledSession.session != null
+                                && !mShowRequested) {
+                            mEnabledSession.session.removeImeSurface();
+                        }
+                    } catch (RemoteException e) {
                     }
-                } catch (RemoteException e) {
+                }
+                return true;
+            }
+            case MSG_REMOVE_IME_SURFACE_FROM_WINDOW: {
+                IBinder windowToken = (IBinder) msg.obj;
+                synchronized (mMethodMap) {
+                    try {
+                        if (windowToken == mCurFocusedWindow
+                                && mEnabledSession != null && mEnabledSession.session != null) {
+                            mEnabledSession.session.removeImeSurface();
+                        }
+                    } catch (RemoteException e) {
+                    }
                 }
                 return true;
             }
@@ -5110,6 +5134,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void reportImeControl(@Nullable IBinder windowToken) {
             mService.reportImeControl(windowToken);
+        }
+
+        @Override
+        public void removeImeSurface() {
+            mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
         }
     }
 

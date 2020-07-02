@@ -9377,6 +9377,11 @@ public final class ViewRootImpl implements ViewParent,
         return mInputEventReceiver.getToken();
     }
 
+    @NonNull
+    public IBinder getWindowToken() {
+        return mAttachInfo.mWindowToken;
+    }
+
     /**
      * Class for managing the accessibility interaction connection
      * based on the global accessibility state.
