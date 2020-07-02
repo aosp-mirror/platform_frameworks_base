@@ -101,11 +101,11 @@ import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.media.MediaFrameworkInitializer;
 import android.media.MediaRouter;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
 import android.media.projection.MediaProjectionManager;
-import android.media.session.MediaSessionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
@@ -855,13 +855,6 @@ public final class SystemServiceRegistry {
                 return new ConsumerIrManager(ctx);
             }});
 
-        registerService(Context.MEDIA_SESSION_SERVICE, MediaSessionManager.class,
-                new CachedServiceFetcher<MediaSessionManager>() {
-            @Override
-            public MediaSessionManager createService(ContextImpl ctx) {
-                return new MediaSessionManager(ctx);
-            }});
-
         registerService(Context.TRUST_SERVICE, TrustManager.class,
                 new StaticServiceFetcher<TrustManager>() {
             @Override
@@ -1335,6 +1328,7 @@ public final class SystemServiceRegistry {
             WifiFrameworkInitializer.registerServiceWrappers();
             StatsFrameworkInitializer.registerServiceWrappers();
             RollbackManagerFrameworkInitializer.initialize();
+            MediaFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

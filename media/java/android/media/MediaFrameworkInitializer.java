@@ -17,6 +17,9 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.app.SystemServiceRegistry;
+import android.content.Context;
+import android.media.session.MediaSessionManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -52,5 +55,20 @@ public class MediaFrameworkInitializer {
     /** @hide */
     public static MediaServiceManager getMediaServiceManager() {
         return sMediaServiceManager;
+    }
+
+    /**
+     * Called by {@link SystemServiceRegistry}'s static initializer and registers all media
+     * services to {@link Context}, so that {@link Context#getSystemService} can return them.
+     *
+     * @throws IllegalStateException if this is called from anywhere besides
+     * {@link SystemServiceRegistry}
+     */
+    public static void registerServiceWrappers() {
+        SystemServiceRegistry.registerContextAwareService(
+                Context.MEDIA_SESSION_SERVICE,
+                MediaSessionManager.class,
+                context -> new MediaSessionManager(context)
+        );
     }
 }
