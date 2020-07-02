@@ -24,7 +24,6 @@ import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContent
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
-import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.os.Build;
@@ -161,7 +160,7 @@ public class ApkSignatureSchemeV3Verifier {
             boolean doVerifyIntegrity) throws SecurityException, IOException {
         int signerCount = 0;
         Map<Integer, byte[]> contentDigests = new ArrayMap<>();
-        VerifiedSigner result = null;
+        Pair<X509Certificate[], VerifiedProofOfRotation> result = null;
         CertificateFactory certFactory;
         try {
             certFactory = CertificateFactory.getInstance("X.509");
@@ -206,18 +205,17 @@ public class ApkSignatureSchemeV3Verifier {
             ApkSigningBlockUtils.verifyIntegrity(contentDigests, apk, signatureInfo);
         }
 
+        byte[] verityRootHash = null;
         if (contentDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
             byte[] verityDigest = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
-            result.verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
+            verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
                     verityDigest, apk.length(), signatureInfo);
         }
 
-        result.digest = pickBestDigestForV4(contentDigests);
-
-        return result;
+        return new VerifiedSigner(result.first, result.second, verityRootHash, contentDigests);
     }
 
-    private static VerifiedSigner verifySigner(
+    private static Pair<X509Certificate[], VerifiedProofOfRotation> verifySigner(
             ByteBuffer signerBlock,
             Map<Integer, byte[]> contentDigests,
             CertificateFactory certFactory)
@@ -349,8 +347,7 @@ public class ApkSignatureSchemeV3Verifier {
             } catch (CertificateException e) {
                 throw new SecurityException("Failed to decode certificate #" + certificateCount, e);
             }
-            certificate = new VerbatimX509Certificate(
-                    certificate, encodedCert);
+            certificate = new VerbatimX509Certificate(certificate, encodedCert);
             certs.add(certificate);
         }
 
@@ -382,8 +379,9 @@ public class ApkSignatureSchemeV3Verifier {
 
     private static final int PROOF_OF_ROTATION_ATTR_ID = 0x3ba06f8c;
 
-    private static VerifiedSigner verifyAdditionalAttributes(ByteBuffer attrs,
-            List<X509Certificate> certs, CertificateFactory certFactory) throws IOException {
+    private static Pair<X509Certificate[], VerifiedProofOfRotation> verifyAdditionalAttributes(
+            ByteBuffer attrs, List<X509Certificate> certs, CertificateFactory certFactory)
+            throws IOException {
         X509Certificate[] certChain = certs.toArray(new X509Certificate[certs.size()]);
         VerifiedProofOfRotation por = null;
 
@@ -421,7 +419,7 @@ public class ApkSignatureSchemeV3Verifier {
                     break;
             }
         }
-        return new VerifiedSigner(certChain, por);
+        return Pair.create(certChain, por);
     }
 
     private static VerifiedProofOfRotation verifyProofOfRotationStruct(
@@ -570,12 +568,17 @@ public class ApkSignatureSchemeV3Verifier {
         public final X509Certificate[] certs;
         public final VerifiedProofOfRotation por;
 
-        public byte[] verityRootHash;
-        public byte[] digest;
+        public final byte[] verityRootHash;
+        // Algorithm -> digest map of signed digests in the signature.
+        // All these are verified if requested.
+        public final Map<Integer, byte[]> contentDigests;
 
-        public VerifiedSigner(X509Certificate[] certs, VerifiedProofOfRotation por) {
+        public VerifiedSigner(X509Certificate[] certs, VerifiedProofOfRotation por,
+                byte[] verityRootHash, Map<Integer, byte[]> contentDigests) {
             this.certs = certs;
             this.por = por;
+            this.verityRootHash = verityRootHash;
+            this.contentDigests = contentDigests;
         }
 
     }
