@@ -2099,7 +2099,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock) {
             if (mCurrentFullUserRecord.getMediaButtonSessionLocked()
                     instanceof MediaSession2Record) {
-                // TODO(jaewan): Implement
+                // TODO(jaewan): Make MediaSession2 to receive media key event
                 return;
             }
             MediaSessionRecord session = null;
