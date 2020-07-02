@@ -35,6 +35,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.Utils;
 
 import java.io.FileDescriptor;
@@ -68,7 +69,7 @@ public class CastControllerImpl implements CastController {
     private MediaProjectionInfo mProjection;
 
     @Inject
-    public CastControllerImpl(Context context) {
+    public CastControllerImpl(Context context, DumpManager dumpManager) {
         mContext = context;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouter.setRouterGroupId(MediaRouter.MIRRORING_GROUP_ID);
@@ -76,6 +77,7 @@ public class CastControllerImpl implements CastController {
                 context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = mProjectionManager.getActiveProjectionInfo();
         mProjectionManager.addCallback(mProjectionCallback, new Handler());
+        dumpManager.registerDumpable(TAG, this);
         if (DEBUG) Log.d(TAG, "new CastController()");
     }
 
