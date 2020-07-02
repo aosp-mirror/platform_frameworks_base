@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -34,6 +35,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -194,6 +197,19 @@ public class BackupManager {
      */
     @SystemApi
     public static final int ERROR_TRANSPORT_INVALID = -2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        OperationType.BACKUP,
+        OperationType.MIGRATION
+    })
+    public @interface OperationType {
+        // A regular backup / restore operation.
+        int BACKUP = 0;
+        // A full migration: all app data for non-system apps is eligible.
+        int MIGRATION = 1;
+    }
 
     private Context mContext;
     @UnsupportedAppUsage
