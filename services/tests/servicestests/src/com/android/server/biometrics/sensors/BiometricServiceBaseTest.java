@@ -61,7 +61,7 @@ public class BiometricServiceBaseTest {
         }
 
         @Override
-        protected void updateActiveGroup(int userId, String clientPackage) {
+        protected void updateActiveGroup(int userId) {
         }
 
         @Override

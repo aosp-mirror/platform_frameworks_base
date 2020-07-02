@@ -32,8 +32,6 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
-import android.hardware.biometrics.face.V1_0.OptionalBool;
-import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
@@ -157,7 +155,7 @@ public class FaceService extends BiometricServiceBase {
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures, Surface surface) throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             mHandler.post(() -> {
                 mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
@@ -201,7 +199,7 @@ public class FaceService extends BiometricServiceBase {
                 final IFaceServiceReceiver receiver, final int flags,
                 final String opPackageName) throws RemoteException {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             final IBiometricsFace daemon = getFaceDaemon();
             if (daemon == null) {
@@ -228,7 +226,7 @@ public class FaceService extends BiometricServiceBase {
                 String opPackageName, int cookie, int callingUid, int callingPid,
                 int callingUserId) throws RemoteException {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             final IBiometricsFace daemon = getFaceDaemon();
             if (daemon == null) {
@@ -275,7 +273,7 @@ public class FaceService extends BiometricServiceBase {
                 final IFaceServiceReceiver receiver, final String opPackageName)
                 throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             if (token == null) {
                 Slog.w(TAG, "remove(): token is null");
@@ -392,7 +390,7 @@ public class FaceService extends BiometricServiceBase {
                     return;
                 }
 
-                updateActiveGroup(userId, null /* opPackageName */);
+                updateActiveGroup(userId);
                 final FaceResetLockoutClient client = new FaceResetLockoutClient(
                         mClientFinishCallback, getContext(), daemon, userId,
                         getContext().getOpPackageName(), getSensorId(), hardwareAuthToken);
@@ -410,7 +408,7 @@ public class FaceService extends BiometricServiceBase {
                 if (DEBUG) {
                     Slog.d(TAG, "setFeature for user(" + userId + ")");
                 }
-                updateActiveGroup(userId, opPackageName);
+                updateActiveGroup(userId);
                 if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
                     Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
                     return;
@@ -442,7 +440,7 @@ public class FaceService extends BiometricServiceBase {
                 if (DEBUG) {
                     Slog.d(TAG, "getFeature for user(" + userId + ")");
                 }
-                updateActiveGroup(userId, opPackageName);
+                updateActiveGroup(userId);
                 // This should ideally return tri-state, but the user isn't shown settings unless
                 // they are enrolled so it's fine for now.
                 if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
@@ -670,12 +668,11 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected void updateActiveGroup(int userId, String clientPackage) {
+    protected void updateActiveGroup(int userId) {
         IBiometricsFace daemon = getFaceDaemon();
 
         if (daemon != null) {
             try {
-                userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
                     final File baseDir = Environment.getDataVendorDeDirectory(userId);
                     final File faceDir = new File(baseDir, FACE_DATA_DIR);
@@ -803,7 +800,7 @@ public class FaceService extends BiometricServiceBase {
             if (DEBUG) Slog.v(TAG, "Face HAL id: " + halId);
             if (halId != 0) {
                 loadAuthenticatorIds();
-                updateActiveGroup(ActivityManager.getCurrentUser(), null);
+                updateActiveGroup(ActivityManager.getCurrentUser());
                 doTemplateCleanupForUser(ActivityManager.getCurrentUser());
             } else {
                 Slog.w(TAG, "Failed to open Face HAL!");
