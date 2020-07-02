@@ -21,12 +21,13 @@ import static android.system.OsConstants.AF_INET6;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.net.module.util.Inet4AddressUtils;
 
 import java.io.FileDescriptor;
 import java.math.BigInteger;
