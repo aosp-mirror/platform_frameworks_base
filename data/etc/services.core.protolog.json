@@ -757,6 +757,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-547111355": {
+      "message": "hideIme Control target: %s ",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-545190927": {
       "message": "<<< CLOSE TRANSACTION animate",
       "level": "INFO",
@@ -1085,6 +1091,12 @@
       "message": "Attempted to set IME flag to a display that does not exist: %d",
       "level": "WARN",
       "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "95216706": {
+      "message": "hideIme target: %s ",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "95281111": {

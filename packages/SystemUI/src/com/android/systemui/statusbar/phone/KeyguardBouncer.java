@@ -26,7 +26,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -169,7 +168,7 @@ public class KeyguardBouncer {
 
         // This condition may indicate an error on Android, so log it.
         if (!allowDismissKeyguard) {
-            Slog.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != " + keyguardUserId);
+            Log.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != " + keyguardUserId);
         }
 
         mShowingSoon = true;
