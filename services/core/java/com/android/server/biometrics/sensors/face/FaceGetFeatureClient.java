@@ -43,9 +43,9 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
     FaceGetFeatureClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
             int sensorId, int feature, int faceId) {
-        super(context, token, listener, userId, false /* restricted */, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId,
+                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mFeature = feature;
         mFaceId = faceId;
 

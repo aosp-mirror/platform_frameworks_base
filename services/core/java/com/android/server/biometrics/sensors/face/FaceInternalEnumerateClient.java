@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -38,11 +39,11 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFac
     private static final String TAG = "FaceInternalEnumerateClient";
 
     FaceInternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
-            boolean restricted, @NonNull String owner,
+            @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, userId, restricted, owner, enrolledList, utils,
-                sensorId, statsModality);
+            @NonNull BiometricUtils utils, int sensorId) {
+        super(context, token, userId, owner, enrolledList, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override

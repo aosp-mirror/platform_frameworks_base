@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.FaceManager;
@@ -52,11 +53,11 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
 
     FaceEnrollClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, boolean restricted, @NonNull String owner,
-            @NonNull BiometricUtils utils, @NonNull int[] disabledFeatures, int timeoutSec,
-            int statsModality, @Nullable NativeHandle surfaceHandle, int sensorId) {
-        super(context, token, listener, userId, hardwareAuthToken, restricted,
-                owner, utils, timeoutSec, statsModality, sensorId, false /* shouldVibrate */);
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
+            @NonNull int[] disabledFeatures, int timeoutSec, @Nullable NativeHandle surfaceHandle,
+            int sensorId) {
+        super(context, token, listener, userId, hardwareAuthToken, owner, utils, timeoutSec,
+                BiometricsProtoEnums.MODALITY_FACE, sensorId, false /* shouldVibrate */);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mSurfaceHandle = surfaceHandle;
         mEnrollIgnoreList = getContext().getResources()

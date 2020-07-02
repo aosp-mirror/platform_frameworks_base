@@ -39,10 +39,9 @@ public class FaceResetLockoutClient extends ClientMonitor<IBiometricsFace> {
 
     FaceResetLockoutClient(@NonNull Context context, int userId, String owner, int sensorId,
             byte[] hardwareAuthToken) {
-        super(context, null /* token */, null /* listener */, userId,
-                false /* restricted */, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, null /* token */, null /* listener */, userId, owner, 0 /* cookie */,
+                sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
 
         mHardwareAuthToken = new ArrayList<>();
         for (byte b : hardwareAuthToken) {

@@ -43,6 +43,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
     private final IActivityTaskManager mActivityTaskManager;
     private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
+    private final boolean mIsRestricted;
 
     protected final long mOperationId;
 
@@ -51,13 +52,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
 
     protected boolean mAuthAttempted;
 
-    public AuthenticationClient(@NonNull Context context,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            int statsModality, int statsClient, @NonNull TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker) {
-        super(context, token, listener, targetUserId, restricted, owner, cookie, sensorId,
+    public AuthenticationClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, int statsModality, int statsClient,
+            @NonNull TaskStackListener taskStackListener, @NonNull LockoutTracker lockoutTracker) {
+        super(context, token, listener, targetUserId, owner, cookie, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
@@ -65,6 +65,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
         mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
+        mIsRestricted = restricted;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -147,7 +148,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
 
                     // Explicitly have if/else here to make it super obvious in case the code is
                     // touched in the future.
-                    if (!getIsRestricted()) {
+                    if (!mIsRestricted) {
                         listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
                                 getTargetUserId(), mIsStrongBiometric);
                     } else {

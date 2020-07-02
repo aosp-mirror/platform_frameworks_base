@@ -36,11 +36,9 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
 
     public RemovalClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(context, token, listener, userId, restricted, owner, 0 /* cookie */,
-                sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId, int statsModality) {
+        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_REMOVE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
     }

@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,11 +40,10 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     FingerprintEnrollClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, boolean restricted, @NonNull String owner,
-            @NonNull BiometricUtils utils, int timeoutSec, int statsModality,
-            int sensorId, boolean shouldVibrate) {
-        super(context, token, listener, userId, hardwareAuthToken, restricted,
-                owner, utils, timeoutSec, statsModality, sensorId, shouldVibrate);
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
+            int timeoutSec, int sensorId) {
+        super(context, token, listener, userId, hardwareAuthToken, owner, utils, timeoutSec,
+                BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId, true /* shouldVibrate */);
     }
 
     @Override
