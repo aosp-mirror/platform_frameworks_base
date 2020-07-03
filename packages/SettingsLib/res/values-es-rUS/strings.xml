@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"No se pueden buscar las redes."</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Ninguna"</string>
-    <string name="wifi_remembered" msgid="3266709779723179188">"Guardada"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"Guardado"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Desconectado"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Inhabilitada"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Error de configuración IP"</string>
