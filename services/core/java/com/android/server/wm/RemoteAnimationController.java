@@ -359,17 +359,20 @@ class RemoteAnimationController implements DeathRecipient {
         RemoteAnimationRecord(WindowContainer windowContainer, Point endPos, Rect localBounds,
                 Rect endBounds, Rect startBounds) {
             mWindowContainer = windowContainer;
-            mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds);
             if (startBounds != null) {
                 mStartBounds = new Rect(startBounds);
+                mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
+                        mStartBounds);
                 mTmpRect.set(startBounds);
                 mTmpRect.offsetTo(0, 0);
                 if (mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
                     mThumbnailAdapter =
                             new RemoteAnimationAdapterWrapper(this, new Point(0, 0), localBounds,
-                                    mTmpRect);
+                                    mTmpRect, new Rect());
                 }
             } else {
+                mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
+                        new Rect(endPos.x, endPos.y, endBounds.right, endBounds.bottom));
                 mStartBounds = null;
             }
         }
@@ -407,13 +410,15 @@ class RemoteAnimationController implements DeathRecipient {
         final Point mPosition = new Point();
         final Rect mLocalBounds;
         final Rect mStackBounds = new Rect();
+        final Rect mStartBounds = new Rect();
 
         RemoteAnimationAdapterWrapper(RemoteAnimationRecord record, Point position,
-                Rect localBounds, Rect stackBounds) {
+                Rect localBounds, Rect stackBounds, Rect startBounds) {
             mRecord = record;
             mPosition.set(position.x, position.y);
             mLocalBounds = localBounds;
             mStackBounds.set(stackBounds);
+            mStartBounds.set(startBounds);
         }
 
         @Override
@@ -427,13 +432,12 @@ class RemoteAnimationController implements DeathRecipient {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
 
             // Restore position and stack crop until client has a chance to modify it.
-            if (mRecord.mStartBounds != null) {
-                t.setPosition(animationLeash, mRecord.mStartBounds.left, mRecord.mStartBounds.top);
-                t.setWindowCrop(animationLeash, mRecord.mStartBounds.width(),
-                        mRecord.mStartBounds.height());
+            if (mStartBounds.isEmpty()) {
+                t.setPosition(animationLeash, 0, 0);
+                t.setWindowCrop(animationLeash, -1, -1);
             } else {
-                t.setPosition(animationLeash, mPosition.x, mPosition.y);
-                t.setWindowCrop(animationLeash, mStackBounds.width(), mStackBounds.height());
+                t.setPosition(animationLeash, mStartBounds.left, mStartBounds.top);
+                t.setWindowCrop(animationLeash, mStartBounds.width(), mStartBounds.height());
             }
             mCapturedLeash = animationLeash;
             mCapturedFinishCallback = finishCallback;

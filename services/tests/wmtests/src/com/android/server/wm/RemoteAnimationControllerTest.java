@@ -46,7 +46,6 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.OffsettableClock;
@@ -244,7 +243,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testChange() throws Exception {
+    public void testChangeToSmallerSize() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         mDisplayContent.mChangingContainers.add(win.mActivityRecord);
         try {
@@ -279,8 +278,61 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             assertEquals(false, app.isTranslucent);
             verify(mMockTransaction).setPosition(
                     mMockLeash, app.startBounds.left, app.startBounds.top);
-            verify(mMockTransaction).setWindowCrop(mMockLeash, 200, 200);
+            verify(mMockTransaction).setWindowCrop(
+                    mMockLeash, app.startBounds.width(), app.startBounds.height());
             verify(mMockTransaction).setPosition(mMockThumbnailLeash, 0, 0);
+            verify(mMockTransaction).setWindowCrop(mMockThumbnailLeash, -1, -1);
+
+            finishedCaptor.getValue().onAnimationFinished();
+            verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_WINDOW_ANIMATION),
+                    eq(record.mAdapter));
+            verify(mThumbnailFinishedCallback).onAnimationFinished(
+                    eq(ANIMATION_TYPE_WINDOW_ANIMATION), eq(record.mThumbnailAdapter));
+        } finally {
+            mDisplayContent.mChangingContainers.clear();
+        }
+    }
+
+    @Test
+    public void testChangeTolargerSize() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mChangingContainers.add(win.mActivityRecord);
+        try {
+            final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
+                    win.mActivityRecord, new Point(0, 0), null, new Rect(0, 0, 200, 200),
+                    new Rect(50, 100, 150, 150));
+            assertNotNull(record.mThumbnailAdapter);
+            ((AnimationAdapter) record.mAdapter)
+                    .startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION,
+                            mFinishedCallback);
+            ((AnimationAdapter) record.mThumbnailAdapter).startAnimation(mMockThumbnailLeash,
+                    mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION, mThumbnailFinishedCallback);
+            mController.goodToGo();
+            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                    ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), wallpapersCaptor.capture(),
+                    finishedCaptor.capture());
+            assertEquals(1, appsCaptor.getValue().length);
+            final RemoteAnimationTarget app = appsCaptor.getValue()[0];
+            assertEquals(RemoteAnimationTarget.MODE_CHANGING, app.mode);
+            assertEquals(new Point(0, 0), app.position);
+            assertEquals(new Rect(0, 0, 200, 200), app.sourceContainerBounds);
+            assertEquals(new Rect(50, 100, 150, 150), app.startBounds);
+            assertEquals(mMockLeash, app.leash);
+            assertEquals(mMockThumbnailLeash, app.startLeash);
+            assertEquals(win.mWinAnimator.mLastClipRect, app.clipRect);
+            assertEquals(false, app.isTranslucent);
+            verify(mMockTransaction).setPosition(
+                    mMockLeash, app.startBounds.left, app.startBounds.top);
+            verify(mMockTransaction).setWindowCrop(
+                    mMockLeash, app.startBounds.width(), app.startBounds.height());
+            verify(mMockTransaction).setPosition(mMockThumbnailLeash, 0, 0);
+            verify(mMockTransaction).setWindowCrop(mMockThumbnailLeash, -1, -1);
 
             finishedCaptor.getValue().onAnimationFinished();
             verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_WINDOW_ANIMATION),
