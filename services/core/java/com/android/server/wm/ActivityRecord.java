@@ -3051,6 +3051,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // from the client it-self to the parent surface (owned by us).
         detachChildren();
 
+        clearAllDrawn();
+
         mPendingRelaunchCount++;
     }
 
