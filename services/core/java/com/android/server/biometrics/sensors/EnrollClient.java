@@ -29,7 +29,7 @@ import java.util.Arrays;
 /**
  * A class to keep track of the enrollment state for a given client.
  */
-public abstract class EnrollClient extends AcquisitionClient {
+public abstract class EnrollClient<T> extends AcquisitionClient<T> {
 
     private static final String TAG = "Biometrics/EnrollClient";
 
@@ -41,14 +41,13 @@ public abstract class EnrollClient extends AcquisitionClient {
     private long mEnrollmentStartTimeMs;
     private boolean mAlreadyCancelled;
 
-    public EnrollClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, boolean restricted, String owner,
-            @NonNull BiometricUtils utils, int timeoutSec, int statsModality, int sensorId,
+    public EnrollClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
+            int timeoutSec, int statsModality, int sensorId,
             boolean shouldVibrate) {
-        super(finishCallback, context, token, listener, userId, restricted, owner, 0 /* cookie */,
-                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_ENROLL, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
@@ -88,7 +87,9 @@ public abstract class EnrollClient extends AcquisitionClient {
     }
 
     @Override
-    public void start() {
+    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         mEnrollmentStartTimeMs = System.currentTimeMillis();
         startHalOperation();
     }

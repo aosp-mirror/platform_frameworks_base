@@ -225,7 +225,11 @@ public class UtilsTest {
                 {BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE},
                 {BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT,
-                        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE}
+                        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE},
+                {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+                        BiometricManager.BIOMETRIC_SUCCESS},
+                {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                        BiometricManager.BIOMETRIC_SUCCESS}
         };
 
         for (int i = 0; i < testCases.length; i++) {

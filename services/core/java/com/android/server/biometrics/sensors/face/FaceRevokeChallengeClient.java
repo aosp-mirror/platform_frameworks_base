@@ -29,17 +29,13 @@ import com.android.server.biometrics.sensors.RevokeChallengeClient;
  * Face-specific revokeChallenge client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceRevokeChallengeClient extends RevokeChallengeClient {
+public class FaceRevokeChallengeClient extends RevokeChallengeClient<IBiometricsFace> {
 
     private static final String TAG = "FaceRevokeChallengeClient";
 
-    private final IBiometricsFace mDaemon;
-
-    FaceRevokeChallengeClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, @NonNull IBinder token, @NonNull String owner,
-            int sensorId) {
-        super(finishCallback, context, token, owner, sensorId);
-        mDaemon = daemon;
+    FaceRevokeChallengeClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull String owner, int sensorId) {
+        super(context, token, owner, sensorId);
     }
 
     @Override

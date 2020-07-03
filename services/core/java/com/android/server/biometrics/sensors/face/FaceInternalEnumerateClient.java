@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -34,19 +35,15 @@ import java.util.List;
  * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
  * HIDL interfaces.
  */
-class FaceInternalEnumerateClient extends InternalEnumerateClient {
+class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFace> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
-    private final IBiometricsFace mDaemon;
-
-    FaceInternalEnumerateClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFace daemon, @NonNull IBinder token, int userId, boolean restricted,
+    FaceInternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
             @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(finishCallback, context, token, userId, restricted, owner, enrolledList, utils,
-                sensorId, statsModality);
-        mDaemon = daemon;
+            @NonNull BiometricUtils utils, int sensorId) {
+        super(context, token, userId, owner, enrolledList, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override

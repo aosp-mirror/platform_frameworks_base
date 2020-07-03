@@ -16,8 +16,11 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.FaceManager;
@@ -39,24 +42,22 @@ import java.util.Arrays;
  * Face-specific enroll client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceEnrollClient extends EnrollClient {
+public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
 
     private static final String TAG = "FaceEnrollClient";
 
-    private final IBiometricsFace mDaemon;
-    private final int[] mDisabledFeatures;
-    private final NativeHandle mSurfaceHandle;
-    private final int[] mEnrollIgnoreList;
-    private final int[] mEnrollIgnoreListVendor;
+    @NonNull private final int[] mDisabledFeatures;
+    @Nullable private final NativeHandle mSurfaceHandle;
+    @NonNull private final int[] mEnrollIgnoreList;
+    @NonNull private final int[] mEnrollIgnoreListVendor;
 
-    FaceEnrollClient(FinishCallback finishCallback, Context context, IBiometricsFace daemon,
-            IBinder token, ClientMonitorCallbackConverter listener, int userId,
-            byte[] hardwareAuthToken, boolean restricted, String owner, BiometricUtils utils,
-            int[] disabledFeatures, int timeoutSec, int statsModality, NativeHandle surfaceHandle,
+    FaceEnrollClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
+            @NonNull int[] disabledFeatures, int timeoutSec, @Nullable NativeHandle surfaceHandle,
             int sensorId) {
-        super(finishCallback, context, token, listener, userId, hardwareAuthToken, restricted,
-                owner, utils, timeoutSec, statsModality, sensorId, false /* shouldVibrate */);
-        mDaemon = daemon;
+        super(context, token, listener, userId, hardwareAuthToken, owner, utils, timeoutSec,
+                BiometricsProtoEnums.MODALITY_FACE, sensorId, false /* shouldVibrate */);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mSurfaceHandle = surfaceHandle;
         mEnrollIgnoreList = getContext().getResources()

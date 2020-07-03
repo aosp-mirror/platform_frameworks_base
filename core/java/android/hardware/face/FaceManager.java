@@ -165,7 +165,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      *
      * @param crypto   object associated with the call or null if none required.
      * @param cancel   an object that can be used to cancel authentication
-     * @param flags    optional flags; should be 0
      * @param callback an object to receive authentication events
      * @param handler  an optional handler to handle callback events
      * @throws IllegalArgumentException if the crypto operation is not supported or is not backed
@@ -177,8 +176,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
-        authenticate(crypto, cancel, flags, callback, handler, mContext.getUserId());
+            @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
+        authenticate(crypto, cancel, callback, handler, mContext.getUserId());
     }
 
     /**
@@ -202,7 +201,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      *
      * @param crypto   object associated with the call or null if none required.
      * @param cancel   an object that can be used to cancel authentication
-     * @param flags    optional flags; should be 0
      * @param callback an object to receive authentication events
      * @param handler  an optional handler to handle callback events
      * @param userId   userId to authenticate for
@@ -214,8 +212,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler,
-            int userId) {
+            @NonNull AuthenticationCallback callback, @Nullable Handler handler, int userId) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -237,7 +234,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
                 Trace.beginSection("FaceManager#authenticate");
                 mService.authenticate(mToken, operationId, userId, mServiceReceiver,
-                        flags, mContext.getOpPackageName());
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception while authenticating: ", e);
                 if (callback != null) {
@@ -260,9 +257,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @see FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback, int[], Surface)
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enroll(int userId, byte[] token, CancellationSignal cancel,
+    public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
-        enroll(userId, token, cancel, callback, disabledFeatures, null /* surface */);
+        enroll(userId, hardwareAuthToken, cancel, callback, disabledFeatures, null /* surface */);
     }
 
     /**
@@ -277,7 +274,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @param token    a unique token provided by a recent creation or verification of device
      *                 credentials (e.g. pin, pattern or password).
      * @param cancel   an object that can be used to cancel enrollment
-     * @param flags    optional flags
      * @param userId   the user to whom this face will belong to
      * @param callback an object to receive enrollment events
      * @param surface  optional camera preview surface for a single-camera device. Must be null if
@@ -285,7 +281,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enroll(int userId, byte[] token, CancellationSignal cancel,
+    public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface surface) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
@@ -304,7 +300,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
-                mService.enroll(userId, mToken, token, mServiceReceiver,
+                mService.enroll(userId, mToken, hardwareAuthToken, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures, surface);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
@@ -329,15 +325,15 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * which point the object is no longer valid. The operation can be canceled by using the
      * provided cancel object.
      *
-     * @param token    a unique token provided by a recent creation or verification of device
-     *                 credentials (e.g. pin, pattern or password).
+     * @param hardwareAuthToken    a unique token provided by a recent creation or verification of
+     *                 device credentials (e.g. pin, pattern or password).
      * @param cancel   an object that can be used to cancel enrollment
      * @param userId   the user to whom this face will belong to
      * @param callback an object to receive enrollment events
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enrollRemotely(int userId, byte[] token, CancellationSignal cancel,
+    public void enrollRemotely(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
@@ -356,7 +352,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enrollRemotely");
-                mService.enrollRemotely(userId, mToken, token, mServiceReceiver,
+                mService.enrollRemotely(userId, mToken, hardwareAuthToken, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enrollRemotely: ", e);
@@ -444,13 +440,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void setFeature(int userId, int feature, boolean enabled, byte[] token,
+    public void setFeature(int userId, int feature, boolean enabled, byte[] hardwareAuthToken,
             SetFeatureCallback callback) {
         if (mService != null) {
             try {
                 mSetFeatureCallback = callback;
-                mService.setFeature(userId, feature, enabled, token, mServiceReceiver,
-                        mContext.getOpPackageName());
+                mService.setFeature(mToken, userId, feature, enabled, hardwareAuthToken,
+                        mServiceReceiver, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -465,22 +461,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mGetFeatureCallback = callback;
-                mService.getFeature(userId, feature, mServiceReceiver, mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Pokes the the driver to have it start looking for faces again.
-     * @hide
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void userActivity() {
-        if (mService != null) {
-            try {
-                mService.userActivity();
+                mService.getFeature(mToken, userId, feature, mServiceReceiver,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

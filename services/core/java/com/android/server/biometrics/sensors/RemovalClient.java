@@ -27,26 +27,31 @@ import android.util.Slog;
 /**
  * A class to keep track of the remove state for a given client.
  */
-public abstract class RemovalClient extends ClientMonitor implements RemovalConsumer {
+public abstract class RemovalClient<T> extends ClientMonitor<T> implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
     protected final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int userId, boolean restricted, @NonNull String owner,
-            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(finishCallback, context, token, listener, userId, restricted, owner, 0 /* cookie */,
-                sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+    public RemovalClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId, int statsModality) {
+        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_REMOVE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
     }
 
     @Override
-    public void start() {
+    public void unableToStart() {
+        // Nothing to do here
+    }
+
+    @Override
+    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
         // The biometric template ids will be removed when we get confirmation from the HAL
         startHalOperation();
     }

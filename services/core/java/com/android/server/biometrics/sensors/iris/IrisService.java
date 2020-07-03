@@ -85,6 +85,11 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
+    protected Object getDaemon() {
+        return null;
+    }
+
+    @Override
     protected BiometricUtils getBiometricUtils() {
         return null;
     }
@@ -95,7 +100,7 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected void updateActiveGroup(int userId, String clientPackage) {
+    protected void updateActiveGroup(int userId) {
 
     }
 

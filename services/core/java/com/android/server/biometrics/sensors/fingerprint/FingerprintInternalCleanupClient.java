@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 
@@ -34,36 +35,31 @@ import java.util.List;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintInternalCleanupClient extends InternalCleanupClient {
-    private final IBiometricsFingerprint mDaemon;
+class FingerprintInternalCleanupClient extends InternalCleanupClient<IBiometricsFingerprint> {
 
-    FingerprintInternalCleanupClient(@NonNull FinishCallback finishCallback,
-            @NonNull Context context, @NonNull IBiometricsFingerprint daemon, int userId,
-            boolean restricted, @NonNull String owner, int sensorId, int statsModality,
-            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
+    FingerprintInternalCleanupClient(@NonNull Context context,int userId, @NonNull String owner,
+            int sensorId, @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils) {
-        super(finishCallback, context, userId, restricted, owner, sensorId, statsModality,
+        super(context, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FINGERPRINT,
                 enrolledList, utils);
-        mDaemon = daemon;
     }
 
     @Override
-    protected InternalEnumerateClient getEnumerateClient(FinishCallback finishCallback,
-            Context context, IBinder token, int userId, boolean restricted, String owner,
+    protected InternalEnumerateClient<IBiometricsFingerprint> getEnumerateClient(
+            Context context, IBinder token, int userId, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils,
-            int sensorId, int statsModality) {
-        return new FingerprintInternalEnumerateClient(finishCallback, context, mDaemon, token,
-                userId, restricted, owner, enrolledList, utils, sensorId, statsModality);
+            int sensorId) {
+        return new FingerprintInternalEnumerateClient(context, token, userId, owner, enrolledList,
+                utils, sensorId);
     }
 
     @Override
-    protected RemovalClient getRemovalClient(FinishCallback finishCallback, Context context,
-            IBinder token, int biometricId, int userId, boolean restricted, String owner,
-            BiometricUtils utils, int sensorId, int statsModality) {
+    protected RemovalClient<IBiometricsFingerprint> getRemovalClient(Context context, IBinder token,
+            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        return new FingerprintRemovalClient(finishCallback, context, mDaemon, token,
-                null /* ClientMonitorCallbackConverter */, biometricId, userId, restricted,
-                owner, utils, sensorId, statsModality);
+        return new FingerprintRemovalClient(context, token,
+                null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
+                sensorId);
     }
 }
