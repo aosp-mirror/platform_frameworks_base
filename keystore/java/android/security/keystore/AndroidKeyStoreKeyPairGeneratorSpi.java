@@ -31,7 +31,6 @@ import com.android.org.bouncycastle.asn1.ASN1InputStream;
 import com.android.org.bouncycastle.asn1.ASN1Integer;
 import com.android.org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import com.android.org.bouncycastle.asn1.DERBitString;
-import com.android.org.bouncycastle.asn1.DERInteger;
 import com.android.org.bouncycastle.asn1.DERNull;
 import com.android.org.bouncycastle.asn1.DERSequence;
 import com.android.org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -699,8 +698,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 sigAlgOid = X9ObjectIdentifiers.ecdsa_with_SHA256;
                 sigAlgId = new AlgorithmIdentifier(sigAlgOid);
                 ASN1EncodableVector v = new ASN1EncodableVector();
-                v.add(new DERInteger(0));
-                v.add(new DERInteger(0));
+                v.add(new ASN1Integer(BigInteger.valueOf(0)));
+                v.add(new ASN1Integer(BigInteger.valueOf(0)));
                 signature = new DERSequence().getEncoded();
                 break;
             case KeymasterDefs.KM_ALGORITHM_RSA:
