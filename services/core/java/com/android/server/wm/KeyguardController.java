@@ -133,10 +133,11 @@ class KeyguardController {
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(boolean keyguardShowing, boolean aodShowing) {
-        // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
-        final boolean keyguardChanged = keyguardShowing != mKeyguardShowing
-                || mKeyguardGoingAway && keyguardShowing;
         final boolean aodChanged = aodShowing != mAodShowing;
+        // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
+        // Do not reset keyguardChanged status if this is aodChanged.
+        final boolean keyguardChanged = (keyguardShowing != mKeyguardShowing)
+                || (mKeyguardGoingAway && keyguardShowing && !aodChanged);
         if (!keyguardChanged && !aodChanged) {
             return;
         }
