@@ -404,7 +404,7 @@ public class MediaSession2 implements AutoCloseable {
                 mCallback.onPostConnect(MediaSession2.this, controllerInfo);
                 connected = true;
             } finally {
-                if (!connected) {
+                if (!connected || isClosed()) {
                     if (DEBUG) {
                         Log.d(TAG, "Rejecting connection or notifying that session is closed"
                                 + ", controllerInfo=" + controllerInfo);
