@@ -309,7 +309,7 @@ message ActivityRecordProto {
     repeated .android.graphics.RectProto frozen_bounds = 23;
     optional bool visible = 24;
     reserved 25; // configuration_container
-    optional IdentifierProto identifier = 26;
+    optional IdentifierProto identifier = 26 [deprecated=true];
     optional string state = 27 [(.android.privacy).dest = DEST_EXPLICIT];
     optional bool front_of_task = 28;
     optional int32 proc_id = 29;
@@ -332,7 +332,7 @@ message WindowStateProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
-    optional IdentifierProto identifier = 2;
+    optional IdentifierProto identifier = 2 [deprecated=true];
     // Unique identifier of a DisplayContent stack.
     optional int32 display_id = 3;
     // Unique identifier for the task stack.
@@ -428,6 +428,7 @@ message WindowContainerProto {
     optional bool visible = 3;
     optional SurfaceAnimatorProto surface_animator = 4;
     repeated WindowContainerChildProto children = 5;
+    optional IdentifierProto identifier = 6;
 }
 
 /* represents a generic child of a WindowContainer */

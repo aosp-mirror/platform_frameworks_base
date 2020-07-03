@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -32,19 +33,14 @@ import com.android.server.biometrics.sensors.RemovalClient;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintRemovalClient extends RemovalClient {
+class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
     private static final String TAG = "FingerprintRemovalClient";
 
-    private final IBiometricsFingerprint mDaemon;
-
-    FingerprintRemovalClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token,
+    FingerprintRemovalClient(@NonNull Context context, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(finishCallback, context, token, listener, biometricId, userId, restricted, owner,
-                utils, sensorId, statsModality);
-        mDaemon = daemon;
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
+        super(context, token, listener, biometricId, userId, owner, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override

@@ -126,4 +126,17 @@ public final class ClientMonitorCallbackConverter {
             mFingerprintServiceReceiver.onChallengeGenerated(challenge);
         }
     }
+
+    public void onFeatureSet(boolean success, int feature) throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onFeatureSet(success, feature);
+        }
+    }
+
+    public void onFeatureGet(boolean success, int feature, boolean value)
+            throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onFeatureGet(success, feature, value);
+        }
+    }
 }

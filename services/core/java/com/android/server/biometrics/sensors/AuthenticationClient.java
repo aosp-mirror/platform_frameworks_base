@@ -22,6 +22,7 @@ import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 /**
  * A class to keep track of the authentication state for a given client.
  */
-public abstract class AuthenticationClient extends AcquisitionClient {
+public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
 
     private static final String TAG = "Biometrics/AuthenticationClient";
 
@@ -42,26 +43,29 @@ public abstract class AuthenticationClient extends AcquisitionClient {
     private final IActivityTaskManager mActivityTaskManager;
     private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
+    private final boolean mIsRestricted;
 
     protected final long mOperationId;
 
     private long mStartTimeMs;
     private boolean mAlreadyCancelled;
 
-    public AuthenticationClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            int statsModality, int statsClient, @NonNull TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker) {
-        super(finishCallback, context, token, listener, targetUserId, restricted, owner, cookie,
-                sensorId, statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+    protected boolean mAuthAttempted;
+
+    public AuthenticationClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, int statsModality, int statsClient,
+            @NonNull TaskStackListener taskStackListener, @NonNull LockoutTracker lockoutTracker) {
+        super(context, token, listener, targetUserId, owner, cookie, sensorId,
+                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
         mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
+        mIsRestricted = restricted;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -144,7 +148,7 @@ public abstract class AuthenticationClient extends AcquisitionClient {
 
                     // Explicitly have if/else here to make it super obvious in case the code is
                     // touched in the future.
-                    if (!getIsRestricted()) {
+                    if (!mIsRestricted) {
                         listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
                                 getTargetUserId(), mIsStrongBiometric);
                     } else {
@@ -183,7 +187,20 @@ public abstract class AuthenticationClient extends AcquisitionClient {
      * Start authentication
      */
     @Override
-    public void start() {
+    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
+        super.start(daemon, finishCallback);
+
+        final @LockoutTracker.LockoutMode int lockoutMode =
+                mLockoutTracker.getLockoutModeForUser(getTargetUserId());
+        if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+            Slog.v(TAG, "In lockout mode(" + lockoutMode + ") ; disallowing authentication");
+            int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
+                    ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                    : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+            onError(errorCode, 0 /* vendorCode */);
+            return;
+        }
+
         try {
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
@@ -193,6 +210,7 @@ public abstract class AuthenticationClient extends AcquisitionClient {
         if (DEBUG) Slog.w(TAG, "Requesting auth for " + getOwnerString());
 
         mStartTimeMs = System.currentTimeMillis();
+        mAuthAttempted = true;
         startHalOperation();
     }
 
