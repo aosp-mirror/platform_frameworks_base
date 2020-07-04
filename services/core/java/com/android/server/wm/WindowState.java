@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
@@ -755,6 +756,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mPendingSeamlessRotate != null) {
             oldRotation = mPendingSeamlessRotate.getOldRotation();
+        }
+
+        // Skip performing seamless rotation when the controlled insets is IME with visible state.
+        if (mControllableInsetProvider != null
+                && mControllableInsetProvider.getSource().getType() == ITYPE_IME) {
+            return;
         }
 
         if (mForceSeamlesslyRotate || requested) {
