@@ -56,7 +56,7 @@
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Anmeldung abgeschlossen. Verbindung wird hergestellt…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"Sehr langsam"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Langsam"</string>
-    <string name="speed_label_okay" msgid="1253594383880810424">"Ok"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"Mittel"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"Mittel"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Schnell"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Sehr schnell"</string>
@@ -192,7 +192,7 @@
     <item msgid="581904787661470707">"Am schnellsten"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Profil auswählen"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Nutzer"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
     <string name="category_work" msgid="4014193632325996115">"Geschäftlich"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Entwickleroptionen"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Entwickleroptionen aktivieren"</string>
@@ -205,7 +205,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Debugmodus bei Anschluss über USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB-Debugging-Autorisierungen aufheben"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Verknüpfung zu Fehlerbericht"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Im Menü \"Ein/Aus\" wird eine Option zum Erstellen eines Fehlerberichts angezeigt"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Im Ein-/Aus-Menü wird eine Option zum Erstellen eines Fehlerberichts angezeigt"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Aktiv lassen"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Display wird beim Laden nie in den Ruhezustand versetzt"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI-Snoop-Protokoll aktivieren"</string>
@@ -450,7 +450,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mehr Zeit."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Weniger Zeit."</string>
     <string name="cancel" msgid="5665114069455378395">"Abbrechen"</string>
-    <string name="okay" msgid="949938843324579502">"Ok"</string>
+    <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivieren"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Bitte nicht stören\" aktivieren"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nie"</string>
@@ -463,6 +463,6 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Dauer"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Bis zur Deaktivierung"</string>
-    <string name="time_unit_just_now" msgid="3006134267292728099">"gerade eben"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Gerade eben"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Dieses Gerät"</string>
 </resources>

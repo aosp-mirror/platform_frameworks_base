@@ -153,7 +153,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Bəzi susmaya görələr təyin edilib"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Susmaya görələr təyin edilməyib."</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mətndən-danışığa parametrləri"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə çıxışı"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə daxiletmə"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nitq diapazonu"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Mətnin səsləndirilmə sürəti"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Pitç"</string>
@@ -414,7 +414,7 @@
     <string name="disabled" msgid="8017887509554714950">"Deaktiv"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"İcazə verilib"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"İcazə verilməyib"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Naməlum tətbiqlərin quraşdırılması"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Tanınmayan tətbiqlərin quraşdırılması"</string>
     <string name="home" msgid="973834627243661438">"Ayarların əsas səhifəsi"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

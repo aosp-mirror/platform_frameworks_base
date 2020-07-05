@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"Inaunganisha kwa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="3028983857109369308">"Uhalalishaji kwa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="4287401332778341890">"Inamiliki anwani ya IP kutoka <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="1043944043827424501">" Umeunganishwa kwa<xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1043944043827424501">"Umeunganishwa kwa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Imesimamishwa"</item>
     <item msgid="1175040558087735707">"inakatisha muunganisho kutoka <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"Muunganisho Umekatika"</item>

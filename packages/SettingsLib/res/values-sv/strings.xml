@@ -181,19 +181,19 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Återställ tonhöjden för tal"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Återställ tonhöjden för talad text till standardinställningen."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Mycket långsamt"</item>
-    <item msgid="1815382991399815061">"Långsamt"</item>
-    <item msgid="3075292553049300105">"Normalt"</item>
-    <item msgid="1158955023692670059">"Snabbt"</item>
+    <item msgid="9004239613505400644">"Mycket långsam"</item>
+    <item msgid="1815382991399815061">"Långsam"</item>
+    <item msgid="3075292553049300105">"Normal"</item>
+    <item msgid="1158955023692670059">"Snabb"</item>
     <item msgid="5664310435707146591">"Snabbare"</item>
-    <item msgid="5491266922147715962">"Mycket snabbt"</item>
-    <item msgid="7659240015901486196">"Supersnabbt"</item>
-    <item msgid="7147051179282410945">"Turbosnabbt"</item>
+    <item msgid="5491266922147715962">"Mycket snabb"</item>
+    <item msgid="7659240015901486196">"Supersnabb"</item>
+    <item msgid="7147051179282410945">"Turbosnabb"</item>
     <item msgid="581904787661470707">"Snabbast"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Personligt"</string>
-    <string name="category_work" msgid="4014193632325996115">"Arbetet"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
+    <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Utvecklaralternativ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivera utvecklaralternativ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ange alternativ för apputveckling"</string>
@@ -434,7 +434,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Nästa"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Lösenord krävs"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktiva inmatningsmetoder"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använda systemspråk"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använd systemspråk"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Det gick inte att öppna inställningarna för <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Den här inmatningsmetoden kan samla all text som du skriver, inklusive personliga uppgifter som lösenord och kreditkortsnummer. Den kommer från appen <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Vill du använda inmatningsmetoden?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Obs! När du har startat om enheten måste du låsa upp mobilen innan du kan starta den här appen"</string>

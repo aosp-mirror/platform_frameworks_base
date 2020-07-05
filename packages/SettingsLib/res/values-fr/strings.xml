@@ -141,7 +141,7 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Applications supprimées"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Applications et utilisateurs supprimés"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Mises à jour du système"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Partage connexion Bluetooth par USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Partage de connexion via USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Point d\'accès Wi-Fi mobile"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Partage connexion Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Partage de connexion"</string>
@@ -375,7 +375,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deutéranomalie (rouge/vert)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rouge/vert)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (bleu-jaune)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correction couleur"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correction des couleurs"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Cette fonctionnalité est expérimentale et peut affecter les performances."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Remplacé par <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>

@@ -70,21 +70,21 @@
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Povezano (brez predstavnosti) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Povezano (brez dostopa do sporočil) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Povezano (brez telefona/predstavnosti) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Povezano, raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Povezano (brez telefona), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Povezano (brez predstavnosti), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Povezano (brez telefona ali predstavnosti), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktivna, akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivno, L: napolnjenost akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: napolnjenost akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: napolnjenost akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: napolnjenost akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Povezano, raven napolnjenosti baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Povezano (brez telefona), raven napolnjenosti baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Povezano (brez predstavnosti), raven napolnjenosti baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Povezano (brez telefona ali predstavnosti), raven napolnjenosti baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktivna, baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivno, L: napolnjenost baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: napolnjenost baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: napolnjenost baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: napolnjenost baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktivna"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Zvok predstavnosti"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonski klici"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos datoteke"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vnosna naprava"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetni dostop"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Dajanje stikov v skupno rabo"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Deljenje stikov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Uporabi za dajanje stikov v skupno rabo"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Skupna raba internetne povezave"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sporočila SMS"</string>
@@ -127,8 +127,8 @@
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Seznanjanje z levim slušnim pripomočkom …"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Seznanjanje z desnim slušnim pripomočkom …"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Levi – akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Desni – akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Levi – baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Desni – baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi je izklopljen."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Povezava Wi-Fi je prekinjena."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Ena črtica signala Wi-Fi."</string>
@@ -247,7 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Povezave ni bilo mogoče vzpostaviti"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povečaj raven zapisovanja dnevnika za Wi-Fi; v izbirniku Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmanjša porabo energije akumulatorja in izboljša delovanje omrežja"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmanjša porabo energije baterije in izboljša delovanje omrežja"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Omejen prenos podatkov"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Z neomejenim prenosom podatkov"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Velikosti medpomnilnikov zapisovalnika dnevnika"</string>
@@ -390,7 +390,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Naprava bi morala delovati do približno <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Moralo bi zadostovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Podaljšanje časa delovanja akumulatorja za dlje kot <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Podaljšanje časa delovanja baterije za dlje kot <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Preostalo manj kot <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Preostanek: manj kot <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Preostali čas delovanja: manj kot <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +465,6 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vedno vprašaj"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Dokler ne izklopite"</string>
-    <string name="time_unit_just_now" msgid="3006134267292728099">"pravkar"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Pravkar"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Ta naprava"</string>
 </resources>

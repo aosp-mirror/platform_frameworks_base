@@ -110,7 +110,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Ginagamit para sa paglilipat ng file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gamitin para sa input"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gamitin para sa Mga Hearing Aid"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Pares"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Ipares"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"IPARES"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Kanselahin"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Nagbibigay ang pagpapares ng access sa iyong mga contact at history ng tawag kapag nakakonekta."</string>

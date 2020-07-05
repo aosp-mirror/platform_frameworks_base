@@ -212,7 +212,7 @@
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar os pacotes Bluetooth (ative/desative o Bluetooth após alterar esta definição)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueio de OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir o desbloqueio do carregador de arranque"</string>
-    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Pretende permitir o desbloqueio de OEM?"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permitir o desbloqueio de OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVISO: as funcionalidades de proteção do dispositivo não funcionam neste dispositivo enquanto esta definição estiver ativada."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Selecionar aplicação de localização fictícia"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplicação de localização fictícia não definida"</string>
@@ -356,7 +356,7 @@
     <string name="inactive_apps_title" msgid="5372523625297212320">"Aplicações em espera"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Inativo. Toque para ativar/desativar."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ativo. Toque para ativar/desativar."</string>
-    <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado do Modo de espera das aplicações:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado do Modo de espera das apps:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ver e controlar os serviços actualmente em execução"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementação WebView"</string>
@@ -409,12 +409,12 @@
     <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"a carregar…"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está a carregar"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Ligada à corrente, não é possível carregar neste momento"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Completo"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"Carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlado pelo gestor"</string>
     <string name="disabled" msgid="8017887509554714950">"Desativada"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorizada"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Não autorizada"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalar aplicações desconhecidas"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalar apps desconhecidas"</string>
     <string name="home" msgid="973834627243661438">"Página inicial de definições"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -462,7 +462,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"no(a) <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duração"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Até ser desativado"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Até desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Este dispositivo"</string>
 </resources>

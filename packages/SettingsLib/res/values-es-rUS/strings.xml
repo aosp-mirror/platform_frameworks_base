@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"No se pueden buscar las redes."</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Ninguna"</string>
-    <string name="wifi_remembered" msgid="3266709779723179188">"Guardada"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Desconectada"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"Guardado"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Desconectado"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Inhabilitada"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Error de configuración IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"No se estableció conexión debido a la mala calidad de la red"</string>
@@ -151,7 +151,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Configuraciones predeterminadas establecidas"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No hay configuraciones predeterminadas establecidas."</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Sin configuraciones predeterminadas"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Configuración de texto a voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Salida de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de voz"</string>
@@ -205,7 +205,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Modo de depuración cuando se conecta el USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depur. USB"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo para informes de errores"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar un botón en el menú de encendido para realizar un informe de errores"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Muestra un botón en el menú de encendido para realizar un informe de errores"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer activo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando."</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Registro de Bluetooth HCI"</string>
@@ -248,7 +248,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce el consumo de batería y mejora el rendimiento de la red"</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"Con uso medido"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"De uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona el tamaño del Logger por búfer"</string>
@@ -290,7 +290,7 @@
     <string name="media_category" msgid="8122076702526144053">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Supervisión"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modo estricto"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Destello por op. de apps en la conversación principal"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Destello por op. de apps en el subproceso principal"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Ubicación del puntero"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Superponer capa en pant. para mostrar puntos tocados"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostrar presiones"</string>
@@ -388,7 +388,7 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Duración aproximada hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Extender la duración de la batería después de las <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -412,7 +412,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Cargado"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Permitida"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"No permitida"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar apps desconocidas"</string>
     <string name="home" msgid="973834627243661438">"Pantalla de configuración"</string>

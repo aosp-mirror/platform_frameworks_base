@@ -110,8 +110,8 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gunakan untuk transfer file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gunakan untuk masukan"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gunakan untuk Alat Bantu Dengar"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sandingkan"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SANDINGKAN"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sambungkan"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAMBUNGKAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Penyandingan memberi akses ke kontak dan histori panggilan saat tersambung"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyandingkan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Pilih profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Pribadi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Kantor"</string>
+    <string name="category_work" msgid="4014193632325996115">"Kerja"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opsi developer"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktifkan opsi developer"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Menyetel opsi untuk pengembangan apl"</string>
@@ -306,8 +306,8 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Selalu gunakan GPU untuk pengomposisian layar"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulasikan ruang warna"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktifkan jejak OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Perutean audio USB nonaktif"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Perutean otomatis ke periferal audio USB nonaktif"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Pemilihan rute audio USB nonaktif"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Pemilihan rute otomatis ke periferal audio USB nonaktif"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Tampilkan batas tata letak"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah tata letak RTL"</string>
@@ -441,7 +441,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Status pendaftaran IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Terdaftar"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Tidak terdaftar"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Tidak Tersedia"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Tidak tersedia"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC diacak"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">%1$d perangkat terhubung</item>

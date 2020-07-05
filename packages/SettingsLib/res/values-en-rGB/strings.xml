@@ -88,7 +88,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Use for contact sharing"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internet connection sharing"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Text messages"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM Access"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM access"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hearing Aids"</string>
@@ -239,7 +239,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Trigger Bluetooth Audio LDAC\nCodec Selection: Playback Quality"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Private DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Select private DNS mode"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Select Private DNS Mode"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatic"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Private DNS provider hostname"</string>

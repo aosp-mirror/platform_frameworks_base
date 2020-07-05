@@ -92,12 +92,12 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏صدای HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏صدای HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سمعک‌ها"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"متصل به سمعک‌ها"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"به سمعک متصل شد"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"به رسانه صوتی متصل شد"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"به تلفن صوتی متصل شد"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"به سرور انتقال فایل متصل شد"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"به نقشه متصل شد"</string>
-    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"‏متصل به SAP"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"‏به SAP متصل شد"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"به سرور انتقال فایل متصل نیست"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"به دستگاه ورودی متصل شد"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"برای دسترسی به اینترنت، به دستگاه متصل شد"</string>
@@ -151,7 +151,7 @@
     <string name="unknown" msgid="3544487229740637809">"ناشناس"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"کاربر: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"بعضی پیش‌فرض‌ها تنظیم شده‌اند"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"هیچ پیش‌فرضی تنظیم نشده است"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"پیش‌فرضی تنظیم نشده است"</string>
     <string name="tts_settings" msgid="8130616705989351312">"تنظیمات متن به گفتار"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"خروجی تبدیل متن به گفتار"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعت گفتار"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"انتخاب نمایه"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصی"</string>
-    <string name="category_work" msgid="4014193632325996115">"محل کار"</string>
+    <string name="category_work" msgid="4014193632325996115">"کاری"</string>
     <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
@@ -222,7 +222,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"شتاب سخت‌افزاری اشتراک‌گذاری اینترنت"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏نسخه AVRCP بلوتوث"</string>
@@ -442,7 +442,7 @@
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ثبت‌شده"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ثبت نشده است"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"در دسترس نیست"</string>
-    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏ویژگی تصادفی‌سازی MAC فعال است"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏ویژگی MAC تصادفی است"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">‏%1$d دستگاه متصل</item>
       <item quantity="other">‏%1$d دستگاه متصل</item>

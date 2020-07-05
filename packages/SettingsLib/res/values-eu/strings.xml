@@ -124,7 +124,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Irudietarako gailua"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Entzungailua"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Idazteko gailua"</string>
-    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth gailua"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth bidezko gailua"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Ezkerreko audifonoa parekatzen…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Eskuineko audifonoa parekatzen…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Ezkerrekoa. Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -142,10 +142,10 @@
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Kendutako aplikazioak eta erabiltzaileak"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Sistemaren eguneratzeak"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"Konexioa partekatzea (USB)"</string>
-    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Sare publiko eramangarria"</string>
+    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Wifi-gune eramangarria"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Konexioa partekatzea (Bluetooth)"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Konexioa partekatzea"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"Konexioa partekatzea eta sare publikoak"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Konexioa partekatzea eta wifi-gune eramangarriak"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Laneko aplikazio guztiak"</string>
     <string name="user_guest" msgid="6939192779649870792">"Gonbidatua"</string>
     <string name="unknown" msgid="3544487229740637809">"Ezezaguna"</string>
@@ -205,11 +205,11 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Gaitu arazketa modua USBa konektatzean"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Baliogabetu USB bidezko arazketarako baimenak"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Akatsen txostenerako lasterbidea"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Pizteko menuan, erakutsi akatsen txostena sortzeko botoia"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Itzaltzeko menuan, erakutsi akatsen txostena sortzeko botoia"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Mantendu aktibo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Pantaila ez da ezarriko inoiz inaktibo kargatu bitartean"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Gaitu Bluetooth HCI miatze-erregistroa"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Hauteman Bluetooth paketeak (aktibatu edo desaktibatu Bluetooth konexioa ezarpena aldatu ostean)."</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Hauteman Bluetooth paketeak (aktibatu edo desaktibatu Bluetooth-a ezarpena aldatu ostean)."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM desblokeoa"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Onartu abiarazlea desblokeatzea"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
@@ -414,7 +414,7 @@
     <string name="disabled" msgid="8017887509554714950">"Desgaituta"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Baimena dauka"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ez dauka baimenik"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Aplikazio ezezagunak instalatzea"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalatu aplikazio ezezagunak"</string>
     <string name="home" msgid="973834627243661438">"Ezarpenen hasierako pantaila"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"% 0"</item>

@@ -151,10 +151,10 @@
     <string name="unknown" msgid="3544487229740637809">"അജ്ഞാതം"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ഉപയോക്താവ്: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"സ്ഥിരമായ ചിലത് സജ്ജീകരിച്ചു"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"സ്ഥിരമായൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"ഡിഫോൾട്ടുകളൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ട്"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"വായനാ നിരക്ക്"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"വായനയുടെ വേഗത"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ടെക്സ്റ്റ് ചെയ്യൽ പറയുമ്പോഴുടെക്കുന്ന വേഗത"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"പിച്ച്"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"സിന്തസൈസ് ചെയ്ത സംസാരത്തിന്റെ സ്വരഭേദത്തെ ബാധിക്കുന്നു"</string>
@@ -176,7 +176,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"പരിശോധിക്കുന്നു…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> എന്നതിനായുള്ള ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"എഞ്ചിൻ ക്രമീകരണങ്ങൾ സമാരംഭിക്കുക"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"തിരഞ്ഞെടുത്ത എഞ്ചിൻ"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"മുൻഗണന നൽകുന്ന എഞ്ചിൻ"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"പൊതുവായ കാര്യങ്ങൾ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"സംസാരത്തിന്റെ ശബ്ദനില പുനഃക്രമീകരിക്കുക"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ടെക്‌സ്റ്റ് സംസാരിക്കപ്പെടുന്ന ശബ്ദനില \'ഡിഫോൾട്ടി\'ലേക്ക് പുനഃക്രമീകരിക്കുക."</string>
@@ -192,7 +192,7 @@
     <item msgid="581904787661470707">"ഏറ്റവും വേഗത്തിൽ"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിഗതം"</string>
+    <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിപരം"</string>
     <string name="category_work" msgid="4014193632325996115">"ഔദ്യോഗികം"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -242,13 +242,13 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"സ്വകാര്യ DNS മോഡ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ഓഫ്"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"സ്വയമേവ"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം നൽകുക"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റ് നാമം"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റ് നാമം നൽകുക"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"കണക്റ്റ് ചെയ്യാനായില്ല"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ബാറ്ററി ചാർജ് വേഗത്തിൽ തീരുന്ന അവസ്ഥ കുറച്ച് നെറ്റ്‌വർക്ക് പ്രകടനം മെച്ചപ്പെടുത്തുന്നു"</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർചെയ്ത"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർ ചെയ്തത്"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"മീറ്റർമാപകമല്ലാത്തത്"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ലോഗർ ബഫർ വലുപ്പം"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"ഓരോ ലോഗ് ബഫറിനും വലുപ്പം തിരഞ്ഞെടുക്കൂ"</string>
@@ -375,7 +375,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"വർണ്ണാന്ധത (ചുവപ്പ്-പച്ച‌)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"പ്രോട്ടാനോമലി (ചുവപ്പ്-പച്ച)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ട്രിട്ടാനോമലി (നീല-മഞ്ഞ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"നിറം ക്രമീകരിക്കൽ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"ഈ ഫീച്ചർ പരീക്ഷണാത്മകമായതിനാൽ പ്രകടനത്തെ ബാധിച്ചേക്കാം."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>

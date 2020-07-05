@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Nie można wyszukać sieci."</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Brak"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Zapisana"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Rozłączona"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Rozłączono"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Wyłączona"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Błąd konfiguracji IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Brak połączenia z powodu słabego sygnału sieci"</string>
@@ -61,7 +61,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"Szybka"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Bardzo szybka"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączona"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączono"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Rozłączanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Łączenie..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Połączono – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Wybierz profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
-    <string name="category_work" msgid="4014193632325996115">"Praca"</string>
+    <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcje programistyczne"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje dla programistów"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ustaw opcje związane z programowaniem aplikacji."</string>

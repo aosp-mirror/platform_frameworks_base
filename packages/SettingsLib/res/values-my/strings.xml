@@ -114,7 +114,7 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ချိတ်တွဲရန်"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"မလုပ်တော့"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ချိတ်တွဲမှုက ချိတ်ဆက်ထားလျှင် သင်၏ အဆက်အသွယ်များ နှင့် ခေါ်ဆိုမှု မှတ်တမ်းကို ရယူခွင့် ပြုသည်။"</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ"</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် တွဲချိတ်မရပါ"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
@@ -151,7 +151,7 @@
     <string name="unknown" msgid="3544487229740637809">"မသိ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"ပုံမှန်သတ်မှတ်ထားခြင်းမရှိ"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"မူရင်း သတ်မှတ်မထားပါ။"</string>
     <string name="tts_settings" msgid="8130616705989351312">"စာသားမှစကားပြောပြောင်း ဆက်တင်များ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"စာသားမှ စကားပြောသို့ အထွက်"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"စကားပြောနှုန်း"</string>
@@ -422,7 +422,7 @@
     <item msgid="7529124349186240216">"၁၀၀%"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"ပြီးခဲ့သည့် <xliff:g id="ID_1">%1$s</xliff:g> က"</string>
-    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်ပါသည်"</string>
+    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"သေး"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"မူရင်း"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ကြီး"</string>

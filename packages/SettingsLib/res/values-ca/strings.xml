@@ -86,7 +86,7 @@
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accés a Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Compartició de contactes"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"S\'utilitza per compartir contactes."</string>
-    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Connexió compartida a Internet"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Compartició de connexió d\'Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Missatges de text"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accés a la SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Àudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Tria un perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
-    <string name="category_work" msgid="4014193632325996115">"Feina"</string>
+    <string name="category_work" msgid="4014193632325996115">"Treball"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcions per a desenvolupadors"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activa les opcions per a desenvolupadors"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Defineix les opcions per al desenvolupament d\'aplicacions"</string>
@@ -375,7 +375,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (vermell-verd)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalia (vermell-verd)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (blau-groc)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correcció del color"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correcció de color"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Aquesta funció és experimental i pot afectar el rendiment."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"S\'ha substituït per <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>: <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -462,7 +462,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"Data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Durada"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pregunta sempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Fins que no ho desactivis"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Fins que no el desactivis"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Aquest dispositiu"</string>
 </resources>

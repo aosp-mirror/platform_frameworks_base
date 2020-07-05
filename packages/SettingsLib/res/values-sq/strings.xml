@@ -408,7 +408,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
     <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"po karikohet"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nuk po karikohet"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Në prizë, por nuk mund të ngarkohet për momentin"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Në prizë, por nuk mund të karikohet për momentin"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolluar nga administratori"</string>
     <string name="disabled" msgid="8017887509554714950">"Çaktivizuar"</string>
@@ -424,7 +424,7 @@
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> më parë"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> të mbetura"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"I vogël"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"I parazgjedhur"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"E parazgjedhur"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"I madh"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Më i madh"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Më i madhi"</string>

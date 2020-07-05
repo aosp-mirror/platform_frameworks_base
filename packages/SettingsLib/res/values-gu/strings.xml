@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"પ્રોફાઇલ પસંદ કરો"</string>
     <string name="category_personal" msgid="6236798763159385225">"વ્યક્તિગત"</string>
-    <string name="category_work" msgid="4014193632325996115">"કાર્યાલય"</string>
+    <string name="category_work" msgid="4014193632325996115">"ઑફિસ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"વિકાસકર્તાનાં વિકલ્પો"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"વિકાસકર્તાનાં વિકલ્પો સક્ષમ કરો"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ઍપ્લિકેશન વિકાસ માટે વિકલ્પો સેટ કરો"</string>
@@ -241,7 +241,7 @@
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ખાનગી DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ખાનગી DNS મોડને પસંદ કરો"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"બંધ"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"આપમેળે"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ઑટોમૅટિક"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ખાનગી DNS પ્રદાતા હોસ્ટનું નામ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS પ્રદાતાના હોસ્ટનું નામ દાખલ કરો"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"કનેક્ટ કરી શકાયું નથી"</string>
@@ -424,7 +424,7 @@
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> પહેલાં"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> બાકી"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"નાનું"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ડિફોલ્ટ"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ડિફૉલ્ટ"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"મોટું"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"વધુ મોટું"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"સૌથી મોટું"</string>

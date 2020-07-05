@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Výber profilu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobné"</string>
-    <string name="category_work" msgid="4014193632325996115">"Práca"</string>
+    <string name="category_work" msgid="4014193632325996115">"Pracovné"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Pre vývojárov"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Povolenie možností vývojára"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Možnosti nastavenia vývoja aplikácií"</string>
@@ -204,7 +204,7 @@
     <string name="enable_adb" msgid="8072776357237289039">"Ladenie cez USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Povoliť režim ladenia s pripojeným zariadením USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Odvolať autorizácie na ladenie cez USB"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Skratka hlásenia chyby"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Odkaz na hlásenie chyby"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Zobraziť v hlavnej ponuke tlačidlo na vytvorenie hlásenia chyby"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Nevypínať obrazovku"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Obrazovka sa pri nabíjaní neprepne do režimu spánku"</string>
@@ -242,7 +242,7 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Výber súkromného režimu DNS"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Vypnuté"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaticky"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Súkromný názov hostiteľa poskytovateľa DNS"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Názov hostiteľa poskytovateľa súkromného DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadajte názov hostiteľa poskytovateľa DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nepodarilo sa pripojiť"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
@@ -434,7 +434,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Ďalej"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Vyžaduje sa heslo"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktívne metódy vstupu"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Použiť jazyky systému"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Jazyky systému"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Nastavenia aplikácie <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> sa nepodarilo otvoriť"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Pri tejto metóde vstupu sa môže zhromažďovať zadávaný text vrátane osobných údajov, ako sú heslá alebo čísla kreditných kariet. Táto metóda je poskytovaná aplikáciou <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Chcete použiť túto metódu vstupu?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Poznámka: Po reštartovaní sa táto aplikácia spustí až vtedy, keď odomknete telefón"</string>
@@ -464,7 +464,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"o <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trvanie"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vždy sa opýtať"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Dokiaľ túto funkciu nevypnete"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Dokým funkciu nevypnete"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Teraz"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Toto zariadenie"</string>
 </resources>

@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"無法掃瞄網絡"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"無"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"已儲存"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"已解除連接"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"已中斷連線"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP 設定失敗"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"網絡品質欠佳，因此無法連線"</string>
@@ -388,7 +388,7 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"根據您的使用情況 (<xliff:g id="LEVEL">%2$s</xliff:g>)，電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"根據您的使用情況，電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"電量大約可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"還可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"將電池壽命延長至 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"剩餘電量時間少於 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -408,7 +408,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"正在充電"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已插入電源插座，但目前無法充電"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已連接電源插頭，但目前無法充電"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"電量已滿"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>

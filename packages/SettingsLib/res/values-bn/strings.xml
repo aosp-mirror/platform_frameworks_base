@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"নেটওয়ার্কগুলির জন্য স্ক্যান করা যাবে না"</string>
-    <string name="wifi_security_none" msgid="7392696451280611452">"কোনো কিছুই নয়"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"কোনও কিছুই নয়"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"সংরক্ষিত"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"কানেকশন নেই"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"অক্ষম হয়েছে"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"বাতিল করুন"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"চেনানো থাকলে তা কানেক্ট থাকাকালীন অবস্থায় আপনার পরিচিতিগুলি এবং কলের ইতিহাসকে অ্যাক্সেস করতে অনুমোদিত করে৷"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সাথে চেনানো যায়নি।"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ভুল পিন বা কোড দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে চেনানো যায়নি।"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ভুল পিন বা কোড দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-এর সঙ্গে যুক্ত করা যায়নি।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যোগাযোগ করতে পারবেন না।"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"চেনানো <xliff:g id="DEVICE_NAME">%1$s</xliff:g> প্রত্যাখ্যান করেছে।"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"কম্পিউটার"</string>
@@ -151,7 +151,7 @@
     <string name="unknown" msgid="3544487229740637809">"অজানা"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ব্যবহারকারী: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"কোনো ডিফল্ট সেট করা নেই"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"কোনও ডিফল্ট সেট করা নেই"</string>
     <string name="tts_settings" msgid="8130616705989351312">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"টেক্সট-টু-স্পিচ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"কথা বলার হার"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"প্রোফাইল বেছে নিন"</string>
     <string name="category_personal" msgid="6236798763159385225">"ব্যক্তিগত"</string>
-    <string name="category_work" msgid="4014193632325996115">"কর্মক্ষেত্র"</string>
+    <string name="category_work" msgid="4014193632325996115">"অফিস"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ডেভেলপার বিকল্প"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ডেভেলপার বিকল্প সক্ষম করুন"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"অ্যাপ্লিকেশান উন্নয়নের জন্য বিকল্পগুলি সেট করুন"</string>
@@ -238,7 +238,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ব্লুটুথ অডিও LDAC কোডেক: প্লেব্যাক গুণমান"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ব্লুটুথ অডিও LDAC কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: প্লেব্যাকের কোয়ালিটি"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ব্যক্তিগত ডিএনএস"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"প্রাইভেট ডিএনএস"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ব্যক্তিগত ডিএনএস মোড বেছে নিন"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"বন্ধ আছে"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"অটোমেটিক"</string>
@@ -414,7 +414,7 @@
     <string name="disabled" msgid="8017887509554714950">"অক্ষম হয়েছে"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"অনুমোদিত"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"অনুমোদিত নয়"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"অজানা অ্যাপ ইনস্টল করুন"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"অজানা অ্যাপ ইনস্টল করা"</string>
     <string name="home" msgid="973834627243661438">"সেটিংস হোম"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"০%"</item>
@@ -441,7 +441,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS রেজিস্ট্রেশনের স্থিতি"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"রেজিস্টার করা"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"রেজিস্টার করা নয়"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"অনুপলব্ধ"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"অনুপলভ্য"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC র‍্যান্ডমাইজ করা হয়েছে"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$dটি ডিভাইস কানেক্ট</item>

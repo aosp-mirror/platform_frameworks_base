@@ -141,9 +141,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Εφαρμογές που καταργήθηκαν"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Εφαρμογές και χρήστες που έχουν καταργηθεί"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Ενημερώσεις συστήματος"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Πρόσδεση USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Σύνδεση με USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Φορητό σημείο πρόσβασης"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Πρόσδεση Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Σύνδεση με Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Πρόσδεση"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Πρόσ. και φορητό σημ. πρόσβ."</string>
     <string name="managed_user_title" msgid="449081789742645723">"Όλες οι εφαρμ. εργασίας"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Επιλογή προφίλ"</string>
     <string name="category_personal" msgid="6236798763159385225">"Προσωπικό"</string>
-    <string name="category_work" msgid="4014193632325996115">"Εργασία"</string>
+    <string name="category_work" msgid="4014193632325996115">"Εργασίας"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Επιλογές για προγραμματιστές"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ενεργοποίηση επιλογών για προγραμματιστές"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ορισμός επιλογών για ανάπτυξη εφαρμογής"</string>
@@ -421,7 +421,7 @@
     <item msgid="8894873528875953317">"50%"</item>
     <item msgid="7529124349186240216">"100%"</item>
   </string-array>
-    <string name="charge_length_format" msgid="6941645744588690932">"Πριν από <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="charge_length_format" msgid="6941645744588690932">"Πριν <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Απομένουν <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Μικρά"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Προεπιλογή"</string>

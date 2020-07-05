@@ -159,7 +159,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tom de voz"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Afeta o tom da voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Idioma"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Usa o idioma do sistema"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Usar o idioma do sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Idioma não selecionado"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Define a voz específica do idioma para o texto falado"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Ouça um exemplo"</string>
@@ -385,10 +385,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Tempo restante aproximado, com base no seu uso: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g> com base no seu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g> com base no seu uso"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Deve durar até por volta de <xliff:g id="TIME">%1$s</xliff:g> com base no seu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Deve durar até por volta de <xliff:g id="TIME">%1$s</xliff:g> com base no seu uso"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Deve durar até por volta de <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Deve durar até por volta de <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Até <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Estender duração da bateria depois de <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> restante(s)"</string>

@@ -151,7 +151,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Se han establecido algunos valores predeterminados"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido valores predeterminados"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido opciones predeterminadas"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Ajustes de síntesis de voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Síntesis de voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de la voz"</string>
@@ -204,7 +204,7 @@
     <string name="enable_adb" msgid="8072776357237289039">"Depuración por USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Activar el modo de depuración cuando el dispositivo esté conectado por USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración USB"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Atajo a informe de errores"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo a informe de errores"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar un botón en el menú de encendido para crear un informe de errores"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Pantalla siempre encendida al cargar"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca entra en modo de suspensión si el dispositivo se está cargando"</string>
@@ -386,9 +386,9 @@
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g> (según el uso)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Debería durar hasta las <xliff:g id="TIME">%1$s</xliff:g> basado en tu uso"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar hasta las <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Prolongar la duración de la batería después de las <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -408,7 +408,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"cargando"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No se está cargando"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Se ha conectado, pero no se puede cargar en este momento"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Enchufado, pero no se puede cargar en este momento"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
@@ -462,7 +462,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"Fecha: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duración"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Preguntar siempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que se desactive"</string>
-    <string name="time_unit_just_now" msgid="3006134267292728099">"Justo ahora"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que lo desactives"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"justo ahora"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Este dispositivo"</string>
 </resources>

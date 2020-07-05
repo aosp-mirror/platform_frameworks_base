@@ -222,7 +222,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"啟用 Wi‑Fi 詳細記錄設定"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi-Fi 掃描調節"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"行動數據連線一律保持啟用狀態"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"數據連線硬體加速"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"網路共用硬體加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"顯示沒有名稱的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"停用絕對音量功能"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"藍牙 AVRCP 版本"</string>
@@ -262,7 +262,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"允許模擬位置"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"啟用檢視屬性檢查"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"即使 Wi‑Fi 連線已啟用，一律將行動數據連線保持啟用狀態 (以便快速切換網路)。"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用數據連線硬體加速功能 (如果可用的話)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用網路共用硬體加速功能 (如果可用的話)"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"允許 USB 偵錯嗎？"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB 偵錯是針對應用程式開發而設計的功能，可讓你複製電腦和裝置中的資料、不需經由通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"要針對先前授權的所有電腦撤銷 USB 偵錯權限嗎？"</string>
@@ -388,7 +388,7 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"根據你的使用情形，目前電量為 <xliff:g id="LEVEL">%2$s</xliff:g>，預估可持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"根據你的使用情形，預估可持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"目前電量 <xliff:g id="LEVEL">%2$s</xliff:g>，預估還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"預估還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"預估電力大約可使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"在 <xliff:g id="TIME">%1$s</xliff:g>後延長電池續航力"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>

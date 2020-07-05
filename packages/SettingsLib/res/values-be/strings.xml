@@ -110,7 +110,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Выкарыстоўваць для перадачы файлаў"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Выкарыстоўваць для ўводу"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Выкарыстоўваць для слыхавых апаратаў"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Падлучыць"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Спалучыць"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"СПАЛУЧЫЦЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасаваць"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Спалучэнне дае доступ да вашых кантактаў і гісторыі выклікаў пры падключэнні."</string>
@@ -138,8 +138,8 @@
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Адкрытая сетка"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Бяспечная сетка"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"АС Android"</string>
-    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Выдаленыя прыкладанні"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Выдаленыя прыкладанні і карыстальнiкi"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Выдаленыя праграмы"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Выдаленыя праграмы і карыстальнiкi"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Абнаўленні сістэмы"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB-мадэм"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Партатыўны хот-спот"</string>
@@ -151,10 +151,10 @@
     <string name="unknown" msgid="3544487229740637809">"Невядома"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Карыстальнiк: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Усталяваны некаторыя стандартныя налады"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Параметры па змаўчанні не ўсталяваныя"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Стандартныя налады не зададзены"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Налады Text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Сінтэз маўлення"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць гаворкі"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць маўлення"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Хуткасць, з якой кажуць тэкст"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Тон"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Уплывае на тон сінтэзаванага маўлення"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Выбраць профіль"</string>
     <string name="category_personal" msgid="6236798763159385225">"Асабісты"</string>
-    <string name="category_work" msgid="4014193632325996115">"Рабочы"</string>
+    <string name="category_work" msgid="4014193632325996115">"Працоўны"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Параметры распрацоўшчыка"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Уключыць параметры распрацоўшчыка"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Налада параметраў для распрацоўкі прыкладанняў"</string>

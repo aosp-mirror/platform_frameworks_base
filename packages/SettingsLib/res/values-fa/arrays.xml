@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"در حال اتصال به <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="3028983857109369308">"در حال راستی‌آزمایی با <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="4287401332778341890">"‏درحال دریافت نشانی IP از <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="1043944043827424501">"متصل شد به <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1043944043827424501">"به <xliff:g id="NETWORK_NAME">%1$s</xliff:g> متصل شد"</item>
     <item msgid="7445993821842009653">"معلق"</item>
     <item msgid="1175040558087735707">"اتصال قطع شد از <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="699832486578171722">"اتصال قطع شد"</item>

@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फ़ोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फ़ाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिवाइस"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट पहुंच"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट ऐक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"संपर्क शेयर करना"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"संपर्क साझाकरण के लिए उपयोग करें"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इंटरनेट कनेक्शन साझाकरण"</string>
@@ -159,7 +159,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्‍टम भाषा का उपयोग करें"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्‍टम की भाषा का इस्तेमाल करें"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा नहीं चुनी गई है"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोले गए लेख के लिए भाषा-विशिष्ट ध्‍वनि सेट करता है"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"एक उदाहरण सुनें"</string>
@@ -241,7 +241,7 @@
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"निजी डीएनएस"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"निजी डीएनएस मोड चुनें"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"बंद"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने आप"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने-आप"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"निजी डीएनएस सेवा देने वाले का होस्टनाम"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"डीएनएस सेवा देने वाले का होस्टनाम डालें"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"कनेक्‍ट नहीं हो सका"</string>
@@ -375,7 +375,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"लाल-हरे रंग की पहचान न कर पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"लाल रंग पहचान न पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"नीला रंग पहचान न पाना (नीला-पीला)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधार"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग में सुधार करने की सुविधा"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"यह सुविधा प्रायोगिक है और निष्पादन को प्रभावित कर सकती है."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> के द्वारा ओवरराइड किया गया"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -388,7 +388,7 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> तक"</string>
     <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"बैटरी लाइफ़ <xliff:g id="TIME">%1$s</xliff:g> तक के लिए बढाएं"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम समय बचा है"</string>
@@ -414,7 +414,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -441,7 +441,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS रजिस्ट्रेशन की स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"रजिस्टर है"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"रजिस्टर नहीं है"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"अनुपलब्ध"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"मौजूद नहीं है"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"एमएसी पता रैंडम पर सेट है"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$d डिवाइस जुड़े हैं</item>

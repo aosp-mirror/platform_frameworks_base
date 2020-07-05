@@ -38,7 +38,7 @@
     <string name="saved_network" msgid="7143698034077223645">"Ով է պահել՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Կապակցված է %1$s-ի միջոցով"</string>
+    <string name="connected_via_passpoint" msgid="7735442932429075684">"Միացված է %1$s-ի միջոցով"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Միացված է <xliff:g id="NAME">%1$s</xliff:g>-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Հասանելի է %1$s-ի միջոցով"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Հպեք՝ գրանցվելու համար"</string>
@@ -97,7 +97,7 @@
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Միացված է հեռախոսի ձայնային տվյալներին"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Միացված է ֆայլերի փոխանցման սերվերին"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Միացված է քարտեզին"</string>
-    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Կապակցված է SAP-ին"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Միացված է SAP-ին"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Ֆայլերը փոխանցող սերվերի հետ կապ չկա"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Միացված է մուտքային սարքին"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Միացված է սարքին` ինտերնետ մտնելու համար"</string>
@@ -110,11 +110,11 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Օգտագործել ֆայլի փոխանցման համար"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Օգտագործել ներմուծման համար"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Օգտագործել լսողական ապարատի համար"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Զուգավորել"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"Զուգավորել"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Զուգակցել"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"Զուգակցել"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգավորել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Հնարավոր չեղավ զուգավորվել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
@@ -242,7 +242,7 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Ընտրեք մասնավոր DNS-ի ռեժիմը"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Անջատված է"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Ավտոմատ"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Մասնավոր DNS ծառայության մատակարարի խնամորդի անունը"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Մասնավոր DNS մատակարարի սերվերը"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Մուտքագրեք DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Չհաջողվեց միանալ"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ցույց տալ անլար էկրանների հավաստագրման ընտրանքները"</string>
@@ -408,7 +408,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Լիցքավորում"</string>
     <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"լիցքավորում"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Չի լիցքավորվում"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Միացված է հոսանքի աղբյուրին, սակայն այս պահին չի կարող լիցքավորվել"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Միացված է հոսանքին, այս պահին չի կարող լիցքավորվել"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Լիցքավորված է"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="disabled" msgid="8017887509554714950">"Կասեցված է"</string>
@@ -461,7 +461,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"<xliff:g id="WHEN">%1$s</xliff:g>-ին"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g>-ին"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Տևողություն"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Հարցնել ամեն անգամ"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ամեն անգամ հարցնել"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Մինչև չանջատեք"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Հենց նոր"</string>
     <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Այս սարքը"</string>
