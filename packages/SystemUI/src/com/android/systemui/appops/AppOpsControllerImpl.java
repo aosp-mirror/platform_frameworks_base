@@ -57,7 +57,6 @@ public class AppOpsControllerImpl implements AppOpsController,
     private static final long NOTED_OP_TIME_DELAY_MS = 5000;
     private static final String TAG = "AppOpsControllerImpl";
     private static final boolean DEBUG = false;
-    private final Context mContext;
 
     private final AppOpsManager mAppOps;
     private H mBGHandler;
@@ -83,7 +82,6 @@ public class AppOpsControllerImpl implements AppOpsController,
             Context context,
             @Background Looper bgLooper,
             DumpManager dumpManager) {
-        mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
         final int numOps = OPS.length;

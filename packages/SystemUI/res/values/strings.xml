@@ -2608,6 +2608,27 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
+    <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
+
+    <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
+
+    <!-- Separator for types. Include spaces before and after if needed [CHAR LIMIT=10] -->
+    <string name="ongoing_privacy_dialog_separator">,\u0020</string>
+
+    <!-- Separator for types, before last type. Include spaces before and after if needed [CHAR LIMIT=10] -->
+    <string name="ongoing_privacy_dialog_last_separator">\u0020and\u0020</string>
+
+    <!-- Text for camera app op [CHAR LIMIT=20]-->
+    <string name="privacy_type_camera">camera</string>
+
+    <!-- Text for location app op [CHAR LIMIT=20]-->
+    <string name="privacy_type_location">location</string>
+
+    <!-- Text for microphone app op [CHAR LIMIT=20]-->
+    <string name="privacy_type_microphone">microphone</string>
+
     <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
     <string name="sensor_privacy_mode">Sensors off</string>
 
