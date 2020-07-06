@@ -29,7 +29,6 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -84,7 +83,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -101,6 +99,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
     private final LockoutResetTracker mLockoutResetTracker;
     private final ClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
+    private final GestureAvailabilityTracker mGestureAvailabilityTracker;
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
@@ -358,13 +357,13 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
         @Override
         public void addClientActiveCallback(IFingerprintClientActiveCallback callback) {
             checkPermission(MANAGE_FINGERPRINT);
-            mClientActiveCallbacks.add(callback);
+            mGestureAvailabilityTracker.registerCallback(callback);
         }
 
         @Override
         public void removeClientActiveCallback(IFingerprintClientActiveCallback callback) {
             checkPermission(MANAGE_FINGERPRINT);
-            mClientActiveCallbacks.remove(callback);
+            mGestureAvailabilityTracker.removeCallback(callback);
         }
 
         @Override // Binder call
@@ -472,8 +471,6 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
     }
 
     private final LockoutFrameworkImpl mLockoutTracker;
-    private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
-            new CopyOnWriteArrayList<>();
     private IUdfpsOverlayController mUdfpsOverlayController;
 
     @GuardedBy("this")
@@ -555,6 +552,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
     public FingerprintService(Context context) {
         super(context);
         mLazyDaemon = FingerprintService.this::getFingerprintDaemon;
+        mGestureAvailabilityTracker = new GestureAvailabilityTracker();
         mLockoutResetTracker = new LockoutResetTracker(context);
         final LockoutFrameworkImpl.LockoutResetCallback lockoutResetCallback = userId -> {
             mLockoutResetTracker.notifyLockoutResetCallbacks();
@@ -691,15 +689,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
     @Override
     protected void notifyClientActiveCallbacks(boolean isActive) {
-        List<IFingerprintClientActiveCallback> callbacks = mClientActiveCallbacks;
-        for (int i = 0; i < callbacks.size(); i++) {
-            try {
-                callbacks.get(i).onClientActiveChanged(isActive);
-            } catch (RemoteException re) {
-                // If the remote is dead, stop notifying it
-                mClientActiveCallbacks.remove(callbacks.get(i));
-            }
-        }
+        mGestureAvailabilityTracker.notifyClientActiveCallbacks(isActive);
     }
 
     @Override
