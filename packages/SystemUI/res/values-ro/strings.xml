@@ -547,7 +547,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Ecranul este fixat"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunile Înapoi și Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunile Înapoi și Acasă pentru a anula fixarea."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Astfel rămâne afișat până anulați fixarea. Glisați în sus și țineți apăsat pentru a anula fixarea."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Astfel rămâne afișată până anulați fixarea. Glisați în sus și țineți apăsat pentru a anula fixarea."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunea Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunea Acasă pentru a anula fixarea."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Pentru a anula fixarea acestui ecran, atingeți lung butoanele Înapoi și Recente"</string>

@@ -231,7 +231,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Ұшақ режимі өшірілді."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Ұшақ режимі қосылды."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"үнсіз"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"тек дабылдар"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"оятқыштар ғана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Мазаламау."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"Мазаламау\" режимі өшірілді."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"Мазаламау\" режимі қосылды."</string>
@@ -301,7 +301,7 @@
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"Басқа опцияларды көру үшін белгішелерді түртіп ұстап тұрыңыз"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Мазаламау"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Маңыздылары ғана"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Тек дабылдар"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Оятқыштар ғана"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Толық тыныштық"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> құрылғылары)"</string>
@@ -414,7 +414,7 @@
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Толық тыныштық. Экранды оқу құралдары да өшеді."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Толық тыныштық"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"Маңыздылары ғана"</string>
-    <string name="interruption_level_alarms" msgid="2457850481335846959">"Тек дабылдар"</string>
+    <string name="interruption_level_alarms" msgid="2457850481335846959">"Оятқыштар ғана"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Толық\nтыныштық"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Тек\nбасымдық"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Тек\nдабылдар"</string>

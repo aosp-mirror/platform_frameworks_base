@@ -100,7 +100,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"मागे"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"होम"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"मेनू"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"प्रवेशयोग्यता"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"स्क्रीन फिरवा"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"अवलोकन"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"शोधा"</string>
@@ -565,7 +565,7 @@
     <string name="stream_notification" msgid="7930294049046243939">"सूचना"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ब्लूटूथ"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"दुहेरी एकाधिक टोन वारंंवारता"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"प्रवेशयोग्यता"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"कॉल"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"रिंग करा"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"व्हायब्रेट"</string>

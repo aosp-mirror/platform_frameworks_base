@@ -462,7 +462,7 @@
     <string name="media_projection_dialog_title" msgid="6379655487632663290">"ప్రసారం/రికార్డ్ అయ్యే సమయాలలో గోప్యమైన సమాచారాన్ని బహిర్గతపరచడం"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"మళ్లీ చూపవద్దు"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"అన్నీ క్లియర్ చేయండి"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"నిర్వహించండి"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"మేనేజ్ చేయండి"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"నిశ్శబ్ద నోటిఫికేషన్‌లు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
@@ -928,7 +928,7 @@
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని తెరువు"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్స్ సెట్టింగ్‌లు"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> నుండి బబుల్‌లను అనుమతించాలా?"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"నిర్వహించండి"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"మేనేజ్ చేయండి"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"తిరస్కరించు"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"అనుమతించు"</string>
     <string name="ask_me_later_bubbles" msgid="2666199914636253557">"నన్ను తర్వాత అడగు"</string>

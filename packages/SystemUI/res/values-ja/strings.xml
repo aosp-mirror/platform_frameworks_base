@@ -550,7 +550,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"この画面の固定を解除するには [戻る] ボタンと [最近] ボタンを押し続けます"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"この画面の固定を解除するには [戻る] ボタンと [ホーム] ボタンを押し続けます"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"この画面の固定を解除するには、上にスワイプして長押しします"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"はい"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"画面を固定しました"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"画面の固定を解除しました"</string>

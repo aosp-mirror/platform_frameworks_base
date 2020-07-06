@@ -542,11 +542,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"螢幕已固定"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"畫面將會繼續顯示，直至您取消固定為止。按住 [返回] 按鈕和主按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"畫面將會繼續顯示，直至您取消固定為止。向上滑動並按住即可取消固定。"</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住「返回」和「概覽」按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住「返回」按鈕和主按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。向上滑動後按住即可取消固定。"</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住「概覽」按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"如要取消固定此畫面，請按住 [返回] 按鈕和 [概覽] 按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"如要取消固定此畫面，請按住 [返回] 按鈕和主按鈕"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"如要取消固定此畫面，請向上滑動然後按住"</string>
@@ -658,7 +658,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"靜音"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"發出提醒"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"助您保持專注，不會發出聲音或震動。"</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"發出聲音或震動來吸引您的注意。"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"發出聲音或震動來吸引您注意。"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"無法在此設定這組通知"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>

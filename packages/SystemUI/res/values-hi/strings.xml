@@ -544,9 +544,9 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"बंद करें"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"आउटपुट डिवाइस बदलें"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"स्‍क्रीन पिन कर दी गई है"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"इससे वह तब तक दिखता रहता है, जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"इससे ऐप्लिकेशन की स्क्रीन तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं करते. अनपिन करने के लिए ऊपर स्वाइप करें और स्क्रीन दबाकर रखें."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"इससे ऐप्लिकेशन की स्क्रीन तब तक दिखाई देती है, जब तक आप उसे अनपिन नहीं करते. अनपिन करने के लिए ऊपर स्वाइप करें और स्क्रीन दबाकर रखें."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम बटन को दबाकर रखें."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"इस स्क्रीन को अनपिन करने के लिए, खास जानकारी और वापस जाएं वाले बटन को दबाकर रखें"</string>

@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"ตรึงหน้าจอแล้ว"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"หากต้องการเลิกตรึงหน้าจอนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
@@ -658,7 +658,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"เงียบ"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"แจ้งเตือน"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ช่วยรักษาสมาธิของคุณด้วยการไม่ส่งเสียงหรือสั่น"</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"ดึงความสนใจของคุณด้วยเสียงและการสั่น"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"ดึงความสนใจของคุณด้วยเสียงหรือการสั่น"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"การแจ้งเตือนกลุ่มนี้กำหนดค่าที่นี่ไม่ได้"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"การแจ้งเตือนที่ผ่านพร็อกซี"</string>
@@ -925,7 +925,7 @@
     <string name="device_services" msgid="1549944177856658705">"บริการของอุปกรณ์"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ไม่มีชื่อ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"แตะเพื่อรีสตาร์ทแอปนี้และแสดงแบบเต็มหน้าจอ"</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"เปิด <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"เปิด \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"การตั้งค่าบับเบิล <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"อนุญาตบับเบิลจาก <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"จัดการ"</string>

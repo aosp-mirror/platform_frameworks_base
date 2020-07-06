@@ -550,7 +550,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Obrazovka je připnuta"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítek Zpět a Plocha."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolnit ho můžete přejetím nahoru a podržením."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Díky připnutí bude vidět, dokud ji neodepnete. Odepnout ji můžete přejetím nahoru a podržením."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Chcete-li tuto obrazovku uvolnit, podržte tlačítka Zpět a Přehled"</string>

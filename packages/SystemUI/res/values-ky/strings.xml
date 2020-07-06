@@ -460,7 +460,7 @@
     <string name="media_projection_dialog_text" msgid="5509958417853154019">"Жаздырып же тышкы экранга чыгаруу учурунда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу ойноткон аудиоңуз, сырсөздөрүңүз, төлөө маалыматыңыз, сүрөттөрүңүз жана билдирүүлөрүңүз сыяктуу экранда көрсөтүлгөн купуя маалыматты жаздырып калышы мүмкүн."</string>
     <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"Жаздырып же тышкы экранга чыгаруу учурунда, бул функцияны аткарып жаткан колдонмо ойноткон аудиоңуз, сырсөздөрүңүз, төлөө маалыматыңыз, сүрөттөрүңүз жана билдирүүлөрүңүз сыяктуу экранда көрсөтүлгөн купуя маалыматты жаздырып калышы мүмкүн."</string>
     <string name="media_projection_dialog_title" msgid="6379655487632663290">"Тышкы экранга чыгарууда/жаздырууда купуя маалыматты ачыктоо"</string>
-    <string name="media_projection_remember_text" msgid="6896767327140422951">"Экинчи көрсөтүлбөсүн"</string>
+    <string name="media_projection_remember_text" msgid="6896767327140422951">"Экинчи көрүнбөсүн"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Баарын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Башкаруу"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Үнсүз билдирмелер"</string>
@@ -783,7 +783,7 @@
     <string name="left_icon" msgid="5036278531966897006">"¨Солго¨ сүрөтчөсү"</string>
     <string name="right_icon" msgid="1103955040645237425">"¨Оңго¨ сүрөтчөсү"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Керектүү элементтерди сүйрөп келиңиз"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн, кармап туруп, сүйрөңүз"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Сизге жок дегенде <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> мозаика керек"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Түзөтүү"</string>
@@ -791,12 +791,12 @@
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"Сааттар, мүнөттөр жана секунддар"</item>
     <item msgid="1271006222031257266">"Сааттар жана мүнөттөр (демейки шартта)"</item>
-    <item msgid="6135970080453877218">"Бул сүрөтчө көрсөтүлбөсүн"</item>
+    <item msgid="6135970080453877218">"Бул сүрөтчө көрүнбөсүн"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"Ар дайым пайызы көрсөтүлсүн"</item>
     <item msgid="3805744470661798712">"Кубаттоо учурунда пайызы көрсөтүлсүн (демейки)"</item>
-    <item msgid="8619482474544321778">"Бул сүрөтчө көрсөтүлбөсүн"</item>
+    <item msgid="8619482474544321778">"Бул сүрөтчө көрүнбөсүн"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Анча маанилүү эмес билдирменин сүрөтчөлөрүн көрсөтүү"</string>
     <string name="other" msgid="429768510980739978">"Башка"</string>

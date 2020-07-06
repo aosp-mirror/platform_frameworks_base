@@ -100,7 +100,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Bumalik"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Pagiging Accessible"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Accessibility"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"I-rotate ang screen"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Overview"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"Hanapin"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Naka-pin ang screen"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Home upang mag-unpin."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Mag-swipe pataas at i-hold para i-unpin."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Mananatiling nakikita ang app hanggang sa mag-unpin ka. Mag-swipe pataas at i-hold para i-unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Home upang mag-unpin."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Overview"</string>
@@ -565,7 +565,7 @@
     <string name="stream_notification" msgid="7930294049046243939">"Notification"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Dual multi tone frequency"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Pagiging Accessible"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Accessibility"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"Mga Tawag"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ipa-ring"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"I-vibrate"</string>

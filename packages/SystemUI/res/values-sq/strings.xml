@@ -35,7 +35,7 @@
     <string name="battery_low_why" msgid="2056750982959359863">"Cilësimet"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Të aktivizohet \"Kursyesi i baterisë\"?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Rreth \"Kursyesit të baterisë\""</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ndiz"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktivizo"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivizo \"Kursyesin e baterisë\""</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Cilësimet"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Ekrani u gozhdua"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Prapa\" dhe \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Prapa\" dhe \"Kreu\" për ta hequr nga gozhdimi."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Kjo e ruan në pamje deri sa ta zhgozhdosh. Rrëshqit shpejt lart dhe mbaje të shtypur për ta hequr zhgozhduar."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Kjo e ruan në pamje deri sa ta zhgozhdosh. Rrëshqit shpejt lart dhe mbaje të shtypur për ta zhgozhduar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Përmbledhja\"."</string>

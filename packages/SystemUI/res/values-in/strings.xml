@@ -149,7 +149,7 @@
     <string name="accessibility_data_three_bars" msgid="3036562180893930325">"Data tiga batang."</string>
     <string name="accessibility_data_signal_full" msgid="283507058258113551">"Sinyal data penuh."</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"Terhubung ke <xliff:g id="WIFI">%s</xliff:g>."</string>
-    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tersambung ke <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Terhubung ke <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Terhubung ke <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="2014864207473859228">"Tidak ada WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="2996915709342221412">"WiMAX satu batang."</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Layar dipasangi pin"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Ringkasan untuk melepas pin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Beranda untuk melepas pin."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ini akan terus ditampilkan sampai Anda melepas pin. Geser ke atas &amp; tahan untuk melepas pin."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikasi akan terus ditampilkan sampai pin dilepas. Geser ke atas dan tahan untuk lepas pin."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Ringkasan untuk melepas pin."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Beranda untuk melepas pin."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Ringkasan"</string>

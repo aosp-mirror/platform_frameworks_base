@@ -375,7 +375,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Обмеження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Застереження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Робочий профіль"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний режим"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -556,7 +556,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Щоб відкріпити цей екран, натисніть і утримуйте кнопки \"Назад\" та \"Огляд\""</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Щоб відкріпити цей екран, натисніть і утримуйте кнопки \"Назад\" та \"Головний екран\""</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Щоб відкріпити цей екран, проведіть пальцем вгору й утримуйте"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"Зрозуміло"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ні, дякую"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Екран закріплено"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"Екран відкріплено"</string>
@@ -620,7 +620,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Це цікаво, але будьте обачні"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner пропонує нові способи налаштувати та персоналізувати інтерфейс користувача Android. Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
-    <string name="got_it" msgid="477119182261892069">"Зрозуміло"</string>
+    <string name="got_it" msgid="477119182261892069">"OK"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Вітаємо! System UI Tuner установлено в додатку Налаштування"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Видалити з додатка Налаштування"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Видалити інструмент System UI Tuner із додатка Налаштування та припинити користуватися всіма його функціями?"</string>

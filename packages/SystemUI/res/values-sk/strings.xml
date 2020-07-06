@@ -541,7 +541,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Nastavenia zvuku"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Rozbaliť"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Zbaliť"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automaticky pridávať titulky k médiám"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatické titulkovanie médií"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Zavrieť tip pre titulky"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Prekrytie titulkov"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"povoliť"</string>
@@ -550,7 +550,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Obrazovka je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte potiahnutím a pridržaním."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte ju potiahnutím nahor a pridržaním."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidla Domov."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Ak chcete odopnúť túto obrazovku, pridržte tlačidlá Späť a Prehľad"</string>

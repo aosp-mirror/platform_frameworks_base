@@ -542,11 +542,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"tắt"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Chuyển đổi thiết bị đầu ra"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"Màn hình được ghim"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Quay lại và Tổng quan để bỏ ghim."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Quay lại và nút Màn hình chính để bỏ ghim."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Màn hình tiếp tục hiển thị cho tới khi bạn bỏ ghim. Hãy vuốt lên và giữ để bỏ ghim."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Tổng quan để bỏ ghim."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Màn hình chính để bỏ ghim."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Quay lại và Tổng quan để bỏ ghim."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Quay lại và nút Màn hình chính để bỏ ghim."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy vuốt lên và giữ để bỏ ghim."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Tổng quan để bỏ ghim."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Màn hình chính để bỏ ghim."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Để bỏ ghim màn hình này, hãy chạm và giữ nút Quay lại và nút Tổng quan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Để bỏ ghim màn hình này, hãy chạm và giữ nút Quay lại và nút Màn hình chính"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Để bỏ ghim màn hình này, hãy vuốt lên và giữ"</string>
@@ -633,7 +633,7 @@
     <string name="do_not_silence_block" msgid="4361847809775811849">"Không im lặng hoặc chặn"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Điều khiển thông báo nguồn"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Bật"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Tắt"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Đang tắt"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Với các kiểm soát thông báo nguồn, bạn có thể đặt cấp độ quan trọng từ 0 đến 5 cho các thông báo của ứng dụng. \n\n"<b>"Cấp 5"</b>" \n- Hiển thị ở đầu danh sách thông báo \n- Cho phép gián đoạn ở chế độ toàn màn hình \n- Luôn xem nhanh \n\n"<b>"Cấp 4"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Luôn xem nhanh \n\n"<b>"Cấp 3"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n\n"<b>"Cấp 2"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n- Không bao giờ có âm báo và rung \n\n"<b>"Cấp 1"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n- Không bao giờ có âm báo và rung \n- Ẩn khỏi màn hình khóa và thanh trạng thái \n- Hiển thị ở cuối danh sách thông báo \n\n"<b>"Cấp 0"</b>" \n- Chặn tất cả các thông báo từ ứng dụng"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Thông báo"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Bạn sẽ không thấy các thông báo này nữa"</string>

@@ -216,10 +216,10 @@
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Melding verwijderd."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Meldingenpaneel."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Snelle instellingen."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Vergrendelingsscherm."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Vergrendelscherm."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"Instellingen"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"Overzicht."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Vergrendelingsscherm voor werk"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Vergrendelscherm voor werk"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Sluiten"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi uitgeschakeld."</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Scherm is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Veeg omhoog en houd vast om los te maken."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Swipe omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Tik op Terug en Overzicht en houd deze knoppen vast om dit scherm los te maken"</string>
@@ -634,7 +634,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Beheeropties voor meldingen met betrekking tot stroomverbruik"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aan"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Uit"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Meldingen"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Meldingen worden niet meer weergegeven"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Deze meldingen worden geminimaliseerd"</string>
@@ -834,7 +834,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Vergrendelingsscherm"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Vergrendelscherm"</string>
     <string name="pip_phone_expand" msgid="1424988917240616212">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8801864042095341824">"Sluiten"</string>

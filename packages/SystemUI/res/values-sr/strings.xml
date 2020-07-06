@@ -547,7 +547,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Екран је закачен"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"На овај начин се стално приказује док га не откачите. Превуците нагоре и задржите да бисте га откачили."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Стално ће се приказивати док је не откачите. Превуците нагоре и задржите да бисте је откачили."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Почетна да бисте га откачили."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Да бисте откачили овај екран, додирните и задржите дугмад Назад и Преглед"</string>

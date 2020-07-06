@@ -83,7 +83,7 @@
     <string name="screenrecord_mic_label" msgid="6134198080740031632">"Gravar voz-off"</string>
     <string name="screenrecord_taps_label" msgid="2518244240225925076">"Mostrar toques"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Parar"</string>
-    <string name="screenrecord_pause_label" msgid="6004054907104549857">"Colocar em pausa"</string>
+    <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pausar"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Retomar"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancelar"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Partilhar"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"O ecrã está fixado"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Anterior e em Vista geral para soltar."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Anterior e em Página inicial para soltar."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Esta opção mantém o item visível até o soltar. Deslize rapidamente para cima e mantenha o gesto para soltar."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Esta opção mantém o item visível até o soltar. Deslize rapidamente para cima e mantenha pressionado para soltar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Vista geral para soltar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Página inicial para soltar."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Vista geral."</string>
@@ -657,8 +657,8 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Pretende continuar a ver notificações desta app?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Silencioso"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"Alertar"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ajuda-o a focar-se sem som ou vibração."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Chama a sua atenção com som ou vibração."</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ajuda-o a concentrar-se sem som ou vibração"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Chama a sua atenção com som ou vibração"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar estas notificações."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Não é possível configurar este grupo de notificações aqui."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificação de app proxy"</string>
@@ -844,7 +844,7 @@
     <string name="pip_notification_title" msgid="8661573026059630525">"A app <xliff:g id="NAME">%s</xliff:g> está no modo de ecrã no ecrã"</string>
     <string name="pip_notification_message" msgid="4991831338795022227">"Se não pretende que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="pip_play" msgid="333995977693142810">"Reproduzir"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Colocar em pausa"</string>
+    <string name="pip_pause" msgid="1139598607050555845">"Pausar"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Mudar para o seguinte"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Mudar para o anterior"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telem. deslig. devido ao calor"</string>
