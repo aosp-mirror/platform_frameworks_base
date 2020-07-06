@@ -14,6 +14,7 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static androidx.lifecycle.Lifecycle.State.STARTED;
 
@@ -475,6 +476,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         }
         mCallbacks.clear();
         mHandler.removeCallbacksAndMessages(null);
+        // This will force it to be removed from all controllers that may have it registered.
+        mLifecycle.setCurrentState(DESTROYED);
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
