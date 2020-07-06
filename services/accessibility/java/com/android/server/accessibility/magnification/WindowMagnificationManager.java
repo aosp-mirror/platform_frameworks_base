@@ -34,7 +34,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
-import com.android.server.accessibility.MagnificationController;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
@@ -50,8 +49,8 @@ public class WindowMagnificationManager implements
     private static final String TAG = "WindowMagnificationMgr";
 
     //Ensure the range has consistency with full screen.
-    static final float MAX_SCALE = MagnificationController.MAX_SCALE;
-    static final float MIN_SCALE = MagnificationController.MIN_SCALE;
+    static final float MAX_SCALE = FullScreenMagnificationController.MAX_SCALE;
+    static final float MIN_SCALE = FullScreenMagnificationController.MIN_SCALE;
 
     private final Object mLock = new Object();;
     private final Context mContext;
