@@ -6334,6 +6334,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     int getAppStartModeLocked(int uid, String packageName, int packageTargetSdk,
             int callingPid, boolean alwaysRestrict, boolean disabledOnly, boolean forcedStandby) {
+        if (mInternal.isPendingTopUid(uid)) {
+            return ActivityManager.APP_START_MODE_NORMAL;
+        }
         UidRecord uidRec = mProcessList.getUidRecordLocked(uid);
         if (DEBUG_BACKGROUND_CHECK) Slog.d(TAG, "checkAllowBackground: uid=" + uid + " pkg="
                 + packageName + " rec=" + uidRec + " always=" + alwaysRestrict + " idle="
