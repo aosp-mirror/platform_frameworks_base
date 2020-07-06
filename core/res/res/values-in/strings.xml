@@ -335,7 +335,7 @@
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Mengizinkan aplikasi menambahkan pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"meng-uninstal pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
-    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ubah rute panggilan keluar"</string>
+    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"alihkan panggilan keluar"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Memungkinkan aplikasi melihat nomor yang dihubungi saat melakukan panggilan keluar dengan opsi untuk mengalihkan panggilan ke nomor lain atau membatalkan panggilan sepenuhnya."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"jawab panggilan telepon"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Mengizinkan aplikasi menjawab panggilan telepon masuk."</string>
@@ -1876,9 +1876,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"Permintaan USSD diubah ke panggilan reguler"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"Permintaan USSD diubah ke permintaan SS"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"Diubah ke permintaan USSD baru"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"Permintaan USSD diubah ke video call"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"Permintaan USSD diubah ke panggilan video"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"Permintaan SS diubah ke panggilan reguler"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Permintaan SS diubah ke video call"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Permintaan SS diubah ke panggilan video"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Permintaan SS diubah ke permintaan USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Diubah ke permintaan SS baru"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil kerja"</string>
@@ -1923,7 +1923,7 @@
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Beberapa fitur tidak dapat digunakan"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Profil kerja terkunci"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Ketuk untuk membuka kunci profil kerja"</string>
-    <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Tersambung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Terhubung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Ketuk untuk melihat file"</string>
     <string name="pin_target" msgid="8036028973110156895">"Pasang pin"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Lepas pin"</string>

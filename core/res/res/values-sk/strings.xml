@@ -230,11 +230,11 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Možnosti telefónu"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Vypnúť"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Tiesňový režim"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Tieseň"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ukončiť reláciu"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka obrazovky"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Hlásenie chyby"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Nahlásiť chybu"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktívne nahlásenie"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Táto možnosť je vhodná pre väčšinu prípadov. Umožňuje sledovať priebeh nahlásenia, zadávať ďalšie podrobnosti o probléme a vytvárať snímky obrazovky. Môžu byť vynechané niektoré menej používané sekcie, ktorých nahlásenie trvá dlho."</string>
@@ -540,7 +540,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie je nastavený PIN, vzor ani heslo"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Podarilo sa rozpoznať iba časť odtlačku prsta. Skúste to znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Snímač odtlačkov prstov je špinavý. Vyčistite ho a skúste to znova."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Očistite senzor odtlačkov prstov a skúste to znova."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Pohli ste prstom príliš rýchlo. Skúste to znova."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1176,10 +1176,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Otvoriť v aplikácii"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvoriť v aplikácii %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otvoriť"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvárajte odkazy z webu <xliff:g id="HOST">%1$s</xliff:g> v prehliadači alebo aplikácii"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvárajte odkazy v prehliadači"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otvárajte odkazy v prehliadači <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otvárajte odkazy z webu <xliff:g id="HOST">%1$s</xliff:g> v prehliadači <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvárať odkazy <xliff:g id="HOST">%1$s</xliff:g> v aplikácii"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvárať odkazy v aplikácii"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otvárať odkazy v aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otvárať odkazy <xliff:g id="HOST">%1$s</xliff:g> v aplikácii <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Udeliť prístup"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Upraviť pomocou"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Upraviť v aplikácii %1$s"</string>
@@ -1645,7 +1645,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Spustiť prehliadač?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Prijať hovor?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Vždy"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Nastaviť na Vždy otvárať"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Otvárať vždy"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Len raz"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Nastavenia"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"Spúšťač %1$s nepodporuje pracovné profily"</string>
@@ -1926,7 +1926,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ďalší budík)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Dokiaľ túto funkciu nevypnete"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Dokým funkciu nevypnete"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Dokiaľ nevypnete režim bez vyrušení"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Zbaliť"</string>
@@ -1976,7 +1976,7 @@
     <string name="search_language_hint" msgid="7004225294308793583">"Zadajte názov jazyka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Všetky jazyky"</string>
-    <string name="region_picker_section_all" msgid="756441309928774155">"Všetky regióny"</string>
+    <string name="region_picker_section_all" msgid="756441309928774155">"Všetky oblasti"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Vyhľadávanie"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikácia nie je k dispozícii"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie je momentálne k dispozícii. Spravuje to aplikácia <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>

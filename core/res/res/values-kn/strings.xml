@@ -534,7 +534,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ಪಿನ್, ಪ್ಯಾಟರ್ನ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಸೆಟ್ ಮಾಡಿಲ್ಲ"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ಭಾಗಶಃ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಮಲಿನಗೊಂಡಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"ಬೆರಳನ್ನು ಅತಿ ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1367,7 +1367,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -1504,7 +1504,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"ಮುಗಿದಿದೆ"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"ಹಂಚಲಾದ ಸಂಗ್ರಹಣೆಯನ್ನು ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="share" msgid="4157615043345227321">"ಹಂಚು"</string>
+    <string name="share" msgid="4157615043345227321">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="find" msgid="5015737188624767706">"ಹುಡುಕಿ"</string>
     <string name="websearch" msgid="5624340204512793290">"ವೆಬ್ ಹುಡುಕಾಟ"</string>
     <string name="find_next" msgid="5341217051549648153">"ಮುಂದಿನದನ್ನು ಹುಡುಕಿ"</string>
@@ -1599,7 +1599,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ಬ್ರೌಸರ್ ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"ಯಾವಾಗಲೂ"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"ಯಾವಾಗಲೂ ತೆರೆಯುವುದಕ್ಕೆ ಹೊಂದಿಸಿ"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"\'ಯಾವಾಗಲೂ ತೆರೆಯಿರಿ\' ಗೆ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ಒಮ್ಮೆ ಮಾತ್ರ"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>

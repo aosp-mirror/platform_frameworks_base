@@ -1167,7 +1167,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Hap përsëri aplikacionin"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Dërgo koment"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Dërgo reagim"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Mbyll"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Vendose në heshtje deri kur të riniset pajisja"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Prit!"</string>
@@ -1192,7 +1192,7 @@
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> është ndërtuar për një version të papërputhshëm të sistemit operativ Android dhe mund të shfaqë sjellje të papritura. Mund të ofrohet një version i përditësuar i aplikacionit."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Shfaq gjithnjë"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Kontrollo për përditësim"</string>
-    <string name="smv_application" msgid="3775183542777792638">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i ashpër\" (StrictMode)."</string>
+    <string name="smv_application" msgid="3775183542777792638">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetëimponuar të \"Modalitetit të ashpër\"(StrictMode) ."</string>
     <string name="smv_process" msgid="1398801497130695446">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i rreptë\" (StrictMode)"</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefoni po përditësohet…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Tableti po përditësohet…"</string>

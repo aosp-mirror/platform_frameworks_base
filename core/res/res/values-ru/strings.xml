@@ -63,7 +63,7 @@
     <string name="ColpMmi" msgid="4736462893284419302">"Идентификатор подключенной линии"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Ограничение идентификатора подключенной линии"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Переадресация вызовов"</string>
-    <string name="CwMmi" msgid="3164609577675404761">"Параллельный вызов"</string>
+    <string name="CwMmi" msgid="3164609577675404761">"Ожидание вызова"</string>
     <string name="BaMmi" msgid="7205614070543372167">"Запрет вызовов"</string>
     <string name="PwdMmi" msgid="3360991257288638281">"Смена пароля"</string>
     <string name="PinMmi" msgid="7133542099618330959">"Смена PIN"</string>
@@ -1009,7 +1009,7 @@
     <string name="weeks" msgid="3516247214269821391">"нед."</string>
     <string name="year" msgid="5182610307741238982">"г."</string>
     <string name="years" msgid="5797714729103773425">"г."</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"сейчас"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"Сейчас"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> мин.</item>
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> мин.</item>

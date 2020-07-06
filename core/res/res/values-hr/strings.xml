@@ -538,7 +538,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelomični otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor otiska prsta nije čist. Očistite ga i pokušajte ponovo."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Prebrzo pomicanje prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Prebrzo ste pomaknuli prst. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Presporo pomicanje prsta. Pokušajte ponovo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1156,7 +1156,7 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Otvaranje pomoću aplikacije"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvaranje pomoću aplikacije %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otvori"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvaranje veza s <xliff:g id="HOST">%1$s</xliff:g> u aplikaciji"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvaranje veza sa stranice <xliff:g id="HOST">%1$s</xliff:g> u aplikaciji"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvaranje veza u aplikaciji"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otvaranje veza u aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otvaranje veza s <xliff:g id="HOST">%1$s</xliff:g> u aplikaciji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>

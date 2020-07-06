@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS सन्देशहरू"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"भ्वाइस मेल सन्देशहरू"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi कल"</string>
-    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को स्थिति"</string>
+    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को अवस्था"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"उच्च प्राथमिकता रहेको SIM को स्थिति"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"अति धेरै <xliff:g id="CONTENT_TYPE">%s</xliff:g> मेटाउने प्रयास गरियो।"</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"ट्याब्लेट भण्डारण खाली छैन! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
-    <string name="low_memory" product="tv" msgid="8803524975509826759">"TV भण्डारण पूर्ण छ। ठाउँ खाली गर्नको लागि केही फाइलहरू मेट्नुहोस्।"</string>
+    <string name="low_memory" product="tv" msgid="8803524975509826759">"टिभी भण्डारण पूर्ण छ। ठाउँ खाली गर्नको लागि केही फाइलहरू मेट्नुहोस्।"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="other">प्रमाणपत्रका अख्तियारीहरूलाई स्थापना गरियो</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
-    <string name="power_dialog" product="tv" msgid="5941745051236770764">"TV विकल्पहरू"</string>
+    <string name="power_dialog" product="tv" msgid="5941745051236770764">"टिभी विकल्पहरू"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"फोन विकल्पहरू"</string>
     <string name="silent_mode" msgid="8796112363642579333">"मौन मोड"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"वायरलेस अन गर्नुहोस्"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"पुनःसुरु हुँदै ..."</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"बन्द गर्दै..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"तपाईँको ट्याब्लेट बन्द हुने छ।"</string>
-    <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"तपाईंको TV बन्द हुनेछ।"</string>
+    <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"तपाईंको टिभी बन्द हुनेछ।"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"तपाईँको घडी बन्द गरिने छ।"</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"तपाईँको फोन बन्द हुने छ।"</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"के तपाईं बन्द गर्न चाहनुहुन्छ?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="8183172372995396653">"नयाँ"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"कुनै नयाँ एपहरू छैनन्।"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"ट्याब्लेट विकल्पहरू"</string>
-    <string name="global_actions" product="tv" msgid="2020669784083287370">"TV विकल्प"</string>
+    <string name="global_actions" product="tv" msgid="2020669784083287370">"टिभी विकल्प"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"फोन विकल्पहरू"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"स्क्रिन बन्द"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"बन्द गर्नुहोस्"</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_sendSms" msgid="6757089798435130769">"एपलाई SMS सन्देशहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब एपहरूले तपाईंको पुष्टि बिना सन्देशहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"तपाईंका पाठ सन्देशहरू (SMS वा MMS) पढ्नुहोस्"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"यस अनुप्रयोगले तपाईंको ट्याब्लेटमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
-    <string name="permdesc_readSms" product="tv" msgid="8967963387951154530">"यस अनुप्रयोगले तपाईंको TV मा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
+    <string name="permdesc_readSms" product="tv" msgid="8967963387951154530">"यस अनुप्रयोगले तपाईंको टिभी मा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"यस अनुप्रयोगले तपाईंको फोनमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"पाठ सन्देशहरू (WAP) प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न एपलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका सन्देशहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
@@ -373,7 +373,7 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"यो अनुप्रयोगले पृष्ठभूमिमा डेटा प्रयोग गर्नसक्छ। यसले गर्दा धेरै डेटा प्रयोग हुनसक्छ।"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"एपहरू जहिले पनि चल्ने बनाउनुहोस्"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"यसको आफ्नै मेमोरीमा दृढ भएकोको अंश बनाउनको लागि एपलाई अनुमति दिन्छ। ट्याब्लेटलाई ढिलो गराउँदै गरेका अन्य अनुप्रयोगहरूलाई सीमित मात्रामा यसले मेमोरी उपलब्ध गराउन सक्छ।"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"एपलाई अनुमति दिन्छ मेमोरीमा आफैंलाई स्थायी भागका रूपमा प्रस्तुत गर्न। यसले अन्य एपलाई उपलब्ध मेमोरीलाई सीमित गरी TV लाई ढिलो बनाउन सक्छ।"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"एपलाई अनुमति दिन्छ मेमोरीमा आफैंलाई स्थायी भागका रूपमा प्रस्तुत गर्न। यसले अन्य एपलाई उपलब्ध मेमोरीलाई सीमित गरी टिभी लाई ढिलो बनाउन सक्छ।"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"एपलाई मेमोरीमा आफैंको निरन्तरको अंश बनाउन अनुमति दिन्छ। यसले फोनलाई ढिला बनाएर अन्य एपहरूमा मेमोरी SIMित गर्न सक्दछन्।"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"अग्रभूमिको सेवा सञ्चालन गर्नुहोस्"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"एपलाई अग्रभूमिका सेवाहरू प्रयोग गर्ने अनुमति दिन्छ।"</string>
@@ -383,35 +383,35 @@
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"प्रणालीका सेटिङ डेटालाई परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। खराब एपहरूले सायद तपाईँको प्रणालीको कन्फिगरेसनलाई क्षति पुर्‍याउन सक्छन्।"</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"स्टार्टअपमा चलाउनुहोस्"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"आनुप्रयोगलाई प्रणाली बुट प्रक्रिया पूर्ण हुने बितिकै आफैलाई सुरु गर्ने अनुमति दिन्छ। यसले ट्याब्लेट सुरु गर्नमा ढिला गर्न सक्दछ र एपलाई समग्रमा ट्याब्लेट सधैँ चालु गरेर ढिला बनाउँदछ।"</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="2701244540810970401">"एपलाई अनुमति दिन्छ प्रणालीले बुटिङ सकेपछि आफै सुरुवात हुन। यसले TV सुरु गर्न लामो समय लिन सक्छ र अनुप्रयोगहरूलाई अनुमति दिन सक्छ सँधै सञ्चालन भई समग्र रूपमा ट्याब्लेटलाई ढिलो गराएर।"</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="2701244540810970401">"एपलाई अनुमति दिन्छ प्रणालीले बुटिङ सकेपछि आफै सुरुवात हुन। यसले टिभी सुरु गर्न लामो समय लिन सक्छ र अनुप्रयोगहरूलाई अनुमति दिन सक्छ सँधै सञ्चालन भई समग्र रूपमा ट्याब्लेटलाई ढिलो गराएर।"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"एपलाई प्रणाली बुट गरी सकेपछि जति सक्दो चाँडो आफैंमा सुरु गर्न अनुमति दिन्छ। यसले फोन सुरु गर्नमा ढिला गर्न सक्दछ र अनप्रयोगलाई समग्रमा फोन सधैँ चालु गरेर ढिला बनाउँदछ।"</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"स्टिकि प्रसारण पठाउनुहोस्"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"औपचारिक प्रसारणलाई पठाउनको लागि एउटा एपलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले ट्याब्लेटलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"एपलाई टाँसिने प्रसारणहरू पठाउन अनुमति दिन्छ, जुन प्रसारण पछि पनि रहन्छ। अत्यन्य धेरै मेमोरी प्रयोग गर्ने बनाएर अत्यधिक प्रयोगले TV लाई ढिलो वा अस्थिर बनाउन सक्छ ।"</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"एपलाई टाँसिने प्रसारणहरू पठाउन अनुमति दिन्छ, जुन प्रसारण पछि पनि रहन्छ। अत्यन्य धेरै मेमोरी प्रयोग गर्ने बनाएर अत्यधिक प्रयोगले टिभी लाई ढिलो वा अस्थिर बनाउन सक्छ ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"औपचारिक प्रसारणलाई पठाउनको लागि एक एपलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले फोनलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"तपाईँका सम्पर्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"एपलाई तपाईंको ट्याब्लेटमा भण्डार गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। यस अनुमतिले अनुप्रयोगहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सुरक्षित गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"एपलाई तपाईंको TV मा भण्डार गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। यस अनुमतिले अनुप्रयोगहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सुरक्षित गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"एपलाई तपाईंको टिभी मा भण्डार गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। यस अनुमतिले अनुप्रयोगहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सुरक्षित गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
     <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"एपलाई तपाईंको फोनमा भण्डार गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। यस अनुमतिले अनुप्रयोगहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सुरक्षित गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"तपाईँका सम्पर्कहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"एपलाई तपाईंको TV मा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"एपलाई तपाईंको टिभी मा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"एपलाई तपाईंको फोनमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"कल लग पढ्नुहोस्"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"यस अनुप्रयोगले तपाईंको फोन सम्पर्कको इतिहास पढ्न सक्छ।"</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"कल लग लेख्‍नुहोस्"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"आगमन तथा बहर्गमन डेटासहित तपाईँको ट्याब्लेटको कल लगको परिमार्जन गर्न एपलाई अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईँको कल लग परिमार्जन गर्न वा मेटाउन प्रयोग गर्न सक्छन्।"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="220754624705969171">"अनुप्रयोगहरूलाई अनुमति दिन्छ तपाईँको TV को कल लग, आगमन र बहिर्गमन कलका डेटा लगायत,  परिमार्जन गर्न। दुस्प्रभावी एपहरूले यसलाई तपाईँको कल लग मेट्न वा परिमार्जन गर्न सक्छ।"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="220754624705969171">"अनुप्रयोगहरूलाई अनुमति दिन्छ तपाईँको टिभी को कल लग, आगमन र बहिर्गमन कलका डेटा लगायत,  परिमार्जन गर्न। दुस्प्रभावी एपहरूले यसलाई तपाईँको कल लग मेट्न वा परिमार्जन गर्न सक्छ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"एपलाई तपाईंको फोनको आउने र बाहिर जाने कलहरूको बारेको डेटा सहित कल लग परिमार्जन गर्न अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्दछ।"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीरका सेन्सरहरूमा पहुँच गराउनुहोस् (जस्तै हृदय धड्कन निगरानीहरू)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"तपाईँको हृदय गति जस्तो सेंसर बाट डेटा पहुँचको लागि एप अनुमति दिन्छ जसले तपाईँको भौतिक अवस्था अनुगमन गर्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस अनुप्रयोगले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="4359404686228921749">"यस अनुप्रयोगले तपाईंको TV मा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="4359404686228921749">"यस अनुप्रयोगले तपाईंको टिभी मा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"यस अनुप्रयोगले तपाईंको फोनमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"पात्रो घटनाहरू थप्नुहोस् वा परिमार्जन गर्नुहोस् र मालिकको ज्ञान बिना नै पाहुनाहरूलाई इमेल पठाउनुहोस्"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"यस अनुप्रयोगले तपाईंको ट्याब्लेटमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस अनुप्रयोगले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="6841397610226826926">"यस अनुप्रयोगले तपाईंको TV मा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस अनुप्रयोगले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="6841397610226826926">"यस अनुप्रयोगले तपाईंको टिभी मा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस अनुप्रयोगले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"यस अनुप्रयोगले तपाईंको फोनमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस अनुप्रयोगले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"एपलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो एपलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
@@ -419,7 +419,7 @@
     <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"यो अनुप्रयोगले अग्रभागमा चलिरहेको अवस्थामा मात्र तपाईंलाई स्थानको सटिक जानकारी दिन सक्छ। यी स्थानसम्बन्धी सेवाहरू अनिवार्य रूपमा सक्रिय गरिएका हुनु पर्छ र अनुप्रयोगले यिनीहरूको प्रयोग गर्न सकोस् भन्नाका खातिर तपाईंको फोनमै उपलब्ध हुन्छन्। यस कार्यले गर्दा ब्याट्री बढी खर्च हुन सक्छ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"अग्रभूमिमा मात्र अनुमानित स्थान (नेटवर्कमा आधारित) माथि पहुँच राख्नुहोस्"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"यस एपले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो एप ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थानसम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको ट्याब्लेटमा उपलब्ध हुनु पर्छ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"यस एपले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो एप ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थानसम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको TV मा उपलब्ध हुनु पर्छ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"यस एपले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो एप ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थानसम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको टिभी मा उपलब्ध हुनु पर्छ।"</string>
     <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"यो अनुप्रयोगले अग्रभागमा चलिरहेको अवस्थामा मात्र तपाईंलाई स्थानको अनुमानित जानकारी दिन सक्छ। यी स्थानसम्बन्धी सेवाहरू अनिवार्य रूपमा सक्रिय गरिएका हुनु पर्छ र अनुप्रयोगले यिनीहरूको प्रयोग गर्न सकोस् भन्नाका खातिर तपाईंको कारमै उपलब्ध हुन्छन्।"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"यस एपले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो एप ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थानसम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको फोनमा उपलब्ध हुनु पर्छ।"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"पृष्ठभूमिमा स्थानसम्बन्धी पहुँच"</string>
@@ -454,15 +454,15 @@
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"उक्त एपलाई यस यन्त्रको फोन नम्बरहरूमाथि पहुँच राख्न दिनुहोस्।"</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कारको स्क्रिन सक्रिय राख्नुहोस्"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ट्याब्लेटलाई निन्द्रामा जानबाट रोक्नुहोस्"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"TV निभ्नबाट जोगाउनुहोस्"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"टिभी निभ्नबाट जोगाउनुहोस्"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"फोनलाई निदाउनबाट रोक्नुहोस्"</string>
     <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"यो अनुमतिले यस एपलाई कारको स्क्रिन सक्रिय राख्न दिन्छ।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ट्याब्लेटलाई निस्क्रिय हुनबाट रोक्नको लागि एपलाई अनुमति दिन्छ।"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"एपलाई अनुमति दिन्छ TV लाई निभ्नबाट जोगाउन।"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"एपलाई अनुमति दिन्छ टिभी लाई निभ्नबाट जोगाउन।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"फोनलाई निस्क्रिय हुनबाट रोक्नको लागि एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"infrared ट्रान्समिट गर्नुहोस्"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"ट्याबलेटको infrared transmitter प्रयोगको लागि एप अनुमति दिन्छ।"</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"एपलाई TV को  इन्फ्रारेड ट्रान्समिटर प्रयोग गर्न अनुमति दिन्छ।"</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"एपलाई टिभी को  इन्फ्रारेड ट्रान्समिटर प्रयोग गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"फोनको infrared transmitter प्रयोगको लागि एप अनुमति दिन्छ।"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"वालपेपर सेट गर्नुहोस्"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"एपलाई प्रणाली वालपेपर सेट गर्न अनुमति दिन्छ।"</string>
@@ -474,7 +474,7 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"एपलाई फोनको समय क्षेत्र परिवर्तन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"उपकरणमा खाताहरू भेट्टाउनुहोस्"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"एपलाई ट्याब्लेटद्वारा ज्ञात खाताहरूको सूची पाउन अनुमति दिन्छ। यसले अनुप्रयोगद्वारा तपाईंले स्थापित गर्नुभएको कुनै पनि खाताहरू समावेश गर्न सक्दछ।"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="3233589616751852028">"एपलाई अनुमति दिन्छ TV लाई थाहा भएका खाताहरूका सूची प्राप्त गर्न। यसमा तपाईँले स्थापना गर्नु भएका एपहरू द्वारा सिर्जना गरिएका खाताहरू समावेश हुन सक्छन्।"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="3233589616751852028">"एपलाई अनुमति दिन्छ टिभी लाई थाहा भएका खाताहरूका सूची प्राप्त गर्न। यसमा तपाईँले स्थापना गर्नु भएका एपहरू द्वारा सिर्जना गरिएका खाताहरू समावेश हुन सक्छन्।"</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"फोनलाई थाहा भएका खाताहरूको सूची प्राप्त गर्न एपलाई अनुमति दिन्छ। यसले तपाईँले स्थापना गर्नु भएका अनुप्रयोगहरूबाट सृजित कुनै खाताहरू समावेश हुन सक्छ।"</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"नेटवर्क जडानहरू हेर्नहोस्"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"एपलाई नेटवर्क जडानहरू जस्तै कुन नेटवर्कहरू अवस्थित हुन्छन् र जडित छन् जसले हेर्नलाई अनुमति दिन्छ।"</string>
@@ -490,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"एपलाई Wi-Fi पहुँच बिन्दुबाट जडान गर्न र विच्छेदन गर्न र Wi-Fi नेटवर्कहरूको लागि उपकरण कन्फिगरेसनमा परिवर्तनहरू गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fi Multicast स्विकृतिलाई अनुमति दिनुहोस्"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"एपलाई मल्टिकाष्ट ठेगानाहरू प्रयोग गरेर Wi-Fi नेटवर्कमा पठाइएको प्याकेटहरू प्राप्त गर्न अनुमति दिन्छ, केवल तपाईंको ट्याब्लेट मात्र होइन। यसले गैर-मल्टिकाष्ट मोड भन्दा बढी उर्जा प्रयोग गर्दछ।"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"एपलाई अनुमति दिन्छ प्याकेटहरू प्राप्त गर्न एक Wi-Fi सञ्जालमा अवस्थित सम्पूर्ण यन्त्रहरूमा बहुकास्ट ठेगानाहरू प्रयोग गरेर, तपाईँको TVमा मात्र नभई।यसले गैर-मल्टिकास्ट मोडभन्दा बढि बिधुतीय शक्ति प्रयोग गर्दछ।"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"एपलाई अनुमति दिन्छ प्याकेटहरू प्राप्त गर्न एक Wi-Fi सञ्जालमा अवस्थित सम्पूर्ण यन्त्रहरूमा बहुकास्ट ठेगानाहरू प्रयोग गरेर, तपाईँको टिभीमा मात्र नभई।यसले गैर-मल्टिकास्ट मोडभन्दा बढी बिधुतीय शक्ति प्रयोग गर्दछ।"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"तपाईँको फोन मात्र होइन, मल्टिकास्ट ठेगानाहरूको प्रयोग गरे Wi-Fi नेटवर्कका सबै उपकरणहरूमा पठाइएका प्याकेटहरू प्राप्त गर्न एपलाई अनुमति दिन्छ। यसले गैर-मल्टिकास्ट मोडभन्दा बढी उर्जा प्रयोग गर्छ।"</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"ब्लुटुथ सेटिङहरूमा पहुँच गर्नुहोस्"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"स्थानीय ब्लुटुथ ट्याब्लेटलाई कन्फिगर गर्नको लागि र टाढाका उपकरणहरूलाई पत्ता लगाउन र जोड्नको लागि एपलाई अनुमति दिन्छ।"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"एपलाई स्थानीय ब्लुटूथ TV कन्फिगर गर्न र पत्ता लगाउन र टाढाका यन्त्रहरूसँग जोडी बनाउन अनुमति दिन्छ।"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"एपलाई स्थानीय ब्लुटूथ टिभी कन्फिगर गर्न र पत्ता लगाउन र टाढाका यन्त्रहरूसँग जोडी बनाउन अनुमति दिन्छ।"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"एपलाई स्थानीय ब्लुटुथ फोन कन्फिगर गर्न र टाढाका उपकरणहरूसँग खोज गर्न र जोडी गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAXसँग जोड्नुहोस् वा छुटाउनुहोस्"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"एपलाई वाइम्याक्स सक्षम छ कि छैन र जडान भएको कुनै पनि वाइम्याक्स नेटवर्कहरूको बारेमा जानकारी निर्धारिण गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"वाइम्याक्स अवस्था परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"एपलाई वाइम्याक्स नेटवर्कहरूबाट ट्याब्लेट जडान गर्न र ट्याब्लेट विच्छेदन गर्न अनुमति दिन्छ।"</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"एपलाई अनुमति दिन्छ TV लाई  जडान गर्न र WiMAX सञ्जालबाट TV को जडान टुटाउन"</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"एपलाई अनुमति दिन्छ टिभी लाई  जडान गर्न र WiMAX सञ्जालबाट टिभी को जडान टुटाउन"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"वाइम्याक्स नेटवर्कहरूसँग फोन जोड्न र छुटाउन एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"ब्लुटुथ उपकरणहरूसँग जोडी मिलाउनुहोस्"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ट्याब्लेटमा ब्लुटुथको कन्फिगुरेसनलाई हेर्न र बनाउन र जोडी उपकरणहरूसँग जडानहरूलाई स्वीकार गर्न एपलाई अनुमति दिन्छ।"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"एपलाई TVमा ब्लुटूथको कन्फिगुरेसन हेर्न र  जोडी यन्त्रहरूसँगको जडान स्वीकार गर्न अनुमति दिन्छ।"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"एपलाई टिभीमा ब्लुटूथको कन्फिगुरेसन हेर्न र  जोडी यन्त्रहरूसँगको जडान स्वीकार गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"एपलाई फोनमा ब्लुटुथको कन्फिगरेसन हेर्न र जोडी भएका उपकरणहरूसँग जडानहरू बनाउन र स्वीकार गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"एपलाई नयाँ क्षेत्र संचार (NFC) ट्यागहरू, कार्डहरू र पाठकहरूसँग अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
@@ -661,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने ट्याब्लेट लक गर्नुहोस् वा ट्याब्लेटका सबै डेटा मेट्नुहोस्।"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"स्क्रिन अनलक गर्दा गलत पासवर्डका संख्या अनुगमन गर्नुहोस् र TV लक गर्नुहोस् वा TV को सबै डेटा मेट्नुहोस् यदि ज्यादै धेरै गलत पासवर्ड टाइप गरिएका छन् भने।"</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"स्क्रिन अनलक गर्दा गलत पासवर्डका संख्या अनुगमन गर्नुहोस् र टिभी लक गर्नुहोस् वा टिभी को सबै डेटा मेट्नुहोस् यदि ज्यादै धेरै गलत पासवर्ड टाइप गरिएका छन् भने।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रिनअनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने फोन लक गर्नुहोस् वा फोनका सबै डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा ट्याब्लेट लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा TV लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा टिभी लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा फोन लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्ने"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
@@ -672,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सबै डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
-    <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"कारखाना डेटा रिसेट गरेर बिना चेतावनी TV को डेटा मेट्नुहोस्"</string>
+    <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"कारखाना डेटा रिसेट गरेर बिना चेतावनी टिभी को डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नदिइकन फोनको डेटा मेट्न।"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"प्रयोगकर्ता डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"चेतावनी बिना यो ट्याब्लेटमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"चेतावनी बिना यो TV मा यो प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"चेतावनी बिना यो टिभी मा यो प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"चेतावनी बिना यो फोनमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"उपकरण विश्वव्यापी प्रोक्सी मिलाउनुहोस्"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"नीति सक्षम हुँदा प्रयोग गरिनको लागि यन्त्र ग्लोवल प्रोक्सी सेट गर्नुहोस्। केवल यन्त्र मालिकले ग्लोवल प्रोक्सी सेट गर्न सक्नुहुन्छ।"</string>
@@ -826,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"अत्यधिक मोहडा खोल्ने प्रयासहरू बढी भए।"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM कार्ड छैन"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1165408361036993077">"TV मा कुनै SIM कार्ड छैन।"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1165408361036993077">"टिभी मा कुनै SIM कार्ड छैन।"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"फोनमा SIM कार्ड छैन।"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM कार्ड घुसाउनुहोस्"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM कार्ड छैन वा पढ्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
@@ -849,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तपाईंले गलत तरिकाले आफ्नो पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नुभयो। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"तपाईँले तपाईँको अनलक ढाँचा गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल कोसिसहरू, तपाईँको Google साइन इन प्रयोग गरी तपाईँको ट्याब्लेट अनलक गर्न भनिने छ।\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फरि प्रयास गर्नुहोस्।"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा झिक्नु भएकोछ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि तपाईँलाई आफ्नो TV तपाईँको Google साइन इन प्रयोग गरी अनलक गर्न आग्रह गरिनेछ। \n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा।"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा झिक्नु भएकोछ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि तपाईँलाई आफ्नो टिभी तपाईँको Google साइन इन प्रयोग गरी अनलक गर्न आग्रह गरिनेछ। \n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले तपाईँको अनलक ढाँचालाई कोर्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, तपाईँलाई तपाईँको फोन Google साइन इन प्रयोग गरेर अनलक गर्नको लागि सोधिने छ। \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक ट्याब्लेटलाई अनलक गर्नको लागि गलत तरिकाले कोशिस गर्नुभएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, ट्याब्लेट फ्याट्रि पूर्वनिर्धारितमा रिसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"तपाईंले गलत तरिकाले TV अनलक गर्ने प्रयास गर्नुभएको छ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि TV कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट हुनेछ र सबै प्रयोगकर्ता डेटा नष्ट हुनेछन्।"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"तपाईंले गलत तरिकाले टिभी अनलक गर्ने प्रयास गर्नुभएको छ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि टिभी कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट हुनेछ र सबै प्रयोगकर्ता डेटा नष्ट हुनेछन्।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"तपाईंले गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक फोन अनलक गर्ने प्रयत्न गर्नुभयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> बढी असफल प्रयत्नहरू पछि, फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"तपाईँले ट्यब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER">%d</xliff:g> पटक प्रयास गर्नु भएको छ। अब ट्याब्लेटलाई पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ।"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"तपाईंले गलत तरिकाले TV अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। TV अब कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट गरिनेछ।"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"तपाईंले गलत तरिकाले टिभी अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। टिभी अब कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट गरिनेछ।"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ।"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"ढाँचा बिर्सनु भयो?"</string>
@@ -942,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"ब्राउजरले भ्रमण गरेको सबै URL हरूको इतिहास र ब्राउजरका सबै बुकमार्कहरू पढ्नको लागि एपलाई अनुमति दिन्छ। नोट: यो अनुमतिलाई तेस्रो पक्ष ब्राउजरहरूद्वारा वा वेब ब्राउज गर्ने क्षमताद्वारा बलपूर्वक गराउन सकिँदैन।"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"वेब बुकमार्कहरू र इतिहास लेख्नुहोस्"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"एपलाई तपाईंको ट्याब्लेटमा भण्डार गरिएको ब्राउजरको इतिहास वा बुकमार्कहरू परिमार्जन गर्न अनुमति दिन्छ। यसले एपलाई ब्राजर डेटा मेटाउन वा परिमार्जन गर्न अनुमति दिन सक्दछ। टिप्पणी: यो अनुमति वेब ब्राउज गर्ने क्षमताहरूको साथ तेस्रो-पार्टी ब्राउजर वा अन्य अनुप्रयोगहरूद्वारा लागू गरिएको होइन।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="755207379344494691">"एपलाई अनुमति दिन्छ तपाईँको TV मा भण्डार गरिएको ब्राउजर इतिहास वा पुस्तकचिनोलाई परिमार्जन गर्न। यसले एपलाई ब्राउजर डेटा मेट्न वा परिमार्जन गर्न अनुमति दिन सक्छ। नोट: यस अनुमतिलाई तेस्रो पक्ष ब्राउजर वा वेब ब्राउजिङ सामर्थ्यता राख्ने अन्य अनुप्रयोगले लागु गर्न सक्छन्।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="755207379344494691">"एपलाई अनुमति दिन्छ तपाईँको टिभी मा भण्डार गरिएको ब्राउजर इतिहास वा पुस्तकचिनोलाई परिमार्जन गर्न। यसले एपलाई ब्राउजर डेटा मेट्न वा परिमार्जन गर्न अनुमति दिन सक्छ। नोट: यस अनुमतिलाई तेस्रो पक्ष ब्राउजर वा वेब ब्राउजिङ सामर्थ्यता राख्ने अन्य अनुप्रयोगले लागु गर्न सक्छन्।"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"तपाईँको फोनमा भण्डारण भएको ब्राउजरको इतिहास वा बुकमार्कहरू परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। यसले सायद ब्राउजर डेटालाई मेट्न वा परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। नोट: वेब ब्राउज गर्ने क्षमतासहितका अन्य एपहरू वा तेस्रो- पक्ष ब्राउजरद्वारा सायद यस अनुमतिलाई लागु गर्न सकिंदैन।"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी अनुप्रयोगमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
@@ -1131,14 +1131,10 @@
     <string name="capital_on" msgid="2770685323900821829">"चालु"</string>
     <string name="capital_off" msgid="7443704171014626777">"बन्द"</string>
     <string name="whichApplication" msgid="5432266899591255759">"प्रयोग गरेर कारबाही पुरा गर्नुहोस्"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"निम्न एपको प्रयोग गरी कारबाही पुरा गर्नुहोस्: %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"पूर्ण कारबाही"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"निम्नबाट खोल्नुहोस्"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichViewApplicationNamed (415164730629690105) -->
-    <skip />
+    <string name="whichViewApplicationNamed" msgid="415164730629690105">"निम्न एपमा खोल्नुहोस्: %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"खोल्नुहोस्"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"निम्नमार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"निम्नमार्फत लिंकहरू खोल्नुहोस्"</string>
@@ -1146,9 +1142,7 @@
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="APPLICATION">%2$s</xliff:g> मार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"पहुँच दिनुहोस्"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"सँग सम्पादन गर्नुहोस्"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichEditApplicationNamed (8096494987978521514) -->
-    <skip />
+    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s सँग सम्पादन गर्नुहोस्"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"सम्पादन गर्नुहोस्"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"सेयर गर्नुहोस्"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s सँग सेयर गर्नुहोस्"</string>
@@ -1325,7 +1319,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="1020819021188731574">"आवश्यक PIN टाइप गर्नुहोस्:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="3598694912050152976">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"यो <xliff:g id="DEVICE_NAME">%1$s</xliff:g>सँग जोडिएको बेला ट्याब्लेट अस्थायी रूपमा वाइ-फाइबाट विच्छेद गरिने छ।"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"TV अस्थायी रूपमा Wi-Fi जडान बाट टुट्नेछ जब यो <xliff:g id="DEVICE_NAME">%1$s</xliff:g>मा जडित हुन्छ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"टिभी अस्थायी रूपमा Wi-Fi जडान बाट टुट्नेछ जब यो <xliff:g id="DEVICE_NAME">%1$s</xliff:g>मा जडित हुन्छ"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"जब यो <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सँग जडित हुन्छ, फोन अस्थायी रूपमा वाइ-फाइबाट विच्छेद हुने छ"</string>
     <string name="select_character" msgid="3352797107930786979">"अक्षरहरू प्रवेश गराउनुहोस्"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS सन्देशहरू पठाइँदै"</string>
@@ -1610,7 +1604,7 @@
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"सेटिङहरू"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s  कार्य प्रोफाइल समर्थन गर्दैन"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ट्याब्लेट"</string>
-    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
+    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टिभी"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डक स्पिकरहरू"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
@@ -1668,13 +1662,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"तपाईँले तपाईँक पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत टाइप गर्नुभएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"तपाईँले तपाईँको अनलक ढाँचा गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"तपाईँले ट्याब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल प्रयासहरू, ट्याब्लेट पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"तपाईंले गलत तरिकाले TV अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि, TV कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट हुनेछ र सबै प्रयोगकर्ता डेटा नष्ट हुनेछन्।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"तपाईंले गलत तरिकाले टिभी अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि, टिभी कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट हुनेछ र सबै प्रयोगकर्ता डेटा नष्ट हुनेछन्।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"तपाईँले गलतसँग फोनलाई अनलक गर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल कोसिसहरू, फोनलाई पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"तपाईँले ट्यब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER">%d</xliff:g> पटक प्रयास गर्नु भएको छ। अब ट्याब्लेटलाई पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"तपाईंले गलत तरिकाले TV अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। TV अब कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट हुनेछ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"तपाईंले गलत तरिकाले टिभी अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। टिभी अब कारखानाको पूर्वनिर्धारित सेटिङमा रिसेट हुनेछ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोर्नुभयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> विफल प्रयत्नहरू पछि, तपाईंलाई आफ्नो ट्याब्लेट इमेल खाता प्रयोग गरेर अनलक गर्न सोधिने छ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डहरूमा।"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचालाई झिक्नु भएको छ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि तपाईँलाई इमेल खाता खोली तपाईँको  TV अनलक गर्नाका लागि आग्रह गरिनेछ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचालाई झिक्नु भएको छ <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक। <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल प्रयासहरू पछि तपाईँलाई इमेल खाता खोली तपाईँको  टिभी अनलक गर्नाका लागि आग्रह गरिनेछ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
@@ -1972,10 +1966,10 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"यी वस्तुहरू "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" मा अद्यावधिक गर्नुहोस्‌: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> हो?"</string>
+    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"यी वस्तुहरू "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" मा अपडेट गर्नुहोस्‌: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> हो?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"सुरक्षित गर्नुहोस्"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"पर्दैन, धन्यवाद"</string>
-    <string name="autofill_update_yes" msgid="4608662968996874445">"अद्यावधिक गर्नुहोस्"</string>
+    <string name="autofill_update_yes" msgid="4608662968996874445">"अपडेट गर्नुहोस्"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"ठेगाना"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"क्रेडिट कार्ड"</string>

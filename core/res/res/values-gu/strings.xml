@@ -226,11 +226,11 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"ફોન વિકલ્પો"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"સ્ક્રીન લૉક"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"પાવર બંધ"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"કટોકટી"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"ઇમર્જન્સી"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"બગ રિપોર્ટ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"સત્ર સમાપ્ત કરો"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"સ્ક્રીનશૉટ"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"ખામી જણાવતો રિપોર્ટ"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"બગ રિપોર્ટ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ક્રિયાપ્રતિક્રિયાત્મક રિપોર્ટ"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"મોટાભાગના સંજોગોમાં આનો ઉપયોગ કરો. તે રિપોર્ટની પ્રગતિને ટ્રૅક કરવા, સમસ્યા વિશે વધુ વિગતો દાખલ કરવાની અને સ્ક્રીનશૉટ્સ લેવાની મંજૂરી આપે છે. તે કેટલાક ઓછા ઉપયોગમાં આવતાં વિભાગો કે જે જાણ કરવામાં વધુ સમય લેતાં હોય તેને છોડી દઈ શકે છે."</string>
@@ -277,7 +277,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android સિસ્ટમ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"વ્યક્તિગત પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"કાર્યાલયની પ્રોફાઇલ પર સ્વિચ કરો"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"સંપર્કો"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
     <string name="permgrouprequest_contacts" msgid="7755354139254094668">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા સંપર્કોને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"સ્થાન"</string>
@@ -379,7 +379,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ઍપને ફૉરગ્રાઉન્ડ સેવાઓનો ઉપયોગ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ઍપ્લિકેશન સંગ્રહ સ્થાન માપો"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"એપ્લિકેશનને તેનો કોડ, ડેટા અને કેશ કદ પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"સિસ્ટમ સેટિંગ્સ સંશોધિત કરો"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"સિસ્ટમ સેટિંગમાં ફેરફાર કરો"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"એપ્લિકેશનને તમારા સિસ્ટમના સેટિંગ્સ ડેટાને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારા સિસ્ટમની ગોઠવણીને દૂષિત કરી શકે છે."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"સ્ટાર્ટઅપ પર શરૂ કરો"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"એપ્લિકેશનને સિસ્ટમ બૂટ થવાનું સમાપ્ત કરી લે કે તરત જ પોતાની જાતે પ્રારંભ થવાની મંજૂરી આપે છે. આનાથી ટેબ્લેટને પ્રારંભ થવામાં વધુ લાંબો સમય લાગી શકે છે અને એપ્લિકેશનને હંમેશા ચાલુ રહીને ટેબ્લેટને એકંદર ધીમું કરવાની મંજૂરી આપી શકે છે."</string>
@@ -811,13 +811,13 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"અનલૉક કરવા માટે પિન લખો"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"ખોટો પિન કોડ."</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"અનલૉક કરવા માટે, મેનૂ દબાવો તે પછી 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ઇમરજન્સિ નંબર"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ઇમર્જન્સી નંબર"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"કોઈ સેવા નથી"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"સ્ક્રીન લૉક કરી."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"અનલૉક કરવા માટે અથવા કટોકટીનો કૉલ કરવા માટે મેનૂ દબાવો."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"અનલૉક કરવા માટે મેનૂ દબાવો."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"અનલૉક કરવા માટે પૅટર્ન દોરો."</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"કટોકટી"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ઇમર્જન્સી"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"કૉલ પર પાછા ફરો"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"સાચું!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ફરી પ્રયાસ કરો"</string>
@@ -917,7 +917,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"આ પૃષ્ઠ છોડો"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"આ પૃષ્ઠ પર રહો"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nશું તમે ખરેખર આ પૃષ્ઠથી દૂર નેવિગેટ કરવા માંગો છો?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"પુષ્ટિ કરો"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"કન્ફર્મ કરો"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ટિપ: ઝૂમ વધારવા અને ઘટાડવા માટે બે વાર ટેપ કરો."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"સ્વતઃભરણ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"સ્વતઃભરણ સેટ કરો"</string>

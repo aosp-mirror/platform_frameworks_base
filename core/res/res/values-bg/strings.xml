@@ -302,8 +302,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"достъп до физическата ви активност"</string>
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до физическата ви активност?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="7585150538459320326">"да прави снимки и записва видеоклипове"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да прави снимки и да записва видеоклипове?"</string>
+    <string name="permgroupdesc_camera" msgid="7585150538459320326">"да прави снимки и записва видео"</string>
+    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да прави снимки и да записва видео?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Списъци с обажданията"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"четене и запис на списъка с телефонните обаждания"</string>
     <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до списъците с телефонните ви обаждания?"</string>
@@ -433,7 +433,7 @@
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"разпознаване на физическата активност"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Това приложение може да разпознава физическата ви активност."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"правене на снимки и видеоклипове"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Това приложение може по всяко време да прави снимки и да записва видеоклипове посредством камерата."</string>
+    <string name="permdesc_camera" msgid="1354600178048761499">"Това приложение може по всяко време да прави снимки и да записва видео посредством камерата."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Разрешаване на приложение или услуга да получават обратни повиквания за отварянето или затварянето на снимачни устройства."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Това приложение може да получава обратни повиквания, когато снимачно устройство бъде отворено (от кое приложение) или затворено."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролиране на вибрирането"</string>

@@ -1224,7 +1224,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> üçün senpşotu paylaşa bilərsiniz. Diqqətli olun: bu snepşotda yazdıqlarınızdan ibarət olan mühüm şəxsi məlumat ola bilər. Əməliyyat həmin məlumata daxil ola bilər."</string>
     <string name="sendText" msgid="493003724401350724">"Mətn üçün əməliyyat seçin"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Zəngin səs gücü"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Media həcmi"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Media səsi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth vasitəsilə oynadılır"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Səssiz zəng"</string>
     <string name="volume_call" msgid="7625321655265747433">"Daxili zəng səsi"</string>
@@ -1235,7 +1235,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth həcmi"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Zəng səsi gücü"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Zəng həcmi"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Media həcmi"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Media səsi"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Bildiriş səsi"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Defolt rinqton"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Defolt (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

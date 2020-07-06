@@ -249,7 +249,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Configuració"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistència"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assist. per veu"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloq. de seguretat"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloqueig de seguretat"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"+999"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Notificació nova"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Teclat virtual"</string>
@@ -1356,7 +1356,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"No cal cap permís"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"pot ser que comporti càrrecs"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"D\'acord"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"S\'està carregant el dispositiu per USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregant el dispositiu per USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"S\'està carregant el dispositiu connectat per USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"S\'ha activat la transferència de fitxers per USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"S\'ha activat el mode PTP per USB"</string>

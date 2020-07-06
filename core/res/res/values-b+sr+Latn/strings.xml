@@ -1157,7 +1157,7 @@
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvorite pomoću aplikacije %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otvori"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvarajte <xliff:g id="HOST">%1$s</xliff:g> linkove pomoću"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvaratej linkove pomoću"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvaraj linkove pomoću"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otvarajte linkove pomoću aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otvarajte <xliff:g id="HOST">%1$s</xliff:g> linkove pomoću aplikacije <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Dozvoli pristup"</string>

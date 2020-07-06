@@ -544,7 +544,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره احراز هویت شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"ذخیره اثر انگشت ممکن نیست. لطفاً یک اثر انگشت موجود را حذف کنید."</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"مهلت زمانی ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"درنگ ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
@@ -1144,7 +1144,7 @@
     <string name="whichEditApplication" msgid="6191568491456092812">"ویرایش با"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"‏ویرایش با %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ویرایش"</string>
-    <string name="whichSendApplication" msgid="4143847974460792029">"اشتراک‌گذاری"</string>
+    <string name="whichSendApplication" msgid="4143847974460792029">"هم‌رسانی"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"‏اشتراک‌گذاری با %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"اشتراک‌گذاری"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"ارسال با استفاده از"</string>
@@ -1504,7 +1504,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"تمام"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"درحال پاک کردن فضای ذخیره‌سازی هم‌رسانی‌شده…"</string>
-    <string name="share" msgid="4157615043345227321">"اشتراک‌گذاری"</string>
+    <string name="share" msgid="4157615043345227321">"هم‌رسانی"</string>
     <string name="find" msgid="5015737188624767706">"یافتن"</string>
     <string name="websearch" msgid="5624340204512793290">"جستجوی وب"</string>
     <string name="find_next" msgid="5341217051549648153">"یافتن بعدی"</string>

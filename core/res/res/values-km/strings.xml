@@ -839,7 +839,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"បញ្ឈប់"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ខា​ថយក្រោយ"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ទៅ​មុខ​​​រហ័ស"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"សម្រាប់​តែ​ហៅ​ពេល​អាសន្ន​ប៉ុណ្ណោះ"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ស៊ីម​កាត​ជាប់​សោ PUK។"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"មើល​មគ្គុទ្ទេសក៍​អ្នក​ប្រើ ឬ​ទាក់ទង​សេវា​អតិថិជន។"</string>
@@ -1131,17 +1131,15 @@
     <string name="capital_on" msgid="2770685323900821829">"បើក"</string>
     <string name="capital_off" msgid="7443704171014626777">"បិទ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"បើក"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"បើកតំណជាមួយ"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"បើក​តំណជាមួយ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ដោយប្រើ"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"បើកតំណដោយប្រើ"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"បើក​តំណដោយប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ដោយប្រើ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"កែសម្រួល​ជាមួយ​ %1$s"</string>
@@ -1236,7 +1234,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"កម្រិត​សំឡេង"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"កម្រិត​សំឡេង​ប៊្លូធូស"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"កម្រិត​សំឡេង​រោទ៍"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅ"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅទូរសព្ទ"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"សំឡេង​រោទ៍​លំនាំដើម"</string>

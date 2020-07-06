@@ -1001,7 +1001,7 @@
     <string name="weeks" msgid="3516247214269821391">"tuần"</string>
     <string name="year" msgid="5182610307741238982">"năm"</string>
     <string name="years" msgid="5797714729103773425">"năm"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"bây giờ"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"ngay lúc này"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ph</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ph</item>
@@ -1229,7 +1229,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Đã đặt nhạc chuông im lặng"</string>
     <string name="volume_call" msgid="7625321655265747433">"Âm lượng cuộc gọi"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Âm lượng cuộc gọi trong Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Âm lượng báo thức"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Âm lượng chuông báo"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Âm lượng thông báo"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Âm lượng"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Âm lượng bluetooth"</string>

@@ -839,7 +839,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Arrêter"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Retour arrière"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avance rapide"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"Urgences seulement"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"Appels d\'urgence uniquement"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La carte SIM est verrouillée par clé PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Veuillez consulter le guide de l\'utilisateur ou contacter le service client."</string>
@@ -1260,7 +1260,7 @@
       <item quantity="one">Réseau Wi-Fi ouvert disponible</item>
       <item quantity="other">Réseaux Wi-Fi ouverts disponibles</item>
     </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Se connecter pour ouvrir le réseau Wi-Fi"</string>
+    <string name="wifi_available_title" msgid="722493260955778406">"Connexion à un réseau Wi-Fi ouvert"</string>
     <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"Se connecter au réseau Wi-Fi de l\'opérateur"</string>
     <string name="wifi_available_title_connecting" msgid="5249247039230566878">"Connexion au réseau Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="5892203664604121475">"Connecté au réseau Wi-Fi"</string>

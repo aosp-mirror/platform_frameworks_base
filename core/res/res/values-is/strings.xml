@@ -297,7 +297,7 @@
     <string name="permgrouprequest_storage" msgid="1594774620878445266">"Viltu veita &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aðgang að myndum, efni og skrám í tækinu?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Hljóðnemi"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"taka upp hljóð"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Viltu leyfa &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; að taka upp hljóð?"</string>
+    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Viltu leyfa forritinu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; að taka upp hljóð?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Hreyfing"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"fá aðgang að hreyfingu þinni"</string>
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Viltu leyfa &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; að fá aðgang að hreyfingu þinni?"</string>

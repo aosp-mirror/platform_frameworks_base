@@ -230,7 +230,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај за грешка"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Завршете ја сесијата"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Слика од екранот"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Извештај за грешка"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Извештај за грешки"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
@@ -1136,10 +1136,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Отвори со"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Отвори со %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Отвори"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Отворајте врски на <xliff:g id="HOST">%1$s</xliff:g> со"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Отворајте врски со"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Отворајте врски со <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Отворајте врски на <xliff:g id="HOST">%1$s</xliff:g> со <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Отворајте линкови на <xliff:g id="HOST">%1$s</xliff:g> со"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Отворајте линкови со"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Отворајте линкови со <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Отворајте линкови на <xliff:g id="HOST">%1$s</xliff:g> со <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Дозволи пристап"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Измени со"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Измени со %1$s"</string>
@@ -1556,9 +1556,7 @@
     <string name="action_bar_home_description" msgid="1501655419158631974">"Движи се кон дома"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Движи се нагоре"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Повеќе опции"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for action_bar_home_description_format (5087107531331621803) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Внатрешно заедничко место за складирање"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"СД картичка"</string>
@@ -1601,7 +1599,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Стартувај прелистувач?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Прифати повик?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Секогаш"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Поставете на секогаш отворај"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Секојпат"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Само еднаш"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Поставки"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s не поддржува работен профил"</string>
@@ -1641,7 +1639,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Употреби ја својата шема"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внеси PIN на SIM картичка"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"Внеси PIN"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"Впишете PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Внеси посакуван PIN код"</string>
@@ -1789,7 +1787,7 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"Услугате <xliff:g id="NAME">%s</xliff:g> е инсталирана"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Допри да се овозможи"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Внесете PIN на админстратор"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Внеси PIN"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Впишете PIN"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Неточно"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Тековен PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"Нов PIN"</string>

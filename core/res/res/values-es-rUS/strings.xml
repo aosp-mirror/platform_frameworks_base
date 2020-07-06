@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="7755354139254094668">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda a tus contactos?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicación"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acceder a la ubicación de este dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda a la ubicación de este dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="5261379525646615507">"¿Quieres permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda a la ubicación de este dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"La app solo tendrá acceso a la ubicación cuando esté en uso"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"¿Quieres permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda a la ubicación de este dispositivo &lt;b&gt;todo el tiempo&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Actualmente, la app puede acceder a la ubicación solo cuando está en uso"</string>
