@@ -1078,7 +1078,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Hammasini belgilash"</string>
-    <string name="cut" msgid="2561199725874745819">"Kesish"</string>
+    <string name="cut" msgid="2561199725874745819">"Kesib olish"</string>
     <string name="copy" msgid="5472512047143665218">"Nusxa olish"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Vaqtinchalik xotiraga nusxalab bo‘lmadi"</string>
     <string name="paste" msgid="461843306215520225">"Joylash"</string>
@@ -1229,7 +1229,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="7625321655265747433">"Suhbat vaqtidagi tovush balandligi"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Kiruvchi bluetooth tovushi"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Signal balandligi"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Signal tovushi"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Eslatma tovushi"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Tovush balandligi"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth tovushi"</string>
@@ -1367,8 +1367,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Ulangan qurilma quvvatlanmoqda. Boshqa parametrlar uchun bosing."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogli audio uskuna aniqlandi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Biriktirilgan qurilma mazkur telefon bilan mos emas. Batafsil axborot olish uchun bu yerga bosing."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB orqali nosozliklarni aniqlash"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB orqali nosozliklarni aniqlashni faolsizlantirish uchun bosing"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB debagging ulandi"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB debaggingni uzish uchun bosing"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB orqali nosozliklarni tuzatishni o‘chirib qo‘yish uchun bosing."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Xavfsizlik sinovi rejimi yoqildi"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Xavfsizlik sinovi rejimini faolsizlantirish uchun zavod sozlamalariga qaytaring."</string>
@@ -1469,7 +1469,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"Sinx"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Maxsus imkoniyatlar"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Fon rasmi"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"Fon rasmini o‘zgartirish"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"Fon rasmini almashtirish"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Bildirishnoma tinglovchisi"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR rejimi"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Shartlarni taqdim etuvchi"</string>

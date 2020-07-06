@@ -277,7 +277,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"കോൺടാക്റ്റ്"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouprequest_contacts" msgid="7755354139254094668">"നിങ്ങളുടെ കോണ്‍ടാക്റ്റുകള്‍ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ലൊക്കേഷൻ"</string>
@@ -300,7 +300,7 @@
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"ഓഡിയോ റെക്കോർഡ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"കായിക പ്രവർത്തനം"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-നെ നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-നെ നിങ്ങളുടെ കായിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ക്യാമറ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"ചിത്രം എടുക്കാനും വീഡിയോ റെക്കോർഡ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -1598,7 +1598,7 @@
     <string name="sending" msgid="206925243621664438">"അയയ്‌ക്കുന്നു…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ബ്രൗസർ സമാരംഭിക്കണോ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"കോൾ സ്വീകരിക്കണോ?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"എല്ലായ്പ്പോഴും"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"എല്ലായ്‌പ്പോഴും"</string>
     <string name="activity_resolver_set_always" msgid="4142825808921411476">"\'എല്ലായ്‌പ്പോഴും തുറക്കുക\' എന്നതിലേക്കാക്കുക"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ഒരിക്കൽ മാത്രം"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"ക്രമീകരണം"</string>
@@ -1895,8 +1895,8 @@
     <string name="close_button_text" msgid="10603510034455258">"അവസാനിപ്പിക്കുക"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>

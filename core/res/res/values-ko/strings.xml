@@ -201,7 +201,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"무선 사용"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"무선 끄기"</string>
     <string name="screen_lock" msgid="2072642720826409809">"화면 잠금"</string>
-    <string name="power_off" msgid="4111692782492232778">"종료"</string>
+    <string name="power_off" msgid="4111692782492232778">"전원 끄기"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"벨소리가 무음입니다."</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"벨소리가 진동입니다."</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"벨소리가 켜져 있습니다."</string>
@@ -225,7 +225,7 @@
     <string name="global_actions" product="tv" msgid="2020669784083287370">"TV 옵션"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"휴대전화 옵션"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"화면 잠금"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"종료"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"전원 끄기"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"긴급 전화"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"버그 신고"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"세션 끝내기"</string>
@@ -300,7 +300,7 @@
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 오디오를 녹음하도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"신체 활동"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"신체 활동 정보에 액세스"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 앱이 내 신체 활동 정보에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 내 신체 활동 정보에 액세스하도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"사진 및 동영상 촬영"</string>
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 사진을 촬영하고 동영상을 녹화하도록 허용하시겠습니까?"</string>

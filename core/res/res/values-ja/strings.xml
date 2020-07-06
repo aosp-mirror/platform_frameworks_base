@@ -1600,7 +1600,7 @@
     <string name="SetupCallDefault" msgid="5581740063237175247">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"常時"</string>
     <string name="activity_resolver_set_always" msgid="4142825808921411476">"[常に開く] に設定"</string>
-    <string name="activity_resolver_use_once" msgid="948462794469672658">"1回のみ"</string>
+    <string name="activity_resolver_use_once" msgid="948462794469672658">"1 回のみ"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"設定"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$sは仕事用プロファイルをサポートしていません"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"タブレット"</string>
@@ -1913,7 +1913,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"このアプリは使用できません"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルの有効化"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルを ON にしますか？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>

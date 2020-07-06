@@ -1136,8 +1136,8 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"اس کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"‏%1$s کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"کھولیں"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"<xliff:g id="HOST">%1$s</xliff:g> لنکس کے ساتھ کھولیں"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"لنکس کے ساتھ کھولیں"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"‫‫<xliff:g id="HOST">%1$s</xliff:g> لنکس اس کے ساتھ کھولیں"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"اس کے ساتھ لنکس کھولیں"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> کے ذریعے لنکس کھولیں"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="HOST">%1$s</xliff:g> لنکس کو <xliff:g id="APPLICATION">%2$s</xliff:g> کے ذریعے کھولیں"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"رسائی دیں"</string>
@@ -1639,7 +1639,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"اپنا پیٹرن ڈرا کریں"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"‏SIM PIN درج کریں"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"‏PIN درج کریں"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"‏‫PIN درج کریں"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"پاس ورڈ درج کریں"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‏SIM اب غیر فعال ہوگیا ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‏پسندیدہ PIN کوڈ درج کریں"</string>
@@ -1787,7 +1787,7 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> سروس انسٹال ہو گئی"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"فعال کرنے کیلئے تھپتھپائیں"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"‏منتظم PIN درج کریں"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"‏PIN درج کریں"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"‏‫PIN درج کریں"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"غلط"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"‏موجودہ PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"‏نیا PIN"</string>

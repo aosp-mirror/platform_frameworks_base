@@ -961,7 +961,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع إلكترونية عشوائية."</string>
     <string name="save_password_message" msgid="2146409467245462965">"هل تريد من المتصفح تذكر كلمة المرور هذه؟"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"ليس الآن"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"تذكّر"</string>
@@ -1157,7 +1157,7 @@
     <string name="Midnight" msgid="8176019203622191377">"منتصف الليل"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="1532369154488982046">"اختيار الكل"</string>
+    <string name="selectAll" msgid="1532369154488982046">"تحديد الكل"</string>
     <string name="cut" msgid="2561199725874745819">"قص"</string>
     <string name="copy" msgid="5472512047143665218">"نسخ"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"تعذّر النسخ في الحافظة"</string>
@@ -2018,9 +2018,9 @@
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"توسيع"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"تصغير"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"تبديل التوسيع"</string>
-    <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
+    <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏منفذ الأجهزة الملحقة المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
-    <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"‏منفذ الأجهزة الملحقة المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"إغلاق التجاوز"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"تكبير"</string>
@@ -2042,7 +2042,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"اللغات المقترحة"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"المناطق المقترحة"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"البحث"</string>

@@ -534,7 +534,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ешқандай PIN коды, өрнек немесе құпия сөз орнатылмаған."</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Саусақ ізі толық анықталмады. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Саусақ ізі сенсоры лас. Тазалап, әрекетті қайталаңыз."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Сканер лас. Тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Саусағыңызды тым жылдам қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
   <string-array name="fingerprint_acquired_vendor">

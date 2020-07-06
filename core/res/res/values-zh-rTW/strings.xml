@@ -1941,7 +1941,7 @@
     <string name="app_category_social" msgid="2278269325488344054">"社交和通訊"</string>
     <string name="app_category_news" msgid="1172762719574964544">"新聞和雜誌"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"地圖和導航"</string>
-    <string name="app_category_productivity" msgid="1844422703029557883">"生產應用"</string>
+    <string name="app_category_productivity" msgid="1844422703029557883">"工作效率"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB 偵錯"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"點"</string>

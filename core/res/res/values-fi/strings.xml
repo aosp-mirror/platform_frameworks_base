@@ -533,7 +533,7 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Todennus peruutettu"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-koodia, kuviota tai salasanaa ei ole asetettu"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Sormenjälki havaittiin vain osittain. Yritä uudelleen."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen käsittely epäonnistui. Yritä uudelleen."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Sormenjälkitunnistin on likainen. Puhdista tunnistin ja yritä uudelleen."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Liikutit sormea liian nopeasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
@@ -1835,8 +1835,8 @@
       <item quantity="one">1 minuutin ajan (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> asti)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d tunniksi (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 tunniksi (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d tuntia (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 tunti (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
       <item quantity="other">%1$d tunnin ajan (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> asti)</item>

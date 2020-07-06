@@ -184,7 +184,7 @@
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"किसी अज्ञात तृतीय पक्ष के द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"आपकी वर्क प्रोफ़ाइल का व्यवस्थापक करता है"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> के द्वारा"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"वर्क प्रोफ़ाइल हटाई गई"</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"वर्क प्रोफ़ाइल मिटाई गई"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"वर्क प्रोफ़ाइल व्यवस्थापक ऐप्लिकेशन या तो मौजूद नहीं है या वह खराब हो गया है. परिणामस्वरूप, आपकी वर्क प्रोफ़ाइल और उससे जुड़े डेटा को हटा दिया गया है. सहायता के लिए अपने व्यवस्थापक से संपर्क करें."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"आपकी वर्क प्रोफ़ाइल अब इस डिवाइस पर उपलब्‍ध नहीं है"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"कई बार गलत पासवर्ड डाला गया"</string>
@@ -230,7 +230,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्र खत्म करें"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रीनशॉट"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"बग रिपोर्ट"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"गड़बड़ी की रिपोर्ट"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"इससे ईमेल भेजने के लिए, आपके डिवाइस की मौजूदा स्थिति से जुड़ी जानकारी इकट्ठा की जाएगी. गड़बड़ी की रिपोर्ट बनना शुरू होने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया इंतज़ार करें."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"सहभागी रिपोर्ट"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ज़्यादातर परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में ज़्यादा विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में ज़्यादा समय लगता है."</string>
@@ -532,10 +532,10 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"पहचान नहीं हो पाई"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"प्रमाणीकरण रद्द किया गया"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"पिन, पैटर्न या पासवर्ड सेट नहीं है"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"फ़िंगरप्रिंट की पहचान आंशिक तौर पर की गई. कृपया फिर से कोशिश करें."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"अधूरा फ़िंगरप्रिंट प्रोसेस हो सका. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फ़िंगरप्रिंट प्रोसेस नहीं हो सका. कृपया दोबारा कोशिश करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"उंगली बहुत तेज़ी से चलाई गई है. कृपया फिर से कोशिश करें."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"उंगली बहुत तेज़ी से चलाई गई. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1599,8 +1599,8 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ब्राउज़र लॉन्च करें?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"हमेशा"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"\'हमेशा खुला रखें\' पर सेट करें"</string>
-    <string name="activity_resolver_use_once" msgid="948462794469672658">"केवल एक बार"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"\'हमेशा इस ऐप्लिकेशन से ही खोलें\' पर सेट करें"</string>
+    <string name="activity_resolver_use_once" msgid="948462794469672658">"सिर्फ़ एक बार"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"सेटिंग"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s वर्क प्रोफ़ाइल का समर्थन नहीं करता"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"टैबलेट"</string>

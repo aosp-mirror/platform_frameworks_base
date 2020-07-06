@@ -1176,10 +1176,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Otwórz w aplikacji"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otwórz w aplikacji %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otwórz"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otwieraj linki w"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otwieraj linki w aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Udziel uprawnień"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Edytuj w aplikacji %1$s"</string>
@@ -1947,7 +1947,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Żądanie SS zmienione na rozmowę wideo"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Żądanie SS zmienione na żądanie USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Zmieniono na nowe żądanie SS"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil do pracy"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil służbowy"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alert"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Rozwiń"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Zwiń"</string>

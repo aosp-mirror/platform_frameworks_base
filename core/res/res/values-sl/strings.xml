@@ -1176,7 +1176,7 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Odpiranje z aplikacijo"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Odpiranje z aplikacijo %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Odpiranje"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Odpiranje povezav <xliff:g id="HOST">%1$s</xliff:g> z"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Odpiranje povezav <xliff:g id="HOST">%1$s</xliff:g> z aplikacijo"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Odpiranje povezav z"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Odpiranje povezav z aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Odpiranje povezav <xliff:g id="HOST">%1$s</xliff:g> z aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
@@ -1400,7 +1400,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Ni zahtevanih dovoljenj"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"to je lahko plačljivo"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"V redu"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Polnjenje akumulatorja v napravi prek USB-ja"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Polnjenje naprave prek USB-ja"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Polnjenje akumulatorja v povezani napravi prek USB-ja"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Vklopljen je prenos datotek prek USB-ja"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Vklopljen je način PTP prek USB-ja"</string>

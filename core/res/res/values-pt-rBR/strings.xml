@@ -56,8 +56,8 @@
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
-    <string name="ClipMmi" msgid="4110549342447630629">"ID do chamador de entrada"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"ID do chamador de saída"</string>
+    <string name="ClipMmi" msgid="4110549342447630629">"Identificador de chamadas recebidas"</string>
+    <string name="ClirMmi" msgid="4702929460236547156">"Identificador de chamadas realizadas"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID de linha conectada"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Restrição de ID de linha conectada"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Encaminhamento de chamada"</string>
@@ -71,12 +71,12 @@
     <string name="RuacMmi" msgid="1876047385848991110">"Rejeição das chamadas indesejadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Chamando número de entrega"</string>
     <string name="DndMmi" msgid="8797375819689129800">"Não perturbe"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"O ID do chamador assume o padrão de restrito. Próxima chamada: Restrita"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O ID do chamador assume o padrão de restrito. Próxima chamada: Não restrita"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O ID do chamador assume o padrão de não restrito. Próxima chamada: Restrita"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O ID do chamador assume o padrão de não restrito. Próxima chamada: Não restrita"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"O identificador de chamadas assume o padrão de restrito. Próxima chamada: Restrita"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O identificador de chamadas assume o padrão de restrito. Próxima chamada: Não restrita"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Restrita"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Não restrita"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"O serviço não foi habilitado."</string>
-    <string name="CLIRPermanent" msgid="166443681876381118">"Não é possível alterar a configuração de identificação de chamadas."</string>
+    <string name="CLIRPermanent" msgid="166443681876381118">"Não é possível alterar a configuração do identificador de chamadas."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nenhum serviço móvel de dados"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Chamadas de emergência indisponíveis"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sem serviço de voz"</string>
@@ -1136,10 +1136,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Abrir com"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Abrir com %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Abrir"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> com"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> usando"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Abrir links com"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Abrir links com <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> com <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> usando <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Conceder acesso"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Editar com"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Editar com %1$s"</string>
