@@ -997,14 +997,16 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * Returns the display title for the AccessPoint, such as for an AccessPointPreference's title.
      */
     public String getTitle() {
-        if (isPasspoint()) {
+        if (isPasspoint() && !TextUtils.isEmpty(mConfig.providerFriendlyName)) {
             return mConfig.providerFriendlyName;
-        } else if (isPasspointConfig()) {
+        } else if (isPasspointConfig() && !TextUtils.isEmpty(mProviderFriendlyName)) {
             return mProviderFriendlyName;
-        } else if (isOsuProvider()) {
+        } else if (isOsuProvider() && !TextUtils.isEmpty(mOsuProvider.getFriendlyName())) {
             return mOsuProvider.getFriendlyName();
-        } else {
+        } else if (!TextUtils.isEmpty(getSsidStr())) {
             return getSsidStr();
+        } else {
+            return "";
         }
     }
 
