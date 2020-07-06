@@ -1189,6 +1189,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         activity.onRemovedFromDisplay();
         if (activity == mFixedRotationLaunchingApp) {
+            // Make sure the states of associated tokens are also cleared.
+            activity.finishFixedRotationTransform();
             setFixedRotationLaunchingAppUnchecked(null);
         }
     }
@@ -1485,6 +1487,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // Apply normal rotation animation in case of the activity set different requested
                 // orientation without activity switch, or the transition is unset due to starting
                 // window was transferred ({@link #mSkipAppTransitionAnimation}).
+                return false;
+            }
+            if ((mAppTransition.getTransitFlags()
+                    & WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) != 0) {
+                // The transition may be finished before keyguard hidden. In order to avoid the
+                // intermediate orientation change, it is more stable to freeze the display.
                 return false;
             }
         } else if (r != topRunningActivity()) {
@@ -2310,6 +2318,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void onAppTransitionDone() {
         super.onAppTransitionDone();
         mWmService.mWindowsChanged = true;
+        // If the transition finished callback cannot match the token for some reason, make sure the
+        // rotated state is cleared if it is already invisible.
+        if (mFixedRotationLaunchingApp != null && !mFixedRotationLaunchingApp.mVisibleRequested
+                && !mFixedRotationLaunchingApp.isVisible()
+                && !mDisplayRotation.isRotatingSeamlessly()) {
+            clearFixedRotationLaunchingApp();
+        }
     }
 
     @Override
@@ -3011,11 +3026,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final ScreenRotationAnimation rotationAnimation = getRotationAnimation();
         if (rotationAnimation != null) {
-            pw.print(subPrefix);
             pw.println("  mScreenRotationAnimation:");
-            rotationAnimation.printTo("  ", pw);
+            rotationAnimation.printTo(subPrefix, pw);
         } else if (dumpAll) {
-            pw.print(subPrefix);
             pw.println("  no ScreenRotationAnimation ");
         }
 
