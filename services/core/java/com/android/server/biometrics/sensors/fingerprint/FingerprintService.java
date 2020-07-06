@@ -230,7 +230,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
 
             final RemovalClient client = new FingerprintRemovalClient(getContext(), mLazyDaemon,
                     token, new ClientMonitorCallbackConverter(receiver), fingerId, userId,
-                    opPackageName, getBiometricUtils(), getSensorId());
+                    opPackageName, getBiometricUtils(), getSensorId(), mAuthenticatorIds);
             removeInternal(client);
         }
 
@@ -707,7 +707,7 @@ public class FingerprintService extends BiometricServiceBase<IBiometricsFingerpr
         final List<Fingerprint> enrolledList = getEnrolledTemplates(userId);
         final FingerprintInternalCleanupClient client = new FingerprintInternalCleanupClient(
                 getContext(), mLazyDaemon, userId, getContext().getOpPackageName(), getSensorId(),
-                enrolledList, getBiometricUtils());
+                enrolledList, getBiometricUtils(), mAuthenticatorIds);
         cleanupInternal(client);
     }
 

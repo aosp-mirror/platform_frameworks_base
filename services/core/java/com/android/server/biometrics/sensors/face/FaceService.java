@@ -243,7 +243,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
 
             final RemovalClient client = new FaceRemovalClient(getContext(), mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), faceId, userId, opPackageName,
-                    getBiometricUtils(), getSensorId());
+                    getBiometricUtils(), getSensorId(), mAuthenticatorIds);
             removeInternal(client);
         }
 
@@ -705,7 +705,7 @@ public class FaceService extends BiometricServiceBase<IBiometricsFace> {
         final List<Face> enrolledList = getEnrolledTemplates(userId);
         final FaceInternalCleanupClient client = new FaceInternalCleanupClient(getContext(),
                 mLazyDaemon, userId, getContext().getOpPackageName(), getSensorId(), enrolledList,
-                getBiometricUtils());
+                getBiometricUtils(), mAuthenticatorIds);
         cleanupInternal(client);
     }
 

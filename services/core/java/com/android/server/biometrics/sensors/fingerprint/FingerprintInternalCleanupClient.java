@@ -30,6 +30,7 @@ import com.android.server.biometrics.sensors.InternalEnumerateClient;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fingerprint-specific internal cleanup client supporting the
@@ -42,9 +43,9 @@ class FingerprintInternalCleanupClient
     FingerprintInternalCleanupClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, int userId,
             @NonNull String owner, int sensorId, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils utils) {
+            @NonNull BiometricUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, enrolledList, utils);
+                BiometricsProtoEnums.MODALITY_FINGERPRINT, enrolledList, utils, authenticatorIds);
     }
 
     @Override
@@ -60,11 +61,12 @@ class FingerprintInternalCleanupClient
     @Override
     protected RemovalClient<IBiometricsFingerprint> getRemovalClient(Context context,
             LazyDaemon<IBiometricsFingerprint> lazyDaemon, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId) {
+            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId,
+            Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         return new FingerprintRemovalClient(context, lazyDaemon, token,
                 null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
-                sensorId);
+                sensorId, authenticatorIds);
     }
 }

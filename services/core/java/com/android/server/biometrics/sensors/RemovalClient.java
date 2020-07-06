@@ -24,6 +24,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.Map;
+
 /**
  * A class to keep track of the remove state for a given client.
  */
@@ -33,16 +35,18 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
 
     protected final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
+    private final Map<Integer, Long> mAuthenticatorIds;
 
     public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils utils,
-            int sensorId, int statsModality) {
+            int sensorId, @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_REMOVE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
+        mAuthenticatorIds = authenticatorIds;
     }
 
     @Override
@@ -74,6 +78,13 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
         }
 
         if (remaining == 0) {
+            if (mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId()).isEmpty()) {
+                Slog.d(TAG, "Last biometric removed for user: " + getTargetUserId());
+                // When the last biometric of a group is removed, update the authenticator id.
+                // Note that multiple ClientMonitors may be cause onRemoved (e.g. internal
+                // cleanup).
+                mAuthenticatorIds.put(getTargetUserId(), 0L);
+            }
             mFinishCallback.onClientFinished(this, true /* success */);
         }
     }

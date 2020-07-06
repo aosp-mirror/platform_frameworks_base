@@ -29,6 +29,7 @@ import com.android.server.biometrics.sensors.InternalEnumerateClient;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Face-specific internal cleanup client supporting the
@@ -39,9 +40,10 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsF
 
     FaceInternalCleanupClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
-            int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils utils) {
+            int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils utils,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
-                enrolledList, utils);
+                enrolledList, utils, authenticatorIds);
     }
 
     @Override
@@ -55,11 +57,12 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsF
     @Override
     protected RemovalClient<IBiometricsFace> getRemovalClient(Context context,
             LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId) {
+            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId,
+            Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         return new FaceRemovalClient(context, lazyDaemon, token,
                 null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
-                sensorId);
+                sensorId, authenticatorIds);
     }
 }

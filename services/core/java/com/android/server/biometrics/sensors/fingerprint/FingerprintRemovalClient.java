@@ -28,6 +28,8 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
 
+import java.util.Map;
+
 /**
  * Fingerprint-specific removal client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
@@ -39,9 +41,10 @@ class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
     FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+                authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override

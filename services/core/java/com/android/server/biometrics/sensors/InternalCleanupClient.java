@@ -27,6 +27,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Wraps {@link InternalEnumerateClient} and {@link RemovalClient}. Keeps track of all the
@@ -57,6 +58,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
 
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
     private final BiometricUtils mBiometricUtils;
+    private final Map<Integer, Long> mAuthenticatorIds;
     private final List<S> mEnrolledList;
     private ClientMonitor<T> mCurrentTask;
 
@@ -91,15 +93,17 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
 
     protected abstract RemovalClient<T> getRemovalClient(Context context, LazyDaemon<T> lazyDaemon,
             IBinder token, int biometricId, int userId, String owner, BiometricUtils utils,
-            int sensorId);
+            int sensorId, Map<Integer, Long> authenticatorIds);
 
     protected InternalCleanupClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             int userId, @NonNull String owner, int sensorId, int statsModality,
-            @NonNull List<S> enrolledList, @NonNull BiometricUtils utils) {
+            @NonNull List<S> enrolledList, @NonNull BiometricUtils utils,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* ClientMonitorCallbackConverter */,
                 userId, owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
+        mAuthenticatorIds = authenticatorIds;
         mEnrolledList = enrolledList;
     }
 
@@ -108,7 +112,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         mUnknownHALTemplates.remove(template);
         mCurrentTask = getRemovalClient(getContext(), mLazyDaemon, getToken(),
                 template.mIdentifier.getBiometricId(), template.mUserId,
-                getContext().getPackageName(), mBiometricUtils, getSensorId());
+                getContext().getPackageName(), mBiometricUtils, getSensorId(), mAuthenticatorIds);
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                 mStatsModality,
                 BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
