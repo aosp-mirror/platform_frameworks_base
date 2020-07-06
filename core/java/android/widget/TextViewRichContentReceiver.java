@@ -116,9 +116,6 @@ final class TextViewRichContentReceiver implements RichContentReceiver<TextView>
     private static boolean onReceiveForAutofill(@NonNull TextView textView, @NonNull ClipData clip,
             @Flags int flags) {
         final CharSequence text = coerceToText(clip, textView.getContext(), flags);
-        if (text.length() == 0) {
-            return false;
-        }
         // First autofill it...
         textView.setText(text);
         // ...then move cursor to the end.
