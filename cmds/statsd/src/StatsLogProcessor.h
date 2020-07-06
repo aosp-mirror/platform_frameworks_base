@@ -139,10 +139,8 @@ public:
     int64_t getLastReportTimeNs(const ConfigKey& key);
 
     inline void setPrintLogs(bool enabled) {
-#ifdef VERY_VERBOSE_PRINTING
         std::lock_guard<std::mutex> lock(mMetricsMutex);
         mPrintAllLogs = enabled;
-#endif
     }
 
     // Add a specific config key to the possible configs to dump ASAP.
@@ -276,9 +274,7 @@ private:
     //Last time we wrote metadata to disk.
     int64_t mLastMetadataWriteNs = 0;
 
-#ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;
-#endif
 
     FRIEND_TEST(StatsLogProcessorTest, TestOutOfOrderLogs);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
