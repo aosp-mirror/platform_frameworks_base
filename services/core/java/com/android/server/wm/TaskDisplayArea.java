@@ -1859,14 +1859,14 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.println(prefix + "TaskDisplayArea " + getName());
-        super.dump(pw, prefix, dumpAll);
+        final String doublePrefix = prefix + "  ";
+        super.dump(pw, doublePrefix, dumpAll);
         if (mPreferredTopFocusableStack != null) {
-            pw.println(prefix + "  mPreferredTopFocusableStack=" + mPreferredTopFocusableStack);
+            pw.println(doublePrefix + "mPreferredTopFocusableStack=" + mPreferredTopFocusableStack);
         }
         if (mLastFocusedStack != null) {
-            pw.println(prefix + "  mLastFocusedStack=" + mLastFocusedStack);
+            pw.println(doublePrefix + "mLastFocusedStack=" + mLastFocusedStack);
         }
-        final String doublePrefix = prefix + "  ";
         final String triplePrefix = doublePrefix + "  ";
         pw.println(doublePrefix + "Application tokens in top down Z order:");
         for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
