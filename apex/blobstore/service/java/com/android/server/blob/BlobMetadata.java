@@ -61,6 +61,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.DumpArgs;
@@ -496,14 +497,8 @@ class BlobMetadata {
             final byte[] leaseesBytes = proto.getBytes();
 
             // Construct the StatsEvent to represent this Blob
-            return StatsEvent.newBuilder()
-                    .setAtomId(atomTag)
-                    .writeLong(mBlobId)
-                    .writeLong(getSize())
-                    .writeLong(mBlobHandle.getExpiryTimeMillis())
-                    .writeByteArray(committersBytes)
-                    .writeByteArray(leaseesBytes)
-                    .build();
+            return FrameworkStatsLog.buildStatsEvent(atomTag, mBlobId, getSize(),
+                    mBlobHandle.getExpiryTimeMillis(), committersBytes, leaseesBytes);
         }
     }
 

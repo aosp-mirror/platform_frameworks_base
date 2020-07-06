@@ -611,24 +611,18 @@ public class GnssMetrics {
             if (atomTag != FrameworkStatsLog.GNSS_STATS) {
                 throw new UnsupportedOperationException("Unknown tagId = " + atomTag);
             }
-            StatsEvent e = StatsEvent.newBuilder()
-                    .setAtomId(atomTag)
-                    .writeLong(mLocationFailureReportsStatistics.getCount())
-                    .writeLong(mLocationFailureReportsStatistics.getLongSum())
-                    .writeLong(mTimeToFirstFixMilliSReportsStatistics.getCount())
-                    .writeLong(mTimeToFirstFixMilliSReportsStatistics.getLongSum())
-                    .writeLong(mPositionAccuracyMetersReportsStatistics.getCount())
-                    .writeLong(mPositionAccuracyMetersReportsStatistics.getLongSum())
-                    .writeLong(mTopFourAverageCn0DbmHzReportsStatistics.getCount())
-                    .writeLong(mTopFourAverageCn0DbmHzReportsStatistics.getLongSum())
-                    .writeLong(mL5TopFourAverageCn0DbmHzReportsStatistics.getCount())
-                    .writeLong(mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum())
-                    .writeLong(mSvStatusReports)
-                    .writeLong(mSvStatusReportsUsedInFix)
-                    .writeLong(mL5SvStatusReports)
-                    .writeLong(mL5SvStatusReportsUsedInFix)
-                    .build();
-            data.add(e);
+            data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                    mLocationFailureReportsStatistics.getCount(),
+                    mLocationFailureReportsStatistics.getLongSum(),
+                    mTimeToFirstFixMilliSReportsStatistics.getCount(),
+                    mTimeToFirstFixMilliSReportsStatistics.getLongSum(),
+                    mPositionAccuracyMetersReportsStatistics.getCount(),
+                    mPositionAccuracyMetersReportsStatistics.getLongSum(),
+                    mTopFourAverageCn0DbmHzReportsStatistics.getCount(),
+                    mTopFourAverageCn0DbmHzReportsStatistics.getLongSum(),
+                    mL5TopFourAverageCn0DbmHzReportsStatistics.getCount(),
+                    mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum(), mSvStatusReports,
+                    mSvStatusReportsUsedInFix, mL5SvStatusReports, mL5SvStatusReportsUsedInFix));
             return StatsManager.PULL_SUCCESS;
         }
     }
