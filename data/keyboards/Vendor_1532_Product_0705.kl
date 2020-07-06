@@ -32,18 +32,17 @@ key 0x137    BUTTON_R1
 key 0x138    BUTTON_L2
 key 0x139    BUTTON_R2
 
-# L2 axis
-axis 0x03   LTRIGGER
-# R2 axis
-axis 0x04   RTRIGGER
-
-
 # Left Analog Stick
 axis 0x00    X
 axis 0x01    Y
 # Right Analog Stick
 axis 0x02    Z
 axis 0x05    RZ
+
+# L2 axis
+axis 0x09    RTRIGGER
+# R2 axis
+axis 0x0a    LTRIGGER
 
 # Left stick click
 key 0x13d    BUTTON_THUMBL
