@@ -47,6 +47,11 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
 
+    /**
+     * Stops the HAL operation specific to the ClientMonitor subclass.
+     */
+    protected abstract void stopHalOperation();
+
     AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality,
@@ -78,7 +83,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
-        mFinishCallback.onClientFinished(this);
+        mFinishCallback.onClientFinished(this, false /* success */);
     }
 
     /**
@@ -110,7 +115,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendAcquired", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 

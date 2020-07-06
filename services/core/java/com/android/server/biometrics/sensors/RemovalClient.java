@@ -74,7 +74,7 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
         }
 
         if (remaining == 0) {
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, true /* success */);
         }
     }
 }

@@ -53,14 +53,10 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
         startHalOperation();
         try {
             getListener().onChallengeGenerated(mChallenge);
+            mFinishCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
-        mFinishCallback.onClientFinished(this);
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Not supported for GenerateChallenge
     }
 }

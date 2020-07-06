@@ -71,14 +71,10 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
         try {
             final OptionalBool result = getFreshDaemon().getFeature(mFeature, mFaceId);
             getListener().onFeatureGet(result.status == Status.OK, mFeature, result.value);
+            mFinishCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to getFeature", e);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
-        mFinishCallback.onClientFinished(this);
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Not supported for GetFeature
     }
 }

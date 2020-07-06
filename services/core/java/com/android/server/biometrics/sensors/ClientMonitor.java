@@ -47,8 +47,9 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
          * implementation.
          *
          * @param clientMonitor Reference of the ClientMonitor that finished.
+         * @param success True if the operation completed successfully.
          */
-        void onClientFinished(ClientMonitor clientMonitor);
+        void onClientFinished(ClientMonitor clientMonitor, boolean success);
     }
 
     /**
@@ -136,11 +137,6 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      * Starts the HAL operation specific to the ClientMonitor subclass.
      */
     protected abstract void startHalOperation();
-
-    /**
-     * Stops the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void stopHalOperation();
 
     public boolean isAlreadyDone() {
         return mAlreadyDone;

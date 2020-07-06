@@ -60,7 +60,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     private final List<S> mEnrolledList;
     private ClientMonitor<T> mCurrentTask;
 
-    private final FinishCallback mEnumerateFinishCallback = clientMonitor -> {
+    private final FinishCallback mEnumerateFinishCallback = (clientMonitor, success) -> {
         final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
                 ((InternalEnumerateClient<T>) mCurrentTask).getUnknownHALTemplates();
 
@@ -75,14 +75,14 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         if (mUnknownHALTemplates.isEmpty()) {
             // No unknown HAL templates. Unknown framework templates are already cleaned up in
             // InternalEnumerateClient. Finish this client.
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, success);
         } else {
             startCleanupUnknownHalTemplates();
         }
     };
 
-    private final FinishCallback mRemoveFinishCallback = clientMonitor -> {
-        mFinishCallback.onClientFinished(this);
+    private final FinishCallback mRemoveFinishCallback = (clientMonitor, success) -> {
+        mFinishCallback.onClientFinished(this, success);
     };
 
     protected abstract InternalEnumerateClient<T> getEnumerateClient(Context context,
@@ -134,11 +134,6 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     protected void startHalOperation() {
         // Internal cleanup's start method does not require a HAL operation, but rather
         // relies on its subtask's ClientMonitor to start the proper HAL operation.
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Internal cleanup's cannot be stopped.
     }
 
     @Override

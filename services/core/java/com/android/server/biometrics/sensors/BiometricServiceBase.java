@@ -102,7 +102,8 @@ public abstract class BiometricServiceBase<T> extends SystemService
         }
     };
 
-    protected final ClientMonitor.FinishCallback mClientFinishCallback = clientMonitor -> {
+    protected final ClientMonitor.FinishCallback mClientFinishCallback =
+            (clientMonitor, success) -> {
         if (clientMonitor instanceof RemovalConsumer) {
             // When the last biometric of a group is removed, update the authenticator id.
             // Note that 1) multiple ClientMonitors may be cause onRemoved (e.g. internal cleanup),

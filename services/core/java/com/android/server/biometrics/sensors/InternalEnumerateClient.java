@@ -62,7 +62,7 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
         handleEnumeratedTemplate(identifier);
         if (remaining == 0) {
             doTemplateCleanup();
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, true /* success */);
         }
     }
 

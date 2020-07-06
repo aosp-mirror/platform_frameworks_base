@@ -40,11 +40,6 @@ public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
         super.start(finishCallback);
 
         startHalOperation();
-        mFinishCallback.onClientFinished(this);
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Not supported for RevokeChallenge
+        mFinishCallback.onClientFinished(this, true /* success */);
     }
 }

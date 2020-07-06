@@ -73,7 +73,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
         if (authenticated) {
             resetFailedAttempts(getTargetUserId());
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, true /* success */);
         } else {
             final @LockoutTracker.LockoutMode int lockoutMode =
                     mLockoutFrameworkImpl.getLockoutModeForUser(getTargetUserId());
@@ -84,7 +84,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                         ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                         : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                 onError(errorCode, 0 /* vendorCode */);
-                mFinishCallback.onClientFinished(this);
+                mFinishCallback.onClientFinished(this, true /* success */);
             }
         }
     }
@@ -108,7 +108,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -120,7 +120,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 }

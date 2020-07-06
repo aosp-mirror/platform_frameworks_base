@@ -65,14 +65,10 @@ public class FaceResetLockoutClient extends ClientMonitor<IBiometricsFace> {
     protected void startHalOperation() {
         try {
             getFreshDaemon().resetLockout(mHardwareAuthToken);
+            mFinishCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to reset lockout", e);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
-        mFinishCallback.onClientFinished(this);
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Not supported for resetLockout
     }
 }

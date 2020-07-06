@@ -180,7 +180,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to notify listener, finishing", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 

@@ -49,17 +49,7 @@ class FaceRemovalClient extends RemovalClient<IBiometricsFace> {
             getFreshDaemon().remove(mBiometricId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
-            mFinishCallback.onClientFinished(this);
-        }
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        try {
-            getFreshDaemon().cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting cancel", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 }
