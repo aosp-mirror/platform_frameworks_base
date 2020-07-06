@@ -34,9 +34,9 @@ import junit.framework.TestCase;
  * A test case that has access to {@link Instrumentation}.
  *
  * @deprecated Use
- * <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">
+ * <a href="{@docRoot}reference/androidx/test/platform/app/InstrumentationRegistry.html">
  * InstrumentationRegistry</a> instead. New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
+ * <a href="{@docRoot}training/testing/index.html">AndroidX Test Library</a>.
  */
 @Deprecated
 public class InstrumentationTestCase extends TestCase {
