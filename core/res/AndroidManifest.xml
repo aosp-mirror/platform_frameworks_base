@@ -5068,7 +5068,7 @@
                 android:process=":ui"
                 android:exported="true"
                 android:visibleToInstantApps="true">
-            <intent-filter>
+            <intent-filter android:priority="100">
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.VOICE" />
