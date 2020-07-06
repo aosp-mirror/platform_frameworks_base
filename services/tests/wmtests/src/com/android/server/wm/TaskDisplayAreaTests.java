@@ -219,8 +219,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task rootHomeTask = defaultTaskDisplayArea.getRootHomeTask();
         rootHomeTask.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
 
-        final Task primarySplitTask =
-                new ActivityTestsBase.StackBuilder(rootWindowContainer)
+        final Task primarySplitTask = new StackBuilder(rootWindowContainer)
                 .setTaskDisplayArea(defaultTaskDisplayArea)
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 .setActivityType(ACTIVITY_TYPE_STANDARD)
@@ -234,7 +233,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
         ActivityRecord homeActivity = rootHomeTask.getTopNonFinishingActivity();
         if (homeActivity == null) {
-            homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+            homeActivity = new ActivityBuilder(mWm.mAtmService)
                     .setStack(rootHomeTask).setCreateTask(true).build();
         }
         homeActivity.setVisible(false);

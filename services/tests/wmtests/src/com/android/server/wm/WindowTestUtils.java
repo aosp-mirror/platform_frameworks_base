@@ -25,7 +25,7 @@ import android.os.IBinder;
 import android.view.IWindow;
 import android.view.WindowManager;
 
-import com.android.server.wm.ActivityTestsBase.ActivityBuilder;
+import com.android.server.wm.WindowTestsBase.ActivityBuilder;
 
 /**
  * A collection of static functions that provide access to WindowManager related test functionality.
@@ -34,7 +34,7 @@ class WindowTestUtils {
 
     /** Creates a {@link Task} and adds it to the specified {@link Task}. */
     static Task createTaskInStack(WindowManagerService service, Task stack, int userId) {
-        final Task task = new ActivityTestsBase.TaskBuilder(stack.mStackSupervisor)
+        final Task task = new WindowTestsBase.TaskBuilder(stack.mStackSupervisor)
                 .setUserId(userId)
                 .setStack(stack)
                 .build();
@@ -49,7 +49,7 @@ class WindowTestUtils {
     }
 
     static ActivityRecord createTestActivityRecord(Task stack) {
-        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
+        final ActivityRecord activity = new ActivityBuilder(stack.mAtmService)
                 .setStack(stack)
                 .setCreateTask(true)
                 .build();

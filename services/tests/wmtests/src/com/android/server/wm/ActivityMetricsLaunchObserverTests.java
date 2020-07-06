@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
+public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLogger.LaunchingState mLaunchingState;
     private ActivityMetricsLaunchObserver mLaunchObserver;
@@ -81,11 +81,11 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         // Sometimes we need an ActivityRecord for ActivityMetricsLogger to do anything useful.
         // This seems to be the easiest way to create an ActivityRecord.
-        mTrampolineActivity = new ActivityBuilder(mService)
+        mTrampolineActivity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "TrampolineActivity"))
                 .build();
-        mTopActivity = new ActivityBuilder(mService)
+        mTopActivity = new ActivityBuilder(mAtm)
                 .setTask(mTrampolineActivity.getTask())
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "TopActivity"))
                 .build();
@@ -121,7 +121,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     private <T> T verifyAsync(T mock) {
         // With WindowTestRunner, all test methods are inside WM lock, so we have to unblock any
         // messages that are waiting for the lock.
-        waitHandlerIdle(mService.mH);
+        waitHandlerIdle(mAtm.mH);
         // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
         return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
     }
@@ -192,7 +192,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         // Suppress resume when creating the record because we want to notify logger manually.
         mSupervisor.beginDeferResume();
         // Create an activity with different process that meets process switch.
-        final ActivityRecord noDrawnActivity = new ActivityBuilder(mService)
+        final ActivityRecord noDrawnActivity = new ActivityBuilder(mAtm)
                 .setTask(mTopActivity.getTask())
                 .setProcessName("other")
                 .build();
@@ -321,7 +321,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         onActivityLaunched(mTopActivity);
         final ActivityMetricsLogger.LaunchingState previousState = mLaunchingState;
 
-        final ActivityRecord otherActivity = new ActivityBuilder(mService)
+        final ActivityRecord otherActivity = new ActivityBuilder(mAtm)
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "OtherActivity"))
                 .setCreateTask(true)
                 .build();
@@ -345,7 +345,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
                 .setDisplay(addNewDisplayContentAt(DisplayContent.POSITION_BOTTOM))
                 .setCreateActivity(false)
                 .build();
-        final ActivityRecord activityOnNewDisplay = new ActivityBuilder(mService)
+        final ActivityRecord activityOnNewDisplay = new ActivityBuilder(mAtm)
                 .setStack(stack)
                 .setCreateTask(true)
                 .setProcessName("new")
