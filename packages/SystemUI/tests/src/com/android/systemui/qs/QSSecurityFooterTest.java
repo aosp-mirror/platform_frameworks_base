@@ -367,13 +367,46 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetManagementMessage() {
-        assertEquals(null, mFooter.getManagementMessage(false, MANAGING_ORGANIZATION));
+    public void testGetManagementMessage_noManagement() {
+        assertEquals(null, mFooter.getManagementMessage(
+                /* isDeviceManaged= */ false,
+                MANAGING_ORGANIZATION,
+                /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                MANAGING_ORGANIZATION));
+    }
+
+    @Test
+    public void testGetManagementMessage_deviceOwner() {
         assertEquals(mContext.getString(R.string.monitoring_description_named_management,
                                         MANAGING_ORGANIZATION),
-                     mFooter.getManagementMessage(true, MANAGING_ORGANIZATION));
+                     mFooter.getManagementMessage(
+                             /* isDeviceManaged= */ true,
+                             MANAGING_ORGANIZATION,
+                             /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                             /* workProfileOrganizationName= */ null));
         assertEquals(mContext.getString(R.string.monitoring_description_management),
-                     mFooter.getManagementMessage(true, null));
+                     mFooter.getManagementMessage(
+                             /* isDeviceManaged= */ true,
+                             /* organizationName= */ null,
+                             /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                             /* workProfileOrganizationName= */ null));
+    }
+
+    @Test
+    public void testGetManagementMessage_profileOwnerOfOrganizationOwnedDevice() {
+        assertEquals(mContext.getString(R.string.monitoring_description_named_management,
+                MANAGING_ORGANIZATION),
+                mFooter.getManagementMessage(
+                        /* isDeviceManaged= */ false,
+                        /* organizationName= */ null,
+                        /* isProfileOwnerOfOrganizationOwnedDevice= */ true,
+                        MANAGING_ORGANIZATION));
+        assertEquals(mContext.getString(R.string.monitoring_description_management),
+                mFooter.getManagementMessage(
+                        /* isDeviceManaged= */ false,
+                        /* organizationName= */ null,
+                        /* isProfileOwnerOfOrganizationOwnedDevice= */ true,
+                        /* workProfileOrganizationName= */ null));
     }
 
     @Test
