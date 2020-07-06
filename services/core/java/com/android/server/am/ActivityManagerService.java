@@ -4251,9 +4251,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         return procState;
     }
 
+    private boolean isCallerShell() {
+        final int callingUid = Binder.getCallingUid();
+        return callingUid == SHELL_UID || callingUid == ROOT_UID;
+    }
+
     @Override
     public boolean setProcessMemoryTrimLevel(String process, int userId, int level)
             throws RemoteException {
+        if (!isCallerShell()) {
+            EventLog.writeEvent(0x534e4554, 160390416, Binder.getCallingUid(), "");
+            throw new SecurityException("Only shell can call it");
+        }
         synchronized (this) {
             final ProcessRecord app = findProcessLocked(process, userId, "setProcessMemoryTrimLevel");
             if (app == null) {
