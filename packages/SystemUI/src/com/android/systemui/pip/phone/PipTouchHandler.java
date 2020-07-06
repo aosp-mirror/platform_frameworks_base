@@ -242,7 +242,8 @@ public class PipTouchHandler {
                         this::updateMovementBounds, sysUiState);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                        true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()));
+                        true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()),
+                        menuController::hideMenu);
 
         Resources res = context.getResources();
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
@@ -708,6 +709,7 @@ public class PipTouchHandler {
                 // on and changing MotionEvents into HoverEvents.
                 // Let's not enable menu show/hide for a11y services.
                 if (!mAccessibilityManager.isTouchExplorationEnabled()) {
+                    mTouchState.removeHoverExitTimeoutCallback();
                     mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                             false /* allowMenuTimeout */, false /* willResizeMenu */,
                             shouldShowResizeHandle());
@@ -725,7 +727,7 @@ public class PipTouchHandler {
                 // Let's not enable menu show/hide for a11y services.
                 if (!mAccessibilityManager.isTouchExplorationEnabled()) {
                     mHideMenuAfterShown = true;
-                    mMenuController.hideMenu();
+                    mTouchState.scheduleHoverExitTimeoutCallback();
                 }
                 if (!shouldDeliverToMenu && mSendingHoverAccessibilityEvents) {
                     sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
