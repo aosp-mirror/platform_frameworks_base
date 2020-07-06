@@ -102,7 +102,7 @@ public class TakeScreenshotService extends Service {
 
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
-                    mScreenshot.takeScreenshot(uriConsumer, onComplete);
+                    mScreenshot.takeScreenshotFullscreen(uriConsumer, onComplete);
                     break;
                 case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
                     mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
