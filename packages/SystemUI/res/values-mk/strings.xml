@@ -434,7 +434,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се отстрани гостинот?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Отстрани"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добредојде назад, гостине!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни одново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Да, продолжи"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Екранот е прикачен"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ќе се гледа сѐ додека не го откачите. Допрете и држете „Назад“ и „Краток преглед“ за откачување."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ќе се гледа сѐ додека не го откачите. Допрете и задржете „Назад“ и „Почетен екран“ за откачување."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ќе се гледа сѐ додека не го откачите. Лизгајте нагоре и задржете за откачување."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ќе се гледа сѐ додека не ја откачите. Повлечете нагоре и задржете за откачување."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ќе се гледа сѐ додека не го откачите. Допрете и држете „Краток преглед“ за откачување."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ќе се гледа сѐ додека не го откачите. Допрете и задржете „Почетен екран“ за откачување."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"За откачување на екранов, допрете и задржете ги копчињата „Назад“ и „Краток преглед“"</string>
@@ -649,13 +649,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Блокирај"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Продолжи да ги прикажуваш"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Минимизирај"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Тивко"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Безгласно"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Продолжи со безгласно прикажување"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Предупредувај"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Продолжи да ме предупредуваш"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Исклучи известувања"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Дали да продолжат да се прикажуваат известувања од апликацијава?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Тивко"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Безгласно"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"Предупредувај"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ви помага да се концентрирате без звук или вибрации."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Ви го привлекува вниманието со звук или вибрации."</string>
@@ -928,7 +928,7 @@
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Отворете ја <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Поставки за балончињата за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"Да се дозволат балончиња од <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Управување"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"Управувајте"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Одбиј"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Дозволи"</string>
     <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Прашај ме подоцна"</string>

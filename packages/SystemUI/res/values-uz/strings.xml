@@ -386,7 +386,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Ilovalarni almashtirish uchun ekranni tepaga suring"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Ilovalarni tezkor almashtirish uchun o‘ngga torting"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Umumiy nazar rejimini almashtirish"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Batareya quvvati to‘ldi"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Quvvat oldi"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Quvvat olmoqda"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g>da to‘ladi"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Quvvat olmayapti"</string>
@@ -651,18 +651,18 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"Kichraytirish"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Tovushsiz"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Ovozsiz qolsin"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Bildirishnoma yuborish"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Ogohlantirish"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Signal berishda davom etilsin"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Bildirishnoma kelmasin"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Tovushsiz"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"Bildirishnoma yuborish"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"Ogohlantirish"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Bildirishnomalar tovush va tebranishsiz keladi."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Bildirishnomalar tovush va tebranish bilan keladi."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Ishonchli bildirishnoma"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasining barcha bildirishnomalari"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Barcha <xliff:g id="APP_NAME">%1$s</xliff:g> bildirishnomalari"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Yana"</string>
     <string name="appops_camera" msgid="5215967620896725715">"Bu ilova kameradan foydalanmoqda."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"Bu ilova mikrofondan foydalanmoqda."</string>

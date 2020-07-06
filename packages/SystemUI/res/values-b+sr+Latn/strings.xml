@@ -547,7 +547,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Ekran je zakačen"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Pregled da biste ga otkačili."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Početna da biste ga otkačili."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Na ovaj način se stalno prikazuje dok ga ne otkačite. Prevucite nagore i zadržite da biste ga otkačili."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Stalno će se prikazivati dok je ne otkačite. Prevucite nagore i zadržite da biste je otkačili."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Pregled da biste ga otkačili."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Početna da biste ga otkačili."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Da biste otkačili ovaj ekran, dodirnite i zadržite dugmad Nazad i Pregled"</string>

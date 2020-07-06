@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"স্ক্রিন পিন করা হয়েছে"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"ফিরে যান\" এবং \"হোম\" বোতামদুটি ট্যাপ করে ধরে রাখুন।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"হোম\" বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"এই স্ক্রিনটি আনপিন করতে \"ফিরে যান\" এবং \"এক নজরে\" বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
@@ -928,7 +928,7 @@
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> খুলুন"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপের বাবল চালু করবেন?"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"ম্যানেজ করা"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"ম্যানেজ করুন"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"খারিজ করুন"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"অনুমতি দিন"</string>
     <string name="ask_me_later_bubbles" msgid="2666199914636253557">"আমাকে পরে জিজ্ঞাসা করুন"</string>

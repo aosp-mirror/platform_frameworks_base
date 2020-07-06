@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"如要取消固定這個螢幕畫面，請按住「返回」按鈕和「總覽」按鈕"</string>

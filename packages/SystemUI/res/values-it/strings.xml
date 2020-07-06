@@ -69,8 +69,8 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom per riempire schermo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estendi per riemp. schermo"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Salvataggio screenshot..."</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvataggio screenshot..."</string>
+    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Salvataggio screenshot…"</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvataggio screenshot…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Screenshot salvato"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Tocca per visualizzare lo screenshot"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Impossibile salvare lo screenshot"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"La schermata è fissata"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Indietro e Home."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Mantiene la visualizzazione fino allo sblocco. Scorri verso l\'alto e tieni premuto per sbloccare."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Rimarrà visibile finché non viene sbloccata. Scorri verso l\'alto e tieni premuto per sbloccarla."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Per disattivare il blocco su schermo, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
@@ -648,7 +648,7 @@
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Invia in modalità silenziosa"</string>
     <string name="inline_block_button" msgid="479892866568378793">"Blocca"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Continua a mostrare"</string>
-    <string name="inline_minimize_button" msgid="1474436209299333445">"Riduci a icona"</string>
+    <string name="inline_minimize_button" msgid="1474436209299333445">"Riduci"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Modalità silenziosa"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Continua con notifiche silenziose"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Avvisi"</string>
@@ -657,7 +657,7 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Continuare a ricevere notifiche da questa app?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Modalità silenziosa"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"Avvisi"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Favorisce la tua concentrazione grazie all\'assenza di suono o vibrazione."</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ti aiuta a non perdere la concentrazione grazie all\'assenza di suono o vibrazione."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Richiama la tua attenzione con suono o vibrazione."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossibile modificare queste notifiche."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Qui non è possibile configurare questo gruppo di notifiche"</string>

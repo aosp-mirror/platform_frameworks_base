@@ -230,7 +230,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ਏਅਰਪਲੇਨ ਮੋਡ ਬੰਦ ਹੈ।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ ਹੋਇਆ"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ਸੰਪੂਰਨ ਖਾਮੋਸ਼ੀ"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ਪੂਰਾ ਸ਼ਾਂਤ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ਸਿਰਫ਼ ਅਲਾਰਮ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>

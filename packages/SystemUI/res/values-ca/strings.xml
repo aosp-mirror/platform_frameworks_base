@@ -287,7 +287,7 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificació més a l\'interior.</item>
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"Configuració de les notificacions"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"Configuració de notificacions"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"Configuració de l\'aplicació <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"La pantalla girarà automàticament."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"La pantalla està bloquejada en orientació horitzontal."</string>
@@ -463,7 +463,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Esborra-ho tot"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestiona"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificacions silencioses"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificacions silenciades"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Esborra totes les notificacions silencioses"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificacions pausades pel mode No molestis"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comença ara"</string>
@@ -649,7 +649,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"Bloqueja"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Continua rebent"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimitza"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Silencioses"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Silenci"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Continua silenciant"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alertes"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Continua avisant-me"</string>

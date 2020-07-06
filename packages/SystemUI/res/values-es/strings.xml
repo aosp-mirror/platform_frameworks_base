@@ -398,7 +398,7 @@
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas. Seguirás escuchando el contenido que quieras reproducir, como música, vídeos y juegos."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalizar"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Esta opción bloqueará TODOS los sonidos y todas las vibraciones, por ejemplo, los vídeos, los juegos, las alarmas y la música. Seguirás pudiendo hacer llamadas."</string>
-    <string name="zen_silence_introduction" msgid="6117517737057344014">"Este modo permite bloquear TODOS los sonidos y todas las vibraciones (p. ej., los de alarmas, música, vídeos y juegos)."</string>
+    <string name="zen_silence_introduction" msgid="6117517737057344014">"Este modo bloquea TODOS los sonidos y todas las vibraciones, lo que incluye alarmas, música, vídeos y juegos."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de nuevo para abrir"</string>
@@ -463,8 +463,8 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificaciones silenciadas"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciadas"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificaciones silenciosas"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo No molestar"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Empezar ahora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hay notificaciones"</string>
@@ -542,11 +542,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactivar"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Cambiar dispositivo de salida"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"Pantalla fijada"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsados los botones Atrás e Inicio."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Se mantiene visible hasta que dejas de fijarla. Para ello, desliza el dedo hacia arriba y mantén pulsado."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Aplicaciones recientes."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Inicio."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás e Inicio."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, desliza el dedo hacia arriba y mantenlo pulsado."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Aplicaciones recientes."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Inicio."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Mantén pulsado el botón Atrás y el de aplicaciones recientes para dejar de fijar esta pantalla"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Mantén pulsados los botones Atrás e Inicio para dejar de fijar esta pantalla"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Para dejar de fijar esta pantalla, desliza el dedo hacia arriba y mantenla pulsada"</string>

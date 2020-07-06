@@ -117,7 +117,7 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"sesli yardımı aç"</string>
     <string name="camera_label" msgid="8253821920931143699">"kamerayı aç"</string>
     <string name="cancel" msgid="1089011503403416730">"İptal"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onaylayın"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onayla"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Tekrar dene"</string>
     <string name="biometric_dialog_empty_space_description" msgid="4990792758502834602">"Boş alan, yetkilendirmeyi iptal etmek için dokunun"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Lütfen tekrar deneyin"</string>

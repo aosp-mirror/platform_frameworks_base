@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"A képernyő rögzítve van"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és a Kezdőképernyő elemet."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz csúsztasson fel, és tartsa ujját a képernyőn."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz csúsztassa fel és tartsa ujját a képernyőn."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Kezdőképernyő elemet."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza és az Áttekintés gombot"</string>

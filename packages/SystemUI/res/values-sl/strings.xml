@@ -548,11 +548,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"onemogoči"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Izbira druge izhodne naprave"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"Zaslon je pripet"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, povlecite navzgor in pridržite."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za pregled."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za začetni zaslon."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, povlecite navzgor in pridržite."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, pridržite gumb za pregled."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, pridržite gumb za začetni zaslon."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Če želite odpeti ta zaslon, hkrati pridržite gumba za nazaj in za pregled."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Če želite odpeti ta zaslon, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Če želite odpeti ta zaslon, povlecite navzgor in pridržite"</string>

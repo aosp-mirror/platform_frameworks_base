@@ -230,7 +230,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌କୁ ଚାଲୁ କରାଯାଇଛି।"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ସମ୍ପୂର୍ଣ୍ଣ ନିରବ"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\"କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
@@ -302,7 +302,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"କେବଳ ଆଲାର୍ମ"</string>
-    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
+    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୁଥ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"ବ୍ଲୁଟୂଥ୍‍‌ (<xliff:g id="NUMBER">%d</xliff:g>ଟି ଡିଭାଇସ୍‌)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଫ୍"</string>
@@ -412,7 +412,7 @@
     <string name="voice_hint" msgid="7476017460191291417">"ଭଏସ୍‍ ସହାୟକ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"କ୍ୟାମେରା ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ। ଏହାଦ୍ୱାରା ସ୍କ୍ରୀନ୍‍ ରିଡର୍‍ ମଧ୍ୟ ନୀରବ ହୋଇଯିବ।"</string>
-    <string name="interruption_level_none" msgid="219484038314193379">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
+    <string name="interruption_level_none" msgid="219484038314193379">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"ସମ୍ପୂର୍ଣ୍ଣ\nନୀରବ"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"ସ୍କ୍ରିନକୁ ପିନ୍‌ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ଓଭରଭ୍ୟୁ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
@@ -651,12 +651,12 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"ନୀରବ"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ନୀରବ ରହନ୍ତୁ"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"ଆଲର୍ଟ କରିବା"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"ଆଲର୍ଟିଂ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ଆଲର୍ଟ କରିବା ଜାରି ରଖନ୍ତୁ"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ବିଜ୍ଞପ୍ତି ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ଏହି ଆପ୍‌ରୁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"ନୀରବ"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"ଆଲର୍ଟ କରିବା"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"ଆଲର୍ଟିଂ"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ବିନା ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍‌ରେ ଆପଣଙ୍କୁ ଫୋକସ୍ କରିବାରେ ସାହାଯ୍ୟ କରେ।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ମାଧ୍ୟମରେ ଆପଣଙ୍କର ଧ୍ୟାନ ଆକର୍ଷିତ କରିଥାଏ।"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>

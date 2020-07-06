@@ -124,7 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Buscando tu rostro"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Se autenticó el rostro"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Presiona Confirmar para completarla"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Presiona Confirmar para completar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella digital"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>

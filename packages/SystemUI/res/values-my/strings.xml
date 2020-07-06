@@ -42,7 +42,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"မျက်နှာပြင်အလိုအလျောက်လှည့်ရန်"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"MUTE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
-    <string name="status_bar_settings_notifications" msgid="5285316949980621438">"သတိပေးချက်များ"</string>
+    <string name="status_bar_settings_notifications" msgid="5285316949980621438">"အကြောင်းကြားချက်များ"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"ထည့်သွင်းနည်းများ သတ်မှတ်ခြင်း"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"ခလုတ်ပါဝင်သော ကီးဘုတ်"</string>
@@ -463,7 +463,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံး ဖယ်ရှားရန်"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"စီမံရန်"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"အကြောင်းကြားချက်များကို အသံတိတ်ခြင်း"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"အသံမပြုသည့် အကြောင်းကြားချက်များ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"အသံတိတ် အကြောင်းကြားချက်များအားလုံးကို ရှင်းလင်းရန်"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"အကြောင်းကြားချက်များကို \'မနှောင့်ယှက်ရ\' က ခေတ္တရပ်ထားသည်"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>

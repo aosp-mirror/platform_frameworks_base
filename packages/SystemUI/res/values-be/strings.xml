@@ -375,7 +375,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ліміт <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Папярэджанне: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Працоўны профіль"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Начны рэжым"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Начная падсветка"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Уключаць увечары"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Да ўсходу сонца"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Уключыць у <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -550,7 +550,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"Экран замацаваны"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, краніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Галоўны экран\"."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Будзе паказвацца, пакуль не адмацуеце Каб адмацаваць, прагартайце ўверх, утрымліваючы палец на экране"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, прагартайце ўверх, утрымліваючы палец на экране."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, краніце і ўтрымлівайце кнопку \"Агляд\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопку \"Галоўны экран\"."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Каб адмацаваць гэты экран, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\""</string>
@@ -648,7 +648,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Гэтыя апавяшчэнні будуць паказвацца з гукам"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Звычайна вы адхіляеце гэтыя апавяшчэнні. \nПаказваць іх?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Гатова"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"Ужыць"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"Прымяніць"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Працягваць паказваць гэтыя апавяшчэнні?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Спыніць апавяшчэнні"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Дастаўляць бязгучна"</string>
