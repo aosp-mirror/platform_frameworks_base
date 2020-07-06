@@ -2440,6 +2440,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
         doAnimationFinished(type, anim);
         mWmService.onAnimationFinished();
+        mNeedsZBoost = false;
     }
 
     /**
