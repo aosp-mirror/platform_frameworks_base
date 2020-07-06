@@ -3300,16 +3300,6 @@ public class DisplayPolicy {
             }
         }
         final WindowState win = winCandidate;
-        if (win.getAttrs().type == TYPE_NOTIFICATION_SHADE && isKeyguardShowing()
-                && isKeyguardOccluded()) {
-            // We are updating at a point where the keyguard has gotten
-            // focus, but we were last in a state where the top window is
-            // hiding it.  This is probably because the keyguard as been
-            // shown while the top window was displayed, so we want to ignore
-            // it here because this is just a very transient change and it
-            // will quickly lose focus once it correctly gets hidden.
-            return 0;
-        }
 
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
