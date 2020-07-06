@@ -52,6 +52,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
+import android.util.IntArray;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
@@ -106,6 +107,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     private final ArrayList<ActivityStack> mTmpAlwaysOnTopStacks = new ArrayList<>();
     private final ArrayList<ActivityStack> mTmpNormalStacks = new ArrayList<>();
     private final ArrayList<ActivityStack> mTmpHomeStacks = new ArrayList<>();
+    private final IntArray mTmpNeedsZBoostIndexes = new IntArray();
+    private int mTmpLayerForSplitScreenDividerAnchor;
+    private int mTmpLayerForAnimationLayer;
 
     private ArrayList<Task> mTmpTasks = new ArrayList<>();
 
@@ -633,37 +637,70 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
 
         int layer = 0;
         // Place home stacks to the bottom.
-        for (int i = 0; i < mTmpHomeStacks.size(); i++) {
-            mTmpHomeStacks.get(i).assignLayer(t, layer++);
-        }
+        layer = adjustRootTaskLayer(t, mTmpHomeStacks, layer, false /* normalStacks */);
         // The home animation layer is between the home stacks and the normal stacks.
         final int layerForHomeAnimationLayer = layer++;
-        int layerForSplitScreenDividerAnchor = layer++;
-        int layerForAnimationLayer = layer++;
-        for (int i = 0; i < mTmpNormalStacks.size(); i++) {
-            final ActivityStack s = mTmpNormalStacks.get(i);
-            s.assignLayer(t, layer++);
-            if (s.inSplitScreenWindowingMode()) {
-                // The split screen divider anchor is located above the split screen window.
-                layerForSplitScreenDividerAnchor = layer++;
-            }
-            if (s.isTaskAnimating() || s.isAppTransitioning()) {
-                // The animation layer is located above the highest animating stack and no
-                // higher.
-                layerForAnimationLayer = layer++;
-            }
-        }
+        mTmpLayerForSplitScreenDividerAnchor = layer++;
+        mTmpLayerForAnimationLayer = layer++;
+        layer = adjustRootTaskLayer(t, mTmpNormalStacks, layer, true /* normalStacks */);
+
         // The boosted animation layer is between the normal stacks and the always on top
         // stacks.
         final int layerForBoostedAnimationLayer = layer++;
-        for (int i = 0; i < mTmpAlwaysOnTopStacks.size(); i++) {
-            mTmpAlwaysOnTopStacks.get(i).assignLayer(t, layer++);
-        }
+        adjustRootTaskLayer(t, mTmpAlwaysOnTopStacks, layer, false /* normalStacks */);
 
         t.setLayer(mHomeAppAnimationLayer, layerForHomeAnimationLayer);
-        t.setLayer(mAppAnimationLayer, layerForAnimationLayer);
-        t.setLayer(mSplitScreenDividerAnchor, layerForSplitScreenDividerAnchor);
+        t.setLayer(mAppAnimationLayer, mTmpLayerForAnimationLayer);
+        t.setLayer(mSplitScreenDividerAnchor, mTmpLayerForSplitScreenDividerAnchor);
         t.setLayer(mBoostedAppAnimationLayer, layerForBoostedAnimationLayer);
+    }
+
+    private int adjustNormalStackLayer(ActivityStack s, int layer) {
+        if (s.inSplitScreenWindowingMode()) {
+            // The split screen divider anchor is located above the split screen window.
+            mTmpLayerForSplitScreenDividerAnchor = layer++;
+        }
+        if (s.isTaskAnimating() || s.isAppTransitioning()) {
+            // The animation layer is located above the highest animating stack and no
+            // higher.
+            mTmpLayerForAnimationLayer = layer++;
+        }
+        return layer;
+    }
+
+    /**
+     * Adjusts the layer of the stack which belongs to the same group.
+     * Note that there are three stack groups: home stacks, always on top stacks, and normal stacks.
+     *
+     * @param startLayer The beginning layer of this group of stacks.
+     * @param normalStacks Set {@code true} if this group is neither home nor always on top.
+     * @return The adjusted layer value.
+     */
+    private int adjustRootTaskLayer(SurfaceControl.Transaction t, ArrayList<ActivityStack> stacks,
+            int startLayer, boolean normalStacks) {
+        mTmpNeedsZBoostIndexes.clear();
+        final int stackSize = stacks.size();
+        for (int i = 0; i < stackSize; i++) {
+            final ActivityStack stack = stacks.get(i);
+            if (!stack.needsZBoost()) {
+                stack.assignLayer(t, startLayer++);
+                if (normalStacks) {
+                    startLayer = adjustNormalStackLayer(stack, startLayer);
+                }
+            } else {
+                mTmpNeedsZBoostIndexes.add(i);
+            }
+        }
+
+        final int zBoostSize = mTmpNeedsZBoostIndexes.size();
+        for (int i = 0; i < zBoostSize; i++) {
+            final ActivityStack stack = stacks.get(mTmpNeedsZBoostIndexes.get(i));
+            stack.assignLayer(t, startLayer++);
+            if (normalStacks) {
+                startLayer = adjustNormalStackLayer(stack, startLayer);
+            }
+        }
+        return startLayer;
     }
 
     @Override
