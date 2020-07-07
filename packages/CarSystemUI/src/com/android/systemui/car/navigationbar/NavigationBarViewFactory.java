@@ -148,10 +148,9 @@ public class NavigationBarViewFactory {
         CarNavigationBarView view = (CarNavigationBarView) View.inflate(mContext, barLayout,
                 /* root= */ null);
 
-        // Include a FocusParkingView at the end. The rotary controller "parks" the focus here when
-        // the user navigates to another window. This is also used to prevent wrap-around which is
-        // why it must be first or last in Tab order.
-        view.addView(new FocusParkingView(mContext));
+        // Include a FocusParkingView at the beginning. The rotary controller "parks" the focus here
+        // when the user navigates to another window. This is also used to prevent wrap-around.
+        view.addView(new FocusParkingView(mContext), 0);
 
         mCachedViewMap.put(type, view);
         return mCachedViewMap.get(type);

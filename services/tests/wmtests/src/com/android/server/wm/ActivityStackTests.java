@@ -1392,8 +1392,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         }
         mSupervisor.endDeferResume();
 
-        doReturn(false).when(mService).isBooting();
-        doReturn(true).when(mService).isBooted();
+        setBooted(mService);
         // 2 activities are started while keyguard is locked, so they are waiting to be resolved.
         assertFalse(unknownAppVisibilityController.allResolved());
 

@@ -67,8 +67,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        doReturn(false).when(mService).isBooting();
-        doReturn(true).when(mService).isBooted();
+        setBooted(mService);
     }
 
     /** Verify that activity is finished correctly upon request. */
