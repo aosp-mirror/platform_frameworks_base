@@ -25,6 +25,7 @@ import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.util.Log;
@@ -62,10 +63,12 @@ public class ThumbnailData {
 
     public ThumbnailData(TaskSnapshot snapshot) {
         final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-        if (buffer != null && (buffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
+        if (buffer == null || (buffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
             // TODO(b/157562905): Workaround for a crash when we get a snapshot without this state
-            Log.e("ThumbnailData", "Unexpected snapshot without USAGE_GPU_SAMPLED_IMAGE");
-            thumbnail = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), ARGB_8888);
+            Log.e("ThumbnailData", "Unexpected snapshot without USAGE_GPU_SAMPLED_IMAGE: "
+                    + buffer);
+            Point taskSize = snapshot.getTaskSize();
+            thumbnail = Bitmap.createBitmap(taskSize.x, taskSize.y, ARGB_8888);
             thumbnail.eraseColor(Color.BLACK);
         } else {
             thumbnail = Bitmap.wrapHardwareBuffer(buffer, snapshot.getColorSpace());
