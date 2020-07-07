@@ -2391,6 +2391,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             // activity here.
                             resumeFocusedStacksTopActivities();
                         }
+                        // The visibility update must not be called before resuming the top, so the
+                        // display orientation can be updated first if needed. Otherwise there may
+                        // have redundant configuration changes due to apply outdated display
+                        // orientation (from keyguard) to activity.
+                        stack.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                                false /* preserveWindows */);
                     }
                 }
             }

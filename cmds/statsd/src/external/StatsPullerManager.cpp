@@ -92,63 +92,43 @@ StatsPullerManager::StatsPullerManager()
 }
 
 bool StatsPullerManager::Pull(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
-                              vector<shared_ptr<LogEvent>>* data, bool useUids) {
+                              vector<shared_ptr<LogEvent>>* data) {
     std::lock_guard<std::mutex> _l(mLock);
-    return PullLocked(tagId, configKey, eventTimeNs, data, useUids);
+    return PullLocked(tagId, configKey, eventTimeNs, data);
 }
 
 bool StatsPullerManager::Pull(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
-                              vector<std::shared_ptr<LogEvent>>* data, bool useUids) {
+                              vector<std::shared_ptr<LogEvent>>* data) {
     std::lock_guard<std::mutex> _l(mLock);
-    return PullLocked(tagId, uids, eventTimeNs, data, useUids);
+    return PullLocked(tagId, uids, eventTimeNs, data);
 }
 
 bool StatsPullerManager::PullLocked(int tagId, const ConfigKey& configKey,
-                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data,
-                                    bool useUids) {
+                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data) {
     vector<int32_t> uids;
-    if (useUids) {
-        auto uidProviderIt = mPullUidProviders.find(configKey);
-        if (uidProviderIt == mPullUidProviders.end()) {
-            ALOGE("Error pulling tag %d. No pull uid provider for config key %s", tagId,
-                  configKey.ToString().c_str());
-            StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
-            return false;
-        }
-        sp<PullUidProvider> pullUidProvider = uidProviderIt->second.promote();
-        if (pullUidProvider == nullptr) {
-            ALOGE("Error pulling tag %d, pull uid provider for config %s is gone.", tagId,
-                  configKey.ToString().c_str());
-            StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
-            return false;
-        }
-        uids = pullUidProvider->getPullAtomUids(tagId);
+    const auto& uidProviderIt = mPullUidProviders.find(configKey);
+    if (uidProviderIt == mPullUidProviders.end()) {
+        ALOGE("Error pulling tag %d. No pull uid provider for config key %s", tagId,
+              configKey.ToString().c_str());
+        StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
+        return false;
     }
-    return PullLocked(tagId, uids, eventTimeNs, data, useUids);
+    sp<PullUidProvider> pullUidProvider = uidProviderIt->second.promote();
+    if (pullUidProvider == nullptr) {
+        ALOGE("Error pulling tag %d, pull uid provider for config %s is gone.", tagId,
+              configKey.ToString().c_str());
+        StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
+        return false;
+    }
+    uids = pullUidProvider->getPullAtomUids(tagId);
+    return PullLocked(tagId, uids, eventTimeNs, data);
 }
 
 bool StatsPullerManager::PullLocked(int tagId, const vector<int32_t>& uids,
-                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data,
-                                    bool useUids) {
+                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data) {
     VLOG("Initiating pulling %d", tagId);
-    if (useUids) {
-        for (int32_t uid : uids) {
-            PullerKey key = {.atomTag = tagId, .uid = uid};
-            auto pullerIt = kAllPullAtomInfo.find(key);
-            if (pullerIt != kAllPullAtomInfo.end()) {
-                bool ret = pullerIt->second->Pull(eventTimeNs, data);
-                VLOG("pulled %zu items", data->size());
-                if (!ret) {
-                    StatsdStats::getInstance().notePullFailed(tagId);
-                }
-                return ret;
-            }
-        }
-        StatsdStats::getInstance().notePullerNotFound(tagId);
-        ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
-        return false;  // Return early since we don't know what to pull.
-    } else {
-        PullerKey key = {.atomTag = tagId, .uid = -1};
+    for (int32_t uid : uids) {
+        PullerKey key = {.atomTag = tagId, .uid = uid};
         auto pullerIt = kAllPullAtomInfo.find(key);
         if (pullerIt != kAllPullAtomInfo.end()) {
             bool ret = pullerIt->second->Pull(eventTimeNs, data);
@@ -158,9 +138,10 @@ bool StatsPullerManager::PullLocked(int tagId, const vector<int32_t>& uids,
             }
             return ret;
         }
-        ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
-        return false;  // Return early since we don't know what to pull.
     }
+    StatsdStats::getInstance().notePullerNotFound(tagId);
+    ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
+    return false;  // Return early since we don't know what to pull.
 }
 
 bool StatsPullerManager::PullerForMatcherExists(int tagId) const {
@@ -352,8 +333,7 @@ int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
 void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t atomTag,
                                                   const int64_t coolDownNs, const int64_t timeoutNs,
                                                   const vector<int32_t>& additiveFields,
-                                                  const shared_ptr<IPullAtomCallback>& callback,
-                                                  bool useUid) {
+                                                  const shared_ptr<IPullAtomCallback>& callback) {
     std::lock_guard<std::mutex> _l(mLock);
     VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
 
@@ -368,16 +348,15 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
 
     sp<StatsCallbackPuller> puller = new StatsCallbackPuller(atomTag, callback, actualCoolDownNs,
                                                              actualTimeoutNs, additiveFields);
-    PullerKey key = {.atomTag = atomTag, .uid = useUid ? uid : -1};
+    PullerKey key = {.atomTag = atomTag, .uid = uid};
     AIBinder_linkToDeath(callback->asBinder().get(), mPullAtomCallbackDeathRecipient.get(),
                          new PullAtomCallbackDeathCookie(this, key, puller));
     kAllPullAtomInfo[key] = puller;
 }
 
-void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag,
-                                                    bool useUids) {
+void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {
     std::lock_guard<std::mutex> _l(mLock);
-    PullerKey key = {.atomTag = atomTag, .uid = useUids ? uid : -1};
+    PullerKey key = {.atomTag = atomTag, .uid = uid};
     if (kAllPullAtomInfo.find(key) != kAllPullAtomInfo.end()) {
         StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag,
                                                                          /*registered=*/false);

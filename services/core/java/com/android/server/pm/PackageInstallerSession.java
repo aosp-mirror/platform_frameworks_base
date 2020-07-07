@@ -268,6 +268,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
 
+    /** Package name of the app that created the installation session. */
+    private final String mOriginalInstallerPackageName;
+
     /** Uid of the owner of the installer session */
     @GuardedBy("mLock")
     private int mInstallerUid;
@@ -557,6 +560,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mOriginalInstallerUid = installerUid;
         mInstallerUid = installerUid;
         mInstallSource = Objects.requireNonNull(installSource);
+        mOriginalInstallerPackageName = mInstallSource.installerPackageName;
         this.params = params;
         this.createdMillis = createdMillis;
         this.updatedMillis = createdMillis;
@@ -1662,11 +1666,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException("Package is not valid", e);
             }
 
-            if (!mPackageName.equals(mInstallSource.installerPackageName)) {
-                throw new SecurityException("Can only transfer sessions that update the original "
-                        + "installer");
-            }
-
             mInstallerUid = newOwnerAppInfo.uid;
             mInstallSource = InstallSource.create(packageName, null, packageName, null);
         }
@@ -2181,6 +2180,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(
                     PackageManager.INSTALL_FAILED_SESSION_INVALID,
                     "Incremental installation of this package is not allowed.");
+        }
+
+        if (mInstallerUid != mOriginalInstallerUid) {
+            // Session has been transferred, check package name.
+            if (TextUtils.isEmpty(mPackageName) || !mPackageName.equals(
+                    mOriginalInstallerPackageName)) {
+                throw new PackageManagerException(PackageManager.INSTALL_FAILED_PACKAGE_CHANGED,
+                        "Can only transfer sessions that update the original installer");
+            }
         }
 
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
@@ -3212,6 +3220,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         pw.printPair("userId", userId);
         pw.printPair("mOriginalInstallerUid", mOriginalInstallerUid);
+        pw.printPair("mOriginalInstallerPackageName", mOriginalInstallerPackageName);
         pw.printPair("installerPackageName", mInstallSource.installerPackageName);
         pw.printPair("installInitiatingPackageName", mInstallSource.initiatingPackageName);
         pw.printPair("installOriginatingPackageName", mInstallSource.originatingPackageName);
