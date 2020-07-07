@@ -400,6 +400,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mVerityFound;
 
+    @GuardedBy("mLock")
     private boolean mDataLoaderFinished = false;
 
     @GuardedBy("mLock")
@@ -2790,7 +2791,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return;
                 }
 
-                if (mDestroyed || mDataLoaderFinished) {
+                final boolean isDestroyedOrDataLoaderFinished;
+                synchronized (mLock) {
+                    isDestroyedOrDataLoaderFinished = mDestroyed || mDataLoaderFinished;
+                }
+                if (isDestroyedOrDataLoaderFinished) {
                     switch (status) {
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
                             onStorageUnhealthy();
@@ -2802,7 +2807,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 try {
                     IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
                     if (dataLoader == null) {
-                        mDataLoaderFinished = true;
+                        synchronized (mLock) {
+                            mDataLoaderFinished = true;
+                        }
                         dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                 "Failure to obtain data loader");
                         return;
@@ -2835,7 +2842,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_READY: {
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
                                         mParentSessionId).dispatchStreamValidateAndCommit();
@@ -2848,7 +2857,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Failed to prepare image.");
                             if (manualStartAndDestroy) {
@@ -2862,7 +2873,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
                             break;
@@ -2886,7 +2899,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
-                    if (mDestroyed || mDataLoaderFinished) {
+                    final boolean isDestroyedOrDataLoaderFinished;
+                    synchronized (mLock) {
+                        isDestroyedOrDataLoaderFinished = mDestroyed || mDataLoaderFinished;
+                    }
+                    if (isDestroyedOrDataLoaderFinished) {
                         // App's installed.
                         switch (status) {
                             case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
@@ -2908,7 +2925,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             // fallthrough
                         case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
                             // Even ADB installation can't wait for missing pages for too long.
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Image is missing pages required for installation.");
                             break;
