@@ -459,8 +459,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final int returnCode = args.argi1;
                     args.recycle();
 
+                    final boolean showNotification;
+                    synchronized (mLock) {
+                        showNotification = isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked();
+                    }
                     sendOnPackageInstalled(mContext, statusReceiver, sessionId,
-                            isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId,
+                            showNotification, userId,
                             packageName, returnCode, message, extras);
 
                     break;
@@ -888,6 +892,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return markerName;
     }
 
+    @GuardedBy("mLock")
     private void createRemoveSplitMarkerLocked(String splitName) throws IOException {
         try {
             final File target = new File(stageDir, getRemoveMarkerName(splitName));
@@ -1058,6 +1063,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private ParcelFileDescriptor openReadInternalLocked(String name) throws IOException {
         try {
             if (!FileUtils.isValidExtFilename(name)) {
