@@ -1687,7 +1687,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void handleInstall() {
-        if (isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked()) {
+        final boolean needsLogging;
+        synchronized (mLock) {
+            needsLogging = isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked();
+        }
+        if (needsLogging) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
                     .setAdmin(mInstallSource.installerPackageName)
