@@ -81,9 +81,9 @@ public:
     static std::shared_ptr<PointerController> create(
             const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
             const sp<SpriteController>& spriteController);
-    enum InactivityTimeout {
-        INACTIVITY_TIMEOUT_NORMAL = 0,
-        INACTIVITY_TIMEOUT_SHORT = 1,
+    enum class InactivityTimeout {
+        NORMAL = 0,
+        SHORT = 1,
     };
 
     virtual ~PointerController();
