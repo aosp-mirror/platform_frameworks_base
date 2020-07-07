@@ -63,6 +63,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -135,6 +136,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
+    private KeyguardViewMediator mKeyguardViewMediator;
+    @Mock
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private FloatingContentCoordinator mFloatingContentCoordinator;
@@ -198,8 +201,8 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mDumpManager);
+                mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
+                mColorExtractor, mDumpManager);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 
