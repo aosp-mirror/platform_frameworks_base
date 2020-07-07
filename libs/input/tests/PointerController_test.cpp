@@ -136,7 +136,7 @@ protected:
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
     sp<MockSpriteController> mSpriteController;
-    sp<PointerController> mPointerController;
+    std::shared_ptr<PointerController> mPointerController;
 
 private:
     void loopThread();
@@ -160,7 +160,7 @@ PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<Moc
     EXPECT_CALL(*mSpriteController, createSprite())
             .WillOnce(Return(mPointerSprite));
 
-    mPointerController = new PointerController(mPolicy, mLooper, mSpriteController);
+    mPointerController = PointerController::create(mPolicy, mLooper, mSpriteController);
 }
 
 PointerControllerTest::~PointerControllerTest() {
