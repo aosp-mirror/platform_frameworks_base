@@ -954,8 +954,6 @@ class ActivityStack extends Task {
     void awakeFromSleepingLocked() {
         // Ensure activities are no longer sleeping.
         forAllActivities((Consumer<ActivityRecord>) (r) -> r.setSleeping(false));
-        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */);
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             mPausingActivity.activityPaused(true);
@@ -2058,7 +2056,12 @@ class ActivityStack extends Task {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
                     } else if (getDisplay().isSingleTaskInstance()) {
+                        // If a new task is being launched in a single task display, we don't need
+                        // to play normal animation, but need to trigger a callback when an app
+                        // transition is actually handled. So ignore already prepared activity, and
+                        // override it.
                         transit = TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
+                        keepCurTransition = false;
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
                         // supporting picture-in-picture while pausing only if the starting activity
