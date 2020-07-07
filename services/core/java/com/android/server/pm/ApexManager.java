@@ -77,6 +77,8 @@ public abstract class ApexManager {
     public static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
     static final int MATCH_FACTORY_PACKAGE = 1 << 1;
 
+    private static final String VNDK_APEX_MODULE_NAME_PREFIX = "com.android.vndk.";
+
     private static final Singleton<ApexManager> sApexManagerSingleton =
             new Singleton<ApexManager>() {
                 @Override
@@ -521,7 +523,9 @@ public abstract class ApexManager {
                         activePackagesSet.add(packageInfo.packageName);
                     }
                     if (ai.isFactory) {
-                        if (factoryPackagesSet.contains(packageInfo.packageName)) {
+                        // Don't throw when the duplicating APEX is VNDK APEX
+                        if (factoryPackagesSet.contains(packageInfo.packageName)
+                                && !ai.moduleName.startsWith(VNDK_APEX_MODULE_NAME_PREFIX)) {
                             throw new IllegalStateException(
                                     "Two factory packages have the same name: "
                                             + packageInfo.packageName);
