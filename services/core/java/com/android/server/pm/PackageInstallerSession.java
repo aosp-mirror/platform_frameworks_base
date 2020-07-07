@@ -1586,12 +1586,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onStorageUnhealthy() {
-        if (TextUtils.isEmpty(mPackageName)) {
+        final String packageName = getPackageName();
+        if (TextUtils.isEmpty(packageName)) {
             // The package has not been installed.
             return;
         }
         final PackageManagerService packageManagerService = mPm;
-        final String packageName = mPackageName;
         mHandler.post(() -> {
             if (packageManagerService.deletePackageX(packageName,
                     PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
@@ -1906,19 +1906,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Skip logging the side-loaded app installations, as those are private and aren't reported
         // anywhere; app stores already have a record of the installation and that's why reporting
         // it here is fine
+        final String packageName = getPackageName();
         final String packageNameToLog =
-                (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? mPackageName : "";
+                (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? packageName : "";
         final long currentTimestamp = System.currentTimeMillis();
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
                 isIncrementalInstallation(),
                 packageNameToLog,
                 currentTimestamp - createdMillis,
                 returnCode,
-                getApksSize());
+                getApksSize(packageName));
     }
 
-    private long getApksSize() {
-        final PackageSetting ps = mPm.getPackageSetting(mPackageName);
+    private long getApksSize(String packageName) {
+        final PackageSetting ps = mPm.getPackageSetting(packageName);
         if (ps == null) {
             return 0;
         }
