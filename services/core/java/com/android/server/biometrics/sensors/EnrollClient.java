@@ -55,36 +55,27 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
         mShouldVibrate = shouldVibrate;
     }
 
-    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
-        if (remaining == 0) {
-            mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
-            logOnEnrolled(getTargetUserId(),
-                    System.currentTimeMillis() - mEnrollmentStartTimeMs,
-                    true /* enrollSuccessful */);
-        }
-        notifyUserActivity();
-        return sendEnrollResult(identifier, remaining);
-    }
-
-    /*
-     * @return true if we're done.
-     */
-    private boolean sendEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
+    public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (mShouldVibrate) {
             vibrateSuccess();
         }
 
+        final ClientMonitorCallbackConverter listener = getListener();
         try {
-            final ClientMonitorCallbackConverter listener = getListener();
             if (listener != null) {
                 listener.onEnrollResult(identifier, remaining);
             }
-            return remaining == 0;
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to notify EnrollResult:", e);
-            return true;
+            Slog.e(TAG, "Remote exception", e);
         }
+
+        if (remaining == 0) {
+            mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
+            logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
+                    true /* enrollSuccessful */);
+            mFinishCallback.onClientFinished(this, true /* success */);
+        }
+        notifyUserActivity();
     }
 
     @Override

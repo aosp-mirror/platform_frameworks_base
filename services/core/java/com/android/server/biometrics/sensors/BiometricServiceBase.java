@@ -105,6 +105,11 @@ public abstract class BiometricServiceBase<T> extends SystemService
     protected final ClientMonitor.FinishCallback mClientFinishCallback =
             (clientMonitor, success) -> {
         removeClient(clientMonitor);
+        // When enrollment finishes, update this group's authenticator id, as the HAL has
+        // already generated a new authenticator id when the new biometric is enrolled.
+        if (clientMonitor instanceof EnrollClient) {
+            updateActiveGroup(clientMonitor.getTargetUserId());
+        }
     };
 
     private IBiometricService mBiometricService;
@@ -373,15 +378,7 @@ public abstract class BiometricServiceBase<T> extends SystemService
         }
 
         final EnrollClient enrollClient = (EnrollClient) client;
-
-        if (enrollClient.onEnrollResult(identifier, remaining)) {
-            removeClient(enrollClient);
-            // When enrollment finishes, update this group's authenticator id, as the HAL has
-            // already generated a new authenticator id when the new biometric is enrolled.
-            if (identifier instanceof Fingerprint) {
-                updateActiveGroup(((Fingerprint)identifier).getGroupId());
-            }
-        }
+        enrollClient.onEnrollResult(identifier, remaining);
     }
 
     protected void handleError(int error, int vendorCode) {
