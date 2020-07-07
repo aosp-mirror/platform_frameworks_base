@@ -122,6 +122,7 @@ import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
 
+import com.google.common.base.Charsets;
 import com.google.common.truth.IterableSubject;
 
 import org.junit.After;
@@ -1910,7 +1911,8 @@ public class KeyValueBackupTaskTest  {
     }
 
     @Test
-    public void testRunTask_whenTransportReturnsError_updatesFilesAndCleansUp() throws Exception {
+    public void testRunTask_whenTransportReturnsErrorForGenericPackage_updatesFilesAndCleansUp()
+            throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         when(transportMock.transport.performBackup(
                         argThat(packageInfo(PACKAGE_1)), any(), anyInt()))
@@ -1924,6 +1926,39 @@ public class KeyValueBackupTaskTest  {
         assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1)))
                 .isEqualTo("oldState".getBytes());
         assertCleansUpFilesAndAgent(mTransport, PACKAGE_1);
+    }
+
+    /**
+     * Checks that TRANSPORT_ERROR during @pm@ backup keeps the state file untouched.
+     * http://b/144030477
+     */
+    @Test
+    public void testRunTask_whenTransportReturnsErrorForPm_updatesFilesAndCleansUp()
+            throws Exception {
+        // TODO(tobiast): Refactor this method to share code with
+        //  testRunTask_whenTransportReturnsErrorForGenericPackage_updatesFilesAndCleansUp
+        // See patchset 7 of http://ag/11762961
+        final PackageData packageData = PM_PACKAGE;
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        when(transportMock.transport.performBackup(
+                argThat(packageInfo(packageData)), any(), anyInt()))
+                .thenReturn(BackupTransport.TRANSPORT_ERROR);
+
+        byte[] pmStateBytes = "fake @pm@ state for testing".getBytes(Charsets.UTF_8);
+
+        Path pmStatePath = createPmStateFile(pmStateBytes.clone());
+        PackageManagerBackupAgent pmAgent = spy(createPmAgent());
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, packageData);
+        runTask(task);
+        verify(pmAgent, never()).onBackup(any(), any(), any());
+
+        assertThat(Files.readAllBytes(pmStatePath)).isEqualTo(pmStateBytes.clone());
+
+        boolean existed = deletePmStateFile();
+        assertThat(existed).isTrue();
+        // unbindAgent() is skipped for @pm@. Comment in KeyValueBackupTask.java:
+        // "For PM metadata (for which applicationInfo is null) there is no agent-bound state."
+        assertCleansUpFiles(mTransport, packageData);
     }
 
     @Test
@@ -2707,21 +2742,29 @@ public class KeyValueBackupTaskTest  {
      *       </ul>
      * </ul>
      */
-    private void createPmStateFile() throws IOException {
-        createPmStateFile(mTransport);
+    private Path createPmStateFile() throws IOException {
+        return createPmStateFile("pmState".getBytes());
     }
 
-    /** @see #createPmStateFile() */
-    private void createPmStateFile(TransportData transport) throws IOException {
-        Files.write(getStateFile(transport, PM_PACKAGE), "pmState".getBytes());
+    private Path createPmStateFile(byte[] bytes) throws IOException {
+        return createPmStateFile(bytes, mTransport);
+    }
+
+    private Path createPmStateFile(TransportData transport) throws IOException {
+        return createPmStateFile("pmState".getBytes(), mTransport);
+    }
+
+    /** @see #createPmStateFile(byte[]) */
+    private Path createPmStateFile(byte[] bytes, TransportData transport) throws IOException {
+        return Files.write(getStateFile(transport, PM_PACKAGE), bytes);
     }
 
     /**
      * Forces transport initialization and call to {@link
      * UserBackupManagerService#resetBackupState(File)}
      */
-    private void deletePmStateFile() throws IOException {
-        Files.deleteIfExists(getStateFile(mTransport, PM_PACKAGE));
+    private boolean deletePmStateFile() throws IOException {
+        return Files.deleteIfExists(getStateFile(mTransport, PM_PACKAGE));
     }
 
     /**
