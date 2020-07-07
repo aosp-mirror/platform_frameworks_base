@@ -1537,6 +1537,9 @@ class StorageManagerService extends IStorageManager.Stub
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
         } else if (vol.type == VolumeInfo.TYPE_STUB) {
+            if (vol.disk.isStubVisible()) {
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+            }
             vol.mountUserId = mCurrentUserId;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
         } else {
