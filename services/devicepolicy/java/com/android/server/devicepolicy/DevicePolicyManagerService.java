@@ -7866,15 +7866,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         synchronized (getLockObject()) {
+            final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
+            final ComponentName poComponent =
+                    mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
+            // Return test only admin by default.
+            if (isAdminTestOnlyLocked(doComponent, userHandle.getIdentifier())) {
+                return doComponent;
+            } else if (isAdminTestOnlyLocked(poComponent, userHandle.getIdentifier())) {
+                return poComponent;
+            }
             final String supervisor = mContext.getResources().getString(
                     com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
             if (supervisor == null) {
                 return null;
             }
             final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
-            final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
-            final ComponentName poComponent =
-                    mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
             if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
                     poComponent)) {
                 return supervisorComponent;
@@ -10223,6 +10229,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isManagedProfile(userId)) {
             throw new SecurityException(
                     "User " + userId + " is not allowed to call setSecondaryLockscreenEnabled");
+        }
+        synchronized (getLockObject()) {
+            if (isAdminTestOnlyLocked(who, userId)) {
+                // Allow testOnly admins to bypass supervision config requirement.
+                return;
+            }
         }
         // Only the default supervision app can use this API.
         final String supervisor = mContext.getResources().getString(
