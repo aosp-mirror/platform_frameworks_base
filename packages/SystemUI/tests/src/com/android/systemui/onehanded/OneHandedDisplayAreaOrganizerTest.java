@@ -61,6 +61,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     DisplayAreaInfo mDisplayAreaInfo;
     Display mDisplay;
     OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
+    OneHandedTutorialHandler mTutorialHandler;
     OneHandedAnimationController.OneHandedTransitionAnimator mFakeAnimator;
     WindowContainerToken mToken;
     SurfaceControl mLeash;
@@ -97,14 +98,15 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockSurfaceTransactionHelper);
         when(mMockAnimator.isRunning()).thenReturn(true);
         when(mMockAnimator.setDuration(anyInt())).thenReturn(mFakeAnimator);
-        when(mMockAnimator.setOneHandedAnimationCallback(any())).thenReturn(mFakeAnimator);
+        when(mMockAnimator.setOneHandedAnimationCallbacks(any())).thenReturn(mFakeAnimator);
         when(mMockAnimator.setTransitionDirection(anyInt())).thenReturn(mFakeAnimator);
         when(mMockLeash.getWidth()).thenReturn(DISPLAY_WIDTH);
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
 
         mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext,
                 mMockDisplayController,
-                mMockAnimationController);
+                mMockAnimationController,
+                mTutorialHandler);
         mUpdateHandler = mDisplayAreaOrganizer.getUpdateHandler();
     }
 

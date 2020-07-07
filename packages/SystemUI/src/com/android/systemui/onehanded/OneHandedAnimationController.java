@@ -28,7 +28,9 @@ import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -121,7 +123,8 @@ public class OneHandedAnimationController {
         private T mEndValue;
         private T mCurrentValue;
 
-        private OneHandedAnimationCallback mOneHandedAnimationCallback;
+        private final List<OneHandedAnimationCallback> mOneHandedAnimationCallbacks =
+                new ArrayList<>();
         private OneHandedSurfaceTransactionHelper mSurfaceTransactionHelper;
         private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
                 mSurfaceControlTransactionFactory;
@@ -142,9 +145,11 @@ public class OneHandedAnimationController {
         @Override
         public void onAnimationStart(Animator animation) {
             mCurrentValue = mStartValue;
-            if (mOneHandedAnimationCallback != null) {
-                mOneHandedAnimationCallback.onOneHandedAnimationStart(this);
-            }
+            mOneHandedAnimationCallbacks.forEach(
+                    (callback) -> {
+                        callback.onOneHandedAnimationStart(this);
+                    }
+            );
         }
 
         @Override
@@ -152,17 +157,21 @@ public class OneHandedAnimationController {
             mCurrentValue = mEndValue;
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
             onEndTransaction(mLeash, tx);
-            if (mOneHandedAnimationCallback != null) {
-                mOneHandedAnimationCallback.onOneHandedAnimationEnd(tx, this);
-            }
+            mOneHandedAnimationCallbacks.forEach(
+                    (callback) -> {
+                        callback.onOneHandedAnimationEnd(tx, this);
+                    }
+            );
         }
 
         @Override
         public void onAnimationCancel(Animator animation) {
             mCurrentValue = mEndValue;
-            if (mOneHandedAnimationCallback != null) {
-                mOneHandedAnimationCallback.onOneHandedAnimationCancel(this);
-            }
+            mOneHandedAnimationCallbacks.forEach(
+                    (callback) -> {
+                        callback.onOneHandedAnimationCancel(this);
+                    }
+            );
         }
 
         @Override
@@ -173,6 +182,11 @@ public class OneHandedAnimationController {
         public void onAnimationUpdate(ValueAnimator animation) {
             applySurfaceControlTransaction(mLeash, newSurfaceControlTransaction(),
                     animation.getAnimatedFraction());
+            mOneHandedAnimationCallbacks.forEach(
+                    (callback) -> {
+                        callback.onTutorialAnimationUpdate(((Rect) mCurrentValue).top);
+                    }
+            );
         }
 
         void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
@@ -192,9 +206,9 @@ public class OneHandedAnimationController {
             mSurfaceTransactionHelper = helper;
         }
 
-        OneHandedTransitionAnimator<T> setOneHandedAnimationCallback(
+        OneHandedTransitionAnimator<T> setOneHandedAnimationCallbacks(
                 OneHandedAnimationCallback callback) {
-            mOneHandedAnimationCallback = callback;
+            mOneHandedAnimationCallbacks.add(callback);
             return this;
         }
 

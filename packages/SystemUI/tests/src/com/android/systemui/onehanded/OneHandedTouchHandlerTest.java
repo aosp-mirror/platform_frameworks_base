@@ -46,6 +46,7 @@ import org.mockito.MockitoAnnotations;
 public class OneHandedTouchHandlerTest extends OneHandedTestCase {
     Instrumentation mInstrumentation;
     OneHandedTouchHandler mTouchHandler;
+    OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
     OneHandedManagerImpl mOneHandedManagerImpl;
     @Mock
@@ -68,13 +69,15 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
+                mTutorialHandler,
                 mGestureHandler,
                 mMockSysUiState);
     }
 
     @Test
     public void testOneHandedManager_registerForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer, times(1)).registerTransitionCallback(mTouchHandler);
+        verify(mMockDisplayAreaOrganizer, times(1))
+                .registerTransitionCallback(mTouchHandler);
     }
 
     @Test
