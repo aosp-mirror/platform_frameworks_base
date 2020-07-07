@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import com.android.systemui.car.window.SystemUIOverlayWindowController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -49,12 +50,14 @@ public class DummyNotificationShadeWindowController extends NotificationShadeWin
             DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
+            KeyguardViewMediator keyguardViewMediator,
             KeyguardBypassController keyguardBypassController,
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             SystemUIOverlayWindowController overlayWindowController) {
         super(context, windowManager, activityManager, dozeParameters, statusBarStateController,
-                configurationController, keyguardBypassController, colorExtractor, dumpManager);
+                configurationController, keyguardViewMediator, keyguardBypassController,
+                colorExtractor, dumpManager);
         mOverlayWindowController = overlayWindowController;
     }
 
