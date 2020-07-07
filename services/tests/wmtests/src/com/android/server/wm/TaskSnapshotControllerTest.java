@@ -183,6 +183,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testPrepareTaskSnapshot() {
         mAppWindow.mWinAnimator.mLastAlpha = 1f;

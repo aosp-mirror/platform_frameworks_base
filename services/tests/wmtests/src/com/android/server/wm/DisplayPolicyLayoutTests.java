@@ -49,7 +49,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -65,14 +64,12 @@ import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
-import android.view.View;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
@@ -90,6 +87,8 @@ import java.io.StringWriter;
  */
 @SmallTest
 @Presubmit
+@WindowTestsBase.UseTestDisplay(
+        addWindows = { WindowTestsBase.W_STATUS_BAR, WindowTestsBase.W_NAVIGATION_BAR })
 @RunWith(WindowTestRunner.class)
 public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
@@ -120,9 +119,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         // Disabling this call for most tests since it can override the systemUiFlags when called.
         doReturn(0).when(mDisplayPolicy).updateSystemUiVisibilityLw();
 
-        mDisplayPolicy.mLastSystemUiFlags |= View.STATUS_BAR_TRANSPARENT;
-        mDisplayPolicy.mLastSystemUiFlags |= View.NAVIGATION_BAR_TRANSPARENT;
-
         updateDisplayFrames();
     }
 
@@ -146,10 +142,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mFrames = createDisplayFrames();
         mDisplayBounds.set(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight);
         mDisplayContent.mDisplayFrames = mFrames;
-
-        doReturn(mDisplayBounds).when(mStatusBarWindow).getBounds();
-        doReturn(mDisplayBounds).when(mNavBarWindow).getBounds();
-        doReturn(mDisplayBounds).when(mWindow).getBounds();
+        mDisplayContent.setBounds(mDisplayBounds);
     }
 
     private DisplayFrames createDisplayFrames() {

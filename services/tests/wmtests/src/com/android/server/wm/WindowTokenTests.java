@@ -142,6 +142,7 @@ public class WindowTokenTests extends WindowTestsBase {
         assertEquals(0, token.getWindowsCount());
     }
 
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER })
     @Test
     public void testFinishFixedRotationTransform() {
         final WindowToken appToken = mAppWindow.mToken;
