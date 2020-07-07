@@ -16,49 +16,58 @@
 
 package android.text.format;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
 import android.icu.util.TimeZone;
 import android.icu.util.ULocale;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
- * Common methods and constants for the various ICU formatters used to support
- * {@link android.text.format.DateUtils}.
+ * Common methods and constants for the various ICU formatters used to support {@link
+ * android.text.format.DateUtils}.
+ *
  * @hide
  */
-final class DateUtilsBridge {
+@VisibleForTesting(visibility = PACKAGE)
+public final class DateUtilsBridge {
     // These are all public API in DateUtils. There are others, but they're either for use with
     // other methods (like FORMAT_ABBREV_RELATIVE), don't internationalize (like FORMAT_CAP_AMPM),
     // or have never been implemented anyway.
-    public static final int FORMAT_SHOW_TIME       = 0x00001;
-    public static final int FORMAT_SHOW_WEEKDAY    = 0x00002;
-    public static final int FORMAT_SHOW_YEAR       = 0x00004;
-    public static final int FORMAT_NO_YEAR         = 0x00008;
-    public static final int FORMAT_SHOW_DATE       = 0x00010;
-    public static final int FORMAT_NO_MONTH_DAY    = 0x00020;
-    public static final int FORMAT_12HOUR          = 0x00040;
-    public static final int FORMAT_24HOUR          = 0x00080;
-    public static final int FORMAT_UTC             = 0x02000;
-    public static final int FORMAT_ABBREV_TIME     = 0x04000;
-    public static final int FORMAT_ABBREV_WEEKDAY  = 0x08000;
-    public static final int FORMAT_ABBREV_MONTH    = 0x10000;
-    public static final int FORMAT_NUMERIC_DATE    = 0x20000;
+    public static final int FORMAT_SHOW_TIME = 0x00001;
+    public static final int FORMAT_SHOW_WEEKDAY = 0x00002;
+    public static final int FORMAT_SHOW_YEAR = 0x00004;
+    public static final int FORMAT_NO_YEAR = 0x00008;
+    public static final int FORMAT_SHOW_DATE = 0x00010;
+    public static final int FORMAT_NO_MONTH_DAY = 0x00020;
+    public static final int FORMAT_12HOUR = 0x00040;
+    public static final int FORMAT_24HOUR = 0x00080;
+    public static final int FORMAT_UTC = 0x02000;
+    public static final int FORMAT_ABBREV_TIME = 0x04000;
+    public static final int FORMAT_ABBREV_WEEKDAY = 0x08000;
+    public static final int FORMAT_ABBREV_MONTH = 0x10000;
+    public static final int FORMAT_NUMERIC_DATE = 0x20000;
     public static final int FORMAT_ABBREV_RELATIVE = 0x40000;
-    public static final int FORMAT_ABBREV_ALL      = 0x80000;
+    public static final int FORMAT_ABBREV_ALL = 0x80000;
 
     /**
-     * Creates an immutable ICU timezone backed by the specified libcore timezone data. At the time of
-     * writing the libcore implementation is faster but restricted to 1902 - 2038.
-     * Callers must not modify the {@code tz} after calling this method.
+     * Creates an immutable ICU timezone backed by the specified libcore timezone data. At the time
+     * of writing the libcore implementation is faster but restricted to 1902 - 2038. Callers must
+     * not modify the {@code tz} after calling this method.
      */
-    public static android.icu.util.TimeZone icuTimeZone(java.util.TimeZone tz) {
-        android.icu.util.TimeZone icuTimeZone = TimeZone.getTimeZone(tz.getID());
+    public static TimeZone icuTimeZone(java.util.TimeZone tz) {
+        TimeZone icuTimeZone = TimeZone.getTimeZone(tz.getID());
         icuTimeZone.freeze(); // Optimization - allows the timezone to be copied cheaply.
         return icuTimeZone;
     }
 
-    public static Calendar createIcuCalendar(android.icu.util.TimeZone icuTimeZone, ULocale icuLocale,
-        long timeInMillis) {
+    /**
+     * Create a GregorianCalendar based on the arguments
+     */
+    public static Calendar createIcuCalendar(TimeZone icuTimeZone, ULocale icuLocale,
+            long timeInMillis) {
         Calendar calendar = new GregorianCalendar(icuTimeZone, icuLocale);
         calendar.setTimeInMillis(timeInMillis);
         return calendar;
@@ -123,7 +132,8 @@ final class DateUtilsBridge {
             if ((flags & FORMAT_SHOW_YEAR) != 0) {
                 // The caller explicitly wants us to show the year.
             } else if ((flags & FORMAT_NO_YEAR) != 0) {
-                // The caller explicitly doesn't want us to show the year, even if we otherwise would.
+                // The caller explicitly doesn't want us to show the year, even if we otherwise
+                // would.
             } else if (!fallInSameYear(startCalendar, endCalendar) || !isThisYear(startCalendar)) {
                 flags |= FORMAT_SHOW_YEAR;
             }
@@ -157,8 +167,8 @@ final class DateUtilsBridge {
      * skeletons provided by {@link #toSkeleton}.
      */
     public static boolean isDisplayMidnightUsingSkeleton(Calendar c) {
-        // All the skeletons returned by toSkeleton have minute precision (they may abbreviate 4:00 PM
-        // to 4 PM but will still show the following minute as 4:01 PM).
+        // All the skeletons returned by toSkeleton have minute precision (they may abbreviate
+        // 4:00 PM to 4 PM but will still show the following minute as 4:01 PM).
         return c.get(Calendar.HOUR_OF_DAY) == 0 && c.get(Calendar.MINUTE) == 0;
     }
 
@@ -167,9 +177,9 @@ final class DateUtilsBridge {
     }
 
     private static boolean fallOnDifferentDates(Calendar c1, Calendar c2) {
-        return c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR) ||
-            c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH) ||
-            c1.get(Calendar.DAY_OF_MONTH) != c2.get(Calendar.DAY_OF_MONTH);
+        return c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR)
+                || c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH)
+                || c1.get(Calendar.DAY_OF_MONTH) != c2.get(Calendar.DAY_OF_MONTH);
     }
 
     private static boolean fallInSameMonth(Calendar c1, Calendar c2) {

@@ -22,17 +22,17 @@ import android.icu.text.DisplayContext;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.icu.util.ULocale;
-
-import libcore.util.BasicLruCache;
+import android.util.LruCache;
 
 /**
  * A formatter that outputs a single date/time.
+ *
+ * @hide
  */
-public class DateTimeFormat {
-    private static final libcore.icu.DateTimeFormat.FormatterCache
-        CACHED_FORMATTERS = new libcore.icu.DateTimeFormat.FormatterCache();
+class DateTimeFormat {
+    private static final FormatterCache CACHED_FORMATTERS = new FormatterCache();
 
-    static class FormatterCache extends BasicLruCache<String, DateFormat> {
+    static class FormatterCache extends LruCache<String, DateFormat> {
         FormatterCache() {
             super(8);
         }
@@ -42,13 +42,14 @@ public class DateTimeFormat {
     }
 
     public static String format(ULocale icuLocale, Calendar time, int flags,
-        DisplayContext displayContext) {
+            DisplayContext displayContext) {
         String skeleton = DateUtilsBridge.toSkeleton(time, flags);
         String key = skeleton + "\t" + icuLocale + "\t" + time.getTimeZone();
-        synchronized(CACHED_FORMATTERS) {
+        synchronized (CACHED_FORMATTERS) {
             DateFormat formatter = CACHED_FORMATTERS.get(key);
             if (formatter == null) {
-                DateTimePatternGenerator generator = DateTimePatternGenerator.getInstance(icuLocale);
+                DateTimePatternGenerator generator = DateTimePatternGenerator.getInstance(
+                        icuLocale);
                 formatter = new SimpleDateFormat(generator.getBestPattern(skeleton), icuLocale);
                 CACHED_FORMATTERS.put(key, formatter);
             }
