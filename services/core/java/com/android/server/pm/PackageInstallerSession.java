@@ -2951,13 +2951,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return EMPTY_CHILD_SESSION_ARRAY;
     }
 
+    private boolean canBeAddedAsChild(int parentCandidate) {
+        synchronized (mLock) {
+            return (!hasParentSessionId() || mParentSessionId == parentCandidate)
+                    && !mCommitted && !mDestroyed;
+        }
+    }
+
     @Override
     public void addChildSessionId(int childSessionId) {
         final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
-        if (childSession == null
-                || (childSession.hasParentSessionId() && childSession.mParentSessionId != sessionId)
-                || childSession.mCommitted
-                || childSession.mDestroyed) {
+        if (childSession == null || !childSession.canBeAddedAsChild(sessionId)) {
             throw new IllegalStateException("Unable to add child session " + childSessionId
                             + " as it does not exist or is in an invalid state.");
         }
