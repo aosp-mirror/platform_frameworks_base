@@ -2375,7 +2375,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         // triggered after contents are drawn on the display.
                         if (display.isSingleTaskInstance()) {
                             display.mDisplayContent.prepareAppTransition(
-                                    TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false);
+                                    TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false,
+                                    0 /* flags */, true /* forceOverride*/);
                         }
                         stack.awakeFromSleepingLocked();
                         if (display.isSingleTaskInstance()) {
