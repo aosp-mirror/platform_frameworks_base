@@ -1115,7 +1115,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (hasParentSessionId()) {
             throw new IllegalStateException(
                     "Session " + sessionId + " is a child of multi-package session "
-                            + mParentSessionId +  " and may not be committed directly.");
+                            + getParentSessionId() +  " and may not be committed directly.");
         }
 
         if (!markAsSealed(statusReceiver, forTransfer)) {
@@ -2622,7 +2622,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (hasParentSessionId()) {
             throw new IllegalStateException(
                     "Session " + sessionId + " is a child of multi-package session "
-                            + mParentSessionId +  " and may not be abandoned directly.");
+                            + getParentSessionId() +  " and may not be abandoned directly.");
         }
 
         List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
@@ -2848,7 +2848,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             }
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
-                                        mParentSessionId).dispatchStreamValidateAndCommit();
+                                        getParentSessionId()).dispatchStreamValidateAndCommit();
                             } else {
                                 dispatchStreamValidateAndCommit();
                             }
@@ -3030,12 +3030,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     boolean hasParentSessionId() {
-        return mParentSessionId != SessionInfo.INVALID_ID;
+        synchronized (mLock) {
+            return mParentSessionId != SessionInfo.INVALID_ID;
+        }
     }
 
     @Override
     public int getParentSessionId() {
-        return mParentSessionId;
+        synchronized (mLock) {
+            return mParentSessionId;
+        }
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
