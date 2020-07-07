@@ -3129,27 +3129,37 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** {@hide} */
     boolean isStagedSessionReady() {
-        return mStagedSessionReady;
+        synchronized (mLock) {
+            return mStagedSessionReady;
+        }
     }
 
     /** {@hide} */
     boolean isStagedSessionApplied() {
-        return mStagedSessionApplied;
+        synchronized (mLock) {
+            return mStagedSessionApplied;
+        }
     }
 
     /** {@hide} */
     boolean isStagedSessionFailed() {
-        return mStagedSessionFailed;
+        synchronized (mLock) {
+            return mStagedSessionFailed;
+        }
     }
 
     /** {@hide} */
     @StagedSessionErrorCode int getStagedSessionErrorCode() {
-        return mStagedSessionErrorCode;
+        synchronized (mLock) {
+            return mStagedSessionErrorCode;
+        }
     }
 
     /** {@hide} */
     String getStagedSessionErrorMessage() {
-        return mStagedSessionErrorMessage;
+        synchronized (mLock) {
+            return mStagedSessionErrorMessage;
+        }
     }
 
     private void destroyInternal() {
