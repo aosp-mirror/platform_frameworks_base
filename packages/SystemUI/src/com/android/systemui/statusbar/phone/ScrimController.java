@@ -348,10 +348,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
-            // In case the user isn't unlocked, make sure to delay a bit because the system is hosed
-            // with too many things at this case, in order to not skip the initial frames.
-            mScrimInFront.postOnAnimationDelayed(this::scheduleUpdate, 16);
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
+            scheduleUpdate();
         } else if ((!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD)
                 || (mState == ScrimState.AOD && !mDozeParameters.getDisplayNeedsBlanking())) {
             // Scheduling a frame isn't enough when:
