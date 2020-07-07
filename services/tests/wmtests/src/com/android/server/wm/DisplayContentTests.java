@@ -1511,6 +1511,24 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
     }
 
+    @Test
+    public void testSetWindowingModeAtomicallyUpdatesWindoingModeAndDisplayWindowingMode() {
+        final DisplayContent dc = createNewDisplay();
+        final ActivityStack stack =
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
+                .setDisplay(dc)
+                .build();
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            final Configuration config = ((Configuration) args[0]);
+            assertEquals(config.windowConfiguration.getWindowingMode(),
+                    config.windowConfiguration.getDisplayWindowingMode());
+            return null;
+        }).when(stack).onConfigurationChanged(any());
+        dc.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        dc.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+    }
+
     private boolean isOptionsPanelAtRight(int displayId) {
         return (mWm.getPreferredOptionsPanelGravity(displayId) & Gravity.RIGHT) == Gravity.RIGHT;
     }

@@ -2310,8 +2310,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        super.setWindowingMode(windowingMode);
-        super.setDisplayWindowingMode(windowingMode);
+        // Intentionally call onRequestedOverrideConfigurationChanged() directly to change windowing
+        // mode and display windowing mode atomically.
+        mTmpConfiguration.setTo(getRequestedOverrideConfiguration());
+        mTmpConfiguration.windowConfiguration.setWindowingMode(windowingMode);
+        mTmpConfiguration.windowConfiguration.setDisplayWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mTmpConfiguration);
     }
 
     @Override
