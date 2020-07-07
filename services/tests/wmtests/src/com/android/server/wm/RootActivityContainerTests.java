@@ -42,6 +42,7 @@ import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -57,8 +58,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
+import android.util.MergedConfiguration;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
@@ -219,6 +222,35 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         verify(stack, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();
         verify(stack, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
                 null /* target */, null /* targetOptions */);
+    }
+
+    @Test
+    public void testAwakeFromSleepingWithAppConfiguration() {
+        final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
+        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true).build();
+        activity.moveFocusableActivityToTop("test");
+        assertTrue(activity.getStack().isFocusedStackOnDisplay());
+        ActivityRecordTests.setRotatedScreenOrientationSilently(activity);
+
+        final Configuration rotatedConfig = new Configuration();
+        display.computeScreenConfiguration(rotatedConfig, display.getDisplayRotation()
+                .rotationForOrientation(activity.getOrientation(), display.getRotation()));
+        assertNotEquals(activity.getConfiguration().orientation, rotatedConfig.orientation);
+        // Assume the activity was shown in different orientation. For example, the top activity is
+        // landscape and the portrait lockscreen is shown.
+        activity.setLastReportedConfiguration(
+                new MergedConfiguration(mService.getGlobalConfiguration(), rotatedConfig));
+        activity.setState(ActivityState.STOPPED, "sleep");
+
+        display.setIsSleeping(true);
+        doReturn(false).when(display).shouldSleep();
+        // Allow to resume when awaking.
+        setBooted(mService);
+        mRootWindowContainer.applySleepTokens(true);
+
+        // The display orientation should be changed by the activity so there is no relaunch.
+        verify(activity, never()).relaunchActivityLocked(anyBoolean());
+        assertEquals(rotatedConfig.orientation, display.getConfiguration().orientation);
     }
 
     /**

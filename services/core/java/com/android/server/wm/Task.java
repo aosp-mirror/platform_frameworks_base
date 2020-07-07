@@ -1423,7 +1423,7 @@ class Task extends WindowContainer<WindowContainer> {
     void removeChild(WindowContainer r, String reason) {
         // A rootable child task that is now being removed from an organized task. Making sure
         // the stack references is keep updated.
-        if (mTaskOrganizer != null && mCreatedByOrganizer && r.asTask() != null) {
+        if (mCreatedByOrganizer && r.asTask() != null) {
             getDisplayArea().removeStackReferenceIfNeeded((ActivityStack) r);
         }
         if (!mChildren.contains(r)) {
