@@ -2544,7 +2544,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     void setPermissionsResult(boolean accepted) {
-        if (!mSealed) {
+        if (!isSealed()) {
             throw new SecurityException("Must be sealed to accept permissions");
         }
 
