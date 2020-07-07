@@ -2573,6 +2573,10 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.TAPS_APP_TO_EXIT,
                 SecureSettingsProto.OneHanded.TAPS_APP_TO_EXIT);
 
+        dumpSetting(s, p,
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
+                SecureSettingsProto.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
+
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
 
