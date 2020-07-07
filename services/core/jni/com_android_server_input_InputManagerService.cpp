@@ -225,7 +225,7 @@ public:
     /* --- InputReaderPolicyInterface implementation --- */
 
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
-    virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
+    virtual std::shared_ptr<PointerControllerInterface> obtainPointerController(int32_t deviceId);
     virtual void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices);
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier);
     virtual std::string getDeviceAlias(const InputDeviceIdentifier& identifier);
@@ -299,7 +299,7 @@ private:
         sp<SpriteController> spriteController;
 
         // Pointer controller singleton, created and destroyed as needed.
-        wp<PointerController> pointerController;
+        std::weak_ptr<PointerController> pointerController;
 
         // Input devices to be disabled
         std::set<int32_t> disabledInputDevices;
@@ -544,15 +544,16 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     } // release lock
 }
 
-sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32_t /* deviceId */) {
+std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerController(
+        int32_t /* deviceId */) {
     ATRACE_CALL();
     AutoMutex _l(mLock);
 
-    sp<PointerController> controller = mLocked.pointerController.promote();
+    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller == nullptr) {
         ensureSpriteControllerLocked();
 
-        controller = new PointerController(this, mLooper, mLocked.spriteController);
+        controller = PointerController::create(this, mLooper, mLocked.spriteController);
         mLocked.pointerController = controller;
         updateInactivityTimeoutLocked();
     }
@@ -803,7 +804,7 @@ void NativeInputManager::setSystemUiVisibility(int32_t visibility) {
 }
 
 void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
-    sp<PointerController> controller = mLocked.pointerController.promote();
+    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller == nullptr) {
         return;
     }
@@ -891,7 +892,7 @@ void NativeInputManager::reloadCalibration() {
 
 void NativeInputManager::setPointerIconType(int32_t iconId) {
     AutoMutex _l(mLock);
-    sp<PointerController> controller = mLocked.pointerController.promote();
+    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
         controller->updatePointerIcon(iconId);
     }
@@ -899,7 +900,7 @@ void NativeInputManager::setPointerIconType(int32_t iconId) {
 
 void NativeInputManager::reloadPointerIcons() {
     AutoMutex _l(mLock);
-    sp<PointerController> controller = mLocked.pointerController.promote();
+    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
         controller->reloadPointerResources();
     }
@@ -907,7 +908,7 @@ void NativeInputManager::reloadPointerIcons() {
 
 void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
     AutoMutex _l(mLock);
-    sp<PointerController> controller = mLocked.pointerController.promote();
+    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
         controller->setCustomPointerIcon(icon);
     }
