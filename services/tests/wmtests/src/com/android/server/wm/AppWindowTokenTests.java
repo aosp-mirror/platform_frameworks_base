@@ -92,7 +92,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mStack = createTaskStackOnDisplay(mDisplayContent);
         mTask = createTaskInStack(mStack, 0 /* userId */);
-        mActivity = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        mActivity = createTestActivityRecord(mDisplayContent);
 
         mTask.addChild(mActivity, 0);
     }
@@ -165,7 +165,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("AppWindow");
-        final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, mActivity);
+        final TestWindowState appWindow = createWindowState(attrs, mActivity);
         mActivity.addWindow(appWindow);
 
         // Set initial orientation and update.
@@ -198,7 +198,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("RotationByPolicy");
-        final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, mActivity);
+        final TestWindowState appWindow = createWindowState(attrs, mActivity);
         mActivity.addWindow(appWindow);
 
         // Set initial orientation and update.
@@ -244,7 +244,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
                 TYPE_BASE_APPLICATION);
         attrs.flags |= FLAG_SHOW_WHEN_LOCKED | FLAG_DISMISS_KEYGUARD;
         attrs.setTitle("AppWindow");
-        final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, mActivity);
+        final TestWindowState appWindow = createWindowState(attrs, mActivity);
 
         // Add window with show when locked flag
         mActivity.addWindow(appWindow);
@@ -307,7 +307,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_PORTRAIT, displayConfig.orientation);
         assertEquals(Configuration.ORIENTATION_PORTRAIT, activityConfig.orientation);
 
-        final ActivityRecord topActivity = WindowTestUtils.createTestActivityRecord(mStack);
+        final ActivityRecord topActivity = createTestActivityRecord(mStack);
         topActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, displayConfig.orientation);
@@ -490,8 +490,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     private ActivityRecord createTestActivityRecordForGivenTask(Task task) {
-        final ActivityRecord activity =
-                WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createTestActivityRecord(mDisplayContent);
         task.addChild(activity, 0);
         waitUntilHandlersIdle();
         return activity;
@@ -562,7 +561,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void testHasStartingWindow() {
         final WindowManager.LayoutParams attrs =
                 new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING);
-        final WindowTestUtils.TestWindowState startingWindow = createWindowState(attrs, mActivity);
+        final TestWindowState startingWindow = createWindowState(attrs, mActivity);
         mActivity.startingDisplayed = true;
         mActivity.addWindow(startingWindow);
         assertTrue("Starting window should be present", mActivity.hasStartingWindow());

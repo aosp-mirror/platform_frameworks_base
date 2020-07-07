@@ -326,7 +326,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(dc);
+        final ActivityRecord activity = createTestActivityRecord(dc);
         task.addChild(activity, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, activity.getDisplayContent());
@@ -397,16 +397,14 @@ public class DisplayContentTests extends WindowTestsBase {
         // Add stack with activity.
         final Task stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
-        final ActivityRecord activity =
-                WindowTestUtils.createTestActivityRecord(dc0);
+        final ActivityRecord activity = createTestActivityRecord(dc0);
         task0.addChild(activity, 0);
         dc0.configureDisplayPolicy();
         assertNotNull(dc0.mTapDetector);
 
         final Task stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord activity1 =
-                WindowTestUtils.createTestActivityRecord(dc0);
+        final ActivityRecord activity1 = createTestActivityRecord(dc0);
         task1.addChild(activity1, 0);
         dc1.configureDisplayPolicy();
         assertNotNull(dc1.mTapDetector);
@@ -1296,7 +1294,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final ActivityRecord pinnedActivity = createActivityRecord(displayContent,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
         final Task pinnedTask = pinnedActivity.getRootTask();
-        final ActivityRecord homeActivity = WindowTestUtils.createTestActivityRecord(
+        final ActivityRecord homeActivity = createTestActivityRecord(
                 displayContent.getDefaultTaskDisplayArea().getOrCreateRootHomeTask());
         if (displayConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             homeActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);

@@ -56,8 +56,7 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer() {
         final Task stackController1 = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stackController1, 0 /* userId */);
-        final ActivityRecord activity =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecordInTask(mDisplayContent, task);
 
         task.removeIfPossible();
         // Assert that the container was removed.
@@ -70,8 +69,7 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer_deferRemoval() {
         final Task stackController1 = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stackController1, 0 /* userId */);
-        final ActivityRecord activity =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecordInTask(mDisplayContent, task);
 
         doReturn(true).when(task).shouldDeferRemoval();
 
@@ -153,10 +151,8 @@ public class TaskTests extends WindowTestsBase {
     public void testIsInStack() {
         final Task task1 = createTaskStackOnDisplay(mDisplayContent);
         final Task task2 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity1 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task1);
-        final ActivityRecord activity2 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task2);
         assertEquals(activity1, task1.isInTask(activity1));
         assertNull(task1.isInTask(activity2));
     }
@@ -165,12 +161,9 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveChildForOverlayTask() {
         final Task task = createTaskStackOnDisplay(mDisplayContent);
         final int taskId = task.mTaskId;
-        final ActivityRecord activity1 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
-        final ActivityRecord activity2 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
-        final ActivityRecord activity3 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity3 = createActivityRecordInTask(mDisplayContent, task);
         activity1.setTaskOverlay(true);
         activity2.setTaskOverlay(true);
         activity3.setTaskOverlay(true);
