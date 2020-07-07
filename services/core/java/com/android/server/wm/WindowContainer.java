@@ -2442,6 +2442,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
         doAnimationFinished(type, anim);
         mWmService.onAnimationFinished();
+        mNeedsZBoost = false;
     }
 
     /**
@@ -2555,6 +2556,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSurfaceAnimator.isAnimating()) {
             pw.print(prefix); pw.println("ContainerAnimator:");
             mSurfaceAnimator.dump(pw, prefix + "  ");
+        }
+        if (mLastOrientationSource != null) {
+            pw.println(prefix + "mLastOrientationSource=" + mLastOrientationSource);
         }
     }
 

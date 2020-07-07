@@ -1291,8 +1291,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testNoFixedRotationWithPip() {
         // Make resume-top really update the activity state.
-        doReturn(false).when(mWm.mAtmService).isBooting();
-        doReturn(true).when(mWm.mAtmService).isBooted();
+        setBooted(mWm.mAtmService);
         // Speed up the test by a few seconds.
         mWm.mAtmService.deferWindowLayout();
         doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
