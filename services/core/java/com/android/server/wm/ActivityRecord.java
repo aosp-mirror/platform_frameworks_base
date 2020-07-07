@@ -268,6 +268,7 @@ import android.os.storage.StorageManager;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
@@ -2054,23 +2055,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     static boolean canLaunchDreamActivity(String packageName) {
-        final DreamManagerInternal dreamManager =
-                LocalServices.getService(DreamManagerInternal.class);
-
-        // Verify that the package is the current active dream. The getActiveDreamComponent()
-        // call path does not acquire the DreamManager lock and thus is safe to use.
-        final ComponentName activeDream = dreamManager.getActiveDreamComponent(false /* doze */);
-        if (activeDream == null || activeDream.getPackageName() == null
-                || !activeDream.getPackageName().equals(packageName)) {
+        if (packageName == null) {
             return false;
         }
 
-        // Verify that the device is dreaming.
         if (!LocalServices.getService(ActivityTaskManagerInternal.class).isDreaming()) {
             return false;
         }
 
-        return true;
+        final DreamManagerInternal dreamManager =
+                LocalServices.getService(DreamManagerInternal.class);
+
+        // Verify that the package is the current active dream or doze component. The
+        // getActiveDreamComponent() call path does not acquire the DreamManager lock and thus
+        // is safe to use.
+        final ComponentName activeDream = dreamManager.getActiveDreamComponent(false /* doze */);
+        final ComponentName activeDoze = dreamManager.getActiveDreamComponent(true /* doze */);
+        return TextUtils.equals(packageName, getPackageName(activeDream))
+                || TextUtils.equals(packageName, getPackageName(activeDoze));
+    }
+
+    private static String getPackageName(ComponentName componentName) {
+        return componentName != null ? componentName.getPackageName() : null;
     }
 
     private void setActivityType(boolean componentSpecified, int launchedFromUid, Intent intent,
@@ -2560,7 +2566,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (mayAdjustTop && ((ActivityStack) task).topRunningActivity(true /* focusableOnly */)
                     == null) {
                 task.adjustFocusToNextFocusableTask("finish-top", false /* allowFocusSelf */,
-                        shouldAdjustGlobalFocus);
+                            shouldAdjustGlobalFocus);
             }
 
             finishActivityResults(resultCode, resultData, resultGrants);
@@ -2580,7 +2586,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 if (DEBUG_VISIBILITY || DEBUG_TRANSITION) {
                     Slog.v(TAG_TRANSITION, "Prepare close transition: finishing " + this);
                 }
-                getDisplay().mDisplayContent.prepareAppTransition(transit, false);
+                mDisplayContent.prepareAppTransition(transit, false);
 
                 // When finishing the activity preemptively take the snapshot before the app window
                 // is marked as hidden and any configuration changes take place
@@ -2605,6 +2611,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 if (endTask) {
                     mAtmService.getLockTaskController().clearLockedTask(task);
+                    // This activity was in the top focused stack and this is the last activity in
+                    // that task, give this activity a higher layer so it can stay on top before the
+                    // closing task transition be executed.
+                    if (mayAdjustTop) {
+                        mNeedsZBoost = true;
+                        mDisplayContent.assignWindowLayers(false /* setLayoutNeeded */);
+                    }
                 }
             } else if (!isState(PAUSING)) {
                 if (mVisibleRequested) {
@@ -6105,7 +6118,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AR#onAnimationFinished");
         mTransit = TRANSIT_UNSET;
         mTransitFlags = 0;
-        mNeedsZBoost = false;
         mNeedsAnimationBoundsLayer = false;
 
         setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM | FINISH_LAYOUT_REDO_WALLPAPER,

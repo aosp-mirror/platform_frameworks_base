@@ -253,6 +253,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                     req = mLastKeyguardForcedOrientation;
                 }
             }
+            mLastOrientationSource = win;
             return req;
         }
     }

@@ -127,8 +127,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mTask = mStack.getBottomMostTask();
         mActivity = mTask.getTopNonFinishingActivity();
 
-        doReturn(false).when(mService).isBooting();
-        doReturn(true).when(mService).isBooted();
+        setBooted(mService);
     }
 
     @Test
@@ -1535,7 +1534,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      * Sets orientation without notifying the parent to simulate that the display has not applied
      * the requested orientation yet.
      */
-    private static void setRotatedScreenOrientationSilently(ActivityRecord r) {
+    static void setRotatedScreenOrientationSilently(ActivityRecord r) {
         final int rotatedOrentation = r.getConfiguration().orientation == ORIENTATION_PORTRAIT
                 ? SCREEN_ORIENTATION_LANDSCAPE
                 : SCREEN_ORIENTATION_PORTRAIT;

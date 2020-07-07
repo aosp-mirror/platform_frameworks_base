@@ -16,6 +16,7 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -49,13 +50,17 @@ public class PipTouchStateTest extends SysuiTestCase {
 
     private PipTouchState mTouchState;
     private CountDownLatch mDoubleTapCallbackTriggeredLatch;
+    private CountDownLatch mHoverExitCallbackTriggeredLatch;
 
     @Before
     public void setUp() throws Exception {
         mDoubleTapCallbackTriggeredLatch = new CountDownLatch(1);
+        mHoverExitCallbackTriggeredLatch = new CountDownLatch(1);
         mTouchState = new PipTouchState(ViewConfiguration.get(getContext()),
                 Handler.createAsync(Looper.myLooper()), () -> {
             mDoubleTapCallbackTriggeredLatch.countDown();
+        }, () -> {
+            mHoverExitCallbackTriggeredLatch.countDown();
         });
         assertFalse(mTouchState.isDoubleTap());
         assertFalse(mTouchState.isWaitingForDoubleTap());
@@ -118,6 +123,35 @@ public class PipTouchStateTest extends SysuiTestCase {
         assertTrue(mTouchState.isDoubleTap());
         assertFalse(mTouchState.isWaitingForDoubleTap());
         assertTrue(mTouchState.getDoubleTapTimeoutCallbackDelay() == -1);
+    }
+
+    @Test
+    public void testHoverExitTimeout_timeoutCallbackCalled() throws Exception {
+        mTouchState.scheduleHoverExitTimeoutCallback();
+
+        // TODO: Remove this sleep. Its only being added because it speeds up this test a bit.
+        Thread.sleep(50);
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 0);
+    }
+
+    @Test
+    public void testHoverExitTimeout_timeoutCallbackNotCalled() throws Exception {
+        mTouchState.scheduleHoverExitTimeoutCallback();
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 1);
+    }
+
+    @Test
+    public void testHoverExitTimeout_timeoutCallbackNotCalled_ifButtonPress() throws Exception {
+        mTouchState.scheduleHoverExitTimeoutCallback();
+        mTouchState.onTouchEvent(createMotionEvent(ACTION_BUTTON_PRESS, SystemClock.uptimeMillis(),
+                0, 0));
+
+        // TODO: Remove this sleep. Its only being added because it speeds up this test a bit.
+        Thread.sleep(50);
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 1);
     }
 
     private MotionEvent createMotionEvent(int action, long eventTime, float x, float y) {
