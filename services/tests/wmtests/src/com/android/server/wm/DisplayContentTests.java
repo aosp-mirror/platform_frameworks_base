@@ -858,6 +858,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testComputeImeParent_app() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.mInputMethodTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        dc.mInputMethodInputTarget = dc.mInputMethodTarget;
         assertEquals(dc.mInputMethodTarget.mActivityRecord.getSurfaceControl(),
                 dc.computeImeParent());
     }
