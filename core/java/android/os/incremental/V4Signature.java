@@ -159,7 +159,7 @@ public class V4Signature {
      *
      * @param fileSize - size of the signed file (APK)
      */
-    public static byte[] getSigningData(long fileSize, HashingInfo hashingInfo,
+    public static byte[] getSignedData(long fileSize, HashingInfo hashingInfo,
             SigningInfo signingInfo) {
         final int size =
                 4/*size*/ + 8/*fileSize*/ + 4/*hash_algorithm*/ + 1/*log2_blocksize*/ + bytesSize(

@@ -577,21 +577,6 @@ final class ApkSigningBlockUtils {
     }
 
     /**
-     * Returns the best digest from the map of available digests.
-     * similarly to compareContentDigestAlgorithm.
-     *
-     * Keep in sync with pickBestDigestForV4 in apksigner's ApkSigningBlockUtils.
-     */
-    static byte[] pickBestDigestForV4(Map<Integer, byte[]> contentDigests) {
-        for (int algo : V4_CONTENT_DIGEST_ALGORITHMS) {
-            if (contentDigests.containsKey(algo)) {
-                return contentDigests.get(algo);
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns new byte buffer whose content is a shared subsequence of this buffer's content
      * between the specified start (inclusive) and end (exclusive) positions. As opposed to
      * {@link ByteBuffer#slice()}, the returned buffer's byte order is the same as the source
