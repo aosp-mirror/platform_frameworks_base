@@ -614,8 +614,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         // Bubble controller will give us a valid display id if it should get the back event
         BubbleController bubbleController = Dependency.get(BubbleController.class);
         int bubbleDisplayId = bubbleController.getExpandedDisplayId(mContext);
-        if (code == KeyEvent.KEYCODE_BACK && bubbleDisplayId != INVALID_DISPLAY) {
+        if (bubbleDisplayId != INVALID_DISPLAY) {
             ev.setDisplayId(bubbleDisplayId);
+        } else {
+            ev.setDisplayId(mContext.getDisplay().getDisplayId());
         }
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
