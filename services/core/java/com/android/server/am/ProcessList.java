@@ -721,7 +721,7 @@ public final class ProcessList {
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         boolean fuseEnabled = SystemProperties.getBoolean(ANDROID_FUSE_ENABLED, false);
         boolean voldAppDataIsolationEnabled = SystemProperties.getBoolean(
-                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         if (!fuseEnabled && voldAppDataIsolationEnabled) {
             Slog.e(TAG, "Fuse is not enabled while vold app data isolation is enabled");
         }
