@@ -117,8 +117,8 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.layoutParamsFlags);
     mInfo.layoutParamsType = env->GetIntField(obj,
             gInputWindowHandleClassInfo.layoutParamsType);
-    mInfo.dispatchingTimeout = env->GetLongField(obj,
-            gInputWindowHandleClassInfo.dispatchingTimeoutNanos);
+    mInfo.dispatchingTimeout = decltype(mInfo.dispatchingTimeout)(
+            env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutNanos));
     mInfo.frameLeft = env->GetIntField(obj,
             gInputWindowHandleClassInfo.frameLeft);
     mInfo.frameTop = env->GetIntField(obj,

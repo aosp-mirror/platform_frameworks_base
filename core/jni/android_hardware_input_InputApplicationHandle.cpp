@@ -61,8 +61,8 @@ bool NativeInputApplicationHandle::updateInfo() {
 
     mInfo.name = getStringField(env, obj, gInputApplicationHandleClassInfo.name, "<null>");
 
-    mInfo.dispatchingTimeout = env->GetLongField(obj,
-            gInputApplicationHandleClassInfo.dispatchingTimeoutNanos);
+    mInfo.dispatchingTimeout = decltype(mInfo.dispatchingTimeout)(
+            env->GetLongField(obj, gInputApplicationHandleClassInfo.dispatchingTimeoutNanos));
 
     jobject tokenObj = env->GetObjectField(obj,
             gInputApplicationHandleClassInfo.token);
