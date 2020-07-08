@@ -17,5 +17,6 @@
 cc_library_shared {
     name: "libshim_jni",
     srcs: ["Shim.c"],
+    header_libs: ["jni_headers"],
     sdk_version: "24",
 }

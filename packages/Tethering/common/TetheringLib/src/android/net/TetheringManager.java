@@ -171,6 +171,14 @@ public class TetheringManager {
      */
     public static final int TETHERING_ETHERNET = 5;
 
+    /**
+     * WIGIG tethering type. Use a separate type to prevent
+     * conflicts with TETHERING_WIFI
+     * This type is only used internally by the tethering module
+     * @hide
+     */
+    public static final int TETHERING_WIGIG = 6;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {

@@ -87,6 +87,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.DataUsageRequest;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
@@ -103,6 +104,7 @@ import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
+import android.net.Uri;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
@@ -212,6 +214,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final PowerManager.WakeLock mWakeLock;
 
     private final boolean mUseBpfTrafficStats;
+
+    private final ContentObserver mContentObserver;
+    private final ContentResolver mContentResolver;
 
     @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
@@ -437,7 +442,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
         mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
-                new HandlerExecutor(mHandler), this);
+                mHandler.getLooper(), new HandlerExecutor(mHandler), this);
+        mContentResolver = mContext.getContentResolver();
+        mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
+                mNetworkStatsSubscriptionsMonitor);
     }
 
     /**
@@ -460,11 +468,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          */
         @NonNull
         public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(@NonNull Context context,
-                @NonNull Executor executor, @NonNull NetworkStatsService service) {
+                @NonNull Looper looper, @NonNull Executor executor,
+                @NonNull NetworkStatsService service) {
             // TODO: Update RatType passively in NSS, instead of querying into the monitor
             //  when forceUpdateIface.
-            return new NetworkStatsSubscriptionsMonitor(context, executor, (subscriberId, type) ->
-                    service.handleOnCollapsedRatTypeChanged());
+            return new NetworkStatsSubscriptionsMonitor(context, looper, executor,
+                    (subscriberId, type) -> service.handleOnCollapsedRatTypeChanged());
+        }
+
+        /**
+         * Create a ContentObserver instance which is used to observe settings changes,
+         * and dispatch onChange events on handler thread.
+         */
+        public @NonNull ContentObserver makeContentObserver(@NonNull Handler handler,
+                @NonNull NetworkStatsSettings settings,
+                @NonNull NetworkStatsSubscriptionsMonitor monitor) {
+            return new ContentObserver(handler) {
+                @Override
+                public void onChange(boolean selfChange, @NonNull Uri uri) {
+                    if (!settings.getCombineSubtypeEnabled()) {
+                        monitor.start();
+                    } else {
+                        monitor.stop();
+                    }
+                }
+            };
         }
     }
 
@@ -530,11 +558,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
                 mSettings.getPollInterval(), pollIntent);
 
-        // TODO: listen to settings changed to support dynamically enable/disable.
-        // watch for networkType changes
-        if (!mSettings.getCombineSubtypeEnabled()) {
-            mNetworkStatsSubscriptionsMonitor.start();
-        }
+        mContentResolver.registerContentObserver(Settings.Global
+                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED),
+                        false /* notifyForDescendants */, mContentObserver);
+
+        // Post a runnable on handler thread to call onChange(). It's for getting current value of
+        // NETSTATS_COMBINE_SUBTYPE_ENABLED to decide start or stop monitoring RAT type changes.
+        mHandler.post(() -> mContentObserver.onChange(false, Settings.Global
+                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED)));
 
         registerGlobalAlert();
     }
@@ -559,6 +590,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (!mSettings.getCombineSubtypeEnabled()) {
             mNetworkStatsSubscriptionsMonitor.stop();
         }
+
+        mContentResolver.unregisterContentObserver(mContentObserver);
 
         final long currentTime = mClock.millis();
 
@@ -1306,21 +1339,39 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
 
                 // Traffic occurring on stacked interfaces is usually clatd.
-                // UID stats are always counted on the stacked interface and never
-                // on the base interface, because the packets on the base interface
-                // do not actually match application sockets until they are translated.
                 //
-                // Interface stats are more complicated. Packets subject to BPF offload
-                // never appear on the base interface and only appear on the stacked
-                // interface, so to ensure those packets increment interface stats, interface
-                // stats from stacked interfaces must be collected.
+                // UID stats are always counted on the stacked interface and never on the base
+                // interface, because the packets on the base interface do not actually match
+                // application sockets (they're not IPv4) and thus the app uid is not known.
+                // For receive this is obvious: packets must be translated from IPv6 to IPv4
+                // before the application socket can be found.
+                // For transmit: either they go through the clat daemon which by virtue of going
+                // through userspace strips the original socket association during the IPv4 to
+                // IPv6 translation process, or they are offloaded by eBPF, which doesn't:
+                // However, on an ebpf device the accounting is done in cgroup ebpf hooks,
+                // which don't trigger again post ebpf translation.
+                // (as such stats accounted to the clat uid are ignored)
+                //
+                // Interface stats are more complicated.
+                //
+                // eBPF offloaded 464xlat'ed packets never hit base interface ip6tables, and thus
+                // *all* statistics are collected by iptables on the stacked v4-* interface.
+                //
+                // Additionally for ingress all packets bound for the clat IPv6 address are dropped
+                // in ip6tables raw prerouting and thus even non-offloaded packets are only
+                // accounted for on the stacked interface.
+                //
+                // For egress, packets subject to eBPF offload never appear on the base interface
+                // and only appear on the stacked interface. Thus to ensure packets increment
+                // interface stats, we must collate data from stacked interfaces. For xt_qtaguid
+                // (or non eBPF offloaded) TX they would appear on both, however egress interface
+                // accounting is explicitly bypassed for traffic from the clat uid.
+                //
                 final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
                 for (LinkProperties stackedLink : stackedLinks) {
                     final String stackedIface = stackedLink.getInterfaceName();
                     if (stackedIface != null) {
-                        if (mUseBpfTrafficStats) {
-                            findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
-                        }
+                        findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
                         findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
                         if (isMobile) {
                             mobileIfaces.add(stackedIface);
@@ -1859,14 +1910,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // fold tethering stats and operations into uid snapshot
         final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
         tetherSnapshot.filter(UID_ALL, ifaces, TAG_ALL);
-        mStatsFactory.apply464xlatAdjustments(uidSnapshot, tetherSnapshot,
-                mUseBpfTrafficStats);
+        mStatsFactory.apply464xlatAdjustments(uidSnapshot, tetherSnapshot);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
         // get a stale copy of uid stats snapshot provided by providers.
         final NetworkStats providerStats = getNetworkStatsFromProviders(STATS_PER_UID);
         providerStats.filter(UID_ALL, ifaces, TAG_ALL);
-        mStatsFactory.apply464xlatAdjustments(uidSnapshot, providerStats, mUseBpfTrafficStats);
+        mStatsFactory.apply464xlatAdjustments(uidSnapshot, providerStats);
         uidSnapshot.combineAllValues(providerStats);
 
         uidSnapshot.combineAllValues(mUidOperations);

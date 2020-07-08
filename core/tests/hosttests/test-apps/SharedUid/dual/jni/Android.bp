@@ -27,6 +27,7 @@ cc_test_library {
     // All of the source files that we will compile.
     srcs: ["native.cpp"],
 
+    header_libs: ["jni_headers"],
     shared_libs: ["liblog"],
 
     cflags: [

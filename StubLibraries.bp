@@ -49,6 +49,7 @@ stubs_defaults {
         ":opt-net-voip-srcs",
         ":art-module-public-api-stubs-source",
         ":android_icu4j_public_api_files",
+        "**/package.html",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
@@ -75,7 +76,18 @@ stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
     sdk_version: "core_platform",
-    libs: ["framework-all"],
+    // There are a few classes from modules used as type arguments that
+    // need to be resolved by metalava. For now, we can use a previously
+    // finalized stub library to resolve them. If a new class gets added,
+    // this may be need to be revisited to use a manually maintained stub
+    // library with empty classes in order to resolve those references.
+    libs: ["sdk_system_29_android"],
+    aidl: {
+        local_include_dirs: [
+            "media/apex/java",
+            "wifi/aidl-export",
+        ],
+    },
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -115,6 +127,19 @@ droidstubs {
         dest: "android.txt",
     },
     jdiff_enabled: true,
+}
+
+droidstubs {
+    name: "api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/current.txt",
+            removed_api_file: "non-updatable-api/removed.txt",
+        },
+    },
 }
 
 priv_apps = " " +
@@ -157,6 +182,19 @@ droidstubs {
         dest: "android.txt",
     },
     jdiff_enabled: true,
+}
+
+droidstubs {
+    name: "system-api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + priv_apps,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/system-current.txt",
+            removed_api_file: "non-updatable-api/system-removed.txt",
+        },
+    },
 }
 
 droidstubs {
@@ -226,6 +264,18 @@ droidstubs {
     },
 }
 
+droidstubs {
+    name: "module-lib-api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + module_libs,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/module-lib-current.txt",
+            removed_api_file: "non-updatable-api/module-lib-removed.txt",
+        },
+    },
+}
 
 // The following droidstub module generates source files for the API stub library for
 // modules. Note that it not only includes its own APIs but also other APIs that have
@@ -285,7 +335,21 @@ java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs" ],
     defaults: ["android_defaults_stubs_current"],
-    libs: ["android_system_stubs_current"],
+    libs: ["sdk_system_29_android"],
+}
+
+java_library_static {
+    name: "android_non_updatable_stubs_current",
+    srcs: [":api-stubs-docs-non-updatable"],
+    defaults: ["android_defaults_stubs_current"],
+    libs: ["sdk_system_29_android"],
+}
+
+java_library_static {
+    name: "android_system_non_updatable_stubs_current",
+    srcs: [":system-api-stubs-docs-non-updatable"],
+    defaults: ["android_defaults_stubs_current"],
+    libs: ["sdk_system_29_android"],
 }
 
 /////////////////////////////////////////////////////////////////////

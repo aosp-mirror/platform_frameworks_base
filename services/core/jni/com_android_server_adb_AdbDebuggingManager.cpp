@@ -41,32 +41,24 @@ namespace {
 template <class T, class N>
 class JSmartWrapper {
 public:
-    JSmartWrapper(JNIEnv* env, T* jData) :
-        mEnv(env),
-        mJData(jData) {
-    }
+    JSmartWrapper(JNIEnv* env, T* jData) : mEnv(env), mJData(jData) {}
 
     virtual ~JSmartWrapper() = default;
 
-    const N* data() const {
-        return mRawData;
-    }
+    const N* data() const { return mRawData; }
 
-    jsize size() const {
-        return mSize;
-    }
+    jsize size() const { return mSize; }
 
 protected:
     N* mRawData = nullptr;
     JNIEnv* mEnv = nullptr;
     T* mJData = nullptr;
     jsize mSize = 0;
-};  // JSmartWrapper
+}; // JSmartWrapper
 
 class JStringUTFWrapper : public JSmartWrapper<jstring, const char> {
 public:
-    explicit JStringUTFWrapper(JNIEnv* env, jstring* str)
-        : JSmartWrapper(env, str) {
+    explicit JStringUTFWrapper(JNIEnv* env, jstring* str) : JSmartWrapper(env, str) {
         mRawData = env->GetStringUTFChars(*str, NULL);
         mSize = env->GetStringUTFLength(*str);
     }
@@ -79,9 +71,7 @@ public:
 }; // JStringUTFWrapper
 
 struct ServerDeleter {
-    void operator()(PairingServerCtx* p) {
-        pairing_server_destroy(p);
-    }
+    void operator()(PairingServerCtx* p) { pairing_server_destroy(p); }
 };
 using PairingServerPtr = std::unique_ptr<PairingServerCtx, ServerDeleter>;
 struct PairingResultWaiter {
@@ -90,8 +80,7 @@ struct PairingResultWaiter {
     std::optional<bool> is_valid_;
     PeerInfo peer_info_;
 
-    static void ResultCallback(const PeerInfo* peer_info,
-                               void* opaque) {
+    static void ResultCallback(const PeerInfo* peer_info, void* opaque) {
         auto* p = reinterpret_cast<PairingResultWaiter*>(opaque);
         {
             std::unique_lock<std::mutex> lock(p->mutex_);
@@ -106,12 +95,9 @@ struct PairingResultWaiter {
 
 PairingServerPtr sServer;
 std::unique_ptr<PairingResultWaiter> sWaiter;
-}  // namespace
+} // namespace
 
-static jint native_pairing_start(JNIEnv* env,
-                                 jobject thiz,
-                                 jstring guid,
-                                 jstring password) {
+static jint native_pairing_start(JNIEnv* env, jobject thiz, jstring guid, jstring password) {
     // Server-side only sends its GUID on success.
     PeerInfo system_info = {};
     system_info.type = ADB_DEVICE_GUID;
@@ -123,9 +109,7 @@ static jint native_pairing_start(JNIEnv* env,
     // Create the pairing server
     sServer = PairingServerPtr(
             pairing_server_new_no_cert(reinterpret_cast<const uint8_t*>(passwordWrapper.data()),
-                                       passwordWrapper.size(),
-                                       &system_info,
-                                       0));
+                                       passwordWrapper.size(), &system_info, 0));
 
     sWaiter.reset(new PairingResultWaiter);
     uint16_t port = pairing_server_start(sServer.get(), sWaiter->ResultCallback, sWaiter.get());
@@ -137,15 +121,13 @@ static jint native_pairing_start(JNIEnv* env,
     return port;
 }
 
-static void native_pairing_cancel(JNIEnv* /* env */,
-                                  jclass /* clazz */) {
+static void native_pairing_cancel(JNIEnv* /* env */, jclass /* clazz */) {
     if (sServer != nullptr) {
         sServer.reset();
     }
 }
 
-static jboolean native_pairing_wait(JNIEnv* env,
-                                    jobject thiz) {
+static jboolean native_pairing_wait(JNIEnv* env, jobject thiz) {
     ALOGI("Waiting for pairing server to complete");
     std::unique_lock<std::mutex> lock(sWaiter->mutex_);
     if (!sWaiter->is_valid_.has_value()) {
@@ -167,19 +149,18 @@ static jboolean native_pairing_wait(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gPairingThreadMethods[] = {
-    /* name, signature, funcPtr */
-    { "native_pairing_start", "(Ljava/lang/String;Ljava/lang/String;)I",
-            (void*) native_pairing_start },
-    { "native_pairing_cancel", "()V",
-            (void*) native_pairing_cancel },
-    { "native_pairing_wait", "()Z",
-            (void*) native_pairing_wait },
+        /* name, signature, funcPtr */
+        {"native_pairing_start", "(Ljava/lang/String;Ljava/lang/String;)I",
+         (void*)native_pairing_start},
+        {"native_pairing_cancel", "()V", (void*)native_pairing_cancel},
+        {"native_pairing_wait", "()Z", (void*)native_pairing_wait},
 };
 
 int register_android_server_AdbDebuggingManager(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/adb/AdbDebuggingManager$PairingThread",
-              gPairingThreadMethods, NELEM(gPairingThreadMethods));
-    (void) res;  // Faked use when LOG_NDEBUG.
+    int res = jniRegisterNativeMethods(env,
+                                       "com/android/server/adb/AdbDebuggingManager$PairingThread",
+                                       gPairingThreadMethods, NELEM(gPairingThreadMethods));
+    (void)res; // Faked use when LOG_NDEBUG.
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
     return 0;
 }

@@ -25,9 +25,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.Animatable;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.util.SparseArray;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,6 +45,7 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 
 public class QSDetail extends LinearLayout {
 
@@ -140,6 +144,25 @@ public class QSDetail extends LinearLayout {
         if (!qsExpanded) {
             mTriggeredExpand = false;
         }
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        DisplayCutout cutout = insets.getDisplayCutout();
+        Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
+                cutout, getDisplay());
+        if (padding == null) {
+            mQsDetailHeader.setPaddingRelative(
+                    getResources().getDimensionPixelSize(R.dimen.qs_detail_header_padding),
+                    getPaddingTop(),
+                    getResources().getDimensionPixelSize(R.dimen.qs_detail_header_padding),
+                    getPaddingBottom()
+            );
+        } else {
+            mQsDetailHeader.setPadding(padding.first, getPaddingTop(),
+                    padding.second, getPaddingBottom());
+        }
+        return super.onApplyWindowInsets(insets);
     }
 
     private void updateDetailText() {

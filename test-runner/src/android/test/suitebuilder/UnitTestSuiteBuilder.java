@@ -19,8 +19,9 @@ package android.test.suitebuilder;
 /**
  * A suite builder that finds unit tests.
  *
- * {@hide} Not needed for 1.0 SDK.
+ * @deprecated android.test.runner is obsolete
  */
+@Deprecated
 public class UnitTestSuiteBuilder extends TestSuiteBuilder {
 
     public UnitTestSuiteBuilder(Class clazz) {

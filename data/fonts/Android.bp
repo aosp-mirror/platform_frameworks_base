@@ -16,8 +16,10 @@ prebuilt_font {
     name: "DroidSansMono.ttf",
     src: "DroidSansMono.ttf",
     required: [
-        "DroidSans.ttf",
-        "DroidSans-Bold.ttf",
+        // Roboto-Regular.ttf provides DroidSans.ttf as a symlink to itself
+        "Roboto-Regular.ttf",
+        // Roboto-Bold.ttf provides DroidSans-Bold.ttf as a symlink to itself
+        "Roboto-Bold.ttf",
     ],
 }
 

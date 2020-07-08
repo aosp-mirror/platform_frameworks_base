@@ -40,7 +40,7 @@
 #include <utils/misc.h>
 #include <utils/String8.h>
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include <dmabufinfo/dmabufinfo.h>

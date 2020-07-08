@@ -1,0 +1,219 @@
+// Signature format: 2.0
+package android {
+
+  public static final class Manifest.permission {
+    field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+  }
+
+}
+
+package android.app {
+
+  public class AppOpsManager {
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
+  }
+
+  public class Notification implements android.os.Parcelable {
+    method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
+  }
+
+  public static final class Notification.TvExtender implements android.app.Notification.Extender {
+    method @Deprecated public String getChannel();
+  }
+
+}
+
+package android.app.admin {
+
+  public class DevicePolicyManager {
+    method @Deprecated @Nullable public String getDeviceInitializerApp();
+    method @Deprecated @Nullable public android.content.ComponentName getDeviceInitializerComponent();
+  }
+
+}
+
+package android.app.backup {
+
+  public class RestoreSession {
+    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor, String[]);
+    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, String[]);
+  }
+
+}
+
+package android.app.prediction {
+
+  public static final class AppTarget.Builder {
+    ctor @Deprecated public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
+  }
+
+}
+
+package android.content {
+
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field @Deprecated public static final String ACTION_DEVICE_INITIALIZATION_WIZARD = "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
+    field @Deprecated public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
+    field @Deprecated public static final String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
+    field @Deprecated public static final String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
+    field @Deprecated public static final String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
+    field @Deprecated public static final String EXTRA_CSS_INDICATOR = "cssIndicator";
+    field @Deprecated public static final String EXTRA_DATA_OPERATOR_ALPHA_LONG = "data-operator-alpha-long";
+    field @Deprecated public static final String EXTRA_DATA_OPERATOR_ALPHA_SHORT = "data-operator-alpha-short";
+    field @Deprecated public static final String EXTRA_DATA_OPERATOR_NUMERIC = "data-operator-numeric";
+    field @Deprecated public static final String EXTRA_DATA_RADIO_TECH = "dataRadioTechnology";
+    field @Deprecated public static final String EXTRA_DATA_REG_STATE = "dataRegState";
+    field @Deprecated public static final String EXTRA_DATA_ROAMING_TYPE = "dataRoamingType";
+    field @Deprecated public static final String EXTRA_EMERGENCY_ONLY = "emergencyOnly";
+    field @Deprecated public static final String EXTRA_IS_DATA_ROAMING_FROM_REGISTRATION = "isDataRoamingFromRegistration";
+    field @Deprecated public static final String EXTRA_IS_USING_CARRIER_AGGREGATION = "isUsingCarrierAggregation";
+    field @Deprecated public static final String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
+    field @Deprecated public static final String EXTRA_MANUAL = "manual";
+    field @Deprecated public static final String EXTRA_NETWORK_ID = "networkId";
+    field @Deprecated public static final String EXTRA_OPERATOR_ALPHA_LONG = "operator-alpha-long";
+    field @Deprecated public static final String EXTRA_OPERATOR_ALPHA_SHORT = "operator-alpha-short";
+    field @Deprecated public static final String EXTRA_OPERATOR_NUMERIC = "operator-numeric";
+    field @Deprecated public static final String EXTRA_SYSTEM_ID = "systemId";
+    field @Deprecated public static final String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
+    field @Deprecated public static final String EXTRA_VOICE_REG_STATE = "voiceRegState";
+    field @Deprecated public static final String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
+  }
+
+}
+
+package android.content.pm {
+
+  public class PackageItemInfo {
+    field @Deprecated public static final int SAFE_LABEL_FLAG_FIRST_LINE = 4; // 0x4
+    field @Deprecated public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 2; // 0x2
+    field @Deprecated public static final int SAFE_LABEL_FLAG_TRIM = 1; // 0x1
+  }
+
+}
+
+package android.hardware.hdmi {
+
+  public final class HdmiControlManager {
+    method @Deprecated public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevicesList();
+    method @Deprecated public boolean isRemoteDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void powerOffRemoteDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void powerOnRemoteDevice(android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void requestRemoteDeviceToBecomeActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+  }
+
+}
+
+package android.location {
+
+  public class LocationManager {
+    method @Deprecated public boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
+    method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
+    method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
+  }
+
+}
+
+package android.media.tv {
+
+  public final class TvInputManager {
+    method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
+  }
+
+  public static final class TvInputManager.Hardware {
+    method public boolean dispatchKeyEventToHdmi(android.view.KeyEvent);
+  }
+
+}
+
+package android.net.wifi {
+
+  @Deprecated public class BatchedScanResult implements android.os.Parcelable {
+    ctor public BatchedScanResult();
+    ctor public BatchedScanResult(android.net.wifi.BatchedScanResult);
+    field public final java.util.List<android.net.wifi.ScanResult> scanResults;
+    field public boolean truncated;
+  }
+
+  public class ScanResult implements android.os.Parcelable {
+    field public boolean untrusted;
+  }
+
+}
+
+package android.os {
+
+  public class Build {
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
+  }
+
+  public final class PowerManager {
+    method @Deprecated public boolean isScreenBrightnessBoosted();
+    field @Deprecated public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
+  }
+
+}
+
+package android.provider {
+
+  public final class DeviceConfig {
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
+  }
+
+  public static interface DeviceConfig.OnPropertyChangedListener {
+    method public void onPropertyChanged(@NonNull String, @NonNull String, @Nullable String);
+  }
+
+}
+
+package android.service.notification {
+
+  public abstract class NotificationListenerService extends android.app.Service {
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(int);
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(String[], int);
+    method public void registerAsSystemService(android.content.Context, android.content.ComponentName, int) throws android.os.RemoteException;
+    method public final void setOnNotificationPostedTrim(int);
+    method public final void snoozeNotification(String, String);
+    method public void unregisterAsSystemService() throws android.os.RemoteException;
+    field public static final int TRIM_FULL = 0; // 0x0
+    field public static final int TRIM_LIGHT = 1; // 0x1
+  }
+
+  public static class NotificationListenerService.Ranking {
+    method public java.util.List<java.lang.String> getAdditionalPeople();
+    method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
+  }
+
+}
+
+package android.telecom {
+
+  public class TelecomManager {
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.WRITE_SECURE_SETTINGS}) public boolean setDefaultDialer(@Nullable String);
+  }
+
+}
+
+package android.telephony {
+
+  public class TelephonyManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void answerRingingCall();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public boolean endCall();
+    method @Deprecated public void silenceRinger();
+  }
+
+}
+
+package android.telephony.data {
+
+  public final class DataCallResponse implements android.os.Parcelable {
+    ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+

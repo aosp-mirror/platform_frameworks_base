@@ -8,4 +8,4 @@ rule com.android.internal.util.State* com.android.networkstack.tethering.util.St
 rule com.android.internal.util.StateMachine* com.android.networkstack.tethering.util.StateMachine@1
 rule com.android.internal.util.TrafficStatsConstants* com.android.networkstack.tethering.util.TrafficStatsConstants@1
 
-rule android.net.LocalLog* com.android.networkstack.tethering.LocalLog@1
+rule android.util.LocalLog* com.android.networkstack.tethering.util.LocalLog@1

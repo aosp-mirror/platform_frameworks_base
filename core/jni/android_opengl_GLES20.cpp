@@ -24,7 +24,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <jni.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <assert.h>

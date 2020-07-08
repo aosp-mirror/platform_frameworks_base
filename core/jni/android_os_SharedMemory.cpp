@@ -22,7 +22,7 @@
 #include <utils/Log.h>
 
 #include <nativehelper/jni_macros.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include <algorithm>

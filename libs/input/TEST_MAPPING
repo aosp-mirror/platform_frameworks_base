@@ -1,0 +1,7 @@
+{
+    "presubmit": [
+        {
+            "name": "libinputservice_test"
+        }
+    ]
+}
