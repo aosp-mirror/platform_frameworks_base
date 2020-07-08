@@ -122,10 +122,18 @@ void signalExceptionForError(JNIEnv *env, status_t err, bool canThrowRemoteExcep
             std::stringstream ss;
             ss << "HwBinder Error: (" << err << ")";
 
-            jniThrowException(
-                    env,
-                    canThrowRemoteException ? "android/os/RemoteException" : "java/lang/RuntimeException",
-                    ss.str().c_str());
+            const char* exception = nullptr;
+            if (canThrowRemoteException) {
+                if (err == DEAD_OBJECT) {
+                    exception = "android/os/DeadObjectException";
+                } else {
+                    exception = "android/os/RemoteException";
+                }
+            } else {
+                exception = "java/lang/RuntimeException";
+            }
+
+            jniThrowException(env, exception, ss.str().c_str());
 
             break;
         }
