@@ -136,8 +136,6 @@ public final class Magnifier {
     // Lock to synchronize between the UI thread and the thread that handles pixel copy results.
     // Only sync mWindow writes from UI thread with mWindow reads from sPixelCopyHandlerThread.
     private final Object mLock = new Object();
-    // The lock used to synchronize the UI and render threads when a #dismiss is performed.
-    private final Object mDestroyLock = new Object();
 
     /**
      * Initializes a magnifier.

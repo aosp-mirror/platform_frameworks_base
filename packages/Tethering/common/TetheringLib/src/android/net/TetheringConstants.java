@@ -37,8 +37,8 @@ public final class TetheringConstants {
     private TetheringConstants() { }
 
     /**
-     * Extra used for communicating with the TetherService. Includes the type of tethering to
-     * enable if any.
+     * Extra used for communicating with the TetherService and TetherProvisioningActivity.
+     * Includes the type of tethering to enable if any.
      */
     public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
     /**
@@ -56,8 +56,38 @@ public final class TetheringConstants {
      */
     public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
     /**
-     * Extra used for communicating with the TetherService. Contains the {@link ResultReceiver}
-     * which will receive provisioning results. Can be left empty.
+     * Extra used for communicating with the TetherService and TetherProvisioningActivity.
+     * Contains the {@link ResultReceiver} which will receive provisioning results.
+     * Can not be empty.
      */
     public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
+
+    /**
+     * Extra used for communicating with the TetherService and TetherProvisioningActivity.
+     * Contains the subId of current active cellular upstream.
+     * @hide
+     */
+    public static final String EXTRA_TETHER_SUBID = "android.net.extra.TETHER_SUBID";
+
+    /**
+     * Extra used for telling TetherProvisioningActivity the entitlement package name and class
+     * name to start UI entitlement check.
+     * @hide
+     */
+    public static final String EXTRA_TETHER_UI_PROVISIONING_APP_NAME =
+            "android.net.extra.TETHER_UI_PROVISIONING_APP_NAME";
+
+    /**
+     * Extra used for telling TetherService the intent action to start silent entitlement check.
+     * @hide
+     */
+    public static final String EXTRA_TETHER_SILENT_PROVISIONING_ACTION =
+            "android.net.extra.TETHER_SILENT_PROVISIONING_ACTION";
+
+    /**
+     * Extra used for TetherService to receive the response of provisioning check.
+     * @hide
+     */
+    public static final String EXTRA_TETHER_PROVISIONING_RESPONSE =
+            "android.net.extra.TETHER_PROVISIONING_RESPONSE";
 }

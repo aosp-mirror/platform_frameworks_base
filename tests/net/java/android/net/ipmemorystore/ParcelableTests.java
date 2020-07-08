@@ -54,7 +54,7 @@ public class ParcelableTests {
 
         builder.setAssignedV4Address((Inet4Address) Inet4Address.getByName("6.7.8.9"));
         builder.setAssignedV4AddressExpiry(System.currentTimeMillis() + 3_600_000);
-        builder.setGroupHint("groupHint");
+        builder.setCluster("groupHint");
         builder.setDnsAddresses(Arrays.asList(
                 InetAddress.getByName("ACA1:652B:0911:DE8F:1200:115E:913B:AA2A"),
                 InetAddress.getByName("6.7.8.9")));

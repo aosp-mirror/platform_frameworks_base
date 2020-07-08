@@ -65,8 +65,6 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
-import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.tuner.TunerService;
@@ -91,6 +89,7 @@ public class StatusBarWindowView extends FrameLayout {
     private View mBrightnessMirror;
     private LockIcon mLockIcon;
     private PhoneStatusBarView mStatusBarView;
+    private PhoneStatusBarTransitions mBarTransitions;
 
     private int mRightInset = 0;
     private int mLeftInset = 0;
@@ -181,7 +180,8 @@ public class StatusBarWindowView extends FrameLayout {
             int targetLeft = Math.max(insets.left, leftCutout);
             int targetRight = Math.max(insets.right, rightCutout);
 
-            // Super-special right inset handling, because scrims and backdrop need to ignore it.
+            // Super-special right inset handling, because scrims, backdrop and status bar
+            // container need to ignore it.
             if (targetRight != mRightInset || targetLeft != mLeftInset) {
                 mRightInset = targetRight;
                 mLeftInset = targetLeft;
@@ -282,6 +282,12 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
         mStatusBarView = statusBarView;
+        mBarTransitions = new PhoneStatusBarTransitions(statusBarView,
+                findViewById(R.id.status_bar_container));
+    }
+
+    public PhoneStatusBarTransitions getBarTransitions() {
+        return mBarTransitions;
     }
 
     public void setService(StatusBar service) {

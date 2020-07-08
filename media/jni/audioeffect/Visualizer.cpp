@@ -25,6 +25,7 @@
 #include <limits.h>
 
 #include <audio_utils/fixedfft.h>
+#include <cutils/bitops.h>
 #include <utils/Thread.h>
 
 #include "Visualizer.h"

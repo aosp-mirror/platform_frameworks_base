@@ -42,7 +42,6 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env);
 int register_android_server_connectivity_Vpn(JNIEnv* env);
 int register_android_server_TestNetworkService(JNIEnv* env);
 int register_android_server_devicepolicy_CryptoTestHelper(JNIEnv*);
-int register_android_server_hdmi_HdmiCecController(JNIEnv* env);
 int register_android_server_tv_TvUinputBridge(JNIEnv* env);
 int register_android_server_tv_TvInputHal(JNIEnv* env);
 int register_android_server_PersistentDataBlockService(JNIEnv* env);
@@ -92,7 +91,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_devicepolicy_CryptoTestHelper(env);
     register_android_server_ConsumerIrService(env);
     register_android_server_BatteryStatsService(env);
-    register_android_server_hdmi_HdmiCecController(env);
     register_android_server_tv_TvUinputBridge(env);
     register_android_server_tv_TvInputHal(env);
     register_android_server_PersistentDataBlockService(env);

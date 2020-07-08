@@ -71,6 +71,10 @@ final class HdmiLogger {
         getLogger().errorInternal(toLogString(logMessage, objs));
     }
 
+    static final void error(String logMessage, Exception e, Object... objs) {
+        getLogger().errorInternal(toLogString(logMessage + e, objs));
+    }
+
     private void errorInternal(String logMessage) {
         String log = updateLog(mErrorTimingCache, logMessage);
         if (!log.isEmpty()) {

@@ -64,7 +64,7 @@ class AnnotationProcessor {
   void AppendNewLine();
 
   // Writes the comments and annotations to the Printer.
-  void Print(text::Printer* printer) const;
+  void Print(text::Printer* printer, bool strip_api_annotations = false) const;
 
  private:
   std::stringstream comment_;

@@ -14,28 +14,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-##########################################
-# create symlink for given font
-# $(1): new font $(2): link target
-# should be used with eval: $(eval $(call ...))
-define create-font-symlink
-$(PRODUCT_OUT)/system/fonts/$(1) : $(PRODUCT_OUT)/system/fonts/$(2)
-	@echo "Symlink: $$@ -> $$<"
-	@mkdir -p $$(dir $$@)
-	@rm -rf $$@
-	$(hide) ln -sf $$(notdir $$<) $$@
-# this magic makes LOCAL_REQUIRED_MODULES work
-ALL_MODULES.$(1).INSTALLED := \
-    $(ALL_MODULES.$(1).INSTALLED) $(PRODUCT_OUT)/system/fonts/$(1)
-endef
-
-##########################################
-# The following fonts are just symlinks, for backward compatibility.
-##########################################
-$(eval $(call create-font-symlink,DroidSans.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,DroidSans-Bold.ttf,Roboto-Bold.ttf))
-
-
 # Run sanity tests on fonts on checkbuild
 checkbuild: fontchain_lint
 

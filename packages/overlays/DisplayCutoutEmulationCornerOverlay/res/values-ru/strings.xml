@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1677693377327336341">"В правом углу"</string>
+    <string name="display_cutout_emulation_overlay" msgid="1677693377327336341">"Сделать вырез в углу"</string>
 </resources>

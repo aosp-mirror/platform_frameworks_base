@@ -17,7 +17,6 @@ package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.os.MessageQueue;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiCecController.NativeWrapper;
@@ -53,13 +52,16 @@ final class FakeNativeWrapper implements NativeWrapper {
     private HdmiPortInfo[] mHdmiPortInfo = null;
 
     @Override
-    public long nativeInit(HdmiCecController handler, MessageQueue messageQueue) {
-        return 1L;
+    public String nativeInit() {
+        return "[class or subclass of IHdmiCec]@Proxy";
     }
 
     @Override
+    public void setCallback(HdmiCecController.HdmiCecCallback callback) {}
+
+    @Override
     public int nativeSendCecCommand(
-            long controllerPtr, int srcAddress, int dstAddress, byte[] body) {
+            int srcAddress, int dstAddress, byte[] body) {
         if (body.length == 0) {
             return mPollAddressResponse[dstAddress];
         } else {
@@ -69,30 +71,30 @@ final class FakeNativeWrapper implements NativeWrapper {
     }
 
     @Override
-    public int nativeAddLogicalAddress(long controllerPtr, int logicalAddress) {
+    public int nativeAddLogicalAddress(int logicalAddress) {
         return 0;
     }
 
     @Override
-    public void nativeClearLogicalAddress(long controllerPtr) {}
+    public void nativeClearLogicalAddress() {}
 
     @Override
-    public int nativeGetPhysicalAddress(long controllerPtr) {
+    public int nativeGetPhysicalAddress() {
         return mMyPhysicalAddress;
     }
 
     @Override
-    public int nativeGetVersion(long controllerPtr) {
+    public int nativeGetVersion() {
         return 0;
     }
 
     @Override
-    public int nativeGetVendorId(long controllerPtr) {
+    public int nativeGetVendorId() {
         return 0;
     }
 
     @Override
-    public HdmiPortInfo[] nativeGetPortInfos(long controllerPtr) {
+    public HdmiPortInfo[] nativeGetPortInfos() {
         if (mHdmiPortInfo == null) {
             mHdmiPortInfo = new HdmiPortInfo[1];
             mHdmiPortInfo[0] = new HdmiPortInfo(1, 1, 0x1000, true, true, true);
@@ -101,16 +103,16 @@ final class FakeNativeWrapper implements NativeWrapper {
     }
 
     @Override
-    public void nativeSetOption(long controllerPtr, int flag, boolean enabled) {}
+    public void nativeSetOption(int flag, boolean enabled) {}
 
     @Override
-    public void nativeSetLanguage(long controllerPtr, String language) {}
+    public void nativeSetLanguage(String language) {}
 
     @Override
-    public void nativeEnableAudioReturnChannel(long controllerPtr, int port, boolean flag) {}
+    public void nativeEnableAudioReturnChannel(int port, boolean flag) {}
 
     @Override
-    public boolean nativeIsConnected(long controllerPtr, int port) {
+    public boolean nativeIsConnected(int port) {
         return false;
     }
 

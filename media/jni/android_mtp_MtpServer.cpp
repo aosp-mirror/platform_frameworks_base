@@ -25,7 +25,7 @@
 #include <utils/threads.h>
 
 #include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "private/android_filesystem_config.h"
 

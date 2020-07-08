@@ -16,7 +16,6 @@
 
 package com.android.internal.os;
 
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -90,9 +89,21 @@ public abstract class KernelCpuUidBpfMapReader {
         if (mErrors > ERROR_THRESHOLD) {
             return;
         }
+        if (endUid < startUid || startUid < 0) {
+            return;
+        }
+
         mWriteLock.lock();
         int firstIndex = mData.indexOfKey(startUid);
+        if (firstIndex < 0) {
+            mData.put(startUid, null);
+            firstIndex = mData.indexOfKey(startUid);
+        }
         int lastIndex = mData.indexOfKey(endUid);
+        if (lastIndex < 0) {
+            mData.put(endUid, null);
+            lastIndex = mData.indexOfKey(endUid);
+        }
         mData.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
         mWriteLock.unlock();
     }

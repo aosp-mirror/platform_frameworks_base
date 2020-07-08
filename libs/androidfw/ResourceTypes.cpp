@@ -6902,9 +6902,8 @@ std::unique_ptr<DynamicRefTable> DynamicRefTable::clone() const {
 status_t DynamicRefTable::load(const ResTable_lib_header* const header)
 {
     const uint32_t entryCount = dtohl(header->count);
-    const uint32_t sizeOfEntries = sizeof(ResTable_lib_entry) * entryCount;
     const uint32_t expectedSize = dtohl(header->header.size) - dtohl(header->header.headerSize);
-    if (sizeOfEntries > expectedSize) {
+    if (entryCount > (expectedSize / sizeof(ResTable_lib_entry))) {
         ALOGE("ResTable_lib_header size %u is too small to fit %u entries (x %u).",
                 expectedSize, entryCount, (uint32_t)sizeof(ResTable_lib_entry));
         return UNKNOWN_ERROR;

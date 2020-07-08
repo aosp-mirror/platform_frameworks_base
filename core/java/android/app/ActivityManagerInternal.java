@@ -344,4 +344,7 @@ public abstract class ActivityManagerInternal {
      * Unregisters the specified {@code processObserver}.
      */
     public abstract void unregisterProcessObserver(IProcessObserver processObserver);
+
+    /** Returns true if the given UID is registered as an active instrumentation. */
+    public abstract boolean isActiveInstrumentation(int uid);
 }

@@ -21,7 +21,7 @@
 
 #include <utils/Log.h>
 #include <jni.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include "SoundPool.h"
 

@@ -17,7 +17,7 @@
 #ifndef CORE_JNI_HELPERS
 #define CORE_JNI_HELPERS
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/scoped_local_ref.h>
 #include <nativehelper/scoped_utf_chars.h>
 #include <android_runtime/AndroidRuntime.h>

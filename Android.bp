@@ -371,8 +371,8 @@ filegroup {
 java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
-        "framework-sdkextensions-stubs-module_libs_api",
-        "framework-tethering-stubs-module_libs_api",
+        "framework-sdkextensions.stubs.module_lib",
+        "framework-tethering.stubs.module_lib",
         "updatable_media_stubs",
     ],
     sdk_version: "module_current",
@@ -687,7 +687,7 @@ java_library {
 
 filegroup {
     name: "framework-ike-shared-srcs",
-    visibility: ["//frameworks/opt/net/ike"],
+    visibility: ["//packages/modules/IPsec"],
     srcs: [
         "core/java/android/annotation/StringDef.java",
         "core/java/android/net/annotations/PolicyDirection.java",
@@ -1132,6 +1132,7 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--error NoSettingsProvider " +
     "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
     "--api-lint-ignore-prefix android.icu. " +
     "--api-lint-ignore-prefix java. " +

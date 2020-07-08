@@ -1,10 +1,10 @@
 package com.android.server.backup.restore;
 
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 
 import libcore.io.IoUtils;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 class FullRestoreEngineThread implements Runnable {
@@ -19,7 +19,7 @@ class FullRestoreEngineThread implements Runnable {
         // We *do* want this FileInputStream to own the underlying fd, so that
         // when we are finished with it, it closes this end of the pipe in a way
         // that signals its other end.
-        mEngineStream = new FileInputStream(engineSocket.getFileDescriptor(), true);
+        mEngineStream = new AutoCloseInputStream(engineSocket);
         // Tell it to be sure to leave the agent instance up after finishing
         mMustKillAgent = false;
     }

@@ -13,29 +13,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-java_library {
+java_sdk_library {
     name: "framework-tethering",
-    sdk_version: "module_current",
+    defaults: ["framework-module-defaults"],
+
+    // Allow access to the stubs from anywhere.
+    visibility: ["//visibility:public"],
+
+    // Restrict access to implementation library.
+    impl_library_visibility: [
+        "//visibility:override", // Ignore the visibility property.
+        "//frameworks/base/packages/Tethering:__subpackages__",
+    ],
+
     srcs: [
         ":framework-tethering-srcs",
     ],
+
     jarjar_rules: "jarjar-rules.txt",
     installable: true,
 
-    libs: [
-        "framework-annotations-lib",
-    ],
-
     hostdex: true, // for hiddenapi check
-    visibility: ["//frameworks/base/packages/Tethering:__subpackages__"],
     apex_available: ["com.android.tethering"],
     permitted_packages: ["android.net"],
-}
-
-stubs_defaults {
-    name: "framework-tethering-stubs-defaults",
-    srcs: [":framework-tethering-srcs"],
-    dist: { dest: "framework-tethering.txt" },
 }
 
 filegroup {
@@ -54,57 +54,4 @@ filegroup {
         "src/android/net/TetherStatesParcel.aidl",
     ],
     path: "src"
-}
-
-droidstubs {
-    name: "framework-tethering-stubs-srcs-publicapi",
-    defaults: [
-        "framework-module-stubs-defaults-publicapi",
-        "framework-tethering-stubs-defaults",
-    ],
-}
-
-droidstubs {
-    name: "framework-tethering-stubs-srcs-systemapi",
-    defaults: [
-        "framework-module-stubs-defaults-systemapi",
-        "framework-tethering-stubs-defaults",
-    ],
-}
-
-droidstubs {
-    name: "framework-tethering-api-module_libs_api",
-    defaults: [
-        "framework-module-api-defaults-module_libs_api",
-        "framework-tethering-stubs-defaults",
-    ],
-}
-
-droidstubs {
-    name: "framework-tethering-stubs-srcs-module_libs_api",
-    defaults: [
-        "framework-module-stubs-defaults-module_libs_api",
-        "framework-tethering-stubs-defaults",
-    ],
-}
-
-java_library {
-    name: "framework-tethering-stubs-publicapi",
-    srcs: [":framework-tethering-stubs-srcs-publicapi"],
-    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
-    dist: { dest: "framework-tethering.jar" },
-}
-
-java_library {
-    name: "framework-tethering-stubs-systemapi",
-    srcs: [":framework-tethering-stubs-srcs-systemapi"],
-    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
-    dist: { dest: "framework-tethering.jar" },
-}
-
-java_library {
-    name: "framework-tethering-stubs-module_libs_api",
-    srcs: [":framework-tethering-stubs-srcs-module_libs_api"],
-    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
-    dist: { dest: "framework-tethering.jar" },
 }

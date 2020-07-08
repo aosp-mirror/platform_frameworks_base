@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static java.lang.Float.isNaN;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -160,6 +162,9 @@ public abstract class PanelBar extends FrameLayout {
      *                 fraction as the panel also might be expanded if the fraction is 0
      */
     public void panelExpansionChanged(float frac, boolean expanded) {
+        if (isNaN(frac)) {
+            throw new IllegalArgumentException("frac cannot be NaN");
+        }
         boolean fullyClosed = true;
         boolean fullyOpened = false;
         if (SPEW) LOG("panelExpansionChanged: start state=%d", mState);

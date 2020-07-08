@@ -2298,6 +2298,75 @@ NoClone: android.service.autofill.augmented.AugmentedAutofillService#dump(java.i
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
     
 NoClone: android.util.proto.ProtoOutputStream#ProtoOutputStream(java.io.FileDescriptor) parameter #0:
+
+
+
+NoSettingsProvider: android.provider.Settings.Global#AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
+    New setting keys are not allowed. (Field: AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES)
+NoSettingsProvider: android.provider.Settings.Global#AUTOMATIC_POWER_SAVE_MODE:
+    New setting keys are not allowed. (Field: AUTOMATIC_POWER_SAVE_MODE)
+NoSettingsProvider: android.provider.Settings.Global#BATTERY_SAVER_CONSTANTS:
+    New setting keys are not allowed. (Field: BATTERY_SAVER_CONSTANTS)
+NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD:
+    New setting keys are not allowed. (Field: DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD)
+NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_ENABLED:
+    New setting keys are not allowed. (Field: DYNAMIC_POWER_SAVINGS_ENABLED)
+NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_BLACKLIST_EXEMPTIONS:
+    New setting keys are not allowed. (Field: HIDDEN_API_BLACKLIST_EXEMPTIONS)
+NoSettingsProvider: android.provider.Settings.Global#LOCATION_GLOBAL_KILL_SWITCH:
+    New setting keys are not allowed. (Field: LOCATION_GLOBAL_KILL_SWITCH)
+NoSettingsProvider: android.provider.Settings.Global#LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST:
+    New setting keys are not allowed. (Field: LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST)
+NoSettingsProvider: android.provider.Settings.Global#LOW_POWER_MODE:
+    New setting keys are not allowed. (Field: LOW_POWER_MODE)
+NoSettingsProvider: android.provider.Settings.Global#LOW_POWER_MODE_STICKY:
+    New setting keys are not allowed. (Field: LOW_POWER_MODE_STICKY)
+NoSettingsProvider: android.provider.Settings.Global#NOTIFICATION_BUBBLES:
+    New setting keys are not allowed. (Field: NOTIFICATION_BUBBLES)
+NoSettingsProvider: android.provider.Settings.Global#OVERLAY_DISPLAY_DEVICES:
+    New setting keys are not allowed. (Field: OVERLAY_DISPLAY_DEVICES)
+NoSettingsProvider: android.provider.Settings.Global#TETHER_OFFLOAD_DISABLED:
+    New setting keys are not allowed. (Field: TETHER_OFFLOAD_DISABLED)
+NoSettingsProvider: android.provider.Settings.Global#USE_OPEN_WIFI_PACKAGE:
+    New setting keys are not allowed. (Field: USE_OPEN_WIFI_PACKAGE)
+NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED:
+    New setting keys are not allowed. (Field: ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED)
+NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE:
+    New setting keys are not allowed. (Field: ACCESSIBILITY_SHORTCUT_TARGET_SERVICE)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_FEATURE_FIELD_CLASSIFICATION:
+    New setting keys are not allowed. (Field: AUTOFILL_FEATURE_FIELD_CLASSIFICATION)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_SERVICE:
+    New setting keys are not allowed. (Field: AUTOFILL_SERVICE)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT:
+    New setting keys are not allowed. (Field: AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE:
+    New setting keys are not allowed. (Field: AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE:
+    New setting keys are not allowed. (Field: AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_VALUE_LENGTH:
+    New setting keys are not allowed. (Field: AUTOFILL_USER_DATA_MAX_VALUE_LENGTH)
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MIN_VALUE_LENGTH:
+    New setting keys are not allowed. (Field: AUTOFILL_USER_DATA_MIN_VALUE_LENGTH)
+NoSettingsProvider: android.provider.Settings.Secure#CONTENT_CAPTURE_ENABLED:
+    New setting keys are not allowed. (Field: CONTENT_CAPTURE_ENABLED)
+NoSettingsProvider: android.provider.Settings.Secure#DISABLED_PRINT_SERVICES:
+    New setting keys are not allowed. (Field: DISABLED_PRINT_SERVICES)
+NoSettingsProvider: android.provider.Settings.Secure#DOZE_ALWAYS_ON:
+    New setting keys are not allowed. (Field: DOZE_ALWAYS_ON)
+NoSettingsProvider: android.provider.Settings.Secure#ENABLED_VR_LISTENERS:
+    New setting keys are not allowed. (Field: ENABLED_VR_LISTENERS)
+NoSettingsProvider: android.provider.Settings.Secure#LOCATION_ACCESS_CHECK_DELAY_MILLIS:
+    New setting keys are not allowed. (Field: LOCATION_ACCESS_CHECK_DELAY_MILLIS)
+NoSettingsProvider: android.provider.Settings.Secure#LOCATION_ACCESS_CHECK_INTERVAL_MILLIS:
+    New setting keys are not allowed. (Field: LOCATION_ACCESS_CHECK_INTERVAL_MILLIS)
+NoSettingsProvider: android.provider.Settings.Secure#NOTIFICATION_BADGING:
+    New setting keys are not allowed. (Field: NOTIFICATION_BADGING)
+NoSettingsProvider: android.provider.Settings.Secure#SYNC_PARENT_SOUNDS:
+    New setting keys are not allowed. (Field: SYNC_PARENT_SOUNDS)
+NoSettingsProvider: android.provider.Settings.Secure#USER_SETUP_COMPLETE:
+    New setting keys are not allowed. (Field: USER_SETUP_COMPLETE)
+NoSettingsProvider: android.provider.Settings.Secure#VOICE_INTERACTION_SERVICE:
+    New setting keys are not allowed. (Field: VOICE_INTERACTION_SERVICE)
     
 
 

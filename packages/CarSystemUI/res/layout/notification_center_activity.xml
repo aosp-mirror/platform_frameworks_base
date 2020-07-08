@@ -20,7 +20,8 @@
     android:id="@+id/notification_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/notification_shade_background_color">
+    android:background="@color/notification_shade_background_color"
+    android:visibility="invisible">
 
     <View
         android:id="@+id/glass_pane"

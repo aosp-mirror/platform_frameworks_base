@@ -164,7 +164,8 @@ public class BarController {
     }
 
     boolean isTransparentAllowed(WindowState win) {
-        return win == null || !win.isLetterboxedOverlappingWith(mContentFrame);
+        return win == null || mState == StatusBarManager.WINDOW_STATE_HIDING
+                || !win.isLetterboxedOverlappingWith(mContentFrame);
     }
 
     boolean setBarShowingLw(final boolean show) {
