@@ -3946,8 +3946,7 @@ public final class Telephony {
 
         /**
          * The APN set id. When the user manually selects an APN or the framework sets an APN as
-         * preferred, all APNs with the same set id as the selected APN should be prioritized over
-         * APNs in other sets.
+         * preferred, the device can only use APNs with the same set id as the selected APN.
          * <p>Type: INTEGER</p>
          * @hide
          */
