@@ -4666,8 +4666,7 @@ public abstract class PackageManager {
      * Marks an application exempt from having its permissions be automatically revoked when
      * the app is unused for an extended period of time.
      *
-     * Only the installer on record that installed the given package, or a holder of
-     * {@code WHITELIST_AUTO_REVOKE_PERMISSIONS} is allowed to call this.
+     * Only the installer on record that installed the given package is allowed to call this.
      *
      * Packages start in whitelisted state, and it is the installer's responsibility to
      * un-whitelist the packages it installs, unless auto-revoking permissions from that package
