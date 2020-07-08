@@ -2128,6 +2128,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onInputMethodFinishInput() throws RemoteException {
             mCallback.onInputMethodFinishInput();
         }
+
+        @Override
+        public void onInlineSuggestionsSessionInvalidated() throws RemoteException {
+            mCallback.onInlineSuggestionsSessionInvalidated();
+        }
     }
 
     /**
