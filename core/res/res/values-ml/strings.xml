@@ -1547,7 +1547,7 @@
     <string name="sending" msgid="206925243621664438">"അയയ്‌ക്കുന്നു…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ബ്രൗസർ സമാരംഭിക്കണോ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"കോൾ സ്വീകരിക്കണോ?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"എല്ലായ്പ്പോഴും"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"എല്ലായ്‌പ്പോഴും"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ഒരിക്കൽ മാത്രം"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s, ഔദ്യോഗിക പ്രൊഫൈലിനെ പിന്തുണയ്‌ക്കുന്നില്ല"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ടാബ്‌ലെറ്റ്"</string>
