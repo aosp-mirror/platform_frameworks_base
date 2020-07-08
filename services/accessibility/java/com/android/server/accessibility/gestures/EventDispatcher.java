@@ -322,6 +322,12 @@ class EventDispatcher {
         return true;
     }
 
+    void clear() {
+        mLongPressingPointerId = -1;
+        mLongPressingPointerDeltaX = 0;
+        mLongPressingPointerDeltaY = 0;
+    }
+
     public void clickWithTouchEvents(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         final int pointerIndex = event.getActionIndex();
         final int pointerId = event.getPointerId(pointerIndex);
