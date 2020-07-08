@@ -45,6 +45,7 @@ import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 
@@ -184,21 +185,21 @@ public class ApkSignatureVerifier {
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
             if (verifyFull) {
-                byte[] nonstreamingDigest = null;
-                Certificate[][] nonstreamingCerts = null;
+                Map<Integer, byte[]> nonstreamingDigests;
+                Certificate[][] nonstreamingCerts;
 
                 try {
                     // v4 is an add-on and requires v2 or v3 signature to validate against its
                     // certificate and digest
                     ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
                             ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
-                    nonstreamingDigest = v3Signer.digest;
+                    nonstreamingDigests = v3Signer.contentDigests;
                     nonstreamingCerts = new Certificate[][]{v3Signer.certs};
                 } catch (SignatureNotFoundException e) {
                     try {
                         ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
                                 ApkSignatureSchemeV2Verifier.verify(apkPath, false);
-                        nonstreamingDigest = v2Signer.digest;
+                        nonstreamingDigests = v2Signer.contentDigests;
                         nonstreamingCerts = v2Signer.certs;
                     } catch (SignatureNotFoundException ee) {
                         throw new SecurityException(
@@ -220,8 +221,15 @@ public class ApkSignatureVerifier {
                     }
                 }
 
-                if (!ArrayUtils.equals(vSigner.apkDigest, nonstreamingDigest,
-                        vSigner.apkDigest.length)) {
+                boolean found = false;
+                for (byte[] nonstreamingDigest : nonstreamingDigests.values()) {
+                    if (ArrayUtils.equals(vSigner.apkDigest, nonstreamingDigest,
+                            vSigner.apkDigest.length)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     throw new SecurityException("APK digest in V4 signature does not match V2/V3");
                 }
             }
