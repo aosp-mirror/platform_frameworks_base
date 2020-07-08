@@ -409,11 +409,9 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
         onWatchdogRollbackOccurredLocked(event);
     }
 
-#ifdef VERY_VERBOSE_PRINTING
     if (mPrintAllLogs) {
         ALOGI("%s", event->ToString().c_str());
     }
-#endif
     resetIfConfigTtlExpiredLocked(eventElapsedTimeNs);
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
