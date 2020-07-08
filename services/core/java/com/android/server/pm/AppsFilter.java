@@ -708,12 +708,15 @@ public class AppsFilter {
         return ret;
     }
 
+    /**
+     * This method recomputes all component / intent-based visibility and is intended to match the
+     * relevant logic of {@link #addPackageInternal(PackageSetting, ArrayMap)}
+     */
     private void recomputeComponentVisibility(ArrayMap<String, PackageSetting> existingSettings) {
         mQueriesViaComponent.clear();
         for (int i = existingSettings.size() - 1; i >= 0; i--) {
             PackageSetting setting = existingSettings.valueAt(i);
-            if (setting.pkg == null
-                    || mForceQueryable.contains(setting.appId)) {
+            if (setting.pkg == null || requestsQueryAllPackages(setting.pkg)) {
                 continue;
             }
             for (int j = existingSettings.size() - 1; j >= 0; j--) {
@@ -721,7 +724,7 @@ public class AppsFilter {
                     continue;
                 }
                 final PackageSetting otherSetting = existingSettings.valueAt(j);
-                if (otherSetting.pkg == null) {
+                if (otherSetting.pkg == null || mForceQueryable.contains(otherSetting.appId)) {
                     continue;
                 }
                 if (canQueryViaComponents(setting.pkg, otherSetting.pkg, mProtectedBroadcasts)) {
