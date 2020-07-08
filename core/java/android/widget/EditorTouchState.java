@@ -174,12 +174,9 @@ public class EditorTouchState {
                 int touchSlop = config.getScaledTouchSlop();
                 mMovedEnoughForDrag = distanceSquared > touchSlop * touchSlop;
                 if (mMovedEnoughForDrag) {
-                    // If the direction of the swipe motion is within 30 degrees of vertical, it is
-                    // considered a vertical drag. We don't actually have to compute the angle to
-                    // implement the check though. When the angle is exactly 30 degrees from
-                    // vertical, 2*deltaX = distance. When the angle is less than 30 degrees from
-                    // vertical, 2*deltaX < distance.
-                    mIsDragCloseToVertical = (4 * deltaXSquared) <= distanceSquared;
+                    // If the direction of the swipe motion is within 45 degrees of vertical, it is
+                    // considered a vertical drag.
+                    mIsDragCloseToVertical = Math.abs(deltaX) <= Math.abs(deltaY);
                 }
             }
         } else if (action == MotionEvent.ACTION_CANCEL) {
