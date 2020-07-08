@@ -675,6 +675,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     private void notifySplitScreenBoundsChanged() {
+        if (mSplitLayout.mPrimary == null || mSplitLayout.mSecondary == null) {
+            return;
+        }
         mOtherTaskRect.set(mSplitLayout.mSecondary);
 
         mTmpRect.set(mHandle.getLeft(), mHandle.getTop(), mHandle.getRight(), mHandle.getBottom());
