@@ -106,9 +106,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     public void updateNotification(@NonNull String key, boolean alert) {
         super.updateNotification(key, alert);
-        AlertEntry alertEntry = getHeadsUpEntry(key);
-        if (alert && alertEntry != null) {
-            setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(alertEntry.mEntry));
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
+        if (alert && headsUpEntry != null) {
+            setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry));
         }
     }
 
