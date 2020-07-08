@@ -43,11 +43,11 @@ public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
     private final ArrayList<Byte> mHardwareAuthToken;
     private final int mFaceId;
 
-    FaceSetFeatureClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
+    FaceSetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, int feature, boolean enabled,
             byte[] hardwareAuthToken, int faceId) {
-        super(context, token, listener, userId, owner, 0 /* cookie */, sensorId,
+        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mFeature = feature;
@@ -70,25 +70,22 @@ public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull IBiometricsFace daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         startHalOperation();
-        mFinishCallback.onClientFinished(this);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            final int result = mDaemon.setFeature(mFeature, mEnabled, mHardwareAuthToken, mFaceId);
+            final int result = getFreshDaemon()
+                    .setFeature(mFeature, mEnabled, mHardwareAuthToken, mFaceId);
             getListener().onFeatureSet(result == Status.OK, mFeature);
+            mFinishCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to set feature: " + mFeature + " to enabled: " + mEnabled, e);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Not supported for SetFeature
     }
 }

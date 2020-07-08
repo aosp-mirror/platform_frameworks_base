@@ -28,6 +28,8 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
 
+import java.util.Map;
+
 /**
  * Fingerprint-specific removal client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
@@ -36,31 +38,23 @@ import com.android.server.biometrics.sensors.RemovalClient;
 class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
     private static final String TAG = "FingerprintRemovalClient";
 
-    FingerprintRemovalClient(@NonNull Context context, @NonNull IBinder token,
+    FingerprintRemovalClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId) {
-        super(context, token, listener, biometricId, userId, owner, utils, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            @NonNull Map<Integer, Long> authenticatorIds) {
+        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
+                authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
-            mDaemon.remove(getTargetUserId(), mBiometricId);
+            getFreshDaemon().remove(getTargetUserId(), mBiometricId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
-            mFinishCallback.onClientFinished(this);
-        }
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        try {
-            mDaemon.cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting cancel", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 }
