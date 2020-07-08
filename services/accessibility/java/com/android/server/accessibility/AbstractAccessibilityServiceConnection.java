@@ -295,6 +295,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mEventTypes = info.eventTypes;
         mFeedbackType = info.feedbackType;
         String[] packageNames = info.packageNames;
+        mPackageNames.clear();
         if (packageNames != null) {
             mPackageNames.addAll(Arrays.asList(packageNames));
         }
