@@ -358,6 +358,8 @@ public class NativeLibraryHelper {
             createNativeLibrarySubdir(subDir);
         }
 
+        // Even if extractNativeLibs is false, we still need to check if the native libs in the APK
+        // are valid. This is done in the native code.
         int copyRet = copyNativeBinaries(handle, subDir, supportedAbi);
         if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
             return copyRet;

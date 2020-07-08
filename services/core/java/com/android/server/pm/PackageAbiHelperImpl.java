@@ -131,16 +131,16 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     }
 
     @Override
-    public NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, PackageSetting pkgSetting,
-            File appLib32InstallDir) {
+    public NativeLibraryPaths deriveNativeLibraryPaths(AndroidPackage pkg,
+            boolean isUpdatedSystemApp, File appLib32InstallDir) {
         // Trying to derive the paths, thus need the raw ABI info from the parsed package, and the
         // current state in PackageSetting is irrelevant.
-        return getNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
+        return deriveNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
                 appLib32InstallDir, pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
-                pkgSetting.getPkgState().isUpdatedSystemApp());
+                isUpdatedSystemApp);
     }
 
-    private static NativeLibraryPaths getNativeLibraryPaths(final Abis abis,
+    private static NativeLibraryPaths deriveNativeLibraryPaths(final Abis abis,
             final File appLib32InstallDir, final String codePath, final String sourceDir,
             final boolean isSystemApp, final boolean isUpdatedSystemApp) {
         final File codeFile = new File(codePath);
@@ -296,22 +296,19 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
     @Override
     public Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg,
-            boolean isUpdatedSystemApp, String cpuAbiOverride, boolean extractLibs)
+            boolean isUpdatedSystemApp, String cpuAbiOverride)
             throws PackageManagerException {
         // Give ourselves some initial paths; we'll come back for another
         // pass once we've determined ABI below.
         String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(pkg);
         String pkgRawSecondaryCpuAbi = AndroidPackageUtils.getRawSecondaryCpuAbi(pkg);
-        final NativeLibraryPaths initialLibraryPaths = getNativeLibraryPaths(
+        final NativeLibraryPaths initialLibraryPaths = deriveNativeLibraryPaths(
                 new Abis(pkgRawPrimaryCpuAbi, pkgRawSecondaryCpuAbi),
                 PackageManagerService.sAppLib32InstallDir, pkg.getCodePath(),
                 pkg.getBaseCodePath(), pkg.isSystem(),
                 isUpdatedSystemApp);
 
-        // We shouldn't attempt to extract libs from system app when it was not updated.
-        if (pkg.isSystem() && !isUpdatedSystemApp) {
-            extractLibs = false;
-        }
+        final boolean extractLibs = shouldExtractLibs(pkg, isUpdatedSystemApp);
 
         final String nativeLibraryRootStr = initialLibraryPaths.nativeLibraryRootDir;
         final boolean useIsaSpecificSubdirs = initialLibraryPaths.nativeLibraryRootRequiresIsa;
@@ -455,9 +452,19 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
         final Abis abis = new Abis(primaryCpuAbi, secondaryCpuAbi);
         return new Pair<>(abis,
-                getNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
+                deriveNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
                         pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
                         isUpdatedSystemApp));
+    }
+
+    private boolean shouldExtractLibs(AndroidPackage pkg, boolean isUpdatedSystemApp) {
+        // We shouldn't extract libs if the package is a library or if extractNativeLibs=false
+        boolean extractLibs = !AndroidPackageUtils.isLibrary(pkg) && pkg.isExtractNativeLibs();
+        // We shouldn't attempt to extract libs from system app when it was not updated.
+        if (pkg.isSystem() && !isUpdatedSystemApp) {
+            extractLibs = false;
+        }
+        return extractLibs;
     }
 
     /**

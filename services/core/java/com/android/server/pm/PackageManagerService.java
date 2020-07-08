@@ -11492,15 +11492,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final String cpuAbiOverride = deriveAbiOverride(request.cpuAbiOverride, pkgSetting);
+        final boolean isUpdatedSystemApp = pkgSetting.getPkgState().isUpdatedSystemApp();
 
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
             if (needToDeriveAbi) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                final boolean extractNativeLibs = !AndroidPackageUtils.isLibrary(parsedPackage);
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
-                        packageAbiHelper.derivePackageAbi(parsedPackage,
-                                pkgSetting.getPkgState().isUpdatedSystemApp(), cpuAbiOverride,
-                                extractNativeLibs);
+                        packageAbiHelper.derivePackageAbi(parsedPackage, isUpdatedSystemApp,
+                                cpuAbiOverride);
                 derivedAbi.first.applyTo(parsedPackage);
                 derivedAbi.second.applyTo(parsedPackage);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -11510,15 +11509,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 // structure. Try to detect abi based on directory structure.
 
                 String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-                if (parsedPackage.isSystem() && !pkgSetting.getPkgState().isUpdatedSystemApp() &&
-                        pkgRawPrimaryCpuAbi == null) {
+                if (parsedPackage.isSystem() && !isUpdatedSystemApp
+                        && pkgRawPrimaryCpuAbi == null) {
                     final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
                             parsedPackage);
                     abis.applyTo(parsedPackage);
                     abis.applyTo(pkgSetting);
                     final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                            packageAbiHelper.getNativeLibraryPaths(parsedPackage, pkgSetting,
-                                    sAppLib32InstallDir);
+                            packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                                    isUpdatedSystemApp, sAppLib32InstallDir);
                     nativeLibraryPaths.applyTo(parsedPackage);
                 }
             } else {
@@ -11529,8 +11528,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
 
                 final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                        packageAbiHelper.getNativeLibraryPaths(parsedPackage,
-                                pkgSetting, sAppLib32InstallDir);
+                        packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                                isUpdatedSystemApp, sAppLib32InstallDir);
                 nativeLibraryPaths.applyTo(parsedPackage);
 
                 if (DEBUG_ABI_SELECTION) {
@@ -11555,7 +11554,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // ABIs we determined during compilation, but the path will depend on the final
             // package path (after the rename away from the stage path).
             final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                    packageAbiHelper.getNativeLibraryPaths(parsedPackage, pkgSetting,
+                    packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isUpdatedSystemApp,
                             sAppLib32InstallDir);
             nativeLibraryPaths.applyTo(parsedPackage);
         }
@@ -17485,7 +17484,6 @@ public class PackageManagerService extends IPackageManager.Stub
             scanFlags |= SCAN_NO_DEX;
 
             try {
-                final boolean extractNativeLibs = !AndroidPackageUtils.isLibrary(parsedPackage);
                 PackageSetting pkgSetting;
                 synchronized (mLock) {
                     pkgSetting = mSettings.getPackageLPr(pkgName);
@@ -17500,7 +17498,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
                         derivedAbi = mInjector.getAbiHelper().derivePackageAbi(parsedPackage,
                         isUpdatedSystemAppFromExistingSetting || isUpdatedSystemAppInferred,
-                        abiOverride, extractNativeLibs);
+                        abiOverride);
                 derivedAbi.first.applyTo(parsedPackage);
                 derivedAbi.second.applyTo(parsedPackage);
             } catch (PackageManagerException pme) {
