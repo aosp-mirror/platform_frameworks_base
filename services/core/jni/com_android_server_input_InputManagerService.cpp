@@ -194,7 +194,7 @@ protected:
 public:
     NativeInputManager(jobject contextObj, jobject serviceObj, const sp<Looper>& looper);
 
-    inline sp<InputManager> getInputManager() const { return mInputManager; }
+    inline sp<InputManagerInterface> getInputManager() const { return mInputManager; }
 
     void dump(std::string& dump);
 
@@ -270,7 +270,7 @@ public:
     virtual int32_t getCustomPointerIconId();
 
 private:
-    sp<InputManager> mInputManager;
+    sp<InputManagerInterface> mInputManager;
 
     jobject mServiceObj;
     sp<Looper> mLooper;
@@ -342,9 +342,9 @@ NativeInputManager::NativeInputManager(jobject contextObj,
     }
     mInteractive = true;
 
-    mInputManager = new InputManager(this, this);
-    defaultServiceManager()->addService(String16("inputflinger"),
-            mInputManager, false);
+    InputManager* im = new InputManager(this, this);
+    mInputManager = im;
+    defaultServiceManager()->addService(String16("inputflinger"), im);
 }
 
 NativeInputManager::~NativeInputManager() {
@@ -1253,7 +1253,7 @@ int32_t NativeInputManager::getCustomPointerIconId() {
 }
 
 void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
-    mInputManager->setMotionClassifierEnabled(enabled);
+    mInputManager->getClassifier()->setMotionClassifierEnabled(enabled);
 }
 
 // ----------------------------------------------------------------------------
