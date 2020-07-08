@@ -2724,7 +2724,6 @@ public final class ViewRootImpl implements ViewParent,
                             mAttachInfo.mThreadedRenderer.isEnabled()) {
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
-                    notifySurfaceDestroyed();
                 } else if ((surfaceReplaced
                         || surfaceSizeChanged || windowRelayoutWasForced || colorModeChanged)
                         && mSurfaceHolder == null
@@ -2953,6 +2952,10 @@ public final class ViewRootImpl implements ViewParent,
                 System.out.println("performTraversals -- after setFrame");
                 host.debug();
             }
+        }
+
+        if (surfaceDestroyed) {
+            notifySurfaceDestroyed();
         }
 
         if (triggerGlobalLayoutListener) {
