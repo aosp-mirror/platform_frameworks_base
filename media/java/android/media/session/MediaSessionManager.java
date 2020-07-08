@@ -28,14 +28,13 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
+import android.media.MediaFrameworkInitializer;
 import android.media.MediaSession2;
 import android.media.Session2Token;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.service.notification.NotificationListenerService;
@@ -115,8 +114,10 @@ public final class MediaSessionManager {
         // Consider rewriting like DisplayManagerGlobal
         // Decide if we need context
         mContext = context;
-        IBinder b = ServiceManager.getService(Context.MEDIA_SESSION_SERVICE);
-        mService = ISessionManager.Stub.asInterface(b);
+        mService = ISessionManager.Stub.asInterface(MediaFrameworkInitializer
+                .getMediaServiceManager()
+                .getMediaSessionServiceRegisterer()
+                .get());
     }
 
     /**
