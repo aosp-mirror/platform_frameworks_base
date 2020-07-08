@@ -282,7 +282,7 @@ public final class NotificationEntry extends ListEntry {
                     + " doesn't match existing key " + mKey);
         }
 
-        mRanking = ranking;
+        mRanking = ranking.withAudiblyAlertedInfo(mRanking);
     }
 
     /*
