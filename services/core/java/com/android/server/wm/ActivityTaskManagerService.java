@@ -218,7 +218,6 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
 import android.telecom.TelecomManager;
-import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1956,7 +1955,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             r.immersive = immersive;
 
             // update associated state if we're frontmost
-            if (r.isResumedActivityOnDisplay()) {
+            if (r.isFocusedActivityOnDisplay()) {
                 if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE, "Frontmost changed immersion: "+ r);
                 applyUpdateLockStateLocked(r);
             }
@@ -4322,7 +4321,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 r.requestedVrComponent = (enabled) ? packageName : null;
 
                 // Update associated state if this activity is currently focused
-                if (r.isResumedActivityOnDisplay()) {
+                if (r.isFocusedActivityOnDisplay()) {
                     applyUpdateVrModeLocked(r);
                 }
                 return 0;

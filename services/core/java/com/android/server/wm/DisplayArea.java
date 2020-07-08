@@ -30,6 +30,7 @@ import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
+import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -40,7 +41,9 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.util.Comparator;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -139,9 +142,106 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return DISPLAY_AREA;
     }
 
+    @Override
+    final DisplayArea asDisplayArea() {
+        return this;
+    }
+
+    @Override
     void forAllDisplayAreas(Consumer<DisplayArea> callback) {
         super.forAllDisplayAreas(callback);
         callback.accept(this);
+    }
+
+    @Override
+    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+            boolean traverseTopToBottom) {
+        // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
+        if (mType != DisplayArea.Type.ANY) {
+            return false;
+        }
+
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        while (i >= 0 && i < childCount) {
+            T child = mChildren.get(i);
+            // Only traverse if the child is a DisplayArea.
+            if (child.asDisplayArea() != null && child.asDisplayArea()
+                    .forAllTaskDisplayAreas(callback, traverseTopToBottom)) {
+                return true;
+            }
+            i += traverseTopToBottom ? -1 : 1;
+        }
+        return false;
+    }
+
+    @Override
+    void forAllTaskDisplayAreas(Consumer<TaskDisplayArea> callback, boolean traverseTopToBottom) {
+        // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
+        if (mType != DisplayArea.Type.ANY) {
+            return;
+        }
+
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        while (i >= 0 && i < childCount) {
+            T child = mChildren.get(i);
+            // Only traverse if the child is a DisplayArea.
+            if (child.asDisplayArea() != null) {
+                child.asDisplayArea().forAllTaskDisplayAreas(callback, traverseTopToBottom);
+            }
+            i += traverseTopToBottom ? -1 : 1;
+        }
+    }
+
+    @Nullable
+    @Override
+    <R> R reduceOnAllTaskDisplayAreas(BiFunction<TaskDisplayArea, R, R> accumulator,
+            @Nullable R initValue, boolean traverseTopToBottom) {
+        // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
+        if (mType != DisplayArea.Type.ANY) {
+            return initValue;
+        }
+
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        R result = initValue;
+        while (i >= 0 && i < childCount) {
+            T child = mChildren.get(i);
+            // Only traverse if the child is a DisplayArea.
+            if (child.asDisplayArea() != null) {
+                result = (R) child.asDisplayArea()
+                        .reduceOnAllTaskDisplayAreas(accumulator, result, traverseTopToBottom);
+            }
+            i += traverseTopToBottom ? -1 : 1;
+        }
+        return result;
+    }
+
+    @Nullable
+    @Override
+    <R> R getItemFromTaskDisplayAreas(Function<TaskDisplayArea, R> callback,
+            boolean traverseTopToBottom) {
+        // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
+        if (mType != DisplayArea.Type.ANY) {
+            return null;
+        }
+
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        while (i >= 0 && i < childCount) {
+            T child = mChildren.get(i);
+            // Only traverse if the child is a DisplayArea.
+            if (child.asDisplayArea() != null) {
+                R result = (R) child.asDisplayArea()
+                        .getItemFromTaskDisplayAreas(callback, traverseTopToBottom);
+                if (result != null) {
+                    return result;
+                }
+            }
+            i += traverseTopToBottom ? -1 : 1;
+        }
+        return null;
     }
 
     void setOrganizer(IDisplayAreaOrganizer organizer) {

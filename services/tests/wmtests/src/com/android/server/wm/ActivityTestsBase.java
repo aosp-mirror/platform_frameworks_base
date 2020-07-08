@@ -591,15 +591,14 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             mService.mTaskOrganizerController.setLaunchRoot(mDisplayId,
                     mSecondary.mRemoteToken.toWindowContainerToken());
             DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
-            for (int tdaNdx = dc.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
-                final TaskDisplayArea taskDisplayArea = dc.getTaskDisplayAreaAt(tdaNdx);
+            dc.forAllTaskDisplayAreas(taskDisplayArea -> {
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                     final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
                     if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
                         stack.reparent(mSecondary, POSITION_BOTTOM);
                     }
                 }
-            }
+            });
         }
         @Override
         public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {

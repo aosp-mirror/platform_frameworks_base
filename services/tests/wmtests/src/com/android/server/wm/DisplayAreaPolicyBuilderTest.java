@@ -290,7 +290,7 @@ public class DisplayAreaPolicyBuilderTest {
         }
     }
 
-    private static class SurfacelessDisplayAreaRoot extends RootDisplayArea {
+    static class SurfacelessDisplayAreaRoot extends RootDisplayArea {
 
         SurfacelessDisplayAreaRoot(WindowManagerService wms) {
             super(wms);

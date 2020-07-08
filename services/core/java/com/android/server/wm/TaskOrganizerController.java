@@ -603,8 +603,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     throw new IllegalArgumentException("Display " + displayId + " doesn't exist");
                 }
                 ArrayList<RunningTaskInfo> out = new ArrayList<>();
-                for (int tdaNdx = dc.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
-                    final TaskDisplayArea taskDisplayArea = dc.getTaskDisplayAreaAt(tdaNdx);
+                dc.forAllTaskDisplayAreas(taskDisplayArea -> {
                     for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                         final Task task = taskDisplayArea.getStackAt(sNdx);
                         if (activityTypes != null
@@ -613,7 +612,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                         }
                         out.add(task.getTaskInfo());
                     }
-                }
+                });
                 return out;
             }
         } finally {

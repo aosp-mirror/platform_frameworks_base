@@ -63,16 +63,6 @@ public abstract class DisplayAreaPolicy {
      */
     public abstract List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId);
 
-    /**
-     * @return the number of task display areas on the display.
-     */
-    public abstract int getTaskDisplayAreaCount();
-
-    /**
-     * @return the task display area at index.
-     */
-    public abstract TaskDisplayArea getTaskDisplayAreaAt(int index);
-
     /** Provider for platform-default display area policy. */
     static final class DefaultProvider implements DisplayAreaPolicy.Provider {
         @Override
