@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,6 +42,7 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -63,6 +65,7 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
     @Mock private IActivityManager mActivityManager;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
+    @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock ColorExtractor.GradientColors mGradientColors;
@@ -79,8 +82,8 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
 
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mDumpManager);
+                mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
+                mColorExtractor, mDumpManager);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();
@@ -117,6 +120,17 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
     @Test
     public void testSetForcePluginOpen_beforeStatusBarInitialization() {
         mNotificationShadeWindowController.setForcePluginOpen(true);
+    }
+
+    @Test
+    public void attach_visibleWithWallpaper() {
+        clearInvocations(mWindowManager);
+        when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
+        mNotificationShadeWindowController.attach();
+
+        verify(mNotificationShadeWindowView).setVisibility(eq(View.VISIBLE));
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) != 0).isTrue();
     }
 
     @Test
