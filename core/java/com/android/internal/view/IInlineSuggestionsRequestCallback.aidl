@@ -58,4 +58,7 @@ oneway interface IInlineSuggestionsRequestCallback {
     //  #onFinishInput()} is called on the field specified by the earlier
     //  {@link #onInputMethodStartInput(AutofillId)}.
     void onInputMethodFinishInput();
+
+    // Indicates that the current IME changes inline suggestion session.
+    void onInlineSuggestionsSessionInvalidated();
 }

@@ -103,6 +103,8 @@ final class AutofillInlineSuggestionsRequestSession {
     private boolean mDestroyed = false;
     @GuardedBy("mLock")
     private boolean mPreviousHasNonPinSuggestionShow;
+    @GuardedBy("mLock")
+    private boolean mImeSessionInvalidated = false;
 
     AutofillInlineSuggestionsRequestSession(
             @NonNull InputMethodManagerInternal inputMethodManagerInternal, int userId,
@@ -157,7 +159,7 @@ final class AutofillInlineSuggestionsRequestSession {
             Slog.d(TAG,
                     "onInlineSuggestionsResponseLocked called for:" + inlineFillUi.getAutofillId());
         }
-        if (mImeRequest == null || mResponseCallback == null) {
+        if (mImeRequest == null || mResponseCallback == null || mImeSessionInvalidated) {
             return false;
         }
         // TODO(b/151123764): each session should only correspond to one field.
@@ -191,6 +193,7 @@ final class AutofillInlineSuggestionsRequestSession {
         if (mDestroyed) {
             return;
         }
+        mImeSessionInvalidated = false;
         if (sDebug) Slog.d(TAG, "onCreateInlineSuggestionsRequestLocked called: " + mAutofillId);
         mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(mUserId,
                 new InlineSuggestionsRequestInfo(mComponentName, mAutofillId, mUiExtras),
@@ -291,6 +294,7 @@ final class AutofillInlineSuggestionsRequestSession {
                 return;
             }
             mImeRequestReceived = true;
+            mImeSessionInvalidated = false;
 
             if (request != null && callback != null) {
                 mImeRequest = request;
@@ -343,6 +347,20 @@ final class AutofillInlineSuggestionsRequestSession {
                 mImeCurrentFieldId = imeFieldId;
             }
             handleOnReceiveImeStatusUpdated(imeInputStarted, imeInputViewStarted);
+        }
+    }
+
+    /**
+     * Handles the IME session status received from the IME.
+     *
+     * <p> Should only be invoked in the {@link #mHandler} thread.
+     */
+    private void handleOnReceiveImeSessionInvalidated() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            mImeSessionInvalidated = true;
         }
     }
 
@@ -431,6 +449,18 @@ final class AutofillInlineSuggestionsRequestSession {
                 session.mHandler.sendMessage(obtainMessage(
                         AutofillInlineSuggestionsRequestSession::handleOnReceiveImeStatusUpdated,
                         session, false, false));
+            }
+        }
+
+        @BinderThread
+        @Override
+        public void onInlineSuggestionsSessionInvalidated() throws RemoteException {
+            if (sDebug) Slog.d(TAG, "onInlineSuggestionsSessionInvalidated() called.");
+            final AutofillInlineSuggestionsRequestSession session = mSession.get();
+            if (session != null) {
+                session.mHandler.sendMessage(obtainMessage(
+                        AutofillInlineSuggestionsRequestSession
+                                ::handleOnReceiveImeSessionInvalidated, session));
             }
         }
     }
