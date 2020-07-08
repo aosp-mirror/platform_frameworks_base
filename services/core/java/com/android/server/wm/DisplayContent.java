@@ -2310,8 +2310,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        super.setWindowingMode(windowingMode);
-        super.setDisplayWindowingMode(windowingMode);
+        // Intentionally call onRequestedOverrideConfigurationChanged() directly to change windowing
+        // mode and display windowing mode atomically.
+        mTmpConfiguration.setTo(getRequestedOverrideConfiguration());
+        mTmpConfiguration.windowConfiguration.setWindowingMode(windowingMode);
+        mTmpConfiguration.windowConfiguration.setDisplayWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mTmpConfiguration);
     }
 
     @Override
@@ -3660,15 +3664,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         drawnWindowTypes.put(TYPE_NOTIFICATION_SHADE, true);
 
         final WindowState visibleNotDrawnWindow = getWindow(w -> {
-            boolean isVisible = w.mViewVisibility == View.VISIBLE && !w.mObscured;
-            boolean hasDrawn = w.isDrawnLw() && w.hasDrawnLw();
-            if (isVisible && !hasDrawn) {
+            final boolean isVisible = w.isVisible() && !w.mObscured;
+            final boolean isDrawn = w.isDrawnLw();
+            if (isVisible && !isDrawn) {
                 ProtoLog.d(WM_DEBUG_BOOT,
                         "DisplayContent: boot is waiting for window of type %d to be drawn",
                         w.mAttrs.type);
                 return true;
             }
-            if (hasDrawn) {
+            if (isDrawn) {
                 switch (w.mAttrs.type) {
                     case TYPE_BOOT_PROGRESS:
                     case TYPE_BASE_APPLICATION:

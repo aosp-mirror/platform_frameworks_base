@@ -381,6 +381,15 @@ message SecureSettingsProto {
     }
     optional Notification notification = 41;
 
+    message OneHanded {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto one_handed_mode_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto one_handed_mode_timeout = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto taps_app_to_exit = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional OneHanded onehanded = 80;
+
     message PackageVerifier {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -502,6 +511,7 @@ message SecureSettingsProto {
     // parent profile.
     optional SettingProto sync_parent_sounds = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto system_navigation_keys_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto swipe_bottom_to_notification_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -594,16 +604,7 @@ message SecureSettingsProto {
     }
     optional Zen zen = 71;
 
-    message OneHanded {
-        option (android.msg_privacy).dest = DEST_EXPLICIT;
-
-        optional SettingProto one_handed_mode_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto one_handed_mode_timeout = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto taps_app_to_exit = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional OneHanded onehanded = 80;
-
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 82;
+    // Next tag = 83;
 }

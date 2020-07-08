@@ -1722,7 +1722,7 @@ enum PageId {
     // OPEN: Settings > System > Language & Region
     SETTINGS_LANGUAGE_CATEGORY = 750;
 
-    // OPEN: Settings > System > Input & Gesture > Swipe to notification gesture
+    // OPEN: Settings > System > Input & Gesture > Swipe fingerprint for notifications
     SETTINGS_GESTURE_SWIPE_TO_NOTIFICATION = 751;
 
     // OPEN: Settings > System > Input & Gesture > Double tap power button gesture
@@ -2688,4 +2688,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     MEDIA_CONTROLS_SETTINGS = 1845;
+
+    // OPEN: Settings > System > Gestures > Swipe for notification
+    // CATEGORY: SETTINGS
+    // OS: R QPR
+    SETTINGS_SWIPE_BOTTOM_TO_NOTIFICATION = 1846;
 }
