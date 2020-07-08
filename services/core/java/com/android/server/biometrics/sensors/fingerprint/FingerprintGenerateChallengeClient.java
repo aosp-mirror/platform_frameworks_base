@@ -36,15 +36,16 @@ public class FingerprintGenerateChallengeClient
 
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
-    FingerprintGenerateChallengeClient(@NonNull Context context, @NonNull IBinder token,
+    FingerprintGenerateChallengeClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
-        super(context, token, listener, owner, sensorId);
+        super(context, lazyDaemon, token, listener, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mChallenge = mDaemon.preEnroll();
+            mChallenge = getFreshDaemon().preEnroll();
         } catch (RemoteException e) {
             Slog.e(TAG, "preEnroll failed", e);
         }

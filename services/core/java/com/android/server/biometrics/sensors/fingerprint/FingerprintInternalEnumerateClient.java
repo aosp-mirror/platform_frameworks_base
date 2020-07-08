@@ -18,9 +18,9 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -38,31 +38,21 @@ import java.util.List;
 class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFingerprint> {
     private static final String TAG = "FingerprintInternalEnumerateClient";
 
-    FingerprintInternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int userId,
-            @NonNull String owner,
-            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
+    FingerprintInternalEnumerateClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
+            int userId, @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
             @NonNull BiometricUtils utils, int sensorId) {
-        super(context, token, userId, owner, enrolledList, utils, sensorId,
+        super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.enumerate();
+            getFreshDaemon().enumerate();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
-            mFinishCallback.onClientFinished(this);
-        }
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        try {
-            mDaemon.cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting cancel", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 }

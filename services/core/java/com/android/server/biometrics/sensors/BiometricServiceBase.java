@@ -34,17 +34,12 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricService;
-import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
-import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHwBinder;
-import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -82,11 +77,9 @@ public abstract class BiometricServiceBase<T> extends SystemService
     private final Context mContext;
     private final String mKeyguardPackage;
     protected final IActivityTaskManager mActivityTaskManager;
-    private final PowerManager mPowerManager;
     protected final BiometricTaskStackListener mTaskStackListener =
             new BiometricTaskStackListener();
     private final ResetClientStateRunnable mResetClientState = new ResetClientStateRunnable();
-    private final ArrayList<LockoutResetMonitor> mLockoutMonitors = new ArrayList<>();
 
     protected final IStatusBarService mStatusBarService;
     protected final Map<Integer, Long> mAuthenticatorIds =
@@ -109,21 +102,14 @@ public abstract class BiometricServiceBase<T> extends SystemService
         }
     };
 
-    protected final ClientMonitor.FinishCallback mClientFinishCallback = clientMonitor -> {
-        if (clientMonitor instanceof RemovalConsumer) {
-            // When the last biometric of a group is removed, update the authenticator id.
-            // Note that 1) multiple ClientMonitors may be cause onRemoved (e.g. internal cleanup),
-            // and 2) updateActiveGroup updates/relies on global state, so there's no good way to
-            // compartmentalize this yet.
-            final int userId = clientMonitor.getTargetUserId();
-            if (!hasEnrolledBiometrics(userId)) {
-                Slog.d(getTag(), "Last biometric removed for user: " + userId
-                        + ", updating active group");
-                updateActiveGroup(userId);
-            }
-        }
-
+    protected final ClientMonitor.FinishCallback mClientFinishCallback =
+            (clientMonitor, success) -> {
         removeClient(clientMonitor);
+        // When enrollment finishes, update this group's authenticator id, as the HAL has
+        // already generated a new authenticator id when the new biometric is enrolled.
+        if (clientMonitor instanceof EnrollClient) {
+            updateActiveGroup(clientMonitor.getTargetUserId());
+        }
     };
 
     private IBiometricService mBiometricService;
@@ -263,65 +249,6 @@ public abstract class BiometricServiceBase<T> extends SystemService
         }
     }
 
-
-
-    private final class LockoutResetMonitor implements IBinder.DeathRecipient {
-        private static final long WAKELOCK_TIMEOUT_MS = 2000;
-        private final IBiometricServiceLockoutResetCallback mCallback;
-        private final PowerManager.WakeLock mWakeLock;
-
-        public LockoutResetMonitor(IBiometricServiceLockoutResetCallback callback) {
-            mCallback = callback;
-            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    "lockout reset callback");
-            try {
-                mCallback.asBinder().linkToDeath(LockoutResetMonitor.this, 0);
-            } catch (RemoteException e) {
-                Slog.w(getTag(), "caught remote exception in linkToDeath", e);
-            }
-        }
-
-        public void sendLockoutReset() {
-            if (mCallback != null) {
-                try {
-                    mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
-                    mCallback.onLockoutReset(new IRemoteCallback.Stub() {
-                        @Override
-                        public void sendResult(Bundle data) throws RemoteException {
-                            releaseWakelock();
-                        }
-                    });
-                } catch (DeadObjectException e) {
-                    Slog.w(getTag(), "Death object while invoking onLockoutReset: ", e);
-                    mHandler.post(mRemoveCallbackRunnable);
-                } catch (RemoteException e) {
-                    Slog.w(getTag(), "Failed to invoke onLockoutReset: ", e);
-                    releaseWakelock();
-                }
-            }
-        }
-
-        private final Runnable mRemoveCallbackRunnable = new Runnable() {
-            @Override
-            public void run() {
-                releaseWakelock();
-                removeLockoutResetCallback(LockoutResetMonitor.this);
-            }
-        };
-
-        @Override
-        public void binderDied() {
-            Slog.e(getTag(), "Lockout reset callback binder died");
-            mHandler.post(mRemoveCallbackRunnable);
-        }
-
-        private void releaseWakelock() {
-            if (mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
-        }
-    }
-
     /**
      * Initializes the system service.
      * <p>
@@ -341,7 +268,6 @@ public abstract class BiometricServiceBase<T> extends SystemService
         mKeyguardPackage = keyguardComponent != null ? keyguardComponent.getPackageName() : null;
         mAppOps = context.getSystemService(AppOpsManager.class);
         mActivityTaskManager = ActivityTaskManager.getService();
-        mPowerManager = mContext.getSystemService(PowerManager.class);
         mPerformanceTracker = PerformanceTracker.getInstanceForSensorId(getSensorId());
     }
 
@@ -452,15 +378,7 @@ public abstract class BiometricServiceBase<T> extends SystemService
         }
 
         final EnrollClient enrollClient = (EnrollClient) client;
-
-        if (enrollClient.onEnrollResult(identifier, remaining)) {
-            removeClient(enrollClient);
-            // When enrollment finishes, update this group's authenticator id, as the HAL has
-            // already generated a new authenticator id when the new biometric is enrolled.
-            if (identifier instanceof Fingerprint) {
-                updateActiveGroup(((Fingerprint)identifier).getGroupId());
-            }
-        }
+        enrollClient.onEnrollResult(identifier, remaining);
     }
 
     protected void handleError(int error, int vendorCode) {
@@ -630,7 +548,8 @@ public abstract class BiometricServiceBase<T> extends SystemService
         });
     }
 
-    protected void cleanupInternal(InternalCleanupClient<T> client) {
+    protected void cleanupInternal(
+            InternalCleanupClient<? extends BiometricAuthenticator.Identifier, T> client) {
         mHandler.post(() -> {
             if (DEBUG) {
                 Slog.v(getTag(), "Cleaning up templates for user("
@@ -645,19 +564,6 @@ public abstract class BiometricServiceBase<T> extends SystemService
         if (DEBUG) Slog.v(getTag(), "startAuthentication(" + opPackageName + ")");
 
         startClient(client, true /* initiatedByClient */);
-    }
-
-    protected void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback) {
-        if (callback == null) {
-            Slog.w(getTag(), "Null LockoutResetCallback");
-            return;
-        }
-        mHandler.post(() -> {
-           final LockoutResetMonitor monitor = new LockoutResetMonitor(callback);
-           if (!mLockoutMonitors.contains(monitor)) {
-               mLockoutMonitors.add(monitor);
-           }
-        });
     }
 
     /**
@@ -816,7 +722,7 @@ public abstract class BiometricServiceBase<T> extends SystemService
             return;
         }
 
-        final T daemon = getDaemon();
+        final T daemon = mCurrentClient.getFreshDaemon();
         if (daemon == null) {
             Slog.e(getTag(), "Daemon null, unable to start: "
                     + mCurrentClient.getClass().getSimpleName());
@@ -825,7 +731,7 @@ public abstract class BiometricServiceBase<T> extends SystemService
             return;
         }
 
-        mCurrentClient.start(daemon, mClientFinishCallback);
+        mCurrentClient.start(mClientFinishCallback);
         notifyClientActiveCallbacks(true);
     }
 
@@ -931,12 +837,6 @@ public abstract class BiometricServiceBase<T> extends SystemService
         doTemplateCleanupForUser(userId);
     }
 
-    protected void notifyLockoutResetMonitors() {
-        for (int i = 0; i < mLockoutMonitors.size(); i++) {
-            mLockoutMonitors.get(i).sendLockoutReset();
-        }
-    }
-
     private void listenForUserSwitches() {
         try {
             ActivityManager.getService().registerUserSwitchObserver(
@@ -950,9 +850,5 @@ public abstract class BiometricServiceBase<T> extends SystemService
         } catch (RemoteException e) {
             Slog.w(getTag(), "Failed to listen for user switching event" ,e);
         }
-    }
-
-    private void removeLockoutResetCallback(LockoutResetMonitor monitor) {
-        mLockoutMonitors.remove(monitor);
     }
 }
