@@ -272,7 +272,9 @@ public class PipTouchHandler {
 
         mMagnetizedPip.setAnimateStuckToTarget(
                 (target, velX, velY, flung, after) -> {
-                    mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung, after);
+                    if (mEnableDismissDragToEdge) {
+                        mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung, after);
+                    }
                     return Unit.INSTANCE;
                 });
         mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
@@ -280,7 +282,9 @@ public class PipTouchHandler {
             public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
                 // Show the dismiss target, in case the initial touch event occurred within the
                 // magnetic field radius.
-                showDismissTargetMaybe();
+                if (mEnableDismissDragToEdge) {
+                    showDismissTargetMaybe();
+                }
             }
 
             @Override
