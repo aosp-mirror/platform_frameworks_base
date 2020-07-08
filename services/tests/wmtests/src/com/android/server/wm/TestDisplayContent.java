@@ -43,10 +43,9 @@ class TestDisplayContent extends DisplayContent {
         // hard-code to FULLSCREEN for tests.
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(this);
-        for (int i = getTaskDisplayAreaCount() - 1; i >= 0; --i) {
-            spyOn(getTaskDisplayAreaAt(i));
-        }
-
+        forAllTaskDisplayAreas(taskDisplayArea -> {
+            spyOn(taskDisplayArea);
+        });
         final DisplayRotation displayRotation = getDisplayRotation();
         spyOn(displayRotation);
         doAnswer(invocation -> {

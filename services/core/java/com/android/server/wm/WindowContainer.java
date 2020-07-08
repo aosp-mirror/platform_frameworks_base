@@ -95,6 +95,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -1731,6 +1732,145 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * For all {@link TaskDisplayArea} at or below this container call the callback.
+     * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
+     *                  returns {@code true}.
+     * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
+     *                            terms of z-order, else from bottom-to-top.
+     * @return {@code true} if the search ended before we reached the end of the hierarchy due to
+     *         callback returning {@code true}.
+     */
+    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+            boolean traverseTopToBottom) {
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        while (i >= 0 && i < childCount) {
+            if (mChildren.get(i).forAllTaskDisplayAreas(callback, traverseTopToBottom)) {
+                return true;
+            }
+            i += traverseTopToBottom ? -1 : 1;
+        }
+        return false;
+    }
+
+    /**
+     * For all {@link TaskDisplayArea} at or below this container call the callback. Traverses from
+     * top to bottom in terms of z-order.
+     * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
+     *                  returns {@code true}.
+     * @return {@code true} if the search ended before we reached the end of the hierarchy due to
+     *         callback returning {@code true}.
+     */
+    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback) {
+        return forAllTaskDisplayAreas(callback, true /* traverseTopToBottom */);
+    }
+
+    /**
+     * For all {@link TaskDisplayArea} at or below this container call the callback.
+     * @param callback Applies on each {@link TaskDisplayArea} found.
+     * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
+     *                            terms of z-order, else from bottom-to-top.
+     */
+    void forAllTaskDisplayAreas(Consumer<TaskDisplayArea> callback, boolean traverseTopToBottom) {
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        while (i >= 0 && i < childCount) {
+            mChildren.get(i).forAllTaskDisplayAreas(callback, traverseTopToBottom);
+            i += traverseTopToBottom ? -1 : 1;
+        }
+    }
+
+    /**
+     * For all {@link TaskDisplayArea} at or below this container call the callback. Traverses from
+     * top to bottom in terms of z-order.
+     * @param callback Applies on each {@link TaskDisplayArea} found.
+     */
+    void forAllTaskDisplayAreas(Consumer<TaskDisplayArea> callback) {
+        forAllTaskDisplayAreas(callback, true /* traverseTopToBottom */);
+    }
+
+    /**
+     * Performs a reduction on all {@link TaskDisplayArea} at or below this container, using the
+     * provided initial value and an accumulation function, and returns the reduced value.
+     * @param accumulator Applies on each {@link TaskDisplayArea} found with the accumulative result
+     *                 from the previous call.
+     * @param initValue The initial value to pass to the accumulating function with the first
+     *                  {@link TaskDisplayArea}.
+     * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
+     *                            terms of z-order, else from bottom-to-top.
+     * @return the accumulative result.
+     */
+    @Nullable
+    <R> R reduceOnAllTaskDisplayAreas(BiFunction<TaskDisplayArea, R, R> accumulator,
+            @Nullable R initValue, boolean traverseTopToBottom) {
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        R result = initValue;
+        while (i >= 0 && i < childCount) {
+            result = (R) mChildren.get(i)
+                    .reduceOnAllTaskDisplayAreas(accumulator, result, traverseTopToBottom);
+            i += traverseTopToBottom ? -1 : 1;
+        }
+        return result;
+    }
+
+    /**
+     * Performs a reduction on all {@link TaskDisplayArea} at or below this container, using the
+     * provided initial value and an accumulation function, and returns the reduced value. Traverses
+     * from top to bottom in terms of z-order.
+     * @param accumulator Applies on each {@link TaskDisplayArea} found with the accumulative result
+     *                 from the previous call.
+     * @param initValue The initial value to pass to the accumulating function with the first
+     *                  {@link TaskDisplayArea}.
+     * @return the accumulative result.
+     */
+    @Nullable
+    <R> R reduceOnAllTaskDisplayAreas(BiFunction<TaskDisplayArea, R, R> accumulator,
+            @Nullable R initValue) {
+        return reduceOnAllTaskDisplayAreas(accumulator, initValue, true /* traverseTopToBottom */);
+    }
+
+    /**
+     * Finds the first non {@code null} return value from calling the callback on all
+     * {@link TaskDisplayArea} at or below this container.
+     * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
+     *                  returns non {@code null}.
+     * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
+     *                            terms of z-order, else from bottom-to-top.
+     * @return the first returned object that is not {@code null}. Returns {@code null} if not
+     *         found.
+     */
+    @Nullable
+    <R> R getItemFromTaskDisplayAreas(Function<TaskDisplayArea, R> callback,
+            boolean traverseTopToBottom) {
+        int childCount = mChildren.size();
+        int i = traverseTopToBottom ? childCount - 1 : 0;
+        while (i >= 0 && i < childCount) {
+            R result = (R) mChildren.get(i)
+                    .getItemFromTaskDisplayAreas(callback, traverseTopToBottom);
+            if (result != null) {
+                return result;
+            }
+            i += traverseTopToBottom ? -1 : 1;
+        }
+        return null;
+    }
+
+    /**
+     * Finds the first non {@code null} return value from calling the callback on all
+     * {@link TaskDisplayArea} at or below this container. Traverses from top to bottom in terms of
+     * z-order.
+     * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
+     *                  returns non {@code null}.
+     * @return the first returned object that is not {@code null}. Returns {@code null} if not
+     *         found.
+     */
+    @Nullable
+    <R> R getItemFromTaskDisplayAreas(Function<TaskDisplayArea, R> callback) {
+        return getItemFromTaskDisplayAreas(callback, true /* traverseTopToBottom */);
+    }
+
+    /**
      * Returns 1, 0, or -1 depending on if this container is greater than, equal to, or lesser than
      * the input container in terms of z-order.
      */
@@ -2653,6 +2793,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Cheap way of doing cast and instanceof. */
     ActivityRecord asActivityRecord() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    DisplayArea asDisplayArea() {
         return null;
     }
 
