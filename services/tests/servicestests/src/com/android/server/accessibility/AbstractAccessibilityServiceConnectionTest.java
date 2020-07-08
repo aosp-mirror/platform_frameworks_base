@@ -51,6 +51,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -268,6 +269,25 @@ public class AbstractAccessibilityServiceConnectionTest {
 
         mServiceConnection.setServiceInfo(serviceInfo);
         verify(mMockSystemSupport).onClientChangeLocked(true);
+    }
+
+    @Test
+    public void setServiceInfo_ChangePackageNames_updateSuccess() {
+        assertTrue(mServiceConnection.mPackageNames.isEmpty());
+
+        final AccessibilityServiceInfo serviceInfo = new AccessibilityServiceInfo();
+        updateServiceInfo(serviceInfo, 0, 0, A11Y_SERVICE_FLAG,
+                new String[] {PACKAGE_NAME1, PACKAGE_NAME2},
+                1000);
+
+        mServiceConnection.setServiceInfo(serviceInfo);
+        assertEquals(serviceInfo.packageNames.length, mServiceConnection.mPackageNames.size());
+        assertTrue(mServiceConnection.mPackageNames.containsAll(
+                Arrays.asList(mServiceConnection.getServiceInfo().packageNames)));
+
+        updateServiceInfo(serviceInfo, 0, 0, A11Y_SERVICE_FLAG, null, 1000);
+        mServiceConnection.setServiceInfo(serviceInfo);
+        assertTrue(mServiceConnection.mPackageNames.isEmpty());
     }
 
     @Test
