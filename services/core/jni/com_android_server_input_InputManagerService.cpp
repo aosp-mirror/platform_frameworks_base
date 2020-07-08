@@ -236,29 +236,26 @@ public:
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
-    virtual void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
-                              uint32_t policyFlags) override;
-    virtual void notifyConfigurationChanged(nsecs_t when);
-    virtual nsecs_t notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
-                              const sp<IBinder>& token, const std::string& reason) override;
-    virtual void notifyInputChannelBroken(const sp<IBinder>& token);
-    virtual void notifyFocusChanged(const sp<IBinder>& oldToken,
-                                    const sp<IBinder>& newToken) override;
-    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
-    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
-    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
-                                            uint32_t& policyFlags) override;
-    virtual void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
-                                               uint32_t& policyFlags) override;
-    virtual nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token,
-                                                  const KeyEvent* keyEvent,
-                                                  uint32_t policyFlags) override;
-    virtual bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
-                                      uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) override;
-    virtual bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid,
-                                                         int32_t injectorUid) override;
-    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
+    void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
+                      uint32_t policyFlags) override;
+    void notifyConfigurationChanged(nsecs_t when) override;
+    std::chrono::nanoseconds notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
+                                       const sp<IBinder>& token,
+                                       const std::string& reason) override;
+    void notifyInputChannelBroken(const sp<IBinder>& token) override;
+    void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
+    bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
+    void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
+    void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) override;
+    void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
+                                       uint32_t& policyFlags) override;
+    nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent* keyEvent,
+                                          uint32_t policyFlags) override;
+    bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
+                              uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
+    void pokeUserActivity(nsecs_t eventTime, int32_t eventType) override;
+    bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid, int32_t injectorUid) override;
+    void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -695,8 +692,9 @@ static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
     return handle->getInputApplicationHandleObjLocalRef(env);
 }
 
-nsecs_t NativeInputManager::notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
-                                      const sp<IBinder>& token, const std::string& reason) {
+std::chrono::nanoseconds NativeInputManager::notifyAnr(
+        const sp<InputApplicationHandle>& inputApplicationHandle, const sp<IBinder>& token,
+        const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyANR");
 #endif
@@ -719,7 +717,7 @@ nsecs_t NativeInputManager::notifyAnr(const sp<InputApplicationHandle>& inputApp
     } else {
         assert(newTimeout >= 0);
     }
-    return newTimeout;
+    return std::chrono::nanoseconds(newTimeout);
 }
 
 void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
