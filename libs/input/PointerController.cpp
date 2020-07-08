@@ -24,30 +24,9 @@
 
 #include <log/log.h>
 
+#include <memory>
+
 namespace android {
-
-// --- WeakLooperCallback ---
-
-class WeakLooperCallback: public LooperCallback {
-protected:
-    virtual ~WeakLooperCallback() { }
-
-public:
-    explicit WeakLooperCallback(const wp<LooperCallback>& callback) :
-        mCallback(callback) {
-    }
-
-    virtual int handleEvent(int fd, int events, void* data) {
-        sp<LooperCallback> callback = mCallback.promote();
-        if (callback != NULL) {
-            return callback->handleEvent(fd, events, data);
-        }
-        return 0; // the client is gone, remove the callback
-    }
-
-private:
-    wp<LooperCallback> mCallback;
-};
 
 // --- PointerController ---
 
@@ -64,29 +43,50 @@ static const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
 // The number of events to be read at once for DisplayEventReceiver.
 static const int EVENT_BUFFER_SIZE = 100;
 
-// --- PointerController ---
+std::shared_ptr<PointerController> PointerController::create(
+        const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+        const sp<SpriteController>& spriteController) {
+    std::shared_ptr<PointerController> controller = std::shared_ptr<PointerController>(
+            new PointerController(policy, looper, spriteController));
 
-PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
-        const sp<Looper>& looper, const sp<SpriteController>& spriteController) :
-        mPolicy(policy), mLooper(looper), mSpriteController(spriteController) {
-    mHandler = new WeakMessageHandler(this);
-    mCallback = new WeakLooperCallback(this);
+    /*
+     * Now we need to hook up the constructed PointerController object to its callbacks.
+     *
+     * This must be executed after the constructor but before any other methods on PointerController
+     * in order to ensure that the fully constructed object is visible on the Looper thread, since
+     * that may be a different thread than where the PointerController is initially constructed.
+     *
+     * Unfortunately, this cannot be done as part of the constructor since we need to hand out
+     * weak_ptr's which themselves cannot be constructed until there's at least one shared_ptr.
+     */
 
-    if (mDisplayEventReceiver.initCheck() == NO_ERROR) {
-        mLooper->addFd(mDisplayEventReceiver.getFd(), Looper::POLL_CALLBACK,
-                       Looper::EVENT_INPUT, mCallback, nullptr);
+    controller->mHandler->pointerController = controller;
+    controller->mCallback->pointerController = controller;
+    if (controller->mDisplayEventReceiver.initCheck() == NO_ERROR) {
+        controller->mLooper->addFd(controller->mDisplayEventReceiver.getFd(), Looper::POLL_CALLBACK,
+                                   Looper::EVENT_INPUT, controller->mCallback, nullptr);
     } else {
         ALOGE("Failed to initialize DisplayEventReceiver.");
     }
+    return controller;
+}
 
+PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                     const sp<Looper>& looper,
+                                     const sp<SpriteController>& spriteController)
+      : mPolicy(policy),
+        mLooper(looper),
+        mSpriteController(spriteController),
+        mHandler(new MessageHandler()),
+        mCallback(new LooperCallback()) {
     AutoMutex _l(mLock);
 
     mLocked.animationPending = false;
 
-    mLocked.presentation = PRESENTATION_POINTER;
+    mLocked.presentation = Presentation::POINTER;
     mLocked.presentationChanged = false;
 
-    mLocked.inactivityTimeout = INACTIVITY_TIMEOUT_NORMAL;
+    mLocked.inactivityTimeout = InactivityTimeout::NORMAL;
 
     mLocked.pointerFadeDirection = 0;
     mLocked.pointerX = 0;
@@ -221,7 +221,7 @@ void PointerController::fade(Transition transition) {
     removeInactivityTimeoutLocked();
 
     // Start fading.
-    if (transition == TRANSITION_IMMEDIATE) {
+    if (transition == Transition::IMMEDIATE) {
         mLocked.pointerFadeDirection = 0;
         mLocked.pointerAlpha = 0.0f;
         updatePointerLocked();
@@ -238,7 +238,7 @@ void PointerController::unfade(Transition transition) {
     resetInactivityTimeoutLocked();
 
     // Start unfading.
-    if (transition == TRANSITION_IMMEDIATE) {
+    if (transition == Transition::IMMEDIATE) {
         mLocked.pointerFadeDirection = 0;
         mLocked.pointerAlpha = 1.0f;
         updatePointerLocked();
@@ -262,7 +262,7 @@ void PointerController::setPresentation(Presentation presentation) {
         return;
     }
 
-    if (presentation == PRESENTATION_POINTER) {
+    if (presentation == Presentation::POINTER) {
         if (mLocked.additionalMouseResources.empty()) {
             mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
                                                   &mLocked.animationResources,
@@ -480,24 +480,35 @@ void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
     updatePointerLocked();
 }
 
-void PointerController::handleMessage(const Message& message) {
+void PointerController::MessageHandler::handleMessage(const Message& message) {
+    std::shared_ptr<PointerController> controller = pointerController.lock();
+
+    if (controller == nullptr) {
+        ALOGE("PointerController instance was released before processing message: what=%d",
+              message.what);
+        return;
+    }
     switch (message.what) {
     case MSG_INACTIVITY_TIMEOUT:
-        doInactivityTimeout();
+        controller->doInactivityTimeout();
         break;
     }
 }
 
-int PointerController::handleEvent(int /* fd */, int events, void* /* data */) {
+int PointerController::LooperCallback::handleEvent(int /* fd */, int events, void* /* data */) {
+    std::shared_ptr<PointerController> controller = pointerController.lock();
+    if (controller == nullptr) {
+        ALOGW("PointerController instance was released with pending callbacks.  events=0x%x",
+              events);
+        return 0; // Remove the callback, the PointerController is gone anyways
+    }
     if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
-        ALOGE("Display event receiver pipe was closed or an error occurred.  "
-              "events=0x%x", events);
+        ALOGE("Display event receiver pipe was closed or an error occurred.  events=0x%x", events);
         return 0; // remove the callback
     }
 
     if (!(events & Looper::EVENT_INPUT)) {
-        ALOGW("Received spurious callback for unhandled poll event.  "
-              "events=0x%x", events);
+        ALOGW("Received spurious callback for unhandled poll event.  events=0x%x", events);
         return 1; // keep the callback
     }
 
@@ -505,7 +516,7 @@ int PointerController::handleEvent(int /* fd */, int events, void* /* data */) {
     ssize_t n;
     nsecs_t timestamp;
     DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-    while ((n = mDisplayEventReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+    while ((n = controller->mDisplayEventReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
         for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
             if (buf[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
                 timestamp = buf[i].header.timestamp;
@@ -514,7 +525,7 @@ int PointerController::handleEvent(int /* fd */, int events, void* /* data */) {
         }
     }
     if (gotVsync) {
-        doAnimate(timestamp);
+        controller->doAnimate(timestamp);
     }
     return 1;  // keep the callback
 }
@@ -613,7 +624,7 @@ bool PointerController::doBitmapAnimationLocked(nsecs_t timestamp) {
 }
 
 void PointerController::doInactivityTimeout() {
-    fade(TRANSITION_GRADUAL);
+    fade(Transition::GRADUAL);
 }
 
 void PointerController::startAnimationLocked() {
@@ -627,8 +638,9 @@ void PointerController::startAnimationLocked() {
 void PointerController::resetInactivityTimeoutLocked() {
     mLooper->removeMessages(mHandler, MSG_INACTIVITY_TIMEOUT);
 
-    nsecs_t timeout = mLocked.inactivityTimeout == INACTIVITY_TIMEOUT_SHORT
-            ? INACTIVITY_TIMEOUT_DELAY_TIME_SHORT : INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL;
+    nsecs_t timeout = mLocked.inactivityTimeout == InactivityTimeout::SHORT
+            ? INACTIVITY_TIMEOUT_DELAY_TIME_SHORT
+            : INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL;
     mLooper->sendMessageDelayed(timeout, mHandler, MSG_INACTIVITY_TIMEOUT);
 }
 
@@ -655,7 +667,7 @@ void PointerController::updatePointerLocked() REQUIRES(mLock) {
     }
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
-        if (mLocked.presentation == PRESENTATION_POINTER) {
+        if (mLocked.presentation == Presentation::POINTER) {
             if (mLocked.requestedPointerType == mPolicy->getDefaultPointerIconId()) {
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             } else {
@@ -731,7 +743,7 @@ PointerController::Spot* PointerController::removeFirstFadingSpotLocked(std::vec
             return spot;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void PointerController::releaseSpotLocked(Spot* spot) {
@@ -772,7 +784,7 @@ void PointerController::loadResourcesLocked() REQUIRES(mLock) {
 
     mLocked.additionalMouseResources.clear();
     mLocked.animationResources.clear();
-    if (mLocked.presentation == PRESENTATION_POINTER) {
+    if (mLocked.presentation == Presentation::POINTER) {
         mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
                 &mLocked.animationResources, mLocked.viewport.displayId);
     }

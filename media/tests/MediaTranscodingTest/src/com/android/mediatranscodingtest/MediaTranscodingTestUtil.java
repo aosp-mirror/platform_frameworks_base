@@ -27,6 +27,7 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Size;
@@ -41,6 +42,75 @@ import java.util.Locale;
 
 /* package */ class MediaTranscodingTestUtil {
     private static final String TAG = "MediaTranscodingTestUtil";
+
+    // Helper class to extract the information from source file and transcoded file.
+    static class VideoFileInfo {
+        String mUri;
+        int mNumVideoFrames = 0;
+        int mWidth = 0;
+        int mHeight = 0;
+        float mVideoFrameRate = 0.0f;
+        boolean mHasAudio = false;
+
+        public String toString() {
+            String str = mUri;
+            str += " Width:" + mWidth;
+            str += " Height:" + mHeight;
+            str += " FrameRate:" + mWidth;
+            str += " FrameCount:" + mNumVideoFrames;
+            str +=  " HasAudio:" + (mHasAudio ? "Yes" : "No");
+            return str;
+        }
+    }
+
+    static VideoFileInfo extractVideoFileInfo(Context ctx, Uri videoUri) throws IOException {
+        VideoFileInfo info = new VideoFileInfo();
+        AssetFileDescriptor afd =  null;
+        MediaMetadataRetriever retriever = null;
+
+        try {
+            afd = ctx.getContentResolver().openAssetFileDescriptor(videoUri, "r");
+            retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+
+            info.mUri = videoUri.getLastPathSegment();
+            Log.i(TAG, "Trying to transcode to " + info.mUri);
+            String width = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+            String height = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+            if (width != null && height != null) {
+                info.mWidth = Integer.parseInt(width);
+                info.mHeight = Integer.parseInt(height);
+            }
+
+            String frameRate = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE);
+            if (frameRate != null) {
+                info.mVideoFrameRate = Float.parseFloat(frameRate);
+            }
+
+            String frameCount = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT);
+            if (frameCount != null) {
+                info.mNumVideoFrames = Integer.parseInt(frameCount);
+            }
+
+            String hasAudio = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO);
+            if (hasAudio != null) {
+                info.mHasAudio = hasAudio.equals("yes");
+            }
+        } finally {
+            if (retriever != null) {
+                retriever.close();
+            }
+            if (afd != null) {
+                afd.close();
+            }
+        }
+        return info;
+    }
 
     static VideoTranscodingStatistics computeStats(final Context ctx, final Uri sourceMp4,
             final Uri transcodedMp4)

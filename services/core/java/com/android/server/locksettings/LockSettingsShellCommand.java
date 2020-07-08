@@ -155,7 +155,7 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PIN>");
             pw.println("    Sets the lock screen as PIN, using the given PIN to unlock.");
             pw.println("");
-            pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
+            pw.println("  set-password [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
             pw.println("    Sets the lock screen as password, using the given PASSOWRD to unlock.");
             pw.println("");
             pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID]");
