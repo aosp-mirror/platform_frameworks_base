@@ -67,7 +67,7 @@ public class MediaTranscodeManagerTest
 
     // Setting for transcoding to H.264.
     private static final String MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
-    private static final int BIT_RATE = 2000000;            // 2Mbps
+    private static final int BIT_RATE = 20000000;            // 20Mbps
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
 
@@ -177,7 +177,7 @@ public class MediaTranscodeManagerTest
         assertNotNull(job);
 
         if (job != null) {
-            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
+            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to cancel.");
             boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
                     TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             assertTrue("Transcode failed to complete in time.", finishedOnTime);
@@ -192,5 +192,43 @@ public class MediaTranscodeManagerTest
                 stats.mAveragePSNR >= PSNR_THRESHOLD);
     }
 
+    @Test
+    public void testCancelTranscoding() throws Exception {
+        Log.d(TAG, "Starting: testMediaTranscodeManager");
+        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
+
+        // Transcode a 15 seconds video, so that the transcoding is not finished when we cancel.
+        Uri srcUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/longtest_15s.mp4");
+        Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/HevcTranscode.mp4");
+
+        TranscodingRequest request =
+                new TranscodingRequest.Builder()
+                        .setSourceUri(srcUri)
+                        .setDestinationUri(destinationUri)
+                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
+                        .setVideoTrackFormat(createMediaFormat())
+                        .build();
+        Executor listenerExecutor = Executors.newSingleThreadExecutor();
+
+        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
+                transcodingJob -> {
+                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
+                    assertEquals(transcodingJob.getResult(), TranscodingJob.RESULT_CANCELED);
+                    transcodeCompleteSemaphore.release();
+                });
+        assertNotNull(job);
+
+        // TODO(hkuang): Wait for progress update before calling cancel to make sure transcoding is
+        // started.
+
+        job.cancel();
+        Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to cancel.");
+        boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
+                30, TimeUnit.MILLISECONDS);
+        assertTrue("Fails to cancel transcoding", finishedOnTime);
+    }
 }
 
