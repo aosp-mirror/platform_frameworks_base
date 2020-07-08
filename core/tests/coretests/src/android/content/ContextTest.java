@@ -23,6 +23,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityThread;
@@ -179,5 +180,27 @@ public class ContextTest {
                 ContextTest.class.getName(), width, height, density, reader.getSurface(),
                 VIRTUAL_DISPLAY_FLAG_PUBLIC | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
         return virtualDisplay.getDisplay();
+    }
+
+    @Test
+    public void testIsUiContext_ContextWrapper() {
+        ContextWrapper wrapper = new ContextWrapper(null /* base */);
+
+        assertFalse(wrapper.isUiContext());
+
+        wrapper = new ContextWrapper(new TestUiContext());
+
+        assertTrue(wrapper.isUiContext());
+    }
+
+    private static class TestUiContext extends ContextWrapper {
+        TestUiContext() {
+            super(null /* base */);
+        }
+
+        @Override
+        public boolean isUiContext() {
+            return true;
+        }
     }
 }
