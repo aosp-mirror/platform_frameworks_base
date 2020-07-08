@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
+import android.util.Log
 import android.util.MathUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
+private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
 
 /**
@@ -236,7 +238,9 @@ class MediaCarouselController @Inject constructor(
         val oldData = mediaPlayers[oldKey]
         if (oldData != null) {
             val oldData = mediaPlayers.remove(oldKey)
-            mediaPlayers.put(key, oldData!!)
+            mediaPlayers.put(key, oldData!!)?.let {
+                Log.wtf(TAG, "new key $key already exists when migrating from $oldKey")
+            }
         }
         var existingPlayer = mediaPlayers[key]
         if (existingPlayer == null) {
@@ -271,6 +275,11 @@ class MediaCarouselController @Inject constructor(
         updatePageIndicator()
         mediaCarouselScrollHandler.onPlayersChanged()
         mediaCarousel.requiresRemeasuring = true
+        // Check postcondition: mediaContent should have the same number of children as there are
+        // elements in mediaPlayers.
+        if (mediaPlayers.size != mediaContent.childCount) {
+            Log.wtf(TAG, "Size of players list and number of views in carousel are out of sync")
+        }
     }
 
     private fun removePlayer(key: String) {
