@@ -640,7 +640,7 @@ android_glCompressedTexImage2D__IIIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -684,7 +684,7 @@ android_glCompressedTexSubImage2D__IIIIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -929,7 +929,7 @@ android_glDrawElements__IIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, indices, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)indices - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -2801,7 +2801,8 @@ android_glReadPixels__IIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, pixels, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _array, (void *)((char *)pixels - _bufferOffset),
+                       _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -3241,7 +3242,7 @@ android_glTexImage2D__IIIIIIIILjava_nio_Buffer_2
         (GLvoid *)pixels
     );
     if (_array) {
-        releasePointer(_env, _array, pixels, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)pixels - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -3301,7 +3302,7 @@ android_glTexSubImage2D__IIIIIIIILjava_nio_Buffer_2
         (GLvoid *)pixels
     );
     if (_array) {
-        releasePointer(_env, _array, pixels, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)pixels - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);

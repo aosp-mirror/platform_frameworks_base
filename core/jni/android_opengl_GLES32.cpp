@@ -863,7 +863,7 @@ android_glDrawElementsBaseVertex__IIILjava_nio_Buffer_2I
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, indices, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)indices - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -911,7 +911,7 @@ android_glDrawRangeElementsBaseVertex__IIIIILjava_nio_Buffer_2I
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, indices, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)indices - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -1048,7 +1048,8 @@ android_glReadnPixels__IIIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset),
+                       _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
