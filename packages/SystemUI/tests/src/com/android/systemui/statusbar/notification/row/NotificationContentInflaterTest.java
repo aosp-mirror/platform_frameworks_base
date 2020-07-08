@@ -51,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
@@ -110,6 +111,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 () -> smartReplyConstants,
                 () -> smartReplyController,
                 mConversationNotificationProcessor,
+                mock(MediaFeatureFlag.class),
                 mock(Executor.class));
     }
 
