@@ -50,7 +50,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.Slog;
 import android.view.KeyEvent;
 
 import com.android.server.LocalServices;
@@ -996,7 +995,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
                 return true;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
+                Log.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
             return false;
         }
@@ -1013,7 +1012,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
                 return true;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
+                Log.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
             return false;
         }
@@ -1023,7 +1022,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onCommand(packageName, pid, uid, command, args, cb);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendCommand.", e);
+                Log.e(TAG, "Remote failure in sendCommand.", e);
             }
         }
 
@@ -1032,7 +1031,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onCustomAction(packageName, pid, uid, action, args);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendCustomAction.", e);
+                Log.e(TAG, "Remote failure in sendCustomAction.", e);
             }
         }
 
@@ -1040,7 +1039,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPrepare(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in prepare.", e);
+                Log.e(TAG, "Remote failure in prepare.", e);
             }
         }
 
@@ -1049,7 +1048,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPrepareFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in prepareFromMediaId.", e);
+                Log.e(TAG, "Remote failure in prepareFromMediaId.", e);
             }
         }
 
@@ -1058,7 +1057,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPrepareFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in prepareFromSearch.", e);
+                Log.e(TAG, "Remote failure in prepareFromSearch.", e);
             }
         }
 
@@ -1066,7 +1065,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPrepareFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in prepareFromUri.", e);
+                Log.e(TAG, "Remote failure in prepareFromUri.", e);
             }
         }
 
@@ -1074,7 +1073,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPlay(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in play.", e);
+                Log.e(TAG, "Remote failure in play.", e);
             }
         }
 
@@ -1083,7 +1082,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPlayFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in playFromMediaId.", e);
+                Log.e(TAG, "Remote failure in playFromMediaId.", e);
             }
         }
 
@@ -1092,7 +1091,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPlayFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in playFromSearch.", e);
+                Log.e(TAG, "Remote failure in playFromSearch.", e);
             }
         }
 
@@ -1100,7 +1099,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPlayFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in playFromUri.", e);
+                Log.e(TAG, "Remote failure in playFromUri.", e);
             }
         }
 
@@ -1108,7 +1107,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onSkipToTrack(packageName, pid, uid, id);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in skipToTrack", e);
+                Log.e(TAG, "Remote failure in skipToTrack", e);
             }
         }
 
@@ -1116,7 +1115,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPause(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in pause.", e);
+                Log.e(TAG, "Remote failure in pause.", e);
             }
         }
 
@@ -1124,7 +1123,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onStop(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in stop.", e);
+                Log.e(TAG, "Remote failure in stop.", e);
             }
         }
 
@@ -1132,7 +1131,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onNext(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in next.", e);
+                Log.e(TAG, "Remote failure in next.", e);
             }
         }
 
@@ -1140,7 +1139,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onPrevious(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in previous.", e);
+                Log.e(TAG, "Remote failure in previous.", e);
             }
         }
 
@@ -1148,7 +1147,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onFastForward(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in fastForward.", e);
+                Log.e(TAG, "Remote failure in fastForward.", e);
             }
         }
 
@@ -1156,7 +1155,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onRewind(packageName, pid, uid);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in rewind.", e);
+                Log.e(TAG, "Remote failure in rewind.", e);
             }
         }
 
@@ -1164,7 +1163,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onSeekTo(packageName, pid, uid, pos);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in seekTo.", e);
+                Log.e(TAG, "Remote failure in seekTo.", e);
             }
         }
 
@@ -1172,7 +1171,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onRate(packageName, pid, uid, rating);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in rate.", e);
+                Log.e(TAG, "Remote failure in rate.", e);
             }
         }
 
@@ -1180,7 +1179,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onSetPlaybackSpeed(packageName, pid, uid, speed);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in setPlaybackSpeed.", e);
+                Log.e(TAG, "Remote failure in setPlaybackSpeed.", e);
             }
         }
 
@@ -1194,7 +1193,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     mCb.onAdjustVolume(packageName, pid, uid, direction);
                 }
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in adjustVolume.", e);
+                Log.e(TAG, "Remote failure in adjustVolume.", e);
             }
         }
 
@@ -1202,7 +1201,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             try {
                 mCb.onSetVolumeTo(packageName, pid, uid, value);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in setVolumeTo.", e);
+                Log.e(TAG, "Remote failure in setVolumeTo.", e);
             }
         }
 
