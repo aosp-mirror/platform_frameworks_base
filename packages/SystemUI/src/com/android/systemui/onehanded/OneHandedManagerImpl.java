@@ -95,7 +95,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private final DisplayChangeController.OnDisplayChangingListener mRotationController =
             (display, fromRotation, toRotation, wct) -> {
                 if (mDisplayAreaOrganizer != null) {
-                    mDisplayAreaOrganizer.onRotateDisplay(mContext.getResources(), toRotation);
+                    mDisplayAreaOrganizer.onRotateDisplay(fromRotation, toRotation);
                 }
             };
 
