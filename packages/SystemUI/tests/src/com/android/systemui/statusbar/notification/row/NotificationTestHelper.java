@@ -46,6 +46,7 @@ import android.widget.RemoteViews;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubblesTestActivity;
+import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -133,6 +134,7 @@ public class NotificationTestHelper {
                 () -> mock(SmartReplyConstants.class),
                 () -> mock(SmartReplyController.class),
                 mock(ConversationNotificationProcessor.class),
+                mock(MediaFeatureFlag.class),
                 mock(Executor.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
