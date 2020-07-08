@@ -88,7 +88,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -189,7 +188,6 @@ public class StagingManager {
      * Validates the signature used to sign the container of the new apex package
      *
      * @param newApexPkg The new apex package that is being installed
-     * @throws PackageManagerException
      */
     private void validateApexSignature(PackageInfo newApexPkg)
             throws PackageManagerException {
@@ -725,12 +723,9 @@ public class StagingManager {
         return ret;
     }
 
-    @NonNull
     private PackageInstallerSession createAndWriteApkSession(
-            @NonNull PackageInstallerSession originalSession, boolean preReboot)
-            throws PackageManagerException {
-        final int errorCode = preReboot ? SessionInfo.STAGED_SESSION_VERIFICATION_FAILED
-                : SessionInfo.STAGED_SESSION_ACTIVATION_FAILED;
+            PackageInstallerSession originalSession) throws PackageManagerException {
+        final int errorCode = SessionInfo.STAGED_SESSION_ACTIVATION_FAILED;
         if (originalSession.stageDir == null) {
             Slog.wtf(TAG, "Attempting to install a staged APK session with no staging dir");
             throw new PackageManagerException(errorCode,
@@ -746,12 +741,7 @@ public class StagingManager {
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
         params.installFlags |= PackageManager.INSTALL_STAGED;
-        if (preReboot) {
-            params.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
-            params.installFlags |= PackageManager.INSTALL_DRY_RUN;
-        } else {
-            params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
-        }
+        params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
         try {
             int apkSessionId = mPi.createSession(
                     params, originalSession.getInstallerPackageName(),
@@ -783,12 +773,10 @@ public class StagingManager {
      * apks in the given session. Only parent session is returned for multi-package session.
      */
     @Nullable
-    private PackageInstallerSession extractApksInSession(PackageInstallerSession session,
-            boolean preReboot) throws PackageManagerException {
-        final int errorCode = preReboot ? SessionInfo.STAGED_SESSION_VERIFICATION_FAILED
-                : SessionInfo.STAGED_SESSION_ACTIVATION_FAILED;
+    private PackageInstallerSession extractApksInSession(PackageInstallerSession session)
+            throws PackageManagerException {
         if (!session.isMultiPackage() && !isApexSession(session)) {
-            return createAndWriteApkSession(session, preReboot);
+            return createAndWriteApkSession(session);
         } else if (session.isMultiPackage()) {
             // For multi-package staged sessions containing APKs, we identify which child sessions
             // contain an APK, and with those then create a new multi-package group of sessions,
@@ -810,10 +798,6 @@ public class StagingManager {
             }
             final PackageInstaller.SessionParams params = session.params.copy();
             params.isStaged = false;
-            if (preReboot) {
-                params.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
-                params.installFlags |= PackageManager.INSTALL_DRY_RUN;
-            }
             final int apkParentSessionId = mPi.createSession(
                     params, session.getInstallerPackageName(), session.getInstallerAttributionTag(),
                     session.userId);
@@ -823,18 +807,18 @@ public class StagingManager {
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to prepare multi-package session for staged session "
                         + session.sessionId);
-                throw new PackageManagerException(errorCode,
+                throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "Unable to prepare multi-package session for staged session");
             }
 
             for (int i = 0, size = childSessions.size(); i < size; i++) {
                 final PackageInstallerSession apkChildSession = createAndWriteApkSession(
-                        childSessions.get(i), preReboot);
+                        childSessions.get(i));
                 try {
                     apkParentSession.addChildSessionId(apkChildSession.sessionId);
                 } catch (IllegalStateException e) {
                     Slog.e(TAG, "Failed to add a child session for installing the APK files", e);
-                    throw new PackageManagerException(errorCode,
+                    throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                             "Failed to add a child session " + apkChildSession.sessionId);
                 }
             }
@@ -877,11 +861,9 @@ public class StagingManager {
         }
     }
 
-    private void installApksInSession(@NonNull PackageInstallerSession session)
+    private void installApksInSession(PackageInstallerSession session)
             throws PackageManagerException {
-
-        final PackageInstallerSession apksToInstall = extractApksInSession(
-                session, /* preReboot */ false);
+        final PackageInstallerSession apksToInstall = extractApksInSession(session);
         if (apksToInstall == null) {
             return;
         }
@@ -1047,7 +1029,7 @@ public class StagingManager {
     /**
      * <p>Abort committed staged session
      *
-     * <p>This method must be called while holding {@link PackageInstallerSession.mLock}.
+     * <p>This method must be called while holding {@link PackageInstallerSession#mLock}.
      *
      * <p>The method returns {@code false} to indicate it is not safe to clean up the session from
      * system yet. When it is safe, the method returns {@code true}.
@@ -1218,7 +1200,7 @@ public class StagingManager {
         }
     }
 
-    void markStagedSessionsAsSuccessful() {
+    private void markStagedSessionsAsSuccessful() {
         synchronized (mSuccessfulStagedSessionIds) {
             for (int i = 0; i < mSuccessfulStagedSessionIds.size(); i++) {
                 mApexManager.markStagedSessionSuccessful(mSuccessfulStagedSessionIds.get(i));
@@ -1242,30 +1224,10 @@ public class StagingManager {
         mFailureReasonFile.delete();
     }
 
-    private static class LocalIntentReceiverAsync {
-        final Consumer<Intent> mConsumer;
-
-        LocalIntentReceiverAsync(Consumer<Intent> consumer) {
-            mConsumer = consumer;
-        }
-
-        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
-            @Override
-            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
-                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
-                mConsumer.accept(intent);
-            }
-        };
-
-        public IntentSender getIntentSender() {
-            return new IntentSender((IIntentSender) mLocalSender);
-        }
-    }
-
     private static class LocalIntentReceiverSync {
         private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
 
-        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+        private final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
             public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
                     IIntentReceiver finishedReceiver, String requiredPermission,
@@ -1300,14 +1262,14 @@ public class StagingManager {
     }
 
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
-    //  verification logic is extraced out of StagingManager into PMS, we can remove
+    //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
     void notifyVerificationComplete(int sessionId) {
         mPreRebootVerificationHandler.onPreRebootVerificationComplete(sessionId);
     }
 
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
-    //  verification logic is extraced out of StagingManager into PMS, we can remove
+    //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
     void notifyPreRebootVerification_Apk_Complete(int sessionId) {
         mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(sessionId);
@@ -1524,35 +1486,6 @@ public class StagingManager {
                 return;
             }
             session.verifyStagedSession();
-        }
-
-        private void verifyApksInSession(PackageInstallerSession session)
-                throws PackageManagerException {
-
-            final PackageInstallerSession apksToVerify = extractApksInSession(
-                    session,  /* preReboot */ true);
-            if (apksToVerify == null) {
-                return;
-            }
-
-            final LocalIntentReceiverAsync receiver = new LocalIntentReceiverAsync(
-                    (Intent result) -> {
-                        final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                                PackageInstaller.STATUS_FAILURE);
-                        if (status != PackageInstaller.STATUS_SUCCESS) {
-                            final String errorMessage = result.getStringExtra(
-                                    PackageInstaller.EXTRA_STATUS_MESSAGE);
-                            Slog.e(TAG, "Failure to verify APK staged session "
-                                    + session.sessionId + " [" + errorMessage + "]");
-                            onPreRebootVerificationFailure(session,
-                                    SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMessage);
-                            return;
-                        }
-                        mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(
-                                session.sessionId);
-                    });
-
-            apksToVerify.commit(receiver.getIntentSender(), false);
         }
 
         /**
