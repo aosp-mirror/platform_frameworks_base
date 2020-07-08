@@ -34,7 +34,6 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricService;
-import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -387,13 +386,13 @@ public abstract class BiometricServiceBase<T> extends SystemService
         if (DEBUG) Slog.v(getTag(), "handleError(client="
                 + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
 
-        if (!(client instanceof ErrorConsumer)) {
+        if (!(client instanceof Interruptable)) {
             Slog.e(getTag(), "error received for non-ErrorConsumer");
             return;
         }
 
-        final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-        errorConsumer.onError(error, vendorCode);
+        final Interruptable interruptable = (Interruptable) client;
+        interruptable.onError(error, vendorCode);
 
         if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
             mHandler.removeCallbacks(mResetClientState);
@@ -665,8 +664,8 @@ public abstract class BiometricServiceBase<T> extends SystemService
                             + "(" + newClient.getOwnerString() + ")"
                             + ", initiatedByClient = " + initiatedByClient);
                 }
-            } else if (currentClient instanceof Cancellable) {
-                ((Cancellable) currentClient).cancel();
+            } else if (currentClient instanceof Interruptable) {
+                ((Interruptable) currentClient).cancel();
 
                 // Only post the reset runnable for non-cleanup clients. Cleanup clients should
                 // never be forcibly stopped since they ensure synchronization between HAL and

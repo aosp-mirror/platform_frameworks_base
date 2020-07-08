@@ -20,7 +20,12 @@ package com.android.server.biometrics.sensors;
  * Interface that {@link ClientMonitor} subclasses eligible/interested in error callbacks should
  * implement.
  */
-public interface ErrorConsumer {
+public interface Interruptable {
+    /**
+     * Requests to end the ClientMonitor's lifecycle.
+     */
+    void cancel();
+
     /**
      * @param errorCode defined by the HIDL interface
      * @param vendorCode defined by the vendor

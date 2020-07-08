@@ -163,9 +163,9 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     // TODO(b/157790417): Move this to the scheduler
     void binderDiedInternal(boolean clearListener) {
         // If the current client dies we should cancel the current operation.
-        if (this instanceof Cancellable) {
+        if (this instanceof Interruptable) {
             Slog.e(TAG, "Binder died, cancelling client");
-            ((Cancellable) this).cancel();
+            ((Interruptable) this).cancel();
         }
         mToken = null;
         if (clearListener) {
