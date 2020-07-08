@@ -517,22 +517,36 @@ class MediaDataManager(
 
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
-        if (useMediaResumption && mediaEntries.get(key)?.resumeAction != null) {
+        val removed = mediaEntries.remove(key)
+        if (useMediaResumption && removed?.resumeAction != null) {
             Log.d(TAG, "Not removing $key because resumable")
-            // Move to resume key aka package name
-            val data = mediaEntries.remove(key)!!
-            val resumeAction = getResumeMediaAction(data.resumeAction!!)
-            val updated = data.copy(token = null, actions = listOf(resumeAction),
+            // Move to resume key (aka package name) if that key doesn't already exist.
+            val resumeAction = getResumeMediaAction(removed.resumeAction!!)
+            val updated = removed.copy(token = null, actions = listOf(resumeAction),
                     actionsToShowInCompact = listOf(0), active = false, resumption = true)
-            mediaEntries.put(data.packageName, updated)
-            // Notify listeners of "new" controls
+            val pkg = removed?.packageName
+            val migrate = mediaEntries.put(pkg, updated) == null
+            // Notify listeners of "new" controls when migrating or removed and update when not
             val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataLoaded(data.packageName, key, updated)
+            if (migrate) {
+                listenersCopy.forEach {
+                    it.onMediaDataLoaded(pkg, key, updated)
+                }
+            } else {
+                // Since packageName is used for the key of the resumption controls, it is
+                // possible that another notification has already been reused for the resumption
+                // controls of this package. In this case, rather than renaming this player as
+                // packageName, just remove it and then send a update to the existing resumption
+                // controls.
+                listenersCopy.forEach {
+                    it.onMediaDataRemoved(key)
+                }
+                listenersCopy.forEach {
+                    it.onMediaDataLoaded(pkg, pkg, updated)
+                }
             }
             return
         }
-        val removed = mediaEntries.remove(key)
         if (removed != null) {
             val listenersCopy = listeners.toSet()
             listenersCopy.forEach {
