@@ -208,6 +208,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void showImmediately() {
         if (!isShown) {
             setVisibility(VISIBLE);
+            mClipper.cancelAnimator();
             mClipper.showBackground();
             isShown = true;
             setTileSpecs();
@@ -230,6 +231,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mUiEventLogger.log(QSEditEvent.QS_EDIT_CLOSED);
             isShown = false;
             mToolbar.dismissPopupMenus();
+            mClipper.cancelAnimator();
+            // Make sure we're not opening (because we're closing). Nobody can think we are
+            // customizing after the next two lines.
+            mOpening = false;
             setCustomizing(false);
             save();
             if (animate) {
