@@ -26,6 +26,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.statusbar.CommandQueue;
@@ -71,6 +72,11 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
             barService.registerStatusBar(mCommandQueue);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
+        }
+
+        if  (mContext.getResources().getBoolean(R.bool.audio_recording_disclosure_enabled)) {
+            // Creating AudioRecordingDisclosureBar and just letting it run
+            new AudioRecordingDisclosureBar(mContext);
         }
     }
 
