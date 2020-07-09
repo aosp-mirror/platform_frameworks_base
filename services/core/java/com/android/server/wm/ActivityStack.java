@@ -2443,7 +2443,7 @@ class ActivityStack extends Task {
         forAllActivities(ActivityRecord::removeLaunchTickRunnable);
     }
 
-    private void updateTransitLocked(int transit, ActivityOptions options) {
+    private void updateTransitLocked(int transit, ActivityOptions options, boolean forceOverride) {
         if (options != null) {
             ActivityRecord r = topRunningActivity();
             if (r != null && !r.isState(RESUMED)) {
@@ -2452,7 +2452,8 @@ class ActivityStack extends Task {
                 ActivityOptions.abort(options);
             }
         }
-        getDisplay().mDisplayContent.prepareAppTransition(transit, false);
+        getDisplay().mDisplayContent.prepareAppTransition(transit, false,
+                0 /* flags */, forceOverride);
     }
 
     final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,
@@ -2472,8 +2473,17 @@ class ActivityStack extends Task {
             // nothing to do!
             if (noAnimation) {
                 ActivityOptions.abort(options);
+            } else if (isSingleTaskInstance()) {
+                // When a task is moved front on the display which can only contain one task, start
+                // a special transition.
+                // {@link AppTransitionController#handleAppTransitionReady} later picks up the
+                // transition, and schedules
+                // {@link ITaskStackListener#onSingleTaskDisplayDrawn} callback which is triggered
+                // after contents are drawn on the display.
+                updateTransitLocked(TRANSIT_SHOW_SINGLE_TASK_DISPLAY, options,
+                        true /* forceOverride */);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options, false /* forceOverride */);
             }
             return;
         }
@@ -2519,9 +2529,13 @@ class ActivityStack extends Task {
                     mStackSupervisor.mNoAnimActivities.add(r);
                 }
                 ActivityOptions.abort(options);
+            } else if (isSingleTaskInstance()) {
+                updateTransitLocked(TRANSIT_SHOW_SINGLE_TASK_DISPLAY, options,
+                        true /* forceOverride */);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options, false /* forceOverride */);
             }
+
             // If a new task is moved to the front, then mark the existing top activity as
             // supporting
 
