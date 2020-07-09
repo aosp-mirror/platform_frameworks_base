@@ -228,6 +228,11 @@ interface ITelephony {
     void updateServiceLocation();
 
     /**
+     * Version of updateServiceLocation that records the caller and validates permissions.
+     */
+    void updateServiceLocationWithPackageName(String callingPkg);
+
+    /**
      * Request to update location information for a subscrition in service state
      * @param subId user preferred subId.
      */
