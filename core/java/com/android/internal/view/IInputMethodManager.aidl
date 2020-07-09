@@ -73,5 +73,8 @@ interface IInputMethodManager {
             in float[] matrixValues);
 
     oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
+    /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
     void removeImeSurface();
+    /** Remove the IME surface. Requires passing the currently focused window. */
+    void removeImeSurfaceFromWindow(in IBinder windowToken);
 }

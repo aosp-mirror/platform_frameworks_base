@@ -2109,28 +2109,36 @@ public final class InputMethodManager {
 
     /**
      * Call showSoftInput with currently focused view.
-     * @return {@code true} if IME can be shown.
+     *
+     * @param windowToken the window from which this request originates. If this doesn't match the
+     *                    currently served view, the request is ignored and returns {@code false}.
+     *
+     * @return {@code true} if IME can (eventually) be shown, {@code false} otherwise.
      * @hide
      */
-    public boolean requestImeShow(ResultReceiver resultReceiver) {
+    public boolean requestImeShow(IBinder windowToken) {
         synchronized (mH) {
             final View servedView = getServedViewLocked();
-            if (servedView == null) {
+            if (servedView == null || servedView.getWindowToken() != windowToken) {
                 return false;
             }
-            showSoftInput(servedView, 0 /* flags */, resultReceiver);
+            showSoftInput(servedView, 0 /* flags */, null /* resultReceiver */);
             return true;
         }
     }
 
     /**
      * Notify IME directly that it is no longer visible.
+     *
+     * @param windowToken the window from which this request originates. If this doesn't match the
+     *                    currently served view, the request is ignored.
      * @hide
      */
-    public void notifyImeHidden() {
+    public void notifyImeHidden(IBinder windowToken) {
         synchronized (mH) {
             try {
-                if (mCurMethod != null) {
+                if (mCurMethod != null && mCurRootView != null
+                        && mCurRootView.getWindowToken() == windowToken) {
                     mCurMethod.notifyImeHidden();
                 }
             } catch (RemoteException re) {
@@ -2140,15 +2148,15 @@ public final class InputMethodManager {
 
     /**
      * Notify IME directly to remove surface as it is no longer visible.
+     * @param windowToken The client window token that requests the IME to remove its surface.
      * @hide
      */
-    public void removeImeSurface() {
+    public void removeImeSurface(IBinder windowToken) {
         synchronized (mH) {
             try {
-                if (mCurMethod != null) {
-                    mCurMethod.removeImeSurface();
-                }
-            } catch (RemoteException re) {
+                mService.removeImeSurfaceFromWindow(windowToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }
