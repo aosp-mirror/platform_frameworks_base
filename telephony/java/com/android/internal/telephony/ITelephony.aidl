@@ -222,7 +222,7 @@ interface ITelephony {
     boolean setRadioPower(boolean turnOn);
 
     /**
-     * Request to update location information in service state
+     * This method has been removed due to security and stability issues.
      */
     @UnsupportedAppUsage
     void updateServiceLocation();
@@ -233,34 +233,16 @@ interface ITelephony {
     void updateServiceLocationWithPackageName(String callingPkg);
 
     /**
-     * Request to update location information for a subscrition in service state
-     * @param subId user preferred subId.
-     */
-    void updateServiceLocationForSubscriber(int subId);
-
-    /**
-     * Enable location update notifications.
+     * This method has been removed due to security and stability issues.
      */
     @UnsupportedAppUsage
     void enableLocationUpdates();
 
     /**
-     * Enable location update notifications.
-     * @param subId user preferred subId.
-     */
-    void enableLocationUpdatesForSubscriber(int subId);
-
-    /**
-     * Disable location update notifications.
+     * This method has been removed due to security and stability issues.
      */
     @UnsupportedAppUsage
     void disableLocationUpdates();
-
-    /**
-     * Disable location update notifications.
-     * @param subId user preferred subId.
-     */
-    void disableLocationUpdatesForSubscriber(int subId);
 
     /**
      * Allow mobile data connections.
