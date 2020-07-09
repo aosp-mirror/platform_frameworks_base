@@ -15,12 +15,13 @@
 package com.android.systemui.statusbar.policy;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.testing.AndroidTestingRunner;
@@ -31,12 +32,15 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -46,11 +50,15 @@ public class LocationControllerImplTest extends SysuiTestCase {
     private LocationControllerImpl mLocationController;
     private TestableLooper mTestableLooper;
 
+    @Mock private AppOpsController mAppOpsController;
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         mTestableLooper = TestableLooper.get(this);
         mLocationController = spy(new LocationControllerImpl(mContext,
-                mTestableLooper.getLooper(),
+                mAppOpsController,
                 mTestableLooper.getLooper(),
                 mock(BroadcastDispatcher.class),
                 mock(BootCompleteCache.class)));
@@ -67,12 +75,12 @@ public class LocationControllerImplTest extends SysuiTestCase {
         mLocationController.addCallback(callback);
         mLocationController.addCallback(mock(LocationChangeCallback.class));
 
-        when(mLocationController.areActiveHighPowerLocationRequests()).thenReturn(false);
-        mLocationController.onReceive(mContext, new Intent(
-                LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION));
-        when(mLocationController.areActiveHighPowerLocationRequests()).thenReturn(true);
-        mLocationController.onReceive(mContext, new Intent(
-                LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION));
+        doReturn(false).when(mLocationController).areActiveHighPowerLocationRequests();
+        mLocationController.onActiveStateChanged(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, 0,
+                "", false);
+        doReturn(true).when(mLocationController).areActiveHighPowerLocationRequests();
+        mLocationController.onActiveStateChanged(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, 0,
+                "", true);
 
         mTestableLooper.processAllMessages();
     }
@@ -107,11 +115,22 @@ public class LocationControllerImplTest extends SysuiTestCase {
         LocationChangeCallback callback = mock(LocationChangeCallback.class);
 
         mLocationController.addCallback(callback);
+
+        mTestableLooper.processAllMessages();
+
         mLocationController.onReceive(mContext, new Intent(LocationManager.MODE_CHANGED_ACTION));
 
         mTestableLooper.processAllMessages();
 
         verify(callback, times(2)).onLocationSettingsChanged(anyBoolean());
+
+        doReturn(true).when(mLocationController).areActiveHighPowerLocationRequests();
+        mLocationController.onActiveStateChanged(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, 0,
+                "", true);
+
+        mTestableLooper.processAllMessages();
+
+        verify(callback, times(1)).onLocationActiveChanged(anyBoolean());
     }
 
     @Test
@@ -123,6 +142,8 @@ public class LocationControllerImplTest extends SysuiTestCase {
 
         verify(callback).onLocationSettingsChanged(anyBoolean());
         mLocationController.removeCallback(callback);
+
+        mTestableLooper.processAllMessages();
 
         mLocationController.onReceive(mContext, new Intent(LocationManager.MODE_CHANGED_ACTION));
 

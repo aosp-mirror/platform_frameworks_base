@@ -16,12 +16,8 @@
 
 package com.android.server.location.util;
 
-import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
-
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.Intent;
-import android.location.LocationManager;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 
@@ -66,22 +62,13 @@ public class SystemAppOpsHelper extends AppOpsHelper {
 
         long identity = Binder.clearCallingIdentity();
         try {
-            boolean allowed = mAppOps.startOpNoThrow(
+            return mAppOps.startOpNoThrow(
                     appOp,
                     callerIdentity.getUid(),
                     callerIdentity.getPackageName(),
                     false,
                     callerIdentity.getAttributionTag(),
                     callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
-
-            if (allowed && appOp == OP_MONITOR_HIGH_POWER_LOCATION) {
-                // notify of possible location icon change
-                mContext.sendBroadcast(
-                        new Intent(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION).addFlags(
-                                Intent.FLAG_RECEIVER_FOREGROUND));
-            }
-
-            return allowed;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -98,13 +85,6 @@ public class SystemAppOpsHelper extends AppOpsHelper {
                     callerIdentity.getUid(),
                     callerIdentity.getPackageName(),
                     callerIdentity.getAttributionTag());
-
-            if (appOp == OP_MONITOR_HIGH_POWER_LOCATION) {
-                // notify of possible location icon change
-                mContext.sendBroadcast(
-                        new Intent(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION).addFlags(
-                                Intent.FLAG_RECEIVER_FOREGROUND));
-            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

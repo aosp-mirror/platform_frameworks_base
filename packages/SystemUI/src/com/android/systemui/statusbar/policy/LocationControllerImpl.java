@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+
 import static com.android.settingslib.Utils.updateLocationEnabled;
 
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
-import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,8 +36,9 @@ import android.provider.Settings;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.BootCompleteCache;
+import com.android.systemui.appops.AppOpItem;
+import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.Utils;
 
@@ -51,41 +52,32 @@ import javax.inject.Singleton;
  * A controller to manage changes of location related states and update the views accordingly.
  */
 @Singleton
-public class LocationControllerImpl extends BroadcastReceiver implements LocationController {
+public class LocationControllerImpl extends BroadcastReceiver implements LocationController,
+        AppOpsController.Callback {
 
-    private static final int[] mHighPowerRequestAppOpArray
-        = new int[] {AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION};
+    private final Context mContext;
+    private final AppOpsController mAppOpsController;
+    private final BootCompleteCache mBootCompleteCache;
+    private final H mHandler;
 
-    private Context mContext;
-
-    private AppOpsManager mAppOpsManager;
-    private StatusBarManager mStatusBarManager;
-    private BroadcastDispatcher mBroadcastDispatcher;
-    private BootCompleteCache mBootCompleteCache;
 
     private boolean mAreActiveLocationRequests;
 
-    private final H mHandler;
-
     @Inject
-    public LocationControllerImpl(Context context, @Main Looper mainLooper,
-            @Background Looper bgLooper, BroadcastDispatcher broadcastDispatcher,
+    public LocationControllerImpl(Context context, AppOpsController appOpsController,
+            @Main Looper mainLooper, BroadcastDispatcher broadcastDispatcher,
             BootCompleteCache bootCompleteCache) {
         mContext = context;
-        mBroadcastDispatcher = broadcastDispatcher;
+        mAppOpsController = appOpsController;
         mBootCompleteCache = bootCompleteCache;
         mHandler = new H(mainLooper);
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
         filter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        mBroadcastDispatcher.registerReceiverWithHandler(this, filter,
-                new Handler(bgLooper), UserHandle.ALL);
+        broadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler, UserHandle.ALL);
 
-        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        mStatusBarManager
-                = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mAppOpsController.addCallback(new int[]{OP_MONITOR_HIGH_POWER_LOCATION}, this);
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
@@ -160,27 +152,12 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      */
     @VisibleForTesting
     protected boolean areActiveHighPowerLocationRequests() {
-        List<AppOpsManager.PackageOps> packages
-            = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);
-        // AppOpsManager can return null when there is no requested data.
-        if (packages != null) {
-            final int numPackages = packages.size();
-            for (int packageInd = 0; packageInd < numPackages; packageInd++) {
-                AppOpsManager.PackageOps packageOp = packages.get(packageInd);
-                List<AppOpsManager.OpEntry> opEntries = packageOp.getOps();
-                if (opEntries != null) {
-                    final int numOps = opEntries.size();
-                    for (int opInd = 0; opInd < numOps; opInd++) {
-                        AppOpsManager.OpEntry opEntry = opEntries.get(opInd);
-                        // AppOpsManager should only return OP_MONITOR_HIGH_POWER_LOCATION because
-                        // of the mHighPowerRequestAppOpArray filter, but checking defensively.
-                        if (opEntry.getOp() == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION) {
-                            if (opEntry.isRunning()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+        List<AppOpItem> appOpsItems = mAppOpsController.getActiveAppOps();
+
+        final int numItems = appOpsItems.size();
+        for (int i = 0; i < numItems; i++) {
+            if (appOpsItems.get(i).getCode() == OP_MONITOR_HIGH_POWER_LOCATION) {
+                return true;
             }
         }
 
@@ -198,12 +175,14 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        final String action = intent.getAction();
-        if (LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
-            updateActiveLocationRequests();
-        } else if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
-            mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
+        if (LocationManager.MODE_CHANGED_ACTION.equals(intent.getAction())) {
+            mHandler.locationSettingsChanged();
         }
+    }
+
+    @Override
+    public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
+        updateActiveLocationRequests();
     }
 
     private final class H extends Handler {

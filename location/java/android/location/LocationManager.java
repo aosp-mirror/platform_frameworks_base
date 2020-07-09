@@ -260,7 +260,9 @@ public class LocationManager {
      * {@code OP_MONITOR_HIGH_POWER_LOCATION}.
      *
      * @hide
+     * @deprecated This action is unnecessary from Android S forward.
      */
+    @Deprecated
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
             "android.location.HIGH_POWER_REQUEST_CHANGE";
 
