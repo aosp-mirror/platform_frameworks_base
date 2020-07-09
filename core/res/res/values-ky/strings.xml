@@ -1108,7 +1108,7 @@
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
-    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Системанын кээ бир функциялары иштебеши мүмкүн"</string>
+    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> иштөөдө"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Көбүрөөк маалымат үчүн же колдонмону токтотуш үчүн таптап коюңуз."</string>
@@ -1547,7 +1547,7 @@
     <string name="sending" msgid="206925243621664438">"Жөнөтүлүүдө…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Серепчи иштетилсинби?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Чалуу кабыл алынсынбы?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"Дайыма"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"Ар дайым"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Бир жолу гана"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s жумуш профилин колдоого албайт"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Планшет"</string>
