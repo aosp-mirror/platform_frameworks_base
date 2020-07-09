@@ -66,6 +66,9 @@ import com.android.server.protolog.common.ProtoLog;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * {@link DisplayArea} that represents a section of a screen that contains app window containers.
@@ -373,6 +376,31 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
         mAtmService.mStackSupervisor.updateTopResumedActivityIfNeeded();
+    }
+
+    @Override
+    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+            boolean traverseTopToBottom) {
+        return callback.apply(this);
+    }
+
+    @Override
+    void forAllTaskDisplayAreas(Consumer<TaskDisplayArea> callback, boolean traverseTopToBottom) {
+        callback.accept(this);
+    }
+
+    @Nullable
+    @Override
+    <R> R reduceOnAllTaskDisplayAreas(BiFunction<TaskDisplayArea, R, R> accumulator,
+            @Nullable R initValue, boolean traverseTopToBottom) {
+        return accumulator.apply(this, initValue);
+    }
+
+    @Nullable
+    @Override
+    <R> R getItemFromTaskDisplayAreas(Function<TaskDisplayArea, R> callback,
+            boolean traverseTopToBottom) {
+        return callback.apply(this);
     }
 
     /**

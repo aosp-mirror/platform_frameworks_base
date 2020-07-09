@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -38,18 +39,6 @@ import javax.inject.Inject;
 public class OneHandedAnimationController {
     private static final float FRACTION_START = 0f;
     private static final float FRACTION_END = 1f;
-
-    public static final int ANIM_TYPE_TRANSLATE = 0;
-    public static final int ANIM_TYPE_SCALE = 1;
-
-    // Note: ANIM_TYPE_SCALE reserve for the future development
-    @IntDef(prefix = {"ANIM_TYPE_"}, value = {
-            ANIM_TYPE_TRANSLATE,
-            ANIM_TYPE_SCALE
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AnimationType {
-    }
 
     public static final int TRANSITION_DIRECTION_NONE = 0;
     public static final int TRANSITION_DIRECTION_TRIGGER = 1;
@@ -66,7 +55,8 @@ public class OneHandedAnimationController {
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final OneHandedSurfaceTransactionHelper mSurfaceTransactionHelper;
-    private OneHandedTransitionAnimator mCurrentAnimator;
+    private final HashMap<SurfaceControl, OneHandedTransitionAnimator> mAnimatorMap =
+            new HashMap<>();
 
     /**
      * Constructor of OneHandedAnimationController
@@ -82,18 +72,33 @@ public class OneHandedAnimationController {
     @SuppressWarnings("unchecked")
     OneHandedTransitionAnimator getAnimator(SurfaceControl leash, Rect startBounds,
             Rect endBounds) {
-        if (mCurrentAnimator == null) {
-            mCurrentAnimator = setupOneHandedTransitionAnimator(
-                    OneHandedTransitionAnimator.ofBounds(leash, startBounds, endBounds));
-        } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_TRANSLATE
-                && mCurrentAnimator.isRunning()) {
-            mCurrentAnimator.updateEndValue(endBounds);
+        final OneHandedTransitionAnimator animator = mAnimatorMap.get(leash);
+        if (animator == null) {
+            mAnimatorMap.put(leash, setupOneHandedTransitionAnimator(
+                    OneHandedTransitionAnimator.ofBounds(leash, startBounds, endBounds)));
+        } else if (animator.isRunning()) {
+            animator.updateEndValue(endBounds);
         } else {
-            mCurrentAnimator.cancel();
-            mCurrentAnimator = setupOneHandedTransitionAnimator(
-                    OneHandedTransitionAnimator.ofBounds(leash, startBounds, endBounds));
+            animator.cancel();
+            mAnimatorMap.put(leash, setupOneHandedTransitionAnimator(
+                    OneHandedTransitionAnimator.ofBounds(leash, startBounds, endBounds)));
         }
-        return mCurrentAnimator;
+        return mAnimatorMap.get(leash);
+    }
+
+    HashMap<SurfaceControl, OneHandedTransitionAnimator> getAnimatorMap() {
+        return mAnimatorMap;
+    }
+
+    boolean isAnimatorsConsumed() {
+        return mAnimatorMap.isEmpty();
+    }
+
+    void removeAnimator(SurfaceControl key) {
+        final OneHandedTransitionAnimator animator = mAnimatorMap.remove(key);
+        if (animator != null && animator.isRunning()) {
+            animator.cancel();
+        }
     }
 
     OneHandedTransitionAnimator setupOneHandedTransitionAnimator(
@@ -114,7 +119,6 @@ public class OneHandedAnimationController {
             ValueAnimator.AnimatorListener {
 
         private final SurfaceControl mLeash;
-        private final @AnimationType int mAnimationType;
         private T mStartValue;
         private T mEndValue;
         private T mCurrentValue;
@@ -127,10 +131,8 @@ public class OneHandedAnimationController {
         private @TransitionDirection int mTransitionDirection;
         private int mTransitionOffset;
 
-        private OneHandedTransitionAnimator(SurfaceControl leash, @AnimationType int animationType,
-                T startValue, T endValue) {
+        private OneHandedTransitionAnimator(SurfaceControl leash, T startValue, T endValue) {
             mLeash = leash;
-            mAnimationType = animationType;
             mStartValue = startValue;
             mEndValue = endValue;
             addListener(this);
@@ -150,8 +152,10 @@ public class OneHandedAnimationController {
         @Override
         public void onAnimationEnd(Animator animation) {
             mCurrentValue = mEndValue;
+            final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
+            onEndTransaction(mLeash, tx);
             if (mOneHandedAnimationCallback != null) {
-                mOneHandedAnimationCallback.onOneHandedAnimationEnd(this);
+                mOneHandedAnimationCallback.onOneHandedAnimationEnd(tx, this);
             }
         }
 
@@ -196,6 +200,10 @@ public class OneHandedAnimationController {
             return this;
         }
 
+        SurfaceControl getLeash() {
+            return mLeash;
+        }
+
         Rect getDestinationBounds() {
             return (Rect) mEndValue;
         }
@@ -227,11 +235,6 @@ public class OneHandedAnimationController {
             return mEndValue;
         }
 
-        @AnimationType
-        int getAnimationType() {
-            return mAnimationType;
-        }
-
         void setCurrentValue(T value) {
             mCurrentValue = value;
         }
@@ -250,11 +253,9 @@ public class OneHandedAnimationController {
         @VisibleForTesting
         static OneHandedTransitionAnimator<Rect> ofBounds(SurfaceControl leash,
                 Rect startValue, Rect endValue) {
-            // At R, we only support translate type first.
-            final int animType = ANIM_TYPE_TRANSLATE;
 
-            return new OneHandedTransitionAnimator<Rect>(leash, animType,
-                    new Rect(startValue), new Rect(endValue)) {
+            return new OneHandedTransitionAnimator<Rect>(leash, new Rect(startValue),
+                    new Rect(endValue)) {
 
                 private final Rect mTmpRect = new Rect();
 
@@ -282,7 +283,7 @@ public class OneHandedAnimationController {
                 void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
                     getSurfaceTransactionHelper()
                             .alpha(tx, leash, 1f)
-                            .crop(tx, leash, getStartValue())
+                            .translate(tx, leash, getEndValue().top - getStartValue().top)
                             .round(tx, leash);
                     tx.apply();
                 }

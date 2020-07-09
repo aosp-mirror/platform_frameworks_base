@@ -16,7 +16,7 @@
 
 package com.android.systemui.onehanded;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
@@ -57,7 +57,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testGetAnimator_withSameBounds_returnTranslateAnimator() {
+    public void testGetAnimator_withSameBounds_returnAnimator() {
         final Rect originalBounds = new Rect(0, 0, TEST_BOUNDS_WIDTH, TEST_BOUNDS_HEIGHT);
         final Rect destinationBounds = originalBounds;
         destinationBounds.offset(0, 300);
@@ -65,7 +65,6 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
                 mOneHandedAnimationController
                         .getAnimator(mMockLeash, originalBounds, destinationBounds);
 
-        assertEquals("Expected translate animation",
-                OneHandedAnimationController.ANIM_TYPE_TRANSLATE, animator.getAnimationType());
+        assertNotNull(animator);
     }
 }

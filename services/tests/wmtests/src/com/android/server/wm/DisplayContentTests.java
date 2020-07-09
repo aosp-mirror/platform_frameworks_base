@@ -96,13 +96,10 @@ import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.Gravity;
-import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
-import android.view.InsetsSourceControl;
-import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
@@ -970,28 +967,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
     }
 
-    private IDisplayWindowInsetsController createDisplayWindowInsetsController() {
-        return new IDisplayWindowInsetsController.Stub() {
-
-            @Override
-            public void insetsChanged(InsetsState insetsState) throws RemoteException {
-            }
-
-            @Override
-            public void insetsControlChanged(InsetsState insetsState,
-                    InsetsSourceControl[] insetsSourceControls) throws RemoteException {
-            }
-
-            @Override
-            public void showInsets(int i, boolean b) throws RemoteException {
-            }
-
-            @Override
-            public void hideInsets(int i, boolean b) throws RemoteException {
-            }
-        };
-    }
-
     @Test
     public void testUpdateSystemGestureExclusion() throws Exception {
         final DisplayContent dc = createNewDisplay();
@@ -1487,7 +1462,6 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testEnsureActivitiesVisibleNotRecursive() {
         final TaskDisplayArea mockTda = mock(TaskDisplayArea.class);
-        doReturn(mockTda).when(mDisplayContent).getTaskDisplayAreaAt(anyInt());
         final boolean[] called = { false };
         doAnswer(invocation -> {
             // The assertion will fail if DisplayArea#ensureActivitiesVisible is called twice.

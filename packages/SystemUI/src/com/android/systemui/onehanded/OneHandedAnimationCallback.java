@@ -16,6 +16,8 @@
 
 package com.android.systemui.onehanded;
 
+import android.view.SurfaceControl;
+
 /**
  * Additional callback interface for OneHanded animation
  */
@@ -30,7 +32,7 @@ public interface OneHandedAnimationCallback {
     /**
      * Called when OneHanded animation is ended.
      */
-    default void onOneHandedAnimationEnd(
+    default void onOneHandedAnimationEnd(SurfaceControl.Transaction tx,
             OneHandedAnimationController.OneHandedTransitionAnimator animator) {
     }
 

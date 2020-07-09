@@ -768,7 +768,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                             serverCallback.sendResult(null /* data */);
                         }
                     }
-                });
+                }, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

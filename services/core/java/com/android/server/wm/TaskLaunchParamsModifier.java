@@ -741,9 +741,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private void adjustBoundsToAvoidConflictInDisplay(@NonNull DisplayContent display,
             @NonNull Rect inOutBounds) {
         final List<Rect> taskBoundsToCheck = new ArrayList<>();
-        int numTaskContainers = display.getTaskDisplayAreaCount();
-        for (int tdaNdx = 0; tdaNdx < numTaskContainers; tdaNdx++) {
-            final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
+        display.forAllTaskDisplayAreas(taskDisplayArea -> {
             int numStacks = taskDisplayArea.getStackCount();
             for (int sNdx = 0; sNdx < numStacks; ++sNdx) {
                 final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
@@ -755,7 +753,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     taskBoundsToCheck.add(stack.getChildAt(j).getBounds());
                 }
             }
-        }
+        }, false /* traverseTopToBottom */);
         adjustBoundsToAvoidConflict(display.getBounds(), taskBoundsToCheck, inOutBounds);
     }
 

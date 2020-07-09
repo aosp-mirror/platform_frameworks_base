@@ -40,6 +40,7 @@ import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static com.android.server.wm.KeyguardOccludedProto.DISPLAY_ID;
 import static com.android.server.wm.KeyguardOccludedProto.KEYGUARD_OCCLUDED;
 
+import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -514,9 +515,9 @@ class KeyguardController {
          * Only the top non-pinned activity of the focusable stack on each display can control its
          * occlusion state.
          */
+        @Nullable
         private ActivityStack getStackForControllingOccluding(DisplayContent display) {
-            for (int tdaNdx = display.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
-                final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
+            return display.getItemFromTaskDisplayAreas(taskDisplayArea -> {
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                     final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
                     if (stack != null && stack.isFocusableAndVisible()
@@ -524,8 +525,8 @@ class KeyguardController {
                         return stack;
                     }
                 }
-            }
-            return null;
+                return null;
+            });
         }
 
         void dumpStatus(PrintWriter pw, String prefix) {

@@ -24,7 +24,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
@@ -36,6 +35,7 @@ import android.view.ViewStub;
 import android.widget.FrameLayout;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
+import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -288,7 +288,8 @@ public class KeyguardUserSwitcher {
             if (item.picture == null) {
                 v.bind(name, getDrawable(mContext, item).mutate(), item.resolveId());
             } else {
-                Drawable drawable = new BitmapDrawable(v.getResources(), item.picture);
+                int avatarSize = (int) v.getResources().getDimension(R.dimen.kg_framed_avatar_size);
+                Drawable drawable = new CircleFramedDrawable(item.picture, avatarSize);
                 drawable.setColorFilter(
                         item.isSwitchToEnabled ? null : getDisabledUserAvatarColorFilter());
                 v.bind(name, drawable, item.info.id);

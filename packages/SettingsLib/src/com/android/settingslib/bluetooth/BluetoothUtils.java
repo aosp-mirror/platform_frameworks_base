@@ -1,6 +1,6 @@
 package com.android.settingslib.bluetooth;
 
-import static com.android.settingslib.widget.AdaptiveOutlineDrawable.AdaptiveOutlineIconType.TYPE_ADVANCED;
+import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -238,7 +238,7 @@ public class BluetoothUtils {
             final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
                     iconSize, false);
             bitmap.recycle();
-            return new AdaptiveOutlineDrawable(resources, resizedBitmap, TYPE_ADVANCED);
+            return new AdaptiveOutlineDrawable(resources, resizedBitmap, ICON_TYPE_ADVANCED);
         }
 
         return drawable;

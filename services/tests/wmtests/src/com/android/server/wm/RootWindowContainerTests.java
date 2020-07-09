@@ -148,7 +148,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
-        TaskDisplayArea taskDisplayArea = displayContent.getTaskDisplayAreaAt(0);
+        TaskDisplayArea taskDisplayArea = displayContent.getDefaultTaskDisplayArea();
         ActivityStack stack = taskDisplayArea.getStackAt(0);
         ActivityRecord activity = createActivityRecord(displayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);

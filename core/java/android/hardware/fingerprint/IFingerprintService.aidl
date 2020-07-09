@@ -94,7 +94,7 @@ interface IFingerprintService {
     void resetLockout(int userId, in byte [] hardwareAuthToken);
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
-    void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
+    void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback, String opPackageName);
 
     // Check if a client request is currently being handled
     boolean isClientActive();

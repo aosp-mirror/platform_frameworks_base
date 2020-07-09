@@ -200,7 +200,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         ai.packageName = "com.android.test.package";
         final WindowProcessController wpc =
                 containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new WindowProcessController(service, ai, null, 0, -1, null, listener);
+                        ? null
+                        : new WindowProcessController(service, ai, null, 0, -1, null, listener);
         doReturn(wpc).when(service).getProcessController(any());
 
         final Intent intent = new Intent();
@@ -211,7 +212,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         IVoiceInteractionSession voiceSession =
                 containsConditions(preconditions, PRECONDITION_SOURCE_VOICE_SESSION)
-                ? mock(IVoiceInteractionSession.class) : null;
+                        ? mock(IVoiceInteractionSession.class) : null;
 
         // Create source token
         final ActivityBuilder builder = new ActivityBuilder(service).setTask(
@@ -489,13 +490,12 @@ public class ActivityStarterTests extends ActivityTestsBase {
     }
 
     private void assertNoTasks(DisplayContent display) {
-        for (int tdaNdx = display.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
-            final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
+        display.forAllTaskDisplayAreas(taskDisplayArea -> {
             for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                 final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
                 assertFalse(stack.hasChild());
             }
-        }
+        });
     }
 
     /**

@@ -326,9 +326,9 @@ public class EditorTouchStateTest {
         mTouchState.update(event1, mConfig);
         assertSingleTap(mTouchState, 0f, 0f, 0, 0);
 
-        // Simulate an ACTION_MOVE event that is > 30 deg from vertical.
+        // Simulate an ACTION_MOVE event that is > 45 deg from vertical.
         long event2Time = 1002;
-        MotionEvent event2 = moveEvent(event1Time, event2Time, 100f, 173f);
+        MotionEvent event2 = moveEvent(event1Time, event2Time, 100f, 90f);
         mTouchState.update(event2, mConfig);
         assertDrag(mTouchState, 0f, 0f, 0, 0, false);
 

@@ -143,7 +143,7 @@ public class EditorCursorDragTest {
         // Swipe along a diagonal path. This should drag the cursor. Because we snap the finger to
         // the handle as the touch moves downwards (and because we have some slop to avoid jumping
         // across lines), the cursor position will end up higher than the finger position.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("1")));
 
         // Swipe right-down along a very steep diagonal path. This should not drag the cursor.
@@ -179,7 +179,7 @@ public class EditorCursorDragTest {
         // Swipe along a diagonal path. This should drag the cursor. Because we snap the finger to
         // the handle as the touch moves downwards (and because we have some slop to avoid jumping
         // across lines), the cursor position will end up higher than the finger position.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("1")));
 
         // Swipe right-down along a very steep diagonal path. This should not drag the cursor.

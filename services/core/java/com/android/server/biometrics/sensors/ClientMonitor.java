@@ -47,11 +47,23 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
          * implementation.
          *
          * @param clientMonitor Reference of the ClientMonitor that finished.
+         * @param success True if the operation completed successfully.
          */
-        void onClientFinished(ClientMonitor clientMonitor);
+        void onClientFinished(ClientMonitor clientMonitor, boolean success);
+    }
+
+    /**
+     * Interface that allows ClientMonitor subclasses to retrieve a fresh instance to the HAL.
+     */
+    public interface LazyDaemon<T> {
+        /**
+         * @return A fresh instance to the biometric HAL
+         */
+        T getDaemon();
     }
 
     @NonNull private final Context mContext;
+    @NonNull protected final LazyDaemon<T> mLazyDaemon;
     private final int mTargetUserId;
     @NonNull private final String mOwner;
     private final int mSensorId; // sensorId as configured by the framework
@@ -63,11 +75,11 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     private final int mCookie;
     boolean mAlreadyDone;
 
-    @NonNull protected T mDaemon;
     @NonNull protected FinishCallback mFinishCallback;
 
     /**
      * @param context    system_server context
+     * @param lazyDaemon pointer for lazy retrieval of the HAL
      * @param token      a unique token for the client
      * @param listener   recipient of related events (e.g. authentication)
      * @param userId     target user id for operation
@@ -78,12 +90,13 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
-    public ClientMonitor(@NonNull Context context, @Nullable IBinder token,
-            @Nullable ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
-            int cookie, int sensorId, int statsModality, int statsAction,
+    public ClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
+            @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {
         super(statsModality, statsAction, statsClient);
         mContext = context;
+        mLazyDaemon = lazyDaemon;
         mToken = token;
         mListener = listener;
         mTargetUserId = userId;
@@ -107,18 +120,16 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     /**
      * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
      * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(Object, FinishCallback)}.
+     * {@link #start(FinishCallback)}.
      */
     public abstract void unableToStart();
 
     /**
      * Starts the ClientMonitor's lifecycle. Invokes {@link #startHalOperation()} when internal book
      * keeping is complete.
-     * @param daemon reference to the HAL
      * @param finishCallback invoked when the operation is complete (succeeds, fails, etc)
      */
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        mDaemon = daemon;
+    public void start(@NonNull FinishCallback finishCallback) {
         mFinishCallback = finishCallback;
     }
 
@@ -126,11 +137,6 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      * Starts the HAL operation specific to the ClientMonitor subclass.
      */
     protected abstract void startHalOperation();
-
-    /**
-     * Stops the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void stopHalOperation();
 
     public boolean isAlreadyDone() {
         return mAlreadyDone;
@@ -189,5 +195,9 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
 
     public final int getSensorId() {
         return mSensorId;
+    }
+
+    public final T getFreshDaemon() {
+        return mLazyDaemon.getDaemon();
     }
 }

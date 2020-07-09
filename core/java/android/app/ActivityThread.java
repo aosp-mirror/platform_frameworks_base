@@ -86,6 +86,8 @@ import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
 import android.hardware.display.DisplayManagerGlobal;
 import android.inputmethodservice.InputMethodService;
+import android.media.MediaFrameworkInitializer;
+import android.media.MediaServiceManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
@@ -7665,6 +7667,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static void initializeMainlineModules() {
         TelephonyFrameworkInitializer.setTelephonyServiceManager(new TelephonyServiceManager());
         StatsFrameworkInitializer.setStatsServiceManager(new StatsServiceManager());
+        MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
     }
 
     private void purgePendingResources() {

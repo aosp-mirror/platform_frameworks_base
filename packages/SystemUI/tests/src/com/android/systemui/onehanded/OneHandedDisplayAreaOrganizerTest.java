@@ -29,11 +29,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.DisplayInfo;
+import android.view.Display;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.IWindowContainerToken;
@@ -58,7 +58,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     static final int DISPLAY_HEIGHT = 1000;
 
     DisplayAreaInfo mDisplayAreaInfo;
-    DisplayInfo mDisplayInfo;
+    Display mDisplay;
     Handler mUpdateHandler;
     OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     OneHandedAnimationController.OneHandedTransitionAnimator mFakeAnimator;
@@ -80,20 +80,13 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext,
-                mMockDisplayController,
-                mMockAnimationController,
-                mMockSurfaceTransactionHelper);
-        mUpdateHandler = Mockito.spy(mDisplayAreaOrganizer.getUpdateHandler());
         mToken = new WindowContainerToken(mMockRealToken);
         mLeash = new SurfaceControl();
+        mDisplay = mContext.getDisplay();
         mDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY, FEATURE_ONE_HANDED);
         mDisplayAreaInfo.configuration.orientation = Configuration.ORIENTATION_PORTRAIT;
-        mDisplayInfo = new DisplayInfo();
-        mDisplayInfo.logicalWidth = DISPLAY_WIDTH;
-        mDisplayInfo.logicalHeight = DISPLAY_HEIGHT;
-
         when(mMockAnimationController.getAnimator(any(), any(), any())).thenReturn(null);
+        when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockSurfaceTransactionHelper.translate(any(), any(), anyFloat())).thenReturn(
                 mMockSurfaceTransactionHelper);
         when(mMockSurfaceTransactionHelper.crop(any(), any(), any())).thenReturn(
@@ -106,8 +99,11 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         when(mMockAnimator.setTransitionDirection(anyInt())).thenReturn(mFakeAnimator);
         when(mMockLeash.getWidth()).thenReturn(DISPLAY_WIDTH);
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
-        when(mMockDisplayController.getDisplay(anyInt())).thenReturn(null);
 
+        mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext,
+                mMockDisplayController,
+                mMockAnimationController);
+        mUpdateHandler = Mockito.spy(mDisplayAreaOrganizer.getUpdateHandler());
     }
 
     @Test
@@ -135,7 +131,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
         mDisplayAreaOrganizer.onDisplayAreaInfoChanged(newDisplayAreaInfo);
 
-        assertThat(mDisplayAreaOrganizer.mDisplayAreaInfo).isEqualTo(newDisplayAreaInfo);
+        assertThat(mDisplayAreaOrganizer.mDisplayAreaMap.containsKey(mDisplayAreaInfo)).isTrue();
     }
 
     @Test
@@ -154,13 +150,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     public void testResetImmediately() {
         // To prevent mNativeObject of Surface is null in the test flow
         when(mMockLeash.isValid()).thenReturn(false);
-        final Rect newBounds = new Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        final DisplayAreaInfo newDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY,
-                FEATURE_ONE_HANDED);
-        newDisplayAreaInfo.configuration.orientation = Configuration.ORIENTATION_LANDSCAPE;
-
-        mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mMockLeash);
-        mDisplayAreaOrganizer.onDisplayAreaInfoChanged(newDisplayAreaInfo);
+        mDisplayAreaOrganizer.onRotateDisplay(mContext.getResources(), Surface.ROTATION_90);
 
         assertThat(mUpdateHandler.hasMessages(
                 OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isNotNull();

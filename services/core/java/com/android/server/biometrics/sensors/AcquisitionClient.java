@@ -47,12 +47,17 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
 
-    AcquisitionClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
+    /**
+     * Stops the HAL operation specific to the ClientMonitor subclass.
+     */
+    protected abstract void stopHalOperation();
+
+    AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality,
             int statsAction, int statsClient) {
-        super(context, token, listener, userId, owner, cookie, sensorId, statsModality, statsAction,
-                statsClient);
+        super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId, statsModality,
+                statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
@@ -78,7 +83,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
-        mFinishCallback.onClientFinished(this);
+        mFinishCallback.onClientFinished(this, false /* success */);
     }
 
     /**
@@ -110,7 +115,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendAcquired", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 

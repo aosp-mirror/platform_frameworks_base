@@ -436,18 +436,6 @@ class DisplayAreaPolicyBuilder {
             }
             return new ArrayList<>();
         }
-
-        @Override
-        public int getTaskDisplayAreaCount() {
-            // TODO(b/157683117): Also add TDA from sub root.
-            return mRoot.mTaskDisplayAreas.size();
-        }
-
-        @Override
-        public TaskDisplayArea getTaskDisplayAreaAt(int index) {
-            // TODO(b/157683117): Get TDA from root/sub root based on their z-order.
-            return mRoot.mTaskDisplayAreas.get(index);
-        }
     }
 
     static class PendingArea {

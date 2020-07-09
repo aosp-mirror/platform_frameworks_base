@@ -610,7 +610,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                                     serverCallback.sendResult(null /* data */);
                                 }
                             }
-                        });
+                        }, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
