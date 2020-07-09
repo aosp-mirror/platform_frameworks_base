@@ -120,6 +120,11 @@ public abstract class InputMethodManagerInternal {
     public abstract void reportImeControl(@Nullable IBinder windowToken);
 
     /**
+     * Destroys the IME surface.
+     */
+    public abstract void removeImeSurface();
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -165,6 +170,10 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void reportImeControl(@Nullable IBinder windowToken) {
+                }
+
+                @Override
+                public void removeImeSurface() {
                 }
             };
 

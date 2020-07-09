@@ -44,6 +44,7 @@ import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowManager;
 
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -74,7 +75,21 @@ class InsetsStateController {
             w.notifyInsetsChanged();
         }
     };
-    private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() { };
+    private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() {
+        @Override
+        public void notifyInsetsControlChanged() {
+            InsetsSourceControl[] controls = getControlsForDispatch(this);
+            if (controls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : controls) {
+                if (control.getType() == ITYPE_IME) {
+                    mDisplayContent.mWmService.mH.post(() ->
+                            InputMethodManagerInternal.get().removeImeSurface());
+                }
+            }
+        }
+    };
 
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
