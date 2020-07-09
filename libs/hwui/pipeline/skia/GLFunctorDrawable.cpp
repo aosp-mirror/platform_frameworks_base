@@ -48,29 +48,20 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
     glScissor(clip.fLeft, y, clip.width(), height);
 }
 
-static bool GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
+static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
     GrRenderTargetContext* renderTargetContext =
             canvas->internal_private_accessTopLayerRenderTargetContext();
-    if (!renderTargetContext) {
-        ALOGW("Unable to extract renderTarget info from canvas; aborting GLFunctor draw");
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!renderTargetContext, "Failed to retrieve GrRenderTargetContext");
 
     GrRenderTarget* renderTarget = renderTargetContext->accessRenderTarget();
-    if (!renderTarget) {
-        ALOGW("Unable to extract renderTarget info from canvas; aborting GLFunctor draw");
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!renderTarget, "accessRenderTarget failed");
 
     GrGLFramebufferInfo fboInfo;
-    if (!renderTarget->getBackendRenderTarget().getGLFramebufferInfo(&fboInfo)) {
-        ALOGW("Unable to extract renderTarget info from canvas; aborting GLFunctor draw");
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!renderTarget->getBackendRenderTarget().getGLFramebufferInfo(&fboInfo),
+        "getGLFrameBufferInfo failed");
 
     *outFboID = fboInfo.fFBOID;
     *outFboSize = SkISize::Make(renderTargetContext->width(), renderTargetContext->height());
-    return true;
 }
 
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
@@ -85,11 +76,12 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         return;
     }
 
+    // flush will create a GrRenderTarget if not already present.
+    canvas->flush();
+
     GLuint fboID = 0;
     SkISize fboSize;
-    if (!GetFboDetails(canvas, &fboID, &fboSize)) {
-        return;
-    }
+    GetFboDetails(canvas, &fboID, &fboSize);
 
     SkIRect surfaceBounds = canvas->internal_private_getTopLayerBounds();
     SkIRect clipBounds = canvas->getDeviceClipBounds();
@@ -143,7 +135,6 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     // ensure that the framebuffer that the webview will render into is bound before we clear
     // the stencil and/or draw the functor.
-    canvas->flush();
     glViewport(0, 0, info.width, info.height);
     glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 
