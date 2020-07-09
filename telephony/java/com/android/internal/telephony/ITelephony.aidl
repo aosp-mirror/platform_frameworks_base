@@ -943,6 +943,35 @@ interface ITelephony {
     boolean setAllowedNetworkTypes(int subId, long allowedNetworkTypes);
 
     /**
+     * Get the allowed network types for certain reason.
+     *
+     * @param subId the id of the subscription.
+     * @param reason the reason the allowed network type change is taking place
+     * @return allowedNetworkTypes the allowed network types.
+     */
+    long getAllowedNetworkTypesForReason(int subId, int reason);
+
+    /**
+     * Get the effective allowed network types on the device. This API will
+     * return an intersection of allowed network types for all reasons,
+     * including the configuration done through setAllowedNetworkTypes
+     *
+     * @param subId the id of the subscription.
+     * @return allowedNetworkTypes the allowed network types.
+     */
+     long getEffectiveAllowedNetworkTypes(int subId);
+
+    /**
+     * Set the allowed network types and provide the reason triggering the allowed network change.
+     *
+     * @param subId the id of the subscription.
+     * @param reason the reason the allowed network type change is taking place
+     * @param allowedNetworkTypes the allowed network types.
+     * @return true on success; false on any failure.
+     */
+    boolean setAllowedNetworkTypesForReason(int subId, int reason, long allowedNetworkTypes);
+
+    /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
