@@ -21,12 +21,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.android.ddmlib.Log;
+import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.ProcessInfo;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,7 +37,9 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
     private static final String TAG = StagedInstallInternalTest.class.getSimpleName();
     private static final long SYSTEM_SERVER_TIMEOUT_MS = 60 * 1000;
-    private boolean mWasRoot = false;
+
+    @Rule
+    public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
 
     /**
      * Runs the given phase of a test by calling into the device.
@@ -62,21 +66,11 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
     @Before
     public void setUp() throws Exception {
-        mWasRoot = getDevice().isAdbRoot();
-        if (!mWasRoot) {
-            getDevice().enableAdbRoot();
-        }
         cleanUp();
-        // Abandon all staged sessions
-        getDevice().executeShellCommand("pm install-abandon $(pm get-stagedsessions --only-ready "
-                + "--only-parent --only-sessionid)");
     }
 
     @After
     public void tearDown() throws Exception {
-        if (!mWasRoot) {
-            getDevice().disableAdbRoot();
-        }
         cleanUp();
     }
 
@@ -90,7 +84,10 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     private void restartSystemServer() throws Exception {
         // Restart the system server
         long oldStartTime = getDevice().getProcessByName("system_server").getStartTime();
+
+        getDevice().enableAdbRoot(); // Need root to restart system server
         assertThat(getDevice().executeShellCommand("am restart")).contains("Restart the system");
+        getDevice().disableAdbRoot();
 
         // Wait for new system server process to start
         long start = System.currentTimeMillis();
