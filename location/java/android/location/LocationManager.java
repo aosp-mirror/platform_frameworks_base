@@ -1855,7 +1855,8 @@ public class LocationManager {
                     "GpsStatus APIs not supported, please use GnssStatus APIs instead");
         }
 
-        getGnssStatusTransportMultiplexer().addListener(listener, DIRECT_EXECUTOR);
+        getGnssStatusTransportMultiplexer().addListener(listener,
+                new HandlerExecutor(new Handler()));
         return true;
     }
 
@@ -1974,7 +1975,7 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addNmeaListener(@NonNull OnNmeaMessageListener listener) {
-        return addNmeaListener(DIRECT_EXECUTOR, listener);
+        return addNmeaListener(listener, null);
     }
 
     /**
