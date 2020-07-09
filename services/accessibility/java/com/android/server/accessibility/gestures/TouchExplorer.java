@@ -809,6 +809,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
                 // Announce the end of a the touch interaction.
                 mAms.onTouchInteractionEnd();
+                mDispatcher.clear();
                 mDispatcher.sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
 
             } break;

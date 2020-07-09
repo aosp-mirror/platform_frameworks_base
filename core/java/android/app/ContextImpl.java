@@ -1900,24 +1900,29 @@ class ContextImpl extends Context {
 
     @Override
     public Object getSystemService(String name) {
-        // We may override this API from outer context.
-        final boolean isUiContext = isUiContext() || getOuterContext().isUiContext();
-        // Check incorrect Context usage.
-        if (isUiComponent(name) && !isUiContext && vmIncorrectContextUseEnabled()) {
-            final String errorMessage = "Tried to access visual service "
-                    + SystemServiceRegistry.getSystemServiceClassName(name)
-                    + " from a non-visual Context:" + getOuterContext();
-            final String message = "Visual services, such as WindowManager, WallpaperService or "
-                    + "LayoutInflater should be accessed from Activity or other visual Context. "
-                    + "Use an Activity or a Context created with "
-                    + "Context#createWindowContext(int, Bundle), which are adjusted to the "
-                    + "configuration and visual bounds of an area on screen.";
-            final Exception exception = new IllegalAccessException(errorMessage);
-            StrictMode.onIncorrectContextUsed(message, exception);
-            Log.e(TAG, errorMessage + message, exception);
+        if (vmIncorrectContextUseEnabled()) {
+            // We may override this API from outer context.
+            final boolean isUiContext = isUiContext() || isOuterUiContext();
+            // Check incorrect Context usage.
+            if (isUiComponent(name) && !isUiContext) {
+                final String errorMessage = "Tried to access visual service "
+                        + SystemServiceRegistry.getSystemServiceClassName(name)
+                        + " from a non-visual Context:" + getOuterContext();
+                final String message = "Visual services, such as WindowManager, WallpaperService "
+                        + "or LayoutInflater should be accessed from Activity or other visual "
+                        + "Context. Use an Activity or a Context created with "
+                        + "Context#createWindowContext(int, Bundle), which are adjusted to "
+                        + "the configuration and visual bounds of an area on screen.";
+                final Exception exception = new IllegalAccessException(errorMessage);
+                StrictMode.onIncorrectContextUsed(message, exception);
+                Log.e(TAG, errorMessage + " " + message, exception);
+            }
         }
-
         return SystemServiceRegistry.getSystemService(this, name);
+    }
+
+    private boolean isOuterUiContext() {
+        return getOuterContext() != null && getOuterContext().isUiContext();
     }
 
     @Override
@@ -2371,7 +2376,7 @@ class ContextImpl extends Context {
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
                 mResources.getLoaders()));
-        context.mIsUiContext = isUiContext() || getOuterContext().isUiContext();
+        context.mIsUiContext = isUiContext() || isOuterUiContext();
         return context;
     }
 
