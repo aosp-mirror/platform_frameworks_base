@@ -226,6 +226,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             if (!activeControl.getSurfacePosition().equals(lastSurfacePosition)
                                     && mAnimation != null) {
                                 startAnimation(mImeShowing, true /* forceRestart */);
+                            } else if (!mImeShowing) {
+                                removeImeSurface();
                             }
                         });
                     }
@@ -375,16 +377,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
                         t.hide(mImeSourceControl.getLeash());
-                        final IInputMethodManager imms = getImms();
-                        if (imms != null) {
-                            try {
-                                // Remove the IME surface to make the insets invisible for
-                                // non-client controlled insets.
-                                imms.removeImeSurface();
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Failed to remove IME surface.", e);
-                            }
-                        }
+                        removeImeSurface();
                     }
                     t.apply();
                     mTransactionPool.release(t);
@@ -403,6 +396,19 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // When showing away, queue up insets change last, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(true /* visible */);
+            }
+        }
+    }
+
+    void removeImeSurface() {
+        final IInputMethodManager imms = getImms();
+        if (imms != null) {
+            try {
+                // Remove the IME surface to make the insets invisible for
+                // non-client controlled insets.
+                imms.removeImeSurface();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to remove IME surface.", e);
             }
         }
     }

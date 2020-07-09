@@ -895,6 +895,26 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testComputeImeControlTarget_exitingApp() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+
+        WindowState exitingWin = createWindow(null, TYPE_BASE_APPLICATION, "exiting app");
+        makeWindowVisible(exitingWin);
+        exitingWin.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        exitingWin.mAnimatingExit = true;
+
+        dc.mInputMethodControlTarget = exitingWin;
+        dc.mInputMethodTarget = dc.mInputMethodInputTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, "starting app");
+
+        assertEquals(exitingWin, dc.computeImeControlTarget());
+
+        exitingWin.removeImmediately();
+
+        assertEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget());
+    }
+
+    @Test
     public void testComputeImeControlTarget_splitscreen() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.mInputMethodInputTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
