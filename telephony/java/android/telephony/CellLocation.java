@@ -16,7 +16,9 @@
 
 package android.telephony;
 
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.cdma.CdmaCellLocation;
@@ -31,11 +33,25 @@ import com.android.internal.telephony.PhoneConstants;
 public abstract class CellLocation {
 
     /**
-     * Request an update of the current location.  If the location has changed,
-     * a broadcast will be sent to everyone registered with {@link
-     * PhoneStateListener#LISTEN_CELL_LOCATION}.
+     * This method will not do anything.
+     *
+     * Whenever location changes, a callback will automatically be be sent to
+     * all registrants of {@link PhoneStateListener#LISTEN_CELL_LOCATION}.
+     *
+     * <p>This method is a no-op for callers targeting SDK level 31 or greater.
+     * <p>This method is a no-op for callers that target SDK level 29 or 30 and lack
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     * <p>This method is a no-op for callers that target SDK level 28 or below and lack
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
+     * Callers wishing to request a single location update should use
+     * {@link TelephonyManager#requestCellInfoUpdate}.
      */
     public static void requestLocationUpdate() {
+        // Since this object doesn't have a context, this is the best we can do.
+        final Context appContext = ActivityThread.currentApplication();
+        if (appContext == null) return; // should never happen
+
         try {
             ITelephony phone = ITelephony.Stub.asInterface(
                     TelephonyFrameworkInitializer
@@ -43,7 +59,7 @@ public abstract class CellLocation {
                             .getTelephonyServiceRegisterer()
                             .get());
             if (phone != null) {
-                phone.updateServiceLocation();
+                phone.updateServiceLocationWithPackageName(appContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
