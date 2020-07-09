@@ -15,24 +15,27 @@
  */
 package com.android.server.timezonedetector;
 
-import java.io.PrintWriter;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.IndentingPrintWriter;
 
 /** An interface for components that can write their internal state to dumpsys logs. */
 public interface Dumpable {
 
     /** Dump internal state. */
-    void dump(PrintWriter pw, String[] args);
+    void dump(@NonNull IndentingPrintWriter pw, @Nullable String[] args);
 
     /**
      * An interface that can be used expose when one component allows another to be registered so
      * that it is dumped at the same time.
      */
-    interface Dumpee {
+    interface Container {
 
         /**
          * Registers the supplied {@link Dumpable}. When the implementation is dumped
-         * {@link Dumpable#dump(PrintWriter, String[])} should be called on the {@code dumpable}.
+         * {@link Dumpable#dump(IndentingPrintWriter, String[])} should be called on the
+         * {@code dumpable}.
          */
-        void addDumpable(Dumpable dumpable);
+        void addDumpable(@NonNull Dumpable dumpable);
     }
 }

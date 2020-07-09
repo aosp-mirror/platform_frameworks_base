@@ -19,8 +19,7 @@ package com.android.server.timezonedetector;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-
-import com.android.internal.util.IndentingPrintWriter;
+import android.util.IndentingPrintWriter;
 
 import java.util.ArrayDeque;
 

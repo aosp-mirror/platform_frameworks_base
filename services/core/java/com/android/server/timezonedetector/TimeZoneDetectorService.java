@@ -36,6 +36,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -118,7 +119,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
                 new ContentObserver(handler) {
                     public void onChange(boolean selfChange) {
-                        service.handleAutoTimeZoneDetectionChanged();
+                        service.handleAutoTimeZoneConfigChanged();
                     }
                 });
         return service;
@@ -272,12 +273,14 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        mTimeZoneDetectorStrategy.dump(pw, args);
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+        mTimeZoneDetectorStrategy.dump(ipw, args);
+        ipw.flush();
     }
 
     /** Internal method for handling the auto time zone configuration being changed. */
     @VisibleForTesting
-    public void handleAutoTimeZoneDetectionChanged() {
+    public void handleAutoTimeZoneConfigChanged() {
         mHandler.post(mTimeZoneDetectorStrategy::handleAutoTimeZoneConfigChanged);
     }
 
