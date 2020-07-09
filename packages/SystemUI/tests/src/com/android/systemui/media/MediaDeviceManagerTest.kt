@@ -166,7 +166,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the listener for the old key should removed.
         verify(lmm).unregisterCallback(any())
         // AND a new device event emitted
-        val data = captureDeviceData(KEY, KEY_OLD)
+        val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
     }
@@ -179,14 +179,13 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // WHEN the new key is the same as the old key
         manager.onMediaDataLoaded(KEY, KEY, mediaData)
         // THEN no event should be emitted
-        verify(listener, never()).onMediaDeviceChanged(eq(KEY), eq(null), any())
+        verify(listener, never()).onMediaDeviceChanged(eq(KEY), any())
     }
 
     @Test
     fun unknownOldKey() {
-        val oldKey = "unknown"
-        manager.onMediaDataLoaded(KEY, oldKey, mediaData)
-        verify(listener).onMediaDeviceChanged(eq(KEY), eq(oldKey), any())
+        manager.onMediaDataLoaded(KEY, "unknown", mediaData)
+        verify(listener).onMediaDeviceChanged(eq(KEY), any())
     }
 
     @Test
@@ -224,7 +223,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.removeListener(listener)
         // THEN it doesn't receive device events
         manager.onMediaDataLoaded(KEY, null, mediaData)
-        verify(listener, never()).onMediaDeviceChanged(eq(KEY), eq(null), any())
+        verify(listener, never()).onMediaDeviceChanged(eq(KEY), any())
     }
 
     @Test
@@ -319,9 +318,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         return captor.getValue()
     }
 
-    fun captureDeviceData(key: String, oldKey: String? = null): MediaDeviceData {
+    fun captureDeviceData(key: String): MediaDeviceData {
         val captor = ArgumentCaptor.forClass(MediaDeviceData::class.java)
-        verify(listener).onMediaDeviceChanged(eq(key), eq(oldKey), captor.capture())
+        verify(listener).onMediaDeviceChanged(eq(key), captor.capture())
         return captor.getValue()
     }
 }
