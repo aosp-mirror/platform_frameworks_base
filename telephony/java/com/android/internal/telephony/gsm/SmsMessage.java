@@ -140,38 +140,6 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * TS 27.005 3.4.1 lines[0] and lines[1] are the two lines read from the
-     * +CMT unsolicited response (PDU mode, of course)
-     *  +CMT: [&lt;alpha>],<length><CR><LF><pdu>
-     *
-     * Only public for debugging
-     *
-     * {@hide}
-     */
-    public static SmsMessage newFromCMT(byte[] pdu) {
-        try {
-            SmsMessage msg = new SmsMessage();
-            msg.parsePdu(pdu);
-            return msg;
-        } catch (RuntimeException ex) {
-            Rlog.e(LOG_TAG, "SMS PDU parsing failed: ", ex);
-            return null;
-        }
-    }
-
-    /** @hide */
-    public static SmsMessage newFromCDS(byte[] pdu) {
-        try {
-            SmsMessage msg = new SmsMessage();
-            msg.parsePdu(pdu);
-            return msg;
-        } catch (RuntimeException ex) {
-            Rlog.e(LOG_TAG, "CDS SMS PDU parsing failed: ", ex);
-            return null;
-        }
-    }
-
-    /**
      * Creates an SmsMessage from an SMS EF record.
      *
      * @param index Index of SMS EF record.
