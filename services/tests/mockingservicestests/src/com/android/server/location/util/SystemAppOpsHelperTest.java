@@ -41,8 +41,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.Intent;
-import android.location.LocationManager;
 import android.location.util.identity.CallerIdentity;
 import android.platform.test.annotations.Presubmit;
 
@@ -52,7 +50,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
@@ -183,11 +180,6 @@ public class SystemAppOpsHelperTest {
                         eq(false), eq("myfeature"), nullable(String.class));
         assertThat(mHelper.startHighPowerLocationMonitoring(identity)).isTrue();
 
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).sendBroadcast(intentCaptor.capture());
-        assertThat(intentCaptor.getValue().getAction()).isEqualTo(
-                LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
-
         doReturn(MODE_IGNORED).when(
                 mAppOps).startOpNoThrow(eq(OP_MONITOR_HIGH_POWER_LOCATION), eq(1000),
                         eq("mypackage"),
@@ -209,11 +201,6 @@ public class SystemAppOpsHelperTest {
 
         mHelper.stopHighPowerLocationMonitoring(identity);
         verify(mAppOps).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, 1000, "mypackage", "myfeature");
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).sendBroadcast(intentCaptor.capture());
-        assertThat(intentCaptor.getValue().getAction()).isEqualTo(
-                LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
     }
 
     @Test
