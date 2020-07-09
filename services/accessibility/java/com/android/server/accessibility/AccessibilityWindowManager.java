@@ -747,6 +747,13 @@ public class AccessibilityWindowManager {
          * Dumps all {@link AccessibilityWindowInfo}s here.
          */
         void dumpLocked(FileDescriptor fd, final PrintWriter pw, String[] args) {
+            pw.append("Global Info [ ");
+            pw.println("Top focused display Id = " + mTopFocusedDisplayId);
+            pw.println("     Active Window Id = " + mActiveWindowId);
+            pw.println("     Top Focused Window Id = " + mTopFocusedWindowId);
+            pw.println("     Accessibility Focused Window Id = " + mAccessibilityFocusedWindowId
+                    + " ]");
+            pw.println();
             if (mWindows != null) {
                 final int windowCount = mWindows.size();
                 for (int j = 0; j < windowCount; j++) {
