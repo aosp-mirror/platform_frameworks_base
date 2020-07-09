@@ -4590,7 +4590,7 @@ message GeneralExternalStorageAccessStats {
     // Includes file path and ContentResolver accesses
     optional uint32 secondary_storage_accesses = 4;
     // Comma-separated list of mime types that were accessed.
-    optional MimeTypes mime_types_accessed = 5;
+    optional MimeTypes mime_types_accessed = 5 [(log_mode) = MODE_BYTES];
 }
 
 /**
@@ -6174,7 +6174,7 @@ message ProcessStatsAvailablePagesProto {
  * Pulled from ProcessStatsService.java
  */
 message ProcStats {
-    optional ProcessStatsSectionProto proc_stats_section = 1;
+    optional ProcessStatsSectionProto proc_stats_section = 1 [(log_mode) = MODE_BYTES];
     // Data pulled from device into this is sometimes sharded across multiple atoms to work around
     // a size limit. When this happens, this shard ID will contain an increasing 1-indexed integer
     // with the number of this shard.
@@ -6185,7 +6185,7 @@ message ProcStats {
  * Pulled from ProcessStatsService.java
  */
 message ProcStatsPkgProc {
-    optional ProcessStatsSectionProto proc_stats_section = 1;
+    optional ProcessStatsSectionProto proc_stats_section = 1 [(log_mode) = MODE_BYTES];
 }
 
 // Next Tag: 2
@@ -6203,7 +6203,7 @@ message NotificationRemoteViewsProto {
  * Pulled from NotificationManagerService.java
  */
 message NotificationRemoteViews {
-    optional NotificationRemoteViewsProto notification_remote_views = 1;
+    optional NotificationRemoteViewsProto notification_remote_views = 1 [(log_mode) = MODE_BYTES];
 }
 
 /**
@@ -6271,7 +6271,7 @@ message DNDModeProto {
     // May also be "MANUAL_RULE" to indicate app-activation of the manual rule.
     optional string id = 5;
     optional int32 uid = 6 [(is_uid) = true]; // currently only SYSTEM_UID or 0 for other
-    optional DNDPolicyProto policy = 7;
+    optional DNDPolicyProto policy = 7 [(log_mode) = MODE_BYTES];
 }
 
 /**
@@ -6436,7 +6436,7 @@ message PowerProfileProto {
  * Pulled from PowerProfile.java
  */
 message PowerProfile {
-    optional PowerProfileProto power_profile = 1;
+    optional PowerProfileProto power_profile = 1 [(log_mode) = MODE_BYTES];
 }
 
 /**
@@ -8131,7 +8131,7 @@ message DeviceIdentifierAccessDenied {
 message TrainInfo {
     optional int64 train_version_code = 1;
 
-    optional TrainExperimentIds train_experiment_id = 2;
+    optional TrainExperimentIds train_experiment_id = 2 [(log_mode) = MODE_BYTES];
 
     optional string train_name = 3;
 
@@ -11179,8 +11179,8 @@ message BlobInfo {
     optional int64 expiry_timestamp_millis = 3;
 
     // List of committers of this Blob
-    optional BlobCommitterListProto committers = 4;
+    optional BlobCommitterListProto committers = 4 [(log_mode) = MODE_BYTES];
 
     // List of leasees of this Blob
-    optional BlobLeaseeListProto leasees = 5;
+    optional BlobLeaseeListProto leasees = 5 [(log_mode) = MODE_BYTES];
 }
