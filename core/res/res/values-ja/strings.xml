@@ -1149,7 +1149,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"「%1$s」を使用して画像をキャプチャ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"画像をキャプチャ"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"常にこの操作で使用する"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"別のアプリの使用"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"別のアプリを使用"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]でデフォルト設定をクリアします。"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"操作の選択"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USBデバイス用アプリを選択"</string>

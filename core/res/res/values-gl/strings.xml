@@ -854,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emerxencia"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Bloqueada pola rede"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"A tarxeta SIM está bloqueada con código PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta a guía do usuario ou ponte en contacto co servizo de asistencia ao cliente."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta a guía para usuarios ou ponte en contacto co servizo de asistencia ao cliente."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"A tarxeta SIM está bloqueada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Desbloqueando tarxeta SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
