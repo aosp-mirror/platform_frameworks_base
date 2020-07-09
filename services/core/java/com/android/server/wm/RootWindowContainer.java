@@ -3353,7 +3353,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void cancelInitializingActivities() {
         forAllTaskDisplayAreas(taskDisplayArea -> {
             for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                taskDisplayArea.getStackAt(sNdx).cancelInitializingActivities();
+                // We don't want to clear starting window for activities that aren't occluded
+                // as we need to display their starting window until they are done initializing.
+                taskDisplayArea.getStackAt(sNdx).forAllOccludedActivities(
+                        ActivityRecord::cancelInitializing);
             }
         });
     }

@@ -328,81 +328,6 @@ class ActivityStack extends Task {
         }
     }
 
-    private final CheckBehindFullscreenActivityHelper mCheckBehindFullscreenActivityHelper =
-            new CheckBehindFullscreenActivityHelper();
-    private class CheckBehindFullscreenActivityHelper {
-        private boolean mAboveTop;
-        private boolean mBehindFullscreenActivity;
-        private ActivityRecord mToCheck;
-        private Consumer<ActivityRecord> mHandleBehindFullscreenActivity;
-        private boolean mHandlingOccluded;
-
-        private void reset(ActivityRecord toCheck,
-                Consumer<ActivityRecord> handleBehindFullscreenActivity) {
-            mToCheck = toCheck;
-            mHandleBehindFullscreenActivity = handleBehindFullscreenActivity;
-            mAboveTop = true;
-            mBehindFullscreenActivity = false;
-
-            if (!shouldBeVisible(null)) {
-                // The stack is not visible, so no activity in it should be displaying a starting
-                // window. Mark all activities below top and behind fullscreen.
-                mAboveTop = false;
-                mBehindFullscreenActivity = true;
-            }
-
-            mHandlingOccluded = mToCheck == null && mHandleBehindFullscreenActivity != null;
-        }
-
-        boolean process(ActivityRecord toCheck,
-                Consumer<ActivityRecord> handleBehindFullscreenActivity) {
-            reset(toCheck, handleBehindFullscreenActivity);
-
-            if (!mHandlingOccluded && mBehindFullscreenActivity) {
-                return true;
-            }
-
-            final ActivityRecord topActivity = topRunningActivity();
-            final PooledFunction f = PooledLambda.obtainFunction(
-                    CheckBehindFullscreenActivityHelper::processActivity, this,
-                    PooledLambda.__(ActivityRecord.class), topActivity);
-            forAllActivities(f);
-            f.recycle();
-
-            return mBehindFullscreenActivity;
-        }
-
-        /** Returns {@code true} to stop the outer loop and indicate the result is computed. */
-        private boolean processActivity(ActivityRecord r, ActivityRecord topActivity) {
-            if (mAboveTop) {
-                if (r == topActivity) {
-                    if (r == mToCheck) {
-                        // It is the top activity in a visible stack.
-                        mBehindFullscreenActivity = false;
-                        return true;
-                    }
-                    mAboveTop = false;
-                }
-                mBehindFullscreenActivity |= r.occludesParent();
-                return false;
-            }
-
-            if (mHandlingOccluded) {
-                // Iterating through all occluded activities.
-                if (mBehindFullscreenActivity) {
-                    mHandleBehindFullscreenActivity.accept(r);
-                }
-            } else if (r == mToCheck) {
-                return true;
-            } else if (mBehindFullscreenActivity) {
-                // It is occluded before {@param toCheck} is found.
-                return true;
-            }
-            mBehindFullscreenActivity |= r.occludesParent();
-            return false;
-        }
-    }
-
     // TODO: Can we just loop through WindowProcessController#mActivities instead of doing this?
     private final RemoveHistoryRecordsForApp mRemoveHistoryRecordsForApp =
             new RemoveHistoryRecordsForApp();
@@ -1432,25 +1357,6 @@ class ActivityStack extends Task {
                 }
             }
         }
-    }
-
-    /** @see ActivityRecord#cancelInitializing() */
-    void cancelInitializingActivities() {
-        // We don't want to clear starting window for activities that aren't behind fullscreen
-        // activities as we need to display their starting window until they are done initializing.
-        checkBehindFullscreenActivity(null /* toCheck */, ActivityRecord::cancelInitializing);
-    }
-
-    /**
-     * If an activity {@param toCheck} is given, this method returns {@code true} if the activity
-     * is occluded by any fullscreen activity. If there is no {@param toCheck} and the handling
-     * function {@param handleBehindFullscreenActivity} is given, this method will pass all occluded
-     * activities to the function.
-     */
-    boolean checkBehindFullscreenActivity(ActivityRecord toCheck,
-            Consumer<ActivityRecord> handleBehindFullscreenActivity) {
-        return mCheckBehindFullscreenActivityHelper.process(
-                toCheck, handleBehindFullscreenActivity);
     }
 
     /**
@@ -2658,16 +2564,6 @@ class ActivityStack extends Task {
 
     private static void setTaskBounds(Task task, Rect bounds) {
         task.setBounds(task.isResizeable() ? bounds : null);
-    }
-
-    /**
-     * Returns the top-most activity that occludes the given one, or @{code null} if none.
-     */
-    @Nullable
-    private ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
-        ActivityRecord top = getActivity((ar) -> ar.occludesParent(),
-                true /* traverseTopToBottom */, activity);
-        return top != activity ? top : null;
     }
 
     boolean willActivityBeVisible(IBinder token) {

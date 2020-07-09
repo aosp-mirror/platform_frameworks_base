@@ -1331,42 +1331,40 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testCheckBehindFullscreenActivity() {
+    public void testIterateOccludedActivity() {
         final ArrayList<ActivityRecord> occludedActivities = new ArrayList<>();
-        final Consumer<ActivityRecord> handleBehindFullscreenActivity = occludedActivities::add;
+        final Consumer<ActivityRecord> handleOccludedActivity = occludedActivities::add;
         final ActivityRecord bottomActivity =
                 new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
         final ActivityRecord topActivity =
                 new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
-        doReturn(true).when(mStack).shouldBeVisible(any());
-        assertTrue(mStack.checkBehindFullscreenActivity(bottomActivity,
-                null /* handleBehindFullscreenActivity */));
-        assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
-                null /* handleBehindFullscreenActivity */));
-
         // Top activity occludes bottom activity.
-        mStack.checkBehindFullscreenActivity(null /* toCheck */, handleBehindFullscreenActivity);
+        doReturn(true).when(mStack).shouldBeVisible(any());
+        assertTrue(topActivity.shouldBeVisible());
+        assertFalse(bottomActivity.shouldBeVisible());
+
+        mStack.forAllOccludedActivities(handleOccludedActivity);
         assertThat(occludedActivities).containsExactly(bottomActivity);
 
+        // Top activity doesn't occlude parent, so the bottom activity is not occluded.
         doReturn(false).when(topActivity).occludesParent();
-        assertFalse(mStack.checkBehindFullscreenActivity(bottomActivity,
-                null /* handleBehindFullscreenActivity */));
-        assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
-                null /* handleBehindFullscreenActivity */));
+        assertTrue(bottomActivity.shouldBeVisible());
 
         occludedActivities.clear();
-        // Top activity doesn't occlude parent, so the bottom activity is not occluded.
-        mStack.checkBehindFullscreenActivity(null /* toCheck */, handleBehindFullscreenActivity);
+        mStack.forAllOccludedActivities(handleOccludedActivity);
         assertThat(occludedActivities).isEmpty();
 
+        // A finishing activity should not occlude other activities behind.
         final ActivityRecord finishingActivity =
                 new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
         finishingActivity.finishing = true;
         doCallRealMethod().when(finishingActivity).occludesParent();
-        assertFalse(mStack.checkBehindFullscreenActivity(bottomActivity,
-                null /* handleBehindFullscreenActivity */));
-        assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
-                null /* handleBehindFullscreenActivity */));
+        assertTrue(topActivity.shouldBeVisible());
+        assertTrue(bottomActivity.shouldBeVisible());
+
+        occludedActivities.clear();
+        mStack.forAllOccludedActivities(handleOccludedActivity);
+        assertThat(occludedActivities).isEmpty();
     }
 
     @Test
