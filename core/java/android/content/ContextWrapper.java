@@ -1151,6 +1151,9 @@ public class ContextWrapper extends Context {
      */
     @Override
     public boolean isUiContext() {
+        if (mBase == null) {
+            return false;
+        }
         return mBase.isUiContext();
     }
 }
