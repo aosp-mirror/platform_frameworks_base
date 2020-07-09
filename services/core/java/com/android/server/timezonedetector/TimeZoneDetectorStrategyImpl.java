@@ -32,14 +32,13 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
 import android.content.Context;
+import android.util.IndentingPrintWriter;
 import android.util.LocalLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -517,7 +516,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public synchronized void addDumpable(Dumpable dumpable) {
+    public synchronized void addDumpable(@NonNull Dumpable dumpable) {
         mDumpables.add(dumpable);
     }
 
@@ -525,8 +524,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * Dumps internal state such as field values.
      */
     @Override
-    public synchronized void dump(PrintWriter pw, String[] args) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+    public synchronized void dump(@NonNull IndentingPrintWriter ipw, @Nullable String[] args) {
         ipw.println("TimeZoneDetectorStrategy:");
 
         ipw.increaseIndent(); // level 1
@@ -549,7 +547,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         for (Dumpable dumpable : mDumpables) {
             dumpable.dump(ipw, args);
         }
-        ipw.flush();
     }
 
     /**

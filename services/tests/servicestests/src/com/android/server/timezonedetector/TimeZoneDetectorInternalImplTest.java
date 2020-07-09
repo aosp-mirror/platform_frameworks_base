@@ -37,7 +37,7 @@ public class TimeZoneDetectorInternalImplTest {
     private static final List<String> ARBITRARY_ZONE_IDS = Arrays.asList("TestZoneId");
 
     private Context mMockContext;
-    private StubbedTimeZoneDetectorStrategy mStubbedTimeZoneDetectorStrategy;
+    private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
 
     private TimeZoneDetectorInternalImpl mTimeZoneDetectorInternal;
     private HandlerThread mHandlerThread;
@@ -53,10 +53,10 @@ public class TimeZoneDetectorInternalImplTest {
         mHandlerThread.start();
         mTestHandler = new TestHandler(mHandlerThread.getLooper());
 
-        mStubbedTimeZoneDetectorStrategy = new StubbedTimeZoneDetectorStrategy();
+        mFakeTimeZoneDetectorStrategy = new FakeTimeZoneDetectorStrategy();
 
         mTimeZoneDetectorInternal = new TimeZoneDetectorInternalImpl(
-                mMockContext, mTestHandler, mStubbedTimeZoneDetectorStrategy);
+                mMockContext, mTestHandler, mFakeTimeZoneDetectorStrategy);
     }
 
     @After
@@ -72,7 +72,7 @@ public class TimeZoneDetectorInternalImplTest {
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeZoneDetectorStrategy.verifySuggestGeolocationTimeZoneCalled(timeZoneSuggestion);
+        mFakeTimeZoneDetectorStrategy.verifySuggestGeolocationTimeZoneCalled(timeZoneSuggestion);
     }
 
     private static GeolocationTimeZoneSuggestion createGeolocationTimeZoneSuggestion() {

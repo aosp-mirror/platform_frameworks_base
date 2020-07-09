@@ -17,25 +17,25 @@
 package com.android.server.timedetector;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
+import android.util.IndentingPrintWriter;
 
-import java.io.PrintWriter;
+import com.android.server.timezonedetector.Dumpable;
 
 /**
  * The interface for the class that implements the time detection algorithm used by the
  * {@link TimeDetectorService}.
  *
  * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
- * {@link #dump(PrintWriter, String[])}) may be called on a different thread so implementations must
- * handle thread safety.
+ * {@link #dump(IndentingPrintWriter, String[])}) may be called on a different thread so
+ * implementations must handle thread safety.
  *
  * @hide
  */
-public interface TimeDetectorStrategy {
+public interface TimeDetectorStrategy extends Dumpable {
 
     /**
      * The interface used by the strategy to interact with the surrounding service.
@@ -93,9 +93,6 @@ public interface TimeDetectorStrategy {
 
     /** Handle the auto-time setting being toggled on or off. */
     void handleAutoTimeDetectionChanged();
-
-    /** Dump debug information. */
-    void dump(@NonNull PrintWriter pw, @Nullable String[] args);
 
     // Utility methods below are to be moved to a better home when one becomes more obvious.
 

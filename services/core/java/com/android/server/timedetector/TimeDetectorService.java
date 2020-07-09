@@ -28,6 +28,7 @@ import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -139,7 +140,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
             @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        mTimeDetectorStrategy.dump(pw, args);
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+        mTimeDetectorStrategy.dump(ipw, args);
+        ipw.flush();
     }
 
     private void enforceSuggestTelephonyTimePermission() {
