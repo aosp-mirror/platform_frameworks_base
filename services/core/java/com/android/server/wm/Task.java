@@ -3175,6 +3175,33 @@ class Task extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    /** Returns the top-most activity that occludes the given one, or {@code null} if none. */
+    @Nullable
+    ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
+        final ActivityRecord top = getActivity(ActivityRecord::occludesParent,
+                true /* traverseTopToBottom */, activity);
+        return top != activity ? top : null;
+    }
+
+    /** Iterates through all occluded activities. */
+    void forAllOccludedActivities(Consumer<ActivityRecord> handleOccludedActivity) {
+        if (!shouldBeVisible(null /* starting */)) {
+            // The stack is invisible so all activities are occluded.
+            forAllActivities(handleOccludedActivity);
+            return;
+        }
+        final ActivityRecord topOccluding = getOccludingActivityAbove(null);
+        if (topOccluding == null) {
+            // No activities are occluded.
+            return;
+        }
+        // Invoke the callback on the activities behind the top occluding activity.
+        forAllActivities(r -> {
+            handleOccludedActivity.accept(r);
+            return false;
+        }, topOccluding, false /* includeBoundary */, true /* traverseTopToBottom */);
+    }
+
     @Override
     public SurfaceControl.Builder makeAnimationLeash() {
         return super.makeAnimationLeash().setMetadata(METADATA_TASK_ID, mTaskId);

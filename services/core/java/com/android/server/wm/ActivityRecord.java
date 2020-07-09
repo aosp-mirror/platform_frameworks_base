@@ -4605,8 +4605,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        final boolean behindFullscreenActivity = stack.checkBehindFullscreenActivity(
-                this, null /* handleBehindFullscreenActivity */);
+        final boolean behindFullscreenActivity = !stack.shouldBeVisible(null /* starting */)
+                || stack.getOccludingActivityAbove(this) != null;
         return shouldBeVisible(behindFullscreenActivity, false /* ignoringKeyguard */);
     }
 
