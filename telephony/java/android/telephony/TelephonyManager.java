@@ -2341,58 +2341,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Enables location update notifications.  {@link PhoneStateListener#onCellLocationChanged
-     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_LOCATION_UPDATES)
-    public void enableLocationUpdates() {
-        enableLocationUpdates(getSubId());
-    }
-
-    /**
-     * Enables location update notifications for a subscription.
-     * {@link PhoneStateListener#onCellLocationChanged
-     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
-     *
-     * @param subId for which the location updates are enabled
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_LOCATION_UPDATES)
-    public void enableLocationUpdates(int subId) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.enableLocationUpdatesForSubscriber(subId);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
-     * Disables location update notifications.  {@link PhoneStateListener#onCellLocationChanged
-     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_LOCATION_UPDATES)
-    public void disableLocationUpdates() {
-        disableLocationUpdates(getSubId());
-    }
-
-    /** @hide */
-    public void disableLocationUpdates(int subId) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.disableLocationUpdatesForSubscriber(subId);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
      * Returns the neighboring cell information of the device.
      *
      * @return List of NeighboringCellInfo or null if info unavailable.
@@ -9307,17 +9255,14 @@ public class TelephonyManager {
         return RADIO_POWER_UNAVAILABLE;
     }
 
-    /** @hide */
+    /**
+     * This method should not be used due to privacy and stability concerns.
+     *
+     * @hide
+     */
     @SystemApi
-    @SuppressLint("Doclava125")
     public void updateServiceLocation() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.updateServiceLocation();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#updateServiceLocation", e);
-        }
+        Log.e(TAG, "Do not call TelephonyManager#updateServiceLocation()");
     }
 
     /** @hide */
