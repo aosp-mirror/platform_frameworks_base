@@ -20,12 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.os.Handler;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.Assert;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.FakeThreadFactory;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,21 +35,20 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class ThresholdSensorImplTest extends SysuiTestCase {
 
     private ThresholdSensorImpl mThresholdSensor;
     private FakeSensorManager mSensorManager;
     private AsyncSensorManager mAsyncSensorManager;
     private FakeSensorManager.FakeProximitySensor mFakeProximitySensor;
+    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
-        allowTestableLooperAsMainThread();
         mSensorManager = new FakeSensorManager(getContext());
 
         mAsyncSensorManager = new AsyncSensorManager(
-                mSensorManager, null, new Handler());
+                mSensorManager, new FakeThreadFactory(mFakeExecutor), null);
 
         mFakeProximitySensor = mSensorManager.getFakeProximitySensor();
         ThresholdSensorImpl.Builder thresholdSensorBuilder = new ThresholdSensorImpl.Builder(
@@ -60,6 +61,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testSingleListener() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listener = new TestableListener();
 
         assertFalse(mThresholdSensor.isRegistered());
@@ -81,6 +83,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testMultiListener() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listenerA = new TestableListener();
         TestableListener listenerB = new TestableListener();
 
@@ -114,6 +117,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testDuplicateListener() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listenerA = new TestableListener();
 
         assertFalse(mThresholdSensor.isRegistered());
@@ -138,6 +142,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
     }
     @Test
     public void testUnregister() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listener = new TestableListener();
 
         assertFalse(mThresholdSensor.isRegistered());
@@ -157,6 +162,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testPauseAndResume() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listener = new TestableListener();
 
         assertFalse(mThresholdSensor.isRegistered());
@@ -199,6 +205,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testAlertListeners() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listenerA = new TestableListener();
         TestableListener listenerB = new TestableListener();
 
@@ -230,6 +237,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testHysteresis() {
+        Assert.setTestThread(Thread.currentThread());
         float lowValue = 10f;
         float highValue = 100f;
         FakeSensorManager.FakeGenericSensor sensor = mSensorManager.getFakeLightSensor();
@@ -278,6 +286,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
 
     @Test
     public void testAlertAfterPause() {
+        Assert.setTestThread(Thread.currentThread());
         TestableListener listener = new TestableListener();
 
         mThresholdSensor.register(listener);
@@ -307,7 +316,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
     }
 
     private void waitForSensorManager() {
-        TestableLooper.get(this).processAllMessages();
+        mFakeExecutor.runAllReady();
     }
 
 }

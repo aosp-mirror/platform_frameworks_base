@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Singleton;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -199,4 +200,10 @@ public abstract class ConcurrencyModule {
     public static Executor provideUiBackgroundExecutor() {
         return Executors.newSingleThreadExecutor();
     }
+
+    /**
+     * Binds {@link ThreadFactoryImpl} to {@link ThreadFactory}.
+     */
+    @Binds
+    public abstract ThreadFactory bindExecutorFactory(ThreadFactoryImpl impl);
 }
