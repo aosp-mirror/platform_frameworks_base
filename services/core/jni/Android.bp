@@ -99,6 +99,7 @@ cc_defaults {
         "libpowermanager",
         "libutils",
         "libui",
+        "libvibratorservice",
         "libinput",
         "libinputflinger",
         "libinputflinger_base",
