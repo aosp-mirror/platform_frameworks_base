@@ -53,16 +53,14 @@ public final class StorageSessionController {
     private final Context mContext;
     @GuardedBy("mLock")
     private final SparseArray<StorageUserConnection> mConnections = new SparseArray<>();
-    private final boolean mIsFuseEnabled;
 
     private volatile ComponentName mExternalStorageServiceComponent;
     private volatile String mExternalStorageServicePackageName;
     private volatile int mExternalStorageServiceAppId;
     private volatile boolean mIsResetting;
 
-    public StorageSessionController(Context context, boolean isFuseEnabled) {
+    public StorageSessionController(Context context) {
         mContext = Objects.requireNonNull(context);
-        mIsFuseEnabled = isFuseEnabled;
     }
 
     /**
@@ -361,6 +359,6 @@ public final class StorageSessionController {
     }
 
     private boolean shouldHandle(@Nullable VolumeInfo vol) {
-        return mIsFuseEnabled && !mIsResetting && (vol == null || isEmulatedOrPublic(vol));
+        return !mIsResetting && (vol == null || isEmulatedOrPublic(vol));
     }
 }

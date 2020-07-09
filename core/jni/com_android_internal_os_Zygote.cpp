@@ -124,7 +124,6 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 static pid_t gSystemServerPid = 0;
 
 static constexpr const char* kVoldAppDataIsolation = "persist.sys.vold_app_data_isolation_enabled";
-static constexpr const char* kPropFuse = "persist.sys.fuse";
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
@@ -836,29 +835,20 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   PrepareDir(user_source, 0710, user_id ? AID_ROOT : AID_SHELL,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
-  bool isFuse = GetBoolProperty(kPropFuse, false);
   bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, false);
 
-  if (isFuse) {
-    if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
+  if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
       const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);
       PrepareDir(pass_through_source, 0710, AID_ROOT, AID_MEDIA_RW, fail_fn);
       BindMount(pass_through_source, "/storage", fail_fn);
-    } else if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
+  } else if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
       const std::string installer_source = StringPrintf("/mnt/installer/%d", user_id);
       BindMount(installer_source, "/storage", fail_fn);
-    } else if (isAppDataIsolationEnabled && mount_mode == MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+  } else if (isAppDataIsolationEnabled && mount_mode == MOUNT_EXTERNAL_ANDROID_WRITABLE) {
       const std::string writable_source = StringPrintf("/mnt/androidwritable/%d", user_id);
       BindMount(writable_source, "/storage", fail_fn);
-    } else {
-      BindMount(user_source, "/storage", fail_fn);
-    }
   } else {
-    const std::string& storage_source = ExternalStorageViews[mount_mode];
-    BindMount(storage_source, "/storage", fail_fn);
-
-    // Mount user-specific symlink helper into place
-    BindMount(user_source, "/storage/self", fail_fn);
+      BindMount(user_source, "/storage", fail_fn);
   }
 }
 
