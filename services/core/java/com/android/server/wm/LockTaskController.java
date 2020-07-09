@@ -151,7 +151,7 @@ public class LockTaskController {
      * The first task in the list, which started the current LockTask session, is called the root
      * task. It coincides with the Home task in a typical multi-app kiosk deployment. When there are
      * more than one locked tasks, the root task can't be finished. Nor can it be moved to the back
-     * of the stack by {@link ActivityStack#moveTaskToBack(Task)};
+     * of the stack by {@link Task#moveTaskToBack(Task)};
      *
      * Calling {@link Activity#stopLockTask()} on the root task will finish all tasks but itself in
      * this list, and the device will exit LockTask mode.
@@ -252,7 +252,7 @@ public class LockTaskController {
 
     /**
      * @return whether the given task can be moved to the back of the stack with
-     * {@link ActivityStack#moveTaskToBack(Task)}
+     * {@link Task#moveTaskToBack(Task)}
      * @see #mLockTaskModeTasks
      */
     boolean canMoveTaskToBack(Task task) {
@@ -617,14 +617,14 @@ public class LockTaskController {
             mSupervisor.findTaskToMoveToFront(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
             mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
-            final ActivityStack stack = task.getStack();
-            if (stack != null) {
-                stack.getDisplay().mDisplayContent.executeAppTransition();
+            final Task rootTask = task.getRootTask();
+            if (rootTask != null) {
+                rootTask.getDisplay().mDisplayContent.executeAppTransition();
             }
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
             mSupervisor.handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
                     mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea(),
-                    task.getStack(), true /* forceNonResizable */);
+                    task.getRootTask(), true /* forceNonResizable */);
         }
     }
 

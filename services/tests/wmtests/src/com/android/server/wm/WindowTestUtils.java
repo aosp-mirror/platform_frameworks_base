@@ -32,8 +32,8 @@ import com.android.server.wm.ActivityTestsBase.ActivityBuilder;
  */
 class WindowTestUtils {
 
-    /** Creates a {@link Task} and adds it to the specified {@link ActivityStack}. */
-    static Task createTaskInStack(WindowManagerService service, ActivityStack stack, int userId) {
+    /** Creates a {@link Task} and adds it to the specified {@link Task}. */
+    static Task createTaskInStack(WindowManagerService service, Task stack, int userId) {
         final Task task = new ActivityTestsBase.TaskBuilder(stack.mStackSupervisor)
                 .setUserId(userId)
                 .setStack(stack)
@@ -48,7 +48,7 @@ class WindowTestUtils {
         return activity;
     }
 
-    static ActivityRecord createTestActivityRecord(ActivityStack stack) {
+    static ActivityRecord createTestActivityRecord(Task stack) {
         final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
                 .setStack(stack)
                 .setCreateTask(true)

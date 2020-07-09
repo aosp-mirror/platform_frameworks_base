@@ -808,7 +808,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testOnDisplayChanged() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final ActivityRecord activity =
                 WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
@@ -852,7 +852,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testTaskCanApplyAnimation() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final ActivityRecord activity2 =
                 WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
@@ -863,7 +863,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testStackCanApplyAnimation() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final ActivityRecord activity2 = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
                 createTaskInStack(stack, 0 /* userId */));
         final ActivityRecord activity1 = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
@@ -879,7 +879,7 @@ public class WindowContainerTests extends WindowTestsBase {
         assertNull(windowContainer.getDisplayArea());
 
         // ActivityStack > WindowContainer
-        final ActivityStack activityStack = createTaskStackOnDisplay(mDisplayContent);
+        final Task activityStack = createTaskStackOnDisplay(mDisplayContent);
         activityStack.addChild(windowContainer, 0);
         activityStack.setParent(null);
 

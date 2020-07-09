@@ -48,7 +48,7 @@ class RunningTasks {
     private ArraySet<Integer> mProfileIds;
     private boolean mAllowed;
     private boolean mFilterOnlyVisibleRecents;
-    private ActivityStack mTopDisplayFocusStack;
+    private Task mTopDisplayFocusStack;
     private RecentTasks mRecentTasks;
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
@@ -114,7 +114,7 @@ class RunningTasks {
             return;
         }
 
-        final ActivityStack stack = task.getStack();
+        final Task stack = task.getRootTask();
         if (stack == mTopDisplayFocusStack && stack.getTopMostTask() == task) {
             // For the focused stack top task, update the last stack active time so that it can be
             // used to determine the order of the tasks (it may not be set for newly created tasks)

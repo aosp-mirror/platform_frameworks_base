@@ -164,7 +164,7 @@ public class ActivityStartController {
      * last starter for an arbitrary task record. Re-evaluate whether we can remove.
      */
     void postStartActivityProcessingForLastStarter(ActivityRecord r, int result,
-            ActivityStack targetStack) {
+            Task targetStack) {
         if (mLastStarter == null) {
             return;
         }
@@ -190,7 +190,7 @@ public class ActivityStartController {
         // The home activity will be started later, defer resuming to avoid unneccerary operations
         // (e.g. start home recursively) when creating home stack.
         mSupervisor.beginDeferResume();
-        final ActivityStack homeStack;
+        final Task homeStack;
         try {
             // Make sure home stack exists on display area.
             homeStack = taskDisplayArea.getOrCreateRootHomeTask(ON_TOP);

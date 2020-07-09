@@ -45,19 +45,19 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REQUESTED;
-import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
-import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
-import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
-import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
-import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
-import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
-import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+import static com.android.server.wm.Task.ActivityState.DESTROYED;
+import static com.android.server.wm.Task.ActivityState.DESTROYING;
+import static com.android.server.wm.Task.ActivityState.FINISHING;
+import static com.android.server.wm.Task.ActivityState.INITIALIZING;
+import static com.android.server.wm.Task.ActivityState.PAUSED;
+import static com.android.server.wm.Task.ActivityState.PAUSING;
+import static com.android.server.wm.Task.ActivityState.RESUMED;
+import static com.android.server.wm.Task.ActivityState.STARTED;
+import static com.android.server.wm.Task.ActivityState.STOPPED;
+import static com.android.server.wm.Task.ActivityState.STOPPING;
+import static com.android.server.wm.Task.STACK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -106,7 +106,7 @@ import android.view.WindowManagerGlobal;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.R;
-import com.android.server.wm.ActivityStack.ActivityState;
+import com.android.server.wm.Task.ActivityState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -123,7 +123,7 @@ import org.mockito.invocation.InvocationOnMock;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityRecordTests extends ActivityTestsBase {
-    private ActivityStack mStack;
+    private Task mStack;
     private Task mTask;
     private ActivityRecord mActivity;
 
@@ -292,7 +292,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSetsRelaunchReason_NotDragResizing() {
-        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+        mActivity.setState(Task.ActivityState.RESUMED, "Testing");
 
         mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
@@ -315,7 +315,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSetsRelaunchReason_DragResizing() {
-        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+        mActivity.setState(Task.ActivityState.RESUMED, "Testing");
 
         mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
@@ -340,7 +340,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSetsRelaunchReason_NonResizeConfigChanges() {
-        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+        mActivity.setState(Task.ActivityState.RESUMED, "Testing");
 
         mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
@@ -366,7 +366,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .setTask(mTask)
                 .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
                 .build();
-        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+        mActivity.setState(Task.ActivityState.RESUMED, "Testing");
 
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 mActivity.getConfiguration()));
@@ -489,7 +489,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testShouldMakeActive_deferredResume() {
-        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.setState(Task.ActivityState.STOPPED, "Testing");
 
         mSupervisor.beginDeferResume();
         assertEquals(false, mActivity.shouldMakeActive(null /* activeActivity */));
@@ -503,14 +503,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
         ActivityRecord finishingActivity = new ActivityBuilder(mService).setTask(mTask).build();
         finishingActivity.finishing = true;
         ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.setState(Task.ActivityState.STOPPED, "Testing");
 
         assertEquals(false, mActivity.shouldMakeActive(null /* activeActivity */));
     }
 
     @Test
     public void testShouldResume_stackVisibility() {
-        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.setState(Task.ActivityState.STOPPED, "Testing");
         spyOn(mStack);
 
         doReturn(STACK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
@@ -525,7 +525,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testShouldResumeOrPauseWithResults() {
-        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.setState(Task.ActivityState.STOPPED, "Testing");
         spyOn(mStack);
 
         ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
@@ -544,9 +544,9 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .setLaunchTaskBehind(true)
                 .setConfigChanges(CONFIG_ORIENTATION)
                 .build();
-        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.setState(Task.ActivityState.STOPPED, "Testing");
 
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         try {
             doReturn(false).when(stack).isTranslucent(any());
             assertFalse(mStack.shouldBeVisible(null /* starting */));
@@ -585,7 +585,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testShouldStartWhenMakeClientActive() {
         ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
         topActivity.setOccludesParent(false);
-        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.setState(Task.ActivityState.STOPPED, "Testing");
         mActivity.setVisibility(true);
         mActivity.makeActiveIfNeeded(null /* activeActivity */);
         assertEquals(STARTED, mActivity.getState());
@@ -754,14 +754,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testFinishActivityIfPossible_adjustStackOrder() {
         // Prepare the stacks with order (top to bottom): mStack, stack1, stack2.
-        final ActivityStack stack1 = new StackBuilder(mRootWindowContainer).build();
+        final Task stack1 = new StackBuilder(mRootWindowContainer).build();
         mStack.moveToFront("test");
         // The stack2 is needed here for moving back to simulate the
         // {@link DisplayContent#mPreferredTopFocusableStack} is cleared, so
         // {@link DisplayContent#getFocusedStack} will rely on the order of focusable-and-visible
         // stacks. Then when mActivity is finishing, its stack will be invisible (no running
         // activities in the stack) that is the key condition to verify.
-        final ActivityStack stack2 = new StackBuilder(mRootWindowContainer).build();
+        final Task stack2 = new StackBuilder(mRootWindowContainer).build();
         stack2.moveToBack("test", stack2.getBottomMostTask());
 
         assertTrue(mStack.isTopStackInDisplayArea());
@@ -787,7 +787,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .setCreateTask(true)
                 .setStack(mStack)
                 .build();
-        ActivityStack topRootableTask = (ActivityStack) topActivity.getTask();
+        Task topRootableTask = topActivity.getTask();
         topRootableTask.moveToFront("test");
         assertTrue(mStack.isTopStackInDisplayArea());
 
@@ -807,7 +807,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testFinishActivityIfPossible_PreferredTopStackChanged() {
         final ActivityRecord topActivityOnNonTopDisplay =
                 createActivityOnDisplay(true /* defaultDisplay */, null /* process */);
-        ActivityStack topRootableTask = topActivityOnNonTopDisplay.getRootTask();
+        Task topRootableTask = topActivityOnNonTopDisplay.getRootTask();
         topRootableTask.moveToFront("test");
         assertTrue(topRootableTask.isTopStackInDisplayArea());
         assertEquals(topRootableTask, topActivityOnNonTopDisplay.getDisplayArea()
@@ -971,7 +971,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Simulates that {@code currentTop} starts an existing activity from background (so its
         // state is stopped) and the starting flow just goes to place it at top.
-        final ActivityStack nextStack = new StackBuilder(mRootWindowContainer).build();
+        final Task nextStack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord nextTop = nextStack.getTopNonFinishingActivity();
         nextTop.setState(STOPPED, "test");
 
@@ -1093,7 +1093,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Add another stack to become focused and make the activity there visible. This way it
         // simulates finishing in non-focused stack in split-screen.
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord focusedActivity = stack.getTopMostActivity();
         focusedActivity.nowVisible = true;
         focusedActivity.mVisibleRequested = true;
@@ -1199,7 +1199,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplayArea().getRootHomeTask();
+        final Task homeStack = mActivity.getDisplayArea().getRootHomeTask();
         homeStack.forAllLeafTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */);
@@ -1225,7 +1225,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplayArea().getRootHomeTask();
+        final Task homeStack = mActivity.getDisplayArea().getRootHomeTask();
         homeStack.forAllLeafTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */);
@@ -1325,7 +1325,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testRemoveFromHistory() {
-        final ActivityStack stack = mActivity.getRootTask();
+        final Task stack = mActivity.getRootTask();
         final Task task = mActivity.getTask();
 
         mActivity.removeFromHistory("test");
@@ -1334,7 +1334,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertNull(mActivity.app);
         assertNull(mActivity.getTask());
         assertEquals(0, task.getChildCount());
-        assertEquals(task.getStack(), task);
+        assertEquals(task.getRootTask(), task);
         assertEquals(0, stack.getChildCount());
     }
 
@@ -1576,7 +1576,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Create a new task with custom config to reparent the activity to.
         final Task newTask =
-                new TaskBuilder(mSupervisor).setStack(initialTask.getStack()).build();
+                new TaskBuilder(mSupervisor).setStack(initialTask.getRootTask()).build();
         final Configuration newConfig = newTask.getConfiguration();
         newConfig.densityDpi += 100;
         newTask.onRequestedOverrideConfigurationChanged(newConfig);
@@ -1608,7 +1608,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Create a new task with custom config to reparent the second activity to.
         final Task newTask =
-                new TaskBuilder(mSupervisor).setStack(initialTask.getStack()).build();
+                new TaskBuilder(mSupervisor).setStack(initialTask.getRootTask()).build();
         final Configuration newConfig = newTask.getConfiguration();
         newConfig.densityDpi += 100;
         newTask.onRequestedOverrideConfigurationChanged(newConfig);
@@ -1696,7 +1696,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
             display = new TestDisplayContent.Builder(mService, 2000, 1000).setDensityDpi(300)
                     .setPosition(DisplayContent.POSITION_TOP).build();
         }
-        final ActivityStack stack = display.getDefaultTaskDisplayArea()
+        final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         return new ActivityBuilder(mService).setTask(task).setUseProcess(process).build();

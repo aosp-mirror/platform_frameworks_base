@@ -22,20 +22,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFI
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import com.android.internal.util.FastXmlSerializer;
-
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.pm.ApplicationInfo;
@@ -50,6 +36,20 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+
+import com.android.internal.util.FastXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public final class CompatModePackages {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_ATM;
@@ -321,7 +321,7 @@ public final class CompatModePackages {
 
             scheduleWrite();
 
-            final ActivityStack stack = mService.getTopDisplayFocusedStack();
+            final Task stack = mService.getTopDisplayFocusedStack();
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.

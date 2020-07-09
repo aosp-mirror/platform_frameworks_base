@@ -924,15 +924,15 @@ class WindowStateAnimator {
 
             int posX = 0;
             int posY = 0;
-            task.getStack().getDimBounds(mTmpStackBounds);
+            task.getRootTask().getDimBounds(mTmpStackBounds);
 
             boolean allowStretching = false;
-            task.getStack().getFinalAnimationSourceHintBounds(mTmpSourceBounds);
+            task.getRootTask().getFinalAnimationSourceHintBounds(mTmpSourceBounds);
             // If we don't have source bounds, we can attempt to use the content insets
             // if we have content insets.
             if (mTmpSourceBounds.isEmpty() && (mWin.mLastRelayoutContentInsets.width() > 0
                     || mWin.mLastRelayoutContentInsets.height() > 0)) {
-                mTmpSourceBounds.set(task.getStack().mPreAnimationBounds);
+                mTmpSourceBounds.set(task.getRootTask().mPreAnimationBounds);
                 mTmpSourceBounds.inset(mWin.mLastRelayoutContentInsets);
                 allowStretching = true;
             }
@@ -946,7 +946,7 @@ class WindowStateAnimator {
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
                 // current stack bounds
-                task.getStack().getFinalAnimationBounds(mTmpAnimatingBounds);
+                task.getRootTask().getFinalAnimationBounds(mTmpAnimatingBounds);
 
                 // Calculate the current progress and interpolate the difference between the target
                 // and source bounds
@@ -1042,7 +1042,7 @@ class WindowStateAnimator {
                         mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                                 mWin.getFrameNumber());
                     } else {
-                        final ActivityStack stack = mWin.getRootTask();
+                        final Task stack = mWin.getRootTask();
                         mTmpPos.x = 0;
                         mTmpPos.y = 0;
                         if (stack != null) {
@@ -1576,7 +1576,7 @@ class WindowStateAnimator {
      */
     boolean isForceScaled() {
         final Task task = mWin.getTask();
-        if (task != null && task.getStack().isForceScaled()) {
+        if (task != null && task.getRootTask().isForceScaled()) {
             return true;
         }
         return mForceScaleUntilResize;

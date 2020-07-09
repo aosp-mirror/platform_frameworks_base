@@ -112,7 +112,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private String mAffinity;
         private int mUid = 12345;
         private boolean mCreateTask;
-        private ActivityStack mStack;
+        private Task mStack;
         private int mActivityFlags;
         private int mLaunchMode;
         private int mResizeMode = RESIZE_MODE_RESIZEABLE;
@@ -164,7 +164,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        ActivityBuilder setStack(ActivityStack stack) {
+        ActivityBuilder setStack(Task stack) {
             mStack = stack;
             return this;
         }
@@ -338,7 +338,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private IVoiceInteractionSession mVoiceSession;
         private boolean mCreateStack = true;
 
-        private ActivityStack mStack;
+        private Task mStack;
         private TaskDisplayArea mTaskDisplayArea;
 
         TaskBuilder(ActivityStackSupervisor supervisor) {
@@ -384,7 +384,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        TaskBuilder setStack(ActivityStack stack) {
+        TaskBuilder setStack(Task stack) {
             mStack = stack;
             return this;
         }
@@ -418,7 +418,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             intent.setComponent(mComponent);
             intent.setFlags(mFlags);
 
-            final Task task = new ActivityStack(mSupervisor.mService, mTaskId, aInfo,
+            final Task task = new Task(mSupervisor.mService, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
                     null /*taskDescription*/, mStack);
             spyOn(task);
@@ -503,11 +503,11 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        ActivityStack build() {
+        Task build() {
             SystemServicesTestRule.checkHoldsLock(mRootWindowContainer.mWmService.mGlobalLock);
 
             final int stackId = mStackId >= 0 ? mStackId : mTaskDisplayArea.getNextStackId();
-            final ActivityStack stack = mTaskDisplayArea.createStackUnchecked(
+            final Task stack = mTaskDisplayArea.createStackUnchecked(
                     mWindowingMode, mActivityType, stackId, mOnTop, mInfo, mIntent,
                     false /* createdByOrganizer */);
             final ActivityStackSupervisor supervisor = mRootWindowContainer.mStackSupervisor;
@@ -593,7 +593,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
             dc.forAllTaskDisplayAreas(taskDisplayArea -> {
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                    final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                    final Task stack = taskDisplayArea.getStackAt(sNdx);
                     if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
                         stack.reparent(mSecondary, POSITION_BOTTOM);
                     }

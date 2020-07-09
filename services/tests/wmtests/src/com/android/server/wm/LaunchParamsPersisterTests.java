@@ -114,7 +114,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId)))
                 .thenReturn(mTestDisplay);
 
-        ActivityStack stack = mTestDisplay.getDefaultTaskDisplayArea()
+        Task stack = mTestDisplay.getDefaultTaskDisplayArea()
                 .createStack(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         mTestTask = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).setStack(stack)
                 .build();
@@ -337,7 +337,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testClearsRecordsOfTheUserOnUserCleanUp() {
         mTarget.saveTask(mTestTask);
 
-        ActivityStack stack = mTestDisplay.getDefaultTaskDisplayArea().createStack(
+        Task stack = mTestDisplay.getDefaultTaskDisplayArea().createStack(
                 TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         final Task anotherTaskOfTheSameUser = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT)

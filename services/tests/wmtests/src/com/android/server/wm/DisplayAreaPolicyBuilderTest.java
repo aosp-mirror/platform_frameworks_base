@@ -531,7 +531,7 @@ public class DisplayAreaPolicyBuilderTest {
     private Map<DisplayArea<?>, Set<Integer>> calculateZSets(
             DisplayAreaPolicyBuilder.Result policy,
             DisplayArea<WindowContainer> ime,
-            DisplayArea<ActivityStack> tasks) {
+            DisplayArea<Task> tasks) {
         Map<DisplayArea<?>, Set<Integer>> zSets = new HashMap<>();
         int[] types = {TYPE_STATUS_BAR, TYPE_NAVIGATION_BAR, TYPE_PRESENTATION,
                 TYPE_APPLICATION_OVERLAY};

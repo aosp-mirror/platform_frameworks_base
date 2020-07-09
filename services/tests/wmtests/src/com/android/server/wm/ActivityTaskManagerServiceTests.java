@@ -73,7 +73,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     /** Verify that activity is finished correctly upon request. */
     @Test
     public void testActivityFinish() {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         assertTrue("Activity must be finished", mService.finishActivity(activity.appToken,
                 0 /* resultCode */, null /* resultData */,
@@ -87,7 +87,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test
     public void testOnPictureInPictureRequested() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         final ClientLifecycleManager mockLifecycleManager = mock(ClientLifecycleManager.class);
         doReturn(mockLifecycleManager).when(mService).getLifecycleManager();
@@ -106,7 +106,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test(expected = IllegalStateException.class)
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
         doReturn(false).when(activity).inPinnedWindowingMode();
@@ -120,7 +120,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test(expected = IllegalStateException.class)
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();

@@ -93,7 +93,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // Verify that we have proper ordering
         Type.checkChild(mType, Type.typeOf(child));
 
-        if (child instanceof ActivityStack) {
+        if (child instanceof Task) {
             // TODO(display-area): ActivityStacks are type ANY, but are allowed to have siblings.
             //                     They might need a separate type.
             return;
@@ -487,7 +487,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 return ((DisplayArea) c).mType;
             } else if (c instanceof WindowToken && !(c instanceof ActivityRecord)) {
                 return typeOf((WindowToken) c);
-            } else if (c instanceof ActivityStack) {
+            } else if (c instanceof Task) {
                 return ANY;
             } else {
                 throw new IllegalArgumentException("Unknown container: " + c);
