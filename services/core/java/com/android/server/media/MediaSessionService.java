@@ -16,7 +16,8 @@
 
 package com.android.server.media;
 
-import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.ALL;
+import static android.os.UserHandle.CURRENT;
 
 import static com.android.server.media.MediaKeyDispatcher.KEY_EVENT_LONG_PRESS;
 import static com.android.server.media.MediaKeyDispatcher.isDoubleTapOverridden;
@@ -252,7 +253,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private List<MediaSessionRecord> getActiveSessionsLocked(int userId) {
         List<MediaSessionRecord> records = new ArrayList<>();
-        if (userId == USER_ALL) {
+        if (userId == ALL.getIdentifier()) {
             int size = mUserRecords.size();
             for (int i = 0; i < size; i++) {
                 records.addAll(mUserRecords.valueAt(i).mPriorityStack.getActiveSessions(userId));
@@ -268,7 +269,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         // Return global priority session at the first whenever it's asked.
         if (isGlobalPriorityActiveLocked()
-                && (userId == USER_ALL || userId == mGlobalPrioritySession.getUserId())) {
+                && (userId == ALL.getIdentifier()
+                        || userId == mGlobalPrioritySession.getUserId())) {
             records.add(0, mGlobalPrioritySession);
         }
         return records;
@@ -276,7 +278,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     List<Session2Token> getSession2TokensLocked(int userId) {
         List<Session2Token> list = new ArrayList<>();
-        if (userId == USER_ALL) {
+        if (userId == ALL.getIdentifier()) {
             int size = mUserRecords.size();
             for (int i = 0; i < size; i++) {
                 list.addAll(mUserRecords.valueAt(i).mPriorityStack.getSession2Tokens(userId));
@@ -352,7 +354,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user != null) {
                 if (user.mFullUserId == userId) {
-                    user.destroySessionsForUserLocked(USER_ALL);
+                    user.destroySessionsForUserLocked(ALL.getIdentifier());
                     mUserRecords.remove(userId);
                 } else {
                     user.destroySessionsForUserLocked(userId);
@@ -654,7 +656,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             pushRemoteVolumeUpdateLocked(userId);
             for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
                 SessionsListenerRecord record = mSessionsListeners.get(i);
-                if (record.userId == USER_ALL || record.userId == userId) {
+                if (record.userId == ALL.getIdentifier() || record.userId == userId) {
                     try {
                         record.listener.onActiveSessionsChanged(tokens);
                     } catch (RemoteException e) {
@@ -669,13 +671,13 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     void pushSession2Changed(int userId) {
         synchronized (mLock) {
-            List<Session2Token> allSession2Tokens = getSession2TokensLocked(USER_ALL);
+            List<Session2Token> allSession2Tokens = getSession2TokensLocked(ALL.getIdentifier());
             List<Session2Token> session2Tokens = getSession2TokensLocked(userId);
 
             for (int i = mSession2TokensListenerRecords.size() - 1; i >= 0; i--) {
                 Session2TokensListenerRecord listenerRecord = mSession2TokensListenerRecords.get(i);
                 try {
-                    if (listenerRecord.userId == USER_ALL) {
+                    if (listenerRecord.userId == ALL.getIdentifier()) {
                         listenerRecord.listener.onSession2TokensChanged(allSession2Tokens);
                     } else if (listenerRecord.userId == userId) {
                         listenerRecord.listener.onSession2TokensChanged(session2Tokens);
@@ -761,7 +763,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private MediaSessionRecord getMediaSessionRecordLocked(MediaSession.Token sessionToken) {
-        FullUserRecord user = getFullUserRecordLocked(UserHandle.getUserId(sessionToken.getUid()));
+        FullUserRecord user = getFullUserRecordLocked(
+                UserHandle.getUserHandleForUid(sessionToken.getUid()).getIdentifier());
         if (user != null) {
             return user.mPriorityStack.getMediaSessionRecord(sessionToken);
         }
@@ -1090,7 +1093,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private void observe() {
             mContentResolver.registerContentObserver(mSecureSettingsUri,
-                    false, this, USER_ALL);
+                    false, this, ALL.getIdentifier());
         }
 
         @Override
@@ -1436,7 +1439,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 final IOnMediaKeyEventDispatchedListener listener) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserId(uid);
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!hasMediaControlPermission(pid, uid)) {
@@ -1464,7 +1467,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 final IOnMediaKeyEventDispatchedListener listener) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserId(uid);
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!hasMediaControlPermission(pid, uid)) {
@@ -1492,7 +1495,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 final IOnMediaKeyEventSessionChangedListener listener) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserId(uid);
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!hasMediaControlPermission(pid, uid)) {
@@ -1520,7 +1523,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 final IOnMediaKeyEventSessionChangedListener listener) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserId(uid);
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!hasMediaControlPermission(pid, uid)) {
@@ -1558,7 +1561,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
 
                 synchronized (mLock) {
-                    int userId = UserHandle.getUserId(uid);
+                    int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
                     FullUserRecord user = getFullUserRecordLocked(userId);
                     if (user == null || user.mFullUserId != userId) {
                         Log.w(TAG, "Only the full user can set the volume key long-press listener"
@@ -1617,7 +1620,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
 
                 synchronized (mLock) {
-                    int userId = UserHandle.getUserId(uid);
+                    int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
                     FullUserRecord user = getFullUserRecordLocked(userId);
                     if (user == null || user.mFullUserId != userId) {
                         Log.w(TAG, "Only the full user can set the media key listener"
@@ -1925,7 +1928,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         public boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid)
                 throws RemoteException {
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserId(uid);
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
                 // Don't perform sanity check between controllerPackageName and controllerUid.
@@ -2004,7 +2007,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName)
                 throws RemoteException {
             // You may not access another user's content as an enabled listener.
-            final int userId = UserHandle.getUserId(resolvedUserId);
+            final int userId = UserHandle.getUserHandleForUid(resolvedUserId).getIdentifier();
             if (resolvedUserId != userId) {
                 return false;
             }
@@ -2221,7 +2224,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private boolean isUserSetupComplete() {
             return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+                    Settings.Secure.USER_SETUP_COMPLETE, 0, CURRENT.getIdentifier()) != 0;
         }
 
         // we only handle public stream types, which are 0-5
