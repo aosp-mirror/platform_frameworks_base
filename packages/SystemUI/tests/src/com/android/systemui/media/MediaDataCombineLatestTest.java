@@ -22,6 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Color;
@@ -47,6 +48,7 @@ import java.util.Map;
 public class MediaDataCombineLatestTest extends SysuiTestCase {
 
     private static final String KEY = "TEST_KEY";
+    private static final String OLD_KEY = "TEST_KEY_OLD";
     private static final String APP = "APP";
     private static final String PACKAGE = "PKG";
     private static final int BG_COLOR = Color.RED;
@@ -97,7 +99,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     @Test
     public void eventNotEmittedWithoutMedia() {
         // WHEN device source emits an event without media data
-        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, null, mDeviceData);
         // THEN an event isn't emitted
         verify(mListener, never()).onMediaDataLoaded(eq(KEY), any(), any());
     }
@@ -105,7 +107,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     @Test
     public void emitEventAfterDeviceFirst() {
         // GIVEN that a device event has already been received
-        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, null, mDeviceData);
         // WHEN media event is received
         mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
         // THEN the listener receives a combined event
@@ -119,10 +121,68 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         // GIVEN that media event has already been received
         mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
         // WHEN device event is received
-        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, null, mDeviceData);
         // THEN the listener receives a combined event
         ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
         verify(mListener).onMediaDataLoaded(eq(KEY), any(), captor.capture());
+        assertThat(captor.getValue().getDevice()).isNotNull();
+    }
+
+    @Test
+    public void migrateKeyMediaFirst() {
+        // GIVEN that media and device info has already been received
+        mDataListener.onMediaDataLoaded(OLD_KEY, null, mMediaData);
+        mDeviceListener.onMediaDeviceChanged(OLD_KEY, null, mDeviceData);
+        reset(mListener);
+        // WHEN a key migration event is received
+        mDataListener.onMediaDataLoaded(KEY, OLD_KEY, mMediaData);
+        // THEN the listener receives a combined event
+        ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
+        verify(mListener).onMediaDataLoaded(eq(KEY), eq(OLD_KEY), captor.capture());
+        assertThat(captor.getValue().getDevice()).isNotNull();
+    }
+
+    @Test
+    public void migrateKeyDeviceFirst() {
+        // GIVEN that media and device info has already been received
+        mDataListener.onMediaDataLoaded(OLD_KEY, null, mMediaData);
+        mDeviceListener.onMediaDeviceChanged(OLD_KEY, null, mDeviceData);
+        reset(mListener);
+        // WHEN a key migration event is received
+        mDeviceListener.onMediaDeviceChanged(KEY, OLD_KEY, mDeviceData);
+        // THEN the listener receives a combined event
+        ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
+        verify(mListener).onMediaDataLoaded(eq(KEY), eq(OLD_KEY), captor.capture());
+        assertThat(captor.getValue().getDevice()).isNotNull();
+    }
+
+    @Test
+    public void migrateKeyMediaAfter() {
+        // GIVEN that media and device info has already been received
+        mDataListener.onMediaDataLoaded(OLD_KEY, null, mMediaData);
+        mDeviceListener.onMediaDeviceChanged(OLD_KEY, null, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, OLD_KEY, mDeviceData);
+        reset(mListener);
+        // WHEN a second key migration event is received for media
+        mDataListener.onMediaDataLoaded(KEY, OLD_KEY, mMediaData);
+        // THEN the key has already been migrated
+        ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
+        verify(mListener).onMediaDataLoaded(eq(KEY), eq(KEY), captor.capture());
+        assertThat(captor.getValue().getDevice()).isNotNull();
+    }
+
+    @Test
+    public void migrateKeyDeviceAfter() {
+        // GIVEN that media and device info has already been received
+        mDataListener.onMediaDataLoaded(OLD_KEY, null, mMediaData);
+        mDeviceListener.onMediaDeviceChanged(OLD_KEY, null, mDeviceData);
+        mDataListener.onMediaDataLoaded(KEY, OLD_KEY, mMediaData);
+        reset(mListener);
+        // WHEN a second key migration event is received for the device
+        mDeviceListener.onMediaDeviceChanged(KEY, OLD_KEY, mDeviceData);
+        // THEN the key has already be migrated
+        ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
+        verify(mListener).onMediaDataLoaded(eq(KEY), eq(KEY), captor.capture());
         assertThat(captor.getValue().getDevice()).isNotNull();
     }
 
@@ -143,7 +203,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
 
     @Test
     public void mediaDataRemovedAfterDeviceEvent() {
-        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, null, mDeviceData);
         mDataListener.onMediaDataRemoved(KEY);
         verify(mListener).onMediaDataRemoved(eq(KEY));
     }
@@ -152,7 +212,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     public void mediaDataKeyUpdated() {
         // GIVEN that device and media events have already been received
         mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
-        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, null, mDeviceData);
         // WHEN the key is changed
         mDataListener.onMediaDataLoaded("NEW_KEY", KEY, mMediaData);
         // THEN the listener gets a load event with the correct keys
@@ -163,7 +223,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     @Test
     public void getDataIncludesDevice() {
         // GIVEN that device and media events have been received
-        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        mDeviceListener.onMediaDeviceChanged(KEY, null, mDeviceData);
         mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
 
         // THEN the result of getData includes device info
