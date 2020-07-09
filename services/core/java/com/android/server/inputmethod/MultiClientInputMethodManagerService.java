@@ -225,6 +225,11 @@ public final class MultiClientInputMethodManagerService {
                         @Override
                         public void reportImeControl(@Nullable IBinder windowToken) {
                         }
+
+                        @Override
+                        public void removeImeSurface() {
+                            reportNotSupported();
+                        }
                     });
         }
 
@@ -1468,6 +1473,12 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public void removeImeSurface() {
+            reportNotSupported();
+        }
+
+        @BinderThread
+        @Override
+        public void removeImeSurfaceFromWindow(IBinder windowToken) {
             reportNotSupported();
         }
 
