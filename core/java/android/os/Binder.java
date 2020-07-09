@@ -122,6 +122,13 @@ public class Binder implements IBinder {
 
     private static native long getNativeFinalizer();
 
+    /**
+     * Returns the TID (task ID) for the current thread. Same as {@link Thread#getNativeTid()}
+     *
+     * @hide
+     */
+    public static native int getNativeTid();
+
     // Use a Holder to allow static initialization of Binder in the boot image, and
     // possibly to avoid some initialization ordering issues.
     private static class NoImagePreloadHolder {
