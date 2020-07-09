@@ -589,12 +589,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (mBypassNextStagedInstallerCheck) {
-            mBypassNextStagedInstallerCheck = false;
-        } else if (params.isStaged
-                && !isCalledBySystemOrShell(callingUid)
-                && !isWhitelistedStagedInstaller(requestedInstallerPackageName)) {
-            throw new SecurityException("Installer not allowed to commit staged install");
+        if (params.isStaged && !isCalledBySystemOrShell(callingUid)) {
+            if (mBypassNextStagedInstallerCheck) {
+                mBypassNextStagedInstallerCheck = false;
+            } else if (!isStagedInstallerAllowed(requestedInstallerPackageName)) {
+                throw new SecurityException("Installer not allowed to commit staged install");
+            }
         }
 
         if (!params.isMultiPackage) {
@@ -725,7 +725,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 || callingUid == Process.SHELL_UID;
     }
 
-    private boolean isWhitelistedStagedInstaller(String installerName) {
+    private boolean isStagedInstallerAllowed(String installerName) {
         return SystemConfig.getInstance().getWhitelistedStagedInstallers().contains(installerName);
     }
 
