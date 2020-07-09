@@ -339,6 +339,10 @@ static jobject JHwBinder_native_getService(
     return JHwRemoteBinder::NewObject(env, service);
 }
 
+void JHwBinder_native_setTrebleTestingOverride(JNIEnv*, jclass, jboolean testingOverride) {
+    hardware::details::setTrebleTestingOverride(testingOverride);
+}
+
 void JHwBinder_native_configureRpcThreadpool(JNIEnv *, jclass,
         jlong maxThreads, jboolean callerWillJoin) {
     CHECK(maxThreads > 0);
@@ -367,6 +371,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getService", "(Ljava/lang/String;Ljava/lang/String;Z)L" PACKAGE_PATH "/IHwBinder;",
         (void *)JHwBinder_native_getService },
+
+    { "setTrebleTestingOverride", "(Z)V",
+        (void *)JHwBinder_native_setTrebleTestingOverride },
 
     { "configureRpcThreadpool", "(JZ)V",
         (void *)JHwBinder_native_configureRpcThreadpool },
