@@ -86,7 +86,6 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.DataUnit;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -160,11 +159,6 @@ public class StorageManager {
     public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
     /** {@hide} */
     public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
-    /** {@hide} */
-    public static final String PROP_FUSE = "persist.sys.fuse";
-    /** {@hide} */
-    public static final String PROP_SETTINGS_FUSE = FeatureFlagUtils.PERSIST_PREFIX
-            + FeatureFlagUtils.SETTINGS_FUSE_FLAG;
     /** {@hide} */
     public static final String PROP_FORCED_SCOPED_STORAGE_WHITELIST =
             "forced_scoped_storage_whitelist";
