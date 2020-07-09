@@ -1048,7 +1048,7 @@ static void android_os_Binder_setExtension(JNIEnv* env, jobject obj, jobject ext
     jbh->setExtension(extension);
 }
 
-JNIEXPORT jint JNICALL android_os_Binder_getNativeTid(JNIEnv* env, jobject clazz) {
+static jint android_os_Binder_getNativeTid() {
     return (jint)android::base::GetThreadId();
 }
 
@@ -1083,6 +1083,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable },
     { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
     { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
+    // @CriticalNative
     { "getNativeTid", "()I", (void*)android_os_Binder_getNativeTid },
 };
 

@@ -127,6 +127,7 @@ public class Binder implements IBinder {
      *
      * @hide
      */
+    @CriticalNative
     public static native int getNativeTid();
 
     // Use a Holder to allow static initialization of Binder in the boot image, and
