@@ -18,12 +18,13 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 
-import android.graphics.PixelFormat;
 import android.view.InsetsSource;
 import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.protolog.common.ProtoLog;
+
+import java.io.PrintWriter;
 
 /**
  * Controller for IME inset source on the server. It's called provider as it provides the
@@ -132,8 +133,17 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 || (mImeTargetFromIme != null && dcTarget.getParentWindow() == mImeTargetFromIme
                         && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer)
                 || mImeTargetFromIme == mDisplayContent.getImeFallback()
-                // If IME target is transparent but control target matches requesting window.
-                || (controlTarget == mImeTargetFromIme
-                        && PixelFormat.formatHasAlpha(dcTarget.mAttrs.format));
+                || (!mImeTargetFromIme.isClosing() && controlTarget == mImeTargetFromIme);
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        super.dump(pw, prefix);
+        if (mImeTargetFromIme != null) {
+            pw.print(prefix);
+            pw.print("showImePostLayout pending for mImeTargetFromIme=");
+            pw.print(mImeTargetFromIme);
+            pw.println();
+        }
     }
 }
