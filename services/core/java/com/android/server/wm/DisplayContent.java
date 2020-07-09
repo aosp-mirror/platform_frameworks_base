@@ -3574,12 +3574,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    private void updateImeControlTarget() {
+    void updateImeControlTarget() {
         mInputMethodControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
 
-        final WindowState win = mInputMethodControlTarget != null
-                ? mInputMethodControlTarget.getWindow() : null;
+        final WindowState win = InsetsControlTarget.asWindowOrNull(mInputMethodControlTarget);
         final IBinder token = win != null ? win.mClient.asBinder() : null;
         // Note: not allowed to call into IMMS with the WM lock held, hence the post.
         mWmService.mH.post(() ->
@@ -3603,6 +3602,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null) {
             return mRemoteInsetsControlTarget;
         } else {
+            // Now, a special case -- if the last target's window is in the process of exiting, but
+            // not removed, keep on the last target to avoid IME flicker.
+            final WindowState cur = InsetsControlTarget.asWindowOrNull(mInputMethodControlTarget);
+            if (cur != null && !cur.mRemoved && cur.isDisplayedLw() && cur.isClosing()
+                    && !cur.isActivityTypeHome()) {
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.v(TAG_WM, "Not changing control while current window"
+                            + " is closing and not removed");
+                }
+                return cur;
+            }
             // Otherwise, we just use the ime target as received from IME.
             return mInputMethodInputTarget;
         }
@@ -5758,6 +5768,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
+        }
+
+        /**
+         * Notifies the remote insets controller that the top focused window has changed.
+         *
+         * @param packageName The name of the package that is open in the top focused window.
+         */
+        void topFocusedWindowChanged(String packageName) {
+            try {
+                mRemoteInsetsController.topFocusedWindowChanged(packageName);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver package in top focused window change", e);
+            }
         }
 
         void notifyInsetsChanged() {

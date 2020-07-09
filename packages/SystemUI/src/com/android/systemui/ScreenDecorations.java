@@ -62,6 +62,7 @@ import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayCutout.BoundsPosition;
 import android.view.DisplayInfo;
@@ -820,6 +821,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         private static final float HIDDEN_CAMERA_PROTECTION_SCALE = 0.5f;
 
+        private Display.Mode mDisplayMode = null;
         private final DisplayInfo mInfo = new DisplayInfo();
         private final Paint mPaint = new Paint();
         private final List<Rect> mBounds = new ArrayList();
@@ -904,9 +906,31 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         @Override
         public void onDisplayChanged(int displayId) {
+            Display.Mode oldMode = mDisplayMode;
+            mDisplayMode = getDisplay().getMode();
+
+            // Display mode hasn't meaningfully changed, we can ignore it
+            if (!modeChanged(oldMode, mDisplayMode)) {
+                return;
+            }
+
             if (displayId == getDisplay().getDisplayId()) {
                 update();
             }
+        }
+
+        private boolean modeChanged(Display.Mode oldMode, Display.Mode newMode) {
+            if (oldMode == null) {
+                return true;
+            }
+
+            boolean changed = false;
+            changed |= oldMode.getPhysicalHeight() != newMode.getPhysicalHeight();
+            changed |= oldMode.getPhysicalWidth() != newMode.getPhysicalWidth();
+            // We purposely ignore refresh rate and id changes here, because we don't need to
+            // invalidate for those, and they can trigger the refresh rate to increase
+
+            return changed;
         }
 
         public void setRotation(int rotation) {

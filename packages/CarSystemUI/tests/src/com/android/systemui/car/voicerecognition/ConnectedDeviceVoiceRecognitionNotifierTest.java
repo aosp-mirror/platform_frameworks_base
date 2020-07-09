@@ -24,6 +24,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadsetClient;
 import android.content.Intent;
 import android.os.Handler;
@@ -44,14 +46,19 @@ import org.junit.runner.RunWith;
 public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
+    private static final String BLUETOOTH_REMOTE_ADDRESS = "00:11:22:33:44:55";
 
     private ConnectedDeviceVoiceRecognitionNotifier mVoiceRecognitionNotifier;
+    private TestableLooper mTestableLooper;
     private Handler mTestHandler;
+    private BluetoothDevice mBluetoothDevice;
 
     @Before
     public void setUp() throws Exception {
-        TestableLooper testableLooper = TestableLooper.get(this);
-        mTestHandler = spy(new Handler(testableLooper.getLooper()));
+        mTestableLooper = TestableLooper.get(this);
+        mTestHandler = spy(new Handler(mTestableLooper.getLooper()));
+        mBluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
+                BLUETOOTH_REMOTE_ADDRESS);
         mVoiceRecognitionNotifier = new ConnectedDeviceVoiceRecognitionNotifier(
                 mContext, mTestHandler);
         mVoiceRecognitionNotifier.onBootCompleted();
@@ -61,8 +68,10 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
     public void testReceiveIntent_started_showToast() {
         Intent intent = new Intent(BluetoothHeadsetClient.ACTION_AG_EVENT);
         intent.putExtra(BluetoothHeadsetClient.EXTRA_VOICE_RECOGNITION, VOICE_RECOGNITION_STARTED);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         verify(mTestHandler).post(any());
     }
@@ -71,8 +80,10 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
     public void testReceiveIntent_invalidExtra_noToast() {
         Intent intent = new Intent(BluetoothHeadsetClient.ACTION_AG_EVENT);
         intent.putExtra(BluetoothHeadsetClient.EXTRA_VOICE_RECOGNITION, INVALID_VALUE);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         verify(mTestHandler, never()).post(any());
     }
@@ -80,8 +91,10 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
     @Test
     public void testReceiveIntent_noExtra_noToast() {
         Intent intent = new Intent(BluetoothHeadsetClient.ACTION_AG_EVENT);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         verify(mTestHandler, never()).post(any());
     }
@@ -89,8 +102,10 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
     @Test
     public void testReceiveIntent_invalidIntent_noToast() {
         Intent intent = new Intent(BluetoothHeadsetClient.ACTION_AUDIO_STATE_CHANGED);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         verify(mTestHandler, never()).post(any());
     }
