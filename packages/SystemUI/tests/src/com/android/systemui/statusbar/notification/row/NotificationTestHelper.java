@@ -43,6 +43,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
+import com.android.systemui.R;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubblesTestActivity;
@@ -69,7 +70,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
-import com.android.systemui.tests.R;
 
 import org.mockito.ArgumentCaptor;
 

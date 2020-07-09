@@ -50,6 +50,7 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -60,7 +61,6 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
-import com.android.systemui.tests.R;
 
 import org.junit.Assert;
 import org.junit.Before;
