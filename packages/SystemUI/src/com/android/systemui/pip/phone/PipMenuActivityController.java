@@ -574,6 +574,22 @@ public class PipMenuActivityController {
         }
     }
 
+    /**
+     * Tell the PIP Menu to recalculate its layout given its current position on the display.
+     */
+    public void updateMenuLayout(Rect bounds) {
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_UPDATE_MENU_LAYOUT;
+            m.obj = bounds;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not dispatch touch event", e);
+            }
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);

@@ -127,7 +127,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 new PhysicsAnimator.SpringConfig(
                         SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
-    private final Consumer<Rect> mUpdateBoundsCallback = mBounds::set;
+    private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
+        mMenuController.updateMenuLayout(newBounds);
+        mBounds.set(newBounds);
+    };
 
     /**
      * Whether we're springing to the touch event location (vs. moving it to that position
@@ -248,7 +251,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 mBounds.set(toBounds);
             } else {
                 mTemporaryBounds.set(toBounds);
-                mPipTaskOrganizer.scheduleUserResizePip(mBounds, mTemporaryBounds, null);
+                mPipTaskOrganizer.scheduleUserResizePip(mBounds, mTemporaryBounds,
+                        (Rect newBounds) -> {
+                            mMenuController.updateMenuLayout(newBounds);
+                    });
             }
         } else {
             // If PIP is 'catching up' after being stuck in the dismiss target, update the animation
