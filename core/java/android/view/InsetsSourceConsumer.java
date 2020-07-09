@@ -153,6 +153,9 @@ public class InsetsSourceConsumer {
                 if (oldLeash == null || newLeash == null || !oldLeash.isSameSurface(newLeash)) {
                     applyHiddenToControl();
                 }
+                if (!requestedVisible && !mIsAnimationPending) {
+                    removeSurface();
+                }
             }
         }
         if (lastControl != null) {

@@ -605,9 +605,6 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
                     + " ic=" + mInputConnection);
             // Unbind input is per process per display.
-            // TODO(b/150902448): free-up IME surface when target is changing.
-            //  e.g. DisplayContent#setInputMethodTarget()
-            removeImeSurface();
             onUnbindInput();
             mInputBinding = null;
             mInputConnection = null;
