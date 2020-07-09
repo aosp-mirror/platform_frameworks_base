@@ -29,6 +29,7 @@
 namespace android {
 namespace stats_log_api_gen {
 
+using google::protobuf::OneofDescriptor;
 using google::protobuf::Descriptor;
 using google::protobuf::FieldDescriptor;
 using std::map;
@@ -40,6 +41,14 @@ using std::vector;
 const int PULL_ATOM_START_ID = 10000;
 
 const int FIRST_UID_IN_CHAIN_ID = 0;
+
+/**
+ * The types of oneof atoms.
+ *
+ * `OneofDescriptor::name()` returns the name of the oneof.
+ */
+const string ONEOF_PUSHED_ATOM_NAME = "pushed";
+const string ONEOF_PULLED_ATOM_NAME = "pulled";
 
 enum AnnotationId : uint8_t {
     ANNOTATION_ID_IS_UID = 1,
@@ -184,6 +193,7 @@ using SignatureInfoMap = map<vector<java_type_t>, FieldNumberToAtomDeclSet>;
 
 struct Atoms {
     SignatureInfoMap signatureInfoMap;
+    SignatureInfoMap pulledAtomsSignatureInfoMap;
     AtomDeclSet decls;
     AtomDeclSet non_chained_decls;
     SignatureInfoMap nonChainedSignatureInfoMap;

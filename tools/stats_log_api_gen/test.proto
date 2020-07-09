@@ -58,7 +58,7 @@ message AllTypesAtom {
 }
 
 message Event {
-    oneof event {
+    oneof pushed {
         OutOfOrderAtom out_of_order_atom = 2;
         IntAtom int_atom = 1;
         AnotherIntAtom another_int_atom = 3;
@@ -74,7 +74,7 @@ message BadTypesAtom {
 }
 
 message BadTypesEvent {
-    oneof event {
+    oneof pushed {
         BadTypesAtom bad_types_atom = 1;
     }
 }
@@ -84,7 +84,7 @@ message BadSkippedFieldSingleAtom {
 }
 
 message BadSkippedFieldSingle {
-    oneof event {
+    oneof pushed {
         BadSkippedFieldSingleAtom bad = 1;
     }
 }
@@ -96,7 +96,7 @@ message BadSkippedFieldMultipleAtom {
 }
 
 message BadSkippedFieldMultiple {
-    oneof event {
+    oneof pushed {
         BadSkippedFieldMultipleAtom bad = 1;
     }
 }
@@ -107,11 +107,11 @@ message BadAttributionNodePositionAtom {
 }
 
 message BadAttributionNodePosition {
-  oneof event { BadAttributionNodePositionAtom bad = 1; }
+  oneof pushed { BadAttributionNodePositionAtom bad = 1; }
 }
 
 message GoodEventWithBinaryFieldAtom {
-    oneof event { GoodBinaryFieldAtom field1 = 1; }
+    oneof pushed { GoodBinaryFieldAtom field1 = 1; }
 }
 
 message ComplexField {
@@ -124,7 +124,7 @@ message GoodBinaryFieldAtom {
 }
 
 message BadEventWithBinaryFieldAtom {
-    oneof event { BadBinaryFieldAtom field1 = 1; }
+    oneof pushed { BadBinaryFieldAtom field1 = 1; }
 }
 
 message BadBinaryFieldAtom {
@@ -133,7 +133,7 @@ message BadBinaryFieldAtom {
 }
 
 message BadStateAtoms {
-    oneof event {
+    oneof pushed {
         BadStateAtom1 bad1 = 1;
         BadStateAtom2 bad2 = 2;
         BadStateAtom3 bad3 = 3;
@@ -141,7 +141,7 @@ message BadStateAtoms {
 }
 
 message GoodStateAtoms {
-    oneof event {
+    oneof pushed {
         GoodStateAtom1 good1 = 1;
         GoodStateAtom2 good2 = 2;
     }
@@ -204,12 +204,33 @@ message NoModuleAtom {
 }
 
 message ModuleAtoms {
-    oneof event {
+    oneof pushed {
         ModuleOneAtom module_one_atom = 1 [(android.os.statsd.module) = "module1"];
         ModuleTwoAtom module_two_atom = 2 [(android.os.statsd.module) = "module2"];
         ModuleOneAndTwoAtom module_one_and_two_atom = 3 [
                 (android.os.statsd.module) = "module1", (android.os.statsd.module) = "module2"
         ];
         NoModuleAtom no_module_atom = 4;
+    }
+}
+
+message NotAPushNorPullAtom {
+    oneof event {
+        IntAtom int_atom = 1;
+    }
+}
+
+message AtomNotInAOneof {
+    optional IntAtom int_atom = 1;
+}
+
+message PushedAndPulledAtoms {
+    oneof pushed {
+        IntAtom int_atom_1 = 1;
+    }
+
+    oneof pulled {
+        OutOfOrderAtom out_of_order_atom = 11;
+        AnotherIntAtom another_int_atom = 10;
     }
 }
