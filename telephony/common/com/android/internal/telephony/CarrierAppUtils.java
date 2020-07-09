@@ -128,11 +128,7 @@ public final class CarrierAppUtils {
     }
 
     private static boolean isUpdatedSystemApp(ApplicationInfo ai) {
-        if ((ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-            return true;
-        }
-
-        return false;
+        return (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     /**
