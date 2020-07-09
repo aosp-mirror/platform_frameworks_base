@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
@@ -24,6 +25,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIG
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -44,7 +46,13 @@ class WallpaperWindowToken extends WindowToken {
 
     WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
-        super(service, token, TYPE_WALLPAPER, explicit, dc, ownerCanManageAppTokens);
+        this(service, token, explicit, dc, ownerCanManageAppTokens, null /* options */);
+    }
+
+    WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
+            DisplayContent dc, boolean ownerCanManageAppTokens, @Nullable Bundle options) {
+        super(service, token, TYPE_WALLPAPER, explicit, dc, ownerCanManageAppTokens, INVALID_UID,
+                false /* roundedCornerOverlay */, false /* fromClientToken */, options);
         dc.mWallpaperController.addWallpaperToken(this);
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);
     }
