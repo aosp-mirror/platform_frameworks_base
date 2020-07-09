@@ -28,6 +28,8 @@ import android.view.Display;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.doze.dagger.DozeScope;
+import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -38,6 +40,8 @@ import com.android.systemui.util.wakelock.WakeLock;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * Orchestrates all things doze.
  *
@@ -46,6 +50,7 @@ import java.util.ArrayList;
  *
  * During state transitions and in certain states, DozeMachine holds a wake lock.
  */
+@DozeScope
 public class DozeMachine {
 
     static final String TAG = "DozeMachine";
@@ -146,9 +151,11 @@ public class DozeMachine {
     private boolean mWakeLockHeldForCurrentState = false;
     private DockManager mDockManager;
 
-    public DozeMachine(Service service, AmbientDisplayConfiguration config, WakeLock wakeLock,
-            WakefulnessLifecycle wakefulnessLifecycle, BatteryController batteryController,
-            DozeLog dozeLog, DockManager dockManager, DozeHost dozeHost) {
+    @Inject
+    public DozeMachine(@WrappedService Service service, AmbientDisplayConfiguration config,
+            WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
+            BatteryController batteryController, DozeLog dozeLog, DockManager dockManager,
+            DozeHost dozeHost, Part[] parts) {
         mDozeService = service;
         mConfig = config;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -157,6 +164,10 @@ public class DozeMachine {
         mDozeLog = dozeLog;
         mDockManager = dockManager;
         mDozeHost = dozeHost;
+        mParts = parts;
+        for (Part part : parts) {
+            part.setDozeMachine(this);
+        }
     }
 
     /**
@@ -166,12 +177,6 @@ public class DozeMachine {
         for (Part part : mParts) {
             part.destroy();
         }
-    }
-
-    /** Initializes the set of {@link Part}s. Must be called exactly once after construction. */
-    public void setParts(Part[] parts) {
-        Preconditions.checkState(mParts == null);
-        mParts = parts;
     }
 
     /**
@@ -432,6 +437,9 @@ public class DozeMachine {
 
         /** Alerts that the screenstate is being changed. */
         default void onScreenState(int state) {}
+
+        /** Sets the {@link DozeMachine} when this Part is associated with one. */
+        default void setDozeMachine(DozeMachine dozeMachine) {}
     }
 
     /** A wrapper interface for {@link android.service.dreams.DreamService} */
