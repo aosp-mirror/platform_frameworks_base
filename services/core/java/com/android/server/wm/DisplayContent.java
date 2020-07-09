@@ -3493,12 +3493,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    private void updateImeControlTarget() {
+    void updateImeControlTarget() {
         mInputMethodControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
 
-        final WindowState win = mInputMethodControlTarget != null
-                ? mInputMethodControlTarget.getWindow() : null;
+        final WindowState win = InsetsControlTarget.asWindowOrNull(mInputMethodControlTarget);
         final IBinder token = win != null ? win.mClient.asBinder() : null;
         // Note: not allowed to call into IMMS with the WM lock held, hence the post.
         mWmService.mH.post(() ->
@@ -3522,6 +3521,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null) {
             return mRemoteInsetsControlTarget;
         } else {
+            // Now, a special case -- if the last target's window is in the process of exiting, but
+            // not removed, keep on the last target to avoid IME flicker.
+            final WindowState cur = InsetsControlTarget.asWindowOrNull(mInputMethodControlTarget);
+            if (cur != null && !cur.mRemoved && cur.isDisplayedLw() && cur.isClosing()
+                    && !cur.isActivityTypeHome()) {
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.v(TAG_WM, "Not changing control while current window"
+                            + " is closing and not removed");
+                }
+                return cur;
+            }
             // Otherwise, we just use the ime target as received from IME.
             return mInputMethodInputTarget;
         }
