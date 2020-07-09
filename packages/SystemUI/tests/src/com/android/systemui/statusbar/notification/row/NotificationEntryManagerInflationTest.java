@@ -86,6 +86,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -120,8 +121,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private NotificationGutsManager mGutsManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
-    @Mock private ExpandableNotificationRowComponent.Builder
-            mExpandableNotificationRowComponentBuilder;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private ExpandableNotificationRowComponent.Builder mExpandableNotificationRowComponentBuilder;
     @Mock private ExpandableNotificationRowComponent mExpandableNotificationRowComponent;
     @Mock private FalsingManager mFalsingManager;
     @Mock private KeyguardBypassController mKeyguardBypassController;
@@ -209,21 +210,9 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         when(mExpandableNotificationRowComponentBuilder
                 .expandableNotificationRow(viewCaptor.capture()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
-        when(mExpandableNotificationRowComponentBuilder
-                .notificationEntry(any()))
-                .thenReturn(mExpandableNotificationRowComponentBuilder);
-        when(mExpandableNotificationRowComponentBuilder
-                .onDismissRunnable(any()))
-                .thenReturn(mExpandableNotificationRowComponentBuilder);
-        when(mExpandableNotificationRowComponentBuilder
-                .rowContentBindStage(any()))
-                .thenReturn(mExpandableNotificationRowComponentBuilder);
-        when(mExpandableNotificationRowComponentBuilder
-                .onExpandClickListener(any()))
-                .thenReturn(mExpandableNotificationRowComponentBuilder);
-
         when(mExpandableNotificationRowComponentBuilder.build())
                 .thenReturn(mExpandableNotificationRowComponent);
+
         when(mExpandableNotificationRowComponent.getExpandableNotificationRowController())
                 .thenAnswer((Answer<ExpandableNotificationRowController>) invocation ->
                         new ExpandableNotificationRowController(

@@ -142,7 +142,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                                         .expandableNotificationRow(row)
                                         .notificationEntry(entry)
                                         .onDismissRunnable(onDismissRunnable)
-                                        .rowContentBindStage(mRowContentBindStage)
                                         .onExpandClickListener(mPresenter)
                                         .build();
                         ExpandableNotificationRowController rowController =
