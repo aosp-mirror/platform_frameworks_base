@@ -41,6 +41,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -51,9 +52,12 @@ import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
+
 /**
  * Handles triggers for ambient state changes.
  */
+@DozeScope
 public class DozeTriggers implements DozeMachine.Part {
 
     private static final String TAG = "DozeTriggers";
@@ -73,7 +77,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private static final int PROXIMITY_TIMEOUT_DELAY_MS = 500;
 
     private final Context mContext;
-    private final DozeMachine mMachine;
+    private DozeMachine mMachine;
     private final DozeLog mDozeLog;
     private final DozeSensors mDozeSensors;
     private final DozeHost mDozeHost;
@@ -153,27 +157,32 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
+    @Inject
+    public DozeTriggers(Context context, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, AsyncSensorManager sensorManager,
-            WakeLock wakeLock, boolean allowPulseTriggers, DockManager dockManager,
+            WakeLock wakeLock, DockManager dockManager,
             ProximitySensor proximitySensor, ProximitySensor.ProximityCheck proxCheck,
             DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
-        mMachine = machine;
         mDozeHost = dozeHost;
         mConfig = config;
         mDozeParameters = dozeParameters;
         mSensorManager = sensorManager;
         mWakeLock = wakeLock;
-        mAllowPulseTriggers = allowPulseTriggers;
-        mDozeSensors = new DozeSensors(context, alarmManager, mSensorManager, dozeParameters,
+        mAllowPulseTriggers = true;
+        mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = proxCheck;
         mDozeLog = dozeLog;
         mBroadcastDispatcher = broadcastDispatcher;
+    }
+
+    @Override
+    public void setDozeMachine(DozeMachine dozeMachine) {
+        mMachine = dozeMachine;
     }
 
     @Override

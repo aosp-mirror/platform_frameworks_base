@@ -81,8 +81,9 @@ public class DozeUiTest extends SysuiTestCase {
         mWakeLock = new WakeLockFake();
         mHandler = mHandlerThread.getThreadHandler();
 
-        mDozeUi = new DozeUi(mContext, mAlarmManager, mMachine, mWakeLock, mHost, mHandler,
+        mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
                 mDozeParameters, mKeyguardUpdateMonitor, mDozeLog);
+        mDozeUi.setDozeMachine(mMachine);
     }
 
     @After
@@ -136,8 +137,9 @@ public class DozeUiTest extends SysuiTestCase {
         reset(mDozeParameters);
         reset(mHost);
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
-        mDozeUi = new DozeUi(mContext, mAlarmManager, mMachine, mWakeLock, mHost, mHandler,
+        mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
                 mDozeParameters, mKeyguardUpdateMonitor, mDozeLog);
+        mDozeUi.setDozeMachine(mMachine);
 
         // Never animate if display doesn't support it.
         mDozeUi.getKeyguardCallback().onKeyguardVisibilityChanged(true);

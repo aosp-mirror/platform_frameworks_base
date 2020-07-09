@@ -24,6 +24,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
@@ -68,6 +69,7 @@ import dagger.Provides;
         },
         subcomponents = {StatusBarComponent.class,
                 NotificationRowComponent.class,
+                DozeComponent.class,
                 ExpandableNotificationRowComponent.class})
 public abstract class SystemUIModule {
 
