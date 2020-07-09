@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -126,6 +127,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     };
 
+    private final Object mNativeTidsLock = new Object();
+    // @GuardedBy("mNativeTidsLock")  // Cannot mark it as "GuardedBy" because it's read
+    // directly, as a volatile field.
+    private volatile IntArray mNativeTids = new IntArray(0);
+
     /** Injector for {@link BinderCallsStats}. */
     public static class Injector {
         public Random getRandomGenerator() {
@@ -174,6 +180,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         if (mDeviceState == null || mDeviceState.isCharging()) {
             return null;
         }
+
+        noteNativeThreadId();
 
         final CallSession s = obtainCallSession();
         s.binderClass = binder.getClass();
@@ -309,6 +317,27 @@ public class BinderCallsStats implements BinderInternal.Observer {
         } catch (RuntimeException e) {
             // Do not propagate the exception. We do not want to swallow original exception.
             Slog.wtf(TAG, "Unexpected exception while updating mExceptionCounts");
+        }
+    }
+
+    private void noteNativeThreadId() {
+        final int tid = getNativeTid();
+        int index = mNativeTids.binarySearch(tid);
+        if (index >= 0) {
+            return;
+        }
+
+        // Use the copy-on-write approach. The changes occur exceedingly infrequently, so
+        // this code path is exercised just a few times per boot
+        synchronized (mNativeTidsLock) {
+            IntArray nativeTids = mNativeTids;
+            index = nativeTids.binarySearch(tid);
+            if (index < 0) {
+                IntArray copyOnWriteArray = new IntArray(nativeTids.size() + 1);
+                copyOnWriteArray.addAll(nativeTids);
+                copyOnWriteArray.add(-index - 1, tid);
+                mNativeTids = copyOnWriteArray;
+            }
         }
     }
 
@@ -503,6 +532,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     protected int getCallingUid() {
         return Binder.getCallingUid();
+    }
+
+    protected int getNativeTid() {
+        return Binder.getNativeTid();
+    }
+
+    /**
+     * Returns known Linux TIDs for threads taking incoming binder calls.
+     */
+    public int[] getNativeTids() {
+        return mNativeTids.toArray();
     }
 
     protected long getElapsedRealtimeMicro() {
