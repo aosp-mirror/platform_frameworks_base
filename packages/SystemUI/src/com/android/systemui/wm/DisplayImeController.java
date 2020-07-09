@@ -251,6 +251,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mHandler.post(() -> startAnimation(false /* show */, false /* forceRestart */));
         }
 
+        @Override
+        public void topFocusedWindowChanged(String packageName) {
+            // no-op
+        }
+
         /**
          * Sends the local visibility state back to window manager. Needed for legacy adjustForIme.
          */
