@@ -24,14 +24,12 @@ import static com.android.server.wm.flicker.helpers.AutomationUtils.isInSplitScr
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 import androidx.test.uiautomator.UiDevice;
 
 import org.junit.AfterClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -43,8 +41,6 @@ import org.junit.runners.MethodSorters;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 140856143)
-@Ignore("Waiting bug feedback")
 public class SplitScreenToLauncherTest extends FlickerTestBase {
 
     public SplitScreenToLauncherTest() {
@@ -93,15 +89,6 @@ public class SplitScreenToLauncherTest extends FlickerTestBase {
     public void checkVisibility_statusBarWindowIsAlwaysVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
                 .showsAboveAppWindow(STATUS_BAR_WINDOW_TITLE).forAllEntries());
-    }
-
-    @Test
-    public void checkVisibility_dividerWindowBecomesInVisible() {
-        checkResults(result -> WmTraceSubject.assertThat(result)
-                .showsAboveAppWindow(DOCKED_STACK_DIVIDER)
-                .then()
-                .hidesAboveAppWindow(DOCKED_STACK_DIVIDER)
-                .forAllEntries());
     }
 
     @AfterClass

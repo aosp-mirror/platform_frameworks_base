@@ -386,11 +386,6 @@ public class DisplayPolicy {
     private int mForcingShowNavBarLayer;
     private boolean mForceShowSystemBars;
 
-    /**
-     * Force the display of system bars regardless of other settings.
-     */
-    private boolean mForceShowSystemBarsFromExternal;
-
     private boolean mShowingDream;
     private boolean mLastShowingDream;
     private boolean mDreamingLockscreen;
@@ -480,7 +475,6 @@ public class DisplayPolicy {
         final Resources r = mContext.getResources();
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
-        mForceShowSystemBarsFromExternal = r.getBoolean(R.bool.config_forceShowSystemBars);
 
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -696,17 +690,6 @@ public class DisplayPolicy {
 
     public int getDockMode() {
         return mDockMode;
-    }
-
-    /**
-     * @see WindowManagerService.setForceShowSystemBars
-     */
-    void setForceShowSystemBars(boolean forceShowSystemBars) {
-        mForceShowSystemBarsFromExternal = forceShowSystemBars;
-    }
-
-    boolean getForceShowSystemBars() {
-        return mForceShowSystemBarsFromExternal;
     }
 
     public boolean hasNavigationBar() {
@@ -3539,8 +3522,7 @@ public class DisplayPolicy {
         // We need to force system bars when the docked stack is visible, when the freeform stack
         // is focused but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        mForceShowSystemBars = dockedStackVisible || win.inFreeformWindowingMode() || resizing
-                || mForceShowSystemBarsFromExternal;
+        mForceShowSystemBars = dockedStackVisible || win.inFreeformWindowingMode() || resizing;
         final boolean forceOpaqueStatusBar = mForceShowSystemBars && !isKeyguardShowing();
 
         // apply translucent bar vis flags
@@ -3915,8 +3897,8 @@ public class DisplayPolicy {
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
-        pw.print(prefix); pw.print("mForceShowSystemBarsFromExternal=");
-        pw.print(mForceShowSystemBarsFromExternal);
+        pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars");
+        pw.print(mDisplayContent.getInsetsPolicy().getRemoteInsetsControllerControlsSystemBars());
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
         mStatusBarController.dump(pw, prefix);
         mNavigationBarController.dump(pw, prefix);

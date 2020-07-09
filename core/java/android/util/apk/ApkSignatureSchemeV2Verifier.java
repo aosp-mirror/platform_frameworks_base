@@ -24,7 +24,6 @@ import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContent
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
-import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.util.ArrayMap;
@@ -213,11 +212,9 @@ public class ApkSignatureSchemeV2Verifier {
                     verityDigest, apk.length(), signatureInfo);
         }
 
-        byte[] digest = pickBestDigestForV4(contentDigests);
-
         return new VerifiedSigner(
                 signerCerts.toArray(new X509Certificate[signerCerts.size()][]),
-                verityRootHash, digest);
+                verityRootHash, contentDigests);
     }
 
     private static X509Certificate[] verifySigner(
@@ -339,8 +336,7 @@ public class ApkSignatureSchemeV2Verifier {
             } catch (CertificateException e) {
                 throw new SecurityException("Failed to decode certificate #" + certificateCount, e);
             }
-            certificate = new VerbatimX509Certificate(
-                    certificate, encodedCert);
+            certificate = new VerbatimX509Certificate(certificate, encodedCert);
             certs.add(certificate);
         }
 
@@ -434,12 +430,15 @@ public class ApkSignatureSchemeV2Verifier {
         public final X509Certificate[][] certs;
 
         public final byte[] verityRootHash;
-        public final byte[] digest;
+        // Algorithm -> digest map of signed digests in the signature.
+        // All these are verified if requested.
+        public final Map<Integer, byte[]> contentDigests;
 
-        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash, byte[] digest) {
+        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash,
+                Map<Integer, byte[]> contentDigests) {
             this.certs = certs;
             this.verityRootHash = verityRootHash;
-            this.digest = digest;
+            this.contentDigests = contentDigests;
         }
 
     }

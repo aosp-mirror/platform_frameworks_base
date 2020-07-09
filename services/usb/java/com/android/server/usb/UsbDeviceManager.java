@@ -1367,6 +1367,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             try {
                 writeStringIfNotNull(dump, "kernel_state", UsbHandlerProto.KERNEL_STATE,
                         FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
+            } catch (FileNotFoundException exNotFound) {
+                Slog.w(TAG, "Ignore missing legacy kernel path in bugreport dump: "
+                        + "kernel state:" + STATE_PATH);
             } catch (Exception e) {
                 Slog.e(TAG, "Could not read kernel state", e);
             }
@@ -1375,6 +1378,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 writeStringIfNotNull(dump, "kernel_function_list",
                         UsbHandlerProto.KERNEL_FUNCTION_LIST,
                         FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
+            } catch (FileNotFoundException exNotFound) {
+                Slog.w(TAG, "Ignore missing legacy kernel path in bugreport dump: "
+                        + "kernel function list:" + FUNCTIONS_PATH);
             } catch (Exception e) {
                 Slog.e(TAG, "Could not read kernel function list", e);
             }

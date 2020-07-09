@@ -33,15 +33,16 @@ public class FaceRevokeChallengeClient extends RevokeChallengeClient<IBiometrics
 
     private static final String TAG = "FaceRevokeChallengeClient";
 
-    FaceRevokeChallengeClient(@NonNull Context context, @NonNull IBinder token,
+    FaceRevokeChallengeClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
             @NonNull String owner, int sensorId) {
-        super(context, token, owner, sensorId);
+        super(context, lazyDaemon, token, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.revokeChallenge();
+            getFreshDaemon().revokeChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "revokeChallenge failed", e);
         }

@@ -27,6 +27,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Wraps {@link InternalEnumerateClient} and {@link RemovalClient}. Keeps track of all the
@@ -37,8 +38,8 @@ import java.util.List;
  * 2) The HAL and Framework are not in sync, and
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
-public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
-        implements EnumerateConsumer, RemovalConsumer {
+public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Identifier, T>
+        extends ClientMonitor<T> implements EnumerateConsumer, RemovalConsumer {
 
     private static final String TAG = "Biometrics/InternalCleanupClient";
 
@@ -57,10 +58,11 @@ public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
 
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
     private final BiometricUtils mBiometricUtils;
-    private final List<? extends BiometricAuthenticator.Identifier> mEnrolledList;
+    private final Map<Integer, Long> mAuthenticatorIds;
+    private final List<S> mEnrolledList;
     private ClientMonitor<T> mCurrentTask;
 
-    private final FinishCallback mEnumerateFinishCallback = clientMonitor -> {
+    private final FinishCallback mEnumerateFinishCallback = (clientMonitor, success) -> {
         final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
                 ((InternalEnumerateClient<T>) mCurrentTask).getUnknownHALTemplates();
 
@@ -75,45 +77,46 @@ public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
         if (mUnknownHALTemplates.isEmpty()) {
             // No unknown HAL templates. Unknown framework templates are already cleaned up in
             // InternalEnumerateClient. Finish this client.
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, success);
         } else {
             startCleanupUnknownHalTemplates();
         }
     };
 
-    private final FinishCallback mRemoveFinishCallback = clientMonitor -> {
-        mFinishCallback.onClientFinished(this);
+    private final FinishCallback mRemoveFinishCallback = (clientMonitor, success) -> {
+        mFinishCallback.onClientFinished(this, success);
     };
 
-    protected abstract InternalEnumerateClient<T> getEnumerateClient(Context context, IBinder token,
-            int userId, String owner,
-            List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils,
-            int sensorId);
+    protected abstract InternalEnumerateClient<T> getEnumerateClient(Context context,
+            LazyDaemon<T> lazyDaemon, IBinder token, int userId, String owner,
+            List<S> enrolledList, BiometricUtils utils, int sensorId);
 
-    protected abstract RemovalClient<T> getRemovalClient(Context context, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId);
+    protected abstract RemovalClient<T> getRemovalClient(Context context, LazyDaemon<T> lazyDaemon,
+            IBinder token, int biometricId, int userId, String owner, BiometricUtils utils,
+            int sensorId, Map<Integer, Long> authenticatorIds);
 
-    protected InternalCleanupClient(@NonNull Context context, int userId,
-            @NonNull String owner, int sensorId, int statsModality,
-            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            @NonNull BiometricUtils utils) {
-        super(context, null /* token */, null /* ClientMonitorCallbackConverter */,
+    protected InternalCleanupClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            int userId, @NonNull String owner, int sensorId, int statsModality,
+            @NonNull List<S> enrolledList, @NonNull BiometricUtils utils,
+            @NonNull Map<Integer, Long> authenticatorIds) {
+        super(context, lazyDaemon, null /* token */, null /* ClientMonitorCallbackConverter */,
                 userId, owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
+        mAuthenticatorIds = authenticatorIds;
         mEnrolledList = enrolledList;
     }
 
     private void startCleanupUnknownHalTemplates() {
         UserTemplate template = mUnknownHALTemplates.get(0);
         mUnknownHALTemplates.remove(template);
-        mCurrentTask = getRemovalClient(getContext(), getToken(),
+        mCurrentTask = getRemovalClient(getContext(), mLazyDaemon, getToken(),
                 template.mIdentifier.getBiometricId(), template.mUserId,
-                getContext().getPackageName(), mBiometricUtils, getSensorId());
+                getContext().getPackageName(), mBiometricUtils, getSensorId(), mAuthenticatorIds);
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                 mStatsModality,
                 BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
-        mCurrentTask.start(mDaemon, mRemoveFinishCallback);
+        mCurrentTask.start(mRemoveFinishCallback);
     }
 
     @Override
@@ -122,24 +125,19 @@ public abstract class InternalCleanupClient<T> extends ClientMonitor<T>
     }
 
     @Override
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         // Start enumeration. Removal will start if necessary, when enumeration is completed.
-        mCurrentTask = getEnumerateClient(getContext(), getToken(), getTargetUserId(),
+        mCurrentTask = getEnumerateClient(getContext(), mLazyDaemon, getToken(), getTargetUserId(),
                 getOwnerString(), mEnrolledList, mBiometricUtils, getSensorId());
-        mCurrentTask.start(daemon, mEnumerateFinishCallback);
+        mCurrentTask.start(mEnumerateFinishCallback);
     }
 
     @Override
     protected void startHalOperation() {
         // Internal cleanup's start method does not require a HAL operation, but rather
         // relies on its subtask's ClientMonitor to start the proper HAL operation.
-    }
-
-    @Override
-    protected void stopHalOperation() {
-        // Internal cleanup's cannot be stopped.
     }
 
     @Override

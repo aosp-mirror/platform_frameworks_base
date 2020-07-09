@@ -52,12 +52,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
 
     protected boolean mAuthAttempted;
 
-    public AuthenticationClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
-            boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
-            int sensorId, boolean isStrongBiometric, int statsModality, int statsClient,
-            @NonNull TaskStackListener taskStackListener, @NonNull LockoutTracker lockoutTracker) {
-        super(context, token, listener, targetUserId, owner, cookie, sensorId,
+    public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
+            int targetUserId, long operationId, boolean restricted, @NonNull String owner,
+            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
+            int statsModality, int statsClient, @NonNull TaskStackListener taskStackListener,
+            @NonNull LockoutTracker lockoutTracker) {
+        super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
@@ -179,7 +180,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to notify listener, finishing", e);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -187,8 +188,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
      * Start authentication
      */
     @Override
-    public void start(@NonNull T daemon, @NonNull FinishCallback finishCallback) {
-        super.start(daemon, finishCallback);
+    public void start(@NonNull FinishCallback finishCallback) {
+        super.start(finishCallback);
 
         final @LockoutTracker.LockoutMode int lockoutMode =
                 mLockoutTracker.getLockoutModeForUser(getTargetUserId());

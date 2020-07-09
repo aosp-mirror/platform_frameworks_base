@@ -18,9 +18,9 @@ package com.android.server.biometrics.sensors.face;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
+import android.hardware.face.Face;
 import android.os.IBinder;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
@@ -29,36 +29,40 @@ import com.android.server.biometrics.sensors.InternalEnumerateClient;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Face-specific internal cleanup client supporting the
  * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
  * HIDL interfaces.
  */
-class FaceInternalCleanupClient extends InternalCleanupClient<IBiometricsFace> {
+class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsFace> {
 
-    FaceInternalCleanupClient(@NonNull Context context, int userId, @NonNull String owner,
-            int sensorId, @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            @NonNull BiometricUtils utils) {
-        super(context, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE, enrolledList,
-                utils);
+    FaceInternalCleanupClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
+            int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils utils,
+            @NonNull Map<Integer, Long> authenticatorIds) {
+        super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
+                enrolledList, utils, authenticatorIds);
     }
 
     @Override
     protected InternalEnumerateClient<IBiometricsFace> getEnumerateClient(Context context,
-            IBinder token, int userId, String owner,
-            List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            BiometricUtils utils, int sensorId) {
-        return new FaceInternalEnumerateClient(context, token, userId, owner, enrolledList, utils,
-                sensorId);
+            LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token, int userId, String owner,
+            List<Face> enrolledList, BiometricUtils utils, int sensorId) {
+        return new FaceInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
+                enrolledList, utils, sensorId);
     }
 
     @Override
-    protected RemovalClient<IBiometricsFace> getRemovalClient(Context context, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId) {
+    protected RemovalClient<IBiometricsFace> getRemovalClient(Context context,
+            LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token,
+            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId,
+            Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        return new FaceRemovalClient(context, token, null /* ClientMonitorCallbackConverter */,
-                biometricId, userId, owner, utils, sensorId);
+        return new FaceRemovalClient(context, lazyDaemon, token,
+                null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
+                sensorId, authenticatorIds);
     }
 }

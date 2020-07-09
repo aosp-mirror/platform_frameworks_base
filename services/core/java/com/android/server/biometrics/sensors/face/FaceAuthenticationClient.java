@@ -62,13 +62,14 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
     private int mLastAcquire;
 
-    FaceAuthenticationClient(@NonNull Context context, @NonNull IBinder token,
+    FaceAuthenticationClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
-        super(context, token, listener, targetUserId, operationId, restricted,
+        super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
                 lockoutTracker);
@@ -89,22 +90,22 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.authenticate(mOperationId);
+            getFreshDaemon().authenticate(mOperationId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
         try {
-            mDaemon.cancel();
+            getFreshDaemon().cancel();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this);
+            mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -132,7 +133,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         // 1) Authenticated == true
         // 2) Error occurred
         // 3) Authenticated == false
-        mFinishCallback.onClientFinished(this);
+        mFinishCallback.onClientFinished(this, true /* success */);
     }
 
     @Override

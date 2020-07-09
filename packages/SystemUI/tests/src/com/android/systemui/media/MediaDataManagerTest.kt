@@ -31,6 +31,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
 private const val KEY = "KEY"
+private const val KEY_2 = "KEY_2"
 private const val PACKAGE_NAME = "com.android.systemui"
 private const val APP_NAME = "SystemUI"
 private const val SESSION_ARTIST = "artist"
@@ -156,8 +157,43 @@ class MediaDataManagerTest : SysuiTestCase() {
         mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
         // WHEN the notification is removed
         mediaDataManager.onNotificationRemoved(KEY)
-        // THEN the media data indicates that it is
+        // THEN the media data indicates that it is for resumption
         assertThat(listener.data!!.resumption).isTrue()
+        // AND the new key is the package name
+        assertThat(listener.key!!).isEqualTo(PACKAGE_NAME)
+        assertThat(listener.oldKey!!).isEqualTo(KEY)
+        assertThat(listener.removedKey).isNull()
+    }
+
+    @Test
+    fun testOnNotificationRemoved_twoWithResumption() {
+        // GIVEN that the manager has two notifications with resume actions
+        val listener = TestListener()
+        mediaDataManager.addListener(listener)
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        mediaDataManager.onNotificationAdded(KEY_2, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(2)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(2)
+        val data = listener.data!!
+        assertThat(data.resumption).isFalse()
+        val resumableData = data.copy(resumeAction = Runnable {})
+        mediaDataManager.onMediaDataLoaded(KEY, null, resumableData)
+        mediaDataManager.onMediaDataLoaded(KEY_2, null, resumableData)
+        // WHEN the first is removed
+        mediaDataManager.onNotificationRemoved(KEY)
+        // THEN the data is for resumption and the key is migrated to the package name
+        assertThat(listener.data!!.resumption).isTrue()
+        assertThat(listener.key!!).isEqualTo(PACKAGE_NAME)
+        assertThat(listener.oldKey!!).isEqualTo(KEY)
+        assertThat(listener.removedKey).isNull()
+        // WHEN the second is removed
+        mediaDataManager.onNotificationRemoved(KEY_2)
+        // THEN the data is for resumption and the second key is removed
+        assertThat(listener.data!!.resumption).isTrue()
+        assertThat(listener.key!!).isEqualTo(PACKAGE_NAME)
+        assertThat(listener.oldKey!!).isEqualTo(PACKAGE_NAME)
+        assertThat(listener.removedKey!!).isEqualTo(KEY_2)
     }
 
     @Test
@@ -190,6 +226,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         var data: MediaData? = null
         var key: String? = null
         var oldKey: String? = null
+        var removedKey: String? = null
 
         override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
             this.key = key
@@ -198,9 +235,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         }
 
         override fun onMediaDataRemoved(key: String) {
-            this.key = key
-            oldKey = null
-            data = null
+            removedKey = key
         }
     }
 }

@@ -13,9 +13,6 @@ fi
 
 mm
 
-# Push the files onto the device.
-. $ANDROID_BUILD_TOP/frameworks/av/media/libmediatranscoding/tests/assets/push_assets.sh
-
 echo "[==========] waiting for device"
 adb root && adb wait-for-device remount
 
@@ -26,6 +23,13 @@ adb shell kill -9 `pid media.transcoding`
 echo "[==========] build test apk"
 mmm -j16 .
 adb install -r -g ${OUT}/testcases/mediatranscodingtest/arm64/mediatranscodingtest.apk
+
+# Push the files into app's cache directory/
+FILES=$ANDROID_BUILD_TOP/frameworks/av/media/libmediatranscoding/tests/assets/*
+for file in $FILES
+do
+adb push --sync $file /data/user/0/com.android.mediatranscodingtest/cache/
+done
 
 echo "[==========] running real transcoding tests"
 adb shell am instrument -e class com.android.mediatranscodingtest.MediaTranscodeManagerTest -w com.android.mediatranscodingtest/.MediaTranscodingTestRunner

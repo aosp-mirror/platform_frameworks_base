@@ -371,12 +371,26 @@ public abstract class PanelViewController {
             float vectorVel = (float) Math.hypot(
                     mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 
-            boolean expand = flingExpands(vel, vectorVel, x, y)
-                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel;
+            final boolean onKeyguard =
+                    mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+
+            final boolean expand;
+            if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
+                // If we get a cancel, put the shade back to the state it was in when the gesture
+                // started
+                if (onKeyguard) {
+                    expand = true;
+                } else {
+                    expand = !mPanelClosedOnDown;
+                }
+            } else {
+                expand = flingExpands(vel, vectorVel, x, y);
+            }
+
             mDozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                     mStatusBar.isFalsingThresholdNeeded(), mStatusBar.isWakeUpComingFromTouch());
             // Log collapse gesture if on lock screen.
-            if (!expand && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+            if (!expand && onKeyguard) {
                 float displayDensity = mStatusBar.getDisplayDensity();
                 int heightDp = (int) Math.abs((y - mInitialTouchY) / displayDensity);
                 int velocityDp = (int) Math.abs(vel / displayDensity);

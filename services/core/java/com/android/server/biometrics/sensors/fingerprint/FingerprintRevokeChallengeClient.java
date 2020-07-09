@@ -35,15 +35,16 @@ public class FingerprintRevokeChallengeClient
 
     private static final String TAG = "FingerprintRevokeChallengeClient";
 
-    FingerprintRevokeChallengeClient(@NonNull Context context, @NonNull IBinder token,
+    FingerprintRevokeChallengeClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull String owner, int sensorId) {
-        super(context, token, owner, sensorId);
+        super(context, lazyDaemon, token, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mDaemon.postEnroll();
+            getFreshDaemon().postEnroll();
         } catch (RemoteException e) {
             Slog.e(TAG, "revokeChallenge/postEnroll failed", e);
         }

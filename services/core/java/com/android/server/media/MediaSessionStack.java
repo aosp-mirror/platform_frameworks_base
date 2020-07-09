@@ -22,7 +22,6 @@ import android.media.Session2Token;
 import android.media.session.MediaSession;
 import android.os.Debug;
 import android.os.UserHandle;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -190,7 +189,8 @@ class MediaSessionStack {
         if (DEBUG) {
             Log.d(TAG, "updateMediaButtonSessionIfNeeded, callers=" + Debug.getCallers(2));
         }
-        IntArray audioPlaybackUids = mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
+        List<Integer> audioPlaybackUids =
+                mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
         for (int i = 0; i < audioPlaybackUids.size(); i++) {
             int audioPlaybackUid = audioPlaybackUids.get(i);
             MediaSessionRecordImpl mediaButtonSession = findMediaButtonSession(audioPlaybackUid);
