@@ -47,6 +47,7 @@ import android.app.IBackupAgent;
 import android.app.PendingIntent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManager;
@@ -535,11 +536,12 @@ public class UserBackupManagerService {
     }
 
     @VisibleForTesting
-    UserBackupManagerService(Context context) {
+    UserBackupManagerService(Context context, PackageManager packageManager) {
         mContext = context;
 
         mUserId = 0;
         mRegisterTransportsRequestedTime = 0;
+        mPackageManager = packageManager;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -550,7 +552,6 @@ public class UserBackupManagerService {
         mRunInitIntent = null;
         mAgentTimeoutParameters = null;
         mTransportManager = null;
-        mPackageManager = null;
         mActivityManagerInternal = null;
         mAlarmManager = null;
         mConstants = null;
@@ -1825,6 +1826,15 @@ public class UserBackupManagerService {
      */
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) {
+        return requestBackup(packages, observer, monitor, flags, OperationType.BACKUP);
+    }
+
+    /**
+     * Requests a backup for the inputted {@code packages} with a specified {@link
+     * IBackupManagerMonitor} and {@link OperationType}.
+     */
+    public int requestBackup(String[] packages, IBackupObserver observer,
+            IBackupManagerMonitor monitor, int flags, @OperationType int operationType) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
@@ -1872,6 +1882,18 @@ public class UserBackupManagerService {
         OnTaskFinishedListener listener =
                 caller -> mTransportManager.disposeOfTransportClient(transportClient, caller);
 
+        Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
+        msg.obj = getRequestBackupParams(packages, observer, monitor, flags, operationType,
+                transportClient, transportDirName, listener);
+        mBackupHandler.sendMessage(msg);
+        return BackupManager.SUCCESS;
+    }
+
+    @VisibleForTesting
+    BackupParams getRequestBackupParams(String[] packages, IBackupObserver observer,
+            IBackupManagerMonitor monitor, int flags, @OperationType int operationType,
+            TransportClient transportClient, String transportDirName,
+            OnTaskFinishedListener listener) {
         ArrayList<String> fullBackupList = new ArrayList<>();
         ArrayList<String> kvBackupList = new ArrayList<>();
         for (String packageName : packages) {
@@ -1882,12 +1904,13 @@ public class UserBackupManagerService {
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageName,
                         PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
-                if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo, mUserId)) {
+                if (!appIsEligibleForBackup(packageInfo.applicationInfo, mUserId,
+                        operationType)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
                 }
-                if (AppBackupUtils.appGetsFullBackup(packageInfo)) {
+                if (appGetsFullBackup(packageInfo, operationType)) {
                     fullBackupList.add(packageInfo.packageName);
                 } else {
                     kvBackupList.add(packageInfo.packageName);
@@ -1897,6 +1920,7 @@ public class UserBackupManagerService {
                         BackupManager.ERROR_PACKAGE_NOT_FOUND);
             }
         }
+
         EventLog.writeEvent(EventLogTags.BACKUP_REQUESTED, packages.length, kvBackupList.size(),
                 fullBackupList.size());
         if (MORE_DEBUG) {
@@ -1915,11 +1939,20 @@ public class UserBackupManagerService {
 
         boolean nonIncrementalBackup = (flags & BackupManager.FLAG_NON_INCREMENTAL_BACKUP) != 0;
 
-        Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
-        msg.obj = new BackupParams(transportClient, transportDirName, kvBackupList, fullBackupList,
-                observer, monitor, listener, true, nonIncrementalBackup);
-        mBackupHandler.sendMessage(msg);
-        return BackupManager.SUCCESS;
+        return new BackupParams(transportClient, transportDirName, kvBackupList, fullBackupList,
+                observer, monitor, listener, /* userInitiated */ true, nonIncrementalBackup,
+                operationType);
+    }
+
+    @VisibleForTesting
+    boolean appIsEligibleForBackup(ApplicationInfo applicationInfo, int userId,
+            @OperationType int operationType) {
+        return AppBackupUtils.appIsEligibleForBackup(applicationInfo, userId, operationType);
+    }
+
+    @VisibleForTesting
+    boolean appGetsFullBackup(PackageInfo packageInfo, @OperationType int operationType) {
+        return AppBackupUtils.appGetsFullBackup(packageInfo, operationType);
     }
 
     /** Cancel all running backups. */

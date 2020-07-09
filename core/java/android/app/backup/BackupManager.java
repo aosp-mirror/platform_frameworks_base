@@ -752,7 +752,7 @@ public class BackupManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public int requestBackup(String[] packages, BackupObserver observer) {
-        return requestBackup(packages, observer, null, 0);
+        return requestBackup(packages, observer, null, 0, OperationType.BACKUP);
     }
 
     /**
@@ -777,6 +777,31 @@ public class BackupManager {
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public int requestBackup(String[] packages, BackupObserver observer,
             BackupManagerMonitor monitor, int flags) {
+        return requestBackup(packages, observer, monitor, flags, OperationType.BACKUP);
+    }
+
+    /**
+     * Request an immediate backup, providing an observer to which results of the backup operation
+     * will be published. The Android backup system will decide for each package whether it will
+     * be full app data backup or key/value-pair-based backup.
+     *
+     * <p>If this method returns {@link BackupManager#SUCCESS}, the OS will attempt to backup all
+     * provided packages using the remote transport.
+     *
+     * @param packages List of package names to backup.
+     * @param observer The {@link BackupObserver} to receive callbacks during the backup
+     *                 operation. Could be {@code null}.
+     * @param monitor  The {@link BackupManagerMonitorWrapper} to receive callbacks of important
+     *                 events during the backup operation. Could be {@code null}.
+     * @param flags    {@link #FLAG_NON_INCREMENTAL_BACKUP}.
+     * @param operationType {@link OperationType}
+     * @return {@link BackupManager#SUCCESS} on success; nonzero on error.
+     * @throws IllegalArgumentException on null or empty {@code packages} param.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public int requestBackup(String[] packages, BackupObserver observer,
+            BackupManagerMonitor monitor, int flags, @OperationType int operationType) {
         checkServiceBinder();
         if (sService != null) {
             try {
@@ -786,7 +811,8 @@ public class BackupManager {
                 BackupManagerMonitorWrapper monitorWrapper = monitor == null
                         ? null
                         : new BackupManagerMonitorWrapper(monitor);
-                return sService.requestBackup(packages, observerWrapper, monitorWrapper, flags);
+                return sService.requestBackup(packages, observerWrapper, monitorWrapper, flags,
+                        operationType);
             } catch (RemoteException e) {
                 Log.e(TAG, "requestBackup() couldn't connect");
             }
