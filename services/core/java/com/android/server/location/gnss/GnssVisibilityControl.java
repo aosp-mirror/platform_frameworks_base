@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -582,15 +581,7 @@ class GnssVisibilityControl {
             mAppOps.finishOp(AppOpsManager.OP_MONITOR_LOCATION, uid, proxyAppPkgName);
             mAppOps.finishOp(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, uid, proxyAppPkgName);
         }
-        sendHighPowerMonitoringBroadcast();
         return true;
-    }
-
-    private void sendHighPowerMonitoringBroadcast() {
-        // Send an intent to notify that a high power request has been added/removed so that
-        // the SystemUi checks the state of AppOps and updates the location icon accordingly.
-        Intent intent = new Intent(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void handleEmergencyNfwNotification(NfwNotification nfwNotification) {
