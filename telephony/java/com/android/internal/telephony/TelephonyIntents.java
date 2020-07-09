@@ -171,8 +171,8 @@ public class TelephonyIntents {
      *   if not specified </dd>
      * </dl>
      *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
+     * <p class="note">This is a sticky broadcast, and therefore requires no permissions to listen
+     * to. Do not add any additional information to this broadcast.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
