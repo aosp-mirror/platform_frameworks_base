@@ -71,6 +71,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
@@ -910,7 +911,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param root {@link RootWindowContainer}
      */
     DisplayContent(Display display, RootWindowContainer root) {
-        super(root.mWindowManager);
+        super(root.mWindowManager, "DisplayContent", FEATURE_ROOT);
         if (mWmService.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists="

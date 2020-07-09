@@ -149,7 +149,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         TaskDisplayArea secondTda =
                 new TaskDisplayArea(display, mWm, "Tapped TDA", FEATURE_VENDOR_FIRST);
         display.addChild(secondTda, 1);
-        display.mTaskDisplayAreas.add(secondTda);
         // Current focused window
         ActivityStack focusedStack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, display);
