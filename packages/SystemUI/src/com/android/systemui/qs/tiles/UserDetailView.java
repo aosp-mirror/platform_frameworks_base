@@ -21,7 +21,6 @@ import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
@@ -33,6 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
 import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.qs.QSUserSwitcherEvent;
@@ -100,7 +100,8 @@ public class UserDetailView extends PseudoGridView {
             if (item.picture == null) {
                 v.bind(name, getDrawable(mContext, item).mutate(), item.resolveId());
             } else {
-                Drawable drawable = new BitmapDrawable(v.getResources(), item.picture);
+                int avatarSize = (int) v.getResources().getDimension(R.dimen.qs_framed_avatar_size);
+                Drawable drawable = new CircleFramedDrawable(item.picture, avatarSize);
                 drawable.setColorFilter(
                         item.isSwitchToEnabled ? null : getDisabledUserAvatarColorFilter());
                 v.bind(name, drawable, item.info.id);
