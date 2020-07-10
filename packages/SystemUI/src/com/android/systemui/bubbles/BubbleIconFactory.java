@@ -24,7 +24,6 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -95,9 +94,16 @@ public class BubbleIconFactory extends BaseIconFactory {
             Bitmap badgeAndRing = Bitmap.createBitmap(userBadgedBitmap.getWidth(),
                     userBadgedBitmap.getHeight(), userBadgedBitmap.getConfig());
             Canvas c = new Canvas(badgeAndRing);
-            Rect dest = new Rect((int) ringStrokeWidth, (int) ringStrokeWidth,
-                    c.getHeight() - (int) ringStrokeWidth, c.getWidth() - (int) ringStrokeWidth);
-            c.drawBitmap(userBadgedBitmap, null, dest, null);
+
+            final int bitmapTop = (int) ringStrokeWidth;
+            final int bitmapLeft = (int) ringStrokeWidth;
+            final int bitmapWidth = c.getWidth() - 2 * (int) ringStrokeWidth;
+            final int bitmapHeight = c.getHeight() - 2 * (int) ringStrokeWidth;
+
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(userBadgedBitmap, bitmapWidth,
+                    bitmapHeight, /* filter */ true);
+            c.drawBitmap(scaledBitmap, bitmapTop, bitmapLeft, /* paint */null);
+
             Paint ringPaint = new Paint();
             ringPaint.setStyle(Paint.Style.STROKE);
             ringPaint.setColor(importantConversationColor);
@@ -105,6 +111,7 @@ public class BubbleIconFactory extends BaseIconFactory {
             ringPaint.setStrokeWidth(ringStrokeWidth);
             c.drawCircle(c.getWidth() / 2, c.getHeight() / 2, c.getWidth() / 2 - ringStrokeWidth,
                     ringPaint);
+
             shadowGenerator.recreateIcon(Bitmap.createBitmap(badgeAndRing), c);
             return createIconBitmap(badgeAndRing);
         }

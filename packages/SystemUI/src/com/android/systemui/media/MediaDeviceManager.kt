@@ -71,7 +71,8 @@ class MediaDeviceManager @Inject constructor(
             val controller = data.token?.let {
                 MediaController(context, it)
             }
-            entry = Token(key, controller, localMediaManagerFactory.create(data.packageName))
+            entry = Token(key, oldKey, controller,
+                    localMediaManagerFactory.create(data.packageName))
             entries[key] = entry
             entry.start()
         }
@@ -98,23 +99,24 @@ class MediaDeviceManager @Inject constructor(
         }
     }
 
-    private fun processDevice(key: String, device: MediaDevice?) {
+    private fun processDevice(key: String, oldKey: String?, device: MediaDevice?) {
         val enabled = device != null
         val data = MediaDeviceData(enabled, device?.iconWithoutBackground, device?.name)
         listeners.forEach {
-            it.onMediaDeviceChanged(key, data)
+            it.onMediaDeviceChanged(key, oldKey, data)
         }
     }
 
     interface Listener {
         /** Called when the route has changed for a given notification. */
-        fun onMediaDeviceChanged(key: String, data: MediaDeviceData?)
+        fun onMediaDeviceChanged(key: String, oldKey: String?, data: MediaDeviceData?)
         /** Called when the notification was removed. */
         fun onKeyRemoved(key: String)
     }
 
     private inner class Token(
         val key: String,
+        val oldKey: String?,
         val controller: MediaController?,
         val localMediaManager: LocalMediaManager
     ) : LocalMediaManager.DeviceCallback {
@@ -125,7 +127,7 @@ class MediaDeviceManager @Inject constructor(
             set(value) {
                 if (!started || value != field) {
                     field = value
-                    processDevice(key, value)
+                    processDevice(key, oldKey, value)
                 }
             }
         fun start() {
