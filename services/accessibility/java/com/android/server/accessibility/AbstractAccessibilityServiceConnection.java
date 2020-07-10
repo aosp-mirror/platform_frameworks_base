@@ -89,6 +89,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -1176,7 +1177,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 /* ignore */
         }
         if (mService != null) {
-            mService.unlinkToDeath(this, 0);
+            try {
+                mService.unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                Slog.e(LOG_TAG, "Failed unregistering death link");
+            }
             mService = null;
         }
 
