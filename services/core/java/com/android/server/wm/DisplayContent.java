@@ -3506,12 +3506,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private boolean isImeControlledByApp() {
-        return mInputMethodTarget != null && !WindowConfiguration.isSplitScreenWindowingMode(
-                mInputMethodTarget.getWindowingMode());
+        return mInputMethodInputTarget != null && !WindowConfiguration.isSplitScreenWindowingMode(
+                        mInputMethodInputTarget.getWindowingMode());
     }
 
     boolean isImeAttachedToApp() {
         return isImeControlledByApp()
+                && mInputMethodTarget != null
                 && mInputMethodTarget.mActivityRecord != null
                 && mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 // An activity with override bounds should be letterboxed inside its parent bounds,
