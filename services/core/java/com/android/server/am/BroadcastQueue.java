@@ -603,7 +603,7 @@ public final class BroadcastQueue {
     }
 
     private void deliverToRegisteredReceiverLocked(BroadcastRecord r,
-            BroadcastFilter filter, boolean ordered, int index) {
+            BroadcastFilter filter, boolean ordered, int index, boolean skipOomAdj) {
         boolean skip = false;
         if (!mService.validateAssociationAllowedLocked(r.callerPackage, r.callingUid,
                 filter.packageName, filter.owningUid)) {
@@ -787,8 +787,10 @@ public final class BroadcastQueue {
                 // are already core system stuff so don't matter for this.
                 r.curApp = filter.receiverList.app;
                 filter.receiverList.app.curReceivers.add(r);
-                mService.updateOomAdjLocked(r.curApp, true,
-                        OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
+                if (!skipOomAdj) {
+                    mService.updateOomAdjLocked(r.curApp, true,
+                            OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
+                }
             }
         }
         try {
@@ -984,7 +986,8 @@ public final class BroadcastQueue {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Delivering non-ordered on [" + mQueueName + "] to registered "
                         + target + ": " + r);
-                deliverToRegisteredReceiverLocked(r, (BroadcastFilter)target, false, i);
+                deliverToRegisteredReceiverLocked(r,
+                        (BroadcastFilter) target, false, i, skipOomAdj);
             }
             addBroadcastToHistoryLocked(r);
             if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Done with parallel broadcast ["
@@ -1036,7 +1039,7 @@ public final class BroadcastQueue {
                 // No more broadcasts are deliverable right now, so all done!
                 mDispatcher.scheduleDeferralCheckLocked(false);
                 mService.scheduleAppGcsLocked();
-                if (looped) {
+                if (looped && !skipOomAdj) {
                     // If we had finished the last ordered broadcast, then
                     // make sure all processes have correct oom and sched
                     // adjustments.
@@ -1282,7 +1285,7 @@ public final class BroadcastQueue {
                     "Delivering ordered ["
                     + mQueueName + "] to registered "
                     + filter + ": " + r);
-            deliverToRegisteredReceiverLocked(r, filter, r.ordered, recIdx);
+            deliverToRegisteredReceiverLocked(r, filter, r.ordered, recIdx, skipOomAdj);
             if (r.receiver == null || !r.ordered) {
                 // The receiver has already finished, so schedule to
                 // process the next one.
