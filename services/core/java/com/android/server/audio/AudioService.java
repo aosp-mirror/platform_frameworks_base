@@ -1320,6 +1320,11 @@ public class AudioService extends IAudioService.Stub
                         device, caller, true /*hasModifyAudioSettings*/);
             }
             mStreamStates[streamType].checkFixedVolumeDevices();
+
+            // Unmute streams if device is full volume
+            if (mFullVolumeDevices.contains(device)) {
+                mStreamStates[streamType].mute(false);
+            }
         }
     }
 
