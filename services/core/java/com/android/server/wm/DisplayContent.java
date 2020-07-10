@@ -596,9 +596,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private IntArray mDisplayAccessUIDs = new IntArray();
 
     /** All tokens used to put activities on this stack to sleep (including mOffToken) */
-    final ArrayList<ActivityTaskManagerInternal.SleepToken> mAllSleepTokens = new ArrayList<>();
-    /** The token acquired by ActivityStackSupervisor to put stacks on the display to sleep */
-    ActivityTaskManagerInternal.SleepToken mOffToken;
+    final ArrayList<RootWindowContainer.SleepToken> mAllSleepTokens = new ArrayList<>();
+    /** The token acquirer to put stacks on the display to sleep */
+    private final ActivityTaskManagerInternal.SleepTokenAcquirer mOffTokenAcquirer;
 
     private boolean mSleeping;
 
@@ -934,6 +934,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAtmService = mWmService.mAtmService;
         mDisplay = display;
         mDisplayId = display.getDisplayId();
+        mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
@@ -5168,11 +5169,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int displayId = mDisplay.getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             final int displayState = mDisplay.getState();
-            if (displayState == Display.STATE_OFF && mOffToken == null) {
-                mOffToken = mAtmService.acquireSleepToken("Display-off", displayId);
-            } else if (displayState == Display.STATE_ON && mOffToken != null) {
-                mOffToken.release();
-                mOffToken = null;
+            if (displayState == Display.STATE_OFF) {
+                mOffTokenAcquirer.acquire(mDisplayId);
+            } else if (displayState == Display.STATE_ON) {
+                mOffTokenAcquirer.release(mDisplayId);
             }
         }
         mWmService.requestTraversal();
@@ -5424,7 +5424,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayPolicy.release();
 
         if (!mAllSleepTokens.isEmpty()) {
-            mRootWindowContainer.mSleepTokens.removeAll(mAllSleepTokens);
+            mAllSleepTokens.forEach(token ->
+                    mRootWindowContainer.mSleepTokens.remove(token.mHashKey));
             mAllSleepTokens.clear();
             mAtmService.updateSleepIfNeededLocked();
         }
