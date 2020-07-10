@@ -39,7 +39,6 @@ import static com.android.server.accessibility.gestures.TouchState.ALL_POINTER_I
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Region;
 import android.os.Handler;
 import android.util.Slog;
@@ -133,8 +132,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
     // Handle to the accessibility manager service.
     private final AccessibilityManagerService mAms;
 
-    // Temporary point to avoid instantiation.
-    private final Point mTempPoint = new Point();
 
     // Context in which this explorer operates.
     private final Context mContext;
@@ -301,6 +298,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (eventType == TYPE_VIEW_HOVER_EXIT) {
             sendsPendingA11yEventsIfNeeded();
         }
+        mState.onReceivedAccessibilityEvent(event);
         super.onAccessibilityEvent(event);
     }
 
@@ -332,16 +330,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     @Override
-    public void onDoubleTapAndHold() {
-        // Try to use the standard accessibility API to long click
-        if (!mAms.performActionOnAccessibilityFocusedItem(
-                AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)) {
-            Slog.e(LOG_TAG, "ACTION_LONG_CLICK failed.");
+    public void onDoubleTapAndHold(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mDispatcher.longPressWithTouchEvents(event, policyFlags)) {
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+            mState.startDelegating();
         }
     }
 
     @Override
-    public boolean onDoubleTap() {
+    public boolean onDoubleTap(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         mAms.onTouchInteractionEnd();
         // Remove pending event deliveries.
         mSendHoverEnterAndMoveDelayed.cancel();
@@ -357,7 +354,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
         // Try to use the standard accessibility API to click
         if (!mAms.performActionOnAccessibilityFocusedItem(
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
-            Slog.e(LOG_TAG, "ACTION_CLICK failed.");
+            Slog.e(LOG_TAG, "ACTION_CLICK failed. Dispatching motion events to simulate click.");
+
+            mDispatcher.clickWithTouchEvents(event, rawEvent, policyFlags);
+            return true;
         }
         return true;
     }
@@ -819,6 +819,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
                 // Announce the end of a the touch interaction.
                 mAms.onTouchInteractionEnd();
+                mDispatcher.clear();
                 mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
 
             } break;
@@ -851,7 +852,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendHoverExitAndTouchExplorationGestureEndIfNeeded(int policyFlags) {
-        MotionEvent event = mDispatcher.getLastInjectedHoverEvent();
+        MotionEvent event = mState.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() != ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
             if (!mSendTouchExplorationEndDelayed.isPending()) {
@@ -873,7 +874,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendTouchExplorationGestureStartAndHoverEnterIfNeeded(int policyFlags) {
-        MotionEvent event = mDispatcher.getLastInjectedHoverEvent();
+        MotionEvent event = mState.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() == ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
             mDispatcher.sendMotionEvent(
@@ -1198,7 +1199,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 + ", mDetermineUserIntentTimeout: " + mDetermineUserIntentTimeout
                 + ", mDoubleTapSlop: " + mDoubleTapSlop
                 + ", mDraggingPointerId: " + mDraggingPointerId
-                + ", mTempPoint: " + mTempPoint
                 + " }";
     }
 }

@@ -75,6 +75,16 @@ public class TouchState {
     private MotionEvent mLastReceivedEvent;
     // The accompanying raw event without any transformations.
     private MotionEvent mLastReceivedRawEvent;
+    // The id of the last touch explored window.
+    private int mLastTouchedWindowId;
+    // The last injected hover event.
+    private MotionEvent mLastInjectedHoverEvent;
+    // The last injected hover event used for performing clicks.
+    private MotionEvent mLastInjectedHoverEventForClick;
+    // The time of the last injected down.
+    private long mLastInjectedDownEventTime;
+    // Keep track of which pointers sent to the system are down.
+    private int mInjectedPointersDown;
 
     public TouchState() {
         mReceivedPointerTracker = new ReceivedPointerTracker();
@@ -88,7 +98,9 @@ public class TouchState {
             mLastReceivedEvent.recycle();
             mLastReceivedEvent = null;
         }
+        mLastTouchedWindowId = -1;
         mReceivedPointerTracker.clear();
+        mInjectedPointersDown = 0;
     }
 
     /**
@@ -105,6 +117,71 @@ public class TouchState {
         }
         mLastReceivedEvent = MotionEvent.obtain(rawEvent);
         mReceivedPointerTracker.onMotionEvent(rawEvent);
+    }
+
+    /**
+     * Processes an injected {@link MotionEvent} event.
+     *
+     * @param event The event to process.
+     */
+    void onInjectedMotionEvent(MotionEvent event) {
+        final int action = event.getActionMasked();
+        final int pointerId = event.getPointerId(event.getActionIndex());
+        final int pointerFlag = (1 << pointerId);
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mInjectedPointersDown |= pointerFlag;
+                mLastInjectedDownEventTime = event.getDownTime();
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
+                mInjectedPointersDown &= ~pointerFlag;
+                if (mInjectedPointersDown == 0) {
+                    mLastInjectedDownEventTime = 0;
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_ENTER:
+            case MotionEvent.ACTION_HOVER_MOVE:
+                if (mLastInjectedHoverEvent != null) {
+                    mLastInjectedHoverEvent.recycle();
+                }
+                mLastInjectedHoverEvent = MotionEvent.obtain(event);
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                if (mLastInjectedHoverEvent != null) {
+                    mLastInjectedHoverEvent.recycle();
+                }
+                mLastInjectedHoverEvent = MotionEvent.obtain(event);
+                if (mLastInjectedHoverEventForClick != null) {
+                    mLastInjectedHoverEventForClick.recycle();
+                }
+                mLastInjectedHoverEventForClick = MotionEvent.obtain(event);
+                break;
+        }
+        if (DEBUG) {
+            Slog.i(LOG_TAG, "Injected pointer:\n" + toString());
+        }
+    }
+
+    /** Updates state in response to an accessibility event received from the outside. */
+    public void onReceivedAccessibilityEvent(AccessibilityEvent event) {
+        // If a new window opens or the accessibility focus moves we no longer
+        // want to click/long press on the last touch explored location.
+        switch (event.getEventType()) {
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+            case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+                if (mLastInjectedHoverEventForClick != null) {
+                    mLastInjectedHoverEventForClick.recycle();
+                    mLastInjectedHoverEventForClick = null;
+                }
+                mLastTouchedWindowId = -1;
+                break;
+            case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+            case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
+                mLastTouchedWindowId = event.getWindowId();
+                break;
+        }
     }
 
     public void onInjectedAccessibilityEvent(int type) {
@@ -234,6 +311,46 @@ public class TouchState {
     /** @return The last received event. */
     public MotionEvent getLastReceivedEvent() {
         return mLastReceivedEvent;
+    }
+
+    /** @return The the last injected hover event. */
+    public MotionEvent getLastInjectedHoverEvent() {
+        return mLastInjectedHoverEvent;
+    }
+
+    /** @return The time of the last injected down event. */
+    public long getLastInjectedDownEventTime() {
+        return mLastInjectedDownEventTime;
+    }
+
+    public int getLastTouchedWindowId() {
+        return mLastTouchedWindowId;
+    }
+
+    /** @return The number of down pointers injected to the view hierarchy. */
+    public int getInjectedPointerDownCount() {
+        return Integer.bitCount(mInjectedPointersDown);
+    }
+
+    /** @return The bits of the injected pointers that are down. */
+    public int getInjectedPointersDown() {
+        return mInjectedPointersDown;
+    }
+
+    /**
+     * Whether an injected pointer is down.
+     *
+     * @param pointerId The unique pointer id.
+     * @return True if the pointer is down.
+     */
+    public boolean isInjectedPointerDown(int pointerId) {
+        final int pointerFlag = (1 << pointerId);
+        return (mInjectedPointersDown & pointerFlag) != 0;
+    }
+
+    /** @return The the last injected hover event used for a click. */
+    public MotionEvent getLastInjectedHoverEventForClick() {
+        return mLastInjectedHoverEventForClick;
     }
 
     /** This class tracks where and when a pointer went down. It does not track its movement. */
