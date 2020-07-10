@@ -71,7 +71,6 @@ public class FingerprintService extends SystemService {
     private final LockoutResetTracker mLockoutResetTracker;
     private final GestureAvailabilityTracker mGestureAvailabilityTracker;
     private Fingerprint21 mFingerprint21;
-    private IUdfpsOverlayController mUdfpsOverlayController;
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
@@ -319,37 +318,9 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
-        public void showUdfpsOverlay() {
-            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            if (mUdfpsOverlayController == null) {
-                Slog.e(TAG, "showUdfpsOverlay | mUdfpsOverlayController is null");
-                return;
-            }
-            try {
-                mUdfpsOverlayController.showUdfpsOverlay();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "showUdfpsOverlay | RemoteException: ", e);
-            }
-        }
-
-        @Override
-        public void hideUdfpsOverlay() {
-            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            if (mUdfpsOverlayController == null) {
-                Slog.e(TAG, "hideUdfpsOverlay | mUdfpsOverlayController is null");
-                return;
-            }
-            try {
-                mUdfpsOverlayController.hideUdfpsOverlay();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "hideUdfpsOverlay | RemoteException: ", e);
-            }
-        }
-
-        @Override
         public void setUdfpsOverlayController(IUdfpsOverlayController controller) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mUdfpsOverlayController = controller;
+            mFingerprint21.setUdfpsOverlayController(controller);
         }
     }
 
