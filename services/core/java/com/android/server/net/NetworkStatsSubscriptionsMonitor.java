@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Looper;
 import android.telephony.Annotation;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
@@ -196,7 +197,19 @@ public class NetworkStatsSubscriptionsMonitor extends
 
         @Override
         public void onServiceStateChanged(@NonNull ServiceState ss) {
-            final int networkType = ss.getDataNetworkType();
+            // In 5G SA (Stand Alone) mode, the primary cell itself will be 5G hence telephony
+            // would report RAT = 5G_NR.
+            // However, in 5G NSA (Non Stand Alone) mode, the primary cell is still LTE and
+            // network allocates a secondary 5G cell so telephony reports RAT = LTE along with
+            // NR state as connected. In such case, attributes the data usage to NR.
+            // See b/160727498.
+            final boolean is5GNsa = (ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE
+                    || ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE_CA)
+                    && ss.getNrState() == NetworkRegistrationInfo.NR_STATE_CONNECTED;
+
+            final int networkType =
+                    (is5GNsa ? TelephonyManager.NETWORK_TYPE_NR : ss.getDataNetworkType());
+
             final int collapsedRatType = getCollapsedRatType(networkType);
             if (collapsedRatType == mLastCollapsedRatType) return;
 
