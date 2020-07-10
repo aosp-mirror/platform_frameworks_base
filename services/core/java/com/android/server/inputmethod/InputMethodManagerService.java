@@ -18,8 +18,6 @@ package com.android.server.inputmethod;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR;
-
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.Manifest;
@@ -718,11 +716,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * {@link #unbindCurrentMethodLocked()}.</em>
      */
     int mImeWindowVis;
-
-    /**
-     * Checks if the client needs to start input.
-     */
-    private boolean mCurClientNeedStartInput = false;
 
     private AlertDialog.Builder mDialogBuilder;
     private AlertDialog mSwitchingDialog;
@@ -3467,20 +3460,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurFocusedWindow == windowToken) {
             if (DEBUG) {
                 Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
-                        + " attribute=" + attribute + ", token = " + windowToken);
+                        + " attribute=" + attribute + ", token = " + windowToken
+                        + ", startInputReason="
+                        + InputMethodDebug.startInputReasonToString(startInputReason));
             }
-            // Needs to start input when the same window focus gain but not with the same editor,
-            // or when the current client needs to start input (e.g. when focusing the same
-            // window after device turned screen on).
-            if (attribute != null && (startInputReason != WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR
-                    || mCurClientNeedStartInput)) {
-                if (mIsInteractive) {
-                    mCurClientNeedStartInput = false;
-                }
+            if (attribute != null) {
                 return startInputUncheckedLocked(cs, inputContext, missingMethods,
                         attribute, startInputFlags, startInputReason);
             }
-
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
                     null, null, null, -1, null);
@@ -4459,9 +4446,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private void handleSetInteractive(final boolean interactive) {
         synchronized (mMethodMap) {
             mIsInteractive = interactive;
-            if (!interactive) {
-                mCurClientNeedStartInput = true;
-            }
             updateSystemUiLocked(interactive ? mImeWindowVis : 0, mBackDisposition);
 
             // Inform the current client of the change in active status
