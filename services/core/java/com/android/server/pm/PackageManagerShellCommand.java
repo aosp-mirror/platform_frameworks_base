@@ -1376,7 +1376,7 @@ class PackageManagerShellCommand extends ShellCommand {
         long timeoutMs = -1;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
-                case "--wait":
+                case "--wait-for-staged-ready":
                     waitForStagedSessionReady = true;
                     // If there is only one remaining argument, then it represents the sessionId, we
                     // shouldn't try to parse it as timeoutMs.
@@ -2864,7 +2864,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     }
                     sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
                     break;
-                case "--wait":
+                case "--wait-for-staged-ready":
                     params.mWaitForStagedSessionReady = true;
                     try {
                         params.timeoutMs = Long.parseLong(peekNextArg());
@@ -3597,7 +3597,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
         pw.println("       [--enable-rollback]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
-        pw.println("       [--apex] [--wait TIMEOUT]");
+        pw.println("       [--apex] [--wait-for-staged-ready TIMEOUT]");
         pw.println("       [PATH [SPLIT...]|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as");
         pw.println("    file path(s) or '-' to read from stdin.  Options are:");
@@ -3625,8 +3625,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          3=device setup, 4=user request");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --apex: install an .apex file, not an .apk");
-        pw.println("      --wait: when performing staged install, wait TIMEOUT milliseconds");
-        pw.println("          for pre-reboot verification to complete. If TIMEOUT is not");
+        pw.println("      --wait-for-staged-ready: when performing staged install, wait TIMEOUT");
+        pw.println("          ms for pre-reboot verification to complete. If TIMEOUT is not");
         pw.println("          specified it will wait for " + DEFAULT_WAIT_MS + " milliseconds.");
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
