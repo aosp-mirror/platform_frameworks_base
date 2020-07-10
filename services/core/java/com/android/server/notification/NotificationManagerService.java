@@ -4674,10 +4674,11 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationPolicy(String pkg, Policy policy) {
             enforcePolicyAccess(pkg, "setNotificationPolicy");
+            int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 final ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(pkg,
-                        0, UserHandle.getUserId(MY_UID));
+                        0, UserHandle.getUserId(callingUid));
                 Policy currPolicy = mZenModeHelper.getNotificationPolicy();
 
                 if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.P) {
