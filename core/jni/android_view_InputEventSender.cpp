@@ -48,9 +48,9 @@ static struct {
 
 class NativeInputEventSender : public LooperCallback {
 public:
-    NativeInputEventSender(JNIEnv* env,
-            jobject senderWeak, const sp<InputChannel>& inputChannel,
-            const sp<MessageQueue>& messageQueue);
+    NativeInputEventSender(JNIEnv* env, jobject senderWeak,
+                           const std::shared_ptr<InputChannel>& inputChannel,
+                           const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
     void dispose();
@@ -76,12 +76,12 @@ private:
     status_t receiveFinishedSignals(JNIEnv* env);
 };
 
-
-NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
-        jobject senderWeak, const sp<InputChannel>& inputChannel,
-        const sp<MessageQueue>& messageQueue) :
-        mSenderWeakGlobal(env->NewGlobalRef(senderWeak)),
-        mInputPublisher(inputChannel), mMessageQueue(messageQueue),
+NativeInputEventSender::NativeInputEventSender(JNIEnv* env, jobject senderWeak,
+                                               const std::shared_ptr<InputChannel>& inputChannel,
+                                               const sp<MessageQueue>& messageQueue)
+      : mSenderWeakGlobal(env->NewGlobalRef(senderWeak)),
+        mInputPublisher(inputChannel),
+        mMessageQueue(messageQueue),
         mNextPublishedSeq(1) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName().c_str());
@@ -249,8 +249,8 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject senderWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
-    sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
-            inputChannelObj);
+    std::shared_ptr<InputChannel> inputChannel =
+            android_view_InputChannel_getInputChannel(env, inputChannelObj);
     if (inputChannel == NULL) {
         jniThrowRuntimeException(env, "InputChannel is not initialized.");
         return 0;

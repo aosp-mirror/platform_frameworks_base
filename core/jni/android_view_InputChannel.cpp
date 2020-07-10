@@ -43,25 +43,24 @@ static struct {
 
 class NativeInputChannel {
 public:
-    explicit NativeInputChannel(const sp<InputChannel>& inputChannel);
+    explicit NativeInputChannel(const std::shared_ptr<InputChannel>& inputChannel);
     ~NativeInputChannel();
 
-    inline sp<InputChannel> getInputChannel() { return mInputChannel; }
+    inline std::shared_ptr<InputChannel> getInputChannel() { return mInputChannel; }
 
     void setDisposeCallback(InputChannelObjDisposeCallback callback, void* data);
     void dispose(JNIEnv* env, jobject obj);
 
 private:
-    sp<InputChannel> mInputChannel;
+    std::shared_ptr<InputChannel> mInputChannel;
     InputChannelObjDisposeCallback mDisposeCallback;
     void* mDisposeData;
 };
 
 // ----------------------------------------------------------------------------
 
-NativeInputChannel::NativeInputChannel(const sp<InputChannel>& inputChannel) :
-    mInputChannel(inputChannel), mDisposeCallback(nullptr) {
-}
+NativeInputChannel::NativeInputChannel(const std::shared_ptr<InputChannel>& inputChannel)
+      : mInputChannel(inputChannel), mDisposeCallback(nullptr) {}
 
 NativeInputChannel::~NativeInputChannel() {
 }
@@ -81,7 +80,7 @@ void NativeInputChannel::dispose(JNIEnv* env, jobject obj) {
         mDisposeCallback = nullptr;
         mDisposeData = nullptr;
     }
-    mInputChannel.clear();
+    mInputChannel.reset();
 }
 
 // ----------------------------------------------------------------------------
@@ -92,7 +91,8 @@ static NativeInputChannel* android_view_InputChannel_getNativeInputChannel(JNIEn
     return reinterpret_cast<NativeInputChannel*>(longPtr);
 }
 
-sp<InputChannel> android_view_InputChannel_getInputChannel(JNIEnv* env, jobject inputChannelObj) {
+std::shared_ptr<InputChannel> android_view_InputChannel_getInputChannel(JNIEnv* env,
+                                                                        jobject inputChannelObj) {
     NativeInputChannel* nativeInputChannel =
             android_view_InputChannel_getNativeInputChannel(env, inputChannelObj);
     return nativeInputChannel != nullptr ? nativeInputChannel->getInputChannel() : nullptr;
@@ -109,8 +109,8 @@ void android_view_InputChannel_setDisposeCallback(JNIEnv* env, jobject inputChan
     }
 }
 
-static jlong android_view_InputChannel_createInputChannel(JNIEnv* env,
-        sp<InputChannel> inputChannel) {
+static jlong android_view_InputChannel_createInputChannel(
+        JNIEnv* env, std::shared_ptr<InputChannel> inputChannel) {
     std::unique_ptr<NativeInputChannel> nativeInputChannel =
             std::make_unique<NativeInputChannel>(inputChannel);
 
@@ -122,8 +122,8 @@ static jlongArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv* e
     ScopedUtfChars nameChars(env, nameObj);
     std::string name = nameChars.c_str();
 
-    sp<InputChannel> serverChannel;
-    sp<InputChannel> clientChannel;
+    std::shared_ptr<InputChannel> serverChannel;
+    std::shared_ptr<InputChannel> clientChannel;
     status_t result = InputChannel::openInputChannelPair(name, serverChannel, clientChannel);
 
     if (result) {
@@ -180,7 +180,7 @@ static jlong android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject
     if (parcel) {
         bool isInitialized = parcel->readInt32();
         if (isInitialized) {
-            sp<InputChannel> inputChannel = new InputChannel();
+            std::shared_ptr<InputChannel> inputChannel = std::make_shared<InputChannel>();
             inputChannel->readFromParcel(parcel);
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
             return reinterpret_cast<jlong>(nativeInputChannel);
@@ -227,13 +227,13 @@ static jlong android_view_InputChannel_nativeDup(JNIEnv* env, jobject obj, jlong
         return 0;
     }
 
-    sp<InputChannel> inputChannel = nativeInputChannel->getInputChannel();
+    std::shared_ptr<InputChannel> inputChannel = nativeInputChannel->getInputChannel();
     if (inputChannel == nullptr) {
         jniThrowRuntimeException(env, "NativeInputChannel has no corresponding InputChannel");
         return 0;
     }
 
-    sp<InputChannel> dupInputChannel = inputChannel->dup();
+    std::shared_ptr<InputChannel> dupInputChannel = inputChannel->dup();
     if (dupInputChannel == nullptr) {
         std::string message = android::base::StringPrintf(
                 "Could not duplicate input channel %s", inputChannel->getName().c_str());
