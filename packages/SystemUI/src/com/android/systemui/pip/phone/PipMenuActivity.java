@@ -104,6 +104,8 @@ public class PipMenuActivity extends Activity {
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
+    private static final long MENU_SLOW_FADE_DURATION = 175;
+    private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
     private static final float DISMISS_BACKGROUND_ALPHA = 0.6f;
@@ -182,6 +184,7 @@ public class PipMenuActivity extends Activity {
                     break;
                 }
                 case MESSAGE_MENU_EXPANDED : {
+                    mMenuContainerAnimator.setStartDelay(MENU_SHOW_ON_EXPAND_START_DELAY);
                     mMenuContainerAnimator.start();
                     break;
                 }
@@ -400,7 +403,9 @@ public class PipMenuActivity extends Activity {
                 mMenuContainerAnimator.playTogether(dismissAnim, resizeAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
-            mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
+            mMenuContainerAnimator.setDuration(menuState == MENU_STATE_CLOSE
+                    ? MENU_FADE_DURATION
+                    : MENU_SLOW_FADE_DURATION);
             if (allowMenuTimeout) {
                 mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
