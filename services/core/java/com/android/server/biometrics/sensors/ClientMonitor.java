@@ -36,6 +36,9 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     private static final String TAG = "Biometrics/ClientMonitor";
     protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
 
+    // Counter used to distinguish between ClientMonitor instances to help debugging.
+    private static int sCount = 0;
+
     /**
      * Interface that ClientMonitor holders should use to receive callbacks.
      */
@@ -49,7 +52,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
          * @param clientMonitor Reference of the ClientMonitor that finished.
          * @param success True if the operation completed successfully.
          */
-        void onClientFinished(ClientMonitor clientMonitor, boolean success);
+        void onClientFinished(ClientMonitor<?> clientMonitor, boolean success);
     }
 
     /**
@@ -62,6 +65,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
         T getDaemon();
     }
 
+    private final int mSequentialId;
     @NonNull private final Context mContext;
     @NonNull protected final LazyDaemon<T> mLazyDaemon;
     private final int mTargetUserId;
@@ -95,6 +99,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
             @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {
         super(statsModality, statsAction, statsClient);
+        mSequentialId = sCount++;
         mContext = context;
         mLazyDaemon = lazyDaemon;
         mToken = token;
@@ -163,9 +168,9 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     // TODO(b/157790417): Move this to the scheduler
     void binderDiedInternal(boolean clearListener) {
         // If the current client dies we should cancel the current operation.
-        if (this instanceof Cancellable) {
+        if (this instanceof Interruptable) {
             Slog.e(TAG, "Binder died, cancelling client");
-            ((Cancellable) this).cancel();
+            ((Interruptable) this).cancel();
         }
         mToken = null;
         if (clearListener) {
@@ -199,5 +204,13 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
 
     public final T getFreshDaemon() {
         return mLazyDaemon.getDaemon();
+    }
+
+    @Override
+    public String toString() {
+        return "{[" + mSequentialId + "] "
+                + this.getClass().getSimpleName()
+                + ", " + getOwnerString()
+                + ", " + getCookie() + "}";
     }
 }

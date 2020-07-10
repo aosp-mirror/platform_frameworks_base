@@ -32,8 +32,7 @@ import android.util.Slog;
  * Abstract {@link ClientMonitor} subclass that operations eligible/interested in acquisition
  * messages should extend.
  */
-public abstract class AcquisitionClient<T> extends ClientMonitor<T>
-        implements ErrorConsumer, Cancellable {
+public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements Interruptable {
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 
@@ -46,6 +45,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
     private final PowerManager mPowerManager;
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
+    private boolean mErrorAlreadySent;
 
     /**
      * Stops the HAL operation specific to the ClientMonitor subclass.
@@ -75,15 +75,43 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T>
 
     @Override
     public void onError(int errorCode, int vendorCode) {
-        logOnError(getContext(), errorCode, vendorCode, getTargetUserId());
+        // Errors from the HAL always finish the client
+        onErrorInternal(errorCode, vendorCode, true /* finish */);
+    }
+
+    protected void onErrorInternal(int errorCode, int vendorCode, boolean finish) {
+        // In some cases, the framework will send an error to the caller before a true terminal
+        // case (success, failure, or error) is received from the HAL (e.g. versions of fingerprint
+        // that do not handle lockout under the HAL. In these cases, ensure that the framework only
+        // sends errors once per ClientMonitor.
+        if (!mErrorAlreadySent) {
+            logOnError(getContext(), errorCode, vendorCode, getTargetUserId());
+            try {
+                if (getListener() != null) {
+                    mErrorAlreadySent = true;
+                    getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke sendError", e);
+            }
+        }
+
+        if (finish) {
+            mFinishCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    @Override
+    public void cancelWithoutStarting(@NonNull FinishCallback finishCallback) {
+        final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
         try {
             if (getListener() != null) {
-                getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
+                getListener().onError(getSensorId(), getCookie(), errorCode, 0 /* vendorCode */);
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
-        mFinishCallback.onClientFinished(this, false /* success */);
+        finishCallback.onClientFinished(this, true /* success */);
     }
 
     /**

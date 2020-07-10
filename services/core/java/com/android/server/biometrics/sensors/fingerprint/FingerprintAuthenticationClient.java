@@ -41,7 +41,8 @@ import java.util.ArrayList;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFingerprint> {
+class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFingerprint>
+        implements Udfps {
 
     private static final String TAG = "Biometrics/FingerprintAuthClient";
 
@@ -79,12 +80,14 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                     mLockoutFrameworkImpl.getLockoutModeForUser(getTargetUserId());
             if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
                 Slog.w(TAG, "Fingerprint locked out, lockoutMode(" + lockoutMode + ")");
-                cancel();
                 final int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
                         ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                         : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-                onError(errorCode, 0 /* vendorCode */);
-                mFinishCallback.onClientFinished(this, true /* success */);
+                // Send the error, but do not invoke the FinishCallback yet. Since lockout is not
+                // controlled by the HAL, the framework must stop the sensor before finishing the
+                // client.
+                onErrorInternal(errorCode, 0 /* vendorCode */, false /* finish */);
+                cancel();
             }
         }
     }
@@ -122,5 +125,15 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                     0 /* vendorCode */);
             mFinishCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public void onFingerDown(int x, int y, float minor, float major) {
+        UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+    }
+
+    @Override
+    public void onFingerUp() {
+        UdfpsHelper.onFingerUp(getFreshDaemon());
     }
 }

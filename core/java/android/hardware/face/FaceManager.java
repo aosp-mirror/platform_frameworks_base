@@ -592,7 +592,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                         new IBiometricServiceLockoutResetCallback.Stub() {
 
                             @Override
-                            public void onLockoutReset(IRemoteCallback serverCallback)
+                            public void onLockoutReset(int sensorId, IRemoteCallback serverCallback)
                                     throws RemoteException {
                                 try {
                                     final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
@@ -601,7 +601,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                                     wakeLock.acquire();
                                     mHandler.post(() -> {
                                         try {
-                                            callback.onLockoutReset();
+                                            callback.onLockoutReset(sensorId);
                                         } finally {
                                             wakeLock.release();
                                         }
@@ -978,7 +978,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
          * authentication
          * again.
          */
-        public void onLockoutReset() {
+        public void onLockoutReset(int sensorId) {
         }
     }
 

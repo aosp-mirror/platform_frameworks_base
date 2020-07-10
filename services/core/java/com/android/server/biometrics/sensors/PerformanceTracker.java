@@ -107,7 +107,7 @@ public class PerformanceTracker {
         mAllUsersInfo.get(userId).mPermanentLockout++;
     }
 
-    void incrementHALDeathCount() {
+    public void incrementHALDeathCount() {
         mHALDeathCount++;
     }
 

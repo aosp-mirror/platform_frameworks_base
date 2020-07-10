@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static com.android.server.biometrics.PreAuthInfo.AUTHENTICATOR_OK;
@@ -30,19 +31,32 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
+import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
+import android.os.Binder;
 import android.os.Build;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.R;
+
 public class Utils {
+
+    private static final String TAG = "BiometricUtils";
+
     public static boolean isDebugEnabled(Context context, int targetUserId) {
         if (targetUserId == UserHandle.USER_NULL) {
             return false;
@@ -330,5 +344,55 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static void checkPermission(Context context, String permission) {
+        context.enforceCallingOrSelfPermission(permission,
+                "Must have " + permission + " permission.");
+    }
+
+    public static boolean isCurrentUserOrProfile(Context context, int userId) {
+        UserManager um = UserManager.get(context);
+        if (um == null) {
+            Slog.e(TAG, "Unable to get UserManager");
+            return false;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Allow current user or profiles of the current user...
+            for (int profileId : um.getEnabledProfileIds(ActivityManager.getCurrentUser())) {
+                if (profileId == userId) {
+                    return true;
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return false;
+    }
+
+    public static boolean isStrongBiometric(int sensorId) {
+        IBiometricService service = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        try {
+            return Utils.isAtLeastStrength(service.getCurrentStrength(sensorId),
+                    Authenticators.BIOMETRIC_STRONG);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+            return false;
+        }
+    }
+
+    public static boolean isKeyguard(Context context, String clientPackage) {
+        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
+
+        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.config_keyguardComponent));
+        final String keyguardPackage = keyguardComponent != null
+                ? keyguardComponent.getPackageName() : null;
+        return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
     }
 }
