@@ -83,7 +83,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     private static final int ENROLL_TIMEOUT_SEC = 60;
 
     private final Context mContext;
-    private final IActivityTaskManager mActivityTaskManager;;
+    private final IActivityTaskManager mActivityTaskManager;
     private final SensorProperties mSensorProperties;
     private final BiometricScheduler mScheduler;
     private final Handler mHandler;
@@ -93,7 +93,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     private final ClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
     private final Map<Integer, Long> mAuthenticatorIds;
 
-    private IBiometricsFingerprint mDaemon;
+    @Nullable private IBiometricsFingerprint mDaemon;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
 
@@ -102,9 +102,9 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
      */
     private static final class SensorProperties {
         final int sensorId;
-        final Boolean isUdfps;
+        final boolean isUdfps;
 
-        SensorProperties(int sensorId, Boolean isUdfps) {
+        SensorProperties(int sensorId, boolean isUdfps) {
             this.sensorId = sensorId;
             this.isUdfps = isUdfps;
         }
@@ -157,9 +157,8 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         }
     };
 
-    private IBiometricsFingerprintClientCallback mDaemonCallback =
+    private final IBiometricsFingerprintClientCallback mDaemonCallback =
             new IBiometricsFingerprintClientCallback.Stub() {
-
         @Override
         public void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
             mHandler.post(() -> {
@@ -169,19 +168,13 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
 
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FingerprintEnrollClient)) {
-                    final String clientName = client != null
-                            ? client.getClass().getSimpleName(): "null";
-                    Slog.e(TAG, "onEnrollResult for non-enroll client: " + clientName);
+                    Slog.e(TAG, "onEnrollResult for non-enroll client: "
+                            + Utils.getClientName(client));
                     return;
                 }
 
                 final FingerprintEnrollClient enrollClient = (FingerprintEnrollClient) client;
                 enrollClient.onEnrollResult(fingerprint, remaining);
-
-                if (remaining == 0) {
-                    // Update the framework's authenticatorId cache for this user
-                    scheduleUpdateActiveUserWithoutHandler(mCurrentUserId);
-                }
             });
         }
 
@@ -195,9 +188,8 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof AcquisitionClient)) {
-                    final String clientName = client != null
-                            ? client.getClass().getSimpleName(): "null";
-                    Slog.e(TAG, "onAcquired for non-acquisition client: " + clientName);
+                    Slog.e(TAG, "onAcquired for non-acquisition client: "
+                            + Utils.getClientName(client));
                     return;
                 }
 
@@ -212,9 +204,8 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FingerprintAuthenticationClient)) {
-                    final String clientName = client != null
-                            ? client.getClass().getSimpleName(): "null";
-                    Slog.e(TAG, "onAuthenticated for non-authentication client: " + clientName);
+                    Slog.e(TAG, "onAuthenticated for non-authentication client: "
+                            + Utils.getClientName(client));
                     return;
                 }
 
@@ -235,9 +226,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                         + ", error: " + error
                         + ", vendorCode: " + vendorCode);
                 if (!(client instanceof Interruptable)) {
-                    final String clientName = client != null
-                            ? client.getClass().getSimpleName(): "null";
-                    Slog.e(TAG, "onError for non-error consumer: " + clientName);
+                    Slog.e(TAG, "onError for non-error consumer: " + Utils.getClientName(client));
                     return;
                 }
 
@@ -258,9 +247,8 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 Slog.d(TAG, "Removed, fingerId: " + fingerId + ", remaining: " + remaining);
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof RemovalConsumer)) {
-                    final String clientName = client != null
-                            ? client.getClass().getSimpleName(): "null";
-                    Slog.e(TAG, "onRemoved for non-removal consumer: " + clientName);
+                    Slog.e(TAG, "onRemoved for non-removal consumer: "
+                            + Utils.getClientName(client));
                     return;
                 }
 
@@ -275,9 +263,8 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof EnumerateConsumer)) {
-                    final String clientName = client != null
-                            ? client.getClass().getSimpleName(): "null";
-                    Slog.e(TAG, "onEnumerate for non-enumerate consumer: " + clientName);
+                    Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
+                            + Utils.getClientName(client));
                     return;
                 }
 
@@ -308,7 +295,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         }
 
         final IBiometricsFingerprint daemon = getDaemon();
-        Boolean isUdfps = false;
+        boolean isUdfps = false;
         android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
                 android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
                         daemon);
@@ -317,7 +304,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 isUdfps = extension.isUdfps(sensorId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception while quering udfps", e);
-                isUdfps = null;
+                isUdfps = false;
             }
         }
         mSensorProperties = new SensorProperties(sensorId, isUdfps);
@@ -414,9 +401,15 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 }
             }
         });
-
     }
 
+    /**
+     * Schedules the {@link FingerprintUpdateActiveUserClient} without posting the work onto the
+     * handler. Many/most APIs are user-specific. However, the HAL requires explicit "setActiveUser"
+     * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
+     * this operation on the same lambda/runnable as those operations so that the ordering is
+     * correct.
+     */
     private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
         final boolean hasEnrolled = !getEnrolledFingerprints(targetUserId).isEmpty();
         final FingerprintUpdateActiveUserClient client =
@@ -467,9 +460,13 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
                     hardwareAuthToken, opPackageName, FingerprintUtils.getInstance(),
                     ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController);
-            mScheduler.scheduleClientMonitor(client);
+            mScheduler.scheduleClientMonitor(client, ((clientMonitor, success) -> {
+                if (success) {
+                    // Update authenticatorIds
+                    scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId());
+                }
+            }));
         });
-
     }
 
     void cancelEnrollment(@NonNull IBinder token) {
@@ -533,7 +530,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     }
 
     boolean isHardwareDetected() {
-        IBiometricsFingerprint daemon = getDaemon();
+        final IBiometricsFingerprint daemon = getDaemon();
         return daemon != null;
     }
 
@@ -619,7 +616,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         tracker.clear();
     }
 
-    void dumpInternal(PrintWriter pw) {
+    void dumpInternal(@NonNull PrintWriter pw) {
         PerformanceTracker performanceTracker =
                 PerformanceTracker.getInstanceForSensorId(mSensorProperties.sensorId);
 

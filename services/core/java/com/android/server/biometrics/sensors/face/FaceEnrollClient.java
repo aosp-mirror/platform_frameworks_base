@@ -68,6 +68,19 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
     }
 
     @Override
+    protected boolean hasReachedEnrollmentLimit() {
+        final int limit = getContext().getResources().getInteger(
+                com.android.internal.R.integer.config_faceMaxTemplatesPerUser);
+        final int enrolled = mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId())
+                .size();
+        if (enrolled >= limit) {
+            Slog.w(TAG, "Too many faces registered, user: " + getTargetUserId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void onAcquired(int acquireInfo, int vendorCode) {
         final boolean shouldSend;
         if (acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR) {

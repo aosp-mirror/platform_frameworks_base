@@ -34,7 +34,7 @@ import java.util.NoSuchElementException;
 public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinder.DeathRecipient {
 
     private static final String TAG = "Biometrics/ClientMonitor";
-    protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
+    protected static final boolean DEBUG = true;
 
     // Counter used to distinguish between ClientMonitor instances to help debugging.
     private static int sCount = 0;

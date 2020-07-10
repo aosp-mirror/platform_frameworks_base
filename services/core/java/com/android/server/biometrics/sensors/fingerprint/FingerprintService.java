@@ -25,6 +25,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -185,7 +186,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                 return;
             }
@@ -336,6 +337,9 @@ public class FingerprintService extends SystemService {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
     }
 
+    /**
+     * Checks for public API invocations to ensure that permissions, etc are granted/correct.
+     */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean canUseFingerprint(String opPackageName, boolean requireForeground, int uid,
             int pid, int userId) {

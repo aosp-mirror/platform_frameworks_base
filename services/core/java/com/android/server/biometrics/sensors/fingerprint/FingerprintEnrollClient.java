@@ -76,6 +76,19 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     }
 
     @Override
+    protected boolean hasReachedEnrollmentLimit() {
+        final int limit = getContext().getResources().getInteger(
+                com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser);
+        final int enrolled = mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId())
+                .size();
+        if (enrolled >= limit) {
+            Slog.w(TAG, "Too many faces registered, user: " + getTargetUserId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected void startHalOperation() {
         showUdfpsOverlay();
         try {
