@@ -1510,7 +1510,7 @@ public class ParsingPackageUtils {
 
                 Uri data = null;
                 String dataType = null;
-                String host = IntentFilter.WILDCARD;
+                String host = null;
                 final int numActions = intentInfo.countActions();
                 final int numSchemes = intentInfo.countDataSchemes();
                 final int numTypes = intentInfo.countDataTypes();
