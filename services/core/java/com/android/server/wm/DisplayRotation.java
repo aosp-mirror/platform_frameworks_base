@@ -42,7 +42,7 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.power.Boost;
+import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -1473,7 +1473,7 @@ public class DisplayRotation {
             @Override
             public void run() {
                 // Send interaction power boost to improve redraw performance.
-                mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
+                mService.mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
                 if (isRotationChoicePossible(mCurrentAppOrientation)) {
                     final boolean isValid = isValidRotationChoice(mRotation);
                     sendProposedRotationChangeToStatusBarInternal(mRotation, isValid);
