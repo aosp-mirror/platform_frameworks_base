@@ -19,11 +19,10 @@ package com.android.systemui.onehanded;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -53,7 +52,7 @@ public class OneHandedAnimationController {
     public @interface TransitionDirection {
     }
 
-    private final Interpolator mFastOutSlowInInterpolator;
+    private final Interpolator mOvershootInterpolator;
     private final OneHandedSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final HashMap<SurfaceControl, OneHandedTransitionAnimator> mAnimatorMap =
             new HashMap<>();
@@ -62,11 +61,10 @@ public class OneHandedAnimationController {
      * Constructor of OneHandedAnimationController
      */
     @Inject
-    public OneHandedAnimationController(Context context,
+    public OneHandedAnimationController(
             OneHandedSurfaceTransactionHelper surfaceTransactionHelper) {
         mSurfaceTransactionHelper = surfaceTransactionHelper;
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
+        mOvershootInterpolator = new OvershootInterpolator();
     }
 
     @SuppressWarnings("unchecked")
@@ -104,7 +102,7 @@ public class OneHandedAnimationController {
     OneHandedTransitionAnimator setupOneHandedTransitionAnimator(
             OneHandedTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
-        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setInterpolator(mOvershootInterpolator);
         animator.setFloatValues(FRACTION_START, FRACTION_END);
         return animator;
     }
