@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Location;
 import android.location.util.identity.CallerIdentity;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -128,27 +129,38 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         mServiceWatcher.dump(fd, pw, args);
     }
 
+    private static String guessPackageName(Context context, int uid) {
+        String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
+        if (packageNames == null || packageNames.length == 0) {
+            // illegal state exception will propagate back through binders
+            throw new IllegalStateException(
+                    "location provider from uid " + uid + " has no package information");
+        } else {
+            return packageNames[0];
+        }
+    }
+
     private class Proxy extends ILocationProviderManager.Stub {
 
         Proxy() {}
 
         // executed on binder thread
         @Override
-        public void onSetAttributionTag(String attributionTag) {
+        public void onSetIdentity(@Nullable String packageName, @Nullable String attributionTag) {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
                 }
 
-                String packageName = mServiceWatcher.getBoundService().getPackageName();
+                CallerIdentity identity;
                 if (packageName == null) {
-                    return;
+                    packageName = guessPackageName(mContext, Binder.getCallingUid());
+                    // unsafe is ok since the package is coming direct from the package manager here
+                    identity = CallerIdentity.fromBinderUnsafe(packageName, attributionTag);
+                } else {
+                    identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
                 }
 
-                // we don't need to verify the package name because we're getting it straight from
-                // the service watcher
-                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName,
-                        attributionTag);
                 setIdentity(identity);
             }
         }
@@ -163,12 +175,9 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
                 // if no identity is set yet, set it now
                 if (getIdentity() == null) {
-                    String packageName = mServiceWatcher.getBoundService().getPackageName();
-                    if (packageName != null) {
-                        // we don't need to verify the package name because we're getting it
-                        // straight from the service watcher
-                        setIdentity(CallerIdentity.fromBinderUnsafe(packageName, null));
-                    }
+                    String packageName = guessPackageName(mContext, Binder.getCallingUid());
+                    // unsafe is ok since the package is coming direct from the package manager here
+                    setIdentity(CallerIdentity.fromBinderUnsafe(packageName, null));
                 }
 
                 setProperties(properties);
