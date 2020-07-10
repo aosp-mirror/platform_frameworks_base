@@ -232,7 +232,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
-import android.location.LocationManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Proxy;
 import android.net.Uri;
@@ -15863,7 +15862,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || Intent.ACTION_FACTORY_RESET.equals(action)
                 || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
                 || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
-                || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
                 || TelephonyManager.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
                 || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)
                 || AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION.equals(action)

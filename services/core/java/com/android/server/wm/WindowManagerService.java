@@ -2670,10 +2670,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 // TODO(window-container): Clean up dead tokens
                 if (type == TYPE_WALLPAPER) {
-                    new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens);
+                    new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens,
+                            options);
                 } else {
                     new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens,
-                            callingUid, false /* roundedCornerOverlay */, fromClientToken);
+                            callingUid, false /* roundedCornerOverlay */, fromClientToken, options);
                 }
             }
         } finally {

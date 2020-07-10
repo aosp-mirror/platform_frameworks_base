@@ -24,7 +24,7 @@ import android.annotation.NonNull;
  *
  * @hide
  */
-public interface TimeZoneDetectorInternal extends Dumpable.Dumpee {
+public interface TimeZoneDetectorInternal extends Dumpable.Container {
 
     /**
      * Suggests the current time zone, determined using geolocation, to the detector. The

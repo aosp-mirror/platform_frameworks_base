@@ -22,6 +22,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +46,7 @@ class UdfpsController {
     private final Context mContext;
     private final IFingerprintService mFingerprintService;
     private final WindowManager mWindowManager;
+    private final Handler mHandler;
 
     private UdfpsView mView;
     private WindowManager.LayoutParams mLayoutParams;
@@ -96,6 +99,7 @@ class UdfpsController {
         mContext = context;
         mFingerprintService = fingerprintService;
         mWindowManager = windowManager;
+        mHandler = new Handler(Looper.getMainLooper());
         start();
     }
 
@@ -138,23 +142,27 @@ class UdfpsController {
     }
 
     private void showUdfpsOverlay() {
-        Log.v(TAG, "showUdfpsOverlay | adding window");
-        if (!mIsOverlayShowing) {
-            try {
-                mWindowManager.addView(mView, mLayoutParams);
-                mIsOverlayShowing = true;
-            } catch (RuntimeException e) {
-                Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
+        mHandler.post(() -> {
+            Log.v(TAG, "showUdfpsOverlay | adding window");
+            if (!mIsOverlayShowing) {
+                try {
+                    mWindowManager.addView(mView, mLayoutParams);
+                    mIsOverlayShowing = true;
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
+                }
             }
-        }
+        });
     }
 
     private void hideUdfpsOverlay() {
-        Log.v(TAG, "hideUdfpsOverlay | removing window");
-        if (mIsOverlayShowing) {
-            mWindowManager.removeView(mView);
-            mIsOverlayShowing = false;
-        }
+        mHandler.post(() -> {
+            Log.v(TAG, "hideUdfpsOverlay | removing window");
+            if (mIsOverlayShowing) {
+                mWindowManager.removeView(mView);
+                mIsOverlayShowing = false;
+            }
+        });
     }
 
     private void onFingerDown(int x, int y, float minor, float major) {

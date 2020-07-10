@@ -21,7 +21,6 @@ import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
-import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -64,10 +63,8 @@ public class DozeSensors {
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
 
     private final Context mContext;
-    private final AlarmManager mAlarmManager;
     private final AsyncSensorManager mSensorManager;
     private final ContentResolver mResolver;
-    private final DozeParameters mDozeParameters;
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
     private final Consumer<Boolean> mProxCallback;
@@ -98,14 +95,12 @@ public class DozeSensors {
         }
     }
 
-    public DozeSensors(Context context, AlarmManager alarmManager, AsyncSensorManager sensorManager,
+    DozeSensors(Context context, AsyncSensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
             Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog,
             ProximitySensor proximitySensor) {
         mContext = context;
-        mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
-        mDozeParameters = dozeParameters;
         mConfig = config;
         mWakeLock = wakeLock;
         mProxCallback = proxCallback;
@@ -206,7 +201,10 @@ public class DozeSensors {
         return findSensorWithType(mSensorManager, type);
     }
 
-    static Sensor findSensorWithType(SensorManager sensorManager, String type) {
+    /**
+     * Utility method to find a {@link Sensor} for the supplied string type.
+     */
+    public static Sensor findSensorWithType(SensorManager sensorManager, String type) {
         if (TextUtils.isEmpty(type)) {
             return null;
         }

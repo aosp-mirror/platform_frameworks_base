@@ -75,7 +75,6 @@ import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -1140,7 +1139,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 return sessionBinder;
             } catch (Exception e) {
-                Slog.w(TAG, "Exception in creating a new session", e);
+                Log.w(TAG, "Exception in creating a new session", e);
                 throw e;
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1351,7 +1350,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (!isUserSetupComplete()) {
                     // Global media key handling can have the side-effect of starting new
                     // activities which is undesirable while setup is in progress.
-                    Slog.i(TAG, "Not dispatching media key event because user "
+                    Log.i(TAG, "Not dispatching media key event because user "
                             + "setup is in progress.");
                     return;
                 }
@@ -1361,7 +1360,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     if (isGlobalPriorityActive && uid != Process.SYSTEM_UID) {
                         // Prevent dispatching key event through reflection while the global
                         // priority session is active.
-                        Slog.i(TAG, "Only the system can dispatch media key event "
+                        Log.i(TAG, "Only the system can dispatch media key event "
                                 + "to the global priority session.");
                         return;
                     }

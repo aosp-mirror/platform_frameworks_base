@@ -110,7 +110,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -154,9 +153,6 @@ public final class ProcessList {
     // A system property to control if obb app data isolation is enabled in vold.
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
-
-    // A system property to control if fuse is enabled.
-    static final String ANDROID_FUSE_ENABLED = "persist.sys.fuse";
 
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
@@ -719,13 +715,8 @@ public final class ProcessList {
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
-        boolean fuseEnabled = SystemProperties.getBoolean(ANDROID_FUSE_ENABLED, false);
-        boolean voldAppDataIsolationEnabled = SystemProperties.getBoolean(
+        mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
-        if (!fuseEnabled && voldAppDataIsolationEnabled) {
-            Slog.e(TAG, "Fuse is not enabled while vold app data isolation is enabled");
-        }
-        mVoldAppDataIsolationEnabled = fuseEnabled && voldAppDataIsolationEnabled;
         mAppDataIsolationWhitelistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 

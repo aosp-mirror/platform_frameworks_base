@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.HandlerThread;
 import android.os.TimestampedValue;
+import android.util.IndentingPrintWriter;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -46,6 +47,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorServiceTest {
@@ -177,7 +179,8 @@ public class TimeDetectorServiceTest {
         when(mMockContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
-        mTimeDetectorService.dump(null, null, null);
+        PrintWriter pw = new PrintWriter(new StringWriter());
+        mTimeDetectorService.dump(null, pw, null);
 
         verify(mMockContext).checkCallingOrSelfPermission(eq(android.Manifest.permission.DUMP));
         mStubbedTimeDetectorStrategy.verifyDumpCalled();
@@ -251,7 +254,7 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void dump(PrintWriter pw, String[] args) {
+        public void dump(IndentingPrintWriter pw, String[] args) {
             mDumpCalled = true;
         }
 

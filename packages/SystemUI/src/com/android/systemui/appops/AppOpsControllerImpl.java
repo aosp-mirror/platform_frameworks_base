@@ -21,9 +21,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -57,12 +57,11 @@ public class AppOpsControllerImpl implements AppOpsController,
     private static final long NOTED_OP_TIME_DELAY_MS = 5000;
     private static final String TAG = "AppOpsControllerImpl";
     private static final boolean DEBUG = false;
-    private final Context mContext;
 
     private final AppOpsManager mAppOps;
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
-    private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
+    private final SparseArray<Set<Callback>> mCallbacksByCode = new SparseArray<>();
     private boolean mListening;
 
     @GuardedBy("mActiveItems")
@@ -71,6 +70,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     private final List<AppOpItem> mNotedItems = new ArrayList<>();
 
     protected static final int[] OPS = new int[] {
+            AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION,
             AppOpsManager.OP_CAMERA,
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
@@ -83,7 +83,6 @@ public class AppOpsControllerImpl implements AppOpsController,
             Context context,
             @Background Looper bgLooper,
             DumpManager dumpManager) {
-        mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
         final int numOps = OPS.length;
@@ -131,7 +130,7 @@ public class AppOpsControllerImpl implements AppOpsController,
         boolean added = false;
         final int numCodes = opsCodes.length;
         for (int i = 0; i < numCodes; i++) {
-            if (mCallbacksByCode.containsKey(opsCodes[i])) {
+            if (mCallbacksByCode.contains(opsCodes[i])) {
                 mCallbacksByCode.get(opsCodes[i]).add(callback);
                 added = true;
             } else {
@@ -155,7 +154,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     public void removeCallback(int[] opsCodes, AppOpsController.Callback callback) {
         final int numCodes = opsCodes.length;
         for (int i = 0; i < numCodes; i++) {
-            if (mCallbacksByCode.containsKey(opsCodes[i])) {
+            if (mCallbacksByCode.contains(opsCodes[i])) {
                 mCallbacksByCode.get(opsCodes[i]).remove(callback);
             }
         }
@@ -312,7 +311,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     private void notifySuscribers(int code, int uid, String packageName, boolean active) {
-        if (mCallbacksByCode.containsKey(code)) {
+        if (mCallbacksByCode.contains(code)) {
             if (DEBUG) Log.d(TAG, "Notifying of change in package " + packageName);
             for (Callback cb: mCallbacksByCode.get(code)) {
                 cb.onActiveStateChanged(code, uid, packageName, active);

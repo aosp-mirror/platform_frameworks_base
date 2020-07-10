@@ -206,6 +206,16 @@ public class AppDataRollbackHelper {
     }
 
     /**
+     * Deletes snapshots of the credential encrypted apex data directories for the specified user,
+     * for the given rollback id. This method will be a no-op if the user is not unlocked.
+     */
+    public void destroyApexCeSnapshots(int userId, int rollbackId) {
+        if (!isUserCredentialLocked(userId)) {
+            mApexManager.destroyCeSnapshots(userId, rollbackId);
+        }
+    }
+
+    /**
      * Commits the pending backups and restores for a given {@code userId} and {@code rollback}. If
      * the rollback has a pending backup, it is updated with a mapping from {@code userId} to inode
      * of the CE user data snapshot.

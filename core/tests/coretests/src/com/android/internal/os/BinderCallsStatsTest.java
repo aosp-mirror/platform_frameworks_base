@@ -807,6 +807,38 @@ public class BinderCallsStatsTest {
         }
     }
 
+    @Test
+    public void testNativeTids() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        Binder binder = new Binder();
+
+        bcs.nativeTid = 3;
+
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        bcs.nativeTid = 1;
+
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        bcs.nativeTid = 1;
+
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        bcs.nativeTid = 2;
+
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        int[] tids = bcs.getNativeTids();
+        assertEquals(3, tids.length);
+        assertEquals(1, tids[0]);
+        assertEquals(2, tids[1]);
+        assertEquals(3, tids[2]);
+    }
+
     private static class TestHandler extends Handler {
         ArrayList<Runnable> mRunnables = new ArrayList<>();
 
@@ -825,6 +857,7 @@ public class BinderCallsStatsTest {
         public int callingUid = CALLING_UID;
         public long time = 1234;
         public long elapsedTime = 0;
+        public int nativeTid;
 
         TestBinderCallsStats() {
             this(mDeviceState);
@@ -874,6 +907,10 @@ public class BinderCallsStatsTest {
         protected void setCallingUid(int uid) {
             callingUid = uid;
         }
-    }
 
+        @Override
+        protected int getNativeTid() {
+            return nativeTid;
+        }
+    }
 }

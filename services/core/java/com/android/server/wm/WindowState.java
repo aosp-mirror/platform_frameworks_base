@@ -2191,6 +2191,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isInputMethodTarget()) {
             dc.computeImeTarget(true /* updateImeTarget */);
         }
+        if (dc.mInputMethodControlTarget == this) {
+            dc.updateImeControlTarget();
+        }
 
         final int type = mAttrs.type;
         if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {

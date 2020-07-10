@@ -19,7 +19,6 @@ package com.android.systemui.doze;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -31,12 +30,17 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Display;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.doze.dagger.BrightnessSensor;
+import com.android.systemui.doze.dagger.DozeScope;
+import com.android.systemui.doze.dagger.WrappedService;
+import com.android.systemui.util.sensors.AsyncSensorManager;
+
+import javax.inject.Inject;
 
 /**
  * Controls the screen brightness when dozing.
  */
+@DozeScope
 public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachine.Part,
         SensorEventListener {
     private static final boolean DEBUG_AOD_BRIGHTNESS = SystemProperties
@@ -51,10 +55,8 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private final Handler mHandler;
     private final SensorManager mSensorManager;
     private final Sensor mLightSensor;
-    private final BroadcastDispatcher mBroadcastDispatcher;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
-    private final boolean mDebuggable;
 
     private boolean mRegistered;
     private int mDefaultDozeBrightness;
@@ -71,40 +73,20 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private int mDebugBrightnessBucket = -1;
     private DozeMachine.State mState;
 
-    @VisibleForTesting
-    public DozeScreenBrightness(Context context, DozeMachine.Service service,
-            SensorManager sensorManager, Sensor lightSensor,
-            BroadcastDispatcher broadcastDispatcher, DozeHost host,
-            Handler handler, int defaultDozeBrightness, int[] sensorToBrightness,
-            int[] sensorToScrimOpacity, boolean debuggable) {
+    @Inject
+    public DozeScreenBrightness(Context context, @WrappedService DozeMachine.Service service,
+            AsyncSensorManager sensorManager, @BrightnessSensor Sensor lightSensor,
+            DozeHost host, Handler handler, AlwaysOnDisplayPolicy alwaysOnDisplayPolicy) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
         mLightSensor = lightSensor;
-        mBroadcastDispatcher = broadcastDispatcher;
         mDozeHost = host;
         mHandler = handler;
-        mDebuggable = debuggable;
 
-        mDefaultDozeBrightness = defaultDozeBrightness;
-        mSensorToBrightness = sensorToBrightness;
-        mSensorToScrimOpacity = sensorToScrimOpacity;
-
-        if (mDebuggable) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(ACTION_AOD_BRIGHTNESS);
-            mBroadcastDispatcher.registerReceiverWithHandler(this, filter, handler, UserHandle.ALL);
-        }
-    }
-
-    public DozeScreenBrightness(Context context, DozeMachine.Service service,
-            SensorManager sensorManager, Sensor lightSensor,
-            BroadcastDispatcher broadcastDispatcher, DozeHost host, Handler handler,
-            AlwaysOnDisplayPolicy policy) {
-        this(context, service, sensorManager, lightSensor, broadcastDispatcher, host, handler,
-                context.getResources().getInteger(
-                        com.android.internal.R.integer.config_screenBrightnessDoze),
-                policy.screenBrightnessArray, policy.dimmingScrimArray, DEBUG_AOD_BRIGHTNESS);
+        mDefaultDozeBrightness = alwaysOnDisplayPolicy.defaultDozeBrightness;
+        mSensorToBrightness = alwaysOnDisplayPolicy.screenBrightnessArray;
+        mSensorToScrimOpacity = alwaysOnDisplayPolicy.dimmingScrimArray;
     }
 
     @Override
@@ -139,9 +121,6 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     private void onDestroy() {
         setLightSensorEnabled(false);
-        if (mDebuggable) {
-            mBroadcastDispatcher.unregisterReceiver(this);
-        }
     }
 
     @Override

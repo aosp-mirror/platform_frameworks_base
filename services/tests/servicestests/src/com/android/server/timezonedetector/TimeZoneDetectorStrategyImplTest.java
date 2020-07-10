@@ -48,13 +48,13 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
 import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
+import android.util.IndentingPrintWriter;
 
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -119,7 +119,8 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testGetCapabilities() {
         new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
         TimeZoneCapabilities expectedCapabilities = mFakeCallback.getCapabilities(USER_ID);
         assertEquals(expectedCapabilities, mTimeZoneDetectorStrategy.getCapabilities(USER_ID));
     }
@@ -127,17 +128,19 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testGetConfiguration() {
         new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
         TimeZoneConfiguration expectedConfiguration = mFakeCallback.getConfiguration(USER_ID);
         assertTrue(expectedConfiguration.isComplete());
         assertEquals(expectedConfiguration, mTimeZoneDetectorStrategy.getConfiguration(USER_ID));
     }
 
     @Test
-    public void testCapabilitiesTestInfra_owner() {
+    public void testCapabilitiesTestInfra_unrestricted() {
         Script script = new Script();
 
-        script.initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+        script.initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
         {
             // Check the fake test infra is doing what is expected.
             TimeZoneCapabilities capabilities = mFakeCallback.getCapabilities(USER_ID);
@@ -145,7 +148,8 @@ public class TimeZoneDetectorStrategyImplTest {
             assertEquals(CAPABILITY_NOT_APPLICABLE, capabilities.getSuggestManualTimeZone());
         }
 
-        script.initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED);
+        script.initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED);
         {
             // Check the fake test infra is doing what is expected.
             TimeZoneCapabilities capabilities = mFakeCallback.getCapabilities(USER_ID);
@@ -155,10 +159,11 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testCapabilitiesTestInfra_nonOwner() {
+    public void testCapabilitiesTestInfra_restricted() {
         Script script = new Script();
 
-        script.initializeUser(USER_ID, UserCase.NON_OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+        script.initializeUser(USER_ID, UserCase.RESTRICTED,
+                CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
         {
             // Check the fake test infra is doing what is expected.
             TimeZoneCapabilities capabilities = mFakeCallback.getCapabilities(USER_ID);
@@ -166,7 +171,7 @@ public class TimeZoneDetectorStrategyImplTest {
             assertEquals(CAPABILITY_NOT_ALLOWED, capabilities.getSuggestManualTimeZone());
         }
 
-        script.initializeUser(USER_ID, UserCase.NON_OWNER,
+        script.initializeUser(USER_ID, UserCase.RESTRICTED,
                 CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED);
         {
             // Check the fake test infra is doing what is expected.
@@ -177,10 +182,10 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testCapabilitiesTestInfra_ownerAutoDetectNotSupported() {
+    public void testCapabilitiesTestInfra_autoDetectNotSupported() {
         Script script = new Script();
 
-        script.initializeUser(USER_ID, UserCase.OWNER_AUTO_DETECT_NOT_SUPPORTED,
+        script.initializeUser(USER_ID, UserCase.AUTO_DETECT_NOT_SUPPORTED,
                 CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
         {
             // Check the fake test infra is doing what is expected.
@@ -189,7 +194,7 @@ public class TimeZoneDetectorStrategyImplTest {
             assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeZone());
         }
 
-        script.initializeUser(USER_ID, UserCase.OWNER_AUTO_DETECT_NOT_SUPPORTED,
+        script.initializeUser(USER_ID, UserCase.AUTO_DETECT_NOT_SUPPORTED,
                 CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED);
         {
             // Check the fake test infra is doing what is expected.
@@ -200,9 +205,10 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testUpdateConfiguration_owner() {
+    public void testUpdateConfiguration_unrestricted() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
 
         // Set the configuration with auto detection enabled.
         script.simulateUpdateConfiguration(USER_ID, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
@@ -225,9 +231,9 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testUpdateConfiguration_nonOwner() {
+    public void testUpdateConfiguration_restricted() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.NON_OWNER,
+                .initializeUser(USER_ID, UserCase.RESTRICTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
 
         // Try to update the configuration with auto detection disabled.
@@ -244,9 +250,9 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testUpdateConfiguration_ownerAutoDetectNotSupported() {
+    public void testUpdateConfiguration_autoDetectNotSupported() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER_AUTO_DETECT_NOT_SUPPORTED,
+                .initializeUser(USER_ID, UserCase.AUTO_DETECT_NOT_SUPPORTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
 
         // Try to update the configuration with auto detection disabled.
@@ -269,7 +275,8 @@ public class TimeZoneDetectorStrategyImplTest {
         TelephonyTimeZoneSuggestion slotIndex2TimeZoneSuggestion =
                 createEmptySlotIndex2Suggestion();
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         script.simulateTelephonyTimeZoneSuggestion(slotIndex1TimeZoneSuggestion)
@@ -311,7 +318,8 @@ public class TimeZoneDetectorStrategyImplTest {
                 QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGH);
 
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
 
         // A low quality suggestions will not be taken: The device time zone setting is left
         // uninitialized.
@@ -376,7 +384,8 @@ public class TimeZoneDetectorStrategyImplTest {
 
         for (TelephonyTestCase testCase : TELEPHONY_TEST_CASES) {
             // Start with the device in a known state.
-            script.initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
+            script.initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                    CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
                     .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
             TelephonyTimeZoneSuggestion suggestion =
@@ -427,7 +436,8 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testTelephonySuggestionsSingleSlotId() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         for (TelephonyTestCase testCase : TELEPHONY_TEST_CASES) {
@@ -493,7 +503,8 @@ public class TimeZoneDetectorStrategyImplTest {
                         TELEPHONY_SCORE_NONE);
 
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
                 // Initialize the latest suggestions as empty so we don't need to worry about nulls
                 // below for the first loop.
@@ -579,7 +590,8 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testTelephonySuggestionTimeZoneDetectorStrategyDoesNotAssumeCurrentSetting() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
 
         TelephonyTestCase testCase = newTelephonyTestCase(
                 MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGH);
@@ -613,9 +625,10 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testManualSuggestion_owner_simulateAutoTimeZoneEnabled() {
+    public void testManualSuggestion_unrestricted_simulateAutoTimeZoneEnabled() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         // Auto time zone detection is enabled so the manual suggestion should be ignored.
@@ -625,9 +638,9 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testManualSuggestion_nonOwner_simulateAutoTimeZoneEnabled() {
+    public void testManualSuggestion_restricted_simulateAutoTimeZoneEnabled() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.NON_OWNER,
+                .initializeUser(USER_ID, UserCase.RESTRICTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
@@ -638,9 +651,9 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testManualSuggestion_ownerAutoDetectNotSupported_simulateAutoTimeZoneEnabled() {
+    public void testManualSuggestion_autoDetectNotSupported_simulateAutoTimeZoneEnabled() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER_AUTO_DETECT_NOT_SUPPORTED,
+                .initializeUser(USER_ID, UserCase.AUTO_DETECT_NOT_SUPPORTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
@@ -652,9 +665,10 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testManualSuggestion_owner_autoTimeZoneDetectionDisabled() {
+    public void testManualSuggestion_unrestricted_autoTimeZoneDetectionDisabled() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         // Auto time zone detection is disabled so the manual suggestion should be used.
@@ -665,13 +679,13 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testManualSuggestion_nonOwner_autoTimeZoneDetectionDisabled() {
+    public void testManualSuggestion_restricted_autoTimeZoneDetectionDisabled() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.NON_OWNER,
+                .initializeUser(USER_ID, UserCase.RESTRICTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
-        // Only owners have the capability.
+        // Restricted users do not have the capability.
         ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
         script.simulateManualTimeZoneSuggestion(
                 USER_ID, manualSuggestion, false /* expectedResult */)
@@ -679,13 +693,13 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testManualSuggestion_ownerAutoDetectNotSupported_autoTimeZoneDetectionDisabled() {
+    public void testManualSuggestion_autoDetectNotSupported_autoTimeZoneDetectionDisabled() {
         Script script = new Script()
-                .initializeUser(USER_ID, UserCase.OWNER_AUTO_DETECT_NOT_SUPPORTED,
+                .initializeUser(USER_ID, UserCase.AUTO_DETECT_NOT_SUPPORTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
-        // Only owners have the capability.
+        // Unrestricted users have the capability.
         ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
         script.simulateManualTimeZoneSuggestion(
                 USER_ID, manualSuggestion, true /* expectedResult */)
@@ -695,22 +709,22 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testAddDumpable() {
         new Script()
-                .initializeUser(USER_ID, UserCase.OWNER,
+                .initializeUser(USER_ID, UserCase.UNRESTRICTED,
                         CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         AtomicBoolean dumpCalled = new AtomicBoolean(false);
         class FakeDumpable implements Dumpable {
             @Override
-            public void dump(PrintWriter pw, String[] args) {
+            public void dump(IndentingPrintWriter pw, String[] args) {
                 dumpCalled.set(true);
             }
         }
 
         mTimeZoneDetectorStrategy.addDumpable(new FakeDumpable());
-        PrintWriter pw = new PrintWriter(new StringWriter());
+        IndentingPrintWriter ipw = new IndentingPrintWriter(new StringWriter());
         String[] args = {"ArgOne", "ArgTwo"};
-        mTimeZoneDetectorStrategy.dump(pw, args);
+        mTimeZoneDetectorStrategy.dump(ipw, args);
 
         assertTrue(dumpCalled.get());
     }
@@ -912,12 +926,15 @@ public class TimeZoneDetectorStrategyImplTest {
 
     /** Simulated user test cases. */
     enum UserCase {
-        /** A catch-all for users that can set time zone config. */
-        OWNER,
-        /** A catch-all for users that can't set time zone config. */
-        NON_OWNER,
-        /** Owner, but auto tz detection is not supported on the device. */
-        OWNER_AUTO_DETECT_NOT_SUPPORTED,
+        /** A catch-all for users that can set auto time zone config. */
+        UNRESTRICTED,
+        /** A catch-all for users that can't set auto time zone config. */
+        RESTRICTED,
+        /**
+         * Like {@link #UNRESTRICTED}, but auto tz detection is not
+         * supported on the device.
+         */
+        AUTO_DETECT_NOT_SUPPORTED,
     }
 
     /**
@@ -927,7 +944,7 @@ public class TimeZoneDetectorStrategyImplTest {
     private static TimeZoneCapabilities createCapabilities(
             int userId, UserCase userRole, TimeZoneConfiguration configuration) {
         switch (userRole) {
-            case OWNER: {
+            case UNRESTRICTED: {
                 int suggestManualTimeZoneCapability = configuration.isAutoDetectionEnabled()
                         ? CAPABILITY_NOT_APPLICABLE : CAPABILITY_POSSESSED;
                 return new TimeZoneCapabilities.Builder(userId)
@@ -935,14 +952,14 @@ public class TimeZoneDetectorStrategyImplTest {
                         .setSuggestManualTimeZone(suggestManualTimeZoneCapability)
                         .build();
             }
-            case NON_OWNER: {
+            case RESTRICTED: {
                 return new TimeZoneCapabilities.Builder(userId)
                         .setConfigureAutoDetectionEnabled(CAPABILITY_NOT_ALLOWED)
                         .setSuggestManualTimeZone(CAPABILITY_NOT_ALLOWED)
                         .build();
 
             }
-            case OWNER_AUTO_DETECT_NOT_SUPPORTED: {
+            case AUTO_DETECT_NOT_SUPPORTED: {
                 return new TimeZoneCapabilities.Builder(userId)
                         .setConfigureAutoDetectionEnabled(CAPABILITY_NOT_SUPPORTED)
                         .setSuggestManualTimeZone(CAPABILITY_POSSESSED)
