@@ -14,7 +14,6 @@ cc_library_static {
     ],
 
     srcs: [
-        ":lib_alarmManagerService_native",
         "BroadcastRadio/JavaRef.cpp",
         "BroadcastRadio/NativeCallbackThread.cpp",
         "BroadcastRadio/BroadcastRadioService.cpp",
@@ -72,17 +71,6 @@ cc_library_static {
     header_libs: [
         "bionic_libc_platform_headers",
     ],
-
-    product_variables: {
-        arc: {
-            exclude_srcs: [
-                "com_android_server_alarm_AlarmManagerService.cpp",
-            ],
-            srcs: [
-                ":arctimersrcs",
-            ],
-        }
-    }
 }
 
 cc_defaults {
@@ -196,12 +184,5 @@ filegroup {
     name: "lib_networkStatsFactory_native",
     srcs: [
         "com_android_server_net_NetworkStatsFactory.cpp",
-    ],
-}
-
-filegroup {
-    name: "lib_alarmManagerService_native",
-    srcs: [
-        "com_android_server_alarm_AlarmManagerService.cpp",
     ],
 }
