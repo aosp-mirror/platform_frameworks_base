@@ -258,8 +258,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.x = mMagnificationFrame.left;
-        params.y = mMagnificationFrame.top;
+        params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
+        params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
         params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         params.setTitle(mContext.getString(R.string.magnification_window_title));
 
