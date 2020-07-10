@@ -995,11 +995,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * changes (eg. a transition animation might play out first).
      */
     void onChildVisibilityRequested(boolean visible) {
-        // If we are changing visibility, then a snapshot isn't necessary and we are no-longer
+        // If we are losing visibility, then a snapshot isn't necessary and we are no-longer
         // part of a change transition.
-        mSurfaceFreezer.unfreeze(getSyncTransaction());
-        if (mDisplayContent != null) {
-            mDisplayContent.mChangingContainers.remove(this);
+        if (!visible) {
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
+            if (mDisplayContent != null) {
+                mDisplayContent.mChangingContainers.remove(this);
+            }
         }
         WindowContainer parent = getParent();
         if (parent != null) {
