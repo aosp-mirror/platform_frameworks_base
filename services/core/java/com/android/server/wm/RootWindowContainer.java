@@ -220,6 +220,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction;
 
+    /** The token acquirer to put stacks on the displays to sleep */
+    final ActivityTaskManagerInternal.SleepTokenAcquirer mDisplayOffTokenAcquirer;
+
     /**
      * The modes which affect which tasks are returned when calling
      * {@link RootWindowContainer#anyTaskForId(int)}.
@@ -259,7 +262,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * They are used by components that may hide and block interaction with underlying
      * activities.
      */
-    final ArrayList<ActivityTaskManagerInternal.SleepToken> mSleepTokens = new ArrayList<>();
+    final SparseArray<SleepToken> mSleepTokens = new SparseArray<>();
 
     /** Set when a power mode launch has started, but not ended. */
     private boolean mPowerModeLaunchStarted;
@@ -444,6 +447,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mService = service.mAtmService;
         mStackSupervisor = mService.mStackSupervisor;
         mStackSupervisor.mRootWindowContainer = this;
+        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl("Display-off");
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -2619,20 +2623,29 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    ActivityTaskManagerInternal.SleepToken createSleepToken(String tag, int displayId) {
+    SleepToken createSleepToken(String tag, int displayId) {
         final DisplayContent display = getDisplayContent(displayId);
         if (display == null) {
             throw new IllegalArgumentException("Invalid display: " + displayId);
         }
 
-        final SleepTokenImpl token = new SleepTokenImpl(tag, displayId);
-        mSleepTokens.add(token);
-        display.mAllSleepTokens.add(token);
+        final int tokenKey = makeSleepTokenKey(tag, displayId);
+        SleepToken token = mSleepTokens.get(tokenKey);
+        if (token == null) {
+            token = new SleepToken(tag, displayId);
+            mSleepTokens.put(tokenKey, token);
+            display.mAllSleepTokens.add(token);
+        } else {
+            throw new RuntimeException("Create the same sleep token twice: " + token);
+        }
         return token;
     }
 
-    private void removeSleepToken(SleepTokenImpl token) {
-        mSleepTokens.remove(token);
+    void removeSleepToken(SleepToken token) {
+        if (!mSleepTokens.contains(token.mHashKey)) {
+            Slog.d(TAG, "Remove non-exist sleep token: " + token + " from " + Debug.getCallers(6));
+        }
+        mSleepTokens.remove(token.mHashKey);
 
         final DisplayContent display = getDisplayContent(token.mDisplayId);
         if (display != null) {
@@ -3613,22 +3626,22 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return printed[0];
     }
 
-    private final class SleepTokenImpl extends ActivityTaskManagerInternal.SleepToken {
+    private static int makeSleepTokenKey(String tag, int displayId) {
+        final String tokenKey = tag + displayId;
+        return tokenKey.hashCode();
+    }
+
+    static final class SleepToken {
         private final String mTag;
         private final long mAcquireTime;
         private final int mDisplayId;
+        final int mHashKey;
 
-        public SleepTokenImpl(String tag, int displayId) {
+        SleepToken(String tag, int displayId) {
             mTag = tag;
             mDisplayId = displayId;
             mAcquireTime = SystemClock.uptimeMillis();
-        }
-
-        @Override
-        public void release() {
-            synchronized (mService.mGlobalLock) {
-                removeSleepToken(this);
-            }
+            mHashKey = makeSleepTokenKey(mTag, mDisplayId);
         }
 
         @Override
