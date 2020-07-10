@@ -42,6 +42,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.ext.SdkExtensions;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -61,8 +62,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
-
 
 /**
  * Information about a rollback available for a set of atomically installed packages.
@@ -699,11 +700,13 @@ class Rollback {
     void delete(AppDataRollbackHelper dataHelper) {
         assertInWorkerThread();
         boolean containsApex = false;
+        Set<Integer> apexUsers = new ArraySet<>();
         for (PackageRollbackInfo pkgInfo : info.getPackages()) {
+            List<Integer> snapshottedUsers = pkgInfo.getSnapshottedUsers();
             if (pkgInfo.isApex()) {
                 containsApex = true;
+                apexUsers.addAll(snapshottedUsers);
             } else {
-                List<Integer> snapshottedUsers = pkgInfo.getSnapshottedUsers();
                 for (int i = 0; i < snapshottedUsers.size(); i++) {
                     // Destroy app data snapshot.
                     int userId = snapshottedUsers.get(i);
@@ -714,6 +717,9 @@ class Rollback {
         }
         if (containsApex) {
             dataHelper.destroyApexDeSnapshots(info.getRollbackId());
+            for (int user : apexUsers) {
+                dataHelper.destroyApexCeSnapshots(user, info.getRollbackId());
+            }
         }
 
         RollbackStore.deleteRollback(this);
