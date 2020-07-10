@@ -4006,8 +4006,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             ActivityRecord record = ActivityRecord.isInStackLocked(token);
             if (record == null) {
-                throw new IllegalArgumentException("reportSizeConfigurations: ActivityRecord not "
-                        + "found for: " + token);
+                return;
             }
             record.setSizeConfigurations(horizontalSizeConfiguration,
                     verticalSizeConfigurations, smallestSizeConfigurations);

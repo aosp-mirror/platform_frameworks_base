@@ -4970,7 +4970,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void relaunchAllActivities(boolean preserveWindows) {
         for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
             final ActivityClientRecord r = entry.getValue();
-            if (!r.activity.mFinished) {
+            // Schedule relaunch the activity if it is not a local object or finishing.
+            if (!r.activity.mFinished && !(r.token instanceof Binder)) {
                 if (preserveWindows && r.window != null) {
                     r.mPreserveWindow = true;
                 }
