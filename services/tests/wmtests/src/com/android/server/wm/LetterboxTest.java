@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,102 +54,10 @@ public class LetterboxTest {
         mTransaction = spy(StubTransaction.class);
     }
 
-    private static final int TOP_BAR = 0x1;
-    private static final int BOTTOM_BAR = 0x2;
-    private static final int LEFT_BAR = 0x4;
-    private static final int RIGHT_BAR = 0x8;
-
     @Test
-    public void testNotIntersectsOrFullyContains_usesGlobalCoordinates() {
-        final Rect outer = new Rect(0, 0, 10, 50);
-        final Point surfaceOrig = new Point(1000, 2000);
-
-        final Rect topBar = new Rect(0, 0, 10, 2);
-        final Rect bottomBar = new Rect(0, 45, 10, 50);
-        final Rect leftBar = new Rect(0, 0, 2, 50);
-        final Rect rightBar = new Rect(8, 0, 10, 50);
-
-        final LetterboxLayoutVerifier verifier =
-                new LetterboxLayoutVerifier(outer, surfaceOrig, mLetterbox);
-        verifier.setBarRect(topBar, bottomBar, leftBar, rightBar);
-
-        // top
-        verifier.setInner(0, 2, 10, 50).verifyPositions(TOP_BAR | BOTTOM_BAR, BOTTOM_BAR);
-        // bottom
-        verifier.setInner(0, 0, 10, 45).verifyPositions(TOP_BAR | BOTTOM_BAR, TOP_BAR);
-        // left
-        verifier.setInner(2, 0, 10, 50).verifyPositions(LEFT_BAR | RIGHT_BAR, RIGHT_BAR);
-        // right
-        verifier.setInner(0, 0, 8, 50).verifyPositions(LEFT_BAR | RIGHT_BAR, LEFT_BAR);
-        // top + bottom
-        verifier.setInner(0, 2, 10, 45).verifyPositions(TOP_BAR | BOTTOM_BAR, 0);
-        // left + right
-        verifier.setInner(2, 0, 8, 50).verifyPositions(LEFT_BAR | RIGHT_BAR, 0);
-        // top + left
-        verifier.setInner(2, 2, 10, 50).verifyPositions(TOP_BAR | LEFT_BAR, 0);
-        // top + left + right
-        verifier.setInner(2, 2, 8, 50).verifyPositions(TOP_BAR | LEFT_BAR | RIGHT_BAR, 0);
-        // left + right + bottom
-        verifier.setInner(2, 0, 8, 45).verifyPositions(LEFT_BAR | RIGHT_BAR | BOTTOM_BAR, 0);
-        // all
-        verifier.setInner(2, 2, 8, 45)
-                .verifyPositions(TOP_BAR | BOTTOM_BAR | LEFT_BAR | RIGHT_BAR, 0);
-    }
-
-    private static class LetterboxLayoutVerifier {
-        final Rect mOuter;
-        final Rect mInner = new Rect();
-        final Point mSurfaceOrig;
-        final Letterbox mLetterbox;
-        final Rect mTempRect = new Rect();
-
-        final Rect mTop = new Rect();
-        final Rect mBottom = new Rect();
-        final Rect mLeft = new Rect();
-        final Rect mRight = new Rect();
-
-        LetterboxLayoutVerifier(Rect outer, Point surfaceOrig, Letterbox letterbox) {
-            mOuter = new Rect(outer);
-            mSurfaceOrig = new Point(surfaceOrig);
-            mLetterbox = letterbox;
-        }
-
-        LetterboxLayoutVerifier setInner(int left, int top, int right, int bottom) {
-            mInner.set(left, top, right, bottom);
-            mLetterbox.layout(mOuter, mInner, mSurfaceOrig);
-            return this;
-        }
-
-        void setBarRect(Rect top, Rect bottom, Rect left, Rect right) {
-            mTop.set(top);
-            mBottom.set(bottom);
-            mLeft.set(left);
-            mRight.set(right);
-        }
-
-        void verifyPositions(int allowedPos, int noOverlapPos) {
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mTop),
-                    (allowedPos & TOP_BAR) != 0);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mBottom),
-                    (allowedPos & BOTTOM_BAR) != 0);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mLeft),
-                    (allowedPos & LEFT_BAR) != 0);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mRight),
-                    (allowedPos & RIGHT_BAR) != 0);
-
-            mTempRect.set(mTop.left, mTop.top, mTop.right, mTop.bottom + 1);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mTempRect),
-                    (noOverlapPos & TOP_BAR) != 0);
-            mTempRect.set(mLeft.left, mLeft.top, mLeft.right + 1, mLeft.bottom);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mTempRect),
-                    (noOverlapPos & LEFT_BAR) != 0);
-            mTempRect.set(mRight.left - 1, mRight.top, mRight.right, mRight.bottom);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mTempRect),
-                    (noOverlapPos & RIGHT_BAR) != 0);
-            mTempRect.set(mBottom.left, mBottom.top - 1, mBottom.right, mBottom.bottom);
-            assertEquals(mLetterbox.notIntersectsOrFullyContains(mTempRect),
-                    (noOverlapPos & BOTTOM_BAR) != 0);
-        }
+    public void testOverlappingWith_usesGlobalCoordinates() {
+        mLetterbox.layout(new Rect(0, 0, 10, 50), new Rect(0, 2, 10, 45), new Point(1000, 2000));
+        assertTrue(mLetterbox.isOverlappingWith(new Rect(0, 0, 1, 1)));
     }
 
     @Test
