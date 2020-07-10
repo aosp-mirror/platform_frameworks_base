@@ -47,7 +47,14 @@ public abstract class CellLocation {
      *
      * Callers wishing to request a single location update should use
      * {@link TelephonyManager#requestCellInfoUpdate}.
+     *
+     * @deprecated this method has undesirable side-effects, and it calls into the OS without
+     * access to a {@link android.content.Context Context}, meaning that certain safety checks and
+     * attribution are error-prone. Given that this method has numerous downsides, and given that
+     * there are long-available superior alternatives, callers are strongly discouraged from using
+     * this method.
      */
+    @Deprecated
     public static void requestLocationUpdate() {
         // Since this object doesn't have a context, this is the best we can do.
         final Context appContext = ActivityThread.currentApplication();
