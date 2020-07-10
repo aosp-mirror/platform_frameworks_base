@@ -56,8 +56,7 @@ import java.util.Objects;
 
 /**
  * Maintains a binding to the best service that matches the given intent information. Bind and
- * unbind callbacks, as well as all binder operations, will all be run on a single thread, but the
- * exact thread is left undefined.
+ * unbind callbacks, as well as all binder operations, will all be run on a single thread.
  */
 public class ServiceWatcher implements ServiceConnection {
 
@@ -73,7 +72,11 @@ public class ServiceWatcher implements ServiceConnection {
     public interface BinderRunner {
         /** Called to run client code with the binder. */
         void run(IBinder binder) throws RemoteException;
-        /** Called if an error occurred and the function could not be run. */
+        /**
+         * Called if an error occurred and the function could not be run. This callback is only
+         * intended for resource deallocation and cleanup in response to a single binder operation,
+         * it should not be used to propagate errors further.
+         */
         default void onError() {}
     }
 
@@ -189,8 +192,15 @@ public class ServiceWatcher implements ServiceConnection {
     public ServiceWatcher(Context context, String action,
             @Nullable BinderRunner onBind, @Nullable Runnable onUnbind,
             @BoolRes int enableOverlayResId, @StringRes int nonOverlayPackageResId) {
+        this(context, FgThread.getHandler(), action, onBind, onUnbind, enableOverlayResId,
+                nonOverlayPackageResId);
+    }
+
+    public ServiceWatcher(Context context, Handler handler, String action,
+            @Nullable BinderRunner onBind, @Nullable Runnable onUnbind,
+            @BoolRes int enableOverlayResId, @StringRes int nonOverlayPackageResId) {
         mContext = context;
-        mHandler = FgThread.getHandler();
+        mHandler = handler;
         mIntent = new Intent(Objects.requireNonNull(action));
 
         Resources resources = context.getResources();
@@ -276,13 +286,6 @@ public class ServiceWatcher implements ServiceConnection {
 
         mHandler.post(() -> onBestServiceChanged(false));
         return true;
-    }
-
-    /**
-     * Returns information on the currently selected service.
-     */
-    public ServiceInfo getBoundService() {
-        return mServiceInfo;
     }
 
     private void onBestServiceChanged(boolean forceRebind) {
@@ -380,7 +383,7 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     @Override
-    public void onBindingDied(ComponentName component) {
+    public final void onBindingDied(ComponentName component) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
         if (D) {
