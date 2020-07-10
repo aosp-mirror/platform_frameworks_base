@@ -7542,6 +7542,7 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @SuppressWarnings("AndroidFrameworkClientSidePermissionCheck")
     public int noteProxyOpNoThrow(int op, @Nullable String proxiedPackageName, int proxiedUid,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         int myUid = Process.myUid();
