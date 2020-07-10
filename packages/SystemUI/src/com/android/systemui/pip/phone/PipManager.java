@@ -47,6 +47,7 @@ import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -259,7 +260,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             PipSnapAlgorithm pipSnapAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
             SysUiState sysUiState,
-            ConfigurationController configController) {
+            ConfigurationController configController,
+            PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -280,7 +282,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mMediaController, mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState);
+                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState,
+                pipUiEventLogger);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
