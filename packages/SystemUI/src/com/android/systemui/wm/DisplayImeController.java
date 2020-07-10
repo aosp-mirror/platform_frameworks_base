@@ -278,10 +278,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
-            // Set frame, but only if the new frame isn't empty -- this maintains continuity
             final Rect newFrame = imeSource.getFrame();
-            mImeFrame.set(newFrame);
-            final boolean isFloating = newFrame.height() == 0;
+            final boolean isFloating = newFrame.height() == 0 && show;
             if (isFloating) {
                 // This is likely a "floating" or "expanded" IME, so to get animations, just
                 // pretend the ime has some size just below the screen.
@@ -290,6 +288,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId).density()
                                 * FLOATING_IME_BOTTOM_INSET);
                 mImeFrame.bottom -= floatingInset;
+            } else if (newFrame.height() != 0) {
+                // Don't set a new frame if it's empty and hiding -- this maintains continuity
+                mImeFrame.set(newFrame);
             }
             if (DEBUG) {
                 Slog.d(TAG, "Run startAnim  show:" + show + "  was:"
