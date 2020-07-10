@@ -347,7 +347,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * Called when lockout period expired and clients are allowed to listen for fingerprint
          * again.
          */
-        public void onLockoutReset() { }
+        public void onLockoutReset(int sensorId) { }
     };
 
     /**
@@ -751,7 +751,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                         new IBiometricServiceLockoutResetCallback.Stub() {
 
                     @Override
-                    public void onLockoutReset(IRemoteCallback serverCallback)
+                    public void onLockoutReset(int sensorId, IRemoteCallback serverCallback)
                             throws RemoteException {
                         try {
                             final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
@@ -759,7 +759,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                             wakeLock.acquire();
                             mHandler.post(() -> {
                                 try {
-                                    callback.onLockoutReset();
+                                    callback.onLockoutReset(sensorId);
                                 } finally {
                                     wakeLock.release();
                                 }

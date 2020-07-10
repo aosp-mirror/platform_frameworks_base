@@ -295,7 +295,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private int mHardwareFingerprintUnavailableRetryCount = 0;
     private int mHardwareFaceUnavailableRetryCount = 0;
     private static final int HAL_ERROR_RETRY_TIMEOUT = 500; // ms
-    private static final int HAL_ERROR_RETRY_MAX = 10;
+    private static final int HAL_ERROR_RETRY_MAX = 20;
 
     private final Runnable mCancelNotReceived = new Runnable() {
         @Override
@@ -682,7 +682,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         public void run() {
             Log.w(TAG, "Retrying fingerprint after HW unavailable, attempt " +
                     mHardwareFingerprintUnavailableRetryCount);
-            updateFingerprintListeningState();
+            if (mFpm.isHardwareDetected()) {
+                updateFingerprintListeningState();
+            } else if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
+                mHardwareFingerprintUnavailableRetryCount++;
+                mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
+            }
         }
     };
 
@@ -704,11 +709,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
-            if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
-                mHardwareFingerprintUnavailableRetryCount++;
-                mHandler.removeCallbacks(mRetryFingerprintAuthentication);
-                mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
-            }
+            mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
@@ -1234,7 +1235,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final FingerprintManager.LockoutResetCallback mFingerprintLockoutResetCallback
             = new FingerprintManager.LockoutResetCallback() {
         @Override
-        public void onLockoutReset() {
+        public void onLockoutReset(int sensorId) {
             handleFingerprintLockoutReset();
         }
     };
@@ -1242,7 +1243,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final FaceManager.LockoutResetCallback mFaceLockoutResetCallback
             = new FaceManager.LockoutResetCallback() {
         @Override
-        public void onLockoutReset() {
+        public void onLockoutReset(int sensorId) {
             handleFaceLockoutReset();
         }
     };
@@ -1838,7 +1839,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (mHandler.hasMessages(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE)) {
             return;
         }
-        mHandler.removeCallbacks(mRetryFingerprintAuthentication);
+
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
         boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;

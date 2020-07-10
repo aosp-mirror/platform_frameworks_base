@@ -18,16 +18,54 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.os.RemoteException;
+import android.util.Slog;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Keeps track of sensor gesture availability (e.g. swipe), and notifies clients when its
  * availability changes
  */
-class GestureAvailabilityTracker {
-    private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
-            new CopyOnWriteArrayList<>();
+public class GestureAvailabilityTracker {
+    private static final String TAG = "GestureAvailabilityTracker";
+
+    private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks;
+    private final Map<Integer, Boolean> mActiveSensors;
+
+    private boolean mIsActive;
+
+    GestureAvailabilityTracker() {
+        mClientActiveCallbacks = new CopyOnWriteArrayList<>();
+        mActiveSensors = new HashMap<>();
+    }
+
+    /**
+     * @return true if any sensor is active.
+     */
+    public boolean isAnySensorActive() {
+        return mIsActive;
+    }
+
+    public void markSensorActive(int sensorId, boolean active) {
+        mActiveSensors.put(sensorId, active);
+
+        final boolean wasActive = mIsActive;
+        boolean isActive = false;
+        for (Boolean b : mActiveSensors.values()) {
+            if (b) {
+                isActive = true;
+                break;
+            }
+        }
+
+        if (wasActive != isActive) {
+            Slog.d(TAG, "Notifying gesture availability, active=" + mIsActive);
+            mIsActive = isActive;
+            notifyClientActiveCallbacks(mIsActive);
+        }
+    }
 
     void registerCallback(IFingerprintClientActiveCallback callback) {
         mClientActiveCallbacks.add(callback);
@@ -37,7 +75,7 @@ class GestureAvailabilityTracker {
         mClientActiveCallbacks.remove(callback);
     }
 
-    void notifyClientActiveCallbacks(boolean isActive) {
+    private void notifyClientActiveCallbacks(boolean isActive) {
         for (IFingerprintClientActiveCallback callback : mClientActiveCallbacks) {
             try {
                 callback.onClientActiveChanged(isActive);

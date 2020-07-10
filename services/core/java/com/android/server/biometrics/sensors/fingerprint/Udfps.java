@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors;
+package com.android.server.biometrics.sensors.fingerprint;
 
 /**
- * Interface that cancellable {@link ClientMonitor} subclasses should implement.
+ * Interface for under-display fingerprint sensors.
+ * {@link com.android.server.biometrics.sensors.ClientMonitor} subclass that require knowledge of
+ * finger position (e.g. enroll, authenticate) should implement this.
  */
-public interface Cancellable {
-    /**
-     * Requests to end the ClientMonitor's lifecycle.
-     */
-    void cancel();
+public interface Udfps {
+    void onFingerDown(int x, int y, float minor, float major);
+    void onFingerUp();
 }
