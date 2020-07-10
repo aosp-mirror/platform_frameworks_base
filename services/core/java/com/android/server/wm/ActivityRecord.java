@@ -7465,7 +7465,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Determines whether this ActivityRecord can turn the screen on. It checks whether the flag
      * {@link ActivityRecord#getTurnScreenOnFlag} is set and checks whether the ActivityRecord
-     * should be visible depending on Keyguard state
+     * should be visible depending on Keyguard and window state.
      *
      * @return true if the screen can be turned on, false otherwise.
      */
@@ -7474,8 +7474,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         final ActivityStack stack = getRootTask();
-        return stack != null &&
-                stack.checkKeyguardVisibility(this, true /* shouldBeVisible */,
+        return stack != null
+                && !stack.inMultiWindowMode()
+                && stack.checkKeyguardVisibility(this, true /* shouldBeVisible */,
                         stack.topRunningActivity() == this /* isTop */);
     }
 
