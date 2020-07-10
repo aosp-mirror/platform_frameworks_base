@@ -119,11 +119,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
         // this code here means that we now got control, so we can start the animation immediately.
         // If client window is trying to control IME and IME is already visible, it is immediate.
-        if (fromIme || mState.getSource(getType()).isVisible()) {
+        if (fromIme || mState.getSource(getType()).isVisible() && getControl() != null) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
-        return getImm().requestImeShow(null /* resultReceiver */)
+        return getImm().requestImeShow(mController.getHost().getWindowToken())
                 ? ShowResult.IME_SHOW_DELAYED : ShowResult.IME_SHOW_FAILED;
     }
 
@@ -132,12 +132,15 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      */
     @Override
     void notifyHidden() {
-        getImm().notifyImeHidden();
+        getImm().notifyImeHidden(mController.getHost().getWindowToken());
     }
 
     @Override
     public void removeSurface() {
-        getImm().removeImeSurface();
+        final IBinder window = mController.getHost().getWindowToken();
+        if (window != null) {
+            getImm().removeImeSurface(window);
+        }
     }
 
     @Override
@@ -146,6 +149,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         super.setControl(control, showTypes, hideTypes);
         if (control == null && !mIsRequestedVisibleAwaitingControl) {
             hide();
+            removeSurface();
         }
     }
 
