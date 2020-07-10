@@ -62,7 +62,7 @@ public class MediaTranscodingBenchmark
     // TODO(hkuang): Change this to query from MediaCodecInfo.CodecCapabilities for different
     // resolution.
     private static final int MINIMUM_TRANSCODING_FPS = 80;
-    private static final int LOOP_COUNT = 10;
+    private static final int LOOP_COUNT = 3;
     // Default Setting for transcoding to H.264.
     private static final String MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
     private static final int BIT_RATE = 20000000;            // 20Mbps
@@ -109,6 +109,7 @@ public class MediaTranscodingBenchmark
 
         MediaTranscodingTestUtil.VideoFileInfo info =
                 MediaTranscodingTestUtil.extractVideoFileInfo(mContext, getUri(sourceFileName));
+
         int timeoutSeconds = calMaxTranscodingWaitTimeSeconds(info.mNumVideoFrames,
                 MINIMUM_TRANSCODING_FPS);
         Log.d(TAG, "Start Transcoding " + info.toString() + " " + timeoutSeconds);
@@ -151,8 +152,9 @@ public class MediaTranscodingBenchmark
 
     // Calculate the maximum wait time based on minimum transcoding throughput and frame number.
     private int calMaxTranscodingWaitTimeSeconds(int numberFrames, int minTranscodingFps) {
-        int waitTimeSeconds =  numberFrames / minTranscodingFps;
-        // If waitTimeSeconds is 0, wait for 1 seconds at least.
+        float waitTime =  (float) numberFrames / (float) minTranscodingFps;
+        // If waitTimeSeconds is 0, wait for 1 second at least.
+        int waitTimeSeconds = (int) Math.ceil(waitTime);
         return waitTimeSeconds == 0 ? 1 : waitTimeSeconds;
     }
 
@@ -171,6 +173,9 @@ public class MediaTranscodingBenchmark
         transcode(testVideoName, transcodedVideoName);
     }
 
+    // TODO(hkuang): Enable this after b/160268606 is fixed. Transcoding video with audio takes way
+    //  more long time that leads to timeout failure.
+    /*
     @Test
     public void testBenchmarkingAVCToAVCWith66FramesWithAudio() throws Exception {
         String videoNameWithoutExtension = "video_1920x1080_66frame_h264_22Mbps_30fps_aac";
@@ -178,5 +183,105 @@ public class MediaTranscodingBenchmark
         String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
 
         transcode(testVideoName, transcodedVideoName);
+    }*/
+
+    @Test
+    public void testBenchmarkingAVCToAVCWith361FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_361frame_h264_22Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
     }
+
+    // TODO(hkuang): Enable this after b/160268606 is fixed. Transcoding video with audio takes way
+    //  more long time that leads to timeout failure.
+    /*@Test
+    public void testBenchmarkingAVCToAVCWith361FramesWithAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_361frame_h264_22Mbps_30fps_aac";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }*/
+
+    @Test
+    public void testBenchmarkingAVCToAVCWith943FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_943frame_h264_22Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    // TODO(hkuang): Enable this after b/160268606 is fixed. Transcoding video with audio takes way
+    //  more long time that leads to timeout failure.
+   /* @Test
+    public void testBenchmarkingAVCToAVCWith943FramesWithAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_943frame_h264_22Mbps_30fps_aac";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }*/
+
+    @Test
+    public void testBenchmarkingAVCToAVCWith1822FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_1822frame_h264_22Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    // TODO(hkuang): Enable this after b/160268606 is fixed. Transcoding video with audio takes way
+    //  more long time that leads to timeout failure.
+    /*@Test
+    public void testBenchmarkingAVCToAVCWith1822FramesWithAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_1822frame_h264_22Mbps_30fps_aac";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }*/
+
+    @Test
+    public void testBenchmarkingAVCToAVCWith3648FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_3648frame_h264_22Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    // TODO(hkuang): Enable this after b/160268606 is fixed. Transcoding video with audio takes way
+    //  more long time that leads to timeout failure.
+    /*@Test
+    public void testBenchmarkingAVCToAVCWith3648FramesWithAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_3648frame_h264_22Mbps_30fps_aac";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }*/
+
+    @Test
+    public void testBenchmarkingAVCToAVCWith11042FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_11042frame_h264_22Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    // TODO(hkuang): Enable this after b/160268606 is fixed. Transcoding video with audio takes way
+    //  more long time that leads to timeout failure.
+    /*@Test
+    public void testBenchmarkingAVCToAVCWith11042FramesWithAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_11042frame_h264_22Mbps_30fps_aac";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }*/
 }
