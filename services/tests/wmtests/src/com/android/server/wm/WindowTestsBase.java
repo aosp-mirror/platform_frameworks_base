@@ -261,6 +261,20 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    /** Creates a {@link TaskDisplayArea} right above the default one. */
+    static TaskDisplayArea createTaskDisplayArea(DisplayContent displayContent,
+            WindowManagerService service, String name, int displayAreaFeature) {
+        final TaskDisplayArea newTaskDisplayArea = new TaskDisplayArea(
+                displayContent, service, name, displayAreaFeature);
+        final TaskDisplayArea defaultTaskDisplayArea = displayContent.getDefaultTaskDisplayArea();
+
+        // Insert the new TDA to the correct position.
+        defaultTaskDisplayArea.getParent().addChild(newTaskDisplayArea,
+                defaultTaskDisplayArea.getParent().mChildren.indexOf(defaultTaskDisplayArea)
+                        + 1);
+        return newTaskDisplayArea;
+    }
+
     /** Creates a {@link ActivityStack} and adds it to the specified {@link DisplayContent}. */
     ActivityStack createTaskStackOnDisplay(DisplayContent dc) {
         return createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);

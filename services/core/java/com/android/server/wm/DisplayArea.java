@@ -109,6 +109,66 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    void positionChildAt(int position, T child, boolean includingParents) {
+        if (child.asDisplayArea() == null) {
+            // Reposition other window containers as normal.
+            super.positionChildAt(position, child, includingParents);
+            return;
+        }
+
+        final int targetPosition = findPositionForChildDisplayArea(position, child.asDisplayArea());
+        super.positionChildAt(targetPosition, child, false /* includingParents */);
+
+        final WindowContainer parent = getParent();
+        if (includingParents && parent != null
+                && (position == POSITION_TOP || position == POSITION_BOTTOM)) {
+            parent.positionChildAt(position, this /* child */, true /* includingParents */);
+        }
+    }
+
+    /**
+     * When a {@link DisplayArea} is repositioned, it should only be moved among its siblings of the
+     * same {@link Type}.
+     * For example, when a {@link DisplayArea} of {@link Type#ANY} is repositioned, it shouldn't be
+     * moved above any {@link Type#ABOVE_TASKS} siblings, or below any {@link Type#BELOW_TASKS}
+     * siblings.
+     */
+    private int findPositionForChildDisplayArea(int requestPosition, DisplayArea child) {
+        if (child.getParent() != this) {
+            throw new IllegalArgumentException("positionChildAt: container=" + child.getName()
+                    + " is not a child of container=" + getName()
+                    + " current parent=" + child.getParent());
+        }
+
+        // The max possible position we can insert the child at.
+        int maxPosition = findMaxPositionForChildDisplayArea(child);
+        // The min possible position we can insert the child at.
+        int minPosition = findMinPositionForChildDisplayArea(child);
+
+        return Math.max(Math.min(requestPosition, maxPosition), minPosition);
+    }
+
+    private int findMaxPositionForChildDisplayArea(DisplayArea child) {
+        final Type childType = Type.typeOf(child);
+        for (int i = mChildren.size() - 1; i > 0; i--) {
+            if (Type.typeOf(getChildAt(i)) == childType) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private int findMinPositionForChildDisplayArea(DisplayArea child) {
+        final Type childType = Type.typeOf(child);
+        for (int i = 0; i < mChildren.size(); i++) {
+            if (Type.typeOf(getChildAt(i)) == childType) {
+                return i;
+            }
+        }
+        return mChildren.size() - 1;
+    }
+
+    @Override
     boolean needsZBoost() {
         // Z Boost should only happen at or below the ActivityStack level.
         return false;
@@ -423,7 +483,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         }
 
         static Type typeOf(WindowContainer c) {
-            if (c instanceof DisplayArea) {
+            if (c.asDisplayArea() != null) {
                 return ((DisplayArea) c).mType;
             } else if (c instanceof WindowToken && !(c instanceof ActivityRecord)) {
                 return typeOf((WindowToken) c);

@@ -70,7 +70,7 @@ import java.util.function.BiFunction;
  *
  * </pre>
  *
- * // TODO(b/157683117): document more complex scenarios where we need multiple areas per feature.
+ * // TODO(b/158713595): document more complex scenarios where we need multiple areas per feature.
  */
 class DisplayAreaPolicyBuilder {
     @Nullable private HierarchyBuilder mRootHierarchyBuilder;
@@ -123,8 +123,14 @@ class DisplayAreaPolicyBuilder {
             }
 
             containsImeContainer = containsImeContainer || hierarchyBuilder.mImeContainer != null;
-            containsDefaultTda = containsDefaultTda
-                    || containsDefaultTaskDisplayArea(hierarchyBuilder);
+            if (containsDefaultTda) {
+                if (containsDefaultTaskDisplayArea(hierarchyBuilder)) {
+                    throw new IllegalStateException("Only one TaskDisplayArea can have the feature "
+                            + "of FEATURE_DEFAULT_TASK_CONTAINER");
+                }
+            } else {
+                containsDefaultTda = containsDefaultTaskDisplayArea(hierarchyBuilder);
+            }
         }
 
         if (!containsImeContainer) {
@@ -506,6 +512,7 @@ class DisplayAreaPolicyBuilder {
     static class Result extends DisplayAreaPolicy {
         final List<RootDisplayArea> mDisplayAreaGroupRoots;
         final BiFunction<WindowToken, Bundle, RootDisplayArea> mSelectRootForWindowFunc;
+        private final TaskDisplayArea mDefaultTaskDisplayArea;
 
         Result(WindowManagerService wmService, RootDisplayArea root,
                 List<RootDisplayArea> displayAreaGroupRoots,
@@ -518,6 +525,16 @@ class DisplayAreaPolicyBuilder {
                     // not specified.
                     ? (window, options) -> mRoot
                     : selectRootForWindowFunc;
+
+            // Cache the default TaskDisplayArea for quick access.
+            mDefaultTaskDisplayArea = mRoot.getItemFromTaskDisplayAreas(taskDisplayArea ->
+                    taskDisplayArea.mFeatureId == FEATURE_DEFAULT_TASK_CONTAINER
+                            ? taskDisplayArea
+                            : null);
+            if (mDefaultTaskDisplayArea == null) {
+                throw new IllegalStateException(
+                        "No display area with FEATURE_DEFAULT_TASK_CONTAINER");
+            }
         }
 
         @Override
@@ -560,6 +577,11 @@ class DisplayAreaPolicyBuilder {
                     displayAreas.addAll(root.mFeatureToDisplayAreas.get(feature));
                 }
             }
+        }
+
+        @Override
+        public TaskDisplayArea getDefaultTaskDisplayArea() {
+            return mDefaultTaskDisplayArea;
         }
     }
 

@@ -2512,8 +2512,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * or for cases when multi-instance is not supported yet (like Split-screen, PiP or Recents).
      */
     TaskDisplayArea getDefaultTaskDisplayArea() {
-        return getItemFromTaskDisplayAreas(taskDisplayArea -> taskDisplayArea,
-                false /* traverseTopToBottom */);
+        return mDisplayAreaPolicy.getDefaultTaskDisplayArea();
     }
 
     void positionDisplayAt(int position, boolean includingParents) {
@@ -2545,9 +2544,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Find the task whose outside touch area (for resizing) (x, y) falls within.
      * Returns null if the touch doesn't fall into a resizing area.
      */
+    @Nullable
     Task findTaskForResizePoint(int x, int y) {
         final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-        return mTmpTaskForResizePointSearchResult.process(getDefaultTaskDisplayArea(), x, y, delta);
+        return getItemFromTaskDisplayAreas(taskDisplayArea ->
+                mTmpTaskForResizePointSearchResult.process(taskDisplayArea, x, y, delta));
     }
 
     void updateTouchExcludeRegion() {
@@ -2615,7 +2616,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // to exclude the docked stack from touch so we need the entire screen area and not just a
         // small portion which the home stack currently is resized to.
         if (task.isActivityTypeHome() && task.isVisible() && task.isResizeable()) {
-            mDisplayContent.getBounds(mTmpRect);
+            task.getDisplayArea().getBounds(mTmpRect);
         } else {
             task.getDimBounds(mTmpRect);
         }
