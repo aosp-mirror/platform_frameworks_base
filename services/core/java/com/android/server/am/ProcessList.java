@@ -2218,7 +2218,8 @@ public final class ProcessList {
                 // access /mnt/user anyway.
                 && app.mountMode != Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
                 && app.mountMode != Zygote.MOUNT_EXTERNAL_PASS_THROUGH
-                && app.mountMode != Zygote.MOUNT_EXTERNAL_INSTALLER;
+                && app.mountMode != Zygote.MOUNT_EXTERNAL_INSTALLER
+                && app.mountMode != Zygote.MOUNT_EXTERNAL_NONE;
     }
 
     private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
