@@ -42,6 +42,7 @@ import android.net.dhcp.DhcpPacket;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.system.Os;
 import android.util.Log;
 
@@ -224,9 +225,19 @@ public class EthernetTetheringTest {
 
     }
 
+    private boolean isAdbOverNetwork() {
+        // If adb TCP port opened, this test may running by adb over network.
+        return (SystemProperties.getInt("persist.adb.tcp.port", -1) > -1)
+                || (SystemProperties.getInt("service.adb.tcp.port", -1) > -1);
+    }
+
     @Test
     public void testPhysicalEthernet() throws Exception {
         assumeTrue(mEm.isAvailable());
+        // Do not run this test if adb is over network and ethernet is connected.
+        // It is likely the adb run over ethernet, the adb would break when ethernet is switching
+        // from client mode to server mode. See b/160389275.
+        assumeFalse(isAdbOverNetwork());
 
         // Get an interface to use.
         final String iface = mTetheredInterfaceRequester.getInterface();
