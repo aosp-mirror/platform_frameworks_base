@@ -81,6 +81,9 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
     <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.ACCESS_VIBRATOR_STATE"/>
+    <uses-permission android:name="android.permission.VIBRATE_ALWAYS_ON"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"

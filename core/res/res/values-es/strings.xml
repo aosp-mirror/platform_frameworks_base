@@ -1152,7 +1152,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Capturar imagen con %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Capturar imagen"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"Usar siempre para esta acción"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"Utiliza otra aplicación"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"Usar otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Elegir una aplicación para el dispositivo USB"</string>

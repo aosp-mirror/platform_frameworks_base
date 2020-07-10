@@ -592,12 +592,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (mBypassNextStagedInstallerCheck) {
-            mBypassNextStagedInstallerCheck = false;
-        } else if (params.isStaged
-                && !isCalledBySystemOrShell(callingUid)
-                && !isWhitelistedStagedInstaller(requestedInstallerPackageName)) {
-            throw new SecurityException("Installer not allowed to commit staged install");
+        if (params.isStaged && !isCalledBySystemOrShell(callingUid)) {
+            if (mBypassNextStagedInstallerCheck) {
+                mBypassNextStagedInstallerCheck = false;
+            } else if (!isStagedInstallerAllowed(requestedInstallerPackageName)) {
+                throw new SecurityException("Installer not allowed to commit staged install");
+            }
         }
 
         if (!params.isMultiPackage) {
@@ -729,7 +729,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 || callingUid == Process.SHELL_UID;
     }
 
-    private boolean isWhitelistedStagedInstaller(String installerName) {
+    private boolean isStagedInstallerAllowed(String installerName) {
         return SystemConfig.getInstance().getWhitelistedStagedInstallers().contains(installerName);
     }
 
@@ -869,7 +869,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public ParceledListSlice<SessionInfo> getStagedSessions() {
-        return mStagingManager.getSessions(Binder.getCallingUid());
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mSessions) {
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (session.isStaged() && !session.isDestroyed()) {
+                    result.add(session.generateInfoForCaller(false, Binder.getCallingUid()));
+                }
+            }
+        }
+        return new ParceledListSlice<>(result);
     }
 
     @Override

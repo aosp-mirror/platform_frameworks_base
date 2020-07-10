@@ -30,9 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 
@@ -43,6 +41,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
@@ -92,15 +91,16 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTapSensor = mSensors.getFakeTapSensor().getSensor();
         WakeLock wakeLock = new WakeLockFake();
         AsyncSensorManager asyncSensorManager =
-                new AsyncSensorManager(mSensors, null, new Handler());
+                new AsyncSensorManager(mSensors, new FakeThreadFactory(mExecutor), null);
 
         FakeThresholdSensor thresholdSensor = new FakeThresholdSensor();
         thresholdSensor.setLoaded(true);
         mProximitySensor = new FakeProximitySensor(thresholdSensor,  null, mExecutor);
 
-        mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
-                asyncSensorManager, wakeLock, true, mDockManager, mProximitySensor,
+        mTriggers = new DozeTriggers(mContext, mHost, mAlarmManager, config, parameters,
+                asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher);
+        mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
 
@@ -186,6 +186,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     private void waitForSensorManager() {
-        TestableLooper.get(this).processAllMessages();
+        mExecutor.runAllReady();
     }
 }

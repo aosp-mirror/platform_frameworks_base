@@ -21,8 +21,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.view.View.SYSTEM_UI_LAYOUT_FLAGS;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -34,8 +32,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -146,17 +142,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if ((view.getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) != 0) {
                     return new Pair<>(Insets.NONE, insets);
                 }
-
-                boolean includeIme = (view.getViewRootImpl().mWindowAttributes.softInputMode
-                        & SOFT_INPUT_MASK_ADJUST)
-                        == SOFT_INPUT_ADJUST_RESIZE;
-                Insets insetsToApply;
-                if (ViewRootImpl.sNewInsetsMode == 0) {
-                    insetsToApply = insets.getSystemWindowInsets();
-                } else {
-                    insetsToApply = insets.getInsets(systemBars() | (includeIme ? ime() : 0));
-                }
-                insets = insets.inset(insetsToApply);
+                Insets insetsToApply = insets.getSystemWindowInsets();
                 return new Pair<>(insetsToApply,
                         insets.inset(insetsToApply).consumeSystemWindowInsets());
             };

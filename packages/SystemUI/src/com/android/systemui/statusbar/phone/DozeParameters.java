@@ -211,8 +211,4 @@ public class DozeParameters implements TunerService.Tunable,
     public void onTuningChanged(String key, String newValue) {
         mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
-
-    public AlwaysOnDisplayPolicy getPolicy() {
-        return mAlwaysOnPolicy;
-    }
 }

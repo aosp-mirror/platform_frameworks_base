@@ -13800,6 +13800,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    private void notifySubtreeAccessibilityStateChangedByParentIfNeeded() {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+            return;
+        }
+
+        final View sendA11yEventView = (View) getParentForAccessibility();
+        if (sendA11yEventView != null && sendA11yEventView.isShown()) {
+            sendA11yEventView.notifySubtreeAccessibilityStateChangedIfNeeded();
+        }
+    }
+
     /**
      * Changes the visibility of this View without triggering any other changes. This should only
      * be used by animation frameworks, such as {@link android.transition.Transition}, where
@@ -16229,7 +16240,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         ((!(mParent instanceof ViewGroup)) || ((ViewGroup) mParent).isShown())) {
                     dispatchVisibilityAggregated(newVisibility == VISIBLE);
                 }
-                notifySubtreeAccessibilityStateChangedIfNeeded();
+                // If this view is invisible from visible, then sending the A11y event by its
+                // parent which is shown and has the accessibility important.
+                if ((old & VISIBILITY_MASK) == VISIBLE) {
+                    notifySubtreeAccessibilityStateChangedByParentIfNeeded();
+                } else {
+                    notifySubtreeAccessibilityStateChangedIfNeeded();
+                }
             }
         }
 

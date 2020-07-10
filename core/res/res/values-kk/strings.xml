@@ -1547,7 +1547,7 @@
     <string name="sending" msgid="206925243621664438">"Жіберілуде..."</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Браузер қосылсын ба?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Қоңырауды қабылдау?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"Үнемі"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"Әрқашан"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Бір рет қана"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s жұмыс профилін қолдамайды"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Планшет"</string>

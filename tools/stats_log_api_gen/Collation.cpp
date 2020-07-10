@@ -25,6 +25,7 @@
 namespace android {
 namespace stats_log_api_gen {
 
+using google::protobuf::OneofDescriptor;
 using google::protobuf::EnumDescriptor;
 using google::protobuf::FieldDescriptor;
 using google::protobuf::FileDescriptor;
@@ -396,16 +397,14 @@ int collate_atom(const Descriptor* atom, AtomDecl* atomDecl, vector<java_type_t>
             collate_enums(*field->enum_type(), &atField);
         }
 
-        // Generate signature for pushed atoms
-        if (atomDecl->code < PULL_ATOM_START_ID) {
-            if (javaType == JAVA_TYPE_ENUM) {
-                // All enums are treated as ints when it comes to function signatures.
-                signature->push_back(JAVA_TYPE_INT);
-            } else if (javaType == JAVA_TYPE_OBJECT && isBinaryField) {
-                signature->push_back(JAVA_TYPE_BYTE_ARRAY);
-            } else {
-                signature->push_back(javaType);
-            }
+        // Generate signature for atom.
+        if (javaType == JAVA_TYPE_ENUM) {
+            // All enums are treated as ints when it comes to function signatures.
+            signature->push_back(JAVA_TYPE_INT);
+        } else if (javaType == JAVA_TYPE_OBJECT && isBinaryField) {
+            signature->push_back(JAVA_TYPE_BYTE_ARRAY);
+        } else {
+            signature->push_back(javaType);
         }
 
         atomDecl->fields.push_back(atField);
@@ -518,8 +517,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
         shared_ptr<AtomDecl> atomDecl =
                 make_shared<AtomDecl>(atomField->number(), atomField->name(), atom->name());
 
-        if (atomDecl->code < PULL_ATOM_START_ID &&
-            atomField->options().GetExtension(os::statsd::truncate_timestamp)) {
+        if (atomField->options().GetExtension(os::statsd::truncate_timestamp)) {
             addAnnotationToAtomDecl(atomDecl.get(), ATOM_ID_FIELD_NUMBER,
                                     ANNOTATION_ID_TRUNCATE_TIMESTAMP, ANNOTATION_TYPE_BOOL,
                                     AnnotationValue(true));
@@ -537,7 +535,24 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
             continue;
         }
 
-        FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = atoms->signatureInfoMap[signature];
+        const OneofDescriptor* oneofAtom = atomField->containing_oneof();
+        if (oneofAtom == nullptr) {
+            print_error(atomField, "Atom is not declared in a `oneof` field: %s\n",
+                        atomField->name().c_str());
+            errorCount++;
+            continue;
+        }
+        else if ((oneofAtom->name() != ONEOF_PUSHED_ATOM_NAME) &&
+                 (oneofAtom->name() != ONEOF_PULLED_ATOM_NAME)) {
+            print_error(atomField, "Atom is neither a pushed nor pulled atom: %s\n",
+                        atomField->name().c_str());
+            errorCount++;
+            continue;
+        }
+
+        FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = oneofAtom->name() ==
+            ONEOF_PUSHED_ATOM_NAME ? atoms->signatureInfoMap[signature] :
+            atoms->pulledAtomsSignatureInfoMap[signature];
         populateFieldNumberToAtomDeclSet(atomDecl, &fieldNumberToAtomDeclSet);
 
         atoms->decls.insert(atomDecl);
@@ -556,9 +571,21 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
     }
 
     if (dbg) {
+        // Signatures for pushed atoms.
         printf("signatures = [\n");
         for (SignatureInfoMap::const_iterator it = atoms->signatureInfoMap.begin();
              it != atoms->signatureInfoMap.end(); it++) {
+            printf("   ");
+            for (vector<java_type_t>::const_iterator jt = it->first.begin(); jt != it->first.end();
+                 jt++) {
+                printf(" %d", (int)*jt);
+            }
+            printf("\n");
+        }
+
+        // Signatures for pull atoms.
+        for (SignatureInfoMap::const_iterator it = atoms->pulledAtomsSignatureInfoMap.begin();
+             it != atoms->pulledAtomsSignatureInfoMap.end(); it++) {
             printf("   ");
             for (vector<java_type_t>::const_iterator jt = it->first.begin(); jt != it->first.end();
                  jt++) {

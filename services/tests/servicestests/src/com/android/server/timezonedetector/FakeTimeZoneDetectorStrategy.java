@@ -25,10 +25,9 @@ import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
+import android.util.IndentingPrintWriter;
 
-import java.io.PrintWriter;
-
-class StubbedTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
+class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
     private StrategyListener mListener;
 
@@ -110,7 +109,7 @@ class StubbedTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(IndentingPrintWriter pw, String[] args) {
         mDumpCalled = true;
     }
 

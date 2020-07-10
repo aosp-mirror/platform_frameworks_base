@@ -71,6 +71,9 @@ public class InsetsSourceConsumerTest {
     private SurfaceControl mLeash;
     @Mock Transaction mMockTransaction;
     private InsetsSource mSpyInsetsSource;
+    private boolean mRemoveSurfaceCalled = false;
+    private InsetsController mController;
+    private InsetsState mState;
 
     @Before
     public void setup() {
@@ -89,13 +92,19 @@ public class InsetsSourceConsumerTest {
             } catch (BadTokenException e) {
                 // activity isn't running, lets ignore BadTokenException.
             }
-            InsetsState state = new InsetsState();
+            mState = new InsetsState();
             mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR));
-            state.addSource(mSpyInsetsSource);
+            mState.addSource(mSpyInsetsSource);
 
-            mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, state,
-                    () -> mMockTransaction,
-                    new InsetsController(new ViewRootInsetsControllerHost(viewRootImpl)));
+            mController = new InsetsController(new ViewRootInsetsControllerHost(viewRootImpl));
+            mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mState,
+                    () -> mMockTransaction, mController) {
+                @Override
+                public void removeSurface() {
+                    super.removeSurface();
+                    mRemoveSurfaceCalled = true;
+                }
+            };
         });
         instrumentation.waitForIdleSync();
 
@@ -171,6 +180,25 @@ public class InsetsSourceConsumerTest {
             mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()),
                     new int[1], hideTypes);
             assertEquals(statusBars(), hideTypes[0]);
+            assertFalse(mRemoveSurfaceCalled);
         });
+    }
+
+    @Test
+    public void testRestore_noAnimation() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mConsumer.hide();
+            mController.onStateChanged(mState);
+            mConsumer.setControl(null, new int[1], new int[1]);
+            reset(mMockTransaction);
+            verifyZeroInteractions(mMockTransaction);
+            mRemoveSurfaceCalled = false;
+            int[] hideTypes = new int[1];
+            mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()),
+                    new int[1], hideTypes);
+            assertTrue(mRemoveSurfaceCalled);
+            assertEquals(0, hideTypes[0]);
+        });
+
     }
 }

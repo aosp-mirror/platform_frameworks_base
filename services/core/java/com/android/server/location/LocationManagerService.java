@@ -25,7 +25,6 @@ import static android.location.LocationManager.EXTRA_PROVIDER_ENABLED;
 import static android.location.LocationManager.EXTRA_PROVIDER_NAME;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
-import static android.location.LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION;
 import static android.location.LocationManager.KEY_LOCATION_CHANGED;
 import static android.location.LocationManager.KEY_PROVIDER_ENABLED;
 import static android.location.LocationManager.MODE_CHANGED_ACTION;
@@ -1222,21 +1221,10 @@ public class LocationManagerService extends ILocationManager.Stub {
                     false);
 
             // Now update monitoring of high power requests only.
-            boolean wasHighPowerMonitoring = mOpHighPowerMonitoring;
             mOpHighPowerMonitoring = updateMonitoring(
                     requestingHighPowerLocation,
                     mOpHighPowerMonitoring,
                     true);
-            if (mOpHighPowerMonitoring != wasHighPowerMonitoring) {
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    // Send an intent to notify that a high power request has been added/removed.
-                    Intent intent = new Intent(HIGH_POWER_REQUEST_CHANGE_ACTION);
-                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
         }
 
         private boolean updateMonitoring(boolean allowMonitoring, boolean currentlyMonitoring,

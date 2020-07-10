@@ -260,7 +260,9 @@ public class LocationManager {
      * {@code OP_MONITOR_HIGH_POWER_LOCATION}.
      *
      * @hide
+     * @deprecated This action is unnecessary from Android S forward.
      */
+    @Deprecated
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
             "android.location.HIGH_POWER_REQUEST_CHANGE";
 
@@ -1855,7 +1857,8 @@ public class LocationManager {
                     "GpsStatus APIs not supported, please use GnssStatus APIs instead");
         }
 
-        getGnssStatusTransportMultiplexer().addListener(listener, DIRECT_EXECUTOR);
+        getGnssStatusTransportMultiplexer().addListener(listener,
+                new HandlerExecutor(new Handler()));
         return true;
     }
 
@@ -1974,7 +1977,7 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addNmeaListener(@NonNull OnNmeaMessageListener listener) {
-        return addNmeaListener(DIRECT_EXECUTOR, listener);
+        return addNmeaListener(listener, null);
     }
 
     /**

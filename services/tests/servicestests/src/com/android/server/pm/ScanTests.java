@@ -102,13 +102,13 @@ public class ScanTests {
     @Before
     public void setupDefaultAbiBehavior() throws Exception {
         when(mMockPackageAbiHelper.derivePackageAbi(
-                any(AndroidPackage.class), anyBoolean(), nullable(String.class), anyBoolean()))
+                any(AndroidPackage.class), anyBoolean(), nullable(String.class)))
                 .thenReturn(new Pair<>(
                         new PackageAbiHelper.Abis("derivedPrimary", "derivedSecondary"),
                         new PackageAbiHelper.NativeLibraryPaths(
                                 "derivedRootDir", true, "derivedNativeDir", "derivedNativeDir2")));
-        when(mMockPackageAbiHelper.getNativeLibraryPaths(
-                any(AndroidPackage.class), any(PackageSetting.class), any(File.class)))
+        when(mMockPackageAbiHelper.deriveNativeLibraryPaths(
+                any(AndroidPackage.class), anyBoolean(), any(File.class)))
                 .thenReturn(new PackageAbiHelper.NativeLibraryPaths(
                         "getRootDir", true, "getNativeDir", "getNativeDir2"
                 ));

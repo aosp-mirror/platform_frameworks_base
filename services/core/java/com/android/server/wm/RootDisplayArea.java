@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
-import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 
@@ -44,19 +43,11 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
     /** Mapping from window layer to {@link DisplayArea.Tokens} that holds windows on that layer. */
     private DisplayArea.Tokens[] mAreaForLayer;
 
-    /**
-     * List of {@link TaskDisplayArea} that are attached to this {@link DisplayArea} hierarchy. The
-     * order is the same as their z-order.
-     *
-     * TODO(b/157683117): Instead of caching the TDAs, always traverse the hierarchy to get them.
-     */
-    ArrayList<TaskDisplayArea> mTaskDisplayAreas;
-
     /** Whether the hierarchy has been built. */
     private boolean mHasBuiltHierarchy;
 
-    RootDisplayArea(WindowManagerService wms) {
-        super(wms, Type.ANY, "RootDisplayArea", FEATURE_ROOT);
+    RootDisplayArea(WindowManagerService wms, String name, int featureId) {
+        super(wms, Type.ANY, name, featureId);
     }
 
     /** Finds the {@link DisplayArea.Tokens} that this type of window should be attached to. */
@@ -73,15 +64,13 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
 
     /** Callback after {@link DisplayArea} hierarchy has been built. */
     void onHierarchyBuilt(ArrayList<Feature> features, DisplayArea.Tokens[] areaForLayer,
-            Map<Feature, List<DisplayArea<? extends WindowContainer>>> featureToDisplayAreas,
-            ArrayList<TaskDisplayArea> taskDisplayAreas) {
+            Map<Feature, List<DisplayArea<? extends WindowContainer>>> featureToDisplayAreas) {
         if (mHasBuiltHierarchy) {
             throw new IllegalStateException("Root should only build the hierarchy once");
         }
         mHasBuiltHierarchy = true;
         mFeatures = Collections.unmodifiableList(features);
         mAreaForLayer = areaForLayer;
-        mTaskDisplayAreas = taskDisplayAreas;
         mFeatureToDisplayAreas = featureToDisplayAreas;
     }
 }

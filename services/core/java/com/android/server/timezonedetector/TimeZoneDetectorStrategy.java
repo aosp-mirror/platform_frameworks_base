@@ -21,8 +21,7 @@ import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
-
-import java.io.PrintWriter;
+import android.util.IndentingPrintWriter;
 
 /**
  * The interface for the class that implements the time detection algorithm used by the
@@ -32,12 +31,12 @@ import java.io.PrintWriter;
  * and what to set it to.
  *
  * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
- * {@link #dump(PrintWriter, String[])}) may be called on a different thread so implementations must
- * handle thread safety.
+ * {@link #dump(IndentingPrintWriter, String[])}) may be called on a different thread so
+ * implementations mustvhandle thread safety.
  *
  * @hide
  */
-public interface TimeZoneDetectorStrategy extends Dumpable.Dumpee {
+public interface TimeZoneDetectorStrategy extends Dumpable, Dumpable.Container {
 
     /** A listener for strategy events. */
     interface StrategyListener {
@@ -91,9 +90,4 @@ public interface TimeZoneDetectorStrategy extends Dumpable.Dumpee {
      * Called when there has been a change to the automatic time zone detection configuration.
      */
     void handleAutoTimeZoneConfigChanged();
-
-    /**
-     * Dumps internal state such as field values.
-     */
-    void dump(PrintWriter pw, String[] args);
 }

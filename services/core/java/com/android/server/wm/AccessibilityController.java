@@ -1357,7 +1357,12 @@ final class AccessibilityController {
                 addedWindows.clear();
 
                 // Gets the top focused display Id and window token for supporting multi-display.
-                topFocusedDisplayId = mService.mRoot.getTopFocusedDisplayContent().getDisplayId();
+                // If this top focused display is an embedded one, using its parent display as the
+                // top focused display.
+                final DisplayContent topFocusedDisplayContent =
+                        mService.mRoot.getTopFocusedDisplayContent();
+                topFocusedDisplayId = isEmbeddedDisplay(topFocusedDisplayContent) ? mDisplayId
+                        : topFocusedDisplayContent.getDisplayId();
                 topFocusedWindowToken = topFocusedWindowState.mClient.asBinder();
             }
             mCallback.onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,

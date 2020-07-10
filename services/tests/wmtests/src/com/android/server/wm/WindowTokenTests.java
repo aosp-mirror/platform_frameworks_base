@@ -20,7 +20,10 @@ import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,8 +31,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
@@ -37,6 +42,8 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.function.BiFunction;
 
 /**
  * Tests for the {@link WindowToken} class.
@@ -204,5 +211,28 @@ public class WindowTokenTests extends WindowTestsBase {
                 true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
                 false /* fromClientToken */);
         assertNotNull(nonClientToken.mSurfaceControl);
+    }
+
+    @Test
+    public void testWindowAttachedWithOptions() {
+        BiFunction<WindowToken, Bundle, RootDisplayArea> selectFunc =
+                ((DisplayAreaPolicyBuilder.Result) mDisplayContent.mDisplayAreaPolicy)
+                        .mSelectRootForWindowFunc;
+        spyOn(selectFunc);
+
+        final WindowToken token1 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
+                false /* fromClientToken */, null /* options */);
+
+        verify(selectFunc).apply(token1, null);
+
+        final Bundle options = new Bundle();
+        final WindowToken token2 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
+                false /* fromClientToken */, options /* options */);
+
+        verify(selectFunc).apply(token2, options);
     }
 }
