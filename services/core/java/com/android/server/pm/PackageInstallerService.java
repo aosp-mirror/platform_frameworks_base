@@ -865,7 +865,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public ParceledListSlice<SessionInfo> getStagedSessions() {
-        return mStagingManager.getSessions(Binder.getCallingUid());
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mSessions) {
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (session.isStaged() && !session.isDestroyed()) {
+                    result.add(session.generateInfoForCaller(false, Binder.getCallingUid()));
+                }
+            }
+        }
+        return new ParceledListSlice<>(result);
     }
 
     @Override
