@@ -288,7 +288,8 @@ public class KeyguardUserSwitcher {
             if (item.picture == null) {
                 v.bind(name, getDrawable(mContext, item).mutate(), item.resolveId());
             } else {
-                int avatarSize = (int) v.getResources().getDimension(R.dimen.kg_framed_avatar_size);
+                int avatarSize =
+                        (int) mContext.getResources().getDimension(R.dimen.kg_framed_avatar_size);
                 Drawable drawable = new CircleFramedDrawable(item.picture, avatarSize);
                 drawable.setColorFilter(
                         item.isSwitchToEnabled ? null : getDisabledUserAvatarColorFilter());
