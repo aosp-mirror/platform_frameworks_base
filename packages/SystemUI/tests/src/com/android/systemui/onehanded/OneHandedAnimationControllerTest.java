@@ -52,7 +52,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mOneHandedAnimationController = new OneHandedAnimationController(mContext,
+        mOneHandedAnimationController = new OneHandedAnimationController(
                 new OneHandedSurfaceTransactionHelper(mContext));
     }
 
