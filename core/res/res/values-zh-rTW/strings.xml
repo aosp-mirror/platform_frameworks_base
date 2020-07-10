@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由你的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"為了延長電池續航力，省電模式會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"為了延長電池續航力，省電模式會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
@@ -1999,9 +1999,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"顯示在畫面上的其他應用程式上層"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用節約耗電量模式以延長電池續航力"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"節約耗電量"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"節約耗電量模式已關閉"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"省電模式已關閉"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"手機電力充足，各項功能不再受到限制。"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"平板電腦電力充足，各項功能不再受到限制。"</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"裝置電力充足，各項功能不再受到限制。"</string>
