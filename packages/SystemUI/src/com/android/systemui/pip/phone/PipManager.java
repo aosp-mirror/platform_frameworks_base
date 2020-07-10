@@ -356,17 +356,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     @Override
     public void onPipTransitionStarted(ComponentName activity, int direction) {
         if (isOutPipDirection(direction)) {
-            // On phones, the expansion animation that happens on pip tap before restoring
-            // to fullscreen makes it so that the bounds received here are the expanded
-            // bounds. We want to restore to the unexpanded bounds when re-entering pip,
-            // so we save the bounds before expansion (normal) instead of the current
-            // bounds.
-            mReentryBounds.set(mTouchHandler.getNormalBounds());
-            // Apply the snap fraction of the current bounds to the normal bounds.
-            final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
-            float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
-            mPipBoundsHandler.applySnapFraction(mReentryBounds, snapFraction);
-            // Save reentry bounds (normal non-expand bounds with current position applied).
+            // Exiting PIP, save the reentry bounds to restore to when re-entering.
+            updateReentryBounds();
             mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
         }
         // Disable touches while the animation is running
@@ -378,6 +369,23 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 Log.e(TAG, "Failed to callback recents", e);
             }
         }
+    }
+
+    /**
+     * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
+     */
+    public void updateReentryBounds() {
+        // On phones, the expansion animation that happens on pip tap before restoring
+        // to fullscreen makes it so that the last reported bounds are the expanded
+        // bounds. We want to restore to the unexpanded bounds when re-entering pip,
+        // so we use the bounds before expansion (normal) instead of the reported
+        // bounds.
+        Rect reentryBounds = mTouchHandler.getNormalBounds();
+        // Apply the snap fraction of the current bounds to the normal bounds.
+        final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
+        float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
+        mPipBoundsHandler.applySnapFraction(reentryBounds, snapFraction);
+        mReentryBounds.set(reentryBounds);
     }
 
     @Override
