@@ -91,6 +91,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
 
     private boolean mPaused = true;
     private boolean mPausedTargetAdjusted = false;
+    private boolean mAdjustedWhileHidden = false;
 
     DividerImeController(SplitScreenTaskOrganizer splits, TransactionPool pool, Handler handler) {
         mSplits = splits;
@@ -170,11 +171,17 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             // If split is hidden, we don't want to trigger any relayouts that would cause the
             // divider to show again.
             updateImeAdjustState();
+        } else {
+            mAdjustedWhileHidden = true;
         }
     }
 
     private void updateImeAdjustState() {
-        if (mAdjusted != mTargetAdjusted) {
+        updateImeAdjustState(false /* force */);
+    }
+
+    private void updateImeAdjustState(boolean force) {
+        if (mAdjusted != mTargetAdjusted || force) {
             // Reposition the server's secondary split position so that it evaluates
             // insets properly.
             WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -229,6 +236,11 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             }
         }
         mSplits.mDivider.setAdjustedForIme(mTargetShown && !mPaused);
+    }
+
+    public void updateAdjustForIme() {
+        updateImeAdjustState(mAdjustedWhileHidden);
+        mAdjustedWhileHidden = false;
     }
 
     @Override
