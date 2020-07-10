@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.test.TestLooper;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
@@ -61,7 +63,6 @@ public final class NetworkStatsSubscriptionsMonitorTest {
     private static final String TEST_IMSI3 = "466929999999999";
 
     @Mock private Context mContext;
-    @Mock private PhoneStateListener mPhoneStateListener;
     @Mock private SubscriptionManager mSubscriptionManager;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private NetworkStatsSubscriptionsMonitor.Delegate mDelegate;
@@ -214,5 +215,54 @@ public final class NetworkStatsSubscriptionsMonitorTest {
         mMonitor.stop();
         verify(mTelephonyManager, times(2)).listen(any(), eq(PhoneStateListener.LISTEN_NONE));
         assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UNKNOWN);
+    }
+
+    @Test
+    public void test5g() {
+        mMonitor.start();
+        // Insert sim1, verify RAT type is NETWORK_TYPE_UNKNOWN, and never get any callback
+        // before changing RAT type. Also capture listener for later use.
+        addTestSub(TEST_SUBID1, TEST_IMSI1);
+        assertRatTypeNotChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        final ArgumentCaptor<RatTypeListener> ratTypeListenerCaptor =
+                ArgumentCaptor.forClass(RatTypeListener.class);
+        verify(mTelephonyManager, times(1)).listen(ratTypeListenerCaptor.capture(),
+                eq(PhoneStateListener.LISTEN_SERVICE_STATE));
+        final RatTypeListener listener = CollectionUtils
+                .find(ratTypeListenerCaptor.getAllValues(), it -> it.getSubId() == TEST_SUBID1);
+        assertNotNull(listener);
+
+        // Set RAT type to 5G NSA (non-standalone) mode, verify the monitor outputs NETWORK_TYPE_NR.
+        final ServiceState serviceState = mock(ServiceState.class);
+        when(serviceState.getDataNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(serviceState.getNrState()).thenReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        listener.onServiceStateChanged(serviceState);
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_NR);
+        reset(mDelegate);
+
+        // Set RAT type to LTE without NR connected, the RAT type should be downgraded to LTE.
+        when(serviceState.getNrState()).thenReturn(NetworkRegistrationInfo.NR_STATE_NONE);
+        listener.onServiceStateChanged(serviceState);
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_LTE);
+        reset(mDelegate);
+
+        // Verify NR connected with other RAT type does not take effect.
+        when(serviceState.getDataNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_UMTS);
+        when(serviceState.getNrState()).thenReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        listener.onServiceStateChanged(serviceState);
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UMTS);
+        reset(mDelegate);
+
+        // Set RAT type to 5G standalone mode, the RAT type should be NR.
+        setRatTypeForSub(ratTypeListenerCaptor.getAllValues(), TEST_SUBID1,
+                TelephonyManager.NETWORK_TYPE_NR);
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_NR);
+        reset(mDelegate);
+
+        // Set NR state to none in standalone mode does not change anything.
+        when(serviceState.getDataNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
+        when(serviceState.getNrState()).thenReturn(NetworkRegistrationInfo.NR_STATE_NONE);
+        listener.onServiceStateChanged(serviceState);
+        assertRatTypeNotChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_NR);
     }
 }
