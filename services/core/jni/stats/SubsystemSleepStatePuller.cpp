@@ -194,17 +194,13 @@ static AStatsManager_PullAtomCallbackReturn getIPowerStatsDataLocked(int32_t ato
                 }
                 for (auto result : results) {
                     for (auto stateResidency : result.stateResidencyData) {
-                        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
-                        AStatsEvent_setAtomId(event, android::util::SUBSYSTEM_SLEEP_STATE);
-                        AStatsEvent_writeString(event,
-                                                gEntityNames.at(result.powerEntityId).c_str());
-                        AStatsEvent_writeString(event,
-                                                gStateNames.at(result.powerEntityId)
-                                                        .at(stateResidency.powerEntityStateId)
-                                                        .c_str());
-                        AStatsEvent_writeInt64(event, stateResidency.totalStateEntryCount);
-                        AStatsEvent_writeInt64(event, stateResidency.totalTimeInStateMs);
-                        AStatsEvent_build(event);
+                        android::util::addAStatsEvent(data, android::util::SUBSYSTEM_SLEEP_STATE,
+                                                      gEntityNames.at(result.powerEntityId).c_str(),
+                                                      gStateNames.at(result.powerEntityId)
+                                                              .at(stateResidency.powerEntityStateId)
+                                                              .c_str(),
+                                                      stateResidency.totalStateEntryCount,
+                                                      stateResidency.totalTimeInStateMs);
                     }
                 }
                 success = true;
@@ -259,26 +255,21 @@ static AStatsManager_PullAtomCallbackReturn getIPowerDataLocked(int32_t atomTag,
 
                     for (size_t i = 0; i < states.size(); i++) {
                         const PowerStatePlatformSleepState& state = states[i];
-                        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
-                        AStatsEvent_setAtomId(event, android::util::SUBSYSTEM_SLEEP_STATE);
-                        AStatsEvent_writeString(event, state.name.c_str());
-                        AStatsEvent_writeString(event, "");
-                        AStatsEvent_writeInt64(event, state.totalTransitions);
-                        AStatsEvent_writeInt64(event, state.residencyInMsecSinceBoot);
-                        AStatsEvent_build(event);
+                        android::util::addAStatsEvent(data, android::util::SUBSYSTEM_SLEEP_STATE,
+                                                      state.name.c_str(), "",
+                                                      state.totalTransitions,
+                                                      state.residencyInMsecSinceBoot);
 
                         ALOGV("powerstate: %s, %lld, %lld, %d", state.name.c_str(),
                               (long long)state.residencyInMsecSinceBoot,
                               (long long)state.totalTransitions,
                               state.supportedOnlyInSuspend ? 1 : 0);
                         for (const auto& voter : state.voters) {
-                            AStatsEvent* event = AStatsEventList_addStatsEvent(data);
-                            AStatsEvent_setAtomId(event, android::util::SUBSYSTEM_SLEEP_STATE);
-                            AStatsEvent_writeString(event, state.name.c_str());
-                            AStatsEvent_writeString(event, voter.name.c_str());
-                            AStatsEvent_writeInt64(event, voter.totalNumberOfTimesVotedSinceBoot);
-                            AStatsEvent_writeInt64(event, voter.totalTimeInMsecVotedForSinceBoot);
-                            AStatsEvent_build(event);
+                            android::util::addAStatsEvent(data,
+                                                          android::util::SUBSYSTEM_SLEEP_STATE,
+                                                          state.name.c_str(), voter.name.c_str(),
+                                                          voter.totalNumberOfTimesVotedSinceBoot,
+                                                          voter.totalTimeInMsecVotedForSinceBoot);
 
                             ALOGV("powerstatevoter: %s, %s, %lld, %lld", state.name.c_str(),
                                   voter.name.c_str(),
@@ -305,14 +296,13 @@ static AStatsManager_PullAtomCallbackReturn getIPowerDataLocked(int32_t atomTag,
                                 for (size_t j = 0; j < subsystem.states.size(); j++) {
                                     const PowerStateSubsystemSleepState& state =
                                             subsystem.states[j];
-                                    AStatsEvent* event = AStatsEventList_addStatsEvent(data);
-                                    AStatsEvent_setAtomId(event,
-                                                          android::util::SUBSYSTEM_SLEEP_STATE);
-                                    AStatsEvent_writeString(event, subsystem.name.c_str());
-                                    AStatsEvent_writeString(event, state.name.c_str());
-                                    AStatsEvent_writeInt64(event, state.totalTransitions);
-                                    AStatsEvent_writeInt64(event, state.residencyInMsecSinceBoot);
-                                    AStatsEvent_build(event);
+                                    android::util::
+                                            addAStatsEvent(data,
+                                                           android::util::SUBSYSTEM_SLEEP_STATE,
+                                                           subsystem.name.c_str(),
+                                                           state.name.c_str(),
+                                                           state.totalTransitions,
+                                                           state.residencyInMsecSinceBoot);
 
                                     ALOGV("subsystemstate: %s, %s, %lld, %lld, %lld",
                                           subsystem.name.c_str(), state.name.c_str(),
