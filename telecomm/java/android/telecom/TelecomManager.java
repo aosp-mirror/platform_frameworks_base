@@ -1850,11 +1850,13 @@ public class TelecomManager {
 
     /**
      * Registers a new incoming conference. A {@link ConnectionService} should invoke this method
-     * when it has an incoming conference. For managed {@link ConnectionService}s, the specified
-     * {@link PhoneAccountHandle} must have been registered with {@link #registerPhoneAccount} and
-     * the user must have enabled the corresponding {@link PhoneAccount}.  This can be checked using
-     * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
-     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
+     * when it has an incoming conference. An incoming {@link Conference} is an adhoc conference
+     * call initiated on another device which the user is being invited to join in. For managed
+     * {@link ConnectionService}s, the specified {@link PhoneAccountHandle} must have been
+     * registered with {@link #registerPhoneAccount} and the user must have enabled the
+     * corresponding {@link PhoneAccount}.  This can be checked using
+     * {@link #getPhoneAccount(PhoneAccountHandle)}. Self-managed {@link ConnectionService}s must
+     * have {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
      * <p>
      * The incoming conference you are adding is assumed to have a video state of
      * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
@@ -1862,8 +1864,9 @@ public class TelecomManager {
      * <p>
      * Once invoked, this method will cause the system to bind to the {@link ConnectionService}
      * associated with the {@link PhoneAccountHandle} and request additional information about the
-     * call (See {@link ConnectionService#onCreateIncomingConference}) before starting the incoming
-     * call UI.
+     * call (See
+     * {@link ConnectionService#onCreateIncomingConference(PhoneAccountHandle, ConnectionRequest)})
+     * before starting the incoming call UI.
      * <p>
      * For a managed {@link ConnectionService}, a {@link SecurityException} will be thrown if either
      * the {@link PhoneAccountHandle} does not correspond to a registered {@link PhoneAccount} or
@@ -1873,7 +1876,6 @@ public class TelecomManager {
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
      *            {@link ConnectionService#onCreateIncomingConference}.
-     * @hide
      */
     public void addNewIncomingConference(@NonNull PhoneAccountHandle phoneAccount,
             @NonNull Bundle extras) {
@@ -2093,8 +2095,8 @@ public class TelecomManager {
 
 
     /**
-     * Place a new conference call with the provided participants using the system telecom service
-     * This method doesn't support placing of emergency calls.
+     * Place a new adhoc conference call with the provided participants using the system telecom
+     * service. This method doesn't support placing of emergency calls.
      *
      * An adhoc conference call is established by providing a list of addresses to
      * {@code TelecomManager#startConference(List<Uri>, int videoState)} where the
@@ -2112,7 +2114,6 @@ public class TelecomManager {
      *
      * @param participants List of participants to start conference with
      * @param extras Bundle of extras to use with the call
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public void startConference(@NonNull List<Uri> participants,
