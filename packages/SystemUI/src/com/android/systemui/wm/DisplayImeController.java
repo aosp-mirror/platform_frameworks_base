@@ -19,6 +19,7 @@ package com.android.systemui.wm;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -136,12 +137,16 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
-    private void dispatchStartPositioning(int displayId, int hiddenTop, int shownTop,
-            boolean show, SurfaceControl.Transaction t) {
+    @ImePositionProcessor.ImeAnimationFlags
+    private int dispatchStartPositioning(int displayId, int hiddenTop, int shownTop,
+            boolean show, boolean isFloating, SurfaceControl.Transaction t) {
         synchronized (mPositionProcessors) {
+            int flags = 0;
             for (ImePositionProcessor pp : mPositionProcessors) {
-                pp.onImeStartPositioning(displayId, hiddenTop, shownTop, show, t);
+                flags |= pp.onImeStartPositioning(
+                        displayId, hiddenTop, shownTop, show, isFloating, t);
             }
+            return flags;
         }
     }
 
@@ -184,6 +189,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         int mRotation = Surface.ROTATION_0;
         boolean mImeShowing = false;
         final Rect mImeFrame = new Rect();
+        boolean mAnimateAlpha = true;
 
         PerDisplay(int displayId, int initialRotation) {
             mDisplayId = displayId;
@@ -268,15 +274,29 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             return mImeFrame.top + (int) surfaceOffset;
         }
 
+        private boolean calcIsFloating(InsetsSource imeSource) {
+            final Rect frame = imeSource.getFrame();
+            if (frame.height() == 0) {
+                return true;
+            }
+            // Some Floating Input Methods will still report a frame, but the frame is actually
+            // a nav-bar inset created by WM and not part of the IME (despite being reported as
+            // an IME inset). For now, we assume that no non-floating IME will be <= this nav bar
+            // frame height so any reported frame that is <= nav-bar frame height is assumed to
+            // be floating.
+            return frame.height() <= mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId)
+                    .navBarFrameHeight();
+        }
+
         private void startAnimation(final boolean show, final boolean forceRestart) {
             final InsetsSource imeSource = mInsetsState.getSource(InsetsState.ITYPE_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
             final Rect newFrame = imeSource.getFrame();
-            final boolean isFloating = newFrame.height() == 0 && show;
+            final boolean isFloating = calcIsFloating(imeSource) && show;
             if (isFloating) {
-                // This is likely a "floating" or "expanded" IME, so to get animations, just
+                // This is a "floating" or "expanded" IME, so to get animations, just
                 // pretend the ime has some size just below the screen.
                 mImeFrame.set(newFrame);
                 final int floatingInset = (int) (
@@ -329,7 +349,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 SurfaceControl.Transaction t = mTransactionPool.acquire();
                 float value = (float) animation.getAnimatedValue();
                 t.setPosition(mImeSourceControl.getLeash(), x, value);
-                final float alpha = isFloating ? (value - hiddenY) / (shownY - hiddenY) : 1.f;
+                final float alpha = (mAnimateAlpha || isFloating)
+                        ? (value - hiddenY) / (shownY - hiddenY) : 1.f;
                 t.setAlpha(mImeSourceControl.getLeash(), alpha);
                 dispatchPositionChanged(mDisplayId, imeTop(value), t);
                 t.apply();
@@ -342,16 +363,18 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 public void onAnimationStart(Animator animation) {
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
                     t.setPosition(mImeSourceControl.getLeash(), x, startY);
-                    final float alpha = isFloating ? (startY - hiddenY) / (shownY - hiddenY) : 1.f;
-                    t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
                                 + imeTop(hiddenY) + "->" + imeTop(shownY)
                                 + " showing:" + (mAnimationDirection == DIRECTION_SHOW));
                     }
-                    dispatchStartPositioning(mDisplayId, imeTop(hiddenY),
-                            imeTop(shownY), mAnimationDirection == DIRECTION_SHOW,
-                            t);
+                    int flags = dispatchStartPositioning(mDisplayId, imeTop(hiddenY),
+                            imeTop(shownY), mAnimationDirection == DIRECTION_SHOW, isFloating, t);
+                    mAnimateAlpha = (flags & ImePositionProcessor.IME_ANIMATION_NO_ALPHA) == 0;
+                    final float alpha = (mAnimateAlpha || isFloating)
+                            ? (startY - hiddenY) / (shownY - hiddenY)
+                            : 1.f;
+                    t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (mAnimationDirection == DIRECTION_SHOW) {
                         t.show(mImeSourceControl.getLeash());
                     }
@@ -414,15 +437,33 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
      */
     public interface ImePositionProcessor {
         /**
+         * Indicates that ime shouldn't animate alpha. It will always be opaque. Used when stuff
+         * behind the IME shouldn't be visible (for example during split-screen adjustment where
+         * there is nothing behind the ime).
+         */
+        int IME_ANIMATION_NO_ALPHA = 1;
+
+        /** @hide */
+        @IntDef(prefix = { "IME_ANIMATION_" }, value = {
+                IME_ANIMATION_NO_ALPHA,
+        })
+        @interface ImeAnimationFlags {}
+
+        /**
          * Called when the IME position is starting to animate.
          *
          * @param hiddenTop The y position of the top of the IME surface when it is hidden.
          * @param shownTop  The y position of the top of the IME surface when it is shown.
          * @param showing   {@code true} when we are animating from hidden to shown, {@code false}
          *                  when animating from shown to hidden.
+         * @param isFloating {@code true} when the ime is a floating ime (doesn't inset).
+         * @return flags that may alter how ime itself is animated (eg. no-alpha).
          */
-        default void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
-                boolean showing, SurfaceControl.Transaction t) {}
+        @ImeAnimationFlags
+        default int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
+                boolean showing, boolean isFloating, SurfaceControl.Transaction t) {
+            return 0;
+        }
 
         /**
          * Called when the ime position changed. This is expected to be a synchronous call on the

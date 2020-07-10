@@ -126,18 +126,20 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     }
 
     @Override
-    public void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
-            boolean imeShouldShow, SurfaceControl.Transaction t) {
+    @ImeAnimationFlags
+    public int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
+            boolean imeShouldShow, boolean imeIsFloating, SurfaceControl.Transaction t) {
         mHiddenTop = hiddenTop;
         mShownTop = shownTop;
         mTargetShown = imeShouldShow;
         if (!isDividerVisible()) {
-            return;
+            return 0;
         }
         final boolean splitIsVisible = !getView().isHidden();
         mSecondaryHasFocus = getSecondaryHasFocus(displayId);
         final boolean targetAdjusted = splitIsVisible && imeShouldShow && mSecondaryHasFocus
-                && !getLayout().mDisplayLayout.isLandscape() && !mSplits.mDivider.isMinimized();
+                && !imeIsFloating && !getLayout().mDisplayLayout.isLandscape()
+                && !mSplits.mDivider.isMinimized();
         if (mLastAdjustTop < 0) {
             mLastAdjustTop = imeShouldShow ? hiddenTop : shownTop;
         } else if (mLastAdjustTop != (imeShouldShow ? mShownTop : mHiddenTop)) {
@@ -155,7 +157,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         if (mPaused) {
             mPausedTargetAdjusted = targetAdjusted;
             if (DEBUG) Slog.d(TAG, " ime starting but paused " + dumpState());
-            return;
+            return (targetAdjusted || mAdjusted) ? IME_ANIMATION_NO_ALPHA : 0;
         }
         mTargetAdjusted = targetAdjusted;
         updateDimTargets();
@@ -174,6 +176,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         } else {
             mAdjustedWhileHidden = true;
         }
+        return (mTargetAdjusted || mAdjusted) ? IME_ANIMATION_NO_ALPHA : 0;
     }
 
     private void updateImeAdjustState() {
