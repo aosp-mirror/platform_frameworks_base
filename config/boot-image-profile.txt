@@ -18839,7 +18839,6 @@ HSPLandroid/telephony/PreciseDataConnectionState;-><init>(Landroid/os/Parcel;)V
 HSPLandroid/telephony/PreciseDataConnectionState;-><init>(Landroid/os/Parcel;Landroid/telephony/PreciseDataConnectionState$1;)V
 HPLandroid/telephony/PreciseDataConnectionState;->equals(Ljava/lang/Object;)Z
 HPLandroid/telephony/PreciseDataConnectionState;->getDataConnectionApn()Ljava/lang/String;
-HPLandroid/telephony/PreciseDataConnectionState;->getDataConnectionLinkProperties()Landroid/net/LinkProperties;
 HPLandroid/telephony/PreciseDataConnectionState;->getNetworkType()I
 HPLandroid/telephony/PreciseDataConnectionState;->getState()I
 HSPLandroid/telephony/PreciseDataConnectionState;->toString()Ljava/lang/String;
