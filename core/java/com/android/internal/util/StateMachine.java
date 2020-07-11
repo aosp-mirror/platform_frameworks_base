@@ -2088,10 +2088,11 @@ public class StateMachine {
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());
         for (int i = 0; i < getLogRecSize(); i++) {
-            pw.println(" rec[" + i + "]: " + getLogRec(i).toString());
+            pw.println(" rec[" + i + "]: " + getLogRec(i));
             pw.flush();
         }
-        pw.println("curState=" + getCurrentState().getName());
+        final IState curState = getCurrentState();
+        pw.println("curState=" + (curState == null ? "<QUIT>" : curState.getName()));
     }
 
     @Override
