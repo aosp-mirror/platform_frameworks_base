@@ -24,6 +24,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -1338,14 +1339,15 @@ public class BackupManagerService extends IBackupManager.Stub {
         if (!isUserReadyForBackup(userId)) {
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
-        return requestBackup(userId, packages, observer, monitor, flags);
+        return requestBackup(userId, packages, observer, monitor, flags, OperationType.BACKUP);
     }
 
     @Override
     public int requestBackup(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags) throws RemoteException {
-        return requestBackupForUser(binderGetCallingUserId(), packages,
-                observer, monitor, flags);
+            IBackupManagerMonitor monitor, int flags, @OperationType int operationType)
+            throws RemoteException {
+        return requestBackup(binderGetCallingUserId(), packages,
+                observer, monitor, flags, operationType);
     }
 
     /**
@@ -1357,13 +1359,15 @@ public class BackupManagerService extends IBackupManager.Stub {
             String[] packages,
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
-            int flags) {
+            int flags,
+            @OperationType int operationType) {
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(userId, "requestBackup()");
 
         return userBackupManagerService == null
                 ? BackupManager.ERROR_BACKUP_NOT_ALLOWED
-                : userBackupManagerService.requestBackup(packages, observer, monitor, flags);
+                : userBackupManagerService.requestBackup(packages, observer, monitor, flags,
+                        operationType);
     }
 
     @Override

@@ -46,6 +46,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
     public static final int FLAG_CORNER_RADIUS = 1 << 4;
     public static final int FLAG_BACKGROUND_BLUR_RADIUS = 1 << 5;
     public static final int FLAG_VISIBILITY = 1 << 6;
+    public static final int FLAG_RELATIVE_LAYER = 1 << 7;
 
     private static final int MSG_UPDATE_SEQUENCE_NUMBER = 0;
 
@@ -192,6 +193,8 @@ public class SyncRtSurfaceTransactionApplierCompat {
             Matrix matrix;
             Rect windowCrop;
             int layer;
+            SurfaceControl relativeTo;
+            int relativeLayer;
             boolean visible;
 
             /**
@@ -249,6 +252,18 @@ public class SyncRtSurfaceTransactionApplierCompat {
             }
 
             /**
+             * @param relativeTo The surface that's set relative layer to.
+             * @param relativeLayer The relative layer.
+             * @return this Builder
+             */
+            public Builder withRelativeLayerTo(SurfaceControl relativeTo, int relativeLayer) {
+                this.relativeTo = relativeTo;
+                this.relativeLayer = relativeLayer;
+                flags |= FLAG_RELATIVE_LAYER;
+                return this;
+            }
+
+            /**
              * @param radius the Radius for rounded corners to apply to the surface.
              * @return this Builder
              */
@@ -283,7 +298,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
              */
             public SurfaceParams build() {
                 return new SurfaceParams(surface, flags, alpha, matrix, windowCrop, layer,
-                        cornerRadius, backgroundBlurRadius, visible);
+                        relativeTo, relativeLayer, cornerRadius, backgroundBlurRadius, visible);
             }
         }
 
@@ -297,21 +312,25 @@ public class SyncRtSurfaceTransactionApplierCompat {
          * @param windowCrop Crop to apply, only applied if not {@code null}
          */
         public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, float cornerRadius) {
+                Rect windowCrop, int layer, SurfaceControl relativeTo, int relativeLayer,
+                float cornerRadius) {
             this(surface.mSurfaceControl,
                     FLAG_ALL & ~(FLAG_VISIBILITY | FLAG_BACKGROUND_BLUR_RADIUS), alpha,
-                    matrix, windowCrop, layer, cornerRadius, 0 /* backgroundBlurRadius */, true);
+                    matrix, windowCrop, layer, relativeTo, relativeLayer, cornerRadius,
+                    0 /* backgroundBlurRadius */, true);
         }
 
         private SurfaceParams(SurfaceControl surface, int flags, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, float cornerRadius, int backgroundBlurRadius,
-                boolean visible) {
+                Rect windowCrop, int layer, SurfaceControl relativeTo, int relativeLayer,
+                float cornerRadius, int backgroundBlurRadius, boolean visible) {
             this.flags = flags;
             this.surface = surface;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
             this.windowCrop = windowCrop != null ? new Rect(windowCrop) : null;
             this.layer = layer;
+            this.relativeTo = relativeTo;
+            this.relativeLayer = relativeLayer;
             this.cornerRadius = cornerRadius;
             this.backgroundBlurRadius = backgroundBlurRadius;
             this.visible = visible;
@@ -327,6 +346,8 @@ public class SyncRtSurfaceTransactionApplierCompat {
         public final Matrix matrix;
         public final Rect windowCrop;
         public final int layer;
+        public final SurfaceControl relativeTo;
+        public final int relativeLayer;
         public final boolean visible;
 
         public void applyTo(SurfaceControl.Transaction t) {
@@ -354,6 +375,9 @@ public class SyncRtSurfaceTransactionApplierCompat {
                 } else {
                     t.hide(surface);
                 }
+            }
+            if ((flags & FLAG_RELATIVE_LAYER) != 0) {
+                t.setRelativeLayer(surface, relativeTo, relativeLayer);
             }
         }
     }

@@ -62,12 +62,13 @@ public class ShadowAppBackupUtils {
     }
 
     @Implementation
-    protected static boolean appIsEligibleForBackup(ApplicationInfo app, int userId) {
+    protected static boolean appIsEligibleForBackup(ApplicationInfo app, int userId,
+            int operationType) {
         return sAppsEligibleForBackup.contains(app.packageName);
     }
 
     @Implementation
-    protected static boolean appGetsFullBackup(PackageInfo packageInfo) {
+    protected static boolean appGetsFullBackup(PackageInfo packageInfo, int operationType) {
         return sAppsGetFullBackup.contains(packageInfo.packageName);
     }
 

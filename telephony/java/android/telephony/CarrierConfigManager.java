@@ -2549,15 +2549,15 @@ public class CarrierConfigManager {
     /**
      * List of 4 customized 5G SS reference signal received quality (SSRSRQ) thresholds.
      * <p>
-     * Reference: 3GPP TS 38.215
+     * Reference: 3GPP TS 38.215; 3GPP TS 38.133 section 10
      * <p>
-     * 4 threshold integers must be within the boundaries [-20 dB, -3 dB], and the levels are:
+     * 4 threshold integers must be within the boundaries [-43 dB, 20 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-20, threshold1]"</LI>
+     *     <LI>"NONE: [-43, threshold1]"</LI>
      *     <LI>"POOR: (threshold1, threshold2]"</LI>
      *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
      *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, -3]"</LI>
+     *     <LI>"EXCELLENT:  (threshold4, 20]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -4295,12 +4295,12 @@ public class CarrierConfigManager {
                     -65,  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY,
-                // Boundaries: [-20 dB, -3 dB]
+                // Boundaries: [-43 dB, 20 dB]
                 new int[] {
-                    -16, /* SIGNAL_STRENGTH_POOR */
-                    -12, /* SIGNAL_STRENGTH_MODERATE */
-                    -9, /* SIGNAL_STRENGTH_GOOD */
-                    -6  /* SIGNAL_STRENGTH_GREAT */
+                    -31, /* SIGNAL_STRENGTH_POOR */
+                    -19, /* SIGNAL_STRENGTH_MODERATE */
+                    -7, /* SIGNAL_STRENGTH_GOOD */
+                    6  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-23 dB, 40 dB]

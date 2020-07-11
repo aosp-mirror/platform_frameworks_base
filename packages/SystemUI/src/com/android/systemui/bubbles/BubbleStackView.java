@@ -1586,6 +1586,11 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, "setSelectedBubble: " + bubbleToSelect);
         }
 
+        if (bubbleToSelect == null) {
+            mBubbleData.setShowingOverflow(false);
+            return;
+        }
+
         // Ignore this new bubble only if it is the exact same bubble object. Otherwise, we'll want
         // to re-render it even if it has the same key (equals() returns true). If the currently
         // expanded bubble is removed and instantly re-added, we'll get back a new Bubble instance
@@ -1594,10 +1599,11 @@ public class BubbleStackView extends FrameLayout
         if (mExpandedBubble == bubbleToSelect) {
             return;
         }
-        if (bubbleToSelect == null || bubbleToSelect.getKey() != BubbleOverflow.KEY) {
-            mBubbleData.setShowingOverflow(false);
-        } else {
+
+        if (bubbleToSelect.getKey() == BubbleOverflow.KEY) {
             mBubbleData.setShowingOverflow(true);
+        } else {
+            mBubbleData.setShowingOverflow(false);
         }
 
         if (mIsExpanded && mIsExpansionAnimating) {
