@@ -32,6 +32,7 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHwBinder;
@@ -93,6 +94,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     private final Map<Integer, Long> mAuthenticatorIds;
 
     private IBiometricsFingerprint mDaemon;
+    @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
 
     /**
@@ -464,7 +466,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
                     hardwareAuthToken, opPackageName, FingerprintUtils.getInstance(),
-                    ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId);
+                    ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController);
             mScheduler.scheduleClientMonitor(client);
         });
 
@@ -487,7 +489,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                     mContext, mLazyDaemon, token, listener, userId, operationId, restricted,
                     opPackageName, cookie, false /* requireConfirmation */,
                     mSensorProperties.sensorId, isStrongBiometric, surface, statsClient,
-                    mTaskStackListener, mLockoutTracker);
+                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -571,6 +573,10 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
 
     boolean isUdfps() {
         return mSensorProperties.isUdfps;
+    }
+
+    void setUdfpsOverlayController(IUdfpsOverlayController controller) {
+        mUdfpsOverlayController = controller;
     }
 
     void dumpProto(FileDescriptor fd) {

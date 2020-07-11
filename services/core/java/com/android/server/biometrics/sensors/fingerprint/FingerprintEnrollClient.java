@@ -17,10 +17,12 @@
 package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -39,18 +41,43 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     private static final String TAG = "FingerprintEnrollClient";
 
+    @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
+
     FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
-            int timeoutSec, int sensorId) {
+            int timeoutSec, int sensorId,
+            @Nullable IUdfpsOverlayController udfpsOverlayController) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 true /* shouldVibrate */);
+        mUdfpsOverlayController = udfpsOverlayController;
+    }
+
+    private void showUdfpsOverlay() {
+        if (mUdfpsOverlayController != null) {
+            try {
+                mUdfpsOverlayController.showUdfpsOverlay();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
+            }
+        }
+    }
+
+    private void hideUdfpsOverlay() {
+        if (mUdfpsOverlayController != null) {
+            try {
+                mUdfpsOverlayController.hideUdfpsOverlay();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
+            }
+        }
     }
 
     @Override
     protected void startHalOperation() {
+        showUdfpsOverlay();
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
@@ -58,12 +85,14 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
+            hideUdfpsOverlay();
             mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
+        hideUdfpsOverlay();
         try {
             getFreshDaemon().cancel();
         } catch (RemoteException e) {
