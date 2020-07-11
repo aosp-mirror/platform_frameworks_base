@@ -180,7 +180,8 @@ static jlong android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject
     if (parcel) {
         bool isInitialized = parcel->readInt32();
         if (isInitialized) {
-            sp<InputChannel> inputChannel = InputChannel::read(*parcel);
+            sp<InputChannel> inputChannel = new InputChannel();
+            inputChannel->readFromParcel(parcel);
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
             return reinterpret_cast<jlong>(nativeInputChannel);
         }
@@ -203,7 +204,7 @@ static void android_view_InputChannel_nativeWriteToParcel(JNIEnv* env, jobject o
         return;
     }
     parcel->writeInt32(1); // initialized
-    nativeInputChannel->getInputChannel()->write(*parcel);
+    nativeInputChannel->getInputChannel()->writeToParcel(parcel);
 }
 
 static jstring android_view_InputChannel_nativeGetName(JNIEnv* env, jobject obj, jlong channel) {
