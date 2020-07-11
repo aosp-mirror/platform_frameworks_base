@@ -1707,7 +1707,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             apn = preciseState.getDataConnectionApn();
             state = preciseState.getState();
             networkType = preciseState.getNetworkType();
-            linkProps = preciseState.getDataConnectionLinkProperties();
+            linkProps = preciseState.getLinkProperties();
         }
         if (VDBG) {
             log("notifyDataConnectionForSubscriber: subId=" + subId

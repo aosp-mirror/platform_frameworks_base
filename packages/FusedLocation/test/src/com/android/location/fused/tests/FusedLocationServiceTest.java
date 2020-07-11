@@ -199,7 +199,7 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onSetAttributionTag(String attributionTag) {
+        public void onSetIdentity(String packageName, String attributionTag) {
 
         }
 

@@ -252,6 +252,7 @@ public class RollbackUnitTest {
         verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(111));
         verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(222));
         verify(mMockDataHelper, never()).destroyApexDeSnapshots(anyInt());
+        verify(mMockDataHelper, never()).destroyApexCeSnapshots(anyInt(), anyInt());
 
         assertThat(rollback.isDeleted()).isTrue();
     }
@@ -273,6 +274,8 @@ public class RollbackUnitTest {
         verify(mMockDataHelper, never())
                 .destroyAppDataSnapshot(anyInt(), pkgRollbackInfoFor(PKG_2), anyInt());
         verify(mMockDataHelper).destroyApexDeSnapshots(123);
+        verify(mMockDataHelper).destroyApexCeSnapshots(111, 123);
+        verify(mMockDataHelper).destroyApexCeSnapshots(222, 123);
 
         assertThat(rollback.isDeleted()).isTrue();
     }

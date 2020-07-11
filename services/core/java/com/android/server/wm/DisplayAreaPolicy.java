@@ -63,6 +63,11 @@ public abstract class DisplayAreaPolicy {
      */
     public abstract List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId);
 
+    /**
+     * @return the default/fallback {@link TaskDisplayArea} on the display.
+     */
+    public abstract TaskDisplayArea getDefaultTaskDisplayArea();
+
     /** Provider for platform-default display area policy. */
     static final class DefaultProvider implements DisplayAreaPolicy.Provider {
         @Override

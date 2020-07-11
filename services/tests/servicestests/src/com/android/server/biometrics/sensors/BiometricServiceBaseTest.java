@@ -80,15 +80,6 @@ public class BiometricServiceBaseTest {
         }
 
         @Override
-        protected void checkUseBiometricPermission() {
-        }
-
-        @Override
-        protected boolean checkAppOps(int uid, String opPackageName) {
-            return false;
-        }
-
-        @Override
         protected List<? extends BiometricAuthenticator.Identifier> getEnrolledTemplates(
                 int userId) {
             return null;
@@ -96,11 +87,6 @@ public class BiometricServiceBaseTest {
 
         @Override
         protected int statsModality() {
-            return 0;
-        }
-
-        @Override
-        protected int getLockoutMode(int userId) {
             return 0;
         }
     }

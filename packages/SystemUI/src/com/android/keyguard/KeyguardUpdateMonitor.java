@@ -228,6 +228,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final Context mContext;
     private final boolean mIsPrimaryUser;
+    private final boolean mIsAutomotive;
     private final StatusBarStateController mStatusBarStateController;
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
@@ -295,7 +296,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private int mHardwareFingerprintUnavailableRetryCount = 0;
     private int mHardwareFaceUnavailableRetryCount = 0;
     private static final int HAL_ERROR_RETRY_TIMEOUT = 500; // ms
-    private static final int HAL_ERROR_RETRY_MAX = 10;
+    private static final int HAL_ERROR_RETRY_MAX = 20;
 
     private final Runnable mCancelNotReceived = new Runnable() {
         @Override
@@ -682,7 +683,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         public void run() {
             Log.w(TAG, "Retrying fingerprint after HW unavailable, attempt " +
                     mHardwareFingerprintUnavailableRetryCount);
-            updateFingerprintListeningState();
+            if (mFpm.isHardwareDetected()) {
+                updateFingerprintListeningState();
+            } else if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
+                mHardwareFingerprintUnavailableRetryCount++;
+                mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
+            }
         }
     };
 
@@ -704,11 +710,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
-            if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
-                mHardwareFingerprintUnavailableRetryCount++;
-                mHandler.removeCallbacks(mRetryFingerprintAuthentication);
-                mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
-            }
+            mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
@@ -1234,7 +1236,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final FingerprintManager.LockoutResetCallback mFingerprintLockoutResetCallback
             = new FingerprintManager.LockoutResetCallback() {
         @Override
-        public void onLockoutReset() {
+        public void onLockoutReset(int sensorId) {
             handleFingerprintLockoutReset();
         }
     };
@@ -1242,7 +1244,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final FaceManager.LockoutResetCallback mFaceLockoutResetCallback
             = new FaceManager.LockoutResetCallback() {
         @Override
-        public void onLockoutReset() {
+        public void onLockoutReset(int sensorId) {
             handleFaceLockoutReset();
         }
     };
@@ -1770,6 +1772,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
         }
 
+        mIsAutomotive = isAutomotive();
+
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
@@ -1838,7 +1842,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (mHandler.hasMessages(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE)) {
             return;
         }
-        mHandler.removeCallbacks(mRetryFingerprintAuthentication);
+
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
         boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
@@ -2484,6 +2488,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 .addCategory(Intent.CATEGORY_HOME);
         ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(homeIntent,
                 0 /* flags */);
+
+        // TODO(b/160971249): Replace in the future by resolving activity as user.
+        if (resolveInfo == null && mIsAutomotive) {
+            Log.w(TAG, "resolveNeedsSlowUnlockTransition: returning false since activity "
+                    + "could not be resolved.");
+            return false;
+        }
+
         return FALLBACK_HOME_COMPONENT.equals(resolveInfo.getComponentInfo().getComponentName());
     }
 
@@ -2552,6 +2564,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         return false;
+    }
+
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     /**
@@ -2989,6 +3005,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 final String time = dateFormat.format(new Date(model.getTimeMillis()));
                 pw.println("    " + time + " " + model.toString());
             }
+        }
+        if (mIsAutomotive) {
+            pw.println("  Running on Automotive build");
         }
     }
 }

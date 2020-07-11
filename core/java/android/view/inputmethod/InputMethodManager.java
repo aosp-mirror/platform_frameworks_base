@@ -633,20 +633,21 @@ public final class InputMethodManager {
                 // we'll just do a window focus gain and call it a day.
                 try {
                     View servedView = controller.getServedView();
-                    boolean nextFocusIsServedView = servedView != null && servedView == focusedView;
+                    boolean nextFocusSameEditor = servedView != null && servedView == focusedView
+                            && isSameEditorAndAcceptingText(focusedView);
                     if (DEBUG) {
                         Log.v(TAG, "Reporting focus gain, without startInput"
-                                + ", nextFocusIsServedView=" + nextFocusIsServedView);
+                                + ", nextFocusIsServedView=" + nextFocusSameEditor);
                     }
                     final int startInputReason =
-                            nextFocusIsServedView ? WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR
+                            nextFocusSameEditor ? WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR
                                     : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR;
                     mService.startInputOrWindowGainedFocus(
                             startInputReason, mClient,
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
                             windowFlags,
-                            nextFocusIsServedView ? mCurrentTextBoxAttribute : null,
-                            nextFocusIsServedView ? mServedInputConnectionWrapper : null,
+                            null,
+                            null,
                             0 /* missingMethodFlags */,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
@@ -671,10 +672,6 @@ public final class InputMethodManager {
         @Override
         public void setCurrentRootView(ViewRootImpl rootView) {
             synchronized (mH) {
-                if (mCurRootView != null) {
-                    // Restart the input when the next window focus state of the root view changed.
-                    mRestartOnNextWindowFocus = true;
-                }
                 mCurRootView = rootView;
             }
         }
@@ -704,14 +701,33 @@ public final class InputMethodManager {
         }
 
         /**
-         * For {@link ImeFocusController} to check if the currently served view is accepting full
-         * text edits.
+         * For {@link ImeFocusController} to check if the given focused view aligns with the same
+         * editor and the editor is active to accept the text input.
+         *
+         * TODO(b/160968797): Remove this method and move mCurrentTextBoxAttritube to
+         *  ImeFocusController.
+         * In the long-term, we should make mCurrentTextBoxAtrtribue as per-window base instance,
+         * so that we we can directly check if the current focused view aligned with the same editor
+         * in the window without using this checking.
+         *
+         * Note that this method is only use for fixing start new input may ignored issue
+         * (e.g. b/160391516), DO NOT leverage this method to do another check.
          */
-        @Override
-        public boolean isAcceptingText() {
+        public boolean isSameEditorAndAcceptingText(View view) {
             synchronized (mH) {
-                return mServedInputConnectionWrapper != null
-                        && mServedInputConnectionWrapper.getInputConnection() != null;
+                if (!hasServedByInputMethodLocked(view) || mCurrentTextBoxAttribute == null) {
+                    return false;
+                }
+
+                final EditorInfo ic = mCurrentTextBoxAttribute;
+                // This sameEditor checking is based on using object hash comparison to check if
+                // some fields of the current EditorInfo (e.g. autoFillId, OpPackageName) the
+                // hash code is same as the given focused view.
+                final boolean sameEditor = view.onCheckIsTextEditor() && view.getId() == ic.fieldId
+                        && view.getAutofillId() == ic.autofillId
+                        && view.getContext().getOpPackageName() == ic.packageName;
+                return sameEditor && mServedInputConnectionWrapper != null
+                        && mServedInputConnectionWrapper.isActive();
             }
         }
     }

@@ -2793,7 +2793,6 @@ class ActivityStack extends Task {
 
         Task task = child.asTask();
         try {
-
             if (task != null) {
                 task.setForceShowForAllUsers(showForAllUsers);
             }

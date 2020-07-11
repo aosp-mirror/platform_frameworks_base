@@ -1394,10 +1394,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
+     * the given {@code rect}.
      */
-    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
-        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
+    boolean isLetterboxOverlappingWith(Rect rect) {
+        return mLetterbox != null && mLetterbox.isOverlappingWith(rect);
     }
 
     static class Token extends IApplicationToken.Stub {

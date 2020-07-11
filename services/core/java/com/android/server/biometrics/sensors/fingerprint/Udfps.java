@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.helpers;
+package com.android.server.biometrics.sensors.fingerprint;
 
-import android.app.Instrumentation;
-
-import com.android.server.wm.flicker.StandardAppHelper;
-
-public abstract class FlickerAppHelper extends StandardAppHelper {
-
-    static int sFindTimeout = 10000;
-    static String sFlickerPackage = "com.android.server.wm.flicker.testapp";
-
-    public FlickerAppHelper(Instrumentation instr, String launcherName) {
-        super(instr, sFlickerPackage, launcherName);
-    }
+/**
+ * Interface for under-display fingerprint sensors.
+ * {@link com.android.server.biometrics.sensors.ClientMonitor} subclass that require knowledge of
+ * finger position (e.g. enroll, authenticate) should implement this.
+ */
+public interface Udfps {
+    void onFingerDown(int x, int y, float minor, float major);
+    void onFingerUp();
 }

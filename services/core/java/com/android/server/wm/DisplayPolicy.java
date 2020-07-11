@@ -139,7 +139,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
-import android.hardware.power.Boost;
+import android.hardware.power.V1_0.PowerHint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -544,8 +544,8 @@ public class DisplayPolicy {
                     @Override
                     public void onFling(int duration) {
                         if (mService.mPowerManagerInternal != null) {
-                            mService.mPowerManagerInternal.setPowerBoost(
-                                    Boost.INTERACTION, duration);
+                            mService.mPowerManagerInternal.powerHint(
+                                    PowerHint.INTERACTION, duration);
                         }
                     }
 

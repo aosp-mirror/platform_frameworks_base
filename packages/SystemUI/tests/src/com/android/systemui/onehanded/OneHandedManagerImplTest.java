@@ -82,7 +82,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
         final OneHandedSurfaceTransactionHelper transactionHelper =
                 new OneHandedSurfaceTransactionHelper(mContext);
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
-                mContext, transactionHelper);
+                transactionHelper);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
                 mContext, mMockDisplayController, animationController);
 

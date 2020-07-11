@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.helpers;
+package com.android.server.wm.flicker.helpers
 
-import android.app.Instrumentation;
+import android.app.Instrumentation
+import androidx.test.uiautomator.UiDevice
 
-import androidx.test.uiautomator.UiDevice;
-
-public class ImeAppAutoFocusHelper extends ImeAppHelper {
-
-    public ImeAppAutoFocusHelper(Instrumentation instr) {
-        super(instr, "ImeAppAutoFocus");
-    }
-
-    public void openIME(UiDevice device) {
+class ImeAppAutoFocusHelper(instr: Instrumentation) : ImeAppHelper(instr, "ImeAppAutoFocus") {
+    override fun openIME(device: UiDevice) {
         // do nothing (the app is focused automatically)
     }
 }

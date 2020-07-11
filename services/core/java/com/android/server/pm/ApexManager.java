@@ -77,6 +77,8 @@ public abstract class ApexManager {
     public static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
     static final int MATCH_FACTORY_PACKAGE = 1 << 1;
 
+    private static final String VNDK_APEX_MODULE_NAME_PREFIX = "com.android.vndk.";
+
     private static final Singleton<ApexManager> sApexManagerSingleton =
             new Singleton<ApexManager>() {
                 @Override
@@ -342,8 +344,17 @@ public abstract class ApexManager {
     public abstract boolean destroyDeSnapshots(int rollbackId);
 
     /**
+     *  Deletes snapshots of the credential encrypted apex data directories for the specified user,
+     *  for the given rollback id as long as the user is credential unlocked.
+     *
+     * @return boolean true if the delete was successful
+     */
+    public abstract boolean destroyCeSnapshots(int userId, int rollbackId);
+
+    /**
      * Deletes snapshots of the credential encrypted apex data directories for the specified user,
-     * where the rollback id is not included in {@code retainRollbackIds}.
+     * where the rollback id is not included in {@code retainRollbackIds} as long as the user is
+     * credential unlocked.
      *
      * @return boolean true if the delete was successful
      */
@@ -526,7 +537,9 @@ public abstract class ApexManager {
                         activePackagesSet.add(packageInfo.packageName);
                     }
                     if (ai.isFactory) {
-                        if (factoryPackagesSet.contains(packageInfo.packageName)) {
+                        // Don't throw when the duplicating APEX is VNDK APEX
+                        if (factoryPackagesSet.contains(packageInfo.packageName)
+                                && !ai.moduleName.startsWith(VNDK_APEX_MODULE_NAME_PREFIX)) {
                             throw new IllegalStateException(
                                     "Two factory packages have the same name: "
                                             + packageInfo.packageName);
@@ -875,6 +888,17 @@ public abstract class ApexManager {
         }
 
         @Override
+        public boolean destroyCeSnapshots(int userId, int rollbackId) {
+            try {
+                waitForApexService().destroyCeSnapshots(userId, rollbackId);
+                return true;
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+
+        @Override
         public boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds) {
             try {
                 waitForApexService().destroyCeSnapshotsNotSpecified(userId, retainRollbackIds);
@@ -1133,6 +1157,11 @@ public abstract class ApexManager {
         @Override
         public boolean destroyDeSnapshots(int rollbackId) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean destroyCeSnapshots(int userId, int rollbackId) {
+            return true;
         }
 
         @Override

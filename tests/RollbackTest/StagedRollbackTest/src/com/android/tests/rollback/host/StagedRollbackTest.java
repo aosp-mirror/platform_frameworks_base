@@ -453,6 +453,32 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
+    @Test
+    public void testExpireApexRollback() throws Exception {
+        List<String> before = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
+        pushTestApex();
+
+        // Push files to apex data directory
+        String oldFilePath1 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
+        String oldFilePath2 =
+                apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
+        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
+        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+
+        // Install new version of the APEX with rollback enabled
+        runPhase("testRollbackApexDataDirectories_Phase1");
+        getDevice().reboot();
+
+        List<String> after = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
+        // Only check directories newly created during the test
+        after.removeAll(before);
+        // Expire all rollbacks and check CE snapshot directories are deleted
+        runPhase("testCleanUp");
+        for (String dir : after) {
+            assertNull(getDevice().getFileEntry(dir));
+        }
+    }
+
     private void pushTestApex() throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";

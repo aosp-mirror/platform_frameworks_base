@@ -16,7 +16,7 @@
 
 android_test {
     name: "FlickerTests",
-    srcs: ["src/**/*.java"],
+    srcs: ["src/**/*.java", "src/**/*.kt"],
     manifest: "AndroidManifest.xml",
     test_config: "AndroidTest.xml",
     platform_apis: true,

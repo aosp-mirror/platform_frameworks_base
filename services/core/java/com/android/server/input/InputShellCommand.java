@@ -199,7 +199,7 @@ public class InputShellCommand extends ShellCommand {
                     + " (Default: touchscreen)");
             out.println("      press (Default: trackball)");
             out.println("      roll <dx> <dy> (Default: trackball)");
-            out.println("      motionevent <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)");
+            out.println("      motionevent <DOWN|UP|MOVE|CANCEL> <x> <y> (Default: touchscreen)");
         }
     }
 
@@ -357,32 +357,50 @@ public class InputShellCommand extends ShellCommand {
                 displayId);
     }
 
-    private void runMotionEvent(int inputSource, int displayId) {
-        inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
-        sendMotionEvent(inputSource, getNextArgRequired(), Float.parseFloat(getNextArgRequired()),
-                Float.parseFloat(getNextArgRequired()), displayId);
+    private int getAction() {
+        String actionString = getNextArgRequired();
+        switch (actionString.toUpperCase()) {
+            case "DOWN":
+                return MotionEvent.ACTION_DOWN;
+            case "UP":
+                return MotionEvent.ACTION_UP;
+            case "MOVE":
+                return MotionEvent.ACTION_MOVE;
+            case "CANCEL":
+                return MotionEvent.ACTION_CANCEL;
+            default:
+                throw new IllegalArgumentException("Unknown action: " + actionString);
+        }
     }
 
-    private void sendMotionEvent(int inputSource, String motionEventType, float x, float y,
-            int displayId) {
-        final int action;
-        final float pressure;
+    private void runMotionEvent(int inputSource, int displayId) {
+        inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
+        int action = getAction();
+        float x = 0, y = 0;
+        if (action == MotionEvent.ACTION_DOWN
+                || action == MotionEvent.ACTION_MOVE
+                || action == MotionEvent.ACTION_UP) {
+            x = Float.parseFloat(getNextArgRequired());
+            y = Float.parseFloat(getNextArgRequired());
+        } else {
+            // For ACTION_CANCEL, the positions are optional
+            String xString = getNextArg();
+            String yString = getNextArg();
+            if (xString != null && yString != null) {
+                x = Float.parseFloat(xString);
+                y = Float.parseFloat(yString);
+            }
+        }
 
-        switch (motionEventType.toUpperCase()) {
-            case "DOWN":
-                action = MotionEvent.ACTION_DOWN;
-                pressure = DEFAULT_PRESSURE;
-                break;
-            case "UP":
-                action = MotionEvent.ACTION_UP;
-                pressure = NO_PRESSURE;
-                break;
-            case "MOVE":
-                action = MotionEvent.ACTION_MOVE;
-                pressure = DEFAULT_PRESSURE;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown motionevent " + motionEventType);
+        sendMotionEvent(inputSource, action, x, y, displayId);
+    }
+
+    private void sendMotionEvent(int inputSource, int action, float x, float y,
+            int displayId) {
+        float pressure = NO_PRESSURE;
+
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
+            pressure = DEFAULT_PRESSURE;
         }
 
         final long now = SystemClock.uptimeMillis();

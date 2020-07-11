@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors;
+package com.android.server.wm.flicker.helpers
 
-/**
- * Interface that cancellable {@link ClientMonitor} subclasses should implement.
- */
-public interface Cancellable {
-    /**
-     * Requests to end the ClientMonitor's lifecycle.
-     */
-    void cancel();
+import android.app.Instrumentation
+import com.android.server.wm.flicker.StandardAppHelper
+
+abstract class FlickerAppHelper(
+    instr: Instrumentation,
+    launcherName: String
+) : StandardAppHelper(instr, sFlickerPackage, launcherName) {
+    companion object {
+        var sFindTimeout = 10000
+        var sFlickerPackage = "com.android.server.wm.flicker.testapp"
+    }
 }
