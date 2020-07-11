@@ -424,9 +424,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"atzitu kokapen-hornitzaileen komando gehigarriak"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Kokapen-hornitzailearen agindu gehigarriak atzitzeko baimena ematen die aplikazioei. Horrela, agian aplikazioek GPSaren edo bestelako kokapenaren iturburuen funtzionamenduan eragina izan dezakete."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"lortu kokapen zehatza aurreko planoan bakarrik"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Erabiltzen ari zarenean, aplikazioak kokapen zehatza lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan. Bateria-erabilera areagotzen du horrek."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Abian denean, aplikazioak kokapen zehatza lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan. Bateria-erabilera areagotzen du horrek."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"atzitu gutxi gorabeherako kokapena aurreko planoan bakarrik"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Erabiltzen ari zarenean, aplikazioak gutxi gorabeherako kokapena lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Abian denean, aplikazioak gutxi gorabeherako kokapena lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"atzitu kokapena atzeko planoan"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aplikazioak kokapena atzi dezake, baita aplikazioa erabiltzen ari ez zarenean ere."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"aldatu audio-ezarpenak"</string>
