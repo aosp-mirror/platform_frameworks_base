@@ -37,7 +37,6 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.graphics.Rect;
-import android.platform.test.annotations.Presubmit;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -96,7 +95,6 @@ public class EditorCursorDragTest {
         mMotionEvents.clear();
     }
 
-    @Presubmit
     @Test
     public void testCursorDrag_horizontal_whenTextViewContentsFitOnScreen() throws Throwable {
         String text = "Hello world!";
