@@ -23,6 +23,7 @@ import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_A
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.BackupTransport;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -66,14 +67,23 @@ public class AppBackupUtils {
      */
     public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId) {
         return appIsEligibleForBackup(
-                app, LocalServices.getService(PackageManagerInternal.class), userId);
+                app, LocalServices.getService(PackageManagerInternal.class), userId,
+                OperationType.BACKUP);
+    }
+
+    public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId,
+            @OperationType int operationType) {
+        return appIsEligibleForBackup(
+                app, LocalServices.getService(PackageManagerInternal.class), userId, operationType);
     }
 
     @VisibleForTesting
     static boolean appIsEligibleForBackup(
-            ApplicationInfo app, PackageManagerInternal packageManager, int userId) {
+            ApplicationInfo app, PackageManagerInternal packageManager, int userId,
+            @OperationType int operationType) {
         // 1. their manifest states android:allowBackup="false"
-        if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+        boolean appAllowsBackup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
+        if (!appAllowsBackup && !forceFullBackup(app.uid, operationType)) {
             return false;
         }
 
@@ -189,6 +199,16 @@ public class AppBackupUtils {
      * policy!
      */
     public static boolean appGetsFullBackup(PackageInfo pkg) {
+        return appGetsFullBackup(pkg, OperationType.BACKUP);
+    }
+
+    @VisibleForTesting
+    public static boolean appGetsFullBackup(PackageInfo pkg, @OperationType int operationType) {
+        if (forceFullBackup(pkg.applicationInfo.uid, operationType)) {
+            // If this is a migration, all non-system packages get full backup.
+            return true;
+        }
+
         if (pkg.applicationInfo.backupAgentName != null) {
             // If it has an agent, it gets full backups only if it says so
             return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FULL_BACKUP_ONLY) != 0;
@@ -196,6 +216,16 @@ public class AppBackupUtils {
 
         // No agent or fullBackupOnly="true" means we do indeed perform full-data backups for it
         return true;
+    }
+
+    public static boolean appIgnoresIncludeExcludeRules(ApplicationInfo app,
+            @OperationType int operationType) {
+        return forceFullBackup(app.uid, operationType);
+    }
+
+    private static boolean forceFullBackup(int appUid, @OperationType int operationType) {
+        return operationType == OperationType.MIGRATION &&
+                !UserHandle.isCore(appUid);
     }
 
     /**
