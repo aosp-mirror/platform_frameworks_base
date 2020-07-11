@@ -1168,7 +1168,12 @@ public class IntentFilter implements Parcelable {
         public int match(Uri data, boolean wildcardSupported) {
             String host = data.getHost();
             if (host == null) {
-                return NO_MATCH_DATA;
+                if (wildcardSupported && mWild) {
+                    // special case, if no host is provided, but the Authority is wildcard, match
+                    return MATCH_CATEGORY_HOST;
+                } else {
+                    return NO_MATCH_DATA;
+                }
             }
             if (false) Log.v("IntentFilter",
                     "Match host " + host + ": " + mHost);
