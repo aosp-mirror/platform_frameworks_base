@@ -38,7 +38,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
-import android.content.pm.ParceledListSlice;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
@@ -178,20 +177,6 @@ public class StagingManager {
                 mStagedSessions.put(sessionInfo.sessionId, sessionInfo);
             }
         }
-    }
-
-    ParceledListSlice<PackageInstaller.SessionInfo> getSessions(int callingUid) {
-        final List<PackageInstaller.SessionInfo> result = new ArrayList<>();
-        synchronized (mStagedSessions) {
-            for (int i = 0; i < mStagedSessions.size(); i++) {
-                final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
-                if (stagedSession.isDestroyed()) {
-                    continue;
-                }
-                result.add(stagedSession.generateInfoForCaller(false /*icon*/, callingUid));
-            }
-        }
-        return new ParceledListSlice<>(result);
     }
 
     /**

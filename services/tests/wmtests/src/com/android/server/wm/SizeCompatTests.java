@@ -269,6 +269,8 @@ public class SizeCompatTests extends ActivityTestsBase {
 
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
         mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
+        mActivity.mDisplayContent.mInputMethodInputTarget =
+                mActivity.mDisplayContent.mInputMethodTarget;
         // Because the aspect ratio of display doesn't exceed the max aspect ratio of activity.
         // The activity should still fill its parent container and IME can attach to the activity.
         assertTrue(mActivity.matchParentBounds());

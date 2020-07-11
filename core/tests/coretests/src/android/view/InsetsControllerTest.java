@@ -691,18 +691,57 @@ public class InsetsControllerTest {
     @Test
     public void testRequestedState() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+
+            // The modified state can be controlled when we have control.
             mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
             mController.hide(statusBars());
             assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
-            mController.onControlsChanged(new InsetsSourceControl[0]);
+
+            // The modified state won't be changed while losing control.
+            mController.onControlsChanged(null /* activeControls */);
             assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
+
+            // The modified state won't be changed while state changed while we don't have control.
             InsetsState newState = new InsetsState(mController.getState(), true /* copySource */);
             mController.onStateChanged(newState);
             assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
+
+            // The modified state won't be changed while controlling an insets without having the
+            // control.
             mController.show(statusBars());
             assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
+
+            // The modified state can be updated while gaining control.
             mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
             assertTrue(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
+
+            // The modified state can still be updated if the local state and the requested state
+            // are the same.
+            mController.onControlsChanged(null /* activeControls */);
+            mController.hide(statusBars());
+            newState = new InsetsState(mController.getState(), true /* copySource */);
+            newState.getSource(ITYPE_STATUS_BAR).setVisible(false);
+            mController.onStateChanged(newState);
+            mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
+            assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
+
+            // The modified state will always be updated while receiving IME control if IME is
+            // requested visible.
+            mController.getSourceConsumer(ITYPE_IME).show(false /* fromIme */);
+            newState = new InsetsState(mController.getState(), true /* copySource */);
+            newState.getSource(ITYPE_IME).setVisible(true);
+            newState.getSource(ITYPE_IME).setFrame(1, 2, 3, 4);
+            mController.onStateChanged(newState);
+            mController.onControlsChanged(createSingletonControl(ITYPE_IME));
+            assertEquals(newState.getSource(ITYPE_IME),
+                    mTestHost.getModifiedState().peekSource(ITYPE_IME));
+            newState = new InsetsState(mController.getState(), true /* copySource */);
+            newState.getSource(ITYPE_IME).setVisible(true);
+            newState.getSource(ITYPE_IME).setFrame(5, 6, 7, 8);
+            mController.onStateChanged(newState);
+            mController.onControlsChanged(createSingletonControl(ITYPE_IME));
+            assertEquals(newState.getSource(ITYPE_IME),
+                    mTestHost.getModifiedState().peekSource(ITYPE_IME));
         });
     }
 
