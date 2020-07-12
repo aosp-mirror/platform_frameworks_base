@@ -169,19 +169,6 @@ public final class PreciseDataConnectionState implements Parcelable {
     /**
      * Returns the network type associated with this data connection.
      *
-     * @deprecated use {@link getNetworkType()}
-     * @hide
-     * @removed Removed from the R preview SDK but was never part of the stable API surface.
-     */
-    @Deprecated
-    @SystemApi
-    public @NetworkType int getDataConnectionNetworkType() {
-        return mNetworkType;
-    }
-
-    /**
-     * Returns the network type associated with this data connection.
-     *
      * Return the current/latest (radio) bearer technology that carries this data connection.
      * For a variety of reasons, the network type can change during the life of the data
      * connection, and this information is not reliable unless the physical link is currently
@@ -216,20 +203,6 @@ public final class PreciseDataConnectionState implements Parcelable {
     @Deprecated
     public String getDataConnectionApn() {
         return mApn;
-    }
-
-    /**
-     * Get the properties of the network link {@link LinkProperties}.
-     *
-     * @deprecated use {@link #getLinkProperties()}
-     * @hide
-     * @removed Removed from the R preview SDK but was never part of the stable API surface.
-     */
-    @Deprecated
-    @SystemApi
-    @Nullable
-    public LinkProperties getDataConnectionLinkProperties() {
-        return mLinkProperties;
     }
 
     /**

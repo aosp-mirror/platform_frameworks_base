@@ -1,0 +1,41 @@
+cc_library_shared {
+    name: "libalarm_jni",
+
+    cpp_std: "c++2a",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+
+    srcs: [
+        "com_android_server_alarm_AlarmManagerService.cpp",
+        "onload.cpp",
+    ],
+
+    shared_libs: [
+         "libnativehelper",
+         "liblog",
+         "libbase",
+    ],
+
+    product_variables: {
+        arc: {
+            exclude_srcs: [
+                "com_android_server_alarm_AlarmManagerService.cpp",
+            ],
+            srcs: [
+                ":arctimersrcs",
+            ],
+        }
+    }
+
+}
+
+filegroup {
+    name: "lib_alarmManagerService_native",
+    srcs: [
+        "com_android_server_alarm_AlarmManagerService.cpp",
+    ],
+}

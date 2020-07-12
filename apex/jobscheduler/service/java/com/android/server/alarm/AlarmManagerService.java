@@ -3831,6 +3831,7 @@ public class AlarmManagerService extends SystemService {
         }
 
         void init() {
+            System.loadLibrary("alarm_jni");
             mNativeData = AlarmManagerService.init();
         }
 

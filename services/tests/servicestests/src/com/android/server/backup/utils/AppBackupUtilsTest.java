@@ -22,6 +22,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -74,7 +76,7 @@ public class AppBackupUtilsTest {
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isFalse();
     }
@@ -89,7 +91,7 @@ public class AppBackupUtilsTest {
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isFalse();
     }
@@ -103,7 +105,7 @@ public class AppBackupUtilsTest {
         applicationInfo.packageName = UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isFalse();
     }
@@ -120,7 +122,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isTrue();
     }
@@ -137,7 +139,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isTrue();
     }
@@ -154,7 +156,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isTrue();
     }
@@ -171,7 +173,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isFalse();
     }
@@ -188,7 +190,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
 
         assertThat(isEligible).isFalse();
     }
@@ -205,7 +207,31 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId);
+                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_backupNotAllowedAndInMigration_returnsTrue()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mMockPackageManagerInternal, mUserId, OperationType.MIGRATION);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_backupNotAllowedForSystemAppAndInMigration_returnsFalse()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
+                /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mMockPackageManagerInternal, mUserId, OperationType.MIGRATION);
 
         assertThat(isEligible).isFalse();
     }
@@ -337,7 +363,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.backupAgentName = null;
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo);
+        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.BACKUP);
 
         assertThat(result).isTrue();
     }
@@ -350,7 +376,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo);
+        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.BACKUP);
 
         assertThat(result).isTrue();
     }
@@ -363,7 +389,31 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.applicationInfo.flags = ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo);
+        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.BACKUP);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void appGetsFullBackup_withCustomBackupAgentAndWithoutFullBackupOnlyFlagAndInMigration_returnsTrue()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY, CUSTOM_BACKUP_AGENT_NAME);
+
+        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.MIGRATION);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void appGetsFullBackup_systemAppWithCustomBackupAgentAndWithoutFullBackupOnlyFlagAndInMigration_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
+                ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY, CUSTOM_BACKUP_AGENT_NAME);
+
+        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.MIGRATION);
 
         assertThat(result).isFalse();
     }
@@ -403,6 +453,50 @@ public class AppBackupUtilsTest {
         boolean result = AppBackupUtils.appIsKeyValueOnly(packageInfo);
 
         assertThat(result).isTrue();
+    }
+
+    @Test
+    public void appIgnoresIncludeExcludeRules_systemAppAndInMigration_returnsFalse() {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = Process.SYSTEM_UID;
+
+        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
+                OperationType.MIGRATION);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void appIgnoresIncludeExcludeRules_systemAppInBackup_returnsFalse() {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = Process.SYSTEM_UID;
+
+        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
+                OperationType.BACKUP);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void appIgnoresIncludeExcludeRules_nonSystemAppInMigration_returnsTrue() {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+
+        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
+                OperationType.MIGRATION);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void appIgnoresIncludeExcludeRules_nonSystemInBackup_returnsFalse() {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+
+        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
+                OperationType.BACKUP);
+
+        assertThat(result).isFalse();
     }
 
     @Test
@@ -692,5 +786,15 @@ public class AppBackupUtilsTest {
         byte[] signatureBytes = new byte[256];
         signatureBytes[0] = i;
         return new Signature(signatureBytes);
+    }
+
+    private static ApplicationInfo getApplicationInfo(int appUid, int flags,
+            String backupAgentName) {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+        applicationInfo.uid = appUid;
+        applicationInfo.backupAgentName = backupAgentName;
+        return applicationInfo;
     }
 }

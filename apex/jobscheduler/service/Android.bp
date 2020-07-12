@@ -19,4 +19,8 @@ java_library {
 
     // Rename classes shared with the framework
     jarjar_rules: "jarjar-rules.txt",
+
+    required: [
+        "libalarm_jni",
+    ],
 }

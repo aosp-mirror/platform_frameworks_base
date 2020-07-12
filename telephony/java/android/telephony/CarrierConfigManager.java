@@ -2549,15 +2549,15 @@ public class CarrierConfigManager {
     /**
      * List of 4 customized 5G SS reference signal received quality (SSRSRQ) thresholds.
      * <p>
-     * Reference: 3GPP TS 38.215
+     * Reference: 3GPP TS 38.215; 3GPP TS 38.133 section 10
      * <p>
-     * 4 threshold integers must be within the boundaries [-20 dB, -3 dB], and the levels are:
+     * 4 threshold integers must be within the boundaries [-43 dB, 20 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-20, threshold1]"</LI>
+     *     <LI>"NONE: [-43, threshold1]"</LI>
      *     <LI>"POOR: (threshold1, threshold2]"</LI>
      *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
      *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, -3]"</LI>
+     *     <LI>"EXCELLENT:  (threshold4, 20]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -3214,6 +3214,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
             "5g_icon_display_secondary_grace_period_string";
+
+    /**
+     * Whether device reset all of NR timers when device camped on a network that haven't 5G
+     * capability and RRC currently in IDLE state.
+     *
+     * The default value is false;
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL =
+            "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
@@ -4284,12 +4295,12 @@ public class CarrierConfigManager {
                     -65,  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY,
-                // Boundaries: [-20 dB, -3 dB]
+                // Boundaries: [-43 dB, 20 dB]
                 new int[] {
-                    -16, /* SIGNAL_STRENGTH_POOR */
-                    -12, /* SIGNAL_STRENGTH_MODERATE */
-                    -9, /* SIGNAL_STRENGTH_GOOD */
-                    -6  /* SIGNAL_STRENGTH_GREAT */
+                    -31, /* SIGNAL_STRENGTH_POOR */
+                    -19, /* SIGNAL_STRENGTH_MODERATE */
+                    -7, /* SIGNAL_STRENGTH_GOOD */
+                    6  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-23 dB, 40 dB]
@@ -4326,6 +4337,7 @@ public class CarrierConfigManager {
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);

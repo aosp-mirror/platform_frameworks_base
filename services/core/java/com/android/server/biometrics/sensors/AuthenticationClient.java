@@ -119,6 +119,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
                     + ", requireConfirmation: " + mRequireConfirmation
                     + ", user: " + getTargetUserId());
 
+            final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
+            if (isCryptoOperation()) {
+                pm.incrementCryptoAuthForUser(getTargetUserId(), authenticated);
+            } else {
+                pm.incrementAuthForUser(getTargetUserId(), authenticated);
+            }
+
             if (authenticated) {
                 mAlreadyDone = true;
 
@@ -181,6 +188,18 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to notify listener, finishing", e);
             mFinishCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    @Override
+    public void onAcquired(int acquiredInfo, int vendorCode) {
+        super.onAcquired(acquiredInfo, vendorCode);
+
+        final @LockoutTracker.LockoutMode int lockoutMode =
+                mLockoutTracker.getLockoutModeForUser(getTargetUserId());
+        if (lockoutMode == LockoutTracker.LOCKOUT_NONE) {
+            PerformanceTracker pt = PerformanceTracker.getInstanceForSensorId(getSensorId());
+            pt.incrementAcquireForUser(getTargetUserId(), isCryptoOperation());
         }
     }
 

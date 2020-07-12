@@ -324,12 +324,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     (task.isRootTask() && !task.mCreatedByOrganizer)
                             || task.getParent().asTask().mCreatedByOrganizer;
             if (isNonOrganizedRootableTask) {
-                Task newParent = hop.getNewParent() == null ? null
-                        : WindowContainer.fromBinder(hop.getNewParent()).asTask();
+                WindowContainer newParent = hop.getNewParent() == null
+                        ? dc.getDefaultTaskDisplayArea()
+                        : WindowContainer.fromBinder(hop.getNewParent());
                 if (task.getParent() != newParent) {
-                    if (newParent == null) {
-                        // Re-parent task to display as a root task.
-                        as.reparent(dc.getDefaultTaskDisplayArea(), hop.getToTop());
+                    if (newParent instanceof TaskDisplayArea) {
+                        // For now, reparenting to displayarea is different from other reparents...
+                        as.reparent((TaskDisplayArea) newParent, hop.getToTop());
                     } else if (newParent.inMultiWindowMode() && !task.isResizeable()
                             && task.isLeafTask()) {
                         Slog.w(TAG, "Can't support task that doesn't support multi-window mode in"
@@ -341,8 +342,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 false /*moveParents*/, "sanitizeAndApplyHierarchyOp");
                     }
                 } else {
-                    final ActivityStack rootTask =
-                            (ActivityStack) (newParent != null ? newParent : task.getRootTask());
+                    final ActivityStack rootTask = (ActivityStack) (
+                            (newParent != null && !(newParent instanceof TaskDisplayArea))
+                                    ? newParent : task.getRootTask());
                     if (hop.getToTop()) {
                         as.getDisplayArea().positionStackAtTop(rootTask,
                                 false /* includingParents */);

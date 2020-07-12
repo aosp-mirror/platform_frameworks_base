@@ -175,7 +175,7 @@ public class BarController {
         }
         final Rect rotatedContentFrame = win.mToken.getFixedRotationBarContentFrame(mWindowType);
         final Rect contentFrame = rotatedContentFrame != null ? rotatedContentFrame : mContentFrame;
-        return win.letterboxNotIntersectsOrFullyContains(contentFrame);
+        return !win.isLetterboxedOverlappingWith(contentFrame);
     }
 
     boolean setBarShowingLw(final boolean show) {

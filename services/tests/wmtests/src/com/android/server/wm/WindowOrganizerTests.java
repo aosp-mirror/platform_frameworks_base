@@ -669,6 +669,14 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(1, lastReportedTiles.size());
         assertEquals(ACTIVITY_TYPE_HOME,
                 lastReportedTiles.get(info1.token.asBinder()).topActivityType);
+
+        // This just needs to not crash (ie. it should be possible to reparent to display twice)
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack2.mRemoteToken.toWindowContainerToken(), null, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack2.mRemoteToken.toWindowContainerToken(), null, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
     }
 
     private List<Task> getTasksCreatedByOrganizer(DisplayContent dc) {

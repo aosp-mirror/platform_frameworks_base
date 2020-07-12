@@ -331,7 +331,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     @Override
     void positionChildAt(int position, ActivityStack child, boolean includingParents) {
         final boolean moveToTop = position >= getChildCount() - 1;
-        final boolean moveToBottom = (position == POSITION_BOTTOM || position == 0);
+        final boolean moveToBottom = position <= 0;
 
         if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
             // This stack is always-on-top, override the default behavior.
@@ -351,12 +351,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         final int targetPosition = findPositionForStack(position, child, false /* adding */);
         super.positionChildAt(targetPosition, child, false /* includingParents */);
 
-        if (includingParents && (moveToTop || moveToBottom)) {
-            // The DisplayContent children do not re-order, but we still want to move the
-            // display of this stack container because the intention of positioning is to have
-            // higher z-order to gain focus.
-            mDisplayContent.positionDisplayAt(moveToTop ? POSITION_TOP : POSITION_BOTTOM,
-                    true /* includingParents */);
+        if (includingParents && getParent() != null && (moveToTop || moveToBottom)) {
+            getParent().positionChildAt(moveToTop ? POSITION_TOP : POSITION_BOTTOM,
+                    this /* child */, true /* includingParents */);
         }
 
         child.updateTaskMovement(moveToTop);

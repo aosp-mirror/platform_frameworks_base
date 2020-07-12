@@ -29,7 +29,8 @@ import java.util.ArrayList;
 
 /**
  * Allows clients (such as keyguard) to register for notifications on when biometric lockout
- * ends.
+ * ends. This class keeps track of all client callbacks. Individual sensors should notify this
+ * when lockout for a specific sensor has been reset.
  */
 public class LockoutResetTracker implements IBinder.DeathRecipient {
 
@@ -54,11 +55,11 @@ public class LockoutResetTracker implements IBinder.DeathRecipient {
                     "LockoutResetMonitor:SendLockoutReset");
         }
 
-        void sendLockoutReset() {
+        void sendLockoutReset(int sensorId) {
             if (mCallback != null) {
                 try {
                     mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
-                    mCallback.onLockoutReset(new IRemoteCallback.Stub() {
+                    mCallback.onLockoutReset(sensorId, new IRemoteCallback.Stub() {
                         @Override
                         public void sendResult(Bundle data) {
                             releaseWakelock();
@@ -114,9 +115,9 @@ public class LockoutResetTracker implements IBinder.DeathRecipient {
         }
     }
 
-    public void notifyLockoutResetCallbacks() {
+    public void notifyLockoutResetCallbacks(int sensorId) {
         for (ClientCallback callback : mClientCallbacks) {
-            callback.sendLockoutReset();
+            callback.sendLockoutReset(sensorId);
         }
     }
 }

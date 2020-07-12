@@ -292,11 +292,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         assertEquals(originalStackCount + 1, defaultTaskDisplayArea.getStackCount());
 
         final DisplayContent dc = defaultTaskDisplayArea.getDisplayContent();
-        final TaskDisplayArea secondTaskDisplayArea = new TaskDisplayArea(dc,
-                mRootWindowContainer.mWmService, "SecondaryTaskDisplayArea", FEATURE_VENDOR_FIRST);
-        // Add second display area right above the default one
-        defaultTaskDisplayArea.getParent().addChild(secondTaskDisplayArea,
-                defaultTaskDisplayArea.getParent().mChildren.indexOf(defaultTaskDisplayArea) + 1);
+        final TaskDisplayArea secondTaskDisplayArea = WindowTestsBase.createTaskDisplayArea(dc,
+                mRootWindowContainer.mWmService, "TestTaskDisplayArea", FEATURE_VENDOR_FIRST);
         final ActivityStack secondStack = secondTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         new ActivityBuilder(mService).setCreateTask(true).setStack(secondStack)

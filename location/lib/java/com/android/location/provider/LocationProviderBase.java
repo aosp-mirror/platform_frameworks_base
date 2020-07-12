@@ -79,7 +79,8 @@ public abstract class LocationProviderBase {
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
     final String mTag;
-    final String mAttributionTag;
+    @Nullable final String mPackageName;
+    @Nullable final String mAttributionTag;
     final IBinder mBinder;
 
     /**
@@ -93,8 +94,7 @@ public abstract class LocationProviderBase {
     protected final ILocationManager mLocationManager;
 
     // write locked on mBinder, read lock is optional depending on atomicity requirements
-    @Nullable
-    volatile ILocationProviderManager mManager;
+    @Nullable volatile ILocationProviderManager mManager;
     volatile ProviderProperties mProperties;
     volatile boolean mAllowed;
 
@@ -116,6 +116,7 @@ public abstract class LocationProviderBase {
     public LocationProviderBase(Context context, String tag,
             ProviderPropertiesUnbundled properties) {
         mTag = tag;
+        mPackageName = context != null ? context.getPackageName() : null;
         mAttributionTag = context != null ? context.getAttributionTag() : null;
         mBinder = new Service();
 
@@ -332,8 +333,8 @@ public abstract class LocationProviderBase {
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    if (mAttributionTag != null) {
-                        manager.onSetAttributionTag(mAttributionTag);
+                    if (mPackageName != null || mAttributionTag != null) {
+                        manager.onSetIdentity(mPackageName, mAttributionTag);
                     }
                     manager.onSetProperties(mProperties);
                     manager.onSetAllowed(mAllowed);
