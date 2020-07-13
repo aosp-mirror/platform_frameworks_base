@@ -51,7 +51,7 @@ import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.Interruptable;
-import com.android.server.biometrics.sensors.LockoutResetTracker;
+import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
@@ -86,7 +86,7 @@ class Face10 implements IHwBinder.DeathRecipient {
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
     @NonNull private final ClientMonitor.LazyDaemon<IBiometricsFace> mLazyDaemon;
-    @NonNull private final LockoutResetTracker mLockoutResetTracker;
+    @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final LockoutHalImpl mLockoutTracker;
     @NonNull private final UsageStats mUsageStats;
     @NonNull private NotificationManager mNotificationManager;
@@ -258,14 +258,14 @@ class Face10 implements IHwBinder.DeathRecipient {
                 mLockoutTracker.setCurrentUserLockoutMode(lockoutMode);
 
                 if (duration == 0) {
-                    mLockoutResetTracker.notifyLockoutResetCallbacks(mSensorId);
+                    mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorId);
                 }
             });
         }
     };
 
     Face10(@NonNull Context context, int sensorId,
-            @NonNull LockoutResetTracker lockoutResetTracker) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
@@ -275,7 +275,7 @@ class Face10 implements IHwBinder.DeathRecipient {
         mLazyDaemon = Face10.this::getDaemon;
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
         mLockoutTracker = new LockoutHalImpl();
-        mLockoutResetTracker = lockoutResetTracker;
+        mLockoutResetDispatcher = lockoutResetDispatcher;
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);

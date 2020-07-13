@@ -28,7 +28,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityTracker;
+import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -172,7 +172,7 @@ public class BiometricScheduler {
     }
 
     @NonNull private final String mBiometricTag;
-    @Nullable private final GestureAvailabilityTracker mGestureAvailabilityTracker;
+    @Nullable private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @NonNull private final IBiometricService mBiometricService;
     @NonNull private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull private final InternalFinishCallback mInternalFinishCallback;
@@ -207,8 +207,8 @@ public class BiometricScheduler {
                 }
 
                 Slog.d(getTag(), "[Finished] " + clientMonitor + ", success: " + success);
-                if (mGestureAvailabilityTracker != null) {
-                    mGestureAvailabilityTracker.markSensorActive(
+                if (mGestureAvailabilityDispatcher != null) {
+                    mGestureAvailabilityDispatcher.markSensorActive(
                             mCurrentOperation.clientMonitor.getSensorId(), false /* active */);
                 }
 
@@ -221,14 +221,14 @@ public class BiometricScheduler {
     /**
      * Creates a new scheduler.
      * @param tag for the specific instance of the scheduler. Should be unique.
-     * @param gestureAvailabilityTracker may be null if the sensor does not support gestures (such
-     *                                   as fingerprint swipe).
+     * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
+     *                                      (such as fingerprint swipe).
      */
     public BiometricScheduler(@NonNull String tag,
-            @Nullable GestureAvailabilityTracker gestureAvailabilityTracker) {
+            @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         mBiometricTag = tag;
         mInternalFinishCallback = new InternalFinishCallback();
-        mGestureAvailabilityTracker = gestureAvailabilityTracker;
+        mGestureAvailabilityDispatcher = gestureAvailabilityDispatcher;
         mPendingOperations = new ArrayDeque<>();
         mBiometricService = IBiometricService.Stub.asInterface(
                 ServiceManager.getService(Context.BIOMETRIC_SERVICE));
@@ -268,9 +268,9 @@ public class BiometricScheduler {
             return;
         }
 
-        if (mGestureAvailabilityTracker != null
+        if (mGestureAvailabilityDispatcher != null
                 && mCurrentOperation.clientMonitor instanceof AcquisitionClient) {
-            mGestureAvailabilityTracker.markSensorActive(
+            mGestureAvailabilityDispatcher.markSensorActive(
                     mCurrentOperation.clientMonitor.getSensorId(),
                     true /* active */);
         }

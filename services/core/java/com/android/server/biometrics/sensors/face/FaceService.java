@@ -36,7 +36,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutResetTracker;
+import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.io.FileDescriptor;
@@ -52,10 +52,9 @@ import java.util.List;
 public class FaceService extends SystemService {
 
     protected static final String TAG = "FaceService";
-    private static final boolean DEBUG = true;
 
     private Face10 mFace10;
-    private final LockoutResetTracker mLockoutResetTracker;
+    private final LockoutResetDispatcher mLockoutResetDispatcher;
 
     /**
      * Receives the incoming binder calls from FaceManager.
@@ -154,7 +153,7 @@ public class FaceService extends SystemService {
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
                 final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mLockoutResetTracker.addCallback(callback, opPackageName);
+            mLockoutResetDispatcher.addCallback(callback, opPackageName);
         }
 
         @Override // Binder call
@@ -235,13 +234,13 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void initializeConfiguration(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mFace10 = new Face10(getContext(), sensorId, mLockoutResetTracker);
+            mFace10 = new Face10(getContext(), sensorId, mLockoutResetDispatcher);
         }
     }
 
     public FaceService(Context context) {
         super(context);
-        mLockoutResetTracker = new LockoutResetTracker(context);
+        mLockoutResetDispatcher = new LockoutResetDispatcher(context);
     }
 
     @Override

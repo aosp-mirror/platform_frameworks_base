@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * ends. This class keeps track of all client callbacks. Individual sensors should notify this
  * when lockout for a specific sensor has been reset.
  */
-public class LockoutResetTracker implements IBinder.DeathRecipient {
+public class LockoutResetDispatcher implements IBinder.DeathRecipient {
 
     private static final String TAG = "LockoutResetTracker";
 
@@ -79,7 +79,7 @@ public class LockoutResetTracker implements IBinder.DeathRecipient {
         }
     }
 
-    public LockoutResetTracker(Context context) {
+    public LockoutResetDispatcher(Context context) {
         mContext = context;
         mClientCallbacks = new ArrayList<>();
     }

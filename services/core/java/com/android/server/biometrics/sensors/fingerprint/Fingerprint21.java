@@ -56,7 +56,7 @@ import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.Interruptable;
-import com.android.server.biometrics.sensors.LockoutResetTracker;
+import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
@@ -87,7 +87,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     private final SensorProperties mSensorProperties;
     private final BiometricScheduler mScheduler;
     private final Handler mHandler;
-    private final LockoutResetTracker mLockoutResetTracker;
+    private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockoutFrameworkImpl mLockoutTracker;
     private final BiometricTaskStackListener mTaskStackListener;
     private final ClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
@@ -146,7 +146,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
             new LockoutFrameworkImpl.LockoutResetCallback() {
         @Override
         public void onLockoutReset(int userId) {
-            mLockoutResetTracker.notifyLockoutResetCallbacks(mSensorProperties.sensorId);
+            mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorProperties.sensorId);
         }
     };
 
@@ -276,17 +276,17 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     };
 
     Fingerprint21(@NonNull Context context, int sensorId,
-            @NonNull LockoutResetTracker lockoutResetTracker,
-            @NonNull GestureAvailabilityTracker gestureAvailabilityTracker) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         mContext = context;
         mActivityTaskManager = ActivityTaskManager.getService();
         mHandler = new Handler(Looper.getMainLooper());
         mTaskStackListener = new BiometricTaskStackListener();
         mAuthenticatorIds = Collections.synchronizedMap(new HashMap<>());
         mLazyDaemon = Fingerprint21.this::getDaemon;
-        mLockoutResetTracker = lockoutResetTracker;
+        mLockoutResetDispatcher = lockoutResetDispatcher;
         mLockoutTracker = new LockoutFrameworkImpl(context, mLockoutResetCallback);
-        mScheduler = new BiometricScheduler(TAG, gestureAvailabilityTracker);
+        mScheduler = new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
