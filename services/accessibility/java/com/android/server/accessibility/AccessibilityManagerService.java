@@ -116,6 +116,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -212,7 +213,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     // Lazily initialized - access through getSystemActionPerfomer()
     private SystemActionPerformer mSystemActionPerformer;
 
-    private MagnificationController mMagnificationController;
+    private FullScreenMagnificationController mFullScreenMagnificationController;
 
     private InteractionBridge mInteractionBridge;
 
@@ -2191,13 +2192,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
-        if (mMagnificationController != null) {
-            mMagnificationController.setUserId(userState.mUserId);
+        if (mFullScreenMagnificationController != null) {
+            mFullScreenMagnificationController.setUserId(userState.mUserId);
         }
 
         if (mUiAutomationManager.suppressingAccessibilityServicesLocked()
-                && mMagnificationController != null) {
-            mMagnificationController.unregisterAll();
+                && mFullScreenMagnificationController != null) {
+            mFullScreenMagnificationController.unregisterAll();
             return;
         }
 
@@ -2209,7 +2210,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 || userState.isShortcutMagnificationEnabledLocked()) {
             for (int i = 0; i < displays.size(); i++) {
                 final Display display = displays.get(i);
-                getMagnificationController().register(display.getDisplayId());
+                getFullScreenMagnificationController().register(display.getDisplayId());
             }
             return;
         }
@@ -2219,9 +2220,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final Display display = displays.get(i);
             final int displayId = display.getDisplayId();
             if (userHasListeningMagnificationServicesLocked(userState, displayId)) {
-                getMagnificationController().register(displayId);
-            } else if (mMagnificationController != null) {
-                mMagnificationController.unregister(displayId);
+                getFullScreenMagnificationController().register(displayId);
+            } else if (mFullScreenMagnificationController != null) {
+                mFullScreenMagnificationController.unregister(displayId);
             }
         }
     }
@@ -2568,7 +2569,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         // In case user assigned magnification to the given shortcut.
         if (targetName.equals(MAGNIFICATION_CONTROLLER_NAME)) {
-            final boolean enabled = !getMagnificationController().isMagnifying(displayId);
+            final boolean enabled = !getFullScreenMagnificationController().isMagnifying(displayId);
             logAccessibilityShortcutActivated(MAGNIFICATION_COMPONENT_NAME, shortcutType, enabled);
             sendAccessibilityButtonToInputFilter(displayId);
             return;
@@ -2928,13 +2929,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public MagnificationController getMagnificationController() {
+    public FullScreenMagnificationController getFullScreenMagnificationController() {
         synchronized (mLock) {
-            if (mMagnificationController == null) {
-                mMagnificationController = new MagnificationController(mContext, this, mLock);
-                mMagnificationController.setUserId(mCurrentUserId);
+            if (mFullScreenMagnificationController == null) {
+                mFullScreenMagnificationController = new FullScreenMagnificationController(mContext,
+                        this, mLock);
+                mFullScreenMagnificationController.setUserId(mCurrentUserId);
             }
-            return mMagnificationController;
+            return mFullScreenMagnificationController;
         }
     }
 
@@ -3126,8 +3128,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
-            if (mMagnificationController != null) {
-                mMagnificationController.onDisplayRemoved(displayId);
+            if (mFullScreenMagnificationController != null) {
+                mFullScreenMagnificationController.onDisplayRemoved(displayId);
             }
             mA11yWindowManager.stopTrackingWindows(displayId);
         }

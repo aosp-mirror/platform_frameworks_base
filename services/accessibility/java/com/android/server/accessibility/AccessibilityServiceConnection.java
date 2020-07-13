@@ -120,7 +120,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
-        mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
+        mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
         mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(), -1,
                 userState.mUserId);
         resetLocked();
@@ -312,7 +312,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 userState.serviceDisconnectedLocked(this);
             }
             resetLocked();
-            mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
+            mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
             mSystemSupport.onClientChangeLocked(false);
         }
     }
