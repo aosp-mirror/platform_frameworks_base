@@ -236,6 +236,8 @@ message ConstantsProto {
     optional int64 api_quota_schedule_window_ms = 33;
     // Whether or not to throw an exception when an app hits its schedule quota limit.
     optional bool api_quota_schedule_throw_exception = 34;
+    // Whether or not to return a failure result when an app hits its schedule quota limit.
+    optional bool api_quota_schedule_return_failure_result = 35;
 
     message QuotaController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -335,7 +337,7 @@ message ConstantsProto {
     // In this time after screen turns on, we increase job concurrency.
     optional int32 screen_off_job_concurrency_increase_delay_ms = 28;
 
-    // Next tag: 35
+    // Next tag: 36
 }
 
 // Next tag: 4

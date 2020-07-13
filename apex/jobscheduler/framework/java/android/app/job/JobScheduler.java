@@ -59,9 +59,9 @@ import java.util.List;
  *
  * <p class="caution"><strong>Note:</strong> Beginning with API 30
  * ({@link android.os.Build.VERSION_CODES#R}), JobScheduler will throttle runaway applications.
- * Calling {@link #schedule(JobInfo)} and other such methods with very high frequency is indicative
- * of an app bug and so, to make sure the system doesn't get overwhelmed, JobScheduler will begin
- * to throttle apps that show buggy behavior, regardless of target SDK version.
+ * Calling {@link #schedule(JobInfo)} and other such methods with very high frequency can have a
+ * high cost and so, to make sure the system doesn't get overwhelmed, JobScheduler will begin
+ * to throttle apps, regardless of target SDK version.
  */
 @SystemService(Context.JOB_SCHEDULER_SERVICE)
 public abstract class JobScheduler {
@@ -74,9 +74,16 @@ public abstract class JobScheduler {
     public @interface Result {}
 
     /**
-     * Returned from {@link #schedule(JobInfo)} when an invalid parameter was supplied. This can occur
-     * if the run-time for your job is too short, or perhaps the system can't resolve the
-     * requisite {@link JobService} in your package.
+     * Returned from {@link #schedule(JobInfo)} if a job wasn't scheduled successfully. Scheduling
+     * can fail for a variety of reasons, including, but not limited to:
+     * <ul>
+     * <li>an invalid parameter was supplied (eg. the run-time for your job is too short, or the
+     * system can't resolve the requisite {@link JobService} in your package)</li>
+     * <li>the app has too many jobs scheduled</li>
+     * <li>the app has tried to schedule too many jobs in a short amount of time</li>
+     * </ul>
+     * Attempting to schedule the job again immediately after receiving this result will not
+     * guarantee a successful schedule.
      */
     public static final int RESULT_FAILURE = 0;
     /**
@@ -88,6 +95,11 @@ public abstract class JobScheduler {
      * Schedule a job to be executed.  Will replace any currently scheduled job with the same
      * ID with the new information in the {@link JobInfo}.  If a job with the given ID is currently
      * running, it will be stopped.
+     *
+     * <p class="caution"><strong>Note:</strong> Scheduling a job can have a high cost, even if it's
+     * rescheduling the same job and the job didn't execute, especially on platform versions before
+     * version {@link android.os.Build.VERSION_CODES#Q}. As such, the system may throttle calls to
+     * this API if calls are made too frequently in a short amount of time.
      *
      * @param job The job you wish scheduled. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
