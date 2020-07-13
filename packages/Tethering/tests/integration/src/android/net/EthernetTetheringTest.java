@@ -102,17 +102,21 @@ public class EthernetTetheringTest {
 
     private UiAutomation mUiAutomation =
             InstrumentationRegistry.getInstrumentation().getUiAutomation();
+    private boolean mRunTests;
 
     @Before
     public void setUp() throws Exception {
-        mHandlerThread = new HandlerThread(getClass().getSimpleName());
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
-        mTetheredInterfaceRequester = new TetheredInterfaceRequester(mHandler, mEm);
         // Needed to create a TestNetworkInterface, to call requestTetheredInterface, and to receive
         // tethered client callbacks.
         mUiAutomation.adoptShellPermissionIdentity(
                 MANAGE_TEST_NETWORKS, NETWORK_SETTINGS, TETHER_PRIVILEGED);
+        mRunTests = mTm.isTetheringSupported() && mEm != null;
+        assumeTrue(mRunTests);
+
+        mHandlerThread = new HandlerThread(getClass().getSimpleName());
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+        mTetheredInterfaceRequester = new TetheredInterfaceRequester(mHandler, mEm);
     }
 
     private void cleanUp() throws Exception {
@@ -136,7 +140,7 @@ public class EthernetTetheringTest {
     @After
     public void tearDown() throws Exception {
         try {
-            cleanUp();
+            if (mRunTests) cleanUp();
         } finally {
             mUiAutomation.dropShellPermissionIdentity();
         }
