@@ -1745,10 +1745,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             if (down || up) {
                 int flags = AudioManager.FLAG_FROM_KEY;
-                if (musicOnly) {
-                    // This flag is used when the screen is off to only affect active media.
-                    flags |= AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
-                } else {
+                if (!musicOnly) {
                     // These flags are consistent with the home screen
                     if (up) {
                         flags |= AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
@@ -1762,11 +1759,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                         direction = 0;
                     }
                     dispatchAdjustVolumeLocked(packageName, opPackageName, pid, uid,
-                            asSystemService, stream, direction, flags);
+                            asSystemService, stream, direction, flags, musicOnly);
                 } else if (isMute) {
                     if (down && keyEvent.getRepeatCount() == 0) {
                         dispatchAdjustVolumeLocked(packageName, opPackageName, pid, uid,
-                                asSystemService, stream, AudioManager.ADJUST_TOGGLE_MUTE, flags);
+                                asSystemService, stream, AudioManager.ADJUST_TOGGLE_MUTE, flags,
+                                musicOnly);
                     }
                 }
             }
@@ -1849,7 +1847,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 synchronized (mLock) {
                     dispatchAdjustVolumeLocked(packageName, opPackageName, pid, uid, false,
-                            suggestedStream, delta, flags);
+                            suggestedStream, delta, flags, false);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2031,7 +2029,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         private void dispatchAdjustVolumeLocked(String packageName, String opPackageName, int pid,
-                int uid, boolean asSystemService, int suggestedStream, int direction, int flags) {
+                int uid, boolean asSystemService, int suggestedStream, int direction, int flags,
+                boolean musicOnly) {
             MediaSessionRecordImpl session = isGlobalPriorityActiveLocked() ? mGlobalPrioritySession
                     : mCurrentFullUserRecord.mPriorityStack.getDefaultVolumeSession();
 
@@ -2046,8 +2045,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + ". flags=" + flags + ", preferSuggestedStream="
                             + preferSuggestedStream + ", session=" + session);
                 }
-                if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0
-                        && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
+                if (musicOnly && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
                     if (DEBUG_KEY_EVENT) {
                         Log.d(TAG, "Nothing is playing on the music stream. Skipping volume event,"
                                 + " flags=" + flags);
