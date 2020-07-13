@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.magnification;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -42,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Locale;
@@ -56,9 +57,9 @@ import java.util.Locale;
  * magnification region. If a value is out of bounds, it will be adjusted to guarantee these
  * constraints.
  */
-public class MagnificationController {
+public class FullScreenMagnificationController {
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "MagnificationController";
+    private static final String LOG_TAG = "FullScreenMagnificationController";
 
     public static final float MIN_SCALE = 1.0f;
     public static final float MAX_SCALE = 8.0f;
@@ -140,11 +141,12 @@ public class MagnificationController {
 
         /**
          * Unregisters magnification callback from window manager. Callbacks to
-         * {@link MagnificationController#unregisterCallbackLocked(int, boolean)} after
+         * {@link FullScreenMagnificationController#unregisterCallbackLocked(int, boolean)} after
          * unregistered.
          *
          * @param delete true if this instance should be removed from the SparseArray in
-         *               MagnificationController after unregistered, for example, display removed.
+         *               FullScreenMagnificationController after unregistered, for example,
+         *               display removed.
          */
         @GuardedBy("mLock")
         void unregister(boolean delete) {
@@ -164,7 +166,8 @@ public class MagnificationController {
          * called after animation finished.
          *
          * @param delete true if this instance should be removed from the SparseArray in
-         *               MagnificationController after unregistered, for example, display removed.
+         *               FullScreenMagnificationController after unregistered, for example,
+         *               display removed.
          */
         @GuardedBy("mLock")
         void unregisterPending(boolean delete) {
@@ -257,15 +260,17 @@ public class MagnificationController {
         @Override
         public void onRotationChanged(int rotation) {
             // Treat as context change and reset
-            final Message m = PooledLambda.obtainMessage(MagnificationController::resetIfNeeded,
-                    MagnificationController.this, mDisplayId, true);
+            final Message m = PooledLambda.obtainMessage(
+                    FullScreenMagnificationController::resetIfNeeded,
+                    FullScreenMagnificationController.this, mDisplayId, true);
             mControllerCtx.getHandler().sendMessage(m);
         }
 
         @Override
         public void onUserContextChanged() {
-            final Message m = PooledLambda.obtainMessage(MagnificationController::resetIfNeeded,
-                    MagnificationController.this, mDisplayId, true);
+            final Message m = PooledLambda.obtainMessage(
+                    FullScreenMagnificationController::resetIfNeeded,
+                    FullScreenMagnificationController.this, mDisplayId, true);
             mControllerCtx.getHandler().sendMessage(m);
         }
 
@@ -554,25 +559,25 @@ public class MagnificationController {
         float getMinOffsetXLocked() {
             final float viewportWidth = mMagnificationBounds.width();
             final float viewportLeft = mMagnificationBounds.left;
-            return (viewportLeft + viewportWidth) -
-                    (viewportLeft + viewportWidth) * mCurrentMagnificationSpec.scale;
+            return (viewportLeft + viewportWidth)
+                    - (viewportLeft + viewportWidth) * mCurrentMagnificationSpec.scale;
         }
 
         float getMaxOffsetXLocked() {
-            return mMagnificationBounds.left -
-                    mMagnificationBounds.left * mCurrentMagnificationSpec.scale;
+            return mMagnificationBounds.left
+                    - mMagnificationBounds.left * mCurrentMagnificationSpec.scale;
         }
 
         float getMinOffsetYLocked() {
             final float viewportHeight = mMagnificationBounds.height();
             final float viewportTop = mMagnificationBounds.top;
-            return (viewportTop + viewportHeight) -
-                    (viewportTop + viewportHeight) * mCurrentMagnificationSpec.scale;
+            return (viewportTop + viewportHeight)
+                    - (viewportTop + viewportHeight) * mCurrentMagnificationSpec.scale;
         }
 
         float getMaxOffsetYLocked() {
-            return mMagnificationBounds.top -
-                    mMagnificationBounds.top * mCurrentMagnificationSpec.scale;
+            return mMagnificationBounds.top
+                    - mMagnificationBounds.top * mCurrentMagnificationSpec.scale;
         }
 
         @Override
@@ -590,9 +595,9 @@ public class MagnificationController {
     }
 
     /**
-     * MagnificationController Constructor
+     * FullScreenMagnificationController Constructor
      */
-    public MagnificationController(@NonNull Context context,
+    public FullScreenMagnificationController(@NonNull Context context,
             @NonNull AccessibilityManagerService ams, @NonNull Object lock) {
         this(new ControllerContext(context, ams,
                 LocalServices.getService(WindowManagerInternal.class),
@@ -604,7 +609,7 @@ public class MagnificationController {
      * Constructor for tests
      */
     @VisibleForTesting
-    public MagnificationController(@NonNull ControllerContext ctx, @NonNull Object lock) {
+    public FullScreenMagnificationController(@NonNull ControllerContext ctx, @NonNull Object lock) {
         mControllerCtx = ctx;
         mLock = lock;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
@@ -1088,7 +1093,7 @@ public class MagnificationController {
 
     private void onScreenTurnedOff() {
         final Message m = PooledLambda.obtainMessage(
-                MagnificationController::resetAllIfNeeded, this, false);
+                FullScreenMagnificationController::resetAllIfNeeded, this, false);
         mControllerCtx.getHandler().sendMessage(m);
     }
 
@@ -1253,14 +1258,14 @@ public class MagnificationController {
             synchronized (mLock) {
                 if (mEnabled) {
                     float fract = animation.getAnimatedFraction();
-                    mTmpMagnificationSpec.scale = mStartMagnificationSpec.scale +
-                            (mEndMagnificationSpec.scale - mStartMagnificationSpec.scale) * fract;
-                    mTmpMagnificationSpec.offsetX = mStartMagnificationSpec.offsetX +
-                            (mEndMagnificationSpec.offsetX - mStartMagnificationSpec.offsetX)
-                                    * fract;
-                    mTmpMagnificationSpec.offsetY = mStartMagnificationSpec.offsetY +
-                            (mEndMagnificationSpec.offsetY - mStartMagnificationSpec.offsetY)
-                                    * fract;
+                    mTmpMagnificationSpec.scale = mStartMagnificationSpec.scale
+                            + (mEndMagnificationSpec.scale - mStartMagnificationSpec.scale) * fract;
+                    mTmpMagnificationSpec.offsetX = mStartMagnificationSpec.offsetX
+                            + (mEndMagnificationSpec.offsetX - mStartMagnificationSpec.offsetX)
+                            * fract;
+                    mTmpMagnificationSpec.offsetY = mStartMagnificationSpec.offsetY
+                            + (mEndMagnificationSpec.offsetY - mStartMagnificationSpec.offsetY)
+                            * fract;
                     setMagnificationSpecLocked(mTmpMagnificationSpec);
                 }
             }
@@ -1269,10 +1274,10 @@ public class MagnificationController {
 
     private static class ScreenStateObserver extends BroadcastReceiver {
         private final Context mContext;
-        private final MagnificationController mController;
+        private final FullScreenMagnificationController mController;
         private boolean mRegistered = false;
 
-        public ScreenStateObserver(Context context, MagnificationController controller) {
+        ScreenStateObserver(Context context, FullScreenMagnificationController controller) {
             mContext = context;
             mController = controller;
         }

@@ -52,6 +52,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.gestures.TouchExplorer;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 
@@ -89,7 +91,7 @@ public class AccessibilityInputFilterTest {
                     FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
                     AutoclickController.class, AccessibilityInputFilter.class};
 
-    private MagnificationController mMockMagnificationController;
+    private FullScreenMagnificationController mMockFullScreenMagnificationController;
     private AccessibilityManagerService mAms;
     private AccessibilityInputFilter mA11yInputFilter;
     private EventCaptor mCaptor1;
@@ -135,12 +137,13 @@ public class AccessibilityInputFilterTest {
 
         setDisplayCount(1);
         mAms = spy(new AccessibilityManagerService(context));
-        mMockMagnificationController = mock(MagnificationController.class);
+        mMockFullScreenMagnificationController = mock(FullScreenMagnificationController.class);
         mA11yInputFilter = new AccessibilityInputFilter(context, mAms, mEventHandler);
         mA11yInputFilter.onInstalled();
 
         when(mAms.getValidDisplayList()).thenReturn(mDisplayList);
-        when(mAms.getMagnificationController()).thenReturn(mMockMagnificationController);
+        when(mAms.getFullScreenMagnificationController()).thenReturn(
+                mMockFullScreenMagnificationController);
     }
 
     @After
