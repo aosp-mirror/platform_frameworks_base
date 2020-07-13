@@ -43,6 +43,7 @@ import com.android.telephony.Rlog;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -855,10 +856,9 @@ public class SmsMessage extends SmsMessageBase {
         }
 
         /**
-         * Parses an SC timestamp and returns a currentTimeMillis()-style
-         * timestamp
+         * Parses an SC timestamp and returns a currentTimeMillis()-style timestamp, or 0 if
+         * invalid.
          */
-
         long getSCTimestampMillis() {
             // TP-Service-Centre-Time-Stamp
             int year = IccUtils.gsmBcdByteToInt(mPdu[mCur++]);
@@ -884,16 +884,22 @@ public class SmsMessage extends SmsMessageBase {
 
             // It's 2006.  Should I really support years < 2000?
             int fullYear = year >= 90 ? year + 1900 : year + 2000;
-            LocalDateTime localDateTime = LocalDateTime.of(
-                    fullYear,
-                    month /* 1-12 */,
-                    day,
-                    hour,
-                    minute,
-                    second);
-            long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
-            // Convert to milliseconds.
-            return epochSeconds * 1000;
+            try {
+                LocalDateTime localDateTime = LocalDateTime.of(
+                        fullYear,
+                        month /* 1-12 */,
+                        day,
+                        hour,
+                        minute,
+                        second);
+                long epochSeconds =
+                        localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
+                // Convert to milliseconds.
+                return epochSeconds * 1000;
+            } catch (DateTimeException ex) {
+                Rlog.e(LOG_TAG, "Invalid timestamp", ex);
+            }
+            return 0;
         }
 
         /**
@@ -1244,6 +1250,7 @@ public class SmsMessage extends SmsMessageBase {
         mRecipientAddress = p.getAddress();
         // TP-Service-Centre-Time-Stamp
         mScTimeMillis = p.getSCTimestampMillis();
+        // TP-Discharge-Time
         p.getSCTimestampMillis();
         // TP-Status
         mStatus = p.getByte();
@@ -1302,6 +1309,7 @@ public class SmsMessage extends SmsMessageBase {
                     + " data coding scheme: " + mDataCodingScheme);
         }
 
+        // TP-Service-Centre-Time-Stamp
         mScTimeMillis = p.getSCTimestampMillis();
 
         if (VDBG) Rlog.d(LOG_TAG, "SMS SC timestamp: " + mScTimeMillis);

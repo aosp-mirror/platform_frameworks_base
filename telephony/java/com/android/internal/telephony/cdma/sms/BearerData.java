@@ -35,6 +35,7 @@ import com.android.internal.util.BitwiseOutputStream;
 import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -315,10 +316,16 @@ public final class BearerData {
         }
 
         public long toMillis() {
-            LocalDateTime localDateTime =
-                    LocalDateTime.of(year, monthOrdinal, monthDay, hour, minute, second);
-            Instant instant = localDateTime.toInstant(mZoneId.getRules().getOffset(localDateTime));
-            return instant.toEpochMilli();
+            try {
+                LocalDateTime localDateTime =
+                        LocalDateTime.of(year, monthOrdinal, monthDay, hour, minute, second);
+                Instant instant =
+                        localDateTime.toInstant(mZoneId.getRules().getOffset(localDateTime));
+                return instant.toEpochMilli();
+            } catch (DateTimeException ex) {
+                Rlog.e(LOG_TAG, "Invalid timestamp", ex);
+            }
+            return 0;
         }
 
 
