@@ -7599,13 +7599,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (imeTarget == null) {
                     return;
                 }
-                imeTarget = imeTarget.getImeControlTarget().getWindow();
+                final InsetsControlTarget controlTarget = imeTarget.getImeControlTarget();
+                imeTarget = controlTarget.getWindow();
                 // If InsetsControlTarget doesn't have a window, its using remoteControlTarget which
                 // is controlled by default display
                 final DisplayContent dc = imeTarget != null
                         ? imeTarget.getDisplayContent() : getDefaultDisplayContentLocked();
                 dc.getInsetsStateController().getImeSourceProvider()
-                        .scheduleShowImePostLayout(imeTarget);
+                        .scheduleShowImePostLayout(controlTarget);
             }
         }
 
