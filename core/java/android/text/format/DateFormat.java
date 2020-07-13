@@ -19,12 +19,12 @@ package android.text.format;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.icu.text.DateTimePatternGenerator;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 
-import libcore.icu.ICU;
 import libcore.icu.LocaleData;
 
 import java.text.SimpleDateFormat;
@@ -251,7 +251,8 @@ public class DateFormat {
      * @return a string pattern suitable for use with {@link java.text.SimpleDateFormat}.
      */
     public static String getBestDateTimePattern(Locale locale, String skeleton) {
-        return ICU.getBestDateTimePattern(skeleton, locale);
+        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(locale);
+        return dtpg.getBestPattern(skeleton);
     }
 
     /**
@@ -333,7 +334,52 @@ public class DateFormat {
      * order returned here.
      */
     public static char[] getDateFormatOrder(Context context) {
-        return ICU.getDateFormatOrder(getDateFormatString(context));
+        return getDateFormatOrder(getDateFormatString(context));
+    }
+
+    /**
+     * @hide Used by internal framework class {@link android.widget.DatePickerSpinnerDelegate}.
+     */
+    public static char[] getDateFormatOrder(String pattern) {
+        char[] result = new char[3];
+        int resultIndex = 0;
+        boolean sawDay = false;
+        boolean sawMonth = false;
+        boolean sawYear = false;
+
+        for (int i = 0; i < pattern.length(); ++i) {
+            char ch = pattern.charAt(i);
+            if (ch == 'd' || ch == 'L' || ch == 'M' || ch == 'y') {
+                if (ch == 'd' && !sawDay) {
+                    result[resultIndex++] = 'd';
+                    sawDay = true;
+                } else if ((ch == 'L' || ch == 'M') && !sawMonth) {
+                    result[resultIndex++] = 'M';
+                    sawMonth = true;
+                } else if ((ch == 'y') && !sawYear) {
+                    result[resultIndex++] = 'y';
+                    sawYear = true;
+                }
+            } else if (ch == 'G') {
+                // Ignore the era specifier, if present.
+            } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+                throw new IllegalArgumentException("Bad pattern character '" + ch + "' in "
+                    + pattern);
+            } else if (ch == '\'') {
+                if (i < pattern.length() - 1 && pattern.charAt(i + 1) == '\'') {
+                    ++i;
+                } else {
+                    i = pattern.indexOf('\'', i + 1);
+                    if (i == -1) {
+                        throw new IllegalArgumentException("Bad quoting in " + pattern);
+                    }
+                    ++i;
+                }
+            } else {
+                // Ignore spaces and punctuation.
+            }
+        }
+        return result;
     }
 
     private static String getDateFormatString(Context context) {
