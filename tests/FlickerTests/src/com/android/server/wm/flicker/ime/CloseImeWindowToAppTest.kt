@@ -16,14 +16,19 @@
 
 package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
+import android.view.Surface
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.LayersTraceSubject
 import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WmTraceSubject
+import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,49 +43,51 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class CloseImeWindowToAppTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        testApp = ImeAppHelper(instrumentation)
-    }
-
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.editTextLoseFocusToApp(testApp as ImeAppHelper,
-                instrumentation, uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
-    @FlakyTest
-    @Test
-    open fun checkVisibility_imeLayerBecomesInvisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer(IME_WINDOW_TITLE)
-                    .then()
-                    .hidesLayer(IME_WINDOW_TITLE)
-                    .forAllEntries()
-        }
-    }
+    rotationName: String,
+    rotation: Int
+) : NonRotationTestBase(rotationName, rotation) {
+    open val testApp = ImeAppHelper(instrumentation)
 
     @Test
-    open fun checkVisibility_imeAppLayerIsAlwaysVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer(testApp.getPackage())
-                    .forAllEntries()
-        }
-    }
+    open fun test() {
+        flicker(instrumentation) {
+            withTag { buildTestTag("imeToApp", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                eachRun {
+                    device.wakeUpAndGoToHomeScreen()
+                    this.setRotation(rotation)
+                    testApp.open()
+                    testApp.openIME(device)
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+            }
+            transitions {
+                device.pressBack()
+                device.waitForIdle()
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+                    imeAppWindowIsAlwaysVisible(testApp)
+                }
 
-    @Test
-    open fun checkVisibility_imeAppWindowIsAlwaysVisible() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAppWindowOnTop(testApp.getPackage())
-                    .forAllEntries()
+                layersTrace {
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible()
+                    noUncoveredRegions(rotation)
+                    navBarLayerRotatesAndScales(rotation)
+                    statusBarLayerRotatesScales(rotation)
+                    imeLayerBecomesInvisible(enabled = false)
+                    imeAppLayerIsAlwaysVisible(testApp)
+                }
+            }
         }
-    }
-
-    companion object {
-        const val IME_WINDOW_TITLE = "InputMethod"
     }
 }

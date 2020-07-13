@@ -27,10 +27,10 @@ class PipAppHelper(instr: Instrumentation) : FlickerAppHelper(instr, "PipApp") {
         Assert.assertNotNull("Pip button not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)", enterPipButton)
         enterPipButton.click()
-        AutomationUtils.hasPipWindow(device)
+        device.hasPipWindow()
     }
 
     fun closePipWindow(device: UiDevice) {
-        AutomationUtils.closePipWindow(device)
+        device.closePipWindow()
     }
 }

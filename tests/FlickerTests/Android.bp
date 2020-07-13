@@ -24,6 +24,7 @@ android_test {
     test_suites: ["device-tests"],
     libs: ["android.test.runner"],
     static_libs: [
+        "androidx.test.ext.junit",
         "flickertestapplib",
         "flickerlib",
         "truth-prebuilt",

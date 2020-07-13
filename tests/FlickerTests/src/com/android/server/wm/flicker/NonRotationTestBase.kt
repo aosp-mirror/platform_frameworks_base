@@ -17,52 +17,20 @@
 package com.android.server.wm.flicker
 
 import android.view.Surface
-import androidx.test.filters.FlakyTest
-import org.junit.Test
 import org.junit.runners.Parameterized
 
 abstract class NonRotationTestBase(
-    beginRotationName: String,
-    protected val beginRotation: Int
+    protected val rotationName: String,
+    protected val rotation: Int
 ) : FlickerTestBase() {
-    @FlakyTest(bugId = 141361128)
-    @Test
-    fun checkCoveredRegion_noUncoveredRegions() {
-        val displayBounds = WindowUtils.getDisplayBounds(beginRotation)
-        checkResults {
-            LayersTraceSubject.assertThat(it).coversRegion(
-                    displayBounds).forAllEntries()
-        }
-    }
-
-    @FlakyTest(bugId = 141361128)
-    @Test
-    fun checkVisibility_navBarLayerIsAlwaysVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries()
-        }
-    }
-
-    @FlakyTest(bugId = 141361128)
-    @Test
-    fun checkVisibility_statusBarLayerIsAlwaysVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer(STATUS_BAR_WINDOW_TITLE).forAllEntries()
-        }
-    }
-
     companion object {
+        const val SCREENSHOT_LAYER = "RotationLayer"
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val supportedRotations = intArrayOf(Surface.ROTATION_0, Surface.ROTATION_90)
-            val params: MutableCollection<Array<Any>> = ArrayList()
-            for (begin in supportedRotations) {
-                params.add(arrayOf(Surface.rotationToString(begin), begin))
-            }
-            return params
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }

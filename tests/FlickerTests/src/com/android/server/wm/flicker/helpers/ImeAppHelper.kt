@@ -29,12 +29,18 @@ open class ImeAppHelper(
     open fun openIME(device: UiDevice) {
         val editText = device.wait(
                 Until.findObject(By.res(getPackage(), "plain_text_input")),
-                AutomationUtils.FIND_TIMEOUT)
+                FIND_TIMEOUT)
         Assert.assertNotNull("Text field not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)", editText)
         editText.click()
-        if (!AutomationUtils.waitForIME(device)) {
+        if (!device.waitForIME()) {
             Assert.fail("IME did not appear")
         }
+    }
+
+    open fun closeIME(device: UiDevice) {
+        device.pressBack()
+        // Using only the AccessibilityInfo it is not possible to identify if the IME is active
+        device.waitForIdle(1000)
     }
 }

@@ -16,13 +16,19 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.view.Surface
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.LayersTraceSubject
 import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WmTraceSubject
+import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,38 +43,58 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenImeWindowTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        testApp = ImeAppHelper(instrumentation)
-    }
-
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.editTextSetFocus(testApp as ImeAppHelper,
-                instrumentation, uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
+    rotationName: String,
+    rotation: Int
+) : NonRotationTestBase(rotationName, rotation) {
     @Test
-    fun checkVisibility_imeWindowBecomesVisible() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .skipUntilFirstAssertion()
-                    .hidesNonAppWindow(IME_WINDOW_TITLE)
-                    .then()
-                    .showsNonAppWindow(IME_WINDOW_TITLE)
-                    .forAllEntries()
-        }
-    }
+    fun test() {
+        val testApp = ImeAppHelper(instrumentation)
 
-    @Test
-    fun checkVisibility_imeLayerBecomesVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .hidesLayer(IME_WINDOW_TITLE)
-                    .then()
-                    .showsLayer(IME_WINDOW_TITLE)
-                    .forAllEntries()
+        flicker(instrumentation) {
+            withTag { buildTestTag("openIme", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                test {
+                    device.wakeUpAndGoToHomeScreen()
+                    this.setRotation(rotation)
+                    testApp.open()
+                }
+            }
+            transitions {
+                testApp.openIME(device)
+            }
+            teardown {
+                eachRun {
+                    testApp.closeIME(device)
+                }
+                test {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+
+                    all("imeWindowBecomesVisible") {
+                        this.skipUntilFirstAssertion()
+                            .hidesNonAppWindow(IME_WINDOW_TITLE)
+                            .then()
+                            .showsNonAppWindow(IME_WINDOW_TITLE)
+                    }
+                }
+
+                layersTrace {
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible()
+                    noUncoveredRegions(rotation)
+                    navBarLayerRotatesAndScales(rotation)
+                    statusBarLayerRotatesScales(rotation)
+
+                    imeLayerBecomesVisible()
+                }
+            }
         }
     }
 
