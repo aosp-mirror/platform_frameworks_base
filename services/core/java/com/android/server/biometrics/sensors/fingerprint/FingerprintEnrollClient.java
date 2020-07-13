@@ -55,26 +55,6 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         mUdfpsOverlayController = udfpsOverlayController;
     }
 
-    private void showUdfpsOverlay() {
-        if (mUdfpsOverlayController != null) {
-            try {
-                mUdfpsOverlayController.showUdfpsOverlay();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
-            }
-        }
-    }
-
-    private void hideUdfpsOverlay() {
-        if (mUdfpsOverlayController != null) {
-            try {
-                mUdfpsOverlayController.hideUdfpsOverlay();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
-            }
-        }
-    }
-
     @Override
     protected boolean hasReachedEnrollmentLimit() {
         final int limit = getContext().getResources().getInteger(
@@ -90,7 +70,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     @Override
     protected void startHalOperation() {
-        showUdfpsOverlay();
+        UdfpsHelper.showUdfpsOverlay(mUdfpsOverlayController);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
@@ -98,14 +78,14 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            hideUdfpsOverlay();
+            UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
             mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
-        hideUdfpsOverlay();
+        UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
         try {
             getFreshDaemon().cancel();
         } catch (RemoteException e) {

@@ -19,6 +19,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
+import android.hardware.face.FaceSensorProperties;
 import android.view.Surface;
 
 /**
@@ -30,6 +31,10 @@ interface IFaceService {
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long operationId, int userid, IFaceServiceReceiver receiver,
             String opPackageName);
+
+    // Uses the face hardware to detect for the presence of a face, without giving details
+    // about accept/reject/lockout.
+    void detectFace(IBinder token, int userId, IFaceServiceReceiver receiver, String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
@@ -45,6 +50,9 @@ interface IFaceService {
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
+
+    // Cancel face detection
+    void cancelFaceDetect(IBinder token, String opPackageName);
 
     // Same as above, with extra arguments.
     void cancelAuthenticationFromService(IBinder token, String opPackageName,
@@ -79,6 +87,9 @@ interface IFaceService {
 
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
+
+    // Retrieve static sensor properties
+    FaceSensorProperties getSensorProperties(String opPackageName);
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int userId);

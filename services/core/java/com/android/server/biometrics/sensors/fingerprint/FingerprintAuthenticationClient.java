@@ -66,26 +66,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         mUdfpsOverlayController = udfpsOverlayController;
     }
 
-    private void showUdfpsOverlay() {
-        if (mUdfpsOverlayController != null) {
-            try {
-                mUdfpsOverlayController.showUdfpsOverlay();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
-            }
-        }
-    }
-
-    private void hideUdfpsOverlay() {
-        if (mUdfpsOverlayController != null) {
-            try {
-                mUdfpsOverlayController.hideUdfpsOverlay();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
-            }
-        }
-    }
-
     @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
@@ -98,7 +78,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
         if (authenticated) {
             resetFailedAttempts(getTargetUserId());
-            hideUdfpsOverlay();
+            UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
             mFinishCallback.onClientFinished(this, true /* success */);
         } else {
             final @LockoutTracker.LockoutMode int lockoutMode =
@@ -111,7 +91,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                 // Send the error, but do not invoke the FinishCallback yet. Since lockout is not
                 // controlled by the HAL, the framework must stop the sensor before finishing the
                 // client.
-                hideUdfpsOverlay();
+                UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
                 onErrorInternal(errorCode, 0 /* vendorCode */, false /* finish */);
                 cancel();
             }
@@ -130,7 +110,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     @Override
     protected void startHalOperation() {
-        showUdfpsOverlay();
+        UdfpsHelper.showUdfpsOverlay(mUdfpsOverlayController);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().authenticate(mOperationId, getTargetUserId());
@@ -138,14 +118,14 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            hideUdfpsOverlay();
+            UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
             mFinishCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
-        hideUdfpsOverlay();
+        UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
         try {
             getFreshDaemon().cancel();
         } catch (RemoteException e) {

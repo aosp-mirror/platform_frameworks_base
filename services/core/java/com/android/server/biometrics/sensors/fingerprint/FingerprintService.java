@@ -44,10 +44,12 @@ import android.os.NativeHandle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.Surface;
 
 import com.android.internal.util.DumpUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -71,6 +73,7 @@ public class FingerprintService extends SystemService {
     private final AppOpsManager mAppOps;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
+    private final LockPatternUtils mLockPatternUtils;
     private Fingerprint21 mFingerprint21;
 
     /**
@@ -108,7 +111,7 @@ public class FingerprintService extends SystemService {
         @Override // Binder call
         public void authenticate(final IBinder token, final long operationId, final int userId,
                 final IFingerprintServiceReceiver receiver, final String opPackageName,
-                Surface surface) {
+                final Surface surface) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -116,6 +119,15 @@ public class FingerprintService extends SystemService {
             if (!canUseFingerprint(opPackageName, true /* requireForeground */, callingUid,
                     callingPid, callingUserId)) {
                 Slog.w(TAG, "Authenticate rejecting package: " + opPackageName);
+                return;
+            }
+
+            if (Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)
+                    && Utils.isKeyguard(getContext(), opPackageName)) {
+                // If this happens, something in KeyguardUpdateMonitor is wrong.
+                // SafetyNet for b/79776455
+                EventLog.writeEvent(0x534e4554, "79776455");
+                Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
                 return;
             }
 
@@ -127,6 +139,28 @@ public class FingerprintService extends SystemService {
             mFingerprint21.scheduleAuthenticate(token, operationId, userId, 0 /* cookie */,
                     new ClientMonitorCallbackConverter(receiver), opPackageName, surface,
                     restricted, statsClient);
+        }
+
+        @Override
+        public void detectFingerprint(final IBinder token, final int userId,
+                final IFingerprintServiceReceiver receiver, final String opPackageName,
+                final Surface surface) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (!Utils.isKeyguard(getContext(), opPackageName)) {
+                Slog.w(TAG, "detectFingerprint called from non-sysui package: " + opPackageName);
+                return;
+            }
+
+            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+                // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
+                // ever be invoked when the user is encrypted or lockdown.
+                Slog.e(TAG, "detectFingerprint invoked when user is not encrypted or lockdown");
+                return;
+            }
+
+            mFingerprint21.scheduleFingerDetect(token, userId,
+                    new ClientMonitorCallbackConverter(receiver), opPackageName, surface,
+                    BiometricsProtoEnums.CLIENT_KEYGUARD);
         }
 
         @Override // Binder call
@@ -161,6 +195,20 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
+            mFingerprint21.cancelAuthentication(token);
+        }
+
+        @Override // Binder call
+        public void cancelFingerprintDetect(final IBinder token, final String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (!Utils.isKeyguard(getContext(), opPackageName)) {
+                Slog.w(TAG, "cancelFingerprintDetect called from non-sysui package: "
+                        + opPackageName);
+                return;
+            }
+
+            // For IBiometricsFingerprint2.1, cancelling fingerprint detect is the same as
+            // cancelling authentication.
             mFingerprint21.cancelAuthentication(token);
         }
 
@@ -214,7 +262,7 @@ public class FingerprintService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mFingerprint21 == null) {
-                    Slog.e(TAG, "No HAL");
+                    Slog.e(TAG, "No HAL, caller: " + opPackageName);
                     return false;
                 }
                 return mFingerprint21.isHardwareDetected();
@@ -334,6 +382,7 @@ public class FingerprintService extends SystemService {
         mAppOps = context.getSystemService(AppOpsManager.class);
         mGestureAvailabilityDispatcher = new GestureAvailabilityDispatcher();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     @Override

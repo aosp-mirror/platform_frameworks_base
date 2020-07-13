@@ -19,6 +19,9 @@ package com.android.server.biometrics;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.server.biometrics.PreAuthInfo.AUTHENTICATOR_OK;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_DISABLED_BY_DEVICE_POLICY;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_HARDWARE_NOT_DETECTED;
@@ -31,6 +34,7 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -53,6 +57,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.biometrics.sensors.ClientMonitor;
 
 public class Utils {
@@ -400,5 +405,18 @@ public class Utils {
 
     public static String getClientName(@Nullable ClientMonitor<?> client) {
         return client != null ? client.getClass().getSimpleName() : "null";
+    }
+
+    private static boolean containsFlag(int haystack, int needle) {
+        return (haystack & needle) != 0;
+    }
+
+    public static boolean isUserEncryptedOrLockdown(@NonNull LockPatternUtils lpu, int user) {
+        final int strongAuth = lpu.getStrongAuthForUser(user);
+        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        final boolean isLockDown = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        Slog.d(TAG, "isEncrypted: " + isEncrypted + " isLockdown: " + isLockDown);
+        return isEncrypted || isLockDown;
     }
 }

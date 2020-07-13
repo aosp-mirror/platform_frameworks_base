@@ -35,6 +35,11 @@ interface IFingerprintService {
     void authenticate(IBinder token, long operationId, int userId,
             IFingerprintServiceReceiver receiver, String opPackageName, in Surface surface);
 
+    // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
+    // about accept/reject/lockout.
+    void detectFingerprint(IBinder token, int userId, IFingerprintServiceReceiver receiver,
+            String opPackageName, in Surface surface);
+
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
@@ -49,6 +54,9 @@ interface IFingerprintService {
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
+
+    // Cancel finger detection
+    void cancelFingerprintDetect(IBinder token, String opPackageName);
 
     // Same as above, except this is protected by the MANAGE_BIOMETRIC signature permission. Takes
     // an additional uid, pid, userid.

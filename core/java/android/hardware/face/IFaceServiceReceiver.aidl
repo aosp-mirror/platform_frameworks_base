@@ -25,6 +25,7 @@ oneway interface IFaceServiceReceiver {
     void onEnrollResult(in Face face, int remaining);
     void onAcquired(int acquiredInfo, int vendorCode);
     void onAuthenticationSucceeded(in Face face, int userId, boolean isStrongBiometric);
+    void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric);
     void onAuthenticationFailed();
     void onError(int error, int vendorCode);
     void onRemoved(in Face face, int remaining);
