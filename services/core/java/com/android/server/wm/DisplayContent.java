@@ -3538,9 +3538,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     InsetsControlTarget getImeFallback() {
         // host is in non-default display that doesn't support system decor, default to
         // default display's StatusBar to control IME (when available), else let system control it.
-        WindowState statusBar = 
-                mWmService.getDefaultDisplayContentLocked().getDisplayPolicy().getStatusBar();
-        return statusBar != null ? statusBar : mRemoteInsetsControlTarget;
+        final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
+        WindowState statusBar = defaultDc.getDisplayPolicy().getStatusBar();
+        return statusBar != null ? statusBar : defaultDc.mRemoteInsetsControlTarget;
     }
 
     boolean canShowIme() {
@@ -3600,7 +3600,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     @VisibleForTesting
     InsetsControlTarget computeImeControlTarget() {
-        if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null) {
+        if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null
+                || (mInputMethodInputTarget != null
+                        && getImeHostOrFallback(mInputMethodInputTarget.getWindow())
+                                == mRemoteInsetsControlTarget)) {
             return mRemoteInsetsControlTarget;
         } else {
             // Now, a special case -- if the last target's window is in the process of exiting, but
