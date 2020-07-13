@@ -2297,10 +2297,6 @@ android.hardware.camera2.impl.CameraMetadataNative$Key
 android.hardware.camera2.impl.CameraMetadataNative
 android.hardware.camera2.impl.GetCommand
 android.hardware.camera2.impl.SetCommand
-android.hardware.camera2.legacy.LegacyCameraDevice
-android.hardware.camera2.legacy.LegacyExceptionUtils$BufferQueueAbandonedException
-android.hardware.camera2.legacy.LegacyMetadataMapper
-android.hardware.camera2.legacy.PerfMeasurement
 android.hardware.camera2.marshal.MarshalHelpers
 android.hardware.camera2.marshal.MarshalQueryable
 android.hardware.camera2.marshal.MarshalRegistry$MarshalToken
