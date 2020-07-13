@@ -158,6 +158,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mActivity.removeImmediately();
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     @FlakyTest(bugId = 131005232)
     public void testLandscapeSeascapeRotationByApp() {
@@ -188,6 +189,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         appWindow.removeImmediately();
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testLandscapeSeascapeRotationByPolicy() {
         // This instance has been spied in {@link TestDisplayContent}.
@@ -295,6 +297,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mWm.mDisplayFrozen = false;
     }
 
+    @UseTestDisplay
     @Test
     public void testRespectTopFullscreenOrientation() {
         final Configuration displayConfig = mActivity.mDisplayContent.getConfiguration();
@@ -316,6 +319,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, activityConfig.orientation);
     }
 
+    @UseTestDisplay
     @Test
     public void testReportOrientationChange() {
         mActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
@@ -343,7 +347,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows
-        final ActivityRecord appToken = mAppWindow.mActivityRecord;
+        final ActivityRecord appToken = createIsolatedTestActivityRecord();
         for (int i = 0; i < 1000; i++) {
             appToken.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,

@@ -39,11 +39,11 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.mockito.Mockito.mock;
 
-import android.content.Context;
+import android.annotation.IntDef;
 import android.content.Intent;
+import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IDisplayWindowInsetsController;
@@ -54,23 +54,36 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.AttributeCache;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.runner.Description;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /** Common base class for window manager unit test classes. */
 class WindowTestsBase extends SystemServiceTestsBase {
-    private static final String TAG = WindowTestsBase.class.getSimpleName();
 
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
     private Session mMockSession;
     static int sNextStackId = 1000;
 
-    /** Non-default display. */
-    DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
+    DisplayContent mDefaultDisplay;
+
+    /**
+     * It is {@link #mDefaultDisplay} by default. If the test class or method is annotated with
+     * {@link UseTestDisplay}, it will be an additional display.
+     */
+    DisplayContent mDisplayContent;
+
+    // The following fields are only available depending on the usage of annotation UseTestDisplay.
     WindowState mWallpaperWindow;
     WindowState mImeWindow;
     WindowState mImeDialogWindow;
@@ -97,48 +110,82 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mWm = mSystemServicesTestRule.getWindowManagerService();
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
+        mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
         mTransaction = mSystemServicesTestRule.mTransaction;
         mMockSession = mock(Session.class);
-        final Context context = getInstrumentation().getTargetContext();
-        // If @Before throws an exception, the error isn't logged. This will make sure any failures
-        // in the set up are clear. This can be removed when b/37850063 is fixed.
-        try {
-            beforeCreateDisplay();
 
-            context.getDisplay().getDisplayInfo(mDisplayInfo);
-            mDisplayContent = createNewDisplay(true /* supportIme */);
+        getInstrumentation().getTargetContext().getSystemService(DisplayManager.class)
+                .getDisplay(Display.DEFAULT_DISPLAY).getDisplayInfo(mDisplayInfo);
 
-            // Set-up some common windows.
-            mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
-            mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
-            mDisplayContent.mInputMethodWindow = mImeWindow;
-            mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG,
-                    "mImeDialogWindow");
-            mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
-            mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
-                    "mNotificationShadeWindow");
-            mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
-            mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER,
-                    "mDockedDividerWindow");
-            mAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
-            mChildAppWindowAbove = createCommonWindow(mAppWindow,
-                    TYPE_APPLICATION_ATTACHED_DIALOG,
-                    "mChildAppWindowAbove");
-            mChildAppWindowBelow = createCommonWindow(mAppWindow,
-                    TYPE_APPLICATION_MEDIA_OVERLAY,
-                    "mChildAppWindowBelow");
-            mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
-
-            // Adding a display will cause freezing the display. Make sure to wait until it's
-            // unfrozen to not run into race conditions with the tests.
-            waitUntilHandlersIdle();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to set up test", e);
-            throw e;
+        // Only create an additional test display for annotated test class/method because it may
+        // significantly increase the execution time.
+        final Description description = mSystemServicesTestRule.getDescription();
+        UseTestDisplay testDisplayAnnotation = description.getAnnotation(UseTestDisplay.class);
+        if (testDisplayAnnotation == null) {
+            testDisplayAnnotation = description.getTestClass().getAnnotation(UseTestDisplay.class);
+        }
+        if (testDisplayAnnotation != null) {
+            createTestDisplay(testDisplayAnnotation);
+        } else {
+            mDisplayContent = mDefaultDisplay;
         }
     }
 
-    void beforeCreateDisplay() {
+    private void createTestDisplay(UseTestDisplay annotation) {
+        beforeCreateTestDisplay();
+        mDisplayContent = createNewDisplay(true /* supportIme */);
+
+        final boolean addAll = annotation.addAllCommonWindows();
+        final @CommonTypes int[] requestedWindows = annotation.addWindows();
+
+        if (addAll || ArrayUtils.contains(requestedWindows, W_WALLPAPER)) {
+            mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
+        }
+        if (addAll || ArrayUtils.contains(requestedWindows, W_INPUT_METHOD)) {
+            mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
+            mDisplayContent.mInputMethodWindow = mImeWindow;
+        }
+        if (addAll || ArrayUtils.contains(requestedWindows, W_INPUT_METHOD_DIALOG)) {
+            mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG,
+                    "mImeDialogWindow");
+        }
+        if (addAll || ArrayUtils.contains(requestedWindows, W_STATUS_BAR)) {
+            mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
+        }
+        if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
+            mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
+                    "mNotificationShadeWindow");
+        }
+        if (addAll || ArrayUtils.contains(requestedWindows, W_NAVIGATION_BAR)) {
+            mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
+        }
+        if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
+            mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER,
+                    "mDockedDividerWindow");
+        }
+        final boolean addAboveApp = ArrayUtils.contains(requestedWindows, W_ABOVE_ACTIVITY);
+        final boolean addBelowApp = ArrayUtils.contains(requestedWindows, W_BELOW_ACTIVITY);
+        if (addAll || addAboveApp || addBelowApp
+                || ArrayUtils.contains(requestedWindows, W_ACTIVITY)) {
+            mAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
+        }
+        if (addAll || addAboveApp) {
+            mChildAppWindowAbove = createCommonWindow(mAppWindow, TYPE_APPLICATION_ATTACHED_DIALOG,
+                    "mChildAppWindowAbove");
+        }
+        if (addAll || addBelowApp) {
+            mChildAppWindowBelow = createCommonWindow(mAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
+                    "mChildAppWindowBelow");
+        }
+
+        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
+
+        // Adding a display will cause freezing the display. Make sure to wait until it's
+        // unfrozen to not run into race conditions with the tests.
+        waitUntilHandlersIdle();
+    }
+
+    void beforeCreateTestDisplay() {
         // Called before display is created.
     }
 
@@ -391,5 +438,67 @@ class WindowTestsBase extends SystemServiceTestsBase {
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
     void removeGlobalMinSizeRestriction() {
         mWm.mAtmService.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
+    }
+
+    /**
+     * Avoids rotating screen disturbed by some conditions. It is usually used for the default
+     * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).
+     *
+     * @see DisplayRotation#updateRotationUnchecked
+     */
+    void unblockDisplayRotation(DisplayContent dc) {
+        mWm.stopFreezingDisplayLocked();
+        // The rotation animation won't actually play, it needs to be cleared manually.
+        dc.setRotationAnimation(null);
+    }
+
+    // The window definition for UseTestDisplay#addWindows. The test can declare to add only
+    // necessary windows, that avoids adding unnecessary overhead of unused windows.
+    static final int W_NOTIFICATION_SHADE = TYPE_NOTIFICATION_SHADE;
+    static final int W_STATUS_BAR = TYPE_STATUS_BAR;
+    static final int W_NAVIGATION_BAR = TYPE_NAVIGATION_BAR;
+    static final int W_INPUT_METHOD_DIALOG = TYPE_INPUT_METHOD_DIALOG;
+    static final int W_INPUT_METHOD = TYPE_INPUT_METHOD;
+    static final int W_DOCK_DIVIDER = TYPE_DOCK_DIVIDER;
+    static final int W_ABOVE_ACTIVITY = TYPE_APPLICATION_ATTACHED_DIALOG;
+    static final int W_ACTIVITY = TYPE_BASE_APPLICATION;
+    static final int W_BELOW_ACTIVITY = TYPE_APPLICATION_MEDIA_OVERLAY;
+    static final int W_WALLPAPER = TYPE_WALLPAPER;
+
+    /** The common window types supported by {@link UseTestDisplay}. */
+    @Retention(RetentionPolicy.RUNTIME)
+    @IntDef(value = {
+            W_NOTIFICATION_SHADE,
+            W_STATUS_BAR,
+            W_NAVIGATION_BAR,
+            W_INPUT_METHOD_DIALOG,
+            W_INPUT_METHOD,
+            W_DOCK_DIVIDER,
+            W_ABOVE_ACTIVITY,
+            W_ACTIVITY,
+            W_BELOW_ACTIVITY,
+            W_WALLPAPER,
+    })
+    @interface CommonTypes {
+    }
+
+    /**
+     * The annotation for class and method (higher priority) to create a non-default display that
+     * will be assigned to {@link #mDisplayContent}. It is used if the test needs
+     * <ul>
+     * <li>Pure empty display.</li>
+     * <li>Configured common windows.</li>
+     * <li>Independent and customizable orientation.</li>
+     * <li>Cross display operation.</li>
+     * </ul>
+     *
+     * @see TestDisplayContent
+     * @see #createTestDisplay
+     **/
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface UseTestDisplay {
+        boolean addAllCommonWindows() default false;
+        @CommonTypes int[] addWindows() default {};
     }
 }
