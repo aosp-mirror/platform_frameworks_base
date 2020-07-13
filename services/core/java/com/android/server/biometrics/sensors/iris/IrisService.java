@@ -18,17 +18,12 @@ package com.android.server.biometrics.sensors.iris;
 
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
+import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.iris.IIrisService;
 
-import com.android.server.biometrics.sensors.BiometricServiceBase;
-import com.android.server.biometrics.sensors.BiometricUtils;
-import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
-
-import java.util.List;
+import com.android.server.SystemService;
+import com.android.server.biometrics.Utils;
 
 /**
  * A service to manage multiple clients that want to access the Iris HAL API.
@@ -36,11 +31,9 @@ import java.util.List;
  * iris-related events.
  *
  * TODO: The vendor is expected to fill in the service. See
- * {@link FingerprintService}
- *
- * @hide
+ * {@link com.android.server.biometrics.sensors.face.FaceService}
  */
-public class IrisService extends BiometricServiceBase {
+public class IrisService extends SystemService {
 
     private static final String TAG = "IrisService";
 
@@ -50,77 +43,16 @@ public class IrisService extends BiometricServiceBase {
     private final class IrisServiceWrapper extends IIrisService.Stub {
         @Override // Binder call
         public void initializeConfiguration(int sensorId) {
-            checkPermission(USE_BIOMETRIC_INTERNAL);
-            initializeConfigurationInternal(sensorId);
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
         }
     }
 
-    /**
-     * Initializes the system service.
-     * <p>
-     * Subclasses must define a single argument constructor that accepts the context
-     * and passes it to super.
-     * </p>
-     *
-     * @param context The system server context.
-     */
-    public IrisService(Context context) {
+    public IrisService(@NonNull Context context) {
         super(context);
     }
 
     @Override
     public void onStart() {
-        super.onStart();
         publishBinderService(Context.IRIS_SERVICE, new IrisServiceWrapper());
-    }
-
-    @Override
-    protected void doTemplateCleanupForUser(int userId) {
-
-    }
-
-    @Override
-    protected String getTag() {
-        return TAG;
-    }
-
-    @Override
-    protected Object getDaemon() {
-        return null;
-    }
-
-    @Override
-    protected BiometricUtils getBiometricUtils() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasReachedEnrollmentLimit(int userId) {
-        return false;
-    }
-
-    @Override
-    protected void updateActiveGroup(int userId) {
-
-    }
-
-    @Override
-    protected boolean hasEnrolledBiometrics(int userId) {
-        return false;
-    }
-
-    @Override
-    protected String getManageBiometricPermission() {
-        return null;
-    }
-
-    @Override
-    protected List<? extends BiometricAuthenticator.Identifier> getEnrolledTemplates(int userId) {
-        return null;
-    }
-
-    @Override
-    protected int statsModality() {
-        return BiometricsProtoEnums.MODALITY_IRIS;
     }
 }

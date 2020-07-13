@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
@@ -41,7 +42,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
     private final boolean mIsStrongBiometric;
     private final boolean mRequireConfirmation;
     private final IActivityTaskManager mActivityTaskManager;
-    private final TaskStackListener mTaskStackListener;
+    @Nullable private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
 
@@ -56,7 +57,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
             int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            int statsModality, int statsClient, @NonNull TaskStackListener taskStackListener,
+            int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
@@ -133,10 +134,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
                     vibrateSuccess();
                 }
 
-                try {
-                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Could not unregister task stack listener", e);
+                if (mTaskStackListener != null) {
+                    try {
+                        mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Could not unregister task stack listener", e);
+                    }
                 }
 
                 final byte[] byteToken = new byte[hardwareAuthToken.size()];
@@ -221,10 +224,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
             return;
         }
 
-        try {
-            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not register task stack listener", e);
+        if (mTaskStackListener != null) {
+            try {
+                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Could not register task stack listener", e);
+            }
         }
 
         if (DEBUG) Slog.w(TAG, "Requesting auth for " + getOwnerString());
@@ -241,10 +246,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
             return;
         }
 
-        try {
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not unregister task stack listener", e);
+        if (mTaskStackListener != null) {
+            try {
+                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Could not unregister task stack listener", e);
+            }
         }
 
         if (DEBUG) Slog.w(TAG, "Requesting cancel for " + getOwnerString());
