@@ -48,8 +48,6 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -4931,20 +4929,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(passwordMetrics);
         dpm.reportPasswordChanged(userHandle);
 
-        // Drain ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED broadcasts as part of
-        // reportPasswordChanged()
-        // This broadcast should be sent 2-4 times:
-        // * Twice from calls to DevicePolicyManagerService.updatePasswordExpirationsLocked,
-        //   once for each affected user, in DevicePolicyManagerService.reportPasswordChanged.
-        // * Optionally, at most twice from calls to DevicePolicyManagerService.saveSettingsLocked
-        //   in DevicePolicyManagerService.reportPasswordChanged, once with the userId
-        //   the password change is relevant to and another with the credential owner of said
-        //   userId, if the password checkpoint value changes.
-        verify(mContext.spiedContext, atMost(4)).sendBroadcastAsUser(
-                MockUtils.checkIntentAction(
-                        DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(userHandle));
-        verify(mContext.spiedContext, atLeast(2)).sendBroadcastAsUser(
+        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
                 MockUtils.checkUserHandle(userHandle));

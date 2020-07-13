@@ -3570,6 +3570,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return new JournaledFile(new File(base), new File(base + ".tmp"));
     }
 
+    /**
+     * Persist modified values to disk by calling {@link #saveSettingsLocked} for each
+     * affected user ID.
+     */
+    @GuardedBy("getLockObject()")
+    private void saveSettingsForUsersLocked(Set<Integer> affectedUserIds) {
+        for (int userId : affectedUserIds) {
+            saveSettingsLocked(userId);
+        }
+    }
+
     private void saveSettingsLocked(int userHandle) {
         DevicePolicyData policy = getUserData(userHandle);
         JournaledFile journal = makeJournaledFile(userHandle);
@@ -4785,13 +4796,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Updates a flag that tells us whether the user's password currently satisfies the
-     * requirements set by all of the user's active admins. The flag is updated both in memory
-     * and persisted to disk by calling {@link #saveSettingsLocked}, for the value of the flag
-     * be the correct one upon boot.
-     * This should be called whenever the password or the admin policies have changed.
+     * requirements set by all of the user's active admins.
+     * This should be called whenever the password or the admin policies have changed. The caller
+     * is responsible for calling {@link #saveSettingsLocked} to persist the change.
+     *
+     * @return the set of user IDs that have been affected
      */
     @GuardedBy("getLockObject()")
-    private void updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
+    private Set<Integer> updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
+        final ArraySet<Integer> affectedUserIds = new ArraySet<>();
         final int credentialOwner = getCredentialOwner(userHandle, parent);
         DevicePolicyData policy = getUserData(credentialOwner);
         PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
@@ -4801,9 +4814,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     metrics, userHandle, parent);
             if (newCheckpoint != policy.mPasswordValidAtLastCheckpoint) {
                 policy.mPasswordValidAtLastCheckpoint = newCheckpoint;
-                saveSettingsLocked(credentialOwner);
+                affectedUserIds.add(credentialOwner);
             }
         }
+        return affectedUserIds;
     }
 
     /**
@@ -6175,7 +6189,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void removeCaApprovalsIfNeeded(int userId) {
+    private Set<Integer> removeCaApprovalsIfNeeded(int userId) {
+        final ArraySet<Integer> affectedUserIds = new ArraySet<>();
         for (UserInfo userInfo : mUserManager.getProfiles(userId)) {
             boolean isSecure = mLockPatternUtils.isSecure(userInfo.id);
             if (userInfo.isManagedProfile()){
@@ -6184,11 +6199,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!isSecure) {
                 synchronized (getLockObject()) {
                     getUserData(userInfo.id).mAcceptedCaCertificates.clear();
-                    saveSettingsLocked(userInfo.id);
+                    affectedUserIds.add(userInfo.id);
                 }
                 mCertificateMonitor.onCertificateApprovalsChanged(userId);
             }
         }
+        return affectedUserIds;
     }
 
     @Override
@@ -7458,42 +7474,45 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         DevicePolicyData policy = getUserData(userId);
+        final ArraySet<Integer> affectedUserIds = new ArraySet<>();
 
         synchronized (getLockObject()) {
             policy.mFailedPasswordAttempts = 0;
-            updatePasswordValidityCheckpointLocked(userId, /* parent */ false);
-            saveSettingsLocked(userId);
-            updatePasswordExpirationsLocked(userId);
+            affectedUserIds.add(userId);
+            affectedUserIds.addAll(updatePasswordValidityCheckpointLocked(
+                    userId, /* parent */ false));
+            affectedUserIds.addAll(updatePasswordExpirationsLocked(userId));
             setExpirationAlarmCheckLocked(mContext, userId, /* parent */ false);
 
             // Send a broadcast to each profile using this password as its primary unlock.
             sendAdminCommandForLockscreenPoliciesLocked(
                     DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userId);
+
+            affectedUserIds.addAll(removeCaApprovalsIfNeeded(userId));
+            saveSettingsForUsersLocked(affectedUserIds);
         }
-        removeCaApprovalsIfNeeded(userId);
     }
 
     /**
      * Called any time the device password is updated. Resets all password expiration clocks.
+     *
+     * @return the set of user IDs that have been affected
      */
-    private void updatePasswordExpirationsLocked(int userHandle) {
-        ArraySet<Integer> affectedUserIds = new ArraySet<Integer>();
+    private Set<Integer> updatePasswordExpirationsLocked(int userHandle) {
+        final ArraySet<Integer> affectedUserIds = new ArraySet<>();
         List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
                 userHandle, /* parent */ false);
-        final int N = admins.size();
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < admins.size(); i++) {
             ActiveAdmin admin = admins.get(i);
             if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
                 affectedUserIds.add(admin.getUserHandle().getIdentifier());
                 long timeout = admin.passwordExpirationTimeout;
-                long expiration = timeout > 0L ? (timeout + System.currentTimeMillis()) : 0L;
-                admin.passwordExpirationDate = expiration;
+                admin.passwordExpirationDate =
+                        timeout > 0L ? (timeout + System.currentTimeMillis()) : 0L;
             }
         }
-        for (int affectedUserId : affectedUserIds) {
-            saveSettingsLocked(affectedUserId);
-        }
+        return affectedUserIds;
     }
 
     @Override
