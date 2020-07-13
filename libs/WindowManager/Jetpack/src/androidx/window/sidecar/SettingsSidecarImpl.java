@@ -192,7 +192,7 @@ class SettingsSidecarImpl extends StubSidecar {
                 Rect featureRect = new Rect(left, top, right, bottom);
                 rotateRectToDisplayRotation(featureRect, displayId);
                 transformToWindowSpaceRect(featureRect, windowToken);
-                if (!featureRect.isEmpty()) {
+                if (isNotZero(featureRect)) {
                     SidecarDisplayFeature feature = new SidecarDisplayFeature();
                     feature.setRect(featureRect);
                     feature.setType(type);
@@ -205,6 +205,10 @@ class SettingsSidecarImpl extends StubSidecar {
             }
         }
         return features;
+    }
+
+    private static boolean isNotZero(Rect rect) {
+        return rect.height() > 0 || rect.width() > 0;
     }
 
     @Override
