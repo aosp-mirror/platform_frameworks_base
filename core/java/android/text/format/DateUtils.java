@@ -29,7 +29,6 @@ import com.android.internal.R;
 
 import libcore.icu.DateIntervalFormat;
 import libcore.icu.LocaleData;
-import libcore.icu.RelativeDateTimeFormatter;
 
 import java.io.IOException;
 import java.time.Instant;
