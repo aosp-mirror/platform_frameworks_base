@@ -110,6 +110,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
@@ -418,8 +419,8 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
-    public AppStandbyController(Context context, Looper looper) {
-        this(new Injector(context, looper));
+    public AppStandbyController(Context context) {
+        this(new Injector(context, JobSchedulerBackgroundThread.get().getLooper()));
     }
 
     AppStandbyController(Injector injector) {
