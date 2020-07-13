@@ -1621,8 +1621,6 @@ public class NotificationManagerService extends SystemService {
                 = Settings.Global.getUriFor(Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE);
         private final Uri NOTIFICATION_HISTORY_ENABLED
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
-        private final Uri NOTIFICATION_SHOW_MEDIA_ON_QUICK_SETTINGS_URI
-                = Settings.Global.getUriFor(Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS);
 
         SettingsObserver(Handler handler) {
             super(handler);
@@ -1639,8 +1637,6 @@ public class NotificationManagerService extends SystemService {
             resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_HISTORY_ENABLED,
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(NOTIFICATION_SHOW_MEDIA_ON_QUICK_SETTINGS_URI,
                     false, this, UserHandle.USER_ALL);
             update(null);
         }
@@ -1677,9 +1673,6 @@ public class NotificationManagerService extends SystemService {
                     mArchive.updateHistoryEnabled(userIds.get(i), Settings.Secure.getInt(resolver,
                             Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1);
                 }
-            }
-            if (uri == null || NOTIFICATION_SHOW_MEDIA_ON_QUICK_SETTINGS_URI.equals(uri)) {
-                mPreferencesHelper.updateMediaNotificationFilteringEnabled();
             }
         }
     }
