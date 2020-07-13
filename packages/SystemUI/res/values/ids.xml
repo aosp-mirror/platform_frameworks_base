@@ -92,6 +92,8 @@
 
     <item type="id" name="requires_remeasuring"/>
 
+    <item type="id" name="secondary_home_handle" />
+
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>
 

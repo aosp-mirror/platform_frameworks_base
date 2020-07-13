@@ -591,6 +591,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 .registerDisplayListener(this, new Handler(Looper.getMainLooper()));
 
         mOrientationHandle = new QuickswitchOrientedNavHandle(getContext());
+        mOrientationHandle.setId(R.id.secondary_home_handle);
 
         getBarTransitions().addDarkIntensityListener(mOrientationHandleIntensityListener);
         mOrientationParams = new WindowManager.LayoutParams(0, 0,
