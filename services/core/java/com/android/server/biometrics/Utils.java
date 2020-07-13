@@ -31,6 +31,7 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -52,6 +53,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.biometrics.sensors.ClientMonitor;
 
 public class Utils {
 
@@ -394,5 +396,9 @@ public class Utils {
         final String keyguardPackage = keyguardComponent != null
                 ? keyguardComponent.getPackageName() : null;
         return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
+    }
+
+    public static String getClientName(@Nullable ClientMonitor<?> client) {
+        return client != null ? client.getClass().getSimpleName() : "null";
     }
 }

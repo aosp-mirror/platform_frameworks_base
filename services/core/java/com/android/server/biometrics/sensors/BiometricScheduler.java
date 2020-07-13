@@ -28,7 +28,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityTracker;
+import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -37,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
@@ -133,7 +132,7 @@ public class BiometricScheduler {
         @Override
         public void run() {
             if (operation.state != Operation.STATE_FINISHED) {
-                Slog.e(tag, "[Watchdog] Running for: " + operation);
+                Slog.e(tag, "[Watchdog Triggered]: " + operation);
                 operation.clientMonitor.mFinishCallback
                         .onClientFinished(operation.clientMonitor, false /* success */);
             }
@@ -173,7 +172,7 @@ public class BiometricScheduler {
     }
 
     @NonNull private final String mBiometricTag;
-    @Nullable private final GestureAvailabilityTracker mGestureAvailabilityTracker;
+    @Nullable private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @NonNull private final IBiometricService mBiometricService;
     @NonNull private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull private final InternalFinishCallback mInternalFinishCallback;
@@ -195,6 +194,8 @@ public class BiometricScheduler {
                     return;
                 }
 
+                mCurrentOperation.state = Operation.STATE_FINISHED;
+
                 if (mCurrentOperation.clientFinishCallback != null) {
                     mCurrentOperation.clientFinishCallback.onClientFinished(clientMonitor, success);
                 }
@@ -206,12 +207,11 @@ public class BiometricScheduler {
                 }
 
                 Slog.d(getTag(), "[Finished] " + clientMonitor + ", success: " + success);
-                if (mGestureAvailabilityTracker != null) {
-                    mGestureAvailabilityTracker.markSensorActive(
+                if (mGestureAvailabilityDispatcher != null) {
+                    mGestureAvailabilityDispatcher.markSensorActive(
                             mCurrentOperation.clientMonitor.getSensorId(), false /* active */);
                 }
 
-                mCurrentOperation.state = Operation.STATE_FINISHED;
                 mCurrentOperation = null;
                 startNextOperationIfIdle();
             });
@@ -221,15 +221,15 @@ public class BiometricScheduler {
     /**
      * Creates a new scheduler.
      * @param tag for the specific instance of the scheduler. Should be unique.
-     * @param gestureAvailabilityTracker may be null if the sensor does not support gestures (such
-     *                                   as fingerprint swipe).
+     * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
+     *                                      (such as fingerprint swipe).
      */
     public BiometricScheduler(@NonNull String tag,
-            @Nullable GestureAvailabilityTracker gestureAvailabilityTracker) {
+            @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         mBiometricTag = tag;
         mInternalFinishCallback = new InternalFinishCallback();
-        mGestureAvailabilityTracker = gestureAvailabilityTracker;
-        mPendingOperations = new LinkedList<>();
+        mGestureAvailabilityDispatcher = gestureAvailabilityDispatcher;
+        mPendingOperations = new ArrayDeque<>();
         mBiometricService = IBiometricService.Stub.asInterface(
                 ServiceManager.getService(Context.BIOMETRIC_SERVICE));
         mCrashStates = new ArrayDeque<>();
@@ -268,9 +268,9 @@ public class BiometricScheduler {
             return;
         }
 
-        if (mGestureAvailabilityTracker != null
+        if (mGestureAvailabilityDispatcher != null
                 && mCurrentOperation.clientMonitor instanceof AcquisitionClient) {
-            mGestureAvailabilityTracker.markSensorActive(
+            mGestureAvailabilityDispatcher.markSensorActive(
                     mCurrentOperation.clientMonitor.getSensorId(),
                     true /* active */);
         }
@@ -297,15 +297,23 @@ public class BiometricScheduler {
      * Starts the {@link #mCurrentOperation} if
      * 1) its state is {@link Operation#STATE_WAITING_FOR_COOKIE} and
      * 2) its cookie matches this cookie
+     *
+     * This is currently only used by {@link com.android.server.biometrics.BiometricService}, which
+     * requests sensors to prepare for authentication with a cookie. Once sensor(s) are ready (e.g.
+     * the BiometricService client becomes the current client in the scheduler), the cookie is
+     * returned to BiometricService. Once BiometricService decides that authentication can start,
+     * it invokes this code path.
+     *
      * @param cookie of the operation to be started
      */
     public void startPreparedClient(int cookie) {
         if (mCurrentOperation == null) {
-            Slog.e(getTag(), "Current operation null");
+            Slog.e(getTag(), "Current operation is null");
             return;
         }
         if (mCurrentOperation.state != Operation.STATE_WAITING_FOR_COOKIE) {
-            Slog.e(getTag(), "Operation in wrong state: " + mCurrentOperation);
+            Slog.e(getTag(), "Operation is in the wrong state: " + mCurrentOperation
+                    + ", expected STATE_WAITING_FOR_COOKIE");
             return;
         }
         if (mCurrentOperation.clientMonitor.getCookie() != cookie) {
@@ -354,7 +362,8 @@ public class BiometricScheduler {
 
         // If the current operation is cancellable, start the cancellation process.
         if (mCurrentOperation != null && mCurrentOperation.clientMonitor instanceof Interruptable
-                && mCurrentOperation.state != Operation.STATE_STARTED_CANCELING) {
+                && mCurrentOperation.state == Operation.STATE_STARTED) {
+            Slog.d(getTag(), "[Cancelling Interruptable]: " + mCurrentOperation);
             cancelInternal(mCurrentOperation);
         }
 
