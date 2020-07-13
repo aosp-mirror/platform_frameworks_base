@@ -32,7 +32,10 @@ import static org.testng.Assert.assertTrue;
 
 import static java.lang.Float.NaN;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -298,6 +301,26 @@ public class WindowMagnificationManagerTest {
 
         mWindowMagnificationManager.requestConnection(false);
         assertFalse(mWindowMagnificationManager.isConnected());
+    }
+
+    @Test
+    public void requestConnection_registerAndUnregisterBroadcastReceiver() {
+        assertTrue(mWindowMagnificationManager.requestConnection(true));
+        verify(mContext).registerReceiver(any(BroadcastReceiver.class),  any(IntentFilter.class));
+
+        assertTrue(mWindowMagnificationManager.requestConnection(false));
+        verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
+    }
+
+    @Test
+    public void onReceiveScreenOff_removeMagnificationButtonAndDisableWindowMagnification()
+            throws RemoteException {
+        mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.mScreenStateReceiver.onReceive(mContext,
+                new Intent(Intent.ACTION_SCREEN_OFF));
+
+        verify(mMockConnection.getConnection()).removeMagnificationButton(TEST_DISPLAY);
+        verify(mMockConnection.getConnection()).disableWindowMagnification(TEST_DISPLAY);
     }
 
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {

@@ -23,7 +23,7 @@ import com.android.server.accessibility.BaseEventStreamTransformation;
  */
 public abstract class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
-    protected final MagnificationGestureHandler.ScaleChangedListener mListener;
+    protected final ScaleChangedListener mListener;
 
     protected MagnificationGestureHandler(ScaleChangedListener listener) {
         mListener = listener;
