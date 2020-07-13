@@ -77,6 +77,7 @@ import java.nio.charset.StandardCharsets;
  */
 @SmallTest
 @Presubmit
+@WindowTestsBase.UseTestDisplay
 @RunWith(WindowTestRunner.class)
 public class DisplayWindowSettingsTests extends WindowTestsBase {
 

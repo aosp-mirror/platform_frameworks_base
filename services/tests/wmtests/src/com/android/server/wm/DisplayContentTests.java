@@ -133,6 +133,7 @@ import java.util.List;
 @RunWith(WindowTestRunner.class)
 public class DisplayContentTests extends WindowTestsBase {
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testForAllWindows() {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
@@ -159,6 +160,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mNavBarWindow));
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testForAllWindows_WithAppImeTarget() {
         final WindowState imeAppTarget =
@@ -180,6 +182,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mNavBarWindow));
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testForAllWindows_WithChildWindowImeTarget() throws Exception {
         mDisplayContent.mInputMethodTarget = mChildAppWindowAbove;
@@ -197,6 +200,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mNavBarWindow));
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testForAllWindows_WithStatusBarImeTarget() throws Exception {
         mDisplayContent.mInputMethodTarget = mStatusBarWindow;
@@ -214,6 +218,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mNavBarWindow));
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testForAllWindows_WithNotificationShadeImeTarget() throws Exception {
         mDisplayContent.mInputMethodTarget = mNotificationShadeWindow;
@@ -231,6 +236,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mNavBarWindow));
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testForAllWindows_WithInBetweenWindowToken() {
         // This window is set-up to be z-ordered between some windows that go in the same token like
@@ -252,6 +258,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mNavBarWindow));
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testComputeImeTarget() {
         // Verify that an app window can be an ime target.
@@ -271,6 +278,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(childWin, imeTarget);
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
     @Test
     public void testComputeImeTarget_startingWindow() {
         ActivityRecord activity = createActivityRecord(mDisplayContent,
@@ -775,6 +783,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
     }
 
+    @UseTestDisplay
     @Test
     public void testClearLastFocusWhenReparentingFocusedWindow() {
         final DisplayContent defaultDisplay = mWm.getDefaultDisplayContentLocked();
@@ -808,6 +817,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
     }
 
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
     @Test
     public void testInputMethodTargetUpdateWhenSwitchingOnDisplays() {
         final DisplayContent newDisplay = createNewDisplay();
@@ -921,6 +931,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testComputeImeParent_app_notMatchParentBounds() {
         spyOn(mAppWindow.mActivityRecord);
@@ -978,6 +989,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNotEquals(dc.mInputMethodInputTarget, dc.computeImeControlTarget());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testComputeImeControlTarget_notMatchParentBounds() throws Exception {
         spyOn(mAppWindow.mActivityRecord);
@@ -1096,6 +1108,7 @@ public class DisplayContentTests extends WindowTestsBase {
         win.setHasSurface(false);
     }
 
+    @UseTestDisplay(addWindows = { W_ABOVE_ACTIVITY, W_ACTIVITY})
     @Test
     public void testRequestResizeForEmptyFrames() {
         final WindowState win = mChildAppWindowAbove;
@@ -1135,6 +1148,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 is(Configuration.ORIENTATION_PORTRAIT));
     }
 
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR })
     @Test
     public void testApplyTopFixedRotationTransform() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -1234,7 +1248,9 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testFinishFixedRotationNoAppTransitioningTask() {
-        final ActivityRecord app = mAppWindow.mActivityRecord;
+        unblockDisplayRotation(mDisplayContent);
+        final ActivityRecord app = createActivityRecord(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                 .setTask(task).build();
@@ -1255,6 +1271,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testRotateSeamlesslyWithFixedRotation() {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
@@ -1275,13 +1292,14 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testNoFixedRotationWithPip() {
+        final DisplayContent displayContent = mDefaultDisplay;
+        unblockDisplayRotation(displayContent);
         // Make resume-top really update the activity state.
         setBooted(mWm.mAtmService);
         // Speed up the test by a few seconds.
         mWm.mAtmService.deferWindowLayout();
         doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
 
-        final DisplayContent displayContent = mWm.mRoot.getDefaultDisplay();
         final Configuration displayConfig = displayContent.getConfiguration();
         final ActivityRecord pinnedActivity = createActivityRecord(displayContent,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
@@ -1324,11 +1342,13 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testRecentsNotRotatingWithFixedRotation() {
+        unblockDisplayRotation(mDisplayContent);
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-        doCallRealMethod().when(displayRotation).updateRotationUnchecked(anyBoolean());
         // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
         doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
 
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord recentsActivity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS);
         recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
@@ -1345,12 +1365,12 @@ public class DisplayContentTests extends WindowTestsBase {
         // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
         // switching activities in different orientations by quickstep gesture.
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        mDisplayContent.setFixedRotationLaunchingAppUnchecked(mAppWindow.mActivityRecord);
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(activity);
         displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
         assertTrue(displayRotation.updateRotationUnchecked(false));
 
         // The recents activity should not apply fixed rotation if the top activity is not opaque.
-        mDisplayContent.mFocusedApp = mAppWindow.mActivityRecord;
+        mDisplayContent.mFocusedApp = activity;
         doReturn(false).when(mDisplayContent.mFocusedApp).occludesParent();
         doReturn(ROTATION_90).when(mDisplayContent).rotationForActivityInDifferentOrientation(
                 eq(recentsActivity));

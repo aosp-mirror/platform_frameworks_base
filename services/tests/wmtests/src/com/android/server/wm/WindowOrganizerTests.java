@@ -521,6 +521,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
     }
 
+    @UseTestDisplay
     @Test
     public void testTaskInfoCallback() {
         final ArrayList<RunningTaskInfo> lastReportedTiles = new ArrayList<>();
@@ -584,6 +585,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(ACTIVITY_TYPE_UNDEFINED, lastReportedTiles.get(0).topActivityType);
     }
 
+    @UseTestDisplay
     @Test
     public void testHierarchyTransaction() {
         final ArrayMap<IBinder, RunningTaskInfo> lastReportedTiles = new ArrayMap<>();

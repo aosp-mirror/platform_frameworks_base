@@ -222,6 +222,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                         opaqueDarkNavBar, imeDrawLightNavBar, imeDrawLightNavBar));
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
@@ -320,6 +321,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
         return win;
     }
 
+    @UseTestDisplay(
+            addWindows = { W_ACTIVITY, W_STATUS_BAR, W_NAVIGATION_BAR, W_NOTIFICATION_SHADE })
     @Test
     public void testUpdateHideNavInputEventReceiver() {
         final InsetsPolicy insetsPolicy = mDisplayContent.getInsetsPolicy();
@@ -358,6 +361,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertNull(displayPolicy.mInputConsumer);
     }
 
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();

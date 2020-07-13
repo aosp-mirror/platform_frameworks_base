@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doCallRealMethod;
 
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
@@ -54,6 +55,14 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mAppTransitionController = new AppTransitionController(mWm, mDisplayContent);
+    }
+
+    @Override
+    ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode, int activityType) {
+        final ActivityRecord r = super.createActivityRecord(dc, windowingMode, activityType);
+        // Ensure that ActivityRecord#setOccludesParent takes effect.
+        doCallRealMethod().when(r).fillsParent();
+        return r;
     }
 
     @Test
@@ -191,6 +200,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_exitingBeforeTransition() {
+        // Create another non-empty task so the animation target won't promote to task display area.
+        WindowTestUtils.createTestActivityRecord(
+                mDisplayContent.getDefaultTaskDisplayArea().getOrCreateRootHomeTask());
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(stack);
         activity.setVisible(false);
