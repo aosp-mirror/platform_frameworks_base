@@ -143,12 +143,12 @@ public class UdfpsView extends View {
     void onFingerDown() {
         mIsFingerDown = true;
         mSensorPaint.setStyle(Paint.Style.FILL);
-        invalidate();
+        postInvalidate();
     }
 
     void onFingerUp() {
         mIsFingerDown = false;
         mSensorPaint.setStyle(Paint.Style.STROKE);
-        invalidate();
+        postInvalidate();
     }
 }
