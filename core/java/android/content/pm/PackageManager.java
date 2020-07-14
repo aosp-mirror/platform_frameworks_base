@@ -8179,7 +8179,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>
             sPackageInfoCache =
             new PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>(
-                    16, PermissionManager.CACHE_KEY_PACKAGE_INFO) {
+                    32, PermissionManager.CACHE_KEY_PACKAGE_INFO) {
                 @Override
                 protected PackageInfo recompute(PackageInfoQuery query) {
                     return getPackageInfoAsUserUncached(
