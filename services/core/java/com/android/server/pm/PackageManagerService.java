@@ -7161,8 +7161,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
-                        && shouldFilterApplicationLocked(
+                final boolean blockNormalResolution =
+                        !resolveForStart && !isTargetInstantApp && !isCallerInstantApp
+                                && shouldFilterApplicationLocked(
                                 getPackageSettingInternal(ai.applicationInfo.packageName,
                                         Process.SYSTEM_UID), filterCallingUid, userId);
                 if (!blockInstantResolution && !blockNormalResolution) {
@@ -7255,8 +7256,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final PackageSetting setting =
                         getPackageSettingInternal(pkgName, Process.SYSTEM_UID);
                 result = null;
-                if (setting != null && setting.pkg != null
-                        && !shouldFilterApplicationLocked(setting, filterCallingUid, userId)) {
+                if (setting != null && setting.pkg != null && (resolveForStart
+                        || !shouldFilterApplicationLocked(setting, filterCallingUid, userId))) {
                     result = filterIfNotSystemUser(mComponentResolver.queryActivities(
                             intent, resolvedType, flags, setting.pkg.getActivities(), userId),
                             userId);
