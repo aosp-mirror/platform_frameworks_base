@@ -19,6 +19,7 @@ package android.hardware.fingerprint;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import android.annotation.NonNull;
@@ -682,6 +683,75 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     public boolean hasEnrolledTemplates(int userId) {
         return hasEnrolledFingerprints(userId);
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean isUdfps() {
+        if (mService == null) {
+            Slog.w(TAG, "isUdfps: no fingerprint service");
+            return false;
+        }
+
+        try {
+            return mService.isUdfps();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void setUdfpsOverlayController(IUdfpsOverlayController controller) {
+        if (mService == null) {
+            Slog.w(TAG, "setUdfpsOverlayController: no fingerprint service");
+            return;
+        }
+
+        try {
+            mService.setUdfpsOverlayController(controller);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onFingerDown(int x, int y, float minor, float major) {
+        if (mService == null) {
+            Slog.w(TAG, "onFingerDown: no fingerprint service");
+            return;
+        }
+
+        try {
+            mService.onFingerDown(x, y, minor, major);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onFingerUp() {
+        if (mService == null) {
+            Slog.w(TAG, "onFingerDown: no fingerprint service");
+            return;
+        }
+
+        try {
+            mService.onFingerUp();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
