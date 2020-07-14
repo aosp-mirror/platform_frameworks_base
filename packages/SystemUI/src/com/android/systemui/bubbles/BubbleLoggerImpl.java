@@ -17,6 +17,7 @@
 package com.android.systemui.bubbles;
 
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.systemui.shared.system.SysUiStatsLog;
 
 /**
  * Implementation of UiEventLogger for logging bubble UI events.
@@ -63,5 +64,53 @@ public class BubbleLoggerImpl extends UiEventLoggerImpl implements BubbleLogger 
         } else if (r == BubbleController.DISMISS_USER_GESTURE) {
             log(b, Event.BUBBLE_OVERFLOW_ADD_USER_GESTURE);
         }
+    }
+
+    void logStackUiChanged(String packageName, int action, int bubbleCount, float normalX,
+            float normalY) {
+        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                packageName,
+                null /* notification channel */,
+                0 /* notification ID */,
+                0 /* bubble position */,
+                bubbleCount,
+                action,
+                normalX,
+                normalY,
+                false /* unread bubble */,
+                false /* on-going bubble */,
+                false /* isAppForeground (unused) */);
+    }
+
+    void logShowOverflow(String packageName, int action, int bubbleCount, float normalX,
+            float normalY) {
+        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                packageName,
+                BubbleOverflow.KEY  /* notification channel */,
+                0 /* notification ID */,
+                0 /* bubble position */,
+                bubbleCount,
+                action,
+                normalX,
+                normalY,
+                false /* unread bubble */,
+                false /* on-going bubble */,
+                false /* isAppForeground (unused) */);
+    }
+
+    void logBubbleUiChanged(Bubble bubble, String packageName, int action, int bubbleCount,
+            float normalX, float normalY, int index) {
+        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                packageName,
+                bubble.getChannelId() /* notification channel */,
+                bubble.getNotificationId() /* notification ID */,
+                index,
+                bubbleCount,
+                action,
+                normalX,
+                normalY,
+                bubble.showInShade() /* isUnread */,
+                false /* isOngoing (unused) */,
+                false /* isAppForeground (unused) */);
     }
 }
