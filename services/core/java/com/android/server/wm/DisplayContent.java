@@ -490,6 +490,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private ActivityRecord mFixedRotationLaunchingApp;
 
+    /** The delay to avoid toggling the animation quickly. */
+    private static final long FIXED_ROTATION_HIDE_ANIMATION_DEBOUNCE_DELAY_MS = 250;
     private FixedRotationAnimationController mFixedRotationAnimationController;
 
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
@@ -1524,10 +1526,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
         if (mFixedRotationLaunchingApp == null && r != null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
-            if (mFixedRotationAnimationController == null) {
-                mFixedRotationAnimationController = new FixedRotationAnimationController(this);
-                mFixedRotationAnimationController.hide();
-            }
+            startFixedRotationAnimation(
+                    // Delay the hide animation to avoid blinking by clicking navigation bar that
+                    // may toggle fixed rotation in a short time.
+                    r == mFixedRotationTransitionListener.mAnimatingRecents /* shouldDebounce */);
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
             finishFixedRotationAnimationIfPossible();
@@ -1623,6 +1625,32 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (rotation != ROTATION_UNDEFINED) {
             startFixedRotationTransform(activityRecord, rotation);
         }
+    }
+
+    /**
+     * Starts the hide animation for the windows which will be rotated seamlessly.
+     *
+     * @return {@code true} if the animation is executed right now.
+     */
+    private boolean startFixedRotationAnimation(boolean shouldDebounce) {
+        if (shouldDebounce) {
+            mWmService.mH.postDelayed(() -> {
+                synchronized (mWmService.mGlobalLock) {
+                    if (mFixedRotationLaunchingApp != null
+                            && startFixedRotationAnimation(false /* shouldDebounce */)) {
+                        // Apply the transaction so the animation leash can take effect immediately.
+                        getPendingTransaction().apply();
+                    }
+                }
+            }, FIXED_ROTATION_HIDE_ANIMATION_DEBOUNCE_DELAY_MS);
+            return false;
+        }
+        if (mFixedRotationAnimationController == null) {
+            mFixedRotationAnimationController = new FixedRotationAnimationController(this);
+            mFixedRotationAnimationController.hide();
+            return true;
+        }
+        return false;
     }
 
     /** Re-show the previously hidden windows if all seamless rotated windows are done. */
