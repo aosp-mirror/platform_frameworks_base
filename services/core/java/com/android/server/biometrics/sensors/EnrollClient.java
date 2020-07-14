@@ -35,11 +35,16 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
 
     protected final byte[] mHardwareAuthToken;
     protected final int mTimeoutSec;
-    private final BiometricUtils mBiometricUtils;
+    protected final BiometricUtils mBiometricUtils;
     private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
     private boolean mAlreadyCancelled;
+
+    /**
+     * @return true if the user has already enrolled the maximum number of templates.
+     */
+    protected abstract boolean hasReachedEnrollmentLimit();
 
     public EnrollClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
@@ -81,6 +86,12 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     @Override
     public void start(@NonNull FinishCallback finishCallback) {
         super.start(finishCallback);
+
+        if (hasReachedEnrollmentLimit()) {
+            Slog.e(TAG, "Reached enrollment limit");
+            finishCallback.onClientFinished(this, false /* success */);
+            return;
+        }
 
         mEnrollmentStartTimeMs = System.currentTimeMillis();
         startHalOperation();

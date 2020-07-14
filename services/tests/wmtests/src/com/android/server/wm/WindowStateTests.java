@@ -36,7 +36,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -417,10 +416,11 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_STATUS_BAR })
     @Test
     public void testVisibleWithInsetsProvider() {
-        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState statusBar = mStatusBarWindow;
+        final WindowState app = mAppWindow;
         statusBar.mHasSurface = true;
         assertTrue(statusBar.isVisible());
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
@@ -542,6 +542,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(window.isVisibleByPolicy());
     }
 
+    @UseTestDisplay(addWindows = { W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE })
     @Test
     public void testRequestDrawIfNeeded() {
         final WindowState startingApp = createWindow(null /* parent */,
@@ -567,6 +568,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(Arrays.asList(keyguardHostWindow, startingWindow), outWaitingForDrawn);
     }
 
+    @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testReportResizedWithRemoteException() {
         final WindowState win = mChildAppWindowAbove;
@@ -597,6 +599,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win.getOrientationChanging());
     }
 
+    @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testRequestResizeForBlastSync() {
         final WindowState win = mChildAppWindowAbove;
@@ -677,6 +680,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(win0.cantReceiveTouchInput());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testNeedsRelativeLayeringToIme_notAttached() {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
@@ -689,6 +693,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
 
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testNeedsRelativeLayeringToIme_startingWindow() {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,

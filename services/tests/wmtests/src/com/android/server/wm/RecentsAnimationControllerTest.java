@@ -92,7 +92,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Mock RecentsAnimationController.RecentsAnimationCallbacks mAnimationCallbacks;
     @Mock TaskSnapshot mMockTaskSnapshot;
     private RecentsAnimationController mController;
-    private DisplayContent mDefaultDisplay;
     private ActivityStack mRootHomeTask;
 
     @Before
@@ -100,7 +99,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         MockitoAnnotations.initMocks(this);
         doNothing().when(mWm.mRoot).performSurfacePlacement();
         when(mMockRunner.asBinder()).thenReturn(new Binder());
-        mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY));
         mRootHomeTask = mDefaultDisplay.getDefaultTaskDisplayArea().getRootHomeTask();
@@ -321,6 +319,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRecentViewInFixedPortraitWhenTopAppInLandscape() {
+        unblockDisplayRotation(mDefaultDisplay);
         mWm.setRecentsAnimationController(mController);
 
         final ActivityRecord homeActivity = createHomeActivity();
@@ -365,6 +364,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testClearFixedRotationLaunchingAppAfterCleanupAnimation() {
+        unblockDisplayRotation(mDefaultDisplay);
         final ActivityRecord homeActivity = createHomeActivity();
         homeActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
@@ -389,6 +389,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testWallpaperHasFixedRotationApplied() {
+        unblockDisplayRotation(mDefaultDisplay);
         mWm.setRecentsAnimationController(mController);
 
         // Create a portrait home activity, a wallpaper and a landscape activity displayed on top.

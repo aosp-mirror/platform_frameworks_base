@@ -192,10 +192,7 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     }
 
     private static RuntimeException handleException(RuntimeException e) {
-        // TODO(b/160169016): There is currently no other way to distinguish dead object from other
-        //   exceptions.
-        if (e.getCause() instanceof RemoteException &&
-                e.getCause().getMessage().equals("HwBinder Error: (-32)")) {
+        if (e.getCause() instanceof DeadObjectException) {
             // Server is dead, no need to reboot.
             Log.e(TAG, "HAL died");
         } else {

@@ -252,8 +252,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
 
     @Override
     protected void setupContainerPadding(View container) {
+        int initialBottomPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.resolver_empty_state_container_padding_bottom);
         container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
-                container.getPaddingRight(), container.getPaddingBottom() + mBottomOffset);
+                container.getPaddingRight(), initialBottomPadding + mBottomOffset);
     }
 
     class ChooserProfileDescriptor extends ProfileDescriptor {

@@ -27,7 +27,9 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
+import android.media.session.MediaSessionManager;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -68,6 +71,8 @@ public class InfoMediaManagerTest {
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
     private MediaManager.MediaDeviceCallback mCallback;
+    @Mock
+    private MediaSessionManager mMediaSessionManager;
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
@@ -76,8 +81,10 @@ public class InfoMediaManagerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
+        mContext = spy(RuntimeEnvironment.application);
 
+        doReturn(mMediaSessionManager).when(mContext).getSystemService(
+                Context.MEDIA_SESSION_SERVICE);
         mInfoMediaManager =
                 new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
         mShadowRouter2Manager = ShadowRouter2Manager.getShadow();

@@ -23,14 +23,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.hardware.CameraInfo;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.legacy.CameraDeviceUserShim;
-import android.hardware.camera2.legacy.LegacyMetadataMapper;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
@@ -405,10 +402,6 @@ public final class CameraManager {
             throw new IllegalArgumentException("No cameras available on device");
         }
         synchronized (mLock) {
-            /*
-             * Get the camera characteristics from the camera service directly if it supports it,
-             * otherwise get them from the legacy shim instead.
-             */
             ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
             if (cameraService == null) {
                 throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
@@ -417,34 +410,18 @@ public final class CameraManager {
             try {
                 Size displaySize = getDisplaySize();
 
-                // First check isHiddenPhysicalCamera to avoid supportsCamera2ApiLocked throwing
-                // exception in case cameraId is a hidden physical camera.
-                if (!isHiddenPhysicalCamera(cameraId) && !supportsCamera2ApiLocked(cameraId)) {
-                    // Legacy backwards compatibility path; build static info from the camera
-                    // parameters
-                    int id = Integer.parseInt(cameraId);
-
-                    String parameters = cameraService.getLegacyParameters(id);
-
-                    CameraInfo info = cameraService.getCameraInfo(id);
-
-                    characteristics = LegacyMetadataMapper.createCharacteristics(parameters, info,
-                            id, displaySize);
-                } else {
-                    // Normal path: Get the camera characteristics directly from the camera service
-                    CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId);
-                    try {
-                        info.setCameraId(Integer.parseInt(cameraId));
-                    } catch (NumberFormatException e) {
-                        // For external camera, reaching here is expected.
-                        Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
-                    }
-                    boolean hasConcurrentStreams =
-                            CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);
-                    info.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
-                    info.setDisplaySize(displaySize);
-                    characteristics = new CameraCharacteristics(info);
+                CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId);
+                try {
+                    info.setCameraId(Integer.parseInt(cameraId));
+                } catch (NumberFormatException e) {
+                    Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
                 }
+                boolean hasConcurrentStreams =
+                        CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);
+                info.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
+                info.setDisplaySize(displaySize);
+                characteristics = new CameraCharacteristics(info);
+
             } catch (ServiceSpecificException e) {
                 throwAsPublicException(e);
             } catch (RemoteException e) {
@@ -500,30 +477,14 @@ public final class CameraManager {
             ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
 
             try {
-                if (supportsCamera2ApiLocked(cameraId)) {
-                    // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
-                    ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
-                    if (cameraService == null) {
-                        throw new ServiceSpecificException(
-                            ICameraService.ERROR_DISCONNECTED,
-                            "Camera service is currently unavailable");
-                    }
-                    cameraUser = cameraService.connectDevice(callbacks, cameraId,
-                            mContext.getOpPackageName(), mContext.getAttributionTag(), uid);
-                } else {
-                    // Use legacy camera implementation for HAL1 devices
-                    int id;
-                    try {
-                        id = Integer.parseInt(cameraId);
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("Expected cameraId to be numeric, but it was: "
-                                + cameraId);
-                    }
-
-                    Log.i(TAG, "Using legacy camera HAL.");
-                    cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id,
-                            getDisplaySize());
+                ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+                if (cameraService == null) {
+                    throw new ServiceSpecificException(
+                        ICameraService.ERROR_DISCONNECTED,
+                        "Camera service is currently unavailable");
                 }
+                cameraUser = cameraService.connectDevice(callbacks, cameraId,
+                    mContext.getOpPackageName(),  mContext.getAttributionTag(), uid);
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
                     throw new AssertionError("Should've gone down the shim path");
@@ -1018,44 +979,6 @@ public final class CameraManager {
             RuntimeException e = (RuntimeException) t;
             throw e;
         }
-    }
-
-    /**
-     * Queries the camera service if it supports the camera2 api directly, or needs a shim.
-     *
-     * @param cameraId a non-{@code null} camera identifier
-     * @return {@code false} if the legacy shim needs to be used, {@code true} otherwise.
-     */
-    private boolean supportsCamera2ApiLocked(String cameraId) {
-        return supportsCameraApiLocked(cameraId, API_VERSION_2);
-    }
-
-    /**
-     * Queries the camera service if it supports a camera api directly, or needs a shim.
-     *
-     * @param cameraId a non-{@code null} camera identifier
-     * @param apiVersion the version, i.e. {@code API_VERSION_1} or {@code API_VERSION_2}
-     * @return {@code true} if connecting will work for that device version.
-     */
-    private boolean supportsCameraApiLocked(String cameraId, int apiVersion) {
-        /*
-         * Possible return values:
-         * - NO_ERROR => CameraX API is supported
-         * - CAMERA_DEPRECATED_HAL => CameraX API is *not* supported (thrown as an exception)
-         * - Remote exception => If the camera service died
-         *
-         * Anything else is an unexpected error we don't want to recover from.
-         */
-        try {
-            ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
-            // If no camera service, no support
-            if (cameraService == null) return false;
-
-            return cameraService.supportsCameraApi(cameraId, apiVersion);
-        } catch (RemoteException e) {
-            // Camera service is now down, no support for any API level
-        }
-        return false;
     }
 
     /**

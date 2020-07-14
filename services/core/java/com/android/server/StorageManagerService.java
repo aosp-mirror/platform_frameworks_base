@@ -4532,9 +4532,10 @@ class StorageManagerService extends IStorageManager.Stub
                         ServiceManager.getServiceOrThrow("vold"));
                 for (String pkg : packageList) {
                     final String packageObbDir =
-                            String.format("/storage/emulated/%d/Android/obb/%s/", userId, pkg);
+                            String.format(Locale.US, "/storage/emulated/%d/Android/obb/%s/",
+                                    userId, pkg);
                     final String packageDataDir =
-                            String.format("/storage/emulated/%d/Android/data/%s/",
+                            String.format(Locale.US, "/storage/emulated/%d/Android/data/%s/",
                                     userId, pkg);
 
                     // Create package obb and data dir if it doesn't exist.
