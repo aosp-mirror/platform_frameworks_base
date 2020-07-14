@@ -68,6 +68,10 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
 
     @Before
     public void setUpDisplayPolicy() {
+        // Disable surface placement because it has no direct relation to layout policy and it also
+        // avoids some noises such as the display info is modified, screen frozen, config change.
+        mWm.mWindowPlacerLocked.deferLayout();
+
         mDisplayPolicy = mDisplayContent.getDisplayPolicy();
         spyOn(mDisplayPolicy);
 
@@ -100,6 +104,9 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
         addWindow(mNavBarWindow);
         mDisplayPolicy.mLastSystemUiFlags |= View.NAVIGATION_BAR_TRANSPARENT;
+
+        // Update source frame and visibility of insets providers.
+        mDisplayContent.getInsetsStateController().onPostLayout();
     }
 
     void addWindow(WindowState win) {

@@ -24,7 +24,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.util.Range;
@@ -68,6 +67,8 @@ import java.util.Set;
 public final class StreamConfigurationMap {
 
     private static final String TAG = "StreamConfigurationMap";
+
+    private static final int MAX_DIMEN_FOR_ROUNDING = 1920; // maximum allowed width for rounding
 
     /**
      * Create a new {@link StreamConfigurationMap}.
@@ -568,7 +569,7 @@ public final class StreamConfigurationMap {
                 if (config.getSize().equals(surfaceSize)) {
                     return true;
                 } else if (isFlexible &&
-                        (config.getSize().getWidth() <= LegacyCameraDevice.MAX_DIMEN_FOR_ROUNDING)) {
+                        (config.getSize().getWidth() <= MAX_DIMEN_FOR_ROUNDING)) {
                     return true;
                 }
             }

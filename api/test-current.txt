@@ -4697,7 +4697,6 @@ package android.telephony.ims.feature {
     ctor @Deprecated public MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
     ctor public MmTelFeature.MmTelCapabilities(int);
     method public final void addCapabilities(int);
-    method public final boolean isCapable(int);
     method public final void removeCapabilities(int);
   }
 

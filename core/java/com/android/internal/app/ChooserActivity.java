@@ -2640,7 +2640,10 @@ public class ChooserActivity extends ResolverActivity implements
         }
         RecyclerView recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
         ChooserGridAdapter gridAdapter = mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
-        if (gridAdapter == null || recyclerView == null) {
+        // Skip height calculation if recycler view was scrolled to prevent it inaccurately
+        // calculating the height, as the logic below does not account for the scrolled offset.
+        if (gridAdapter == null || recyclerView == null
+                || recyclerView.computeVerticalScrollOffset() != 0) {
             return;
         }
 
@@ -3127,6 +3130,10 @@ public class ChooserActivity extends ResolverActivity implements
         ChooserGridAdapter currentRootAdapter =
                 mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
         currentRootAdapter.updateDirectShareExpansion();
+        // This fixes an edge case where after performing a variety of gestures, vertical scrolling
+        // ends up disabled. That's because at some point the old tab's vertical scrolling is
+        // disabled and the new tab's is enabled. For context, see b/159997845
+        setVerticalScrollEnabled(true);
     }
 
     @Override

@@ -44,6 +44,7 @@ import android.os.UserHandle;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -87,7 +88,8 @@ public class AccessibilityServiceConnectionTest {
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock SystemActionPerformer mMockSystemActionPerformer;
     @Mock KeyEventDispatcher mMockKeyEventDispatcher;
-    @Mock MagnificationController mMockMagnificationController;
+    @Mock
+    FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock IBinder mMockIBinder;
     @Mock IAccessibilityServiceClient mMockServiceClient;
     @Mock MotionEventInjector mMockMotionEventInjector;
@@ -98,8 +100,8 @@ public class AccessibilityServiceConnectionTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mMockKeyEventDispatcher);
-        when(mMockSystemSupport.getMagnificationController())
-                .thenReturn(mMockMagnificationController);
+        when(mMockSystemSupport.getFullScreenMagnificationController())
+                .thenReturn(mMockFullScreenMagnificationController);
         when(mMockSystemSupport.getMotionEventInjectorForDisplayLocked(
                 Display.DEFAULT_DISPLAY)).thenReturn(mMockMotionEventInjector);
 

@@ -62,6 +62,7 @@ import java.util.function.Function;
  */
 @SmallTest
 @Presubmit
+@WindowTestsBase.UseTestDisplay(addAllCommonWindows = true)
 @RunWith(WindowTestRunner.class)
 public class ZOrderingTests extends WindowTestsBase {
 
@@ -152,7 +153,7 @@ public class ZOrderingTests extends WindowTestsBase {
     private LayerRecordingTransaction mTransaction;
 
     @Override
-    void beforeCreateDisplay() {
+    void beforeCreateTestDisplay() {
         // We can't use @Before here because it may happen after WindowTestsBase @Before
         // which is after construction of the DisplayContent, meaning the HierarchyRecorder
         // would miss construction of the top-level layers.

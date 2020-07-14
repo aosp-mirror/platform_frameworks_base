@@ -34,8 +34,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker.AbstractDatePickerDelegate;
 import android.widget.NumberPicker.OnValueChangeListener;
 
-import libcore.icu.ICU;
-
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -459,7 +457,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         // We use numeric spinners for year and day, but textual months. Ask icu4c what
         // order the user's locale uses for that combination. http://b/7207103.
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyyMMMdd");
-        char[] order = ICU.getDateFormatOrder(pattern);
+        char[] order = DateFormat.getDateFormatOrder(pattern);
         final int spinnerCount = order.length;
         for (int i = 0; i < spinnerCount; i++) {
             switch (order[i]) {

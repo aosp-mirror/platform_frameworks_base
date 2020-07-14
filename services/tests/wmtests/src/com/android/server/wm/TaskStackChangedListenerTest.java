@@ -74,6 +74,7 @@ public class TaskStackChangedListenerTest {
     private IActivityManager mService;
     private ITaskStackListener mTaskStackListener;
 
+    private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static boolean sTaskStackChangedCalled;
@@ -490,7 +491,8 @@ public class TaskStackChangedListenerTest {
         SystemUtil.runWithShellPermissionIdentity(() -> context.startActivity(
                 new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 options.toBundle()));
-        final TestActivity activity = (TestActivity) monitor.waitForActivityWithTimeout(1000);
+        final TestActivity activity =
+                (TestActivity) monitor.waitForActivityWithTimeout(WAIT_TIMEOUT_MS);
         if (activity == null) {
             throw new RuntimeException("Timed out waiting for Activity");
         }
@@ -508,7 +510,7 @@ public class TaskStackChangedListenerTest {
 
     private void waitForCallback(CountDownLatch latch) {
         try {
-            final boolean result = latch.await(4, TimeUnit.SECONDS);
+            final boolean result = latch.await(WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             if (!result) {
                 throw new RuntimeException("Timed out waiting for task stack change notification");
             }
@@ -560,7 +562,7 @@ public class TaskStackChangedListenerTest {
                 if (mIsResumed == isResumed) {
                     return;
                 }
-                wait(5000);
+                wait(WAIT_TIMEOUT_MS);
             }
             assertEquals("The activity resume state change timed out", isResumed, mIsResumed);
         }

@@ -270,6 +270,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_FULLSCREEN, token.getWindowingMode());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testFixedRotationRecentsAnimatingTask() {
         final RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
