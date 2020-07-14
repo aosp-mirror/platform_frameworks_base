@@ -436,11 +436,12 @@ class SoundEffectsHelper {
                     onUnloadSoundEffects();
                     break;
                 case MSG_PLAY_EFFECT:
+                    final int effect = msg.arg1, volume = msg.arg2;
                     onLoadSoundEffects(new OnEffectsLoadCompleteHandler() {
                         @Override
                         public void run(boolean success) {
                             if (success) {
-                                onPlaySoundEffect(msg.arg1 /*effect*/, msg.arg2 /*volume*/);
+                                onPlaySoundEffect(effect, volume);
                             }
                         }
                     });
