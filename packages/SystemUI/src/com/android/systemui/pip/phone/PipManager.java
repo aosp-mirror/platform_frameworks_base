@@ -77,7 +77,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
     private final Rect mTmpNormalBounds = new Rect();
-    private final Rect mReentryBounds = new Rect();
+    protected final Rect mReentryBounds = new Rect();
 
     private PipBoundsHandler mPipBoundsHandler;
     private InputConsumerController mInputConsumerController;
