@@ -55,9 +55,9 @@ open class CloseImeWindowToHomeTest(
     open fun checkVisibility_imeWindowBecomesInvisible() {
         checkResults {
             WmTraceSubject.assertThat(it)
-                    .showsImeWindow(IME_WINDOW_TITLE)
+                    .showsNonAppWindow(IME_WINDOW_TITLE)
                     .then()
-                    .hidesImeWindow(IME_WINDOW_TITLE)
+                    .hidesNonAppWindow(IME_WINDOW_TITLE)
                     .forAllEntries()
         }
     }
@@ -96,7 +96,7 @@ open class CloseImeWindowToHomeTest(
             WmTraceSubject.assertThat(it)
                     .showsAppWindowOnTop(testApp.getPackage())
                     .then()
-                    .hidesAppWindowOnTop(testApp.getPackage())
+                    .appWindowNotOnTop(testApp.getPackage())
                     .forAllEntries()
         }
     }
