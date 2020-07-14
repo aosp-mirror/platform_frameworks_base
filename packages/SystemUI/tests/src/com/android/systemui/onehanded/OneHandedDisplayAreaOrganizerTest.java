@@ -44,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.wm.DisplayController;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -135,6 +136,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         assertThat(mDisplayAreaOrganizer.mDisplayAreaMap.containsKey(mDisplayAreaInfo)).isTrue();
     }
 
+    @Ignore("b/160848002")
     @Test
     public void testScheduleOffset() {
         final int xOffSet = 0;
@@ -148,6 +150,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 OneHandedDisplayAreaOrganizer.MSG_OFFSET_ANIMATE)).isEqualTo(true);
     }
 
+    @Ignore("b/160848002")
     @Test
     public void testRotation_portraitToLandscape() {
         when(mMockLeash.isValid()).thenReturn(false);
@@ -180,6 +183,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
     }
 
+    @Ignore("b/160848002")
     @Test
     public void testRotation_landscapeToPortrait() {
         when(mMockLeash.isValid()).thenReturn(false);
@@ -212,6 +216,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
     }
 
+    @Ignore("b/160848002")
     @Test
     public void testRotation_portraitToPortrait() {
         when(mMockLeash.isValid()).thenReturn(false);
@@ -244,6 +249,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
     }
 
+    @Ignore("b/160848002")
     @Test
     public void testRotation_landscapeToLandscape() {
         when(mMockLeash.isValid()).thenReturn(false);
