@@ -71,7 +71,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private static final int MSG_SET_FEATURE_COMPLETED = 107;
     private static final int MSG_CHALLENGE_GENERATED = 108;
 
-    private IFaceService mService;
+    private final IFaceService mService;
     private final Context mContext;
     private IBinder mToken = new Binder();
     private AuthenticationCallback mAuthenticationCallback;
