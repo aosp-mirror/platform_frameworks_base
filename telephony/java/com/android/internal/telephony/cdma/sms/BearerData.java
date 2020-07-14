@@ -1100,7 +1100,7 @@ public final class BearerData {
             bData.hasUserDataHeader = (inStream.read(1) == 1);
             inStream.skip(3);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_IDENTIFIER decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1469,7 +1469,7 @@ public final class BearerData {
             bData.reportReq      = (inStream.read(1) == 1);
             inStream.skip(4);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "REPLY_OPTION decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1488,7 +1488,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.numberOfMessages = IccUtils.cdmaBcdByteToInt((byte)inStream.read(8));
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "NUMBER_OF_MESSAGES decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1507,7 +1507,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_DEPOSIT_INDEX decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1594,7 +1594,7 @@ public final class BearerData {
             bData.errorClass = inStream.read(2);
             bData.messageStatus = inStream.read(6);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_STATUS decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1614,7 +1614,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_CENTER_TIME_STAMP decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1633,7 +1633,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "VALIDITY_PERIOD_ABSOLUTE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1653,7 +1653,7 @@ public final class BearerData {
             bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(
                     inStream.readByteArray(6 * 8));
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_ABSOLUTE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1672,7 +1672,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.deferredDeliveryTimeRelative = inStream.read(8);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "VALIDITY_PERIOD_RELATIVE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1692,7 +1692,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.validityPeriodRelative = inStream.read(8);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_RELATIVE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1713,7 +1713,7 @@ public final class BearerData {
             bData.privacy = inStream.read(2);
             inStream.skip(6);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "PRIVACY_INDICATOR decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1733,7 +1733,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.language = inStream.read(8);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "LANGUAGE_INDICATOR decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1754,7 +1754,7 @@ public final class BearerData {
             bData.displayMode = inStream.read(2);
             inStream.skip(6);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "DISPLAY_MODE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1775,7 +1775,7 @@ public final class BearerData {
             bData.priority = inStream.read(2);
             inStream.skip(6);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "PRIORITY_INDICATOR decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1796,7 +1796,7 @@ public final class BearerData {
             bData.alert = inStream.read(2);
             inStream.skip(6);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "ALERT_ON_MESSAGE_DELIVERY decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1816,7 +1816,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.userResponseCode = inStream.read(8);
         }
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "USER_RESPONSE_CODE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1878,7 +1878,7 @@ public final class BearerData {
             decodeSuccess = true;
         }
 
-        if ((! decodeSuccess) || (paramBits > 0)) {
+        if ((!decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "SERVICE_CATEGORY_PROGRAM_DATA decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ')');
