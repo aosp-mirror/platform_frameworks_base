@@ -371,7 +371,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 }
                 if (haveLast) {
                     canvas.drawLine(lastX, lastY, x, y, mPathPaint);
-                    final Paint paint = ps.mTraceCurrent[i] ? mCurrentPointPaint : mPaint;
+                    final Paint paint = ps.mTraceCurrent[i - 1] ? mCurrentPointPaint : mPaint;
                     canvas.drawPoint(lastX, lastY, paint);
                     drawn = true;
                 }
