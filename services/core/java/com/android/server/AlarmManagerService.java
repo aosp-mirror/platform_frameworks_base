@@ -150,8 +150,6 @@ class AlarmManagerService extends SystemService {
 
     // TODO (b/157782538): Turn off once bug is fixed.
     static final boolean DEBUG_PER_UID_LIMIT = true;
-    // TODO (b/157782538): Turn off once bug is fixed.
-    static final boolean WARN_SYSTEM_ON_ALARM_LIMIT = true;
 
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
     static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
@@ -1774,19 +1772,8 @@ class AlarmManagerService extends SystemService {
                         "Maximum limit of concurrent alarms " + mConstants.MAX_ALARMS_PER_UID
                                 + " reached for uid: " + UserHandle.formatUid(callingUid)
                                 + ", callingPackage: " + callingPackage;
-
-                if (WARN_SYSTEM_ON_ALARM_LIMIT && UserHandle.isCore(callingUid)) {
-                    final StringWriter logWriter = new StringWriter();
-                    final PrintWriter pw = new PrintWriter(logWriter);
-                    pw.println(errorMsg);
-                    pw.println("Next 20 alarms for " + callingUid + ":");
-                    dumpUpcomingNAlarmsForUid(pw, callingUid, 20);
-                    pw.flush();
-                    Slog.wtf(TAG, logWriter.toString());
-                } else {
-                    Slog.w(TAG, errorMsg);
-                }
-                if (DEBUG_PER_UID_LIMIT) {
+                Slog.w(TAG, errorMsg);
+                if (DEBUG_PER_UID_LIMIT && UserHandle.isCore(callingUid)) {
                     logAllAlarmsForUidLocked(callingUid);
                 }
                 throw new IllegalStateException(errorMsg);
