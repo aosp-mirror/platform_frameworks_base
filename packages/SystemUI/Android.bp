@@ -140,7 +140,8 @@ android_library {
         "testables",
         "truth-prebuilt",
         "dagger2",
-        "jsr330"
+        "jsr330",
+        "WindowManager-Shell",
     ],
     libs: [
         "android.test.runner",
