@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.app.backup.BackupManager;
 import android.app.backup.BackupManager.OperationType;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -43,11 +42,13 @@ import com.android.server.backup.UserBackupManagerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class AppBackupUtilsTest {
+public class BackupEligibilityRulesTest {
     private static final String CUSTOM_BACKUP_AGENT_NAME = "custom.backup.agent";
     private static final String TEST_PACKAGE_NAME = "test_package";
 
@@ -56,15 +57,18 @@ public class AppBackupUtilsTest {
     private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
     private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
 
-    private PackageManagerInternal mMockPackageManagerInternal;
+    @Mock private PackageManagerInternal mMockPackageManagerInternal;
+    @Mock private PackageManager mPackageManager;
+    private BackupEligibilityRules mBackupEligibilityRules;
 
     private int mUserId;
 
     @Before
     public void setUp() throws Exception {
-        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
+        MockitoAnnotations.initMocks(this);
 
         mUserId = UserHandle.USER_SYSTEM;
+        mBackupEligibilityRules = getBackupEligibilityRules(OperationType.BACKUP);
     }
 
     @Test
@@ -75,8 +79,7 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -90,8 +93,7 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = null;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -104,8 +106,7 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -121,8 +122,7 @@ public class AppBackupUtilsTest {
         when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isTrue();
     }
@@ -138,8 +138,7 @@ public class AppBackupUtilsTest {
         when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isTrue();
     }
@@ -155,8 +154,7 @@ public class AppBackupUtilsTest {
         when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isTrue();
     }
@@ -172,8 +170,7 @@ public class AppBackupUtilsTest {
         when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -189,8 +186,7 @@ public class AppBackupUtilsTest {
         when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -206,8 +202,7 @@ public class AppBackupUtilsTest {
         when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.BACKUP);
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -218,8 +213,9 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.MIGRATION);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.MIGRATION);
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isTrue();
     }
@@ -230,8 +226,9 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
                 /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mMockPackageManagerInternal, mUserId, OperationType.MIGRATION);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.MIGRATION);
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
     }
@@ -248,7 +245,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
 
         boolean isDisabled =
-                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+                mBackupEligibilityRules.appIsDisabled(applicationInfo);
 
         assertThat(isDisabled).isFalse();
     }
@@ -266,7 +263,7 @@ public class AppBackupUtilsTest {
 
 
         boolean isDisabled =
-                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+                mBackupEligibilityRules.appIsDisabled(applicationInfo);
 
         assertThat(isDisabled).isTrue();
     }
@@ -283,7 +280,7 @@ public class AppBackupUtilsTest {
 
 
         boolean isDisabled =
-                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+                mBackupEligibilityRules.appIsDisabled(applicationInfo);
 
         assertThat(isDisabled).isFalse();
     }
@@ -300,7 +297,7 @@ public class AppBackupUtilsTest {
 
 
         boolean isDisabled =
-                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+                mBackupEligibilityRules.appIsDisabled(applicationInfo);
 
         assertThat(isDisabled).isTrue();
     }
@@ -316,7 +313,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER);
 
         boolean isDisabled =
-                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+                mBackupEligibilityRules.appIsDisabled(applicationInfo);
 
         assertThat(isDisabled).isTrue();
     }
@@ -332,7 +329,7 @@ public class AppBackupUtilsTest {
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
 
         boolean isDisabled =
-                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+                mBackupEligibilityRules.appIsDisabled(applicationInfo);
 
         assertThat(isDisabled).isTrue();
     }
@@ -342,7 +339,7 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
 
-        boolean isStopped = AppBackupUtils.appIsStopped(applicationInfo);
+        boolean isStopped = mBackupEligibilityRules.appIsStopped(applicationInfo);
 
         assertThat(isStopped).isTrue();
     }
@@ -352,7 +349,7 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.flags = ~ApplicationInfo.FLAG_STOPPED;
 
-        boolean isStopped = AppBackupUtils.appIsStopped(applicationInfo);
+        boolean isStopped = mBackupEligibilityRules.appIsStopped(applicationInfo);
 
         assertThat(isStopped).isFalse();
     }
@@ -363,7 +360,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.backupAgentName = null;
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.BACKUP);
+        boolean result = mBackupEligibilityRules.appGetsFullBackup(packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -376,7 +373,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.BACKUP);
+        boolean result = mBackupEligibilityRules.appGetsFullBackup(packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -389,7 +386,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.applicationInfo.flags = ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.BACKUP);
+        boolean result = mBackupEligibilityRules.appGetsFullBackup(packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -401,7 +398,9 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY, CUSTOM_BACKUP_AGENT_NAME);
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.MIGRATION);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.MIGRATION);
+        boolean result = eligibilityRules.appGetsFullBackup(packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -413,7 +412,9 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
                 ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY, CUSTOM_BACKUP_AGENT_NAME);
 
-        boolean result = AppBackupUtils.appGetsFullBackup(packageInfo, OperationType.MIGRATION);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.MIGRATION);
+        boolean result = eligibilityRules.appGetsFullBackup(packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -424,7 +425,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.backupAgentName = null;
 
-        boolean result = AppBackupUtils.appIsKeyValueOnly(packageInfo);
+        boolean result = mBackupEligibilityRules.appIsKeyValueOnly(packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -437,7 +438,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
 
-        boolean result = AppBackupUtils.appIsKeyValueOnly(packageInfo);
+        boolean result = mBackupEligibilityRules.appIsKeyValueOnly(packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -450,7 +451,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.applicationInfo.flags = ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
 
-        boolean result = AppBackupUtils.appIsKeyValueOnly(packageInfo);
+        boolean result = mBackupEligibilityRules.appIsKeyValueOnly(packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -460,8 +461,9 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = Process.SYSTEM_UID;
 
-        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
                 OperationType.MIGRATION);
+        boolean result = eligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
 
         assertThat(result).isFalse();
     }
@@ -471,8 +473,9 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = Process.SYSTEM_UID;
 
-        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
-                OperationType.BACKUP);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.MIGRATION);
+        boolean result = eligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
 
         assertThat(result).isFalse();
     }
@@ -482,8 +485,9 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
 
-        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
                 OperationType.MIGRATION);
+        boolean result = eligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
 
         assertThat(result).isTrue();
     }
@@ -493,16 +497,14 @@ public class AppBackupUtilsTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
 
-        boolean result = AppBackupUtils.appIgnoresIncludeExcludeRules(applicationInfo,
-                OperationType.BACKUP);
+        boolean result = mBackupEligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
 
         assertThat(result).isFalse();
     }
 
     @Test
     public void signaturesMatch_targetIsNull_returnsFalse() throws Exception {
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, null,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[] {SIGNATURE_1}, null);
 
         assertThat(result).isFalse();
     }
@@ -514,8 +516,7 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[0], packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -533,8 +534,7 @@ public class AppBackupUtilsTest {
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(null, packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -552,8 +552,7 @@ public class AppBackupUtilsTest {
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[0], packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -568,8 +567,8 @@ public class AppBackupUtilsTest {
         packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[] {SIGNATURE_1},
+                packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -583,8 +582,8 @@ public class AppBackupUtilsTest {
         packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[] {SIGNATURE_1},
+                packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -596,8 +595,7 @@ public class AppBackupUtilsTest {
         packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(null, packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -610,8 +608,7 @@ public class AppBackupUtilsTest {
         packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[0], packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -632,9 +629,8 @@ public class AppBackupUtilsTest {
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[] {signature3Copy, signature1Copy, signature2Copy}, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(
+                new Signature[] {signature3Copy, signature1Copy, signature2Copy}, packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -654,9 +650,8 @@ public class AppBackupUtilsTest {
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature2Copy, signature1Copy}, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(
+                new Signature[]{signature2Copy, signature1Copy}, packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -676,9 +671,8 @@ public class AppBackupUtilsTest {
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(
+                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -698,9 +692,8 @@ public class AppBackupUtilsTest {
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo,
-                mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(
+                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo);
 
         assertThat(result).isFalse();
     }
@@ -723,8 +716,8 @@ public class AppBackupUtilsTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
                 packageInfo.packageName);
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
-                packageInfo, mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -749,8 +742,8 @@ public class AppBackupUtilsTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
                 packageInfo.packageName);
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
-                packageInfo, mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo);
 
         assertThat(result).isTrue();
     }
@@ -776,10 +769,15 @@ public class AppBackupUtilsTest {
         doReturn(false).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
                 packageInfo.packageName);
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
-                packageInfo, mMockPackageManagerInternal);
+        boolean result = mBackupEligibilityRules.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo);
 
         assertThat(result).isFalse();
+    }
+
+    private BackupEligibilityRules getBackupEligibilityRules(@OperationType int operationType) {
+        return new BackupEligibilityRules(mPackageManager, mMockPackageManagerInternal, mUserId,
+                operationType);
     }
 
     private static Signature generateSignature(byte i) {
