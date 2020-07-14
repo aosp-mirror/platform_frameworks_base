@@ -26,8 +26,8 @@ import static com.android.server.media.MediaKeyDispatcher.isSingleTapOverridden;
 import static com.android.server.media.MediaKeyDispatcher.isTripleTapOverridden;
 
 import android.app.ActivityManager;
-import android.app.INotificationManager;
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -68,7 +68,6 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -118,7 +117,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final SessionManagerImpl mSessionManagerImpl;
     private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
-    private final INotificationManager mNotificationManager;
+    private final NotificationManager mNotificationManager;
     private final Object mLock = new Object();
     private final HandlerThread mRecordThread = new HandlerThread("SessionRecordThread");
     // Keeps the full user id for each user.
@@ -158,10 +157,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         super(context);
         mContext = context;
         mSessionManagerImpl = new SessionManagerImpl();
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = mContext.getSystemService(PowerManager.class);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
-        mNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mNotificationManager = mContext.getSystemService(NotificationManager.class);
     }
 
     @Override
@@ -507,11 +505,12 @@ public class MediaSessionService extends SystemService implements Monitor {
     private void enforceMediaPermissions(ComponentName compName, int pid, int uid,
             int resolvedUserId) {
         if (hasStatusBarServicePermission(pid, uid)) return;
+        // TODO: Refactor to use hasMediaControlPermission and hasEnabledNotificationListener
         if (mContext
                 .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
                 != PackageManager.PERMISSION_GRANTED
                 && !isEnabledNotificationListener(compName,
-                UserHandle.getUserHandleForUid(uid).getIdentifier(), resolvedUserId)) {
+                UserHandle.getUserHandleForUid(uid), resolvedUserId)) {
             throw new SecurityException("Missing permission to control media.");
         }
     }
@@ -547,13 +546,13 @@ public class MediaSessionService extends SystemService implements Monitor {
      * they're running as.
      *
      * @param compName The component that is enabled.
-     * @param userId The user id of the caller.
+     * @param userHandle The user handle of the caller.
      * @param forUserId The user id they're making the request on behalf of.
      * @return True if the component is enabled, false otherwise
      */
-    private boolean isEnabledNotificationListener(ComponentName compName, int userId,
+    private boolean isEnabledNotificationListener(ComponentName compName, UserHandle userHandle,
             int forUserId) {
-        if (userId != forUserId) {
+        if (userHandle.getIdentifier() != forUserId) {
             // You may not access another user's content as an enabled listener.
             return false;
         }
@@ -561,12 +560,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             Log.d(TAG, "Checking if enabled notification listener " + compName);
         }
         if (compName != null) {
-            try {
-                return mNotificationManager.isNotificationListenerAccessGrantedForUser(
-                        compName, userId);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Dead NotificationManager in isEnabledNotificationListener", e);
-            }
+            return mNotificationManager.hasEnabledNotificationListener(compName.getPackageName(),
+                    userHandle);
         }
         return false;
     }
@@ -1922,8 +1917,8 @@ public class MediaSessionService extends SystemService implements Monitor {
          * @param controllerUid uid of the controller app
          */
         @Override
-        public boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid)
-                throws RemoteException {
+        public boolean isTrusted(String controllerPackageName, int controllerPid,
+                int controllerUid) {
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
@@ -1937,7 +1932,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // Context#getPackageName() for getting package name that matches with the PID/UID,
                 // but it doesn't tell which package has created the MediaController, so useless.
                 return hasMediaControlPermission(controllerPid, controllerUid)
-                        || hasEnabledNotificationListener(userId, controllerPackageName);
+                        || hasEnabledNotificationListener(userId, controllerPackageName, uid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2001,28 +1996,20 @@ public class MediaSessionService extends SystemService implements Monitor {
             return resolvedUserId;
         }
 
-        private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName)
-                throws RemoteException {
+        private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName,
+                int uid) {
+            // TODO: revisit this checking code
             // You may not access another user's content as an enabled listener.
             final int userId = UserHandle.getUserHandleForUid(resolvedUserId).getIdentifier();
             if (resolvedUserId != userId) {
                 return false;
             }
-
-            // TODO(jaewan): (Post-P) Propose NotificationManager#hasEnabledNotificationListener(
-            //               String pkgName) to notification team for optimization
-            final List<ComponentName> enabledNotificationListeners =
-                    mNotificationManager.getEnabledNotificationListeners(userId);
-            if (enabledNotificationListeners != null) {
-                for (int i = 0; i < enabledNotificationListeners.size(); i++) {
-                    if (TextUtils.equals(packageName,
-                            enabledNotificationListeners.get(i).getPackageName())) {
-                        return true;
-                    }
-                }
+            if (mNotificationManager.hasEnabledNotificationListener(packageName,
+                    UserHandle.getUserHandleForUid(uid))) {
+                return true;
             }
             if (DEBUG) {
-                Log.d(TAG, packageName + " (uid=" + resolvedUserId + ") doesn't have an enabled "
+                Log.d(TAG, packageName + " (uid=" + uid + ") doesn't have an enabled "
                         + "notification listener");
             }
             return false;

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -1539,6 +1540,25 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Whether the given user has an enabled
+     * {@link android.service.notification.NotificationListenerService} with the given package name.
+     *
+     * @param packageName the package name of the NotificationListenerService class
+     * @param userHandle the handle of the user that set the listener
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("UserHandle")
+    public boolean hasEnabledNotificationListener(@NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        INotificationManager service = getService();
+        try {
+            return service.hasEnabledNotificationListener(packageName, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     private Context mContext;
 
