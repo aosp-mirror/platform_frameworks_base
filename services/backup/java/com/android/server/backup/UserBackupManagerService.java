@@ -68,6 +68,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -127,7 +128,7 @@ import com.android.server.backup.restore.ActiveRestoreSession;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportNotRegisteredException;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
@@ -336,6 +337,7 @@ public class UserBackupManagerService {
     private final BackupManagerConstants mConstants;
     private final BackupWakeLock mWakelock;
     private final BackupHandler mBackupHandler;
+    private final BackupEligibilityRules mScheduledBackupEligibility;
 
     private final IBackupManager mBackupManagerBinder;
 
@@ -563,6 +565,7 @@ public class UserBackupManagerService {
         mActivityManager = null;
         mStorageManager = null;
         mBackupManagerBinder = null;
+        mScheduledBackupEligibility = null;
     }
 
     private UserBackupManagerService(
@@ -579,6 +582,8 @@ public class UserBackupManagerService {
         mPackageManagerBinder = AppGlobals.getPackageManager();
         mActivityManager = ActivityManager.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mScheduledBackupEligibility = getEligibilityRules(mPackageManager, userId,
+                OperationType.BACKUP);
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -914,7 +919,13 @@ public class UserBackupManagerService {
      * non-lifecycle agent instance, so we manually set up the context topology for it.
      */
     public BackupAgent makeMetadataAgent() {
-        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager, mUserId);
+        return makeMetadataAgentWithEligibilityRules(mScheduledBackupEligibility);
+    }
+
+    public BackupAgent makeMetadataAgentWithEligibilityRules(
+            BackupEligibilityRules backupEligibilityRules) {
+        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager, mUserId,
+                backupEligibilityRules);
         pmAgent.attach(mContext);
         pmAgent.onCreate(UserHandle.of(mUserId));
         return pmAgent;
@@ -996,7 +1007,8 @@ public class UserBackupManagerService {
         boolean changed = false;
         ArrayList<FullBackupEntry> schedule = null;
         List<PackageInfo> apps =
-                PackageManagerBackupAgent.getStorableApplications(mPackageManager, mUserId);
+                PackageManagerBackupAgent.getStorableApplications(mPackageManager, mUserId,
+                        mScheduledBackupEligibility);
 
         if (mFullBackupScheduleFile.exists()) {
             try (FileInputStream fstream = new FileInputStream(mFullBackupScheduleFile);
@@ -1026,9 +1038,9 @@ public class UserBackupManagerService {
                     foundApps.add(pkgName); // all apps that we've addressed already
                     try {
                         PackageInfo pkg = mPackageManager.getPackageInfoAsUser(pkgName, 0, mUserId);
-                        if (AppBackupUtils.appGetsFullBackup(pkg)
-                                && AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo,
-                                mUserId)) {
+                        if (mScheduledBackupEligibility.appGetsFullBackup(pkg)
+                                && mScheduledBackupEligibility.appIsEligibleForBackup(
+                                        pkg.applicationInfo)) {
                             schedule.add(new FullBackupEntry(pkgName, lastBackup));
                         } else {
                             if (DEBUG) {
@@ -1047,9 +1059,9 @@ public class UserBackupManagerService {
                 // New apps can arrive "out of band" via OTA and similar, so we also need to
                 // scan to make sure that we're tracking all full-backup candidates properly
                 for (PackageInfo app : apps) {
-                    if (AppBackupUtils.appGetsFullBackup(app)
-                            && AppBackupUtils.appIsEligibleForBackup(app.applicationInfo,
-                            mUserId)) {
+                    if (mScheduledBackupEligibility.appGetsFullBackup(app)
+                            && mScheduledBackupEligibility.appIsEligibleForBackup(
+                                    app.applicationInfo)) {
                         if (!foundApps.contains(app.packageName)) {
                             if (MORE_DEBUG) {
                                 Slog.i(
@@ -1080,8 +1092,9 @@ public class UserBackupManagerService {
             changed = true;
             schedule = new ArrayList<>(apps.size());
             for (PackageInfo info : apps) {
-                if (AppBackupUtils.appGetsFullBackup(info) && AppBackupUtils.appIsEligibleForBackup(
-                        info.applicationInfo, mUserId)) {
+                if (mScheduledBackupEligibility.appGetsFullBackup(info)
+                        && mScheduledBackupEligibility.appIsEligibleForBackup(
+                                info.applicationInfo)) {
                     schedule.add(new FullBackupEntry(info.packageName, 0));
                 }
             }
@@ -1381,9 +1394,9 @@ public class UserBackupManagerService {
                         PackageInfo app =
                                 mPackageManager.getPackageInfoAsUser(
                                         packageName, /* flags */ 0, mUserId);
-                        if (AppBackupUtils.appGetsFullBackup(app)
-                                && AppBackupUtils.appIsEligibleForBackup(
-                                        app.applicationInfo, mUserId)) {
+                        if (mScheduledBackupEligibility.appGetsFullBackup(app)
+                                && mScheduledBackupEligibility.appIsEligibleForBackup(
+                                        app.applicationInfo)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
                         } else {
@@ -1881,9 +1894,11 @@ public class UserBackupManagerService {
 
         OnTaskFinishedListener listener =
                 caller -> mTransportManager.disposeOfTransportClient(transportClient, caller);
+        BackupEligibilityRules backupEligibilityRules = getEligibilityRulesForOperation(
+                operationType);
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
-        msg.obj = getRequestBackupParams(packages, observer, monitor, flags, operationType,
+        msg.obj = getRequestBackupParams(packages, observer, monitor, flags, backupEligibilityRules,
                 transportClient, transportDirName, listener);
         mBackupHandler.sendMessage(msg);
         return BackupManager.SUCCESS;
@@ -1891,7 +1906,7 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     BackupParams getRequestBackupParams(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags, @OperationType int operationType,
+            IBackupManagerMonitor monitor, int flags, BackupEligibilityRules backupEligibilityRules,
             TransportClient transportClient, String transportDirName,
             OnTaskFinishedListener listener) {
         ArrayList<String> fullBackupList = new ArrayList<>();
@@ -1904,13 +1919,12 @@ public class UserBackupManagerService {
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageName,
                         PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
-                if (!appIsEligibleForBackup(packageInfo.applicationInfo, mUserId,
-                        operationType)) {
+                if (!backupEligibilityRules.appIsEligibleForBackup(packageInfo.applicationInfo)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
                 }
-                if (appGetsFullBackup(packageInfo, operationType)) {
+                if (backupEligibilityRules.appGetsFullBackup(packageInfo)) {
                     fullBackupList.add(packageInfo.packageName);
                 } else {
                     kvBackupList.add(packageInfo.packageName);
@@ -1941,18 +1955,7 @@ public class UserBackupManagerService {
 
         return new BackupParams(transportClient, transportDirName, kvBackupList, fullBackupList,
                 observer, monitor, listener, /* userInitiated */ true, nonIncrementalBackup,
-                operationType);
-    }
-
-    @VisibleForTesting
-    boolean appIsEligibleForBackup(ApplicationInfo applicationInfo, int userId,
-            @OperationType int operationType) {
-        return AppBackupUtils.appIsEligibleForBackup(applicationInfo, userId, operationType);
-    }
-
-    @VisibleForTesting
-    boolean appGetsFullBackup(PackageInfo packageInfo, @OperationType int operationType) {
-        return AppBackupUtils.appGetsFullBackup(packageInfo, operationType);
+                backupEligibilityRules);
     }
 
     /** Cancel all running backups. */
@@ -2481,7 +2484,7 @@ public class UserBackupManagerService {
                     try {
                         PackageInfo appInfo = mPackageManager.getPackageInfoAsUser(
                                 entry.packageName, 0, mUserId);
-                        if (!AppBackupUtils.appGetsFullBackup(appInfo)) {
+                        if (!mScheduledBackupEligibility.appGetsFullBackup(appInfo)) {
                             // The head app isn't supposed to get full-data backups [any more];
                             // so we cull it and force a loop around to consider the new head
                             // app.
@@ -2562,7 +2565,8 @@ public class UserBackupManagerService {
                     /* backupObserver */ null,
                     /* monitor */ null,
                     /* userInitiated */ false,
-                    "BMS.beginFullBackup()");
+                    "BMS.beginFullBackup()",
+                    getEligibilityRulesForOperation(OperationType.BACKUP));
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
             mWakelock.acquire();
             (new Thread(mRunningFullBackupTask)).start();
@@ -3001,7 +3005,7 @@ public class UserBackupManagerService {
 
             AdbBackupParams params = new AdbBackupParams(fd, includeApks, includeObbs,
                     includeShared, doWidgets, doAllApps, includeSystem, compress, doKeyValue,
-                    pkgList);
+                    pkgList, mScheduledBackupEligibility);
             final int token = generateRandomIntegerToken();
             synchronized (mAdbBackupRestoreConfirmations) {
                 mAdbBackupRestoreConfirmations.put(token, params);
@@ -3086,7 +3090,8 @@ public class UserBackupManagerService {
                         /* backupObserver */ null,
                         /* monitor */ null,
                         /* userInitiated */ false,
-                        "BMS.fullTransportBackup()");
+                        "BMS.fullTransportBackup()",
+                        getEligibilityRulesForOperation(OperationType.BACKUP));
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(task, "full-transport-master")).start();
@@ -4137,8 +4142,8 @@ public class UserBackupManagerService {
             TransportClient transportClient =
                     mTransportManager.getCurrentTransportClient(callerLogString);
             boolean eligible =
-                    AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(
-                            transportClient, packageName, mPackageManager, mUserId);
+                    mScheduledBackupEligibility.appIsRunningAndEligibleForBackupWithTransport(
+                            transportClient, packageName);
             if (transportClient != null) {
                 mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
             }
@@ -4160,9 +4165,8 @@ public class UserBackupManagerService {
                     mTransportManager.getCurrentTransportClient(callerLogString);
             List<String> eligibleApps = new LinkedList<>();
             for (String packageName : packages) {
-                if (AppBackupUtils
-                        .appIsRunningAndEligibleForBackupWithTransport(
-                                transportClient, packageName, mPackageManager, mUserId)) {
+                if (mScheduledBackupEligibility.appIsRunningAndEligibleForBackupWithTransport(
+                                transportClient, packageName)) {
                     eligibleApps.add(packageName);
                 }
             }
@@ -4173,6 +4177,17 @@ public class UserBackupManagerService {
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
+    }
+
+    public BackupEligibilityRules getEligibilityRulesForOperation(
+            @OperationType int operationType) {
+        return getEligibilityRules(mPackageManager, mUserId, operationType);
+    }
+
+    private static BackupEligibilityRules getEligibilityRules(PackageManager packageManager,
+            int userId, @OperationType int operationType) {
+        return new BackupEligibilityRules(packageManager,
+                LocalServices.getService(PackageManagerInternal.class), userId, operationType);
     }
 
     /** Prints service state for 'dumpsys backup'. */
