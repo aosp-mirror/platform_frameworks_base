@@ -6012,9 +6012,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private boolean isAppBad(ApplicationInfo info) {
+    private boolean isAppBad(final String processName, final int uid) {
         synchronized (this) {
-            return mAppErrors.isBadProcessLocked(info);
+            return mAppErrors.isBadProcessLocked(processName, uid);
         }
     }
 
@@ -19713,8 +19713,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isAppBad(ApplicationInfo info) {
-            return ActivityManagerService.this.isAppBad(info);
+        public boolean isAppBad(final String processName, final int uid) {
+            return ActivityManagerService.this.isAppBad(processName, uid);
         }
 
         @Override
