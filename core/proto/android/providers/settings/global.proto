@@ -508,7 +508,7 @@ message GlobalSettingsProto {
 
     optional SettingProto job_scheduler_constants = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto job_scheduler_quota_controller_constants = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto job_scheduler_time_controller_constants = 150 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 150; // job_scheduler_time_controller_constants
 
     optional SettingProto keep_profile_in_background = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
