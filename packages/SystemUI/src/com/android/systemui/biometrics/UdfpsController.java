@@ -156,6 +156,7 @@ class UdfpsController {
     }
 
     private void hideUdfpsOverlay() {
+        onFingerUp();
         mHandler.post(() -> {
             Log.v(TAG, "hideUdfpsOverlay | removing window");
             if (mIsOverlayShowing) {
