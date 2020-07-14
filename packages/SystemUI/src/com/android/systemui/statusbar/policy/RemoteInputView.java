@@ -79,7 +79,7 @@ import java.util.function.Consumer;
 /**
  * Host for the remote input.
  */
-public class RemoteInputView extends LinearLayout implements View.OnClickListener, TextWatcher {
+public class RemoteInputView extends LinearLayout implements View.OnClickListener {
 
     private static final String TAG = "RemoteInput";
 
@@ -88,6 +88,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public final Object mToken = new Object();
 
+    private final SendButtonTextWatcher mTextWatcher;
+    private final TextView.OnEditorActionListener mEditorActionHandler;
     private RemoteEditText mEditText;
     private ImageButton mSendButton;
     private ProgressBar mProgressBar;
@@ -113,6 +115,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mTextWatcher = new SendButtonTextWatcher();
+        mEditorActionHandler = new EditorActionHandler();
         mRemoteInputQuickSettingsDisabler = Dependency.get(RemoteInputQuickSettingsDisabler.class);
         mStatusBarManagerService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -128,30 +132,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mSendButton.setOnClickListener(this);
 
         mEditText = (RemoteEditText) getChildAt(0);
-        mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                final boolean isSoftImeEvent = event == null
-                        && (actionId == EditorInfo.IME_ACTION_DONE
-                        || actionId == EditorInfo.IME_ACTION_NEXT
-                        || actionId == EditorInfo.IME_ACTION_SEND);
-                final boolean isKeyboardEnterKey = event != null
-                        && KeyEvent.isConfirmKey(event.getKeyCode())
-                        && event.getAction() == KeyEvent.ACTION_DOWN;
-
-                if (isSoftImeEvent || isKeyboardEnterKey) {
-                    if (mEditText.length() > 0) {
-                        sendRemoteInput(prepareRemoteInputFromText());
-                    }
-                    // Consume action to prevent IME from closing.
-                    return true;
-                }
-                return false;
-            }
-        });
-        mEditText.addTextChangedListener(this);
         mEditText.setInnerFocusable(false);
-        mEditText.mRemoteInputView = this;
     }
 
     protected Intent prepareRemoteInputFromText() {
@@ -292,6 +273,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mEditText.mRemoteInputView = this;
+        mEditText.setOnEditorActionListener(mEditorActionHandler);
+        mEditText.addTextChangedListener(mTextWatcher);
         if (mEntry.getRow().isChangingPosition()) {
             if (getVisibility() == VISIBLE && mEditText.isFocusable()) {
                 mEditText.requestFocus();
@@ -302,6 +286,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mEditText.removeTextChangedListener(mTextWatcher);
+        mEditText.setOnEditorActionListener(null);
+        mEditText.mRemoteInputView = null;
         if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
@@ -410,17 +397,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private void updateSendButton() {
         mSendButton.setEnabled(mEditText.getText().length() != 0);
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-    @Override
-    public void afterTextChanged(Editable s) {
-        updateSendButton();
     }
 
     public void close() {
@@ -545,6 +521,45 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         return getVisibility() == VISIBLE && mController.isSpinning(mEntry.getKey(), mToken);
     }
 
+    /** Handler for button click on send action in IME. */
+    private class EditorActionHandler implements TextView.OnEditorActionListener {
+
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            final boolean isSoftImeEvent = event == null
+                    && (actionId == EditorInfo.IME_ACTION_DONE
+                    || actionId == EditorInfo.IME_ACTION_NEXT
+                    || actionId == EditorInfo.IME_ACTION_SEND);
+            final boolean isKeyboardEnterKey = event != null
+                    && KeyEvent.isConfirmKey(event.getKeyCode())
+                    && event.getAction() == KeyEvent.ACTION_DOWN;
+
+            if (isSoftImeEvent || isKeyboardEnterKey) {
+                if (mEditText.length() > 0) {
+                    sendRemoteInput(prepareRemoteInputFromText());
+                }
+                // Consume action to prevent IME from closing.
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /** Observes text change events and updates the visibility of the send button accordingly. */
+    private class SendButtonTextWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            updateSendButton();
+        }
+    }
+
     /**
      * An EditText that changes appearance based on whether it's focusable and becomes
      * un-focusable whenever the user navigates away from it or it becomes invisible.
@@ -599,7 +614,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             if (!focused) {
                 defocusIfNeeded(true /* animate */);
             }
-            if (!mRemoteInputView.mRemoved) {
+            if (mRemoteInputView != null && !mRemoteInputView.mRemoved) {
                 mLightBarController.setDirectReplying(focused);
             }
         }
