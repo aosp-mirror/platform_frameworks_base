@@ -623,6 +623,10 @@ public final class TelephonyPermissions {
     }
 
     private static int getCarrierPrivilegeStatus(Context context, int subId, int uid) {
+        if (uid == Process.SYSTEM_UID || uid == Process.PHONE_UID) {
+            // Skip the check if it's one of these special uids
+            return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(
