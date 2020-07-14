@@ -228,6 +228,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final Context mContext;
     private final boolean mIsPrimaryUser;
+    private final boolean mIsAutomotive;
     private final StatusBarStateController mStatusBarStateController;
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
@@ -1770,6 +1771,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
         }
 
+        mIsAutomotive = isAutomotive();
+
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
@@ -2484,6 +2487,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 .addCategory(Intent.CATEGORY_HOME);
         ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(homeIntent,
                 0 /* flags */);
+
+        // TODO(b/160971249): Replace in the future by resolving activity as user.
+        if (resolveInfo == null && mIsAutomotive) {
+            Log.w(TAG, "resolveNeedsSlowUnlockTransition: returning false since activity "
+                    + "could not be resolved.");
+            return false;
+        }
+
         return FALLBACK_HOME_COMPONENT.equals(resolveInfo.getComponentInfo().getComponentName());
     }
 
@@ -2552,6 +2563,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         return false;
+    }
+
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     /**
@@ -2989,6 +3004,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 final String time = dateFormat.format(new Date(model.getTimeMillis()));
                 pw.println("    " + time + " " + model.toString());
             }
+        }
+        if (mIsAutomotive) {
+            pw.println("  Running on Automotive build");
         }
     }
 }
