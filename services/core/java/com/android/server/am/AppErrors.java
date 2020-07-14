@@ -33,7 +33,6 @@ import android.app.ApplicationExitInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -263,16 +262,16 @@ class AppErrors {
         return needSep;
     }
 
-    boolean isBadProcessLocked(ApplicationInfo info) {
-        return mBadProcesses.get(info.processName, info.uid) != null;
+    boolean isBadProcessLocked(final String processName, final int uid) {
+        return mBadProcesses.get(processName, uid) != null;
     }
 
-    void clearBadProcessLocked(ApplicationInfo info) {
-        mBadProcesses.remove(info.processName, info.uid);
+    void clearBadProcessLocked(final String processName, final int uid) {
+        mBadProcesses.remove(processName, uid);
     }
 
-    void resetProcessCrashTimeLocked(ApplicationInfo info) {
-        mProcessCrashTimes.remove(info.processName, info.uid);
+    void resetProcessCrashTimeLocked(final String processName, final int uid) {
+        mProcessCrashTimes.remove(processName, uid);
     }
 
     void resetProcessCrashTimeLocked(boolean resetEntireUser, int appId, int userId) {
@@ -548,7 +547,7 @@ class AppErrors {
             if (r != null && !r.isolated && res != AppErrorDialog.RESTART) {
                 // XXX Can't keep track of crash time for isolated processes,
                 // since they don't have a persistent identity.
-                mProcessCrashTimes.put(r.info.processName, r.uid,
+                mProcessCrashTimes.put(r.processName, r.uid,
                         SystemClock.uptimeMillis());
             }
         }
@@ -695,8 +694,8 @@ class AppErrors {
         boolean tryAgain = false;
 
         if (!app.isolated) {
-            crashTime = mProcessCrashTimes.get(app.info.processName, app.uid);
-            crashTimePersistent = mProcessCrashTimesPersistent.get(app.info.processName, app.uid);
+            crashTime = mProcessCrashTimes.get(app.processName, app.uid);
+            crashTimePersistent = mProcessCrashTimesPersistent.get(app.processName, app.uid);
         } else {
             crashTime = crashTimePersistent = null;
         }
@@ -723,10 +722,10 @@ class AppErrors {
         if (crashTime != null && now < crashTime + ProcessList.MIN_CRASH_INTERVAL) {
             // The process crashed again very quickly. If it was a bound foreground service, let's
             // try to restart again in a while, otherwise the process loses!
-            Slog.w(TAG, "Process " + app.info.processName
+            Slog.w(TAG, "Process " + app.processName
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
-                    app.userId, app.info.processName, app.uid);
+                    app.userId, app.processName, app.uid);
             mService.mAtmInternal.onHandleAppCrash(app.getWindowProcessController());
             if (!app.isPersistent()) {
                 // We don't want to start this process again until the user
@@ -734,13 +733,13 @@ class AppErrors {
                 // need to keep it running.  If a persistent process is actually
                 // repeatedly crashing, then badness for everyone.
                 EventLog.writeEvent(EventLogTags.AM_PROC_BAD, app.userId, app.uid,
-                        app.info.processName);
+                        app.processName);
                 if (!app.isolated) {
                     // XXX We don't have a way to mark isolated processes
                     // as bad, since they don't have a peristent identity.
-                    mBadProcesses.put(app.info.processName, app.uid,
+                    mBadProcesses.put(app.processName, app.uid,
                             new BadProcessInfo(now, shortMsg, longMsg, stackTrace));
-                    mProcessCrashTimes.remove(app.info.processName, app.uid);
+                    mProcessCrashTimes.remove(app.processName, app.uid);
                 }
                 app.bad = true;
                 app.removed = true;
@@ -785,8 +784,8 @@ class AppErrors {
         if (!app.isolated) {
             // XXX Can't keep track of crash times for isolated processes,
             // because they don't have a persistent identity.
-            mProcessCrashTimes.put(app.info.processName, app.uid, now);
-            mProcessCrashTimesPersistent.put(app.info.processName, app.uid, now);
+            mProcessCrashTimes.put(app.processName, app.uid, now);
+            mProcessCrashTimesPersistent.put(app.processName, app.uid, now);
         }
 
         if (app.crashHandler != null) mService.mHandler.post(app.crashHandler);
@@ -829,7 +828,7 @@ class AppErrors {
             }
             Long crashShowErrorTime = null;
             if (!proc.isolated) {
-                crashShowErrorTime = mProcessCrashShowDialogTimes.get(proc.info.processName,
+                crashShowErrorTime = mProcessCrashShowDialogTimes.get(proc.processName,
                         proc.uid);
             }
             final boolean showFirstCrash = Settings.Global.getInt(
@@ -850,7 +849,7 @@ class AppErrors {
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
                 proc.getDialogController().showCrashDialogs(data);
                 if (!proc.isolated) {
-                    mProcessCrashShowDialogTimes.put(proc.info.processName, proc.uid, now);
+                    mProcessCrashShowDialogTimes.put(proc.processName, proc.uid, now);
                 }
             } else {
                 // The device is asleep, so just pretend that the user
