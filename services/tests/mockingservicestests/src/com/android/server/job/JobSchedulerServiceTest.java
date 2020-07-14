@@ -39,6 +39,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -56,6 +57,7 @@ import android.os.SystemClock;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -82,6 +84,7 @@ public class JobSchedulerServiceTest {
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
             super(context);
+            mAppStateTracker = mock(AppStateTracker.class);
         }
 
         @Override
@@ -136,6 +139,9 @@ public class JobSchedulerServiceTest {
         } catch (RemoteException e) {
             fail("registerUidObserver threw exception: " + e.getMessage());
         }
+        // Called by QuotaTracker
+        doReturn(mock(SystemServiceManager.class))
+                .when(() -> LocalServices.getService(SystemServiceManager.class));
 
         JobSchedulerService.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
@@ -749,5 +755,91 @@ public class JobSchedulerServiceTest {
         assertEquals(oldBatchTime, oldRareJob.getFirstForceBatchedTimeElapsed());
         maybeQueueFunctor.postProcess();
         assertEquals(3, mService.mPendingJobs.size());
+    }
+
+    /** Tests that jobs scheduled by the app itself are counted towards scheduling limits. */
+    @Test
+    public void testScheduleLimiting_RegularSchedule_Blocked() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            final int expected =
+                    i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    expected,
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+        }
+    }
+
+    /**
+     * Tests that jobs scheduled by the app itself succeed even if the app is above the scheduling
+     * limit.
+     */
+    @Test
+    public void testScheduleLimiting_RegularSchedule_Allowed() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    JobScheduler.RESULT_SUCCESS,
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+        }
+    }
+
+    /**
+     * Tests that jobs scheduled through a proxy (eg. system server) don't count towards scheduling
+     * limits.
+     */
+    @Test
+    public void testScheduleLimiting_Proxy() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    JobScheduler.RESULT_SUCCESS,
+                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, ""));
+        }
+    }
+
+    /**
+     * Tests that jobs scheduled by an app for itself as if through a proxy are counted towards
+     * scheduling limits.
+     */
+    @Test
+    public void testScheduleLimiting_SelfProxy() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            final int expected =
+                    i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    expected,
+                    mService.scheduleAsPackage(job, null, 10123, job.getService().getPackageName(),
+                            0, ""));
+        }
     }
 }
