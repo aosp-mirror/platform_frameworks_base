@@ -670,10 +670,12 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
+            Log.e(TAG, "Invalid Priority " + priority);
             priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+            Log.e(TAG, "Invalid Validity Period " + validityPeriod);
             validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
         }
 
@@ -1231,10 +1233,12 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
+            Log.e(TAG, "Invalid Priority " + priority);
             priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+            Log.e(TAG, "Invalid Validity Period " + validityPeriod);
             validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
         }
 
