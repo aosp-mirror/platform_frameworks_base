@@ -113,8 +113,6 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
 import com.android.telephony.Rlog;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -127,8 +125,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Provides access to information about the telephony services on
@@ -2540,7 +2536,8 @@ public class TelephonyManager {
             return PhoneConstants.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
-            if (getLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE) {
+            if (TelephonyProperties.lte_on_cdma_device().orElse(
+                    PhoneConstants.LTE_ON_CDMA_FALSE) == PhoneConstants.LTE_ON_CDMA_TRUE) {
                 return PhoneConstants.PHONE_TYPE_CDMA;
             } else {
                 return PhoneConstants.PHONE_TYPE_GSM;
@@ -2551,91 +2548,12 @@ public class TelephonyManager {
     }
 
     /**
-     * The contents of the /proc/cmdline file
-     */
-    @UnsupportedAppUsage
-    private static String getProcCmdLine()
-    {
-        String cmdline = "";
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream("/proc/cmdline");
-            byte [] buffer = new byte[2048];
-            int count = is.read(buffer);
-            if (count > 0) {
-                cmdline = new String(buffer, 0, count);
-            }
-        } catch (IOException e) {
-            Rlog.d(TAG, "No /proc/cmdline exception=" + e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-        Rlog.d(TAG, "/proc/cmdline=" + cmdline);
-        return cmdline;
-    }
-
-    /**
      * @return The max value for the timeout passed in {@link #requestNumberVerification}.
      * @hide
      */
     @SystemApi
     public static long getMaxNumberVerificationTimeoutMillis() {
         return MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS;
-    }
-
-    /** Kernel command line */
-    private static final String sKernelCmdLine = getProcCmdLine();
-
-    /** Pattern for selecting the product type from the kernel command line */
-    private static final Pattern sProductTypePattern =
-        Pattern.compile("\\sproduct_type\\s*=\\s*(\\w+)");
-
-    /** The ProductType used for LTE on CDMA devices */
-    private static final String sLteOnCdmaProductType =
-            TelephonyProperties.lte_on_cdma_product_type().orElse("");
-
-    /**
-     * Return if the current radio is LTE on CDMA. This
-     * is a tri-state return value as for a period of time
-     * the mode may be unknown.
-     *
-     * @return {@link PhoneConstants#LTE_ON_CDMA_UNKNOWN}, {@link PhoneConstants#LTE_ON_CDMA_FALSE}
-     * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static int getLteOnCdmaModeStatic() {
-        int retVal;
-        int curVal;
-        String productType = "";
-
-        curVal = TelephonyProperties.lte_on_cdma_device().orElse(
-            PhoneConstants.LTE_ON_CDMA_UNKNOWN);
-        retVal = curVal;
-        if (retVal == PhoneConstants.LTE_ON_CDMA_UNKNOWN) {
-            Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
-            if (matcher.find()) {
-                productType = matcher.group(1);
-                if (sLteOnCdmaProductType.equals(productType)) {
-                    retVal = PhoneConstants.LTE_ON_CDMA_TRUE;
-                } else {
-                    retVal = PhoneConstants.LTE_ON_CDMA_FALSE;
-                }
-            } else {
-                retVal = PhoneConstants.LTE_ON_CDMA_FALSE;
-            }
-        }
-
-        Rlog.d(TAG, "getLteOnCdmaMode=" + retVal + " curVal=" + curVal +
-                " product_type='" + productType +
-                "' lteOnCdmaProductType='" + sLteOnCdmaProductType + "'");
-        return retVal;
     }
 
     //
