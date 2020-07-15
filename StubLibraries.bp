@@ -229,11 +229,6 @@ droidstubs {
 // namely @SystemApi(client=MODULE_LIBRARIES) APIs.
 /////////////////////////////////////////////////////////////////////
 
-// TODO(b/146727827) remove the *-api module when we can teach metalava
-// about the relationship among the API surfaces. Currently, these modules are only to generate
-// the API signature files and ensure that the APIs evolve in a backwards compatible manner.
-// They however are NOT used for building the API stub.
-
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-full-api-stubs-default"],
@@ -270,24 +265,13 @@ droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
     defaults: ["metalava-non-updatable-api-stubs-default"],
     arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args + module_libs,
+    args: metalava_framework_docs_args + priv_apps + module_libs,
     check_api: {
         current: {
             api_file: "non-updatable-api/module-lib-current.txt",
             removed_api_file: "non-updatable-api/module-lib-removed.txt",
         },
     },
-}
-
-// The following droidstub module generates source files for the API stub library for
-// modules. Note that it not only includes its own APIs but also other APIs that have
-// narrower scope (all @SystemApis, not just the ones with 'client=MODULE_LIBRARIES').
-
-droidstubs {
-    name: "module-lib-api-stubs-docs",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
-    arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args + priv_apps + module_libs,
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -335,7 +319,7 @@ java_library_static {
 
 java_library_static {
     name: "android_module_lib_stubs_current",
-    srcs: [ ":module-lib-api-stubs-docs" ],
+    srcs: [ ":module-lib-api-stubs-docs-non-updatable" ],
     defaults: ["android_defaults_stubs_current"],
     libs: ["sdk_system_29_android"],
 }
