@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -807,6 +805,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 } else {
                     super.applyToView(view);
                 }
+                sTempProperties.setAnimationEndAction(null);
                 boolean inShelf = iconAppearAmount == 1.0f;
                 icon.setIsInShelf(inShelf);
             }
