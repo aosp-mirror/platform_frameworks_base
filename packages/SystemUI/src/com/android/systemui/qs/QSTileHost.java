@@ -179,10 +179,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         onTuningChanged(TILES_SETTING, value);
     }
 
-    public QSLogger getQSLogger() {
-        return mQSLogger;
-    }
-
     @Override
     public UiEventLogger getUiEventLogger() {
         return mUiEventLogger;
