@@ -85,6 +85,14 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         // The option is false by default. Update settings db as well to have the right
         // initial setting on UI.
         mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, mAutoTvOff);
+
+        // Initialize settings database with System Property value. This will be the initial
+        // setting on the UI. If no System Property is set, the option is set to to_tv by default.
+        mService.writeStringSetting(Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                mService.readStringSetting(Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                        HdmiProperties.send_standby_on_sleep().orElse(
+                                HdmiProperties.send_standby_on_sleep_values.TO_TV).name()
+                                .toLowerCase()));
     }
 
     @Override
@@ -188,8 +196,26 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
         switch (standbyAction) {
             case HdmiControlService.STANDBY_SCREEN_OFF:
-                mService.sendCecCommand(
-                        HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+                // Get latest setting value
+                @HdmiControlManager.StandbyBehavior
+                String sendStandbyOnSleep = mService.readStringSetting(
+                        Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                        HdmiProperties.send_standby_on_sleep().orElse(
+                                HdmiProperties.send_standby_on_sleep_values.TO_TV).name()
+                                .toLowerCase());
+                switch (sendStandbyOnSleep) {
+                    case HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV:
+                        mService.sendCecCommand(
+                                HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+                        break;
+                    case HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST:
+                        mService.sendCecCommand(
+                                HdmiCecMessageBuilder.buildStandby(mAddress,
+                                        Constants.ADDR_BROADCAST));
+                        break;
+                    case HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE:
+                        break;
+                }
                 break;
             case HdmiControlService.STANDBY_SHUTDOWN:
                 // ACTION_SHUTDOWN is taken as a signal to power off all the devices.
