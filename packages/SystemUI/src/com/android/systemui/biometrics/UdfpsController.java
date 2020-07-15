@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
@@ -44,7 +45,7 @@ class UdfpsController {
     private static final String TAG = "UdfpsController";
 
     private final Context mContext;
-    private final IFingerprintService mFingerprintService;
+    private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
     private final Handler mHandler;
 
@@ -94,10 +95,9 @@ class UdfpsController {
         }
     };
 
-    UdfpsController(Context context, IFingerprintService fingerprintService,
-            WindowManager windowManager) {
+    UdfpsController(Context context, WindowManager windowManager) {
         mContext = context;
-        mFingerprintService = fingerprintService;
+        mFingerprintManager = context.getSystemService(FingerprintManager.class);
         mWindowManager = windowManager;
         mHandler = new Handler(Looper.getMainLooper());
         start();
@@ -133,11 +133,7 @@ class UdfpsController {
         mHbmEnableCommand = mContext.getResources().getString(R.string.udfps_hbm_enable_command);
         mHbmDisableCommand = mContext.getResources().getString(R.string.udfps_hbm_disable_command);
 
-        try {
-            mFingerprintService.setUdfpsOverlayController(new UdfpsOverlayController());
-        } catch (RemoteException e) {
-            Log.e(TAG, "start | failed to set UDFPS controller", e);
-        }
+        mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
         mIsOverlayShowing = false;
     }
 
@@ -175,19 +171,11 @@ class UdfpsController {
             Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
         }
         mView.onFingerDown();
-        try {
-            mFingerprintService.onFingerDown(x, y, minor, major);
-        } catch (RemoteException e) {
-            Log.e(TAG, "onFingerDown | failed to propagate onFingerDown", e);
-        }
+        mFingerprintManager.onFingerDown(x, y, minor, major);
     }
 
     private void onFingerUp() {
-        try {
-            mFingerprintService.onFingerUp();
-        } catch (RemoteException e) {
-            Log.e(TAG, "onFingeUp | failed to propagate onFingerUp", e);
-        }
+        mFingerprintManager.onFingerUp();
         mView.onFingerUp();
         try {
             FileWriter fw = new FileWriter(mHbmPath);
