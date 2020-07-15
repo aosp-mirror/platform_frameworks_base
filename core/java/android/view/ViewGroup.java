@@ -5811,6 +5811,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         child.mPrivateFlags = (child.mPrivateFlags & ~PFLAG_DIRTY_MASK
                         & ~PFLAG_DRAWING_CACHE_VALID)
                 | PFLAG_DRAWN | PFLAG_INVALIDATED;
+        child.setDetached(false);
         this.mPrivateFlags |= PFLAG_INVALIDATED;
 
         if (child.hasFocus()) {
@@ -5839,6 +5840,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #removeDetachedView(View, boolean)
      */
     protected void detachViewFromParent(View child) {
+        child.setDetached(true);
         removeFromArray(indexOfChild(child));
     }
 
@@ -5860,6 +5862,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #removeDetachedView(View, boolean)
      */
     protected void detachViewFromParent(int index) {
+        if (index >= 0 && index < mChildrenCount) {
+            mChildren[index].setDetached(true);
+        }
         removeFromArray(index);
     }
 
@@ -5882,6 +5887,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #removeDetachedView(View, boolean)
      */
     protected void detachViewsFromParent(int start, int count) {
+        start = Math.max(0, start);
+        final int end = Math.min(mChildrenCount, start + count);
+        for (int i = start; i < end; i++) {
+            mChildren[i].setDetached(true);
+        }
         removeFromArray(start, count);
     }
 
@@ -5911,6 +5921,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         for (int i = count - 1; i >= 0; i--) {
             children[i].mParent = null;
+            children[i].setDetached(true);
             children[i] = null;
         }
     }
