@@ -303,7 +303,7 @@ public class MmTelFeature extends ImsFeature {
         }
 
         /**
-         * @param capabilities a bitmask of one or more {@link MmTelCapability}.
+         * @param capabilities a bitmask of one or more capabilities.
          *
          * @return true if all queried capabilities are true, otherwise false.
          */
