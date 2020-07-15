@@ -283,5 +283,50 @@ public class MediaTranscodingBenchmark
         String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
 
         transcode(testVideoName, transcodedVideoName);
-    }*/
+    } */
+
+    @Test
+    public void testBenchmarkingHEVCToAVCWith107FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_107frame_hevc_4Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    @Test
+    public void testBenchmarkingHEVCToAVCWith928FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_928frame_hevc_4Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    @Test
+    public void testBenchmarkingHEVCToAVCWith1863FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_1863frame_hevc_4Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    @Test
+    public void testBenchmarkingHEVCToAVCWith3863FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_3863frame_hevc_4Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
+
+    @Test
+    public void testBenchmarkingHEVCToAVCWith9374FramesWithoutAudio() throws Exception {
+        String videoNameWithoutExtension = "video_1920x1080_9374frame_hevc_4Mbps_30fps";
+        String testVideoName = videoNameWithoutExtension + ".mp4";
+        String transcodedVideoName = videoNameWithoutExtension + "_transcode.mp4";
+
+        transcode(testVideoName, transcodedVideoName);
+    }
 }
