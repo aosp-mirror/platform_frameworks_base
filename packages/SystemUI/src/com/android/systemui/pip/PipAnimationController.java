@@ -21,7 +21,6 @@ import android.animation.Animator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
@@ -56,13 +55,15 @@ public class PipAnimationController {
     public static final int TRANSITION_DIRECTION_TO_PIP = 2;
     public static final int TRANSITION_DIRECTION_TO_FULLSCREEN = 3;
     public static final int TRANSITION_DIRECTION_TO_SPLIT_SCREEN = 4;
+    public static final int TRANSITION_DIRECTION_REMOVE_STACK = 5;
 
     @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
             TRANSITION_DIRECTION_NONE,
             TRANSITION_DIRECTION_SAME,
             TRANSITION_DIRECTION_TO_PIP,
             TRANSITION_DIRECTION_TO_FULLSCREEN,
-            TRANSITION_DIRECTION_TO_SPLIT_SCREEN
+            TRANSITION_DIRECTION_TO_SPLIT_SCREEN,
+            TRANSITION_DIRECTION_REMOVE_STACK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransitionDirection {}
@@ -88,7 +89,7 @@ public class PipAnimationController {
             });
 
     @Inject
-    PipAnimationController(Context context, PipSurfaceTransactionHelper helper) {
+    PipAnimationController(PipSurfaceTransactionHelper helper) {
         mSurfaceTransactionHelper = helper;
     }
 
@@ -338,6 +339,10 @@ public class PipAnimationController {
 
                 @Override
                 void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
+                    if (getTransitionDirection() == TRANSITION_DIRECTION_REMOVE_STACK) {
+                        // while removing the pip stack, no extra work needs to be done here.
+                        return;
+                    }
                     getSurfaceTransactionHelper()
                             .resetScale(tx, leash, getDestinationBounds())
                             .crop(tx, leash, getDestinationBounds())
