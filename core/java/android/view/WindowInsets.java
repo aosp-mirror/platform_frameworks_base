@@ -17,7 +17,6 @@
 
 package android.view;
 
-import static android.view.WindowInsets.Type.CAPTION_BAR;
 import static android.view.WindowInsets.Type.DISPLAY_CUTOUT;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.IME;
@@ -95,7 +94,7 @@ public final class WindowInsets {
     private final boolean mStableInsetsConsumed;
     private final boolean mDisplayCutoutConsumed;
 
-    private final int mCompatInsetTypes;
+    private final int mCompatInsetsTypes;
     private final boolean mCompatIgnoreVisibility;
 
     /**
@@ -150,8 +149,8 @@ public final class WindowInsets {
             @Nullable Insets[] typeMaxInsetsMap,
             boolean[] typeVisibilityMap,
             boolean isRound,
-            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout, int compatInsetTypes,
-            boolean compatIgnoreVisibility) {
+            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout,
+            @InsetsType int compatInsetsTypes, boolean compatIgnoreVisibility) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
                 ? new Insets[SIZE]
@@ -165,7 +164,7 @@ public final class WindowInsets {
         mTypeVisibilityMap = typeVisibilityMap;
         mIsRound = isRound;
         mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
-        mCompatInsetTypes = compatInsetTypes;
+        mCompatInsetsTypes = compatInsetsTypes;
         mCompatIgnoreVisibility = compatIgnoreVisibility;
 
         mDisplayCutoutConsumed = displayCutout == null;
@@ -183,7 +182,7 @@ public final class WindowInsets {
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
                 src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src),
-                src.mCompatInsetTypes,
+                src.mCompatInsetsTypes,
                 src.mCompatIgnoreVisibility);
     }
 
@@ -310,11 +309,11 @@ public final class WindowInsets {
     @NonNull
     public Insets getSystemWindowInsets() {
         Insets result = mCompatIgnoreVisibility
-                ? getInsetsIgnoringVisibility(mCompatInsetTypes & ~ime())
-                : getInsets(mCompatInsetTypes);
+                ? getInsetsIgnoringVisibility(mCompatInsetsTypes & ~ime())
+                : getInsets(mCompatInsetsTypes);
 
         // We can't query max insets for IME, so we need to add it manually after.
-        if ((mCompatInsetTypes & ime()) != 0 && mCompatIgnoreVisibility) {
+        if ((mCompatInsetsTypes & ime()) != 0 && mCompatIgnoreVisibility) {
             result = Insets.max(result, getInsets(ime()));
         }
         return result;
@@ -503,7 +502,7 @@ public final class WindowInsets {
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
                 null /* displayCutout */,
-                mCompatInsetTypes, mCompatIgnoreVisibility);
+                mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
 
@@ -554,7 +553,7 @@ public final class WindowInsets {
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
                 displayCutoutCopyConstructorArgument(this),
-                mCompatInsetTypes, mCompatIgnoreVisibility);
+                mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
     // TODO(b/119190588): replace @code with @link below
@@ -627,7 +626,7 @@ public final class WindowInsets {
     @Deprecated
     @NonNull
     public Insets getStableInsets() {
-        return getInsets(mTypeMaxInsetsMap, mCompatInsetTypes);
+        return getInsets(mTypeMaxInsetsMap, mCompatInsetsTypes);
     }
 
     /**
@@ -939,7 +938,7 @@ public final class WindowInsets {
                         : mDisplayCutout == null
                                 ? DisplayCutout.NO_CUTOUT
                                 : mDisplayCutout.inset(left, top, right, bottom),
-                mCompatInsetTypes, mCompatIgnoreVisibility);
+                mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
     @Override
