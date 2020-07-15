@@ -261,7 +261,7 @@ interface IPackageManager {
             in IntentFilter filter, int match, in ComponentName activity);
 
     void addPreferredActivity(in IntentFilter filter, int match,
-            in ComponentName[] set, in ComponentName activity, int userId);
+            in ComponentName[] set, in ComponentName activity, int userId, boolean removeExisting);
 
     @UnsupportedAppUsage
     void replacePreferredActivity(in IntentFilter filter, int match,

@@ -6490,7 +6490,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 intent, resolvedType, flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
         addPreferredActivityInternal(filter, match, null, activity, false, userId,
-                "Setting last chosen");
+                "Setting last chosen", false);
     }
 
     @Override
@@ -19610,14 +19610,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void addPreferredActivity(IntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity, int userId) {
+            ComponentName[] set, ComponentName activity, int userId, boolean removeExisting) {
         addPreferredActivityInternal(filter, match, set, activity, true, userId,
-                "Adding preferred");
+                "Adding preferred", removeExisting);
     }
 
     private void addPreferredActivityInternal(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, boolean always, int userId,
-            String opname) {
+            String opname, boolean removeExisting) {
         // writer
         int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
@@ -19645,6 +19645,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized (mLock) {
             final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
+            final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
+            if (removeExisting && existing != null) {
+                removeFiltersLocked(pir, filter, existing);
+            }
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
         }
@@ -19744,24 +19748,28 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 if (existing != null) {
-                    if (DEBUG_PREFERRED) {
-                        Slog.i(TAG, existing.size() + " existing preferred matches for:");
-                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                    }
-                    for (int i = existing.size() - 1; i >= 0; --i) {
-                        final PreferredActivity pa = existing.get(i);
-                        if (DEBUG_PREFERRED) {
-                            Slog.i(TAG, "Removing existing preferred activity "
-                                    + pa.mPref.mComponent + ":");
-                            pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                        }
-                        pir.removeFilter(pa);
-                    }
+                    removeFiltersLocked(pir, filter, existing);
                 }
             }
         }
         addPreferredActivityInternal(filter, match, set, activity, true, userId,
-                "Replacing preferred");
+                "Replacing preferred", false);
+    }
+
+    private void removeFiltersLocked(@NonNull PreferredIntentResolver pir,
+            @NonNull IntentFilter filter, @NonNull List<PreferredActivity> existing) {
+        if (DEBUG_PREFERRED) {
+            Slog.i(TAG, existing.size() + " preferred matches for:");
+            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+        }
+        for (int i = existing.size() - 1; i >= 0; --i) {
+            final PreferredActivity pa = existing.get(i);
+            if (DEBUG_PREFERRED) {
+                Slog.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
+                pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
+            }
+            pir.removeFilter(pa);
+        }
     }
 
     @Override

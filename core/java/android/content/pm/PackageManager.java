@@ -6763,6 +6763,17 @@ public abstract class PackageManager {
     public abstract void clearPackagePreferredActivities(@NonNull String packageName);
 
     /**
+     * Same as {@link #addPreferredActivity(IntentFilter, int, ComponentName[], ComponentName)},
+     * but removes all existing entries that match this filter.
+     * @hide
+     */
+    public void addUniquePreferredActivity(@NonNull IntentFilter filter, int match,
+            @Nullable ComponentName[] set, @NonNull ComponentName activity) {
+        throw new UnsupportedOperationException(
+                "addUniquePreferredActivity not implemented in subclass");
+    }
+
+    /**
      * Retrieve all preferred activities, previously added with
      * {@link #addPreferredActivity}, that are
      * currently registered with the system.
