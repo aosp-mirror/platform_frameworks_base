@@ -4042,36 +4042,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return null;
         }
 
-        int dw = mDisplayInfo.logicalWidth;
-        int dh = mDisplayInfo.logicalHeight;
-
-        if (dw <= 0 || dh <= 0) {
-            return null;
-        }
-
-        final Rect frame = new Rect(0, 0, dw, dh);
-
-        // The screenshot API does not apply the current screen rotation.
-        int rot = mDisplay.getRotation();
-
-        if (rot == ROTATION_90 || rot == ROTATION_270) {
-            rot = (rot == ROTATION_90) ? ROTATION_270 : ROTATION_90;
-        }
-
-        // SurfaceFlinger is not aware of orientation, so convert our logical
-        // crop to SurfaceFlinger's portrait orientation.
-        convertCropForSurfaceFlinger(frame, rot, dw, dh);
-
         final ScreenRotationAnimation screenRotationAnimation =
                 mWmService.mRoot.getDisplayContent(DEFAULT_DISPLAY).getRotationAnimation();
         final boolean inRotation = screenRotationAnimation != null &&
                 screenRotationAnimation.isAnimating();
         if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");
 
-        // TODO(b/68392460): We should screenshot Task controls directly
-        // but it's difficult at the moment as the Task doesn't have the
-        // correct size set.
-        final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, inRotation, rot);
+        // Send invalid rect and no width and height since it will screenshot the entire display.
+        Rect frame = new Rect(0, 0, -1, -1);
+        final Bitmap bitmap = SurfaceControl.screenshot(frame, 0, 0, inRotation,
+                mDisplay.getRotation());
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
             return null;
@@ -4084,30 +4064,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             bitmap.recycle();
         }
         return ret;
-    }
-
-    // TODO: Can this use createRotationMatrix()?
-    private static void convertCropForSurfaceFlinger(Rect crop, int rot, int dw, int dh) {
-        if (rot == Surface.ROTATION_90) {
-            final int tmp = crop.top;
-            crop.top = dw - crop.right;
-            crop.right = crop.bottom;
-            crop.bottom = dw - crop.left;
-            crop.left = tmp;
-        } else if (rot == Surface.ROTATION_180) {
-            int tmp = crop.top;
-            crop.top = dh - crop.bottom;
-            crop.bottom = dh - tmp;
-            tmp = crop.right;
-            crop.right = dw - crop.left;
-            crop.left = dw - tmp;
-        } else if (rot == Surface.ROTATION_270) {
-            final int tmp = crop.top;
-            crop.top = crop.left;
-            crop.left = dh - crop.bottom;
-            crop.bottom = crop.right;
-            crop.right = dh - tmp;
-        }
     }
 
     void setExitingTokensHasVisible(boolean hasVisible) {
