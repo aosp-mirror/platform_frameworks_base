@@ -127,6 +127,12 @@ public class GestureLauncherService extends SystemService {
      * Whether camera double tap power button gesture is currently enabled;
      */
     private boolean mCameraDoubleTapPowerEnabled;
+
+    /**
+     * Whether panic button gesture is currently enabled
+     */
+    private boolean mPanicButtonGestureEnabled;
+
     private long mLastPowerDown;
     private int mPowerButtonConsecutiveTaps;
 
@@ -141,10 +147,12 @@ public class GestureLauncherService extends SystemService {
         mMetricsLogger = metricsLogger;
     }
 
+    @Override
     public void onStart() {
         LocalServices.addService(GestureLauncherService.class, this);
     }
 
+    @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             Resources resources = mContext.getResources();
@@ -160,6 +168,7 @@ public class GestureLauncherService extends SystemService {
                     "GestureLauncherService");
             updateCameraRegistered();
             updateCameraDoubleTapPowerEnabled();
+            updatePanicButtonGestureEnabled();
 
             mUserId = ActivityManager.getCurrentUser();
             mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
@@ -176,6 +185,9 @@ public class GestureLauncherService extends SystemService {
                 false, mSettingObserver, mUserId);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED),
+                false, mSettingObserver, mUserId);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.PANIC_GESTURE_ENABLED),
                 false, mSettingObserver, mUserId);
     }
 
@@ -199,6 +211,14 @@ public class GestureLauncherService extends SystemService {
         boolean enabled = isCameraDoubleTapPowerSettingEnabled(mContext, mUserId);
         synchronized (this) {
             mCameraDoubleTapPowerEnabled = enabled;
+        }
+    }
+
+    @VisibleForTesting
+    void updatePanicButtonGestureEnabled() {
+        boolean enabled = isPanicButtonGestureEnabled(mContext, mUserId);
+        synchronized (this) {
+            mPanicButtonGestureEnabled = enabled;
         }
     }
 
@@ -327,6 +347,15 @@ public class GestureLauncherService extends SystemService {
     }
 
     /**
+     * Whether to enable panic button gesture.
+     */
+    public static boolean isPanicButtonGestureEnabled(Context context, int userId) {
+        return isCameraLaunchEnabled(context.getResources())
+                && (Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.PANIC_GESTURE_ENABLED, 0, userId) != 0);
+    }
+
+    /**
      * Whether to enable the camera launch gesture.
      */
     public static boolean isCameraLaunchEnabled(Resources resources) {
@@ -445,6 +474,7 @@ public class GestureLauncherService extends SystemService {
                 registerContentObservers();
                 updateCameraRegistered();
                 updateCameraDoubleTapPowerEnabled();
+                updatePanicButtonGestureEnabled();
             }
         }
     };
@@ -454,6 +484,7 @@ public class GestureLauncherService extends SystemService {
             if (userId == mUserId) {
                 updateCameraRegistered();
                 updateCameraDoubleTapPowerEnabled();
+                updatePanicButtonGestureEnabled();
             }
         }
     };
