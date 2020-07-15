@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.media.projection.MediaProjectionInfo;
+import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -34,10 +35,12 @@ import android.testing.TestableLooper;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -71,6 +74,12 @@ public class CastTileTest extends SysuiTestCase {
     private QSTileHost mHost;
     @Mock
     NetworkController.SignalCallback mCallback;
+    @Mock
+    private MetricsLogger mMetricsLogger;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private QSLogger mQSLogger;
 
     private TestableLooper mTestableLooper;
     private CastTile mCastTile;
@@ -80,16 +89,20 @@ public class CastTileTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
 
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
-        mController = mDependency.injectMockDependency(CastController.class);
-        mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
-        mKeyguard = mDependency.injectMockDependency(KeyguardStateController.class);
-        mNetworkController = mDependency.injectMockDependency(NetworkController.class);
-
         when(mHost.getContext()).thenReturn(mContext);
 
-        mCastTile = new CastTile(mHost, mController, mKeyguard, mNetworkController,
-                mActivityStarter);
+        mCastTile = new CastTile(
+                mHost,
+                mTestableLooper.getLooper(),
+                new Handler(mTestableLooper.getLooper()),
+                mMetricsLogger,
+                mStatusBarStateController,
+                mActivityStarter,
+                mQSLogger,
+                mController,
+                mKeyguard,
+                mNetworkController
+        );
 
         // We are not setting the mocks to listening, so we trigger a first refresh state to
         // set the initial state

@@ -35,17 +35,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static java.lang.Thread.sleep;
-
 import android.content.Intent;
 import android.metrics.LogMaker;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -57,7 +54,6 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -69,7 +65,6 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -91,9 +86,14 @@ public class QSTileImplTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
     private TileImpl mTile;
+    @Mock
     private QSTileHost mHost;
+    @Mock
     private MetricsLogger mMetricsLogger;
+    @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private ActivityStarter mActivityStarter;
     private UiEventLoggerFake mUiEventLoggerFake;
     private InstanceId mInstanceId = InstanceId.fakeInstanceId(5);
 
@@ -104,21 +104,16 @@ public class QSTileImplTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
-        mDependency.injectMockDependency(ActivityStarter.class);
-        mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mUiEventLoggerFake = new UiEventLoggerFake();
-        mStatusBarStateController =
-            mDependency.injectMockDependency(StatusBarStateController.class);
-        mHost = mock(QSTileHost.class);
         when(mHost.indexOf(SPEC)).thenReturn(POSITION);
         when(mHost.getContext()).thenReturn(mContext.getBaseContext());
-        when(mHost.getQSLogger()).thenReturn(mQsLogger);
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLoggerFake);
         when(mHost.getNewInstanceId()).thenReturn(mInstanceId);
 
-        mTile = spy(new TileImpl(mHost));
-        mTile.mHandler = mTile.new H(mTestableLooper.getLooper());
+        Handler mainHandler = new Handler(mTestableLooper.getLooper());
+
+        mTile = new TileImpl(mHost, mTestableLooper.getLooper(), mainHandler,
+                mMetricsLogger, mStatusBarStateController, mActivityStarter, mQsLogger);
         mTile.setTileSpec(SPEC);
     }
 
@@ -223,40 +218,25 @@ public class QSTileImplTest extends SysuiTestCase {
         verify(maker).addTaggedData(eq(FIELD_QS_POSITION), eq(POSITION));
     }
 
-    @Test
-    @Ignore("flaky")
-    public void testStaleTimeout() throws InterruptedException {
-        when(mTile.getStaleTimeout()).thenReturn(5l);
-        clearInvocations(mTile);
-
-        mTile.handleRefreshState(null);
-        mTestableLooper.processAllMessages();
-        verify(mTile, never()).handleStale();
-
-        sleep(10);
-        mTestableLooper.processAllMessages();
-        verify(mTile).handleStale();
-    }
+    //TODO(b/161799397) Bring back testStaleTimeout when we can use FakeExecutor
 
     @Test
     public void testStaleListening() {
         mTile.handleStale();
         mTestableLooper.processAllMessages();
-        verify(mTile).handleSetListening(eq(true));
+        verify(mQsLogger).logTileChangeListening(SPEC, true);
 
         mTile.handleRefreshState(null);
         mTestableLooper.processAllMessages();
-        verify(mTile).handleSetListening(eq(false));
+        verify(mQsLogger).logTileChangeListening(SPEC, false);
     }
 
     @Test
     public void testHandleDestroyClearsHandlerQueue() {
-        when(mTile.getStaleTimeout()).thenReturn(0L);
         mTile.handleRefreshState(null); // this will add a delayed H.STALE message
         mTile.handleDestroy();
 
-        mTestableLooper.processAllMessages();
-        verify(mTile, never()).handleStale();
+        assertFalse(mTile.mHandler.hasMessages(QSTileImpl.H.STALE));
     }
 
     @Test
@@ -359,8 +339,17 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     private static class TileImpl extends QSTileImpl<QSTile.BooleanState> {
-        protected TileImpl(QSHost host) {
-            super(host);
+        protected TileImpl(
+                QSHost host,
+                Looper backgroundLooper,
+                Handler mainHandler,
+                MetricsLogger metricsLogger,
+                StatusBarStateController statusBarStateController,
+                ActivityStarter activityStarter,
+                QSLogger qsLogger
+        ) {
+            super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                    activityStarter, qsLogger);
             getState().state = Tile.STATE_ACTIVE;
         }
 
