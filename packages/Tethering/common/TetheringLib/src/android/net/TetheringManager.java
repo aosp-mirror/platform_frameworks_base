@@ -55,7 +55,6 @@ import java.util.function.Supplier;
  * @hide
  */
 @SystemApi
-@SystemApi(client = MODULE_LIBRARIES)
 @TestApi
 public class TetheringManager {
     private static final String TAG = TetheringManager.class.getSimpleName();
