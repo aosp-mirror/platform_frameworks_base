@@ -1019,7 +1019,7 @@ public abstract class BiometricServiceBase extends SystemService
             return false;
         }
 
-        if (requireForeground && !(isForegroundActivity(uid, pid) || isCurrentClient(
+        if (requireForeground && !(Utils.isForeground(uid, pid) || isCurrentClient(
                 opPackageName))) {
             Slog.w(getTag(), "Rejecting " + opPackageName + "; not in foreground");
             return false;
@@ -1040,29 +1040,6 @@ public abstract class BiometricServiceBase extends SystemService
      */
     private boolean isKeyguard(String clientPackage) {
         return mKeyguardPackage.equals(clientPackage);
-    }
-
-    private boolean isForegroundActivity(int uid, int pid) {
-        try {
-            final List<ActivityManager.RunningAppProcessInfo> procs =
-                    ActivityManager.getService().getRunningAppProcesses();
-            if (procs == null) {
-                Slog.e(getTag(), "Processes null, defaulting to true");
-                return true;
-            }
-
-            int N = procs.size();
-            for (int i = 0; i < N; i++) {
-                ActivityManager.RunningAppProcessInfo proc = procs.get(i);
-                if (proc.pid == pid && proc.uid == uid
-                        && proc.importance <= IMPORTANCE_FOREGROUND_SERVICE) {
-                    return true;
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.w(getTag(), "am.getRunningAppProcesses() failed");
-        }
-        return false;
     }
 
     /**
