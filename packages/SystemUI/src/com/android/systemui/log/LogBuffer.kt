@@ -217,10 +217,10 @@ class LogBuffer(
     private fun dumpMessage(message: LogMessage, pw: PrintWriter) {
         pw.print(DATE_FORMAT.format(message.timestamp))
         pw.print(" ")
-        pw.print(message.level)
+        pw.print(message.level.shortString)
         pw.print(" ")
         pw.print(message.tag)
-        pw.print(" ")
+        pw.print(": ")
         pw.println(message.printer(message))
     }
 

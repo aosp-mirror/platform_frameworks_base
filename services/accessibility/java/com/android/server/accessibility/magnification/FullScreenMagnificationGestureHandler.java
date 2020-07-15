@@ -175,7 +175,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
      */
     public FullScreenMagnificationGestureHandler(Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
-            MagnificationGestureHandler.ScaleChangedListener listener,
+            ScaleChangedListener listener,
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
             int displayId) {

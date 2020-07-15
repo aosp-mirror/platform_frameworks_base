@@ -208,8 +208,15 @@ public final class PermissionControllerManager {
             ServiceConnector<IPermissionController> remoteService = sRemoteServices.get(key);
             if (remoteService == null) {
                 Intent intent = new Intent(SERVICE_INTERFACE);
-                intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
+                String pkgName = context.getPackageManager().getPermissionControllerPackageName();
+                intent.setPackage(pkgName);
                 ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
+                if (serviceInfo == null) {
+                    String errorMsg = "No PermissionController package (" + pkgName + ") for user "
+                            + context.getUserId();
+                    Log.wtf(TAG, errorMsg);
+                    throw new IllegalStateException(errorMsg);
+                }
                 remoteService = new ServiceConnector.Impl<IPermissionController>(
                         ActivityThread.currentApplication() /* context */,
                         new Intent(SERVICE_INTERFACE)

@@ -2026,6 +2026,13 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                 SecureSettingsProto.EMERGENCY_ASSISTANCE_APPLICATION);
+
+        final long emergencyResponseToken = p.start(SecureSettingsProto.EMERGENCY_RESPONSE);
+        dumpSetting(s, p,
+                Settings.Secure.PANIC_GESTURE_ENABLED,
+                SecureSettingsProto.EmergencyResponse.PANIC_GESTURE_ENABLED);
+        p.end(emergencyResponseToken);
+
         dumpSetting(s, p,
                 Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED,
                 SecureSettingsProto.ENHANCED_VOICE_PRIVACY_ENABLED);

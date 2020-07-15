@@ -21,7 +21,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -67,11 +66,10 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient,
-            @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
-                BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
+                BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
                 lockoutTracker);
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mUsageStats = usageStats;
@@ -221,8 +219,8 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
                     .build();
 
             mNotificationManager.createNotificationChannel(channel);
-            mNotificationManager.notifyAsUser(FaceService.NOTIFICATION_TAG,
-                    FaceService.NOTIFICATION_ID, notification,
+            mNotificationManager.notifyAsUser(Face10.NOTIFICATION_TAG,
+                    Face10.NOTIFICATION_ID, notification,
                     UserHandle.CURRENT);
         }
 

@@ -104,21 +104,21 @@ static jlong FontFamily_getFamilyReleaseFunc(CRITICAL_JNI_PARAMS) {
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
         jint weight, jint italic) {
-    FatVector<SkFontArguments::Axis, 2> skiaAxes;
+    FatVector<SkFontArguments::VariationPosition::Coordinate, 2> skVariation;
     for (const auto& axis : builder->axes) {
-        skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
+        skVariation.push_back({axis.axisTag, axis.value});
     }
 
     const size_t fontSize = data->size();
     const void* fontPtr = data->data();
     std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
-    SkFontArguments params;
-    params.setCollectionIndex(ttcIndex);
-    params.setAxes(skiaAxes.data(), skiaAxes.size());
+    SkFontArguments args;
+    args.setCollectionIndex(ttcIndex);
+    args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
 
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), params));
+    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");
         builder->axes.clear();

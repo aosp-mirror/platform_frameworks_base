@@ -335,7 +335,7 @@ public final class JobStore {
                     Slog.v(TAG, "Scheduling persist of jobs to disk.");
                 }
                 mIoHandler.postDelayed(mWriteRunnable, JOB_PERSIST_DELAY);
-                mWriteScheduled = mWriteInProgress = true;
+                mWriteScheduled = true;
             }
         }
     }
@@ -353,7 +353,7 @@ public final class JobStore {
                 throw new IllegalStateException("An asynchronous write is already scheduled.");
             }
 
-            mWriteScheduled = mWriteInProgress = true;
+            mWriteScheduled = true;
             mWriteRunnable.run();
         }
     }
@@ -369,7 +369,7 @@ public final class JobStore {
         final long start = SystemClock.uptimeMillis();
         final long end = start + maxWaitMillis;
         synchronized (mWriteScheduleLock) {
-            while (mWriteInProgress) {
+            while (mWriteScheduled || mWriteInProgress) {
                 final long now = SystemClock.uptimeMillis();
                 if (now >= end) {
                     // still not done and we've hit the end; failure
@@ -404,6 +404,12 @@ public final class JobStore {
             // a bit of lock contention.
             synchronized (mWriteScheduleLock) {
                 mWriteScheduled = false;
+                if (mWriteInProgress) {
+                    // Another runnable is currently writing. Postpone this new write task.
+                    maybeWriteStatusToDiskAsync();
+                    return;
+                }
+                mWriteInProgress = true;
             }
             synchronized (mLock) {
                 // Clone the jobs so we can release the lock before writing.

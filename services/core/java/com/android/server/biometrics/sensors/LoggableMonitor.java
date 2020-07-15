@@ -39,10 +39,6 @@ public abstract class LoggableMonitor {
     private final int mStatsClient;
     private long mFirstAcquireTimeMs;
 
-    protected long getFirstAcquireTimeMs() {
-        return mFirstAcquireTimeMs;
-    }
-
     /**
      * Only valid for AuthenticationClient.
      * @return true if the client is authenticating for a crypto operation.
@@ -60,6 +56,12 @@ public abstract class LoggableMonitor {
         mStatsModality = statsModality;
         mStatsAction = statsAction;
         mStatsClient = statsClient;
+    }
+
+    private boolean isAnyFieldUnknown() {
+        return mStatsModality == BiometricsProtoEnums.MODALITY_UNKNOWN
+                || mStatsAction == BiometricsProtoEnums.ACTION_UNKNOWN
+                || mStatsClient == BiometricsProtoEnums.CLIENT_UNKNOWN;
     }
 
     protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
@@ -86,6 +88,11 @@ public abstract class LoggableMonitor {
                     + ", AcquiredInfo: " + acquiredInfo
                     + ", VendorCode: " + vendorCode);
         }
+
+        if (isAnyFieldUnknown()) {
+            return;
+        }
+
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ACQUIRED,
                 mStatsModality,
                 targetUserId,
@@ -114,6 +121,11 @@ public abstract class LoggableMonitor {
         } else {
             Slog.v(TAG, "Error latency: " + latency);
         }
+
+        if (isAnyFieldUnknown()) {
+            return;
+        }
+
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                 mStatsModality,
                 targetUserId,
@@ -157,6 +169,10 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Authentication latency: " + latency);
         }
 
+        if (isAnyFieldUnknown()) {
+            return;
+        }
+
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                 mStatsModality,
                 targetUserId,
@@ -177,6 +193,10 @@ public abstract class LoggableMonitor {
                     + ", Success: " + enrollSuccessful);
         } else {
             Slog.v(TAG, "Enroll latency: " + latency);
+        }
+
+        if (isAnyFieldUnknown()) {
+            return;
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,

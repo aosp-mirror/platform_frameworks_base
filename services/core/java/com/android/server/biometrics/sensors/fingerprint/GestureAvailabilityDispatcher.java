@@ -28,7 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Keeps track of sensor gesture availability (e.g. swipe), and notifies clients when its
  * availability changes
  */
-public class GestureAvailabilityTracker {
+public class GestureAvailabilityDispatcher {
     private static final String TAG = "GestureAvailabilityTracker";
 
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks;
@@ -36,7 +36,7 @@ public class GestureAvailabilityTracker {
 
     private boolean mIsActive;
 
-    GestureAvailabilityTracker() {
+    GestureAvailabilityDispatcher() {
         mClientActiveCallbacks = new CopyOnWriteArrayList<>();
         mActiveSensors = new HashMap<>();
     }

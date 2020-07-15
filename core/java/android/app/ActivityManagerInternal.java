@@ -387,8 +387,8 @@ public abstract class ActivityManagerInternal {
     /** Returns true if the given uid is the app in the foreground. */
     public abstract boolean isAppForeground(int uid);
 
-    /** Returns true if the given uid is currently marked 'bad' */
-    public abstract boolean isAppBad(ApplicationInfo info);
+    /** Returns true if the given process name and uid is currently marked 'bad' */
+    public abstract boolean isAppBad(String processName, int uid);
 
     /** Remove pending backup for the given userId. */
     public abstract void clearPendingBackup(@UserIdInt int userId);

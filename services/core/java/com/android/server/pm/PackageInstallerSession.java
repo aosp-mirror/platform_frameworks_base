@@ -403,6 +403,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mVerityFound;
 
+    @GuardedBy("mLock")
     private boolean mDataLoaderFinished = false;
 
     @GuardedBy("mLock")
@@ -1118,7 +1119,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (hasParentSessionId()) {
             throw new IllegalStateException(
                     "Session " + sessionId + " is a child of multi-package session "
-                            + mParentSessionId +  " and may not be committed directly.");
+                            + getParentSessionId() +  " and may not be committed directly.");
         }
 
         if (!markAsSealed(statusReceiver, forTransfer)) {
@@ -1589,12 +1590,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onStorageUnhealthy() {
-        if (TextUtils.isEmpty(mPackageName)) {
+        final String packageName = getPackageName();
+        if (TextUtils.isEmpty(packageName)) {
             // The package has not been installed.
             return;
         }
         final PackageManagerService packageManagerService = mPm;
-        final String packageName = mPackageName;
         mHandler.post(() -> {
             if (packageManagerService.deletePackageX(packageName,
                     PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
@@ -1686,7 +1687,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void handleInstall() {
-        if (isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked()) {
+        final boolean needsLogging;
+        synchronized (mLock) {
+            needsLogging = isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked();
+        }
+        if (needsLogging) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
                     .setAdmin(mInstallSource.installerPackageName)
@@ -1929,19 +1934,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Skip logging the side-loaded app installations, as those are private and aren't reported
         // anywhere; app stores already have a record of the installation and that's why reporting
         // it here is fine
+        final String packageName = getPackageName();
         final String packageNameToLog =
-                (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? mPackageName : "";
+                (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? packageName : "";
         final long currentTimestamp = System.currentTimeMillis();
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
                 isIncrementalInstallation(),
                 packageNameToLog,
                 currentTimestamp - createdMillis,
                 returnCode,
-                getApksSize());
+                getApksSize(packageName));
     }
 
-    private long getApksSize() {
-        final PackageSetting ps = mPm.getPackageSetting(mPackageName);
+    private long getApksSize(String packageName) {
+        final PackageSetting ps = mPm.getPackageSetting(packageName);
         if (ps == null) {
             return 0;
         }
@@ -2577,7 +2583,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     void setPermissionsResult(boolean accepted) {
-        if (!mSealed) {
+        if (!isSealed()) {
             throw new SecurityException("Must be sealed to accept permissions");
         }
 
@@ -2653,7 +2659,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (hasParentSessionId()) {
             throw new IllegalStateException(
                     "Session " + sessionId + " is a child of multi-package session "
-                            + mParentSessionId +  " and may not be abandoned directly.");
+                            + getParentSessionId() +  " and may not be abandoned directly.");
         }
 
         List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
@@ -2823,7 +2829,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return;
                 }
 
-                if (mDestroyed || mDataLoaderFinished) {
+                final boolean isDestroyedOrDataLoaderFinished;
+                synchronized (mLock) {
+                    isDestroyedOrDataLoaderFinished = mDestroyed || mDataLoaderFinished;
+                }
+                if (isDestroyedOrDataLoaderFinished) {
                     switch (status) {
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
                             onStorageUnhealthy();
@@ -2835,7 +2845,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 try {
                     IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
                     if (dataLoader == null) {
-                        mDataLoaderFinished = true;
+                        synchronized (mLock) {
+                            mDataLoaderFinished = true;
+                        }
                         dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                 "Failure to obtain data loader");
                         return;
@@ -2868,10 +2880,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_READY: {
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
-                                        mParentSessionId).dispatchStreamValidateAndCommit();
+                                        getParentSessionId()).dispatchStreamValidateAndCommit();
                             } else {
                                 dispatchStreamValidateAndCommit();
                             }
@@ -2881,7 +2895,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Failed to prepare image.");
                             if (manualStartAndDestroy) {
@@ -2895,7 +2911,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
                             break;
@@ -2919,7 +2937,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
-                    if (mDestroyed || mDataLoaderFinished) {
+                    final boolean isDestroyedOrDataLoaderFinished;
+                    synchronized (mLock) {
+                        isDestroyedOrDataLoaderFinished = mDestroyed || mDataLoaderFinished;
+                    }
+                    if (isDestroyedOrDataLoaderFinished) {
                         // App's installed.
                         switch (status) {
                             case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
@@ -2941,7 +2963,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             // fallthrough
                         case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
                             // Even ADB installation can't wait for missing pages for too long.
-                            mDataLoaderFinished = true;
+                            synchronized (mLock) {
+                                mDataLoaderFinished = true;
+                            }
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Image is missing pages required for installation.");
                             break;
@@ -2984,13 +3008,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return EMPTY_CHILD_SESSION_ARRAY;
     }
 
+    private boolean canBeAddedAsChild(int parentCandidate) {
+        synchronized (mLock) {
+            return (!hasParentSessionId() || mParentSessionId == parentCandidate)
+                    && !mCommitted && !mDestroyed;
+        }
+    }
+
     @Override
     public void addChildSessionId(int childSessionId) {
         final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
-        if (childSession == null
-                || (childSession.hasParentSessionId() && childSession.mParentSessionId != sessionId)
-                || childSession.mCommitted
-                || childSession.mDestroyed) {
+        if (childSession == null || !childSession.canBeAddedAsChild(sessionId)) {
             throw new IllegalStateException("Unable to add child session " + childSessionId
                             + " as it does not exist or is in an invalid state.");
         }
@@ -3039,12 +3067,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     boolean hasParentSessionId() {
-        return mParentSessionId != SessionInfo.INVALID_ID;
+        synchronized (mLock) {
+            return mParentSessionId != SessionInfo.INVALID_ID;
+        }
     }
 
     @Override
     public int getParentSessionId() {
-        return mParentSessionId;
+        synchronized (mLock) {
+            return mParentSessionId;
+        }
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
@@ -3134,27 +3166,37 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** {@hide} */
     boolean isStagedSessionReady() {
-        return mStagedSessionReady;
+        synchronized (mLock) {
+            return mStagedSessionReady;
+        }
     }
 
     /** {@hide} */
     boolean isStagedSessionApplied() {
-        return mStagedSessionApplied;
+        synchronized (mLock) {
+            return mStagedSessionApplied;
+        }
     }
 
     /** {@hide} */
     boolean isStagedSessionFailed() {
-        return mStagedSessionFailed;
+        synchronized (mLock) {
+            return mStagedSessionFailed;
+        }
     }
 
     /** {@hide} */
     @StagedSessionErrorCode int getStagedSessionErrorCode() {
-        return mStagedSessionErrorCode;
+        synchronized (mLock) {
+            return mStagedSessionErrorCode;
+        }
     }
 
     /** {@hide} */
     String getStagedSessionErrorMessage() {
-        return mStagedSessionErrorMessage;
+        synchronized (mLock) {
+            return mStagedSessionErrorMessage;
+        }
     }
 
     private void destroyInternal() {

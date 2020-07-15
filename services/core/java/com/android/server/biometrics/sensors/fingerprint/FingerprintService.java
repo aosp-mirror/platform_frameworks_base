@@ -25,6 +25,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -50,7 +51,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutResetTracker;
+import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.io.FileDescriptor;
@@ -68,8 +69,8 @@ public class FingerprintService extends SystemService {
     protected static final String TAG = "FingerprintService";
 
     private final AppOpsManager mAppOps;
-    private final LockoutResetTracker mLockoutResetTracker;
-    private final GestureAvailabilityTracker mGestureAvailabilityTracker;
+    private final LockoutResetDispatcher mLockoutResetDispatcher;
+    private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private Fingerprint21 mFingerprint21;
 
     /**
@@ -181,11 +182,11 @@ public class FingerprintService extends SystemService {
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
                 final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mLockoutResetTracker.addCallback(callback, opPackageName);
+            mLockoutResetDispatcher.addCallback(callback, opPackageName);
         }
 
         @Override // Binder call
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                 return;
             }
@@ -277,26 +278,26 @@ public class FingerprintService extends SystemService {
         @Override
         public boolean isClientActive() {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
-            return mGestureAvailabilityTracker.isAnySensorActive();
+            return mGestureAvailabilityDispatcher.isAnySensorActive();
         }
 
         @Override
         public void addClientActiveCallback(IFingerprintClientActiveCallback callback) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
-            mGestureAvailabilityTracker.registerCallback(callback);
+            mGestureAvailabilityDispatcher.registerCallback(callback);
         }
 
         @Override
         public void removeClientActiveCallback(IFingerprintClientActiveCallback callback) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
-            mGestureAvailabilityTracker.removeCallback(callback);
+            mGestureAvailabilityDispatcher.removeCallback(callback);
         }
 
         @Override // Binder call
         public void initializeConfiguration(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mFingerprint21 = new Fingerprint21(getContext(), sensorId, mLockoutResetTracker,
-                    mGestureAvailabilityTracker);
+            mFingerprint21 = new Fingerprint21(getContext(), sensorId, mLockoutResetDispatcher,
+                    mGestureAvailabilityDispatcher);
         }
 
         @Override
@@ -327,8 +328,8 @@ public class FingerprintService extends SystemService {
     public FingerprintService(Context context) {
         super(context);
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mGestureAvailabilityTracker = new GestureAvailabilityTracker();
-        mLockoutResetTracker = new LockoutResetTracker(context);
+        mGestureAvailabilityDispatcher = new GestureAvailabilityDispatcher();
+        mLockoutResetDispatcher = new LockoutResetDispatcher(context);
     }
 
     @Override
@@ -336,6 +337,9 @@ public class FingerprintService extends SystemService {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
     }
 
+    /**
+     * Checks for public API invocations to ensure that permissions, etc are granted/correct.
+     */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean canUseFingerprint(String opPackageName, boolean requireForeground, int uid,
             int pid, int userId) {

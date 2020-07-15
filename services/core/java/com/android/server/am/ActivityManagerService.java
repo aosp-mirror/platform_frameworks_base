@@ -6012,9 +6012,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private boolean isAppBad(ApplicationInfo info) {
+    private boolean isAppBad(final String processName, final int uid) {
         synchronized (this) {
-            return mAppErrors.isBadProcessLocked(info);
+            return mAppErrors.isBadProcessLocked(processName, uid);
         }
     }
 
@@ -6082,7 +6082,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mPendingStartActivityUids.isPendingTopPid(pr.uid, pids[i]);
                     states[i] = isPendingTop ? PROCESS_STATE_TOP : pr.getCurProcState();
                     if (scores != null) {
-                        scores[i] = isPendingTop ? ProcessList.FOREGROUND_APP_ADJ : pr.curAdj;
+                        scores[i] = isPendingTop ? (ProcessList.FOREGROUND_APP_ADJ - 1) : pr.curAdj;
                     }
                 } else {
                     states[i] = PROCESS_STATE_NONEXISTENT;
@@ -19713,8 +19713,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isAppBad(ApplicationInfo info) {
-            return ActivityManagerService.this.isAppBad(info);
+        public boolean isAppBad(final String processName, final int uid) {
+            return ActivityManagerService.this.isAppBad(processName, uid);
         }
 
         @Override
