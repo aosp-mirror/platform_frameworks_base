@@ -4224,6 +4224,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                     revokePermissionFromPackageForUser(p.getPackageName(),
                                             bp.getName(), true, userId, callback));
                         }
+                    } else {
+                        mPackageManagerInt.forEachPackage(p -> {
+                            PackageSetting ps = mPackageManagerInt.getPackageSetting(
+                                    p.getPackageName());
+                            if (ps == null) {
+                                return;
+                            }
+                            PermissionsState permissionsState = ps.getPermissionsState();
+                            if (permissionsState.getInstallPermissionState(bp.getName()) != null) {
+                                permissionsState.revokeInstallPermission(bp);
+                                permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
+                                        MASK_PERMISSION_FLAGS_ALL, 0);
+                            }
+                        });
                     }
                     it.remove();
                 }

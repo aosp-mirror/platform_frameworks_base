@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsWifiTestCases",
+      "options": [
+        {
+          "exclude-annotation": "android.net.wifi.cts.VirtualDeviceNotSupported"
+        }
+      ]
+    }
+  ]
+}
