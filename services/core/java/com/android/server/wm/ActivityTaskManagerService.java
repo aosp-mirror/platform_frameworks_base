@@ -145,7 +145,6 @@ import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.INotificationManager;
-import android.app.IRequestFinishCallback;
 import android.app.ITaskStackListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -2464,7 +2463,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void onBackPressedOnTaskRoot(IBinder token, IRequestFinishCallback callback) {
+    public void onBackPressedOnTaskRoot(IBinder token) {
         synchronized (mGlobalLock) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
@@ -2478,18 +2477,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // callback
             } else if (stack != null && (stack.isSingleTaskInstance())) {
                 // Single-task stacks are used for activities which are presented in floating
-                // windows above full screen activities. Instead of directly finishing the
-                // task, a task change listener is used to notify SystemUI so the action can be
-                // handled specially.
+                // windows above full screen activities. A task change listener is used to notify
+                // SystemUI so the back action can be handled specially.
                 final Task task = r.getTask();
                 mTaskChangeNotificationController
                         .notifyBackPressedOnTaskRoot(task.getTaskInfo());
             } else {
-                try {
-                    callback.requestFinish();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to invoke request finish callback", e);
-                }
+                moveActivityTaskToBack(token, false /* nonRoot */);
             }
         }
     }
