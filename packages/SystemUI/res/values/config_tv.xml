@@ -22,4 +22,13 @@
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
          when the PIP menu is shown in center. -->
     <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
+
+    <!-- Whether to enable microphone disclosure indicator
+         (com.android.systemui.statusbar.tv.micdisclosure.AudioRecordingDisclosureBar). -->
+    <bool name="audio_recording_disclosure_enabled">true</bool>
+
+    <!-- Whether the indicator should expand and show the recording application's label.
+         When disabled (false) the "minimized" indicator would appear on the screen whenever an
+         application is recording, but will not reveal to the user what application this is.  -->
+    <bool name="audio_recording_disclosure_reveal_packages">false</bool>
 </resources>
