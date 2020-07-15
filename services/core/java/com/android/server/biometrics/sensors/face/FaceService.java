@@ -30,6 +30,7 @@ import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.NativeHandle;
+import android.util.Slog;
 import android.view.Surface;
 
 import com.android.internal.util.DumpUtils;
@@ -177,6 +178,10 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public boolean isHardwareDetected(String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (mFace10 == null) {
+                Slog.wtf(TAG, "No HAL, caller: " + opPackageName);
+                return false;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 return mFace10.isHardwareDetected();
