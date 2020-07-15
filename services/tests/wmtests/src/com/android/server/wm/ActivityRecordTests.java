@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
@@ -65,9 +67,13 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.TaskSnapshot;
@@ -405,7 +411,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void ignoreRequestedOrientationInFreeformWindows() {
-        mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        mStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         final Rect stableRect = new Rect();
         mStack.getDisplay().mDisplayContent.getStableRect(stableRect);
 
@@ -1655,6 +1661,26 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testCanTurnScreenOn() {
+        mStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        doReturn(true).when(mStack).checkKeyguardVisibility(
+                same(mActivity), eq(true) /* shouldBeVisible */, anyBoolean());
+        doReturn(true).when(mActivity).getTurnScreenOnFlag();
+
+        assertTrue(mActivity.canTurnScreenOn());
+    }
+
+    @Test
+    public void testFreeformWindowCantTurnScreenOn() {
+        mStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        doReturn(true).when(mStack).checkKeyguardVisibility(
+                same(mActivity), eq(true) /* shouldBeVisible */, anyBoolean());
+        doReturn(true).when(mActivity).getTurnScreenOnFlag();
+
+        assertFalse(mActivity.canTurnScreenOn());
     }
 
     /**
