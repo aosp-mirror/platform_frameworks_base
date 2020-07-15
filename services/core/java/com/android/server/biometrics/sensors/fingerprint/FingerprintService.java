@@ -415,7 +415,7 @@ public class FingerprintService extends SystemService {
             Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
             return false;
         }
-        if (requireForeground && !(isForegroundActivity(uid, pid))) {
+        if (requireForeground && !Utils.isForeground(uid, pid)) {
             Slog.w(TAG, "Rejecting " + opPackageName + "; not in foreground");
             return false;
         }
@@ -432,29 +432,6 @@ public class FingerprintService extends SystemService {
             appOpsOk = true;
         }
         return appOpsOk;
-    }
-
-    private boolean isForegroundActivity(int uid, int pid) {
-        try {
-            final List<ActivityManager.RunningAppProcessInfo> procs =
-                    ActivityManager.getService().getRunningAppProcesses();
-            if (procs == null) {
-                Slog.e(TAG, "Processes null, defaulting to true");
-                return true;
-            }
-
-            int N = procs.size();
-            for (int i = 0; i < N; i++) {
-                ActivityManager.RunningAppProcessInfo proc = procs.get(i);
-                if (proc.pid == pid && proc.uid == uid
-                        && proc.importance <= IMPORTANCE_FOREGROUND_SERVICE) {
-                    return true;
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.w(TAG, "am.getRunningAppProcesses() failed");
-        }
-        return false;
     }
 
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);

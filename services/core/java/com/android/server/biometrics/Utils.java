@@ -17,6 +17,7 @@
 package com.android.server.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
@@ -59,6 +60,8 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.biometrics.sensors.ClientMonitor;
+
+import java.util.List;
 
 public class Utils {
 
@@ -418,5 +421,27 @@ public class Utils {
                 || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
         Slog.d(TAG, "isEncrypted: " + isEncrypted + " isLockdown: " + isLockDown);
         return isEncrypted || isLockDown;
+    }
+
+    public static boolean isForeground(int callingUid, int callingPid) {
+        try {
+            final List<ActivityManager.RunningAppProcessInfo> procs =
+                    ActivityManager.getService().getRunningAppProcesses();
+            if (procs == null) {
+                Slog.e(TAG, "No running app processes found, defaulting to true");
+                return true;
+            }
+
+            for (int i = 0; i < procs.size(); i++) {
+                ActivityManager.RunningAppProcessInfo proc = procs.get(i);
+                if (proc.pid == callingPid && proc.uid == callingUid
+                        && proc.importance <= IMPORTANCE_FOREGROUND_SERVICE) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "am.getRunningAppProcesses() failed");
+        }
+        return false;
     }
 }

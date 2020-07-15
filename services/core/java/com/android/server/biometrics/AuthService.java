@@ -28,6 +28,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.IAuthService;
@@ -127,6 +128,11 @@ public class AuthService extends SystemService {
             return IIrisService.Stub.asInterface(
                     ServiceManager.getService(Context.IRIS_SERVICE));
         }
+
+        @VisibleForTesting
+        public AppOpsManager getAppOps(Context context) {
+            return context.getSystemService(AppOpsManager.class);
+        }
     }
 
     private final class AuthServiceImpl extends IAuthService.Stub {
@@ -137,12 +143,24 @@ public class AuthService extends SystemService {
 
             // Only allow internal clients to authenticate with a different userId.
             final int callingUserId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
             if (userId == callingUserId) {
                 checkPermission();
             } else {
                 Slog.w(TAG, "User " + callingUserId + " is requesting authentication of userid: "
                         + userId);
                 checkInternalPermission();
+            }
+
+            if (!checkAppOps(callingUid, opPackageName, "authenticate()")) {
+                Slog.e(TAG, "Denied by app ops: " + opPackageName);
+                return;
+            }
+
+            if (!Utils.isForeground(callingUid, callingPid)) {
+                Slog.e(TAG, "Caller is not foreground: " + opPackageName);
+                return;
             }
 
             if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
@@ -155,8 +173,6 @@ public class AuthService extends SystemService {
                 checkInternalPermission();
             }
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 mBiometricService.authenticate(
@@ -369,5 +385,10 @@ public class AuthService extends SystemService {
             getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC,
                     "Must have USE_BIOMETRIC permission");
         }
+    }
+
+    private boolean checkAppOps(int uid, String opPackageName, String reason) {
+        return mInjector.getAppOps(getContext()).noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid,
+                opPackageName, null /* attributionTag */, reason) == AppOpsManager.MODE_ALLOWED;
     }
 }
