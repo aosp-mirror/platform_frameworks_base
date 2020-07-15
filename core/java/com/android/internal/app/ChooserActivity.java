@@ -3134,6 +3134,7 @@ public class ChooserActivity extends ResolverActivity implements
         // ends up disabled. That's because at some point the old tab's vertical scrolling is
         // disabled and the new tab's is enabled. For context, see b/159997845
         setVerticalScrollEnabled(true);
+        mResolverDrawerLayout.scrollNestedScrollableChildBackToTop();
     }
 
     @Override
