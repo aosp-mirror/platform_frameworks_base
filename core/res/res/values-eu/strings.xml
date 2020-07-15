@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk desaktibatzen edo murrizten ditu, hala nola \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
@@ -1926,7 +1926,7 @@
     <string name="time_picker_header_text" msgid="9073802285051516688">"Ezarri ordua"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"Idatzi balio duen ordu bat"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Idatzi ordua"</string>
-    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Ordua idazteko, aldatu testua idazteko metodora."</string>
+    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Ordua idazteko, aldatu testua idazteko modura."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Aldatu erloju modura ordua zehazteko."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Betetze automatikoaren aukerak"</string>
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Gorde betetze automatikoarekin erabiltzeko"</string>

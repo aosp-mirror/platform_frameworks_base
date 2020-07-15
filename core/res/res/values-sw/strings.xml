@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Imefutwa na msimamizi wako"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri:\n\n•Huwasha Mandhari meusi\n•Huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vingine kama vile \"Ok Google\"\n\n"<annotation id="url">"Pata maelezo zaidi"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri:\n\n•Huwasha Mandhari meusi\n•Huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vingine kama vile \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri:\n\n• Huwasha Mandhari meusi\n• Huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vingine kama vile \"Ok Google\"\n\n"<annotation id="url">"Pata maelezo zaidi"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri:\n\n• Huwasha Mandhari meusi\n• Huzima au kudhibiti shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vingine kama vile \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Washa"</string>
