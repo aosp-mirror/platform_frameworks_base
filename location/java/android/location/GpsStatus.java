@@ -151,6 +151,15 @@ public final class GpsStatus {
         return status;
     }
 
+    /**
+     * Builds an empty GpsStatus.
+     *
+     * @hide
+     */
+    static GpsStatus createEmpty() {
+        return new GpsStatus();
+    }
+
     private GpsStatus() {
     }
 
