@@ -1139,13 +1139,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void completeUnlockUser(int userId) {
-        // If user 0 has completed unlock, perform a one-time migration of legacy obb data
-        // to its new location. This may take time depending on the size of the data to be copied
-        // so it's done on the StorageManager handler thread.
-        if (userId == 0) {
-            mPmInternal.migrateLegacyObbData();
-        }
-
         onKeyguardStateChanged(false);
 
         // Record user as started so newly mounted volumes kick off events
@@ -1538,9 +1531,21 @@ class StorageManagerService extends IStorageManager.Stub
                 mFuseMountedUser.remove(vol.getMountUserId());
             } else if (mVoldAppDataIsolationEnabled){
                 final int userId = vol.getMountUserId();
-                mFuseMountedUser.add(userId);
                 // Async remount app storage so it won't block the main thread.
                 new Thread(() -> {
+
+                    // If user 0 has completed unlock, perform a one-time migration of legacy
+                    // obb data to its new location. This may take time depending on the size of
+                    // the data to be copied so it's done on the StorageManager worker thread.
+                    // This needs to be finished before start mounting obb directories.
+                    if (userId == 0) {
+                        mPmInternal.migrateLegacyObbData();
+                    }
+
+                    // Add fuse mounted user after migration to prevent ProcessList tries to
+                    // create obb directory before migration is done.
+                    mFuseMountedUser.add(userId);
+
                     Map<Integer, String> pidPkgMap = null;
                     // getProcessesWithPendingBindMounts() could fail when a new app process is
                     // starting and it's not planning to mount storage dirs in zygote, but it's
