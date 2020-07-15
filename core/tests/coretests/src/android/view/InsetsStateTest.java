@@ -29,6 +29,7 @@ import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -77,7 +78,7 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_IME).setVisible(true);
             SparseIntArray typeSideMap = new SparseIntArray();
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_RESIZE, 0, typeSideMap);
+                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_RESIZE, 0, 0, typeSideMap);
             assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
             assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
             assertEquals(ISIDE_TOP, typeSideMap.get(ITYPE_STATUS_BAR));
@@ -96,7 +97,7 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_IME).setFrame(new Rect(0, 100, 100, 300));
             mState.getSource(ITYPE_IME).setVisible(true);
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_RESIZE, 0, null);
+                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_RESIZE, 0, 0, null);
             assertEquals(100, insets.getStableInsetBottom());
             assertEquals(Insets.of(0, 0, 0, 100), insets.getInsetsIgnoringVisibility(Type.systemBars()));
             assertEquals(Insets.of(0, 0, 0, 200), insets.getSystemWindowInsets());
@@ -115,7 +116,7 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
             mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(true);
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, 0, 0, null);
+                    false, DisplayCutout.NO_CUTOUT, 0, 0, 0, null);
             assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
             assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
             assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
@@ -131,7 +132,7 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_IME).setFrame(new Rect(0, 200, 100, 300));
             mState.getSource(ITYPE_IME).setVisible(true);
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING, 0, null);
+                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING, 0, 0, null);
             assertEquals(0, insets.getSystemWindowInsetBottom());
             assertEquals(100, insets.getInsets(ime()).bottom);
             assertTrue(insets.isVisible(ime()));
@@ -147,11 +148,28 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_IME).setFrame(new Rect(0, 200, 100, 300));
             mState.getSource(ITYPE_IME).setVisible(true);
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING,
+                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING, 0,
                     SYSTEM_UI_FLAG_LAYOUT_STABLE, null);
             assertEquals(100, insets.getSystemWindowInsetTop());
             insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false, false,
-                    DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING,
+                    DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING, 0,
+                    0 /* legacySystemUiFlags */, null);
+            assertEquals(0, insets.getSystemWindowInsetTop());
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_systemUiFlagLayoutStable_windowFlagFullscreen() {
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(ITYPE_STATUS_BAR).setVisible(false);
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
+                    false, DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING, FLAG_FULLSCREEN,
+                    SYSTEM_UI_FLAG_LAYOUT_STABLE, null);
+            assertEquals(0, insets.getSystemWindowInsetTop());
+            insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false, false,
+                    DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_NOTHING, 0,
                     0 /* legacySystemUiFlags */, null);
             assertEquals(0, insets.getSystemWindowInsetTop());
         }
@@ -195,7 +213,7 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
             mState.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setVisible(true);
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, 0, 0, null);
+                    false, DisplayCutout.NO_CUTOUT, 0, 0, 0, null);
             assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
             assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
             assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
@@ -211,7 +229,7 @@ public class InsetsStateTest {
             mState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
             mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(true);
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
-                    false, DisplayCutout.NO_CUTOUT, 0, 0, null);
+                    false, DisplayCutout.NO_CUTOUT, 0, 0, 0, null);
             assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
             assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
             assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
@@ -226,7 +244,7 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_IME).setVisible(true);
         mState.removeSource(ITYPE_IME);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false, false,
-                DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_RESIZE, 0, null);
+                DisplayCutout.NO_CUTOUT, SOFT_INPUT_ADJUST_RESIZE, 0, 0, null);
         assertEquals(0, insets.getSystemWindowInsetBottom());
     }
 

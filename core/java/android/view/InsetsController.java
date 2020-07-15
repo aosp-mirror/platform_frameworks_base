@@ -501,6 +501,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private PendingControlRequest mPendingImeControlRequest;
 
     private int mLastLegacySoftInputMode;
+    private int mLastLegacyWindowFlags;
     private int mLastLegacySystemUiFlags;
     private DisplayCutout mLastDisplayCutout;
     private boolean mStartingAnimation;
@@ -569,8 +570,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
             WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
                     mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
-                    mLastDisplayCutout, mLastLegacySoftInputMode, mLastLegacySystemUiFlags,
-                    null /* typeSideMap */);
+                    mLastDisplayCutout, mLastLegacySoftInputMode, mLastLegacyWindowFlags,
+                    mLastLegacySystemUiFlags, null /* typeSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets, mUnmodifiableTmpRunningAnims);
             if (DEBUG) {
                 for (WindowInsetsAnimation anim : mUnmodifiableTmpRunningAnims) {
@@ -706,13 +707,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
             boolean alwaysConsumeSystemBars, DisplayCutout cutout,
-            int legacySoftInputMode, int legacySystemUiFlags) {
+            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags) {
         mLastLegacySoftInputMode = legacySoftInputMode;
+        mLastLegacyWindowFlags = legacyWindowFlags;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
         mLastDisplayCutout = cutout;
         mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
                 isScreenRound, alwaysConsumeSystemBars, cutout,
-                legacySoftInputMode, legacySystemUiFlags,
+                legacySoftInputMode, legacyWindowFlags, legacySystemUiFlags,
                 null /* typeSideMap */);
         return mLastInsets;
     }
