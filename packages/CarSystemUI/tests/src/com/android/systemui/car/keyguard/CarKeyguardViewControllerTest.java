@@ -41,6 +41,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.CarSystemUiTest;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -59,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 
 import dagger.Lazy;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
