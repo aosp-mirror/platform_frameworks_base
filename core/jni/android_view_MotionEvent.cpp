@@ -342,11 +342,11 @@ static jlong android_view_MotionEvent_nativeInitialize(
         return 0;
     }
 
-    MotionEvent* event;
+    std::unique_ptr<MotionEvent> event;
     if (nativePtr) {
-        event = reinterpret_cast<MotionEvent*>(nativePtr);
+        event = std::unique_ptr<MotionEvent>(reinterpret_cast<MotionEvent*>(nativePtr));
     } else {
-        event = new MotionEvent();
+        event = std::make_unique<MotionEvent>();
     }
 
     PointerProperties pointerProperties[pointerCount];
@@ -355,7 +355,7 @@ static jlong android_view_MotionEvent_nativeInitialize(
     for (jint i = 0; i < pointerCount; i++) {
         jobject pointerPropertiesObj = env->GetObjectArrayElement(pointerPropertiesObjArray, i);
         if (!pointerPropertiesObj) {
-            goto Error;
+            return 0;
         }
         pointerPropertiesToNative(env, pointerPropertiesObj, &pointerProperties[i]);
         env->DeleteLocalRef(pointerPropertiesObj);
@@ -363,7 +363,7 @@ static jlong android_view_MotionEvent_nativeInitialize(
         jobject pointerCoordsObj = env->GetObjectArrayElement(pointerCoordsObjArray, i);
         if (!pointerCoordsObj) {
             jniThrowNullPointerException(env, "pointerCoords");
-            goto Error;
+            return 0;
         }
         pointerCoordsToNative(env, pointerCoordsObj, xOffset, yOffset, &rawPointerCoords[i]);
         env->DeleteLocalRef(pointerCoordsObj);
@@ -377,13 +377,7 @@ static jlong android_view_MotionEvent_nativeInitialize(
                       downTimeNanos, eventTimeNanos, pointerCount, pointerProperties,
                       rawPointerCoords);
 
-    return reinterpret_cast<jlong>(event);
-
-Error:
-    if (!nativePtr) {
-        delete event;
-    }
-    return 0;
+    return reinterpret_cast<jlong>(event.release());
 }
 
 static void android_view_MotionEvent_nativeDispose(JNIEnv* env, jclass clazz,
