@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIE
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 
+import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
@@ -56,6 +57,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.RemoteStream;
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 
 import libcore.util.EmptyArray;
@@ -497,8 +499,11 @@ public final class PermissionControllerManager {
      */
     public void dump(@NonNull FileDescriptor fd, @Nullable String[] args) {
         try {
-            mRemoteService.post(service -> service.asBinder().dump(fd, args))
-                    .get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            mRemoteService.postAsync(service -> {
+                return AndroidFuture.runAsync(uncheckExceptions(() -> {
+                    service.asBinder().dump(fd, args);
+                }), BackgroundThread.getExecutor());
+            }).get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             Log.e(TAG, "Could not get dump", e);
         }
