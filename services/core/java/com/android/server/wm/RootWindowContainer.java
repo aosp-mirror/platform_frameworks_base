@@ -2269,6 +2269,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             final DisplayContent display = getChildAt(displayNdx);
+            if (display.shouldSleep()) {
+                continue;
+            }
+
             final boolean curResult = result;
             boolean resumedOnDisplay = display.reduceOnAllTaskDisplayAreas(
                     (taskDisplayArea, resumed) -> {
@@ -2360,7 +2364,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             // process the keyguard going away, which can happen before the sleep
                             // token is released. As a result, it is important we resume the
                             // activity here.
-                            resumeFocusedStacksTopActivities();
+                            stack.resumeTopActivityUncheckedLocked(null, null);
                         }
                         // The visibility update must not be called before resuming the top, so the
                         // display orientation can be updated first if needed. Otherwise there may
