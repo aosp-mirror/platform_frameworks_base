@@ -53,6 +53,9 @@ priv_apps = " " +
 module_libs = " " +
     " --show-annotation android.annotation.SystemApi\\(" +
         "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\)" +
+    " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
     "\\) "
 
 mainline_service_stubs_args =
