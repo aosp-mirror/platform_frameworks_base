@@ -155,6 +155,9 @@ priv_apps = " " +
 module_libs = " " +
     " --show-annotation android.annotation.SystemApi\\(" +
         "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\)" +
+    " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
     "\\) "
 
 droidstubs {
@@ -232,9 +235,8 @@ droidstubs {
 }
 
 /////////////////////////////////////////////////////////////////////
-// Following droidstubs modules are for extra APIs for modules.
-// The framework currently have two more API surfaces for modules:
-// @SystemApi(client=MODULE_APPS) and @SystemApi(client=MODULE_LIBRARIES)
+// Following droidstubs modules are for extra APIs for modules,
+// namely @SystemApi(client=MODULE_LIBRARIES) APIs.
 /////////////////////////////////////////////////////////////////////
 
 // TODO(b/146727827) remove the *-api module when we can teach metalava
