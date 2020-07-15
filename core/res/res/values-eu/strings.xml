@@ -1926,7 +1926,7 @@
     <string name="time_picker_header_text" msgid="9073802285051516688">"Ezarri ordua"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"Idatzi balio duen ordu bat"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Idatzi ordua"</string>
-    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Ordua idazteko, aldatu testua idazteko metodora."</string>
+    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Ordua idazteko, aldatu testua idazteko modura."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Aldatu erloju modura ordua zehazteko."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Betetze automatikoaren aukerak"</string>
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Gorde betetze automatikoarekin erabiltzeko"</string>
