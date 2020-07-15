@@ -74,6 +74,15 @@ public class Credentials {
     /** Key containing suffix of lockdown VPN profile. */
     public static final String LOCKDOWN_VPN = "LOCKDOWN_VPN";
 
+    /** Name of CA certificate usage. */
+    public static final String CERTIFICATE_USAGE_CA = "ca";
+
+    /** Name of User certificate usage. */
+    public static final String CERTIFICATE_USAGE_USER = "user";
+
+    /** Name of WIFI certificate usage. */
+    public static final String CERTIFICATE_USAGE_WIFI = "wifi";
+
     /** Data type for public keys. */
     public static final String EXTRA_PUBLIC_KEY = "KEY";
 
@@ -94,9 +103,14 @@ public class Credentials {
     public static final String EXTRA_INSTALL_AS_UID = "install_as_uid";
 
     /**
-     * Intent extra: name for the user's private key.
+     * Intent extra: type of the certificate to install
      */
-    public static final String EXTRA_USER_PRIVATE_KEY_NAME = "user_private_key_name";
+    public static final String EXTRA_CERTIFICATE_USAGE = "certificate_install_usage";
+
+    /**
+     * Intent extra: name for the user's key pair.
+     */
+    public static final String EXTRA_USER_KEY_ALIAS = "user_key_pair_name";
 
     /**
      * Intent extra: data for the user's private key in PEM-encoded PKCS#8.
@@ -104,19 +118,9 @@ public class Credentials {
     public static final String EXTRA_USER_PRIVATE_KEY_DATA = "user_private_key_data";
 
     /**
-     * Intent extra: name for the user's certificate.
-     */
-    public static final String EXTRA_USER_CERTIFICATE_NAME = "user_certificate_name";
-
-    /**
      * Intent extra: data for the user's certificate in PEM-encoded X.509.
      */
     public static final String EXTRA_USER_CERTIFICATE_DATA = "user_certificate_data";
-
-    /**
-     * Intent extra: name for CA certificate chain
-     */
-    public static final String EXTRA_CA_CERTIFICATES_NAME = "ca_certificates_name";
 
     /**
      * Intent extra: data for CA certificate chain in PEM-encoded X.509.
