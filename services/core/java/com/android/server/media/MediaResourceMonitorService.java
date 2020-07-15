@@ -26,9 +26,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
-import com.android.server.SystemService;
 
-import java.util.List;
+import com.android.server.SystemService;
 
 /** This class provides a system service that monitors media resource usage. */
 public class MediaResourceMonitorService extends SystemService {
@@ -62,8 +61,7 @@ public class MediaResourceMonitorService extends SystemService {
                 if (pkgNames == null) {
                     return;
                 }
-                UserManager manager = (UserManager) getContext().getSystemService(
-                        Context.USER_SERVICE);
+                UserManager manager = getContext().getSystemService(UserManager.class);
                 int[] userIds = manager.getEnabledProfileIds(ActivityManager.getCurrentUser());
                 if (userIds == null || userIds.length == 0) {
                     return;
@@ -81,15 +79,11 @@ public class MediaResourceMonitorService extends SystemService {
         }
 
         private String[] getPackageNamesFromPid(int pid) {
-            try {
-                for (ActivityManager.RunningAppProcessInfo proc :
-                        ActivityManager.getService().getRunningAppProcesses()) {
-                    if (proc.pid == pid) {
-                        return proc.pkgList;
-                    }
+            ActivityManager manager = getContext().getSystemService(ActivityManager.class);
+            for (ActivityManager.RunningAppProcessInfo proc : manager.getRunningAppProcesses()) {
+                if (proc.pid == pid) {
+                    return proc.pkgList;
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "ActivityManager.getRunningAppProcesses() failed");
             }
             return null;
         }
