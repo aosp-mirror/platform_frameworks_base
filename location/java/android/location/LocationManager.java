@@ -1922,12 +1922,17 @@ public class LocationManager {
 
         GnssStatus gnssStatus = mGnssStatusListenerManager.getGnssStatus();
         int ttff = mGnssStatusListenerManager.getTtff();
+
+        // even though this method is marked nullable, there are legacy applications that expect
+        // this to never return null, so avoid breaking those apps
         if (gnssStatus != null) {
             if (status == null) {
                 status = GpsStatus.create(gnssStatus, ttff);
             } else {
                 status.setStatus(gnssStatus, ttff);
             }
+        } else if (status == null) {
+            status = GpsStatus.createEmpty();
         }
         return status;
     }
