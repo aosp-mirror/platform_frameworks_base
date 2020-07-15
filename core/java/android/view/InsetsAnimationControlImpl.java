@@ -308,7 +308,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                 false /* isScreenRound */,
                 false /* alwaysConsumeSystemBars */, null /* displayCutout */,
                 LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
-                0 /* legacySystemUiFlags */, typeSideMap)
+                0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, typeSideMap)
                .getInsets(mTypes);
     }
 
