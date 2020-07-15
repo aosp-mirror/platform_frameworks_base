@@ -891,6 +891,24 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         assertEquals(taskDisplayArea.getTopStack(), taskDisplayArea.getRootHomeTask());
     }
 
+    @Test
+    public void testResumeFocusedStackOnSleepingDisplay() {
+        // Create an activity on secondary display.
+        final TestDisplayContent secondDisplay = addNewDisplayContentAt(
+                DisplayContent.POSITION_TOP);
+        final ActivityStack stack = secondDisplay.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityRecord activity = new ActivityBuilder(mService).setStack(stack).build();
+        spyOn(activity);
+        spyOn(stack);
+
+        // Cannot resumed activities on secondary display if the display should sleep.
+        doReturn(true).when(secondDisplay).shouldSleep();
+        mRootWindowContainer.resumeFocusedStacksTopActivities();
+        verify(stack, never()).resumeTopActivityUncheckedLocked(any(), any());
+        verify(activity, never()).makeActiveIfNeeded(any());
+    }
+
     /**
      * Mock {@link RootWindowContainer#resolveHomeActivity} for returning consistent activity
      * info for test cases.
