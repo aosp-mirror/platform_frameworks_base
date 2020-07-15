@@ -183,14 +183,14 @@ public abstract class CompoundButton extends Button implements Checkable {
     public void setStateDescription(@Nullable CharSequence stateDescription) {
         mCustomStateDescription = stateDescription;
         if (stateDescription == null) {
-            setDefaultStateDescritption();
+            setDefaultStateDescription();
         } else {
             super.setStateDescription(stateDescription);
         }
     }
 
     /** @hide **/
-    protected void setDefaultStateDescritption() {
+    protected void setDefaultStateDescription() {
         if (mCustomStateDescription == null) {
             super.setStateDescription(getButtonStateDescription());
         }
@@ -210,6 +210,8 @@ public abstract class CompoundButton extends Button implements Checkable {
 
             // Avoid infinite recursions if setChecked() is called from a listener
             if (mBroadcasting) {
+                // setStateDescription will not send out event if the description is unchanged.
+                setDefaultStateDescription();
                 return;
             }
 
@@ -228,7 +230,7 @@ public abstract class CompoundButton extends Button implements Checkable {
             mBroadcasting = false;
         }
         // setStateDescription will not send out event if the description is unchanged.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
     }
 
     /**
