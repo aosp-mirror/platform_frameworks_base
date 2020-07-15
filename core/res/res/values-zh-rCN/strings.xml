@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理员删除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"确定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”\n\n"<annotation id="url">"了解详情"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”\n\n"<annotation id="url">"了解详情"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要开启流量节省程序吗？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"开启"</string>

@@ -1792,8 +1792,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"तपाईंका प्रशासकले मेट्नुभएको"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठिक छ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ब्याट्रीको आयु बढाउन ब्याट्री सेभरले:\n\n•अँध्यारो थिम सक्रिय गर्छ\n•पृष्ठभूमिका गतिविधि, केही दृश्यात्मक प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"ब्याट्रीको आयु बढाउन ब्याट्री सेभरले:\n\n•अँध्यारो थिम सक्रिय गर्छ\n•पृष्ठभूमिका गतिविधि, केही दृश्यात्मक प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4424488535318105801) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (6794188153647295212) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाको प्रयोगलाई कम गर्न डेटा सर्भरले केही एपलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटा चलाउन सक्छ, तर पहिला भन्दा कम अन्तरालमा मात्र। उदाहरणका लागि, तपाईले छविहरूमा ट्याप नगरेसम्म ती छविहरू देखिँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सक्रिय गर्नुहोस्"</string>

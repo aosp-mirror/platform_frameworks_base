@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n• Tungi mavzuni yoqadi\n• Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n• Tungi mavzuni yoqadi\n• Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
