@@ -43,7 +43,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.DisplayInfo;
 
 import com.android.systemui.Dependency;
@@ -73,10 +72,6 @@ import javax.inject.Singleton;
 public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitionCallback {
     private static final String TAG = "PipManager";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final String SETTINGS_PACKAGE_AND_CLASS_DELIMITER = "/";
-
-    private static List<Pair<String, String>> sSettingsPackageAndClassNamePairList;
 
     /**
      * State when there's no PIP.
@@ -123,10 +118,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
     private List<MediaListener> mMediaListeners = new ArrayList<>();
-    private Rect mCurrentPipBounds;
     private Rect mPipBounds;
     private Rect mDefaultPipBounds = new Rect();
-    private Rect mSettingsPipBounds;
     private Rect mMenuModePipBounds;
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private boolean mInitialized;
@@ -261,37 +254,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         broadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter,
                 null /* handler */, UserHandle.ALL);
 
-        if (sSettingsPackageAndClassNamePairList == null) {
-            String[] settings = mContext.getResources().getStringArray(
-                    R.array.tv_pip_settings_class_name);
-            sSettingsPackageAndClassNamePairList = new ArrayList<>();
-            if (settings != null) {
-                for (int i = 0; i < settings.length; i++) {
-                    Pair<String, String> entry = null;
-                    String[] packageAndClassName =
-                            settings[i].split(SETTINGS_PACKAGE_AND_CLASS_DELIMITER);
-                    switch (packageAndClassName.length) {
-                        case 1:
-                            entry = Pair.<String, String>create(packageAndClassName[0], null);
-                            break;
-                        case 2:
-                            if (packageAndClassName[1] != null) {
-                                entry = Pair.<String, String>create(packageAndClassName[0],
-                                        packageAndClassName[1].startsWith(".")
-                                                ? packageAndClassName[0] + packageAndClassName[1]
-                                                : packageAndClassName[1]);
-                            }
-                            break;
-                    }
-                    if (entry != null) {
-                        sSettingsPackageAndClassNamePairList.add(entry);
-                    } else {
-                        Log.w(TAG, "Ignoring malformed settings name " + settings[i]);
-                    }
-                }
-            }
-        }
-
         // Initialize the last orientation and apply the current configuration
         Configuration initialConfig = mContext.getResources().getConfiguration();
         mLastOrientation = initialConfig.orientation;
@@ -319,15 +281,13 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         Resources res = mContext.getResources();
-        mSettingsPipBounds = Rect.unflattenFromString(res.getString(
-                R.string.pip_settings_bounds));
         mMenuModePipBounds = Rect.unflattenFromString(res.getString(
                 R.string.pip_menu_bounds));
 
         // Reset the PIP bounds and apply. PIP bounds can be changed by two reasons.
         //   1. Configuration changed due to the language change (RTL <-> RTL)
         //   2. SystemUI restarts after the crash
-        mPipBounds = isSettingsShown() ? mSettingsPipBounds : mDefaultPipBounds;
+        mPipBounds = mDefaultPipBounds;
         resizePinnedStack(getPinnedStackInfo() == null ? STATE_NO_PIP : STATE_PIP);
     }
 
@@ -448,9 +408,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             return;
         }
         mState = state;
+        final Rect newBounds;
         switch (mState) {
             case STATE_NO_PIP:
-                mCurrentPipBounds = null;
+                newBounds = null;
                 // If the state was already STATE_NO_PIP, then do not resize the stack below as it
                 // will not exist
                 if (wasStateNoPip) {
@@ -458,16 +419,15 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 }
                 break;
             case STATE_PIP_MENU:
-                mCurrentPipBounds = mMenuModePipBounds;
+                newBounds = mMenuModePipBounds;
                 break;
             case STATE_PIP: // fallthrough
             default:
-                mCurrentPipBounds = mPipBounds;
+                newBounds = mPipBounds;
                 break;
         }
-        if (mCurrentPipBounds != null) {
-            mPipTaskOrganizer.scheduleAnimateResizePip(mCurrentPipBounds, mResizeAnimationDuration,
-                    null);
+        if (newBounds != null) {
+            mPipTaskOrganizer.scheduleAnimateResizePip(newBounds, mResizeAnimationDuration, null);
         } else {
             mPipTaskOrganizer.exitPip(mResizeAnimationDuration);
         }
@@ -628,30 +588,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         return PLAYBACK_STATE_UNAVAILABLE;
     }
 
-    private boolean isSettingsShown() {
-        List<RunningTaskInfo> runningTasks;
-        try {
-            runningTasks = mActivityTaskManager.getTasks(1);
-            if (runningTasks.isEmpty()) {
-                return false;
-            }
-        } catch (RemoteException e) {
-            Log.d(TAG, "Failed to detect top activity", e);
-            return false;
-        }
-        ComponentName topActivity = runningTasks.get(0).topActivity;
-        for (Pair<String, String> componentName : sSettingsPackageAndClassNamePairList) {
-            String packageName = componentName.first;
-            if (topActivity.getPackageName().equals(packageName)) {
-                String className = componentName.second;
-                if (className == null || topActivity.getClassName().equals(className)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
         public void onTaskStackChanged() {
@@ -680,9 +616,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 }
             }
             if (getState() == STATE_PIP) {
-                Rect bounds = isSettingsShown() ? mSettingsPipBounds : mDefaultPipBounds;
-                if (mPipBounds != bounds) {
-                    mPipBounds = bounds;
+                if (mPipBounds != mDefaultPipBounds) {
+                    mPipBounds = mDefaultPipBounds;
                     resizePinnedStack(STATE_PIP);
                 }
             }
@@ -704,7 +639,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                     stackInfo.taskNames[stackInfo.taskNames.length - 1]);
             // Set state to STATE_PIP so we show it when the pinned stack animation ends.
             mState = STATE_PIP;
-            mCurrentPipBounds = mPipBounds;
             mMediaSessionManager.addOnActiveSessionsChangedListener(
                     mActiveMediaSessionListener, null);
             updateMediaController(mMediaSessionManager.getActiveSessions(null));

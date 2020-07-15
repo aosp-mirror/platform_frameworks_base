@@ -17,23 +17,6 @@
  */
 -->
 <resources>
-    <!-- List of package names or class names which are considered as Settings,
-         so PIP location should be adjusted to the left of the side panel.
-         If it should be applied for all activities in a package, add the package name.
-         If it should be applied for an activity in a package, add its class name with package name.
-         The class name must follow format 'package_name/.class_name' ('/.' in between).
-         This can be overriden in an overlay.
-         -->
-    <string-array name="tv_pip_settings_class_name" translatable="false">
-        <item>com.android.tv.settings</item>
-        <item>com.google.android.leanbacklauncher/.settings.HomeScreenSettingsActivity</item>
-        <item>com.google.android.apps.mediashell/.settings.CastSettingsActivity</item>
-        <item>com.google.android.katniss.setting/.SpeechSettingsActivity</item>
-        <item>com.google.android.katniss.setting/.SearchSettingsActivity</item>
-        <item>com.google.android.tungsten.setupwraith/.settings.usage.UsageDiagnosticsSettingActivity</item>
-        <item>com.google.android.tvlauncher/.notifications.NotificationsSidePanelActivity</item>
-    </string-array>
-
     <string-array name="audio_recording_disclosure_exempt_apps" translatable="false">
     </string-array>
 </resources>
