@@ -112,6 +112,13 @@ public class AudioRecordingDisclosureBar implements
      */
     private final AudioActivityObserver[] mAudioActivityObservers;
     /**
+     * Whether the indicator should expand and show the recording application's label.
+     * If disabled ({@code false}) the "minimized" ({@link #STATE_MINIMIZED}) indicator would appear
+     * on the screen whenever an application is recording, but will not reveal to the user what
+     * application this is.
+     */
+    private final boolean mRevealRecordingPackages;
+    /**
      * Set of applications that we've notified the user about since the indicator came up. Meaning
      * that if an application is in this list then at some point since the indicator came up, it
      * was expanded showing this application's title.
@@ -137,6 +144,8 @@ public class AudioRecordingDisclosureBar implements
     public AudioRecordingDisclosureBar(Context context) {
         mContext = context;
 
+        mRevealRecordingPackages = mContext.getResources().getBoolean(
+                R.bool.audio_recording_disclosure_reveal_packages);
         mExemptPackages = new ArraySet<>(
                 Arrays.asList(mContext.getResources().getStringArray(
                         R.array.audio_recording_disclosure_exempt_apps)));
@@ -147,11 +156,6 @@ public class AudioRecordingDisclosureBar implements
                 new RecordAudioAppOpObserver(mContext, this),
                 new MicrophoneForegroundServicesObserver(mContext, this),
         };
-    }
-
-    private String[] getGlobalStringArray(String setting) {
-        String result = Settings.Global.getString(mContext.getContentResolver(), setting);
-        return TextUtils.isEmpty(result) ? new String[0] : result.split(",");
     }
 
     @UiThread
@@ -190,7 +194,9 @@ public class AudioRecordingDisclosureBar implements
                 break;
 
             case STATE_MINIMIZED:
-                expand(packageName);
+                if (mRevealRecordingPackages) {
+                    expand(packageName);
+                }
                 break;
 
             case STATE_DISAPPEARING:
@@ -228,9 +234,8 @@ public class AudioRecordingDisclosureBar implements
 
     @UiThread
     private void show(String packageName) {
-        final String label = getApplicationLabel(packageName);
         if (DEBUG) {
-            Log.d(TAG, "Showing indicator for " + packageName + " (" + label + ")...");
+            Log.d(TAG, "Showing indicator for " + packageName);
         }
 
         mIsLtr = mContext.getResources().getConfiguration().getLayoutDirection()
@@ -247,18 +252,30 @@ public class AudioRecordingDisclosureBar implements
         mTextView = mTextsContainers.findViewById(R.id.text);
         mBgEnd = mIndicatorView.findViewById(R.id.bg_end);
 
-        // Swap background drawables depending on layout directions (both drawables have rounded
-        // corners only on one side)
-        if (mIsLtr) {
-            mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
-            mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
-        } else {
-            mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
-            mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
-        }
-
         // Set up the notification text
-        mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
+        if (mRevealRecordingPackages) {
+            // Swap background drawables depending on layout directions (both drawables have rounded
+            // corners only on one side)
+            if (mIsLtr) {
+                mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
+                mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
+            } else {
+                mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
+                mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
+            }
+
+            final String label = getApplicationLabel(packageName);
+            mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
+        } else {
+            mTextsContainers.setVisibility(View.GONE);
+            mIconContainerBg.setVisibility(View.GONE);
+            mTextView.setVisibility(View.GONE);
+            mBgEnd.setVisibility(View.GONE);
+            mTextsContainers = null;
+            mIconContainerBg = null;
+            mTextView = null;
+            mBgEnd = null;
+        }
 
         // Initially change the visibility to INVISIBLE, wait until and receives the size and
         // then animate it moving from "off" the screen correctly
@@ -296,7 +313,11 @@ public class AudioRecordingDisclosureBar implements
                                             @Override
                                             public void onAnimationEnd(Animator animation) {
                                                 startPulsatingAnimation();
-                                                onExpanded();
+                                                if (mRevealRecordingPackages) {
+                                                    onExpanded();
+                                                } else {
+                                                    onMinimized();
+                                                }
                                             }
                                         });
                                 set.start();
@@ -321,6 +342,8 @@ public class AudioRecordingDisclosureBar implements
 
     @UiThread
     private void expand(String packageName) {
+        assertRevealingRecordingPackages();
+
         final String label = getApplicationLabel(packageName);
         if (DEBUG) {
             Log.d(TAG, "Expanding for " + packageName + " (" + label + ")...");
@@ -348,6 +371,8 @@ public class AudioRecordingDisclosureBar implements
 
     @UiThread
     private void minimize() {
+        assertRevealingRecordingPackages();
+
         if (DEBUG) Log.d(TAG, "Minimizing...");
         final int targetOffset = (mIsLtr ? 1 : -1) * mTextsContainers.getWidth();
         final AnimatorSet set = new AnimatorSet();
@@ -393,6 +418,8 @@ public class AudioRecordingDisclosureBar implements
 
     @UiThread
     private void onExpanded() {
+        assertRevealingRecordingPackages();
+
         if (DEBUG) Log.d(TAG, "Expanded");
         mState = STATE_SHOWN;
 
@@ -404,11 +431,13 @@ public class AudioRecordingDisclosureBar implements
         if (DEBUG) Log.d(TAG, "Minimized");
         mState = STATE_MINIMIZED;
 
-        if (!mPendingNotificationPackages.isEmpty()) {
-            // There is a new application that started recording, tell the user about it.
-            expand(mPendingNotificationPackages.poll());
-        } else {
-            hideIndicatorIfNeeded();
+        if (mRevealRecordingPackages) {
+            if (!mPendingNotificationPackages.isEmpty()) {
+                // There is a new application that started recording, tell the user about it.
+                expand(mPendingNotificationPackages.poll());
+            } else {
+                hideIndicatorIfNeeded();
+            }
         }
     }
 
@@ -451,7 +480,14 @@ public class AudioRecordingDisclosureBar implements
         animator.start();
     }
 
+    private String[] getGlobalStringArray(String setting) {
+        String result = Settings.Global.getString(mContext.getContentResolver(), setting);
+        return TextUtils.isEmpty(result) ? new String[0] : result.split(",");
+    }
+
     private String getApplicationLabel(String packageName) {
+        assertRevealingRecordingPackages();
+
         final PackageManager pm = mContext.getPackageManager();
         final ApplicationInfo appInfo;
         try {
@@ -460,5 +496,12 @@ public class AudioRecordingDisclosureBar implements
             return packageName;
         }
         return pm.getApplicationLabel(appInfo).toString();
+    }
+
+    private void assertRevealingRecordingPackages() {
+        if (!mRevealRecordingPackages) {
+            Log.e(TAG, "Not revealing recording packages",
+                    DEBUG ? new RuntimeException("Should not be called") : null);
+        }
     }
 }
