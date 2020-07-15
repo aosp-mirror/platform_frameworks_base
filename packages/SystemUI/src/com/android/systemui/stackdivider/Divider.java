@@ -529,6 +529,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         updateVisibility(false /* visible */);
         mMinimized = false;
         removeDivider();
+        mImePositionProcessor.reset();
     }
 
     void ensureMinimizedSplit() {

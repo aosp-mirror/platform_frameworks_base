@@ -117,6 +117,18 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
                 && (imeSplit.asBinder() == mSplits.mSecondary.token.asBinder());
     }
 
+    void reset() {
+        mPaused = true;
+        mPausedTargetAdjusted = false;
+        mAdjustedWhileHidden = false;
+        mAnimation = null;
+        mAdjusted = mTargetAdjusted = false;
+        mImeWasShown = mTargetShown = false;
+        mTargetPrimaryDim = mTargetSecondaryDim = mLastPrimaryDim = mLastSecondaryDim = 0.f;
+        mSecondaryHasFocus = false;
+        mLastAdjustTop = -1;
+    }
+
     private void updateDimTargets() {
         final boolean splitIsVisible = !getView().isHidden();
         mTargetPrimaryDim = (mSecondaryHasFocus && mTargetShown && splitIsVisible)
