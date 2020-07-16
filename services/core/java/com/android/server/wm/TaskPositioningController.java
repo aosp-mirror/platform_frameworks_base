@@ -86,7 +86,9 @@ class TaskPositioningController {
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(dc.getSession())
                     .setContainerLayer()
-                    .setName("Drag and Drop Input Consumer").build();
+                    .setName("Drag and Drop Input Consumer")
+                    .setCallsite("TaskPositioningController.showInputSurface")
+                    .build();
         }
 
         final InputWindowHandle h = getDragWindowHandleLocked();

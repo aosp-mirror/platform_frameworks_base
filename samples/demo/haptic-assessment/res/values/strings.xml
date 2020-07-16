@@ -1,0 +1,24 @@
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <string name="app_name">Haptic Hardware Assessment 2020</string>
+    <string name="click_effect_button">Effect 1</string>
+    <string name="oneshot_effect_button">Effect 2</string>
+    <string name="waveform_effect_button">Effect 3</string>
+    <string name="button_3_pass">Effect 3: PASS</string>
+    <string name="button_3_fail">Effect 3: FAIL</string>
+</resources>

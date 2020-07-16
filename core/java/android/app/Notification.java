@@ -96,9 +96,9 @@ import com.android.internal.util.ContrastColorUtil;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -1620,7 +1620,7 @@ public class Notification implements Parcelable
          * of non-textual RemoteInputs do not access these remote inputs.
          */
         public RemoteInput[] getDataOnlyRemoteInputs() {
-            return (RemoteInput[]) mExtras.getParcelableArray(EXTRA_DATA_ONLY_INPUTS);
+            return getParcelableArrayFromBundle(mExtras, EXTRA_DATA_ONLY_INPUTS, RemoteInput.class);
         }
 
         /**
@@ -1802,8 +1802,8 @@ public class Notification implements Parcelable
                 checkContextualActionNullFields();
 
                 ArrayList<RemoteInput> dataOnlyInputs = new ArrayList<>();
-                RemoteInput[] previousDataInputs =
-                    (RemoteInput[]) mExtras.getParcelableArray(EXTRA_DATA_ONLY_INPUTS);
+                RemoteInput[] previousDataInputs = getParcelableArrayFromBundle(
+                        mExtras, EXTRA_DATA_ONLY_INPUTS, RemoteInput.class);
                 if (previousDataInputs != null) {
                     for (RemoteInput input : previousDataInputs) {
                         dataOnlyInputs.add(input);
@@ -5368,8 +5368,8 @@ public class Notification implements Parcelable
                 big.setViewVisibility(R.id.actions_container, View.GONE);
             }
 
-            RemoteInputHistoryItem[] replyText = (RemoteInputHistoryItem[])
-                    mN.extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            RemoteInputHistoryItem[] replyText = getParcelableArrayFromBundle(
+                    mN.extras, EXTRA_REMOTE_INPUT_HISTORY_ITEMS, RemoteInputHistoryItem.class);
             if (validRemoteInput && replyText != null && replyText.length > 0
                     && !TextUtils.isEmpty(replyText[0].getText())
                     && p.maxRemoteInputHistory > 0) {
@@ -7495,6 +7495,7 @@ public class Notification implements Parcelable
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
             mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
+            mShortcutIcon = extras.getParcelable(EXTRA_CONVERSATION_ICON);
         }
 
         /**
@@ -7625,9 +7626,7 @@ public class Notification implements Parcelable
             }
             boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
-            Icon largeIcon = isConversationLayout && mShortcutIcon != null
-                    ? mShortcutIcon
-                    : mBuilder.mN.mLargeIcon;
+            Icon largeIcon = mBuilder.mN.mLargeIcon;
             TemplateBindResult bindResult = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .hasProgress(false)
@@ -7671,6 +7670,8 @@ public class Notification implements Parcelable
             contentView.setCharSequence(R.id.status_bar_latest_event_content,
                     "setConversationTitle", conversationTitle);
             if (isConversationLayout) {
+                contentView.setIcon(R.id.status_bar_latest_event_content,
+                        "setShortcutIcon", mShortcutIcon);
                 contentView.setBoolean(R.id.status_bar_latest_event_content,
                         "setIsImportantConversation", isImportantConversation);
             }
@@ -8154,8 +8155,9 @@ public class Notification implements Parcelable
             if (mBuilder.mActions.size() > 0) {
                 maxRows--;
             }
-            RemoteInputHistoryItem[] remoteInputHistory = (RemoteInputHistoryItem[])
-                    mBuilder.mN.extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            RemoteInputHistoryItem[] remoteInputHistory = getParcelableArrayFromBundle(
+                    mBuilder.mN.extras, EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                    RemoteInputHistoryItem.class);
             if (remoteInputHistory != null
                     && remoteInputHistory.length > NUMBER_OF_HISTORY_ALLOWED_UNTIL_REDUCTION) {
                 // Let's remove some messages to make room for the remote input history.
@@ -9578,8 +9580,8 @@ public class Notification implements Parcelable
                 mFlags = wearableBundle.getInt(KEY_FLAGS, DEFAULT_FLAGS);
                 mDisplayIntent = wearableBundle.getParcelable(KEY_DISPLAY_INTENT);
 
-                Notification[] pages = getNotificationArrayFromBundle(
-                        wearableBundle, KEY_PAGES);
+                Notification[] pages = getParcelableArrayFromBundle(
+                        wearableBundle, KEY_PAGES, Notification.class);
                 if (pages != null) {
                     Collections.addAll(mPages, pages);
                 }
@@ -10837,17 +10839,22 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Get an array of Notification objects from a parcelable array bundle field.
+     * Get an array of Parcelable objects from a parcelable array bundle field.
      * Update the bundle to have a typed array so fetches in the future don't need
      * to do an array copy.
      */
-    private static Notification[] getNotificationArrayFromBundle(Bundle bundle, String key) {
-        Parcelable[] array = bundle.getParcelableArray(key);
-        if (array instanceof Notification[] || array == null) {
-            return (Notification[]) array;
+    @Nullable
+    private static <T extends Parcelable> T[] getParcelableArrayFromBundle(
+            Bundle bundle, String key, Class<T> itemClass) {
+        final Parcelable[] array = bundle.getParcelableArray(key);
+        final Class<?> arrayClass = Array.newInstance(itemClass, 0).getClass();
+        if (arrayClass.isInstance(array) || array == null) {
+            return (T[]) array;
         }
-        Notification[] typedArray = Arrays.copyOf(array, array.length,
-                Notification[].class);
+        final T[] typedArray = (T[]) Array.newInstance(itemClass, array.length);
+        for (int i = 0; i < array.length; i++) {
+            typedArray[i] = (T) array[i];
+        }
         bundle.putParcelableArray(key, typedArray);
         return typedArray;
     }

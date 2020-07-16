@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.service.controls.Control
-import android.service.controls.actions.FloatAction
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.TemperatureControlTemplate
@@ -164,8 +163,10 @@ class ToggleRangeBehavior : Behavior {
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT
                 }
 
-                val rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(type, min, max, current)
-                info.setRangeInfo(rangeInfo)
+                if (isChecked) {
+                    val rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(type, min, max, current)
+                    info.setRangeInfo(rangeInfo)
+                }
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS)
             }
 
@@ -215,6 +216,7 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun beginUpdateRange() {
+        cvh.userInteractionInProgress = true
         cvh.setStatusTextSize(context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
     }
@@ -231,9 +233,11 @@ class ToggleRangeBehavior : Behavior {
 
         rangeAnimator?.cancel()
         if (isDragging) {
-            clipLayer.level = newLevel
             val isEdge = newLevel == MIN_LEVEL || newLevel == MAX_LEVEL
-            cvh.controlActionCoordinator.drag(isEdge)
+            if (clipLayer.level != newLevel) {
+                cvh.controlActionCoordinator.drag(isEdge)
+                clipLayer.level = newLevel
+            }
         } else if (newLevel != clipLayer.level) {
             rangeAnimator = ValueAnimator.ofInt(cvh.clipLayer.level, newLevel).apply {
                 addUpdateListener {
@@ -266,7 +270,7 @@ class ToggleRangeBehavior : Behavior {
 
     private fun format(primaryFormat: String, backupFormat: String, value: Float): String {
         return try {
-            String.format(primaryFormat, value)
+            String.format(primaryFormat, findNearestStep(value))
         } catch (e: IllegalFormatException) {
             Log.w(ControlsUiController.TAG, "Illegal format in range template", e)
             if (backupFormat == "") {
@@ -291,8 +295,9 @@ class ToggleRangeBehavior : Behavior {
         cvh.setStatusTextSize(context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_normal).toFloat())
         cvh.setStatusText("$currentStatusText $currentRangeValue", /* immediately */ true)
-        cvh.action(FloatAction(rangeTemplate.getTemplateId(),
-            findNearestStep(levelToRangeValue(clipLayer.getLevel()))))
+        cvh.controlActionCoordinator.setValue(cvh, rangeTemplate.getTemplateId(),
+            findNearestStep(levelToRangeValue(clipLayer.getLevel())))
+        cvh.userInteractionInProgress = false
     }
 
     fun findNearestStep(value: Float): Float {

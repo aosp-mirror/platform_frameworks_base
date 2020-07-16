@@ -46,8 +46,10 @@ public final class InputMethodDebug {
                 return "UNSPECIFIED";
             case StartInputReason.WINDOW_FOCUS_GAIN:
                 return "WINDOW_FOCUS_GAIN";
-            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY:
-                return "WINDOW_FOCUS_GAIN_REPORT_ONLY";
+            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR:
+                return "WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR";
+            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR:
+                return "WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR";
             case StartInputReason.APP_CALLED_RESTART_INPUT_API:
                 return "APP_CALLED_RESTART_INPUT_API";
             case StartInputReason.CHECK_FOCUS:

@@ -206,10 +206,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"ההדפסה הושבתה על ידי <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"הפעלה של פרופיל העבודה שלך"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"האפליקציות שלך לשימוש אישי יהיו חסומות עד להפעלת פרופיל העבודה"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"‏אפליקציות לשימוש אישי ייחסמו ב-<xliff:g id="DATE">%1$s</xliff:g> בשעה <xliff:g id="TIME">%2$s</xliff:g>. מנהל ה-IT לא מתיר השבתה של יותר מ-<xliff:g id="NUMBER">%3$d</xliff:g> ימים של פרופיל העבודה."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"הפעלה"</string>
     <string name="me" msgid="6207584824693813140">"אני"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"אפשרויות טאבלט"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏אפשרויות Android TV"</string>
@@ -1665,7 +1663,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"הסר"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏לשירות שפועל בחזית מ-<xliff:g id="PACKAGENAME">%1$s</xliff:g> שהחל ברקע לא תהיה הרשאת while-in-use בגרסאות R build בעתיד. יש לעיין בכתובת go/r-bg-fgs-restriction ולהגיש דוח על באג."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\n\nהאזנה בעוצמת קול גבוהה למשכי זמן ממושכים עלולה לפגוע בשמיעה."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"להשתמש בקיצור הדרך לתכונת הנגישות?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"כשקיצור הדרך מופעל, לחיצה על שני לחצני עוצמת הקול למשך שלוש שניות מפעילה את תכונת הנגישות."</string>

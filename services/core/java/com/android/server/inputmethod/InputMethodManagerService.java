@@ -177,6 +177,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -207,6 +208,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     static final int MSG_INITIALIZE_IME = 1040;
     static final int MSG_CREATE_SESSION = 1050;
+    static final int MSG_REMOVE_IME_SURFACE = 1060;
+    static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
 
     static final int MSG_START_INPUT = 2000;
 
@@ -588,6 +591,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Was the keyguard locked when this client became current?
     private boolean mCurClientInKeyguard;
+
+    /**
+     * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
+     */
+    private boolean mCurPerceptible;
 
     /**
      * Set to true if our ServiceConnection is currently actively bound to
@@ -2114,6 +2122,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onInputMethodFinishInput() throws RemoteException {
             mCallback.onInputMethodFinishInput();
         }
+
+        @Override
+        public void onInlineSuggestionsSessionInvalidated() throws RemoteException {
+            mCallback.onInlineSuggestionsSessionInvalidated();
+        }
     }
 
     /**
@@ -2351,6 +2364,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurFocusedWindow, mCurAttribute, mCurFocusedWindowSoftInputMode, mCurSeq);
         mImeTargetWindowMap.put(startInputToken, mCurFocusedWindow);
         mStartInputHistory.addEntry(info);
+
+        // Seems that PackageManagerInternal#grantImplicitAccess() doesn't handle cross-user
+        // implicit visibility (e.g. IME[user=10] -> App[user=0]) thus we do this only for the
+        // same-user scenarios.
+        // That said ignoring cross-user scenario will never affect IMEs that do not have
+        // INTERACT_ACROSS_USERS(_FULL) permissions, which is actually almost always the case.
+        if (mSettings.getCurrentUserId() == UserHandle.getUserId(mCurClient.uid)) {
+            mPackageManagerInternal.grantImplicitAccess(mSettings.getCurrentUserId(),
+                    null /* intent */, UserHandle.getAppId(mCurMethodUid), mCurClient.uid, true);
+        }
 
         final SessionState session = mCurClient.curSession;
         executeOrSendMessage(session.method, mCaller.obtainMessageIIOOOO(
@@ -2918,6 +2941,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
                 vis = 0;
             }
+            if (!mCurPerceptible) {
+                vis = 0;
+            }
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
@@ -3124,6 +3150,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(windowToken, flags, resultReceiver,
                         SoftInputShowHideReason.SHOW_SOFT_INPUT);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+        Objects.requireNonNull(windowToken, "windowToken must not be null");
+        int uid = Binder.getCallingUid();
+        synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (mCurFocusedWindow == windowToken
+                        && mCurPerceptible != perceptible) {
+                    mCurPerceptible = perceptible;
+                    updateSystemUiLocked(mImeWindowVis, mBackDisposition);
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3412,7 +3460,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurFocusedWindow == windowToken) {
             if (DEBUG) {
                 Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
-                        + " attribute=" + attribute + ", token = " + windowToken);
+                        + " attribute=" + attribute + ", token = " + windowToken
+                        + ", startInputReason="
+                        + InputMethodDebug.startInputReasonToString(startInputReason));
             }
             if (attribute != null) {
                 return startInputUncheckedLocked(cs, inputContext, missingMethods,
@@ -3425,6 +3475,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurFocusedWindow = windowToken;
         mCurFocusedWindowSoftInputMode = softInputMode;
         mCurFocusedWindowClient = cs;
+        mCurPerceptible = true;
 
         // Should we auto-show the IME even if the caller has not
         // specified what should be done with it?
@@ -3936,6 +3987,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
+    public void removeImeSurface() {
+        mContext.enforceCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW, null);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
+    }
+
+    @Override
+    public void removeImeSurfaceFromWindow(IBinder windowToken) {
+        // No permission check, because we'll only execute the request if the calling window is
+        // also the current IME client.
+        mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
+    }
+
     @BinderThread
     private void notifyUserAction(@NonNull IBinder token) {
         if (DEBUG) {
@@ -3983,7 +4047,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // Send it to window manager to hide IME from IME target window.
                     // TODO(b/139861270): send to mCurClient.client once IMMS is aware of
                     // actual IME target.
-                    mWindowManagerInternal.hideIme(mHideRequestWindowMap.get(windowToken));
+                    mWindowManagerInternal.hideIme(
+                            mHideRequestWindowMap.get(windowToken),
+                            mCurClient.selfReportedDisplayId);
                 }
             } else {
                 // Send to window manager to show IME after IME layout finishes.
@@ -4204,6 +4270,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
                 args.recycle();
+                return true;
+            }
+            case MSG_REMOVE_IME_SURFACE: {
+                synchronized (mMethodMap) {
+                    try {
+                        if (mEnabledSession != null && mEnabledSession.session != null
+                                && !mShowRequested) {
+                            mEnabledSession.session.removeImeSurface();
+                        }
+                    } catch (RemoteException e) {
+                    }
+                }
+                return true;
+            }
+            case MSG_REMOVE_IME_SURFACE_FROM_WINDOW: {
+                IBinder windowToken = (IBinder) msg.obj;
+                synchronized (mMethodMap) {
+                    try {
+                        if (windowToken == mCurFocusedWindow
+                                && mEnabledSession != null && mEnabledSession.session != null) {
+                            mEnabledSession.session.removeImeSurface();
+                        }
+                    } catch (RemoteException e) {
+                    }
+                }
                 return true;
             }
             // ---------------------------------------------------------
@@ -4966,6 +5057,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mInputManagerInternal.transferTouchFocus(sourceInputToken, curHostInputToken);
     }
 
+    private void reportImeControl(@Nullable IBinder windowToken) {
+        synchronized (mMethodMap) {
+            if (mCurFocusedWindow != windowToken) {
+                // mCurPerceptible was set by the focused window, but it is no longer in control,
+                // so we reset mCurPerceptible.
+                mCurPerceptible = true;
+            }
+        }
+    }
+
     private static final class LocalServiceImpl extends InputMethodManagerInternal {
         @NonNull
         private final InputMethodManagerService mService;
@@ -5017,6 +5118,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
                 int displayId) {
             return mService.transferTouchFocusToImeWindow(sourceInputToken, displayId);
+        }
+
+        @Override
+        public void reportImeControl(@Nullable IBinder windowToken) {
+            mService.reportImeControl(windowToken);
+        }
+
+        @Override
+        public void removeImeSurface() {
+            mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
         }
     }
 
@@ -5120,6 +5231,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurMethodId=" + mCurMethodId);
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
+            p.println("  mCurPerceptible=" + mCurPerceptible);
             p.println("  mCurFocusedWindow=" + mCurFocusedWindow
                     + " softInputMode=" +
                     InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode)

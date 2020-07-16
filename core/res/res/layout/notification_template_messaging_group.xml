@@ -37,6 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:baselineAligned="true"
         android:orientation="vertical">
         <com.android.internal.widget.ImageFloatingTextView
             android:id="@+id/message_name"

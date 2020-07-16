@@ -526,8 +526,16 @@ static void UnsetChldSignalHandler() {
 
 // Calls POSIX setgroups() using the int[] object as an argument.
 // A nullptr argument is tolerated.
-static void SetGids(JNIEnv* env, jintArray managed_gids, fail_fn_t fail_fn) {
+static void SetGids(JNIEnv* env, jintArray managed_gids, jboolean is_child_zygote,
+                    fail_fn_t fail_fn) {
   if (managed_gids == nullptr) {
+    if (is_child_zygote) {
+      // For child zygotes like webview and app zygote, we want to clear out
+      // any supplemental groups the parent zygote had.
+      if (setgroups(0, NULL) == -1) {
+        fail_fn(CREATE_ERROR("Failed to remove supplementary groups for child zygote"));
+      }
+    }
     return;
   }
 
@@ -1351,7 +1359,13 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   }
   closedir(dir);
 
-  bool legacySymlinkCreated = false;
+  // Prepare default dirs for user 0 as user 0 always exists.
+  int result = symlink("/data/data", "/data/user/0");
+  if (result != 0) {
+    fail_fn(CREATE_ERROR("Failed to create symlink /data/user/0 %s", strerror(errno)));
+  }
+  PrepareDirIfNotPresent("/data/user_de/0", DEFAULT_DATA_DIR_PERMISSION,
+      AID_ROOT, AID_ROOT, fail_fn);
 
   for (int i = 0; i < size; i += 3) {
     std::string const & packageName = merged_data_info_list[i];
@@ -1392,17 +1406,8 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
       char internalDeUserPath[PATH_MAX];
       snprintf(internalCeUserPath, PATH_MAX, "/data/user/%d", userId);
       snprintf(internalDeUserPath, PATH_MAX, "/data/user_de/%d", userId);
-      // If it's user 0, create a symlink /data/user/0 -> /data/data,
-      // otherwise create /data/user/$USER
+      // If it's not user 0, create /data/user/$USER.
       if (userId == 0) {
-        if (!legacySymlinkCreated) {
-          legacySymlinkCreated = true;
-          int result = symlink(internalLegacyCePath, internalCeUserPath);
-          if (result != 0) {
-             fail_fn(CREATE_ERROR("Failed to create symlink %s %s", internalCeUserPath,
-              strerror(errno)));
-          }
-        }
         actualCePath = internalLegacyCePath;
       } else {
         PrepareDirIfNotPresent(internalCeUserPath, DEFAULT_DATA_DIR_PERMISSION,
@@ -1579,10 +1584,6 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
   // Fuse is ready, so we can start using fuse path.
   int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
 
-  if (size == 0) {
-    fail_fn(CREATE_ERROR("Data package list cannot be empty"));
-  }
-
   // Create tmpfs on Android/obb and Android/data so these 2 dirs won't enter fuse anymore.
   std::string androidObbDir = StringPrintf("/storage/emulated/%d/Android/obb", user_id);
   MountAppDataTmpFs(androidObbDir, fail_fn);
@@ -1665,7 +1666,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     }
   }
 
-  SetGids(env, gids, fail_fn);
+  SetGids(env, gids, is_child_zygote, fail_fn);
   SetRLimits(env, rlimits, fail_fn);
 
   if (need_pre_initialize_native_bridge) {
@@ -1736,6 +1737,8 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
   }
   android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+  // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
+  runtime_flags &= ~RuntimeFlags::MEMORY_TAG_LEVEL_MASK;
 
   bool forceEnableGwpAsan = false;
   switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
@@ -1748,6 +1751,8 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
           android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
   }
+  // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
+  runtime_flags &= ~RuntimeFlags::GWP_ASAN_LEVEL_MASK;
 
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).

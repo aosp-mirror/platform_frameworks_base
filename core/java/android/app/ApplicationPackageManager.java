@@ -139,6 +139,10 @@ public class ApplicationPackageManager extends PackageManager {
     public static final String APP_PERMISSION_BUTTON_ALLOW_ALWAYS =
             "app_permission_button_allow_always";
 
+    // Name of the package which the permission controller's resources are in.
+    public static final String PERMISSION_CONTROLLER_RESOURCE_PACKAGE =
+            "com.android.permissioncontroller";
+
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -759,23 +763,24 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void revokeRuntimePermission(String packageName, String permName, UserHandle user) {
-        if (DEBUG_TRACE_PERMISSION_UPDATES
-                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
-            Log.i(TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
-                    + permName + " for user " + user.getIdentifier(), new RuntimeException());
-        }
-        try {
-            mPermissionManager
-                    .revokeRuntimePermission(packageName, permName, user.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        revokeRuntimePermission(packageName, permName, user, null);
     }
 
     @Override
     public void revokeRuntimePermission(String packageName, String permName, UserHandle user,
             String reason) {
-        // TODO evanseverson: impl
+        if (DEBUG_TRACE_PERMISSION_UPDATES
+                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
+            Log.i(TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
+                    + permName + " for user " + user.getIdentifier() + " with reason " + reason,
+                    new RuntimeException());
+        }
+        try {
+            mPermissionManager
+                    .revokeRuntimePermission(packageName, permName, user.getIdentifier(), reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override
@@ -893,8 +898,7 @@ public class ApplicationPackageManager extends PackageManager {
                     mContext.createPackageContext(permissionController, 0);
 
             int textId = context.getResources().getIdentifier(APP_PERMISSION_BUTTON_ALLOW_ALWAYS,
-                    "string", "com.android.permissioncontroller");
-//                    permissionController); STOPSHIP b/147434671
+                    "string", PERMISSION_CONTROLLER_RESOURCE_PACKAGE);
             if (textId != 0) {
                 return context.getText(textId);
             }

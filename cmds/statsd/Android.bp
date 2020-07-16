@@ -116,7 +116,6 @@ cc_defaults {
         "libcutils",
         "libgtest_prod",
         "libprotoutil",
-        "libstatsmetadata",
         "libstatslog_statsd",
         "libsysutils",
         "libutils",
@@ -126,51 +125,6 @@ cc_defaults {
         "libbinder_ndk",
         "libincident",
         "liblog",
-    ],
-}
-
-// ================
-// libstatsmetadata
-// ================
-
-genrule {
-    name: "atoms_info.h",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --atomsInfoHeader $(genDir)/atoms_info.h",
-    out: [
-        "atoms_info.h",
-    ],
-}
-
-genrule {
-    name: "atoms_info.cpp",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --atomsInfoCpp $(genDir)/atoms_info.cpp",
-    out: [
-        "atoms_info.cpp",
-    ],
-}
-
-cc_library_static {
-    name: "libstatsmetadata",
-    host_supported: true,
-    generated_sources: [
-        "atoms_info.cpp",
-    ],
-    generated_headers: [
-        "atoms_info.h",
-    ],
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
-    export_generated_headers: [
-        "atoms_info.h",
-    ],
-    apex_available: [
-        //TODO(b/149782403): Remove this once statsd no longer links against libstatsmetadata
-        "com.android.os.statsd",
-        "test_com.android.os.statsd",
     ],
 }
 

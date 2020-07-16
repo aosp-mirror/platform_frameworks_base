@@ -1785,6 +1785,7 @@
   <java-symbol type="string" name="faceunlock_multiple_failures" />
   <java-symbol type="string" name="global_actions" />
   <java-symbol type="string" name="global_action_power_off" />
+  <java-symbol type="string" name="global_action_power_options" />
   <java-symbol type="string" name="global_action_restart" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
   <java-symbol type="string" name="global_actions_airplane_mode_on_status" />
@@ -1850,10 +1851,8 @@
   <java-symbol type="array" name="config_tether_bluetooth_regexs" />
   <java-symbol type="array" name="config_tether_dhcp_range" />
   <java-symbol type="array" name="config_tether_upstream_types" />
-  <java-symbol type="bool" name="config_tether_upstream_automatic" />
   <java-symbol type="array" name="config_tether_usb_regexs" />
   <java-symbol type="array" name="config_tether_wifi_regexs" />
-  <java-symbol type="array" name="config_tether_wifi_p2p_regexs" />
   <java-symbol type="array" name="config_usbHostBlacklist" />
   <java-symbol type="array" name="config_serialPorts" />
   <java-symbol type="array" name="radioAttributes" />
@@ -2766,6 +2765,7 @@
   <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
 
   <java-symbol type="id" name="actions_container" />
+  <java-symbol type="id" name="actions_container_layout" />
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
   <java-symbol type="id" name="pending_intent_tag" />
@@ -3533,6 +3533,8 @@
   <java-symbol type="id" name="clip_to_padding_tag" />
   <java-symbol type="id" name="clip_children_tag" />
   <java-symbol type="id" name="bubble_button" />
+  <java-symbol type="dimen" name="bubble_visible_padding_end" />
+  <java-symbol type="dimen" name="bubble_gone_padding_end" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
@@ -3823,10 +3825,10 @@
 
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
   <java-symbol type="bool" name="config_inflateSignalStrength" />
-  <java-symbol type="array" name="config_restrictedPreinstalledCarrierApps" />
 
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
+  <java-symbol type="drawable" name="ic_number11" />
 
   <java-symbol type="integer" name="config_notificationWarnRemoteViewSizeBytes" />
   <java-symbol type="integer" name="config_notificationStripRemoteViewSizeBytes" />
@@ -3834,7 +3836,9 @@
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
 
+  <java-symbol type="layout" name="chooser_dialog" />
   <java-symbol type="layout" name="chooser_dialog_item" />
+  <java-symbol type="drawable" name="chooser_dialog_background" />
   <java-symbol type="id" name="chooser_copy_button" />
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
@@ -3897,6 +3901,12 @@
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
 
+  <java-symbol type="color" name="conversation_important_highlight" />
+  <java-symbol type="dimen" name="importance_ring_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_anim_max_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_size" />
+  <java-symbol type="dimen" name="conversation_icon_size_badged" />
+
   <java-symbol type="id" name="header_icon_container" />
   <java-symbol type="attr" name="notificationHeaderTextAppearance" />
   <java-symbol type="string" name="conversation_single_line_name_display" />
@@ -3944,6 +3954,13 @@
   <java-symbol type="id" name="conversation_unread_count" />
   <java-symbol type="string" name="unread_convo_overflow" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Conversation.AppName" />
+  <java-symbol type="drawable" name="conversation_badge_background" />
+  <java-symbol type="drawable" name="conversation_badge_ring" />
+  <java-symbol type="color" name="conversation_important_highlight" />
+  <java-symbol type="dimen" name="importance_ring_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_anim_max_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_size" />
+  <java-symbol type="dimen" name="conversation_icon_size_badged" />
 
   <!-- Intent resolver and share sheet -->
   <java-symbol type="string" name="resolver_personal_tab" />
@@ -3989,9 +4006,6 @@
   <java-symbol type="dimen" name="resolver_empty_state_container_padding_top" />
   <java-symbol type="dimen" name="resolver_empty_state_container_padding_bottom" />
 
-  <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
-  <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />
-
   <java-symbol type="string" name="config_deviceSpecificDisplayAreaPolicyProvider" />
 
   <!-- Whether to expand the lock screen user switcher by default -->
@@ -4032,9 +4046,6 @@
   <java-symbol type="string" name="config_pdp_reject_user_authentication_failed" />
   <java-symbol type="string" name="config_pdp_reject_service_not_subscribed" />
   <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
-
-  <java-symbol type="string" name="config_overlayableConfigurator" />
-  <java-symbol type="array" name="config_overlayableConfiguratorTargets" />
 
   <java-symbol type="array" name="config_notificationMsgPkgsAllowedAsConvos" />
 </resources>

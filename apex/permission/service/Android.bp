@@ -20,14 +20,26 @@ filegroup {
     path: "java",
 }
 
-java_library {
+java_sdk_library {
     name: "service-permission",
+    defaults: ["framework-system-server-module-defaults"],
+    visibility: [
+        "//frameworks/base/services/core",
+        "//frameworks/base/apex/permission",
+        "//frameworks/base/apex/permission/testing",
+        "//frameworks/base/apex/permission/tests",
+        "//frameworks/base/services/tests/mockingservicestests",
+    ],
+    impl_library_visibility: [
+        "//visibility:override",
+        "//frameworks/base/apex/permission/tests",
+        "//frameworks/base/services/tests/mockingservicestests",
+        "//frameworks/base/services/tests/servicestests",
+    ],
     srcs: [
         ":service-permission-sources",
     ],
-    sdk_version: "module_current",
     libs: [
-        "framework-annotations-lib",
         "framework-permission",
     ],
     apex_available: [
@@ -35,29 +47,4 @@ java_library {
         "test_com.android.permission",
     ],
     installable: true,
-}
-
-droidstubs {
-    name: "service-permission-stubs-srcs",
-    srcs: [ ":service-permission-sources" ],
-    defaults: ["service-module-stubs-srcs-defaults"],
-    check_api: {
-        last_released: {
-            api_file: ":service-permission.api.system-server.latest",
-            removed_api_file: ":service-permission-removed.api.system-server.latest",
-        },
-        api_lint: {
-            new_since: ":service-permission.api.system-server.latest",
-        },
-    },
-    visibility: ["//visibility:private"],
-    dist: { dest: "service-permission.txt" },
-}
-
-java_library {
-    name: "service-permission-stubs",
-    srcs: [":service-permission-stubs-srcs"],
-    defaults: ["service-module-stubs-defaults"],
-    visibility: ["//frameworks/base/services/core"],
-    dist: { dest: "service-permission.jar" },
 }

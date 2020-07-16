@@ -29,6 +29,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.InputWindowHandle;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
@@ -120,10 +121,13 @@ class Watermark {
                     .setName("WatermarkSurface")
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
+                    .setCallsite("Watermark")
                     .build();
             t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 100)
                     .setPosition(ctrl, 0, 0)
                     .show(ctrl);
+            // Ensure we aren't considered as obscuring for Input purposes.
+            InputMonitor.setTrustedOverlayInputInfo(ctrl, t, dc.getDisplayId(), "Watermark");
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }

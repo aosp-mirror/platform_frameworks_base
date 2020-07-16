@@ -13,26 +13,26 @@
 // limitations under the License.
 
 android_library_import {
-    name: "window-extensions",
-    aars: ["window-extensions-release.aar"],
+    name: "window-sidecar",
+    aars: ["window-sidecar-release.aar"],
     sdk_version: "current",
 }
 
 java_library {
-    name: "androidx.window.extensions",
+    name: "androidx.window.sidecar",
     srcs: ["src/**/*.java"],
-    static_libs: ["window-extensions"],
+    static_libs: ["window-sidecar"],
     installable: true,
     sdk_version: "core_platform",
     vendor: true,
     libs: ["framework", "androidx.annotation_annotation",],
-    required: ["androidx.window.extensions.xml",],
+    required: ["androidx.window.sidecar.xml",],
 }
 
 prebuilt_etc {
-    name: "androidx.window.extensions.xml",
+    name: "androidx.window.sidecar.xml",
     vendor: true,
     sub_dir: "permissions",
-    src: "androidx.window.extensions.xml",
+    src: "androidx.window.sidecar.xml",
     filename_from_src: true,
 }

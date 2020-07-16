@@ -16,18 +16,34 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableContentResolver;
+import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -38,14 +54,18 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.statusbar.phone.AutoTileManagerTest.MyContextWrapper;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -64,9 +84,18 @@ public class AutoTileManagerTest extends SysuiTestCase {
     private static final String TEST_CUSTOM_SPEC = "custom(" + TEST_COMPONENT + ")";
     private static final String SEPARATOR = AutoTileManager.SETTING_SEPARATOR;
 
+    private static final int USER = 0;
+
     @Mock private QSTileHost mQsTileHost;
     @Mock private AutoAddTracker mAutoAddTracker;
     @Mock private CastController mCastController;
+    @Mock private HotspotController mHotspotController;
+    @Mock private DataSaverController mDataSaverController;
+    @Mock private ManagedProfileController mManagedProfileController;
+    @Mock private NightDisplayListener mNightDisplayListener;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private AutoAddTracker.Builder mAutoAddTrackerBuilder;
+    @Mock private Context mUserContext;
 
     private AutoTileManager mAutoTileManager;
 
@@ -82,17 +111,111 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 }
         );
 
-        mAutoTileManager = createAutoTileManager();
+        when(mAutoAddTrackerBuilder.build()).thenReturn(mAutoAddTracker);
+        when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
+        when(mUserContext.getUser()).thenReturn(UserHandle.of(USER));
+
+        mAutoTileManager = createAutoTileManager(new
+                MyContextWrapper(mContext));
     }
 
-    private AutoTileManager createAutoTileManager() {
-        return new AutoTileManager(mContext, mAutoAddTracker, mQsTileHost,
+    @After
+    public void tearDown() {
+        mAutoTileManager.destroy();
+    }
+
+    private AutoTileManager createAutoTileManager(Context context) {
+        return new AutoTileManager(context, mAutoAddTrackerBuilder, mQsTileHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
-                mock(HotspotController.class),
-                mock(DataSaverController.class),
-                mock(ManagedProfileController.class),
-                mock(NightDisplayListener.class),
+                mHotspotController,
+                mDataSaverController,
+                mManagedProfileController,
+                mNightDisplayListener,
                 mCastController);
+    }
+
+    @Test
+    public void testChangeUserCallbacksStoppedAndStarted() throws Exception {
+        TestableLooper.get(this).runWithLooper(() ->
+                mAutoTileManager.changeUser(UserHandle.of(USER + 1))
+        );
+
+        InOrder inOrderHotspot = inOrder(mHotspotController);
+        inOrderHotspot.verify(mHotspotController).removeCallback(any());
+        inOrderHotspot.verify(mHotspotController).addCallback(any());
+
+        InOrder inOrderDataSaver = inOrder(mDataSaverController);
+        inOrderDataSaver.verify(mDataSaverController).removeCallback(any());
+        inOrderDataSaver.verify(mDataSaverController).addCallback(any());
+
+        InOrder inOrderManagedProfile = inOrder(mManagedProfileController);
+        inOrderManagedProfile.verify(mManagedProfileController).removeCallback(any());
+        inOrderManagedProfile.verify(mManagedProfileController).addCallback(any());
+
+        if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
+            InOrder inOrderNightDisplay = inOrder(mNightDisplayListener);
+            inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNull());
+            inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNotNull());
+        }
+
+        InOrder inOrderCast = inOrder(mCastController);
+        inOrderCast.verify(mCastController).removeCallback(any());
+        inOrderCast.verify(mCastController).addCallback(any());
+
+        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        assertEquals(USER + 1, setting.getCurrentUser());
+        assertTrue(setting.isListening());
+    }
+
+    @Test
+    public void testChangeUserSomeCallbacksNotAdded() throws Exception {
+        when(mAutoAddTracker.isAdded("hotspot")).thenReturn(true);
+        when(mAutoAddTracker.isAdded("work")).thenReturn(true);
+        when(mAutoAddTracker.isAdded("cast")).thenReturn(true);
+        when(mAutoAddTracker.isAdded(TEST_SPEC)).thenReturn(true);
+
+        TestableLooper.get(this).runWithLooper(() ->
+                mAutoTileManager.changeUser(UserHandle.of(USER + 1))
+        );
+
+        verify(mAutoAddTracker).changeUser(UserHandle.of(USER + 1));
+
+        InOrder inOrderHotspot = inOrder(mHotspotController);
+        inOrderHotspot.verify(mHotspotController).removeCallback(any());
+        inOrderHotspot.verify(mHotspotController, never()).addCallback(any());
+
+        InOrder inOrderDataSaver = inOrder(mDataSaverController);
+        inOrderDataSaver.verify(mDataSaverController).removeCallback(any());
+        inOrderDataSaver.verify(mDataSaverController).addCallback(any());
+
+        InOrder inOrderManagedProfile = inOrder(mManagedProfileController);
+        inOrderManagedProfile.verify(mManagedProfileController).removeCallback(any());
+        inOrderManagedProfile.verify(mManagedProfileController, never()).addCallback(any());
+
+        if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
+            InOrder inOrderNightDisplay = inOrder(mNightDisplayListener);
+            inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNull());
+            inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNotNull());
+        }
+
+        InOrder inOrderCast = inOrder(mCastController);
+        inOrderCast.verify(mCastController).removeCallback(any());
+        inOrderCast.verify(mCastController, never()).addCallback(any());
+
+        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        assertEquals(USER + 1, setting.getCurrentUser());
+        assertFalse(setting.isListening());
+    }
+
+    @Test
+    public void testGetCurrentUserId() throws Exception {
+        assertEquals(USER, mAutoTileManager.getCurrentUserId());
+
+        TestableLooper.get(this).runWithLooper(() ->
+                mAutoTileManager.changeUser(UserHandle.of(USER + 100))
+        );
+
+        assertEquals(USER + 100, mAutoTileManager.getCurrentUserId());
     }
 
     @Test
@@ -172,11 +295,12 @@ public class AutoTileManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSettingTileAddedComponent_onChanged() {
+    public void testSettingTileAddedComponentAtEnd_onChanged() {
         changeValue(TEST_SETTING_COMPONENT, 1);
         waitForIdleSync();
         verify(mAutoAddTracker).setTileAdded(TEST_CUSTOM_SPEC);
-        verify(mQsTileHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT));
+        verify(mQsTileHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT)
+            , /* end */ true);
     }
 
     @Test
@@ -212,14 +336,14 @@ public class AutoTileManagerTest extends SysuiTestCase {
     public void testEmptyArray_doesNotCrash() {
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsAutoAdd, new String[0]);
-        createAutoTileManager();
+        createAutoTileManager(mContext).destroy();
     }
 
     @Test
     public void testMissingConfig_doesNotCrash() {
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsAutoAdd, null);
-        createAutoTileManager();
+        createAutoTileManager(mContext).destroy();
     }
 
     // Will only notify if it's listening
@@ -228,6 +352,24 @@ public class AutoTileManagerTest extends SysuiTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(), key, value);
         if (s != null && s.isListening()) {
             s.onChange(false);
+        }
+    }
+
+    class MyContextWrapper extends ContextWrapper {
+
+        private TestableContentResolver mSpiedTCR;
+
+        MyContextWrapper(TestableContext context) {
+            super(context);
+            mSpiedTCR = spy(context.getContentResolver());
+            doNothing().when(mSpiedTCR).registerContentObserver(any(), anyBoolean(), any(),
+                    anyInt());
+            doNothing().when(mSpiedTCR).unregisterContentObserver(any());
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mSpiedTCR;
         }
     }
 }

@@ -557,9 +557,9 @@ public class NotificationContentView extends FrameLayout {
 
     private void focusExpandButtonIfNecessary() {
         if (mFocusOnVisibilityChange) {
-            NotificationHeaderView header = getVisibleNotificationHeader();
-            if (header != null) {
-                ImageView expandButton = header.getExpandButton();
+            NotificationViewWrapper wrapper = getVisibleWrapper(mVisibleType);
+            if (wrapper != null) {
+                View expandButton = wrapper.getExpandButton();
                 if (expandButton != null) {
                     expandButton.requestAccessibilityFocus();
                 }
@@ -660,6 +660,14 @@ public class NotificationContentView extends FrameLayout {
 
     private void updateContentTransformation() {
         int visibleType = calculateVisibleType();
+        if (getTransformableViewForVisibleType(mVisibleType) == null) {
+            // Case where visible view was removed in middle of transformation. In this case, we
+            // just update immediately to the appropriate view.
+            mVisibleType = visibleType;
+            updateViewVisibilities(visibleType);
+            updateBackgroundColor(false);
+            return;
+        }
         if (visibleType != mVisibleType) {
             // A new transformation starts
             mTransformationStartVisibleType = mVisibleType;
@@ -1348,7 +1356,9 @@ public class NotificationContentView extends FrameLayout {
         }
         ImageView bubbleButton = layout.findViewById(com.android.internal.R.id.bubble_button);
         View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
-        if (bubbleButton == null || actionContainer == null) {
+        LinearLayout actionContainerLayout =
+                layout.findViewById(com.android.internal.R.id.actions_container_layout);
+        if (bubbleButton == null || actionContainer == null || actionContainerLayout == null) {
             return;
         }
         boolean isPersonWithShortcut =
@@ -1374,8 +1384,16 @@ public class NotificationContentView extends FrameLayout {
             bubbleButton.setOnClickListener(mContainingNotification.getBubbleClickListener());
             bubbleButton.setVisibility(VISIBLE);
             actionContainer.setVisibility(VISIBLE);
+
+            int paddingEnd = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.bubble_visible_padding_end);
+            actionContainerLayout.setPaddingRelative(0, 0, paddingEnd, 0);
         } else  {
             bubbleButton.setVisibility(GONE);
+
+            int paddingEnd = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.bubble_gone_padding_end);
+            actionContainerLayout.setPaddingRelative(0, 0, paddingEnd, 0);
         }
     }
 

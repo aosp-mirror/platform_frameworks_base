@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"删除"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"无法添加自定义铃声"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"无法删除自定义铃声"</string>
+    <string name="app_label" msgid="3091611356093417332">"声音"</string>
 </resources>

@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"मिटाएं"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"आपके मुताबिक रिंगटोन नहीं जोड़ी जा सकी"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"आपके मुताबिक रिंगटोन नहीं हटाई जा सकी"</string>
+    <string name="app_label" msgid="3091611356093417332">"Sounds"</string>
 </resources>

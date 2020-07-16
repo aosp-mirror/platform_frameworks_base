@@ -1269,12 +1269,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
      * Dump proto for the statsd, mainly for testing.
      */
     private void dumpProtoForStatsd(FileDescriptor fd) {
-        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        final ProtoOutputStream[] protos = {new ProtoOutputStream(fd)};
 
         ProcessStats procStats = new ProcessStats(false);
         getCommittedStatsMerged(0, 0, true, null, procStats);
-        procStats.dumpAggregatedProtoForStatsd(proto);
+        procStats.dumpAggregatedProtoForStatsd(protos, 999999 /* max bytes per shard */);
 
-        proto.flush();
+        protos[0].flush();
     }
 }

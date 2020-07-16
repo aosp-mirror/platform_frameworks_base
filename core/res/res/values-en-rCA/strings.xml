@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printing disabled by <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Turn on your work profile"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Your personal apps are blocked until you turn on your work profile"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Personal apps will be blocked on <xliff:g id="DATE">%1$s</xliff:g> at <xliff:g id="TIME">%2$s</xliff:g>. Your IT admin doesn’t allow your work profile to stay off for more than <xliff:g id="NUMBER">%3$d</xliff:g> days."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Turn on"</string>
     <string name="me" msgid="6207584824693813140">"Me"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet options"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV options"</string>
@@ -318,10 +316,10 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Body sensors"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"access sensor data about your vital signs"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Retrieve window content"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspect the content of a window that you\'re interacting with."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspect the content of a window you\'re interacting with."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Turn on Explore by Touch"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Tapped items will be spoken aloud and the screen can be explored using gestures."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Observe text that you type"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Observe text you type"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Includes personal data such as credit card numbers and passwords."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Control display magnification"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Control the display\'s zoom level and positioning."</string>
@@ -684,7 +682,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Change the screen lock."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Lock the screen"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Control how and when the screen locks."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Delete all data"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Erase all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Delete your Android TV device\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Erase the phone\'s data without warning by performing a factory data reset."</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remove"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"The background started foreground service from <xliff:g id="PACKAGENAME">%1$s</xliff:g> will not have while-in-use permission in future R builds. Please see go/r-bg-fgs-restriction and file a bug report."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Use Accessibility Shortcut?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"When the shortcut is on, pressing both volume buttons for three seconds will start an accessibility feature."</string>
@@ -1651,8 +1648,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Done"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Turn off Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Use Shortcut"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Colour Inversion"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Colour Correction"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Colour inversion"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Colour correction"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned on."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned off."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Press and hold both volume keys for three seconds to use <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1768,7 +1765,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Confirm new PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Create a PIN for modifying restrictions"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINs don\'t match. Try again."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN is too short. Must be at least 4 digits."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN is too short. Must be at least four digits."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other">Try again in <xliff:g id="COUNT">%d</xliff:g> seconds</item>
       <item quantity="one">Try again in 1 second</item>
@@ -1795,9 +1792,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Deleted by your admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"To extend battery life, Battery Saver:\n\n•Turns on Dark theme\n•Turns off or restricts background activity, some visual effects and other features like “Hey Google”\n\n"<annotation id="url">"Learn more"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"To extend battery life, Battery Saver:\n\n•Turns on Dark theme\n•Turns off or restricts background activity, some visual effects and other features like “Hey Google”"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"To extend battery life, Battery Saver:\n\n• Turns on Dark theme\n• Turns off or restricts background activity, some visual effects and other features like \"Hey Google\"\n\n"<annotation id="url">"Learn more"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"To extend battery life, Battery Saver:\n\n• Turns on Dark theme\n• Turns off or restricts background activity, some visual effects and other features like \"Hey Google\""</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you\'re currently using can access data, but may do so less frequently. This may mean, for example, that images don\'t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Turn on"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1915,7 +1912,7 @@
     <string name="conference_call" msgid="5731633152336490471">"Conference Call"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Tooltip"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Games"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"Music &amp; Audio"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"Music and audio"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Movies &amp; Video"</string>
     <string name="app_category_image" msgid="7307840291864213007">"Photos &amp; Images"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Social &amp; Communication"</string>

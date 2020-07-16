@@ -130,6 +130,7 @@ public class AssistManager {
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
+    protected final AssistLogger mAssistLogger;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -196,7 +197,9 @@ public class AssistManager {
             PhoneStateMonitor phoneStateMonitor,
             OverviewProxyService overviewProxyService,
             ConfigurationController configurationController,
-            Lazy<SysUiState> sysUiState) {
+            Lazy<SysUiState> sysUiState,
+            DefaultUiController defaultUiController,
+            AssistLogger assistLogger) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -205,6 +208,7 @@ public class AssistManager {
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = phoneStateMonitor;
         mHandleController = handleController;
+        mAssistLogger = assistLogger;
 
         configurationController.addCallback(mConfigurationListener);
 
@@ -215,7 +219,7 @@ public class AssistManager {
         mConfigurationListener.onConfigChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
-        mUiController = new DefaultUiController(mContext);
+        mUiController = defaultUiController;
 
         mSysUiState = sysUiState;
 
@@ -242,6 +246,8 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "Voice open");
                         }
+                        mAssistLogger.reportAssistantSessionEvent(
+                                AssistantSessionEvent.ASSISTANT_SESSION_UPDATE);
                     }
 
                     @Override
@@ -249,6 +255,8 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "Voice closed");
                         }
+                        mAssistLogger.reportAssistantSessionEvent(
+                                AssistantSessionEvent.ASSISTANT_SESSION_CLOSE);
                     }
 
                     @Override
@@ -292,14 +300,19 @@ public class AssistManager {
         if (args == null) {
             args = new Bundle();
         }
-        int invocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
-        if (invocationType == INVOCATION_TYPE_GESTURE) {
+        int legacyInvocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
+        if (legacyInvocationType == INVOCATION_TYPE_GESTURE) {
             mHandleController.onAssistantGesturePerformed();
         }
-        int phoneState = mPhoneStateMonitor.getPhoneState();
-        args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
+        int legacyDeviceState = mPhoneStateMonitor.getPhoneState();
+        args.putInt(INVOCATION_PHONE_STATE_KEY, legacyDeviceState);
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
-        logStartAssist(invocationType, phoneState);
+        mAssistLogger.reportAssistantInvocationEventFromLegacy(
+                legacyInvocationType,
+                /* isInvocationComplete = */ true,
+                assistComponent,
+                legacyDeviceState);
+        logStartAssistLegacy(legacyInvocationType, legacyDeviceState);
         startAssistInternal(args, assistComponent, isService);
     }
 
@@ -499,7 +512,7 @@ public class AssistManager {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
     }
 
-    protected void logStartAssist(int invocationType, int phoneState) {
+    protected void logStartAssistLegacy(int invocationType, int phoneState) {
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
                         .setType(MetricsEvent.TYPE_OPEN)

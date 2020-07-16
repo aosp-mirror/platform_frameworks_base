@@ -52,18 +52,19 @@ public class NotifCoordinators implements Dumpable {
             HideNotifsForOtherUsersCoordinator hideNotifsForOtherUsersCoordinator,
             KeyguardCoordinator keyguardCoordinator,
             RankingCoordinator rankingCoordinator,
-            ForegroundCoordinator foregroundCoordinator,
+            AppOpsCoordinator appOpsCoordinator,
             DeviceProvisionedCoordinator deviceProvisionedCoordinator,
             BubbleCoordinator bubbleCoordinator,
             HeadsUpCoordinator headsUpCoordinator,
             ConversationCoordinator conversationCoordinator,
-            PreparationCoordinator preparationCoordinator) {
+            PreparationCoordinator preparationCoordinator,
+            MediaCoordinator mediaCoordinator) {
         dumpManager.registerDumpable(TAG, this);
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
         mCoordinators.add(hideNotifsForOtherUsersCoordinator);
         mCoordinators.add(keyguardCoordinator);
         mCoordinators.add(rankingCoordinator);
-        mCoordinators.add(foregroundCoordinator);
+        mCoordinators.add(appOpsCoordinator);
         mCoordinators.add(deviceProvisionedCoordinator);
         mCoordinators.add(bubbleCoordinator);
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
@@ -72,6 +73,7 @@ public class NotifCoordinators implements Dumpable {
             mCoordinators.add(preparationCoordinator);
         }
         // TODO: add new Coordinators here! (b/112656837)
+        mCoordinators.add(mediaCoordinator);
 
         // TODO: add the sections in a particular ORDER (HeadsUp < People < Alerting)
         for (Coordinator c : mCoordinators) {

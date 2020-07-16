@@ -18,16 +18,22 @@ package android.widget.inline;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
+import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 /**
@@ -86,7 +92,9 @@ public class InlineContentView extends ViewGroup {
      *
      * @hide
      */
+    @TestApi
     public interface SurfacePackageUpdater {
+
 
         /**
          * Called when the previous surface package is released due to view being detached
@@ -99,14 +107,16 @@ public class InlineContentView extends ViewGroup {
          *
          * @param consumer consumes the updated surface package.
          */
-        void getSurfacePackage(Consumer<SurfaceControlViewHost.SurfacePackage> consumer);
+        void getSurfacePackage(@NonNull Consumer<SurfaceControlViewHost.SurfacePackage> consumer);
     }
 
     @NonNull
     private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            mSurfaceControlCallback.onCreated(mSurfaceView.getSurfaceControl());
+            final SurfaceControl surfaceControl = mSurfaceView.getSurfaceControl();
+            surfaceControl.addOnReparentListener(mOnReparentListener);
+            mSurfaceControlCallback.onCreated(surfaceControl);
         }
 
         @Override
@@ -117,12 +127,51 @@ public class InlineContentView extends ViewGroup {
 
         @Override
         public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-            mSurfaceControlCallback.onDestroyed(mSurfaceView.getSurfaceControl());
+            final SurfaceControl surfaceControl = mSurfaceView.getSurfaceControl();
+            surfaceControl.removeOnReparentListener(mOnReparentListener);
+            mSurfaceControlCallback.onDestroyed(surfaceControl);
+        }
+    };
+
+    @NonNull
+    private final SurfaceControl.OnReparentListener mOnReparentListener =
+            new SurfaceControl.OnReparentListener() {
+                @Override
+                public void onReparent(SurfaceControl.Transaction transaction,
+                        SurfaceControl parent) {
+                    final View parentSurfaceOwnerView = (parent != null)
+                            ? parent.getLocalOwnerView() : null;
+                    if (parentSurfaceOwnerView instanceof SurfaceView) {
+                        mParentSurfaceOwnerView = new WeakReference<>(
+                                (SurfaceView) parentSurfaceOwnerView);
+                    } else {
+                        mParentSurfaceOwnerView = null;
+                    }
+                }
+            };
+
+    @NonNull
+    private final ViewTreeObserver.OnDrawListener mOnDrawListener =
+            new ViewTreeObserver.OnDrawListener() {
+        @Override
+        public void onDraw() {
+            computeParentPositionAndScale();
+            final int visibility = InlineContentView.this.isShown() ? VISIBLE : GONE;
+            mSurfaceView.setVisibility(visibility);
         }
     };
 
     @NonNull
     private final SurfaceView mSurfaceView;
+
+    @Nullable
+    private WeakReference<SurfaceView> mParentSurfaceOwnerView;
+
+    @Nullable
+    private int[] mParentPosition;
+
+    @Nullable
+    private PointF mParentScale;
 
     @Nullable
     private SurfaceControlCallback mSurfaceControlCallback;
@@ -153,6 +202,7 @@ public class InlineContentView extends ViewGroup {
     public InlineContentView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
+        mSurfaceView.setEnableSurfaceClipping(true);
     }
 
     /**
@@ -166,6 +216,12 @@ public class InlineContentView extends ViewGroup {
         return mSurfaceView.getSurfaceControl();
     }
 
+    @Override
+    public void setClipBounds(Rect clipBounds) {
+        super.setClipBounds(clipBounds);
+        mSurfaceView.setClipBounds(clipBounds);
+    }
+
     /**
      * @inheritDoc
      * @hide
@@ -173,10 +229,33 @@ public class InlineContentView extends ViewGroup {
     public InlineContentView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mSurfaceView = new SurfaceView(context, attrs, defStyleAttr, defStyleRes);
+        mSurfaceView = new SurfaceView(context, attrs, defStyleAttr, defStyleRes) {
+            @Override
+            protected void onSetSurfacePositionAndScaleRT(
+                    @NonNull SurfaceControl.Transaction transaction,
+                    @NonNull SurfaceControl surface, int positionLeft, int positionTop,
+                    float postScaleX, float postScaleY) {
+                // If we have a parent position, we need to make our coordinates relative
+                // to the parent in the rendering space.
+                if (mParentPosition != null) {
+                    positionLeft = (int) ((positionLeft - mParentPosition[0]) / mParentScale.x);
+                    positionTop = (int) ((positionTop - mParentPosition[1]) / mParentScale.y);
+                }
+
+                // Any scaling done to the parent or its predecessors would be applied
+                // via the surfaces parent -> child relation, so we only propagate any
+                // scaling set on the InlineContentView itself.
+                postScaleX = InlineContentView.this.getScaleX();
+                postScaleY = InlineContentView.this.getScaleY();
+
+                super.onSetSurfacePositionAndScaleRT(transaction, surface, positionLeft,
+                        positionTop, postScaleX, postScaleY);
+            }
+        };
         mSurfaceView.setZOrderOnTop(true);
         mSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         addView(mSurfaceView);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     /**
@@ -184,6 +263,7 @@ public class InlineContentView extends ViewGroup {
      *
      * @hide
      */
+    @TestApi
     public void setChildSurfacePackageUpdater(
             @Nullable SurfacePackageUpdater surfacePackageUpdater) {
         mSurfacePackageUpdater = surfacePackageUpdater;
@@ -197,9 +277,14 @@ public class InlineContentView extends ViewGroup {
             mSurfacePackageUpdater.getSurfacePackage(
                     sp -> {
                         if (DEBUG) Log.v(TAG, "Received new SurfacePackage");
-                        mSurfaceView.setChildSurfacePackage(sp);
+                        if (getViewRootImpl() != null) {
+                            mSurfaceView.setChildSurfacePackage(sp);
+                        }
                     });
         }
+
+        mSurfaceView.setVisibility(getVisibility());
+        getViewTreeObserver().addOnDrawListener(mOnDrawListener);
     }
 
     @Override
@@ -209,6 +294,9 @@ public class InlineContentView extends ViewGroup {
         if (mSurfacePackageUpdater != null) {
             mSurfacePackageUpdater.onSurfacePackageReleased();
         }
+
+        getViewTreeObserver().removeOnDrawListener(mOnDrawListener);
+        mSurfaceView.setVisibility(View.GONE);
     }
 
     @Override
@@ -254,5 +342,68 @@ public class InlineContentView extends ViewGroup {
      */
     public boolean setZOrderedOnTop(boolean onTop) {
         return mSurfaceView.setZOrderedOnTop(onTop, /*allowDynamicChange*/ true);
+    }
+
+
+    private void computeParentPositionAndScale() {
+        boolean contentPositionOrScaleChanged = false;
+
+        // This method can be called on the UI or render thread but for the cases
+        // it is called these threads are not running concurrently, so no need to lock.
+        final SurfaceView parentSurfaceOwnerView = (mParentSurfaceOwnerView != null)
+                ? mParentSurfaceOwnerView.get() : null;
+
+        if (parentSurfaceOwnerView != null) {
+            if (mParentPosition == null) {
+                mParentPosition = new int[2];
+            }
+            final int oldParentPositionX = mParentPosition[0];
+            final int oldParentPositionY = mParentPosition[1];
+            parentSurfaceOwnerView.getLocationInSurface(mParentPosition);
+            if (oldParentPositionX != mParentPosition[0]
+                    || oldParentPositionY != mParentPosition[1]) {
+                contentPositionOrScaleChanged = true;
+            }
+
+            if (mParentScale == null) {
+                mParentScale = new PointF();
+            }
+
+            final float lastParentSurfaceWidth = parentSurfaceOwnerView
+                    .getSurfaceRenderPosition().width();
+            final float oldParentScaleX = mParentScale.x;
+            if (lastParentSurfaceWidth > 0) {
+                mParentScale.x = lastParentSurfaceWidth /
+                        (float) parentSurfaceOwnerView.getWidth();
+            } else {
+                mParentScale.x = 1.0f;
+            }
+            if (!contentPositionOrScaleChanged
+                    && Float.compare(oldParentScaleX, mParentScale.x) != 0) {
+                contentPositionOrScaleChanged = true;
+            }
+
+            final float lastParentSurfaceHeight = parentSurfaceOwnerView
+                    .getSurfaceRenderPosition().height();
+            final float oldParentScaleY = mParentScale.y;
+            if (lastParentSurfaceHeight > 0) {
+                mParentScale.y = lastParentSurfaceHeight
+                        / (float) parentSurfaceOwnerView.getHeight();
+            } else {
+                mParentScale.y = 1.0f;
+            }
+            if (!contentPositionOrScaleChanged
+                    && Float.compare(oldParentScaleY, mParentScale.y) != 0) {
+                contentPositionOrScaleChanged = true;
+            }
+        } else if (mParentPosition != null || mParentScale != null) {
+            contentPositionOrScaleChanged = true;
+            mParentPosition = null;
+            mParentScale = null;
+        }
+
+        if (contentPositionOrScaleChanged) {
+            mSurfaceView.requestUpdateSurfacePositionAndScale();
+        }
     }
 }

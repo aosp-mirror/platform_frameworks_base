@@ -181,11 +181,11 @@ public class NotificationRemoteInputManager implements Dumpable {
                 return;
             }
             ViewParent parent = view.getParent();
-            StatusBarNotification statusBarNotification = entry.getSbn();
-            if (statusBarNotification == null) {
+            if (entry == null) {
                 Log.w(TAG, "Couldn't determine notification for click.");
                 return;
             }
+            StatusBarNotification statusBarNotification = entry.getSbn();
             String key = statusBarNotification.getKey();
             int buttonIndex = -1;
             // If this is a default template, determine the index of the button.

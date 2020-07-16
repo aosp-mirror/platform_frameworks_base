@@ -17,4 +17,5 @@
 
 <resources>
     <bool name="target_overlaid">true</bool>
+    <bool name="signature_policy_overlaid">true</bool>
 </resources>

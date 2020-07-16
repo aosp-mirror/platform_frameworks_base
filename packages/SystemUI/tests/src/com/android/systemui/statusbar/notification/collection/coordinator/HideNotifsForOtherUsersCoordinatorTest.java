@@ -51,6 +51,7 @@ public class HideNotifsForOtherUsersCoordinatorTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private PluggableListener<NotifFilter> mInvalidationListener;
+    @Mock private SharedCoordinatorLogger mLogger;
 
     @Captor private ArgumentCaptor<UserChangedListener> mUserChangedListenerCaptor;
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
@@ -65,7 +66,7 @@ public class HideNotifsForOtherUsersCoordinatorTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         HideNotifsForOtherUsersCoordinator coordinator =
-                new HideNotifsForOtherUsersCoordinator(mLockscreenUserManager);
+                new HideNotifsForOtherUsersCoordinator(mLockscreenUserManager, mLogger);
         coordinator.attach(mNotifPipeline);
 
         verify(mLockscreenUserManager).addUserChangedListener(mUserChangedListenerCaptor.capture());

@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:paddingTop="8dp"
+        android:paddingTop="11dp"
         android:clipToPadding="true">
         <ImageView
             android:id="@+id/conversation_icon"
@@ -84,34 +84,21 @@
                     android:layout_weight="1"
                     style="@style/TextAppearance.NotificationImportanceChannel"/>
             </LinearLayout>
-            <LinearLayout
+            <TextView
+                android:id="@+id/group_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="start"
-                android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/pkg_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/TextAppearance.NotificationImportanceChannelGroup"
-                    android:ellipsize="end"
-                    android:maxLines="1"/>
-                <TextView
-                    android:id="@+id/group_divider"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    style="@style/TextAppearance.NotificationImportanceHeader"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:text="@*android:string/notification_header_divider_symbol" />
-                <TextView
-                    android:id="@+id/group_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
-            </LinearLayout>
+                android:ellipsize="end"
+                android:textDirection="locale"
+                style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
+            <TextView
+                android:id="@+id/pkg_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.NotificationImportanceApp"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                android:maxLines="1"/>
             <TextView
                 android:id="@+id/delegate_name"
                 android:layout_width="match_parent"
@@ -121,6 +108,7 @@
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
                 android:ellipsize="end"
+                android:textDirection="locale"
                 android:text="@string/notification_delegate_header"
                 android:maxLines="1" />
 

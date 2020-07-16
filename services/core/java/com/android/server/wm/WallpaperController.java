@@ -106,6 +106,8 @@ class WallpaperController {
     private static final int WALLPAPER_DRAW_TIMEOUT = 2;
     private int mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
 
+    private boolean mShouldUpdateZoom;
+
     /**
      * Temporary storage for taking a screenshot of the wallpaper.
      * @see #screenshotWallpaperLocked()
@@ -400,6 +402,7 @@ class WallpaperController {
     void setWallpaperZoomOut(WindowState window, float zoom) {
         if (Float.compare(window.mWallpaperZoomOut, zoom) != 0) {
             window.mWallpaperZoomOut = zoom;
+            mShouldUpdateZoom = true;
             updateWallpaperOffsetLocked(window, false);
         }
     }
@@ -623,9 +626,7 @@ class WallpaperController {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;
                 mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
             }
-            if (mWallpaperTarget.mWallpaperZoomOut >= 0) {
-                mLastWallpaperZoomOut = mWallpaperTarget.mWallpaperZoomOut;
-            }
+            computeLastWallpaperZoomOut();
             if (mWallpaperTarget.mWallpaperY >= 0) {
                 mLastWallpaperY = mWallpaperTarget.mWallpaperY;
                 mLastWallpaperYStep = mWallpaperTarget.mWallpaperYStep;
@@ -804,8 +805,11 @@ class WallpaperController {
      * we'll have conflicts and break the "depth system" mental model.
      */
     private void computeLastWallpaperZoomOut() {
-        mLastWallpaperZoomOut = 0;
-        mDisplayContent.forAllWindows(mComputeMaxZoomOutFunction, true);
+        if (mShouldUpdateZoom) {
+            mLastWallpaperZoomOut = 0;
+            mDisplayContent.forAllWindows(mComputeMaxZoomOutFunction, true);
+            mShouldUpdateZoom = false;
+        }
     }
 
     private float zoomOutToScale(float zoom) {

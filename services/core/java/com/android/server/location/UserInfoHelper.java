@@ -20,48 +20,48 @@ import static android.os.UserManager.DISALLOW_SHARE_LOCATION;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
+import static com.android.server.location.UserInfoHelper.UserListener.CURRENT_USER_CHANGED;
+import static com.android.server.location.UserInfoHelper.UserListener.USER_STARTED;
+import static com.android.server.location.UserInfoHelper.UserListener.USER_STOPPED;
 
+import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
+import android.app.ActivityManagerInternal;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
-import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.FgThread;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Provides accessors and listeners for all user info.
  */
-public class UserInfoHelper {
+public abstract class UserInfoHelper {
 
     /**
      * Listener for current user changes.
      */
     public interface UserListener {
 
-        int USER_SWITCHED = 1;
+        int CURRENT_USER_CHANGED = 1;
         int USER_STARTED = 2;
         int USER_STOPPED = 3;
 
-        @IntDef({USER_SWITCHED, USER_STARTED, USER_STOPPED})
+        @IntDef({CURRENT_USER_CHANGED, USER_STARTED, USER_STOPPED})
         @Retention(RetentionPolicy.SOURCE)
         @interface UserChange {}
 
@@ -75,143 +75,101 @@ public class UserInfoHelper {
     private final CopyOnWriteArrayList<UserListener> mListeners;
 
     @GuardedBy("this")
+    @Nullable private ActivityManagerInternal mActivityManagerInternal;
+    @GuardedBy("this")
     @Nullable private UserManager mUserManager;
-
-    @UserIdInt private volatile int mCurrentUserId;
-
-    @GuardedBy("this")
-    @UserIdInt private int mCachedParentUserId;
-    @GuardedBy("this")
-    private int[] mCachedProfileUserIds;
 
     public UserInfoHelper(Context context) {
         mContext = context;
         mListeners = new CopyOnWriteArrayList<>();
-
-        mCurrentUserId = UserHandle.USER_NULL;
-        mCachedParentUserId = UserHandle.USER_NULL;
-        mCachedProfileUserIds = new int[]{UserHandle.USER_NULL};
     }
 
     /** Called when system is ready. */
+    @CallSuper
     public synchronized void onSystemReady() {
-        if (mUserManager != null) {
+        if (mActivityManagerInternal != null) {
             return;
         }
 
+        mActivityManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(ActivityManagerInternal.class));
         mUserManager = mContext.getSystemService(UserManager.class);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        intentFilter.addAction(Intent.ACTION_USER_STARTED);
-        intentFilter.addAction(Intent.ACTION_USER_STOPPED);
-        intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-        intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (action == null) {
-                    return;
-                }
-                int userId;
-                switch (action) {
-                    case Intent.ACTION_USER_SWITCHED:
-                        userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                        if (userId != UserHandle.USER_NULL) {
-                            onCurrentUserChanged(userId);
-                        }
-                        break;
-                    case Intent.ACTION_USER_STARTED:
-                        userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                        if (userId != UserHandle.USER_NULL) {
-                            onUserStarted(userId);
-                        }
-                        break;
-                    case Intent.ACTION_USER_STOPPED:
-                        userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                        if (userId != UserHandle.USER_NULL) {
-                            onUserStopped(userId);
-                        }
-                        break;
-                    case Intent.ACTION_MANAGED_PROFILE_ADDED:
-                    case Intent.ACTION_MANAGED_PROFILE_REMOVED:
-                        onUserProfilesChanged();
-                        break;
-                }
-            }
-        }, UserHandle.ALL, intentFilter, null, FgThread.getHandler());
-
-        mCurrentUserId = ActivityManager.getCurrentUser();
     }
 
     /**
      * Adds a listener for user changed events. Callbacks occur on an unspecified thread.
      */
-    public void addListener(UserListener listener) {
+    public final void addListener(UserListener listener) {
         mListeners.add(listener);
     }
 
     /**
      * Removes a listener for user changed events.
      */
-    public void removeListener(UserListener listener) {
+    public final void removeListener(UserListener listener) {
         mListeners.remove(listener);
     }
 
-    private void onCurrentUserChanged(@UserIdInt int newUserId) {
-        if (newUserId == mCurrentUserId) {
-            return;
-        }
-
-        if (D) {
-            Log.d(TAG, "current user switched from u" + mCurrentUserId + " to u" + newUserId);
-        }
-
-        int oldUserId = mCurrentUserId;
-        mCurrentUserId = newUserId;
-
-        onUserChanged(oldUserId, UserListener.USER_SWITCHED);
-        onUserChanged(newUserId, UserListener.USER_SWITCHED);
-    }
-
-    private void onUserStarted(@UserIdInt int userId) {
+    protected void dispatchOnUserStarted(@UserIdInt int userId) {
         if (D) {
             Log.d(TAG, "u" + userId + " started");
         }
 
-        onUserChanged(userId, UserListener.USER_STARTED);
+        for (UserListener listener : mListeners) {
+            listener.onUserChanged(userId, USER_STARTED);
+        }
     }
 
-    private void onUserStopped(@UserIdInt int userId) {
+    protected void dispatchOnUserStopped(@UserIdInt int userId) {
         if (D) {
             Log.d(TAG, "u" + userId + " stopped");
         }
 
-        onUserChanged(userId, UserListener.USER_STOPPED);
-    }
-
-    private void onUserChanged(@UserIdInt int userId, @UserListener.UserChange int change) {
         for (UserListener listener : mListeners) {
-            listener.onUserChanged(userId, change);
+            listener.onUserChanged(userId, USER_STOPPED);
         }
     }
 
-    private synchronized void onUserProfilesChanged() {
-        // this intent is only sent to the current user
-        if (mCachedParentUserId == mCurrentUserId) {
-            mCachedParentUserId = UserHandle.USER_NULL;
-            mCachedProfileUserIds = new int[]{UserHandle.USER_NULL};
+    protected void dispatchOnCurrentUserChanged(@UserIdInt int fromUserId,
+            @UserIdInt int toUserId) {
+        int[] fromUserIds = getProfileIds(fromUserId);
+        int[] toUserIds = getProfileIds(toUserId);
+        if (D) {
+            Log.d(TAG, "current user changed from u" + Arrays.toString(fromUserIds) + " to u"
+                    + Arrays.toString(toUserIds));
+        }
+
+        for (UserListener listener : mListeners) {
+            for (int userId : fromUserIds) {
+                listener.onUserChanged(userId, CURRENT_USER_CHANGED);
+            }
+        }
+
+        for (UserListener listener : mListeners) {
+            for (int userId : toUserIds) {
+                listener.onUserChanged(userId, CURRENT_USER_CHANGED);
+            }
         }
     }
 
     /**
      * Returns an array of current user ids. This will always include the current user, and will
-     * also include any profiles of the current user.
+     * also include any profiles of the current user. The caller must never mutate the returned
+     * array.
      */
     public int[] getCurrentUserIds() {
-        return getProfileUserIdsForParentUser(mCurrentUserId);
+        synchronized (this) {
+            if (mActivityManagerInternal == null) {
+                return new int[] {};
+            }
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return mActivityManagerInternal.getCurrentProfileIds();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
@@ -219,54 +177,47 @@ public class UserInfoHelper {
      * user.
      */
     public boolean isCurrentUserId(@UserIdInt int userId) {
-        int currentUserId = mCurrentUserId;
-        return userId == currentUserId || ArrayUtils.contains(
-                getProfileUserIdsForParentUser(currentUserId), userId);
-    }
-
-    @GuardedBy("this")
-    private synchronized int[] getProfileUserIdsForParentUser(@UserIdInt int parentUserId) {
-        if (parentUserId != mCachedParentUserId) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                Preconditions.checkState(mUserManager != null);
-
-                // more expensive check - check that argument really is a parent user id
-                if (Build.IS_DEBUGGABLE) {
-                    Preconditions.checkArgument(
-                            mUserManager.getProfileParent(parentUserId) == null);
-                }
-
-                mCachedParentUserId = parentUserId;
-                mCachedProfileUserIds = mUserManager.getProfileIdsWithDisabled(parentUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+        synchronized (this) {
+            if (mActivityManagerInternal == null) {
+                return false;
             }
         }
 
-        return mCachedProfileUserIds;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return mActivityManagerInternal.isCurrentProfile(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private int[] getProfileIds(@UserIdInt int userId) {
+        synchronized (this) {
+            Preconditions.checkState(mUserManager != null);
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return mUserManager.getEnabledProfileIds(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
      * Dump info for debugging.
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        boolean systemRunning;
-        synchronized (this) {
-            systemRunning = mUserManager != null;
-        }
-
-        if (systemRunning) {
-            int[] currentUserIds = getProfileUserIdsForParentUser(mCurrentUserId);
-            pw.println("current users: " + Arrays.toString(currentUserIds));
-            for (int userId : currentUserIds) {
-                if (mUserManager.hasUserRestrictionForUser(DISALLOW_SHARE_LOCATION,
+        int[] currentUserProfiles = getCurrentUserIds();
+        pw.println("current users: " + Arrays.toString(currentUserProfiles));
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager != null) {
+            for (int userId : currentUserProfiles) {
+                if (userManager.hasUserRestrictionForUser(DISALLOW_SHARE_LOCATION,
                         UserHandle.of(userId))) {
                     pw.println("  u" + userId + " restricted");
                 }
             }
-        } else {
-            pw.println("current user: " + mCurrentUserId);
         }
     }
 }

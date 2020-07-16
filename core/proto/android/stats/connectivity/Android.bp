@@ -13,12 +13,26 @@
 // limitations under the License.
 
 java_library_static {
-    name: "networkstackprotosnano",
+    name: "networkstackprotos",
     proto: {
-        type: "nano",
+        type: "lite",
     },
     srcs: [
         "network_stack.proto",
+    ],
+    sdk_version: "system_29",
+}
+
+java_library_static {
+    name: "tetheringprotos",
+    proto: {
+        type: "lite",
+    },
+    srcs: [
+        "tethering.proto",
+    ],
+    apex_available: [
+        "com.android.tethering",
     ],
     sdk_version: "system_current",
 }

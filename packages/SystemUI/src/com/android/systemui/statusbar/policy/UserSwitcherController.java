@@ -31,6 +31,9 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -80,6 +83,9 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class UserSwitcherController implements Dumpable {
+
+    public static final float USER_SWITCH_ENABLED_ALPHA = 1.0f;
+    public static final float USER_SWITCH_DISABLED_ALPHA = 0.38f;
 
     private static final String TAG = "UserSwitcherController";
     private static final boolean DEBUG = false;
@@ -361,8 +367,14 @@ public class UserSwitcherController implements Dumpable {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
-            UserInfo guest = mUserManager.createGuest(
-                    mContext, mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            UserInfo guest;
+            try {
+                guest = mUserManager.createGuest(mContext,
+                        mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            } catch (UserManager.UserOperationException e) {
+                Log.e(TAG, "Couldn't create guest user", e);
+                return;
+            }
             if (guest == null) {
                 // Couldn't create guest, most likely because there already exists one, we just
                 // haven't reloaded the user list yet.
@@ -672,6 +684,12 @@ public class UserSwitcherController implements Dumpable {
             } else {
                 return item.info.name;
             }
+        }
+
+        protected static ColorFilter getDisabledUserAvatarColorFilter() {
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0f);   // 0 - grayscale
+            return new ColorMatrixColorFilter(matrix);
         }
 
         protected static Drawable getIconDrawable(Context context, UserRecord item) {

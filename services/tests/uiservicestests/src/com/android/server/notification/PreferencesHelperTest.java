@@ -2266,6 +2266,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAppBlockedLogging() {
+        mHelper.setEnabled(PKG_N_MR1, 1020, false);
+        assertEquals(1, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.APP_NOTIFICATIONS_BLOCKED,
+                mLogger.get(0).event);
+    }
+    @Test
     public void testXml_statusBarIcons_default() throws Exception {
         String preQXml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"

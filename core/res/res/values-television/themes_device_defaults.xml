@@ -33,5 +33,6 @@
     <style name="Theme.DeviceDefault.Autofill.Light" parent="Theme.DeviceDefault.Autofill"/>
     <style name="Theme.DeviceDefault.Light.Autofill.Save" parent="Theme.DeviceDefault.Autofill.Save"/>
 
-    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Leanback.Resolver" />
+    <style name="Theme.DeviceDefault.ResolverCommon" parent="Theme.Leanback.Resolver" />
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon" />
 </resources>

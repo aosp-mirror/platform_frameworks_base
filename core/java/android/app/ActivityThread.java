@@ -123,6 +123,7 @@ import android.os.SystemProperties;
 import android.os.TelephonyServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.permission.IPermissionManager;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -3252,18 +3253,56 @@ public final class ActivityThread extends ClientTransactionHandler {
     @Override
     public void handleFixedRotationAdjustments(@NonNull IBinder token,
             @Nullable FixedRotationAdjustments fixedRotationAdjustments) {
-        final Consumer<DisplayAdjustments> override = fixedRotationAdjustments != null
-                ? displayAdjustments -> displayAdjustments.setFixedRotationAdjustments(
-                        fixedRotationAdjustments)
-                : null;
+        handleFixedRotationAdjustments(token, fixedRotationAdjustments, null /* overrideConfig */);
+    }
+
+    /**
+     * Applies the rotation adjustments to override display information in resources belong to the
+     * provided token. If the token is activity token, the adjustments also apply to application
+     * because the appearance of activity is usually more sensitive to the application resources.
+     *
+     * @param token The token to apply the adjustments.
+     * @param fixedRotationAdjustments The information to override the display adjustments of
+     *                                 corresponding resources. If it is null, the exiting override
+     *                                 will be cleared.
+     * @param overrideConfig The override configuration of activity. It is used to override
+     *                       application configuration. If it is non-null, it means the token is
+     *                       confirmed as activity token. Especially when launching new activity,
+     *                       {@link #mActivities} hasn't put the new token.
+     */
+    private void handleFixedRotationAdjustments(@NonNull IBinder token,
+            @Nullable FixedRotationAdjustments fixedRotationAdjustments,
+            @Nullable Configuration overrideConfig) {
+        // The element of application configuration override is set only if the application
+        // adjustments are needed, because activity already has its own override configuration.
+        final Configuration[] appConfigOverride;
+        final Consumer<DisplayAdjustments> override;
+        if (fixedRotationAdjustments != null) {
+            appConfigOverride = new Configuration[1];
+            override = displayAdjustments -> {
+                displayAdjustments.setFixedRotationAdjustments(fixedRotationAdjustments);
+                if (appConfigOverride[0] != null) {
+                    displayAdjustments.getConfiguration().updateFrom(appConfigOverride[0]);
+                }
+            };
+        } else {
+            appConfigOverride = null;
+            override = null;
+        }
         if (!mResourcesManager.overrideTokenDisplayAdjustments(token, override)) {
             // No resources are associated with the token.
             return;
         }
-        if (mActivities.get(token) == null) {
-            // Only apply the override to application for activity token because the appearance of
-            // activity is usually more sensitive to the application resources.
-            return;
+        if (overrideConfig == null) {
+            final ActivityClientRecord r = mActivities.get(token);
+            if (r == null) {
+                // It is not an activity token. Nothing to do for application.
+                return;
+            }
+            overrideConfig = r.overrideConfig;
+        }
+        if (appConfigOverride != null) {
+            appConfigOverride[0] = overrideConfig;
         }
 
         // Apply the last override to application resources for compatibility. Because the Resources
@@ -3503,7 +3542,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         // The rotation adjustments must be applied before creating the activity, so the activity
         // can get the adjusted display info during creation.
         if (r.mPendingFixedRotationAdjustments != null) {
-            handleFixedRotationAdjustments(r.token, r.mPendingFixedRotationAdjustments);
+            handleFixedRotationAdjustments(r.token, r.mPendingFixedRotationAdjustments,
+                    r.overrideConfig);
             r.mPendingFixedRotationAdjustments = null;
         }
 
@@ -6777,7 +6817,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw ex.rethrowFromSystemServer();
         }
         if (holder == null) {
-            Slog.e(TAG, "Failed to find provider info for " + auth);
+            if (UserManager.get(c).isUserUnlocked(userId)) {
+                Slog.e(TAG, "Failed to find provider info for " + auth);
+            } else {
+                Slog.w(TAG, "Failed to find provider info for " + auth + " (user not unlocked)");
+            }
             return null;
         }
 
@@ -7388,10 +7432,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    public Bundle getCoreSettings() {
+        return mCoreSettings;
+    }
+
     public int getIntCoreSetting(String key, int defaultValue) {
         synchronized (mResourcesManager) {
             if (mCoreSettings != null) {
                 return mCoreSettings.getInt(key, defaultValue);
+            }
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Get the string value of the given key from core settings.
+     */
+    public String getStringCoreSetting(String key, String defaultValue) {
+        synchronized (mResourcesManager) {
+            if (mCoreSettings != null) {
+                return mCoreSettings.getString(key, defaultValue);
             }
             return defaultValue;
         }

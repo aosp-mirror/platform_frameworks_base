@@ -81,6 +81,8 @@
     <color name="global_screenshot_dismiss_foreground">#FFFFFF</color>
     <color name="global_screenshot_background_protection_start">#80000000</color> <!-- 50% black -->
 
+    <!-- Media -->
+    <color name="media_divider">#85ffffff</color>
 
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ff888888</color>

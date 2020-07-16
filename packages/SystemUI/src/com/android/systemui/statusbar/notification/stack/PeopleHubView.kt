@@ -72,7 +72,7 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
         }
     }
 
-    var canSwipe: Boolean = true
+    var canSwipe: Boolean = false
         set(value) {
             if (field != value) {
                 if (field) {

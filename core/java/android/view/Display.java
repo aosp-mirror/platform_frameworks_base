@@ -241,11 +241,24 @@ public final class Display {
      * This flag identifies secondary displays that should show system decorations, such as status
      * bar, navigation bar, home activity or IME.
      * </p>
+     * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      *
+     * @see #getFlags()
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
+
+    /**
+     * Flag: The display is trusted to show system decorations and receive inputs without users'
+     * touch.
+     * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     *
+     * @see #getFlags()
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_TRUSTED = 1 << 7;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled
@@ -564,6 +577,7 @@ public final class Display {
      * @see #FLAG_SUPPORTS_PROTECTED_BUFFERS
      * @see #FLAG_SECURE
      * @see #FLAG_PRIVATE
+     * @see #FLAG_ROUND
      */
     public int getFlags() {
         return mFlags;
@@ -1220,6 +1234,16 @@ public final class Display {
     public boolean isPublicPresentation() {
         return (mFlags & (Display.FLAG_PRIVATE | Display.FLAG_PRESENTATION)) ==
                 Display.FLAG_PRESENTATION;
+    }
+
+    /**
+     * @return {@code true} if the display is a trusted display.
+     *
+     * @see #FLAG_TRUSTED
+     * @hide
+     */
+    public boolean isTrusted() {
+        return (mFlags & FLAG_TRUSTED) == FLAG_TRUSTED;
     }
 
     private void updateDisplayInfoLocked() {

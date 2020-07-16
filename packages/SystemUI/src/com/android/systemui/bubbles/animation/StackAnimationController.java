@@ -940,8 +940,12 @@ public class StackAnimationController extends
 
     /** Returns the default stack position, which is on the top left. */
     public PointF getDefaultStartPosition() {
-        return new PointF(
-                getAllowableStackPositionRegion().left,
+        boolean isRtl = mLayout != null
+                && mLayout.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
+        return new PointF(isRtl
+                        ? getAllowableStackPositionRegion().right
+                        : getAllowableStackPositionRegion().left,
                 getAllowableStackPositionRegion().top + mStackStartingVerticalOffset);
     }
 
@@ -1034,13 +1038,13 @@ public class StackAnimationController extends
                 mMagnetizedStack.getFlingToTargetMinVelocity() /* default */);
         final float maxVelocity = Settings.Secure.getFloat(contentResolver,
                 "bubble_dismiss_stick_max_velocity",
-                mMagnetizedStack.getStickToTargetMaxVelocity() /* default */);
+                mMagnetizedStack.getStickToTargetMaxXVelocity() /* default */);
         final float targetWidth = Settings.Secure.getFloat(contentResolver,
                 "bubble_dismiss_target_width_percent",
                 mMagnetizedStack.getFlingToTargetWidthPercent() /* default */);
 
         mMagnetizedStack.setFlingToTargetMinVelocity(minVelocity);
-        mMagnetizedStack.setStickToTargetMaxVelocity(maxVelocity);
+        mMagnetizedStack.setStickToTargetMaxXVelocity(maxVelocity);
         mMagnetizedStack.setFlingToTargetWidthPercent(targetWidth);
 
         return mMagnetizedStack;

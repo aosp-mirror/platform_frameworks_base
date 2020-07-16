@@ -321,7 +321,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRecentViewInFixedPortraitWhenTopAppInLandscape() {
-        mWm.mIsFixedRotationTransformEnabled = true;
         mWm.setRecentsAnimationController(mController);
 
         final ActivityRecord homeActivity = createHomeActivity();
@@ -349,11 +348,19 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
                 homeActivity.getConfiguration().orientation);
 
-        // Home activity won't become top (return to landActivity), so its fixed rotation and the
-        // top rotated record should be cleared.
+        // Home activity won't become top (return to landActivity), so the top rotated record should
+        // be cleared.
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
-        assertFalse(homeActivity.hasFixedRotationTransform());
+        assertFalse(mDefaultDisplay.isFixedRotationLaunchingApp(homeActivity));
         assertFalse(mDefaultDisplay.hasTopFixedRotationLaunchingApp());
+        // The transform should keep until the transition is done, so the restored configuration
+        // won't be sent to activity and cause unnecessary configuration change.
+        assertTrue(homeActivity.hasFixedRotationTransform());
+
+        // In real case the transition will be executed from RecentsAnimation#finishAnimation.
+        mDefaultDisplay.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(
+                homeActivity.token);
+        assertFalse(homeActivity.hasFixedRotationTransform());
     }
 
     @Test
@@ -382,7 +389,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testWallpaperHasFixedRotationApplied() {
-        mWm.mIsFixedRotationTransformEnabled = true;
         mWm.setRecentsAnimationController(mController);
 
         // Create a portrait home activity, a wallpaper and a landscape activity displayed on top.

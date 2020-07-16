@@ -31,7 +31,7 @@ constexpr size_t   kDefaultHeapSize = 1024 * 1024; // 1MB (compatible with low m
 
 Sound::Sound(int32_t soundID, int fd, int64_t offset, int64_t length)
     : mSoundID(soundID)
-    , mFd(fcntl(fd, F_DUPFD_CLOEXEC)) // like dup(fd) but closes on exec to prevent leaks.
+    , mFd(fcntl(fd, F_DUPFD_CLOEXEC, (int)0 /* arg */)) // dup(fd) + close on exec to prevent leaks.
     , mOffset(offset)
     , mLength(length)
 {

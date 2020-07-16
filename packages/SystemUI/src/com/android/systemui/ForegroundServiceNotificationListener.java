@@ -163,31 +163,31 @@ public class ForegroundServiceNotificationListener {
                                 userState.addImportantNotification(sbn.getPackageName(),
                                         sbn.getKey());
                             }
-                            final Notification.Builder builder =
-                                    Notification.Builder.recoverBuilder(
-                                            mContext, sbn.getNotification());
-                            if (builder.usesStandardHeader()) {
-                                userState.addStandardLayoutNotification(
-                                        sbn.getPackageName(), sbn.getKey());
-                            }
+                        }
+                        final Notification.Builder builder =
+                                Notification.Builder.recoverBuilder(
+                                        mContext, sbn.getNotification());
+                        if (builder.usesStandardHeader()) {
+                            userState.addStandardLayoutNotification(
+                                    sbn.getPackageName(), sbn.getKey());
                         }
                     }
-                    tagForeground(entry);
+                    tagAppOps(entry);
                     return true;
                 },
                 true /* create if not found */);
     }
 
     // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
-    //  ForegroundCoordinator
-    private void tagForeground(NotificationEntry entry) {
+    //  AppOpsCoordinator
+    private void tagAppOps(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
         ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
                 sbn.getUserId(),
                 sbn.getPackageName());
-        if (activeOps != null) {
-            synchronized (entry.mActiveAppOps) {
-                entry.mActiveAppOps.clear();
+        synchronized (entry.mActiveAppOps) {
+            entry.mActiveAppOps.clear();
+            if (activeOps != null) {
                 entry.mActiveAppOps.addAll(activeOps);
             }
         }

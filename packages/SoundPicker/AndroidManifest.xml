@@ -11,6 +11,7 @@
 
     <application
             android:allowBackup="false"
+            android:label="@string/app_label"
             android:supportsRtl="true">
         <receiver android:name="RingtoneReceiver">
             <intent-filter>

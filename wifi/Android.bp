@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+java_defaults {
+    name: "wifi-module-sdk-version-defaults",
+    min_sdk_version: "30",
+    target_sdk_version: "30",
+}
+
 filegroup {
     name: "framework-wifi-updatable-exported-aidl-sources",
     srcs: ["aidl-export/**/*.aidl"],
@@ -73,6 +79,7 @@ test_access_hidden_api_whitelist = [
 // classes before they are renamed.
 java_library {
     name: "framework-wifi-pre-jarjar",
+    defaults: ["wifi-module-sdk-version-defaults"],
     sdk_version: "module_current",
     static_libs: [
         "framework-wifi-util-lib",
@@ -98,7 +105,10 @@ java_library {
 // post-jarjar version of framework-wifi
 java_sdk_library {
     name: "framework-wifi",
-    defaults: ["framework-module-defaults"],
+    defaults: [
+        "framework-module-defaults",
+        "wifi-module-sdk-version-defaults",
+    ],
     static_libs: [
         "framework-wifi-util-lib",
         "android.hardware.wifi-V1.0-java-constants",
@@ -110,11 +120,6 @@ java_sdk_library {
         ":framework-wifi-updatable-sources",
         ":framework-wifi-util-lib-aidls",
     ],
-
-    // TODO(b/155480189) - Remove naming_scheme once references have been resolved.
-    // Temporary java_sdk_library component naming scheme to use to ease the transition from separate
-    // modules to java_sdk_library.
-    naming_scheme: "framework-modules",
 
     jarjar_rules: ":wifi-jarjar-rules",
 
@@ -140,7 +145,6 @@ java_sdk_library {
     permitted_packages: [
         "android.hardware.wifi",
         "android.net.wifi",
-        "android.x.net.wifi",
         // Created by jarjar rules.
         "com.android.wifi.x",
     ],

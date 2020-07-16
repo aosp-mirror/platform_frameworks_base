@@ -153,7 +153,14 @@ public class DummyBlobData {
     public void writeToSession(BlobStoreManager.Session session,
             long offsetBytes, long lengthBytes) throws Exception {
         try (FileInputStream in = new FileInputStream(mFile)) {
-            Utils.writeToSession(session, in, offsetBytes, lengthBytes);
+            Utils.writeToSession(session, in, offsetBytes, lengthBytes, lengthBytes);
+        }
+    }
+
+    public void writeToSession(BlobStoreManager.Session session,
+            long offsetBytes, long lengthBytes, long allocateBytes) throws Exception {
+        try (FileInputStream in = new FileInputStream(mFile)) {
+            Utils.writeToSession(session, in, offsetBytes, lengthBytes, allocateBytes);
         }
     }
 

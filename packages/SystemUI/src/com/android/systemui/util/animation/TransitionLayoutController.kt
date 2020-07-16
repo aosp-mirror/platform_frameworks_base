@@ -17,7 +17,9 @@
 package com.android.systemui.util.animation
 
 import android.animation.ValueAnimator
+import android.graphics.PointF
 import android.util.MathUtils
+import com.android.internal.R.attr.width
 import com.android.systemui.Interpolators
 
 /**
@@ -44,6 +46,9 @@ open class TransitionLayoutController {
     private var animationStartState: TransitionViewState? = null
     private var state = TransitionViewState()
     private var animator: ValueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f)
+    private var currentHeight: Int = 0
+    private var currentWidth: Int = 0
+    var sizeChangedListener: ((Int, Int) -> Unit)? = null
 
     init {
         animator.apply {
@@ -58,13 +63,64 @@ open class TransitionLayoutController {
         if (animationStartState == null || !animator.isRunning) {
             return
         }
-        val view = transitionLayout ?: return
-        getInterpolatedState(
+        currentState = getInterpolatedState(
                 startState = animationStartState!!,
                 endState = state,
                 progress = animator.animatedFraction,
-                resultState = currentState)
-        view.setState(currentState)
+                reusedState = currentState)
+        applyStateToLayout(currentState)
+    }
+
+    private fun applyStateToLayout(state: TransitionViewState) {
+        transitionLayout?.setState(state)
+        if (currentHeight != state.height || currentWidth != state.width) {
+            currentHeight = state.height
+            currentWidth = state.width
+            sizeChangedListener?.invoke(currentWidth, currentHeight)
+        }
+    }
+
+    /**
+     * Obtain a state that is gone, based on parameters given.
+     *
+     * @param viewState the viewState to make gone
+     * @param disappearParameters parameters that determine how the view should disappear
+     * @param goneProgress how much is the view gone? 0 for not gone at all and 1 for fully
+     *                     disappeared
+     * @param reusedState optional parameter for state to be reused to avoid allocations
+     */
+    fun getGoneState(
+        viewState: TransitionViewState,
+        disappearParameters: DisappearParameters,
+        goneProgress: Float,
+        reusedState: TransitionViewState? = null
+    ): TransitionViewState {
+        var remappedProgress = MathUtils.map(
+                disappearParameters.disappearStart,
+                disappearParameters.disappearEnd,
+                0.0f, 1.0f,
+                goneProgress)
+        remappedProgress = MathUtils.constrain(remappedProgress, 0.0f, 1.0f)
+        val result = viewState.copy(reusedState).apply {
+            width = MathUtils.lerp(
+                    viewState.width.toFloat(),
+                    viewState.width * disappearParameters.disappearSize.x,
+                    remappedProgress).toInt()
+            height = MathUtils.lerp(
+                    viewState.height.toFloat(),
+                    viewState.height * disappearParameters.disappearSize.y,
+                    remappedProgress).toInt()
+            translation.x = (viewState.width - width) * disappearParameters.gonePivot.x
+            translation.y = (viewState.height - height) * disappearParameters.gonePivot.y
+            contentTranslation.x = (disappearParameters.contentTranslationFraction.x - 1.0f) *
+                    translation.x
+            contentTranslation.y = (disappearParameters.contentTranslationFraction.y - 1.0f) *
+                    translation.y
+            val alphaProgress = MathUtils.map(
+                    disappearParameters.fadeStartPosition, 1.0f, 1.0f, 0.0f, remappedProgress)
+            alpha = MathUtils.constrain(alphaProgress, 0.0f, 1.0f)
+        }
+        return result
     }
 
     /**
@@ -75,9 +131,10 @@ open class TransitionLayoutController {
         startState: TransitionViewState,
         endState: TransitionViewState,
         progress: Float,
-        resultState: TransitionViewState
-    ) {
-        val view = transitionLayout ?: return
+        reusedState: TransitionViewState? = null
+    ): TransitionViewState {
+        val resultState = reusedState ?: TransitionViewState()
+        val view = transitionLayout ?: return resultState
         val childCount = view.childCount
         for (i in 0 until childCount) {
             val id = view.getChildAt(i).id
@@ -178,7 +235,21 @@ open class TransitionLayoutController {
                     progress).toInt()
             height = MathUtils.lerp(startState.height.toFloat(), endState.height.toFloat(),
                     progress).toInt()
+            translation.x = MathUtils.lerp(startState.translation.x, endState.translation.x,
+                    progress)
+            translation.y = MathUtils.lerp(startState.translation.y, endState.translation.y,
+                    progress)
+            alpha = MathUtils.lerp(startState.alpha, endState.alpha, progress)
+            contentTranslation.x = MathUtils.lerp(
+                    startState.contentTranslation.x,
+                    endState.contentTranslation.x,
+                    progress)
+            contentTranslation.y = MathUtils.lerp(
+                    startState.contentTranslation.y,
+                    endState.contentTranslation.y,
+                    progress)
         }
+        return resultState
     }
 
     fun attach(transitionLayout: TransitionLayout) {
@@ -206,7 +277,7 @@ open class TransitionLayoutController {
         this.state = state.copy()
         if (applyImmediately || transitionLayout == null) {
             animator.cancel()
-            transitionLayout?.setState(this.state)
+            applyStateToLayout(this.state)
             currentState = state.copy(reusedState = currentState)
         } else if (animated) {
             animationStartState = currentState.copy()
@@ -214,7 +285,7 @@ open class TransitionLayoutController {
             animator.startDelay = delay
             animator.start()
         } else if (!animator.isRunning) {
-            transitionLayout?.setState(this.state)
+            applyStateToLayout(this.state)
             currentState = state.copy(reusedState = currentState)
         }
         // otherwise the desired state was updated and the animation will go to the new target
@@ -229,5 +300,99 @@ open class TransitionLayoutController {
         state: TransitionViewState
     ) {
         transitionLayout?.measureState = state
+    }
+}
+
+class DisappearParameters() {
+
+    /**
+     * The pivot point when clipping view when disappearing, which describes how the content will
+     * be translated.
+     * The default value of (0.0f, 1.0f) means that the view will not be translated in horizontally
+     * and the vertical disappearing will be aligned on the bottom of the view,
+     */
+    var gonePivot = PointF(0.0f, 1.0f)
+
+    /**
+     * The fraction of the width and height that will remain when disappearing. The default of
+     * (1.0f, 0.0f) means that 100% of the width, but 0% of the height will remain at the end of
+     * the transition.
+     */
+    var disappearSize = PointF(1.0f, 0.0f)
+
+    /**
+     * The fraction of the normal translation, by which the content will be moved during the
+     * disappearing. The values here can be both negative as well as positive. The default value
+     * of (0.0f, 0.2f) means that the content doesn't move horizontally but moves 20% of the
+     * translation imposed by the pivot downwards. 1.0f means that the content will be translated
+     * in sync with the translation of the bounds
+     */
+    var contentTranslationFraction = PointF(0.0f, 0.8f)
+
+    /**
+     * The point during the progress from [0.0, 1.0f] where the view is fully appeared. 0.0f
+     * means that the content will start disappearing immediately, while 0.5f means that it
+     * starts disappearing half way through the progress.
+     */
+    var disappearStart = 0.0f
+
+    /**
+     * The point during the progress from [0.0, 1.0f] where the view has fully disappeared. 1.0f
+     * means that the view will disappear in sync with the progress, while 0.5f means that it
+     * is fully gone half way through the progress.
+     */
+    var disappearEnd = 1.0f
+
+    /**
+     * The point during the mapped progress from [0.0, 1.0f] where the view starts fading out. 1.0f
+     * means that the view doesn't fade at all, while 0.5 means that the content fades starts
+     * fading at the midpoint between [disappearStart] and [disappearEnd]
+     */
+    var fadeStartPosition = 0.9f
+
+    override fun equals(other: Any?): Boolean {
+        if (!(other is DisappearParameters)) {
+            return false
+        }
+        if (!disappearSize.equals(other.disappearSize)) {
+            return false
+        }
+        if (!gonePivot.equals(other.gonePivot)) {
+            return false
+        }
+        if (!contentTranslationFraction.equals(other.contentTranslationFraction)) {
+            return false
+        }
+        if (disappearStart != other.disappearStart) {
+            return false
+        }
+        if (disappearEnd != other.disappearEnd) {
+            return false
+        }
+        if (fadeStartPosition != other.fadeStartPosition) {
+            return false
+        }
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = disappearSize.hashCode()
+        result = 31 * result + gonePivot.hashCode()
+        result = 31 * result + contentTranslationFraction.hashCode()
+        result = 31 * result + disappearStart.hashCode()
+        result = 31 * result + disappearEnd.hashCode()
+        result = 31 * result + fadeStartPosition.hashCode()
+        return result
+    }
+
+    fun deepCopy(): DisappearParameters {
+        val result = DisappearParameters()
+        result.disappearSize.set(disappearSize)
+        result.gonePivot.set(gonePivot)
+        result.contentTranslationFraction.set(contentTranslationFraction)
+        result.disappearStart = disappearStart
+        result.disappearEnd = disappearEnd
+        result.fadeStartPosition = fadeStartPosition
+        return result
     }
 }

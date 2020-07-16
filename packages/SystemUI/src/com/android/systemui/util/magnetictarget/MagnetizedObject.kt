@@ -32,6 +32,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.util.animation.PhysicsAnimator
+import kotlin.math.abs
 import kotlin.math.hypot
 
 /**
@@ -177,6 +178,18 @@ abstract class MagnetizedObject<T : Any>(
     var physicsAnimatorEndListener: PhysicsAnimator.EndListener<T>? = null
 
     /**
+     * Method that is called when the object should be animated stuck to the target. The default
+     * implementation uses the object's x and y properties to animate the object centered inside the
+     * target. You can override this if you need custom animation.
+     *
+     * The method is invoked with the MagneticTarget that the object is sticking to, the X and Y
+     * velocities of the gesture that brought the object into the magnetic radius, whether or not it
+     * was flung, and a callback you must call after your animation completes.
+     */
+    var animateStuckToTarget: (MagneticTarget, Float, Float, Boolean, (() -> Unit)?) -> Unit =
+            ::animateStuckToTargetInternal
+
+    /**
      * Sets whether forcefully flinging the object vertically towards a target causes it to be
      * attracted to the target and then released immediately, despite never being dragged within the
      * magnetic field.
@@ -228,14 +241,14 @@ abstract class MagnetizedObject<T : Any>(
      * to the target. If this velocity is reached, the object will be freed even if it wasn't moved
      * outside the magnetic field radius.
      */
-    var flingUnstuckFromTargetMinVelocity = 1000f
+    var flingUnstuckFromTargetMinVelocity = 4000f
 
     /**
-     * Sets the maximum velocity above which the object will not stick to the target. Even if the
+     * Sets the maximum X velocity above which the object will not stick to the target. Even if the
      * object is dragged through the magnetic field, it will not stick to the target until the
-     * velocity is below this value.
+     * horizontal velocity is below this value.
      */
-    var stickToTargetMaxVelocity = 2000f
+    var stickToTargetMaxXVelocity = 2000f
 
     /**
      * Enable or disable haptic vibration effects when the object interacts with the magnetic field.
@@ -244,9 +257,6 @@ abstract class MagnetizedObject<T : Any>(
      * android.permission.VIBRATE permission!
      */
     var hapticsEnabled = true
-
-    /** Whether the HAPTIC_FEEDBACK_ENABLED setting is true. */
-    private var systemHapticsEnabled = false
 
     /** Default spring configuration to use for animating the object into a target. */
     var springConfig = PhysicsAnimator.SpringConfig(
@@ -259,24 +269,7 @@ abstract class MagnetizedObject<T : Any>(
     var flungIntoTargetSpringConfig = springConfig
 
     init {
-        val hapticSettingObserver =
-                object : ContentObserver(Handler.getMain()) {
-            override fun onChange(selfChange: Boolean) {
-                systemHapticsEnabled =
-                        Settings.System.getIntForUser(
-                                context.contentResolver,
-                                Settings.System.HAPTIC_FEEDBACK_ENABLED,
-                                0,
-                                UserHandle.USER_CURRENT) != 0
-            }
-        }
-
-        context.contentResolver.registerContentObserver(
-                Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),
-                true /* notifyForDescendants */, hapticSettingObserver)
-
-        // Trigger the observer once to initialize systemHapticsEnabled.
-        hapticSettingObserver.onChange(false /* selfChange */)
+        initHapticSettingObserver(context)
     }
 
     /**
@@ -383,7 +376,7 @@ abstract class MagnetizedObject<T : Any>(
             // If the object is moving too quickly within the magnetic field, do not stick it. This
             // only applies to objects newly stuck to a target. If the object is moved into a new
             // target, it wasn't moving at all (since it was stuck to the previous one).
-            if (objectNewlyStuckToTarget && hypot(velX, velY) > stickToTargetMaxVelocity) {
+            if (objectNewlyStuckToTarget && abs(velX) > stickToTargetMaxXVelocity) {
                 return false
             }
 
@@ -392,7 +385,7 @@ abstract class MagnetizedObject<T : Any>(
             targetObjectIsStuckTo = targetObjectIsInMagneticFieldOf
             cancelAnimations()
             magnetListener.onStuckToTarget(targetObjectIsInMagneticFieldOf!!)
-            animateStuckToTarget(targetObjectIsInMagneticFieldOf, velX, velY, false)
+            animateStuckToTarget(targetObjectIsInMagneticFieldOf, velX, velY, false, null)
 
             vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
         } else if (targetObjectIsInMagneticFieldOf == null && objectStuckToTarget) {
@@ -421,9 +414,10 @@ abstract class MagnetizedObject<T : Any>(
             cancelAnimations()
 
             if (objectStuckToTarget) {
-                if (hypot(velX, velY) > flingUnstuckFromTargetMinVelocity) {
-                    // If the object is stuck, but it was forcefully flung away from the target,
-                    // tell the listener so the object can be animated out of the target.
+                if (-velY > flingUnstuckFromTargetMinVelocity) {
+                    // If the object is stuck, but it was forcefully flung away from the target in
+                    // the upward direction, tell the listener so the object can be animated out of
+                    // the target.
                     magnetListener.onUnstuckFromTarget(
                             targetObjectIsStuckTo!!, velX, velY, wasFlungOut = true)
                 } else {
@@ -449,8 +443,8 @@ abstract class MagnetizedObject<T : Any>(
                 targetObjectIsStuckTo = flungToTarget
 
                 animateStuckToTarget(flungToTarget, velX, velY, true) {
-                    targetObjectIsStuckTo = null
                     magnetListener.onReleasedInTarget(flungToTarget)
+                    targetObjectIsStuckTo = null
                     vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
                 }
 
@@ -484,7 +478,7 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     /** Animates sticking the object to the provided target with the given start velocities.  */
-    private fun animateStuckToTarget(
+    private fun animateStuckToTargetInternal(
         target: MagneticTarget,
         velX: Float,
         velY: Float,
@@ -600,10 +594,10 @@ abstract class MagnetizedObject<T : Any>(
      * multiple objects.
      */
     class MagneticTarget(
-        internal val targetView: View,
+        val targetView: View,
         var magneticFieldRadiusPx: Int
     ) {
-        internal val centerOnScreen = PointF()
+        val centerOnScreen = PointF()
 
         private val tempLoc = IntArray(2)
 
@@ -621,6 +615,43 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     companion object {
+
+        /**
+         * Whether the HAPTIC_FEEDBACK_ENABLED setting is true.
+         *
+         * We put it in the companion object because we need to register a settings observer and
+         * [MagnetizedObject] doesn't have an obvious lifecycle so we don't have a good time to
+         * remove that observer. Since this settings is shared among all instances we just let all
+         * instances read from this value.
+         */
+        private var systemHapticsEnabled = false
+        private var hapticSettingObserverInitialized = false
+
+        private fun initHapticSettingObserver(context: Context) {
+            if (hapticSettingObserverInitialized) {
+                return
+            }
+
+            val hapticSettingObserver =
+                    object : ContentObserver(Handler.getMain()) {
+                        override fun onChange(selfChange: Boolean) {
+                            systemHapticsEnabled =
+                                    Settings.System.getIntForUser(
+                                            context.contentResolver,
+                                            Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                                            0,
+                                            UserHandle.USER_CURRENT) != 0
+                        }
+                    }
+
+            context.contentResolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),
+                    true /* notifyForDescendants */, hapticSettingObserver)
+
+            // Trigger the observer once to initialize systemHapticsEnabled.
+            hapticSettingObserver.onChange(false /* selfChange */)
+            hapticSettingObserverInitialized = true
+        }
 
         /**
          * Magnetizes the given view. Magnetized views are attracted to one or more magnetic

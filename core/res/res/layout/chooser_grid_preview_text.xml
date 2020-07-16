@@ -44,6 +44,8 @@
         android:ellipsize="end"
         android:fontFamily="@android:string/config_headlineFontFamily"
         android:textColor="?android:attr/textColorPrimary"
+        android:textAlignment="gravity"
+        android:textDirection="locale"
         android:maxLines="2"
         android:focusable="true"/>
 
@@ -90,6 +92,8 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="2"
+        android:textAlignment="gravity"
+        android:textDirection="locale"
         android:textAppearance="@style/TextAppearance.DeviceDefault.WindowTitle"
         android:fontFamily="@android:string/config_headlineFontFamily"/>
   </LinearLayout>

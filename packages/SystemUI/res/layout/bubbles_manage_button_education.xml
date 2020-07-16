@@ -17,30 +17,74 @@
 <com.android.systemui.bubbles.BubbleManageEducationView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+    >
     <LinearLayout
-        android:id="@+id/manage_education_view"
-        android:orientation="vertical"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_width="@dimen/bubbles_manage_education_width">
+        android:id="@+id/manage_education_view"
+        android:clickable="true"
+        android:paddingTop="28dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="@dimen/bubble_expanded_view_padding"
+        android:paddingEnd="48dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical"
+        android:background="@drawable/bubble_stack_user_education_bg"
+        >
+
+        <TextView
+            android:id="@+id/user_education_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingBottom="16dp"
+            android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="@string/bubbles_user_education_manage_title"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
         <TextView
             android:id="@+id/user_education_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingStart="16dp"
+            android:paddingBottom="24dp"
             android:text="@string/bubbles_user_education_manage"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"
-            android:background="@drawable/bubble_manage_user_education_bg"
-        />
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 
-        <View
-            android:id="@+id/user_education_pointer"
-            android:layout_width="@dimen/bubble_pointer_width"
-            android:layout_height="@dimen/bubble_pointer_height"
-        />
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/button_layout"
+            android:orientation="horizontal" >
 
+            <com.android.systemui.statusbar.AlphaOptimizedButton
+                style="@android:style/Widget.Material.Button.Borderless"
+                android:id="@+id/manage"
+                android:layout_gravity="start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="false"
+                android:text="@string/manage_bubbles_text"
+                android:textColor="?attr/wallpaperTextColor"
+                />
+
+            <com.android.systemui.statusbar.AlphaOptimizedButton
+                style="@android:style/Widget.Material.Button.Borderless"
+                android:id="@+id/got_it"
+                android:layout_gravity="start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:text="@string/bubbles_user_education_got_it"
+                android:textColor="?attr/wallpaperTextColor"
+                />
+        </LinearLayout>
     </LinearLayout>
 </com.android.systemui.bubbles.BubbleManageEducationView>

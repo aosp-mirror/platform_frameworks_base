@@ -117,6 +117,14 @@ class IdmapHeader {
     return overlay_crc_;
   }
 
+  inline uint32_t GetFulfilledPolicies() const {
+    return fulfilled_policies_;
+  }
+
+  bool GetEnforceOverlayable() const {
+    return enforce_overlayable_;
+  }
+
   inline StringPiece GetTargetPath() const {
     return StringPiece(target_path_);
   }
@@ -132,8 +140,11 @@ class IdmapHeader {
   // Invariant: anytime the idmap data encoding is changed, the idmap version
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
-  Result<Unit> IsUpToDate() const;
-  Result<Unit> IsUpToDate(uint32_t target_crc_) const;
+  Result<Unit> IsUpToDate(const char* target_path, const char* overlay_path,
+                          PolicyBitmask fulfilled_policies, bool enforce_overlayable) const;
+  Result<Unit> IsUpToDate(const char* target_path, const char* overlay_path, uint32_t target_crc,
+                          uint32_t overlay_crc, PolicyBitmask fulfilled_policies,
+                          bool enforce_overlayable) const;
 
   void accept(Visitor* v) const;
 
@@ -145,6 +156,8 @@ class IdmapHeader {
   uint32_t version_;
   uint32_t target_crc_;
   uint32_t overlay_crc_;
+  uint32_t fulfilled_policies_;
+  bool enforce_overlayable_;
   char target_path_[kIdmapStringLength];
   char overlay_path_[kIdmapStringLength];
   std::string debug_info_;

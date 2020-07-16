@@ -552,6 +552,6 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"डिवाइस की डिफ़ॉल्ट सेटिंग"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"बंद है"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"चालू है"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"बदली गई सेटिंग को लागू करने के लिए, अपने डिवाइस को फिर से चालू करें. डिवाइस को फिर से चालू करें या रद्द करें."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"बदली गई सेटिंग को लागू करने के लिए, डिवाइस को रीस्टार्ट करना होगा. अपने डिवाइस को रीस्टार्ट करें या रद्द करें."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"वायर वाला हेडफ़ोन"</string>
 </resources>

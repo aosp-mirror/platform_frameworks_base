@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Sil"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Özel zil sesi eklenemiyor"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Özel zil sesi silinemiyor"</string>
+    <string name="app_label" msgid="3091611356093417332">"Sesler"</string>
 </resources>

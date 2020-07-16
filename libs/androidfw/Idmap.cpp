@@ -157,7 +157,7 @@ IdmapResMap::Result IdmapResMap::Lookup(uint32_t target_res_id) const {
   table_value->dataType = entry->type;
   table_value->data = entry->value;
 
-  return Result(ResTable_entry_handle::managed(table_entry));
+  return Result(ResTable_entry_handle::managed(table_entry, [](auto p) { free(p); }));
 }
 
 static bool is_word_aligned(const void* data) {

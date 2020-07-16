@@ -25,4 +25,10 @@
         android:fillBefore="true" android:fillAfter="true"
         android:interpolator="@interpolator/fast_out_slow_in"
         android:duration="@android:integer/config_screen_rotation_total_180" />
+    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+        android:fillEnabled="true"
+        android:fillBefore="true" android:fillAfter="true"
+        android:interpolator="@interpolator/screen_rotation_alpha_in"
+        android:startOffset="@android:integer/config_screen_rotation_fade_in_delay"
+        android:duration="@android:integer/config_screen_rotation_fade_in" />
 </set>

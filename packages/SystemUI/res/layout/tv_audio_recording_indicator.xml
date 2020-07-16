@@ -45,7 +45,7 @@
                     android:id="@+id/icon_mic"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
-                    android:layout_marginLeft="6dp"
+                    android:layout_marginStart="6dp"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="6dp">
 
@@ -112,7 +112,7 @@
     </FrameLayout>
 
     <View
-        android:id="@+id/bg_right"
+        android:id="@+id/bg_end"
         android:layout_width="12dp"
         android:layout_height="47dp"
         android:background="@drawable/tv_rect_dark_right_rounded"

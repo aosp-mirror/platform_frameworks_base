@@ -28,6 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.DaggerSystemUIRootComponent;
 import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
@@ -164,7 +165,8 @@ public class SystemUIFactory {
                 wakeUpCoordinator, keyguardBypassController,
                 Dependency.get(NotificationMediaManager.class),
                 Dependency.get(NotificationListener.class),
-                Dependency.get(DozeParameters.class));
+                Dependency.get(DozeParameters.class),
+                Dependency.get(BubbleController.class));
     }
 
     @Module

@@ -200,12 +200,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Les données de votre appareil vont être effacées"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossible d\'utiliser l\'application d\'administration. Les données de votre appareil vont maintenant être effacées.\n\nSi vous avez des questions, contactez l\'administrateur de votre organisation."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impression désactivée par <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activez profil professionnel"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applications personnelles sont bloquées jusqu\'à ce que vous activiez votre profil professionnel"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activez votre profil pro"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applications personnelles seront bloquées jusqu\'à ce que vous activiez votre profil professionnel"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Vos applications personnelles seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre administrateur informatique ne vous autorise pas à désactiver votre profil professionnel pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activer"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Options Android TV"</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%3$d</xliff:g> secondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Supprimer"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Le service de premier plan qui a démarré en arrière-plan et provenant de <xliff:g id="PACKAGENAME">%1$s</xliff:g> ne disposera pas de l\'autorisation \"pendant l\'utilisation\" dans les futurs builds R. Veuillez accéder à go/r-bg-fgs-restriction et envoyer un rapport de bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Augmenter le volume au dessus du niveau recommandé ?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Utiliser le raccourci d\'accessibilité ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quand le raccourci est activé, appuyez sur les deux boutons de volume pendant trois secondes pour démarrer une fonctionnalité d\'accessibilité."</string>

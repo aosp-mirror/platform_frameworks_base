@@ -769,10 +769,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         return mContentTranslation;
     }
 
-    public boolean wantsAddAndRemoveAnimations() {
-        return true;
-    }
-
     /** Sets whether this view is the first notification in a section. */
     public void setFirstInSection(boolean firstInSection) {
         mFirstInSection = firstInSection;

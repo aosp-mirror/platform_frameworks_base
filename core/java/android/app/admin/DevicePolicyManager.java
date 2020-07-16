@@ -4247,6 +4247,12 @@ public class DevicePolicyManager {
      * device. After this method is called, the device must be unlocked using strong authentication
      * (PIN, pattern, or password). This API is intended for use only by device admins.
      * <p>
+     * From version {@link android.os.Build.VERSION_CODES#R} onwards, the caller must either have
+     * the LOCK_DEVICE permission or the device must have the device admin feature; if neither is
+     * true, then the method will return without completing any action. Before version
+     * {@link android.os.Build.VERSION_CODES#R}, the device needed the device admin feature,
+     * regardless of the caller's permissions.
+     * <p>
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
      * <p>
@@ -4273,6 +4279,12 @@ public class DevicePolicyManager {
      * This method secures the device in response to an urgent situation, such as a lost or stolen
      * device. After this method is called, the device must be unlocked using strong authentication
      * (PIN, pattern, or password). This API is intended for use only by device admins.
+     * <p>
+     * From version {@link android.os.Build.VERSION_CODES#R} onwards, the caller must either have
+     * the LOCK_DEVICE permission or the device must have the device admin feature; if neither is
+     * true, then the method will return without completing any action. Before version
+     * {@link android.os.Build.VERSION_CODES#R}, the device needed the device admin feature,
+     * regardless of the caller's permissions.
      * <p>
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
@@ -5868,12 +5880,22 @@ public class DevicePolicyManager {
      * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
      * the profile owner of an organization-owned managed profile.
      * <p>
-     * If the caller is device owner or called on the parent instance, then the
-     * restriction will be applied to all users.
+     * If the caller is device owner, then the restriction will be applied to all users. If
+     * called on the parent instance, then the restriction will be applied on the personal profile.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
      * not, a security exception will be thrown.
+     * <p>
+     * <b>Note</b>, this policy type is deprecated for legacy device admins since
+     * {@link android.os.Build.VERSION_CODES#Q}. On Android
+     * {@link android.os.Build.VERSION_CODES#Q} devices, legacy device admins targeting SDK
+     * version {@link android.os.Build.VERSION_CODES#P} or below can still call this API to
+     * disable camera, while legacy device admins targeting SDK version
+     * {@link android.os.Build.VERSION_CODES#Q} will receive a SecurityException. Starting
+     * from Android {@link android.os.Build.VERSION_CODES#R}, requests to disable camera from
+     * legacy device admins targeting SDK version {@link android.os.Build.VERSION_CODES#P} or
+     * below will be silently ignored.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled Whether or not the camera should be disabled.

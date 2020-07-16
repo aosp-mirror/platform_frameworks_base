@@ -2232,21 +2232,42 @@ public final class ProcessStats implements Parcelable {
     }
 
     /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
-    public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto) {
-        dumpProtoPreamble(proto);
+    public void dumpAggregatedProtoForStatsd(ProtoOutputStream[] protoStreams,
+            long maxRawShardSizeBytes) {
+        int shardIndex = 0;
+        dumpProtoPreamble(protoStreams[shardIndex]);
+
         final ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
-        final ProcessMap<ArraySet<PackageState>> procToPkgMap =
-                collectProcessPackageMaps(null, false);
+        final ProcessMap<ArraySet<PackageState>> procToPkgMap = new ProcessMap<>();
+        final SparseArray<ArraySet<String>> uidToPkgMap = new SparseArray<>();
+        collectProcessPackageMaps(null, false, procToPkgMap, uidToPkgMap);
+
         for (int ip = 0; ip < procMap.size(); ip++) {
             final String procName = procMap.keyAt(ip);
+            if (protoStreams[shardIndex].getRawSize() > maxRawShardSizeBytes) {
+                shardIndex++;
+                if (shardIndex >= protoStreams.length) {
+                    // We have run out of space; we'll drop the rest of the processes.
+                    Slog.d(TAG, String.format("Dropping process indices from %d to %d from "
+                            + "statsd proto (too large)", ip, procMap.size()));
+                    break;
+                }
+                dumpProtoPreamble(protoStreams[shardIndex]);
+            }
+
             final SparseArray<ProcessState> uids = procMap.valueAt(ip);
             for (int iu = 0; iu < uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
                 final ProcessState procState = uids.valueAt(iu);
-                procState.dumpAggregatedProtoForStatsd(proto,
+                procState.dumpAggregatedProtoForStatsd(protoStreams[shardIndex],
                         ProcessStatsSectionProto.PROCESS_STATS,
-                        procName, uid, mTimePeriodEndRealtime, procToPkgMap);
+                        procName, uid, mTimePeriodEndRealtime,
+                        procToPkgMap, uidToPkgMap);
             }
+        }
+
+        for (int i = 0; i <= shardIndex; i++) {
+            protoStreams[i].flush();
         }
     }
 
@@ -2279,10 +2300,9 @@ public final class ProcessStats implements Parcelable {
     /**
      * Walk through the known processes and build up the process -> packages map if necessary.
      */
-    public ProcessMap<ArraySet<PackageState>> collectProcessPackageMaps(
-            String reqPackage, boolean activeOnly) {
-        final ProcessMap<ArraySet<PackageState>> map = new ProcessMap<>();
-
+    private void collectProcessPackageMaps(String reqPackage, boolean activeOnly,
+            final ProcessMap<ArraySet<PackageState>> procToPkgMap,
+            final SparseArray<ArraySet<String>> uidToPkgMap) {
         final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
                 mPackages.getMap();
         for (int ip = pkgMap.size() - 1; ip >= 0; ip--) {
@@ -2304,17 +2324,22 @@ public final class ProcessStats implements Parcelable {
 
                         final String name = proc.getName();
                         final int uid = proc.getUid();
-                        ArraySet<PackageState> pkgStates = map.get(name, uid);
+                        ArraySet<PackageState> pkgStates = procToPkgMap.get(name, uid);
                         if (pkgStates == null) {
                             pkgStates = new ArraySet<>();
-                            map.put(name, uid, pkgStates);
+                            procToPkgMap.put(name, uid, pkgStates);
                         }
                         pkgStates.add(state);
+                        ArraySet<String> packages = uidToPkgMap.get(uid);
+                        if (packages == null) {
+                            packages = new ArraySet<>();
+                            uidToPkgMap.put(uid, packages);
+                        }
+                        packages.add(state.mPackageName);
                     }
                 }
             }
         }
-        return map;
     }
 
     /**
@@ -2329,10 +2354,12 @@ public final class ProcessStats implements Parcelable {
      * @param now       The timestamp when the dump was initiated.
      * @param procState The target process where its association states should be dumped.
      * @param proc2Pkg  The map between process to packages running within it.
+     * @param uidToPkgMap The map between UID to packages with this UID
      */
     public void dumpFilteredAssociationStatesProtoForProc(ProtoOutputStream proto,
             long fieldId, long now, ProcessState procState,
-            final ProcessMap<ArraySet<PackageState>> proc2Pkg) {
+            final ProcessMap<ArraySet<PackageState>> proc2Pkg,
+            final SparseArray<ArraySet<String>> uidToPkgMap) {
         if (procState.isMultiPackage() && procState.getCommonProcess() != procState) {
             // It's a per-package process state, don't bother to write into statsd
             return;
@@ -2395,8 +2422,12 @@ public final class ProcessStats implements Parcelable {
                 final SourceKey key = assocVals.keyAt(i);
                 final long[] vals = assocVals.valueAt(i);
                 final long token = proto.start(fieldId);
-                proto.write(ProcessStatsAssociationProto.ASSOC_PROCESS_NAME, key.mProcess);
-                proto.write(ProcessStatsAssociationProto.ASSOC_PACKAGE_NAME, key.mPackage);
+                final int idx = uidToPkgMap.indexOfKey(key.mUid);
+                ProcessState.writeCompressedProcessName(proto,
+                        ProcessStatsAssociationProto.ASSOC_PROCESS_NAME,
+                        key.mProcess, key.mPackage,
+                        idx >= 0 && uidToPkgMap.valueAt(idx).size() > 1);
+                proto.write(ProcessStatsAssociationProto.ASSOC_UID, key.mUid);
                 proto.write(ProcessStatsAssociationProto.TOTAL_COUNT, (int) vals[1]);
                 proto.write(ProcessStatsAssociationProto.TOTAL_DURATION_SECS,
                         (int) (vals[0] / 1000));

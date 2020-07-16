@@ -67,7 +67,6 @@ class ControlViewHolder(
 
     companion object {
         const val STATE_ANIMATION_DURATION = 700L
-        private const val UPDATE_DELAY_IN_MILLIS = 3000L
         private const val ALPHA_ENABLED = 255
         private const val ALPHA_DISABLED = 0
         private const val STATUS_ALPHA_ENABLED = 1f
@@ -87,10 +86,9 @@ class ControlViewHolder(
             deviceType: Int
         ): KClass<out Behavior> {
             return when {
-                status == Control.STATUS_UNKNOWN -> StatusBehavior::class
-                status == Control.STATUS_ERROR -> StatusBehavior::class
-                status == Control.STATUS_NOT_FOUND -> StatusBehavior::class
+                status != Control.STATUS_OK -> StatusBehavior::class
                 deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
+                template == ControlTemplate.NO_TEMPLATE -> TouchBehavior::class
                 template is ToggleTemplate -> ToggleBehavior::class
                 template is StatelessTemplate -> TouchBehavior::class
                 template is ToggleRangeTemplate -> ToggleRangeBehavior::class
@@ -114,15 +112,21 @@ class ControlViewHolder(
     val context: Context = layout.getContext()
     val clipLayer: ClipDrawable
     lateinit var cws: ControlWithState
-    var cancelUpdate: Runnable? = null
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
     var isLoading = false
+    var visibleDialog: Dialog? = null
     private var lastChallengeDialog: Dialog? = null
     private val onDialogCancel: () -> Unit = { lastChallengeDialog = null }
 
     val deviceType: Int
-        get() = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
+        get() = cws.control?.let { it.deviceType } ?: cws.ci.deviceType
+    val controlStatus: Int
+        get() = cws.control?.let { it.status } ?: Control.STATUS_UNKNOWN
+    val controlTemplate: ControlTemplate
+        get() = cws.control?.let { it.controlTemplate } ?: ControlTemplate.NO_TEMPLATE
+
+    var userInteractionInProgress = false
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -135,18 +139,23 @@ class ControlViewHolder(
     }
 
     fun bindData(cws: ControlWithState) {
+        // If an interaction is in progress, the update may visually interfere with the action the
+        // action the user wants to make. Don't apply the update, and instead assume a new update
+        // will coming from when the user interaction is complete.
+        if (userInteractionInProgress) return
+
         this.cws = cws
 
-        cancelUpdate?.run()
-
-        val (controlStatus, template) = cws.control?.let {
-            title.setText(it.getTitle())
-            subtitle.setText(it.getSubtitle())
-            Pair(it.status, it.controlTemplate)
-        } ?: run {
+        // For the following statuses only, assume the title/subtitle could not be set properly
+        // by the app and instead use the last known information from favorites
+        if (controlStatus == Control.STATUS_UNKNOWN || controlStatus == Control.STATUS_NOT_FOUND) {
             title.setText(cws.ci.controlTitle)
             subtitle.setText(cws.ci.controlSubtitle)
-            Pair(Control.STATUS_UNKNOWN, ControlTemplate.NO_TEMPLATE)
+        } else {
+            cws.control?.let {
+                title.setText(it.title)
+                subtitle.setText(it.subtitle)
+            }
         }
 
         cws.control?.let {
@@ -155,14 +164,19 @@ class ControlViewHolder(
                 controlActionCoordinator.longPress(this@ControlViewHolder)
                 true
             })
+
+            controlActionCoordinator.runPendingAction(cws.ci.controlId)
         }
 
         isLoading = false
-        behavior = bindBehavior(behavior, findBehaviorClass(controlStatus, template, deviceType))
+        behavior = bindBehavior(behavior,
+            findBehaviorClass(controlStatus, controlTemplate, deviceType))
         updateContentDescription()
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
+        controlActionCoordinator.enableActionOnTouch(cws.ci.controlId)
+
         // OK responses signal normal behavior, and the app will provide control updates
         val failedAttempt = lastChallengeDialog != null
         when (response) {
@@ -170,20 +184,20 @@ class ControlViewHolder(
                 lastChallengeDialog = null
             ControlAction.RESPONSE_UNKNOWN -> {
                 lastChallengeDialog = null
-                setTransientStatus(context.resources.getString(R.string.controls_error_failed))
+                setErrorStatus()
             }
             ControlAction.RESPONSE_FAIL -> {
                 lastChallengeDialog = null
-                setTransientStatus(context.resources.getString(R.string.controls_error_failed))
+                setErrorStatus()
             }
             ControlAction.RESPONSE_CHALLENGE_PIN -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
-                    this, false, failedAttempt, onDialogCancel)
+                    this, false /* useAlphanumeric */, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
-                    this, false, failedAttempt, onDialogCancel)
+                    this, true /* useAlphanumeric */, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_ACK -> {
@@ -197,18 +211,15 @@ class ControlViewHolder(
     fun dismiss() {
         lastChallengeDialog?.dismiss()
         lastChallengeDialog = null
+        visibleDialog?.dismiss()
+        visibleDialog = null
     }
 
-    fun setTransientStatus(tempStatus: String) {
-        val previousText = status.getText()
-
-        cancelUpdate = uiExecutor.executeDelayed({
-            setStatusText(previousText)
-            updateContentDescription()
-        }, UPDATE_DELAY_IN_MILLIS)
-
-        setStatusText(tempStatus)
-        updateContentDescription()
+    fun setErrorStatus() {
+        val text = context.resources.getString(R.string.controls_error_failed)
+        animateStatusChange(/* animated */ true, {
+            setStatusText(text, /* immediately */ true)
+        })
     }
 
     private fun updateContentDescription() =
@@ -219,7 +230,10 @@ class ControlViewHolder(
         controlsController.action(cws.componentName, cws.ci, action)
     }
 
-    fun usePanel(): Boolean = deviceType in ControlViewHolder.FORCE_PANEL_DEVICES
+    fun usePanel(): Boolean {
+        return deviceType in ControlViewHolder.FORCE_PANEL_DEVICES ||
+            controlTemplate == ControlTemplate.NO_TEMPLATE
+    }
 
     fun bindBehavior(
         existingBehavior: Behavior?,
@@ -245,10 +259,15 @@ class ControlViewHolder(
     }
 
     internal fun applyRenderInfo(enabled: Boolean, offset: Int, animated: Boolean = true) {
-        val ri = RenderInfo.lookup(context, cws.componentName, deviceType, offset)
+        val deviceTypeOrError = if (controlStatus == Control.STATUS_OK ||
+                controlStatus == Control.STATUS_UNKNOWN) {
+            deviceType
+        } else {
+            RenderInfo.ERROR_ICON
+        }
+        val ri = RenderInfo.lookup(context, cws.componentName, deviceTypeOrError, offset)
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
         val newText = nextStatusText
-        nextStatusText = ""
         val control = cws.control
 
         var shouldAnimate = animated
@@ -271,10 +290,9 @@ class ControlViewHolder(
         if (immediately) {
             status.alpha = STATUS_ALPHA_ENABLED
             status.text = text
-            nextStatusText = ""
-        } else {
-            nextStatusText = text
+            updateContentDescription()
         }
+        nextStatusText = text
     }
 
     private fun animateBackgroundChange(
@@ -389,11 +407,15 @@ class ControlViewHolder(
         setEnabled(enabled)
 
         status.text = text
+        updateContentDescription()
+
         status.setTextColor(color)
 
         control?.getCustomIcon()?.let {
             // do not tint custom icons, assume the intended icon color is correct
-            icon.imageTintList = null
+            if (icon.imageTintList != null) {
+                icon.imageTintList = null
+            }
             icon.setImageIcon(it)
         } ?: run {
             if (drawable is StateListDrawable) {

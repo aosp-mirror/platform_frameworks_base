@@ -41,7 +41,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 
-class ControlsRequestDialog @Inject constructor(
+open class ControlsRequestDialog @Inject constructor(
     private val controller: ControlsController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val controlsListingController: ControlsListingController
@@ -51,7 +51,7 @@ class ControlsRequestDialog @Inject constructor(
         private const val TAG = "ControlsRequestDialog"
     }
 
-    private lateinit var component: ComponentName
+    private lateinit var controlComponent: ComponentName
     private lateinit var control: Control
     private var dialog: Dialog? = null
     private val callback = object : ControlsListingController.ControlsListingCallback {
@@ -86,7 +86,7 @@ class ControlsRequestDialog @Inject constructor(
             finish()
         }
 
-        component = intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME) ?: run {
+        controlComponent = intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME) ?: run {
             Log.e(TAG, "Request did not contain componentName")
             finish()
             return
@@ -103,7 +103,7 @@ class ControlsRequestDialog @Inject constructor(
         super.onResume()
         val label = verifyComponentAndGetLabel()
         if (label == null) {
-            Log.e(TAG, "The component specified (${component.flattenToString()} " +
+            Log.e(TAG, "The component specified (${controlComponent.flattenToString()} " +
                     "is not a valid ControlsProviderService")
             finish()
             return
@@ -127,16 +127,16 @@ class ControlsRequestDialog @Inject constructor(
     }
 
     private fun verifyComponentAndGetLabel(): CharSequence? {
-        return controlsListingController.getAppLabel(component)
+        return controlsListingController.getAppLabel(controlComponent)
     }
 
     private fun isCurrentFavorite(): Boolean {
-        val favorites = controller.getFavoritesForComponent(component)
+        val favorites = controller.getFavoritesForComponent(controlComponent)
         return favorites.any { it.controls.any { it.controlId == control.controlId } }
     }
 
     fun createDialog(label: CharSequence): Dialog {
-        val renderInfo = RenderInfo.lookup(this, component, control.deviceType)
+        val renderInfo = RenderInfo.lookup(this, controlComponent, control.deviceType)
         val frame = LayoutInflater.from(this).inflate(R.layout.controls_dialog, null).apply {
             requireViewById<ImageView>(R.id.icon).apply {
                 setImageDrawable(renderInfo.icon)
@@ -170,7 +170,7 @@ class ControlsRequestDialog @Inject constructor(
     override fun onClick(dialog: DialogInterface?, which: Int) {
         if (which == Dialog.BUTTON_POSITIVE) {
             controller.addFavorite(
-                componentName,
+                controlComponent,
                 control.structure ?: "",
                 ControlInfo(control.controlId, control.title, control.subtitle, control.deviceType)
             )

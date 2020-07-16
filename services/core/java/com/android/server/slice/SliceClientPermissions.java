@@ -160,6 +160,9 @@ public class SliceClientPermissions implements DirtyTracker, Persistable {
         // Get to the beginning of the provider.
         while (parser.getEventType() != XmlPullParser.START_TAG
                 || !TAG_CLIENT.equals(parser.getName())) {
+            if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
+                throw new XmlPullParserException("Can't find client tag in xml");
+            }
             parser.next();
         }
         int depth = parser.getDepth();
@@ -173,6 +176,9 @@ public class SliceClientPermissions implements DirtyTracker, Persistable {
         parser.next();
 
         while (parser.getDepth() > depth) {
+            if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
+                return provider;
+            }
             if (parser.getEventType() == XmlPullParser.START_TAG
                     && TAG_AUTHORITY.equals(parser.getName())) {
                 try {

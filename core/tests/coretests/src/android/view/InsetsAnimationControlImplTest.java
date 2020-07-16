@@ -234,6 +234,24 @@ public class InsetsAnimationControlImplTest {
         verify(mMockListener).onFinished(mController);
     }
 
+    @Test
+    public void testPerceptible_insets() {
+        mController.setInsetsAndAlpha(mController.getHiddenStateInsets(), 1f, 1f);
+        verify(mMockController).reportPerceptible(systemBars(), false);
+
+        mController.setInsetsAndAlpha(mController.getShownStateInsets(), 1f, 1f);
+        verify(mMockController).reportPerceptible(systemBars(), true);
+    }
+
+    @Test
+    public void testPerceptible_alpha() {
+        mController.setInsetsAndAlpha(mController.getShownStateInsets(), 0f, 1f);
+        verify(mMockController).reportPerceptible(systemBars(), false);
+
+        mController.setInsetsAndAlpha(mController.getShownStateInsets(), 1f, 1f);
+        verify(mMockController).reportPerceptible(systemBars(), true);
+    }
+
     private void assertPosition(Matrix m, Rect original, Rect transformed) {
         RectF rect = new RectF(original);
         rect.offsetTo(0, 0);

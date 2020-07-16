@@ -37,7 +37,6 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.graphics.Rect;
-import android.platform.test.annotations.Presubmit;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -96,7 +95,6 @@ public class EditorCursorDragTest {
         mMotionEvents.clear();
     }
 
-    @Presubmit
     @Test
     public void testCursorDrag_horizontal_whenTextViewContentsFitOnScreen() throws Throwable {
         String text = "Hello world!";
@@ -145,7 +143,7 @@ public class EditorCursorDragTest {
         // Swipe along a diagonal path. This should drag the cursor. Because we snap the finger to
         // the handle as the touch moves downwards (and because we have some slop to avoid jumping
         // across lines), the cursor position will end up higher than the finger position.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("1")));
 
         // Swipe right-down along a very steep diagonal path. This should not drag the cursor.
@@ -181,7 +179,7 @@ public class EditorCursorDragTest {
         // Swipe along a diagonal path. This should drag the cursor. Because we snap the finger to
         // the handle as the touch moves downwards (and because we have some slop to avoid jumping
         // across lines), the cursor position will end up higher than the finger position.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("1")));
 
         // Swipe right-down along a very steep diagonal path. This should not drag the cursor.

@@ -72,9 +72,6 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
-
-        // Creating AudioRecordingDisclosureBar and just letting it run
-        new AudioRecordingDisclosureBar(mContext);
     }
 
     @Override

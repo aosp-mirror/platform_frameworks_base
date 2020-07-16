@@ -44,6 +44,7 @@ import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowManager;
 
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -74,7 +75,21 @@ class InsetsStateController {
             w.notifyInsetsChanged();
         }
     };
-    private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() { };
+    private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() {
+        @Override
+        public void notifyInsetsControlChanged() {
+            InsetsSourceControl[] controls = getControlsForDispatch(this);
+            if (controls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : controls) {
+                if (control.getType() == ITYPE_IME) {
+                    mDisplayContent.mWmService.mH.post(() ->
+                            InputMethodManagerInternal.get().removeImeSurface());
+                }
+            }
+        }
+    };
 
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -178,6 +193,7 @@ class InsetsStateController {
             if (imeSource != null && imeSource.isVisible()) {
                 imeSource = new InsetsSource(imeSource);
                 imeSource.setVisible(false);
+                imeSource.setFrame(0, 0, 0, 0);
                 state = new InsetsState(state);
                 state.addSource(imeSource);
             }
@@ -245,7 +261,7 @@ class InsetsStateController {
             // (e.g., z-order) have changed. They can affect the insets states that we dispatch to
             // the clients.
             for (int i = winInsetsChanged.size() - 1; i >= 0; i--) {
-                winInsetsChanged.get(i).notifyInsetsChanged();
+                mDispatchInsetsChanged.accept(winInsetsChanged.get(i));
             }
         }
         winInsetsChanged.clear();
@@ -253,8 +269,9 @@ class InsetsStateController {
 
     void onInsetsModified(InsetsControlTarget windowState, InsetsState state) {
         boolean changed = false;
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            final InsetsSource source = state.peekSource(i);
+            if (source == null) continue;
             final InsetsSourceProvider provider = mProviders.get(source.getType());
             if (provider == null) {
                 continue;

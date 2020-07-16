@@ -53,6 +53,9 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
     public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
     public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
+    public static final String ROUTE_ID6_TO_BE_IGNORED = "route_id6_to_be_ignored";
+    public static final String ROUTE_NAME6 = "Sample Route 6 - Route to be ignored";
+
     public static final String ROUTE_ID_SPECIAL_FEATURE = "route_special_feature";
     public static final String ROUTE_NAME_SPECIAL_FEATURE = "Special Feature Route";
 
@@ -76,6 +79,7 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
     @GuardedBy("sLock")
     private static StubMediaRoute2ProviderService sInstance;
     private Proxy mProxy;
+    private Spy mSpy;
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
@@ -98,7 +102,10 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
                 ROUTE_ID5_TO_TRANSFER_TO, ROUTE_NAME5)
                 .addFeature(FEATURE_SAMPLE)
                 .build();
-
+        MediaRoute2Info route6 = new MediaRoute2Info.Builder(
+                ROUTE_ID6_TO_BE_IGNORED, ROUTE_NAME6)
+                .addFeature(FEATURE_SAMPLE)
+                .build();
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_FEATURE, ROUTE_NAME_SPECIAL_FEATURE)
                         .addFeature(FEATURE_SAMPLE)
@@ -121,6 +128,7 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
         mRoutes.put(route3.getId(), route3);
         mRoutes.put(route4.getId(), route4);
         mRoutes.put(route5.getId(), route5);
+        mRoutes.put(route6.getId(), route6);
 
         mRoutes.put(routeSpecial.getId(), routeSpecial);
         mRoutes.put(fixedVolumeRoute.getId(), fixedVolumeRoute);
@@ -219,6 +227,10 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
             notifyRequestFailed(requestId, REASON_UNKNOWN_ERROR);
             return;
         }
+        // Ignores the request intentionally for testing
+        if (TextUtils.equals(ROUTE_ID6_TO_BE_IGNORED, routeId)) {
+            return;
+        }
         maybeDeselectRoute(routeId);
 
         final String sessionId = String.valueOf(mNextSessionId);
@@ -245,6 +257,11 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
 
     @Override
     public void onReleaseSession(long requestId, String sessionId) {
+        Spy spy = mSpy;
+        if (spy != null) {
+            spy.onReleaseSession(requestId, sessionId);
+        }
+
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
         if (sessionInfo == null) {
             return;
@@ -364,7 +381,21 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
         mProxy = proxy;
     }
 
+    public void setSpy(@Nullable Spy spy) {
+        mSpy = spy;
+    }
+
+    /**
+     * It overrides the original service
+     */
     public static class Proxy {
         public void onSetRouteVolume(String routeId, int volume, long requestId) {}
+    }
+
+    /**
+     * It gets notified but doesn't prevent the original methods to be called.
+     */
+    public static class Spy {
+        public void onReleaseSession(long requestId, String sessionId) {}
     }
 }

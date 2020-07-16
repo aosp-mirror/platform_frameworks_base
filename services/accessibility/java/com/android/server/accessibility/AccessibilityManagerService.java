@@ -56,6 +56,8 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IFingerprintService;
@@ -190,6 +192,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
+    private final Rect mTempRect = new Rect();
+    private final Rect mTempRect1 = new Rect();
+
     private final PackageManager mPackageManager;
 
     private final PowerManager mPowerManager;
@@ -246,6 +251,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     //TODO: Remove this hack
     private boolean mInitialized;
 
+    private Point mTempPoint = new Point();
     private boolean mIsAccessibilityButtonShown;
 
     private AccessibilityUserState getCurrentUserStateLocked() {
@@ -1068,6 +1074,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
+     * Gets a point within the accessibility focused node where we can send down
+     * and up events to perform a click.
+     *
+     * @param outPoint The click point to populate.
+     * @return Whether accessibility a click point was found and set.
+     */
+    // TODO: (multi-display) Make sure this works for multiple displays.
+    public boolean getAccessibilityFocusClickPointInScreen(Point outPoint) {
+        return getInteractionBridge().getAccessibilityFocusClickPointInScreenNotLocked(outPoint);
+    }
+
+    /**
      * Perform an accessibility action on the view that currently has accessibility focus.
      * Has no effect if no item has accessibility focus, if the item with accessibility
      * focus does not expose the specified action, or if the action fails.
@@ -1079,6 +1097,32 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public boolean performActionOnAccessibilityFocusedItem(
             AccessibilityNodeInfo.AccessibilityAction action) {
         return getInteractionBridge().performActionOnAccessibilityFocusedItemNotLocked(action);
+    }
+
+    /**
+     * Returns true if accessibility focus is confined to the active window.
+     */
+    public boolean accessibilityFocusOnlyInActiveWindow() {
+        synchronized (mLock) {
+            return mA11yWindowManager.isTrackingWindowsLocked();
+        }
+    }
+
+    /**
+     * Gets the bounds of a window.
+     *
+     * @param outBounds The output to which to write the bounds.
+     */
+    boolean getWindowBounds(int windowId, Rect outBounds) {
+        IBinder token;
+        synchronized (mLock) {
+            token = getWindowToken(windowId, mCurrentUserId);
+        }
+        mWindowManagerService.getWindowFrame(token, outBounds);
+        if (!outBounds.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
     public int getActiveWindowId() {
@@ -1824,9 +1868,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = 0; !observingWindows && (i < boundServiceCount); i++) {
             AccessibilityServiceConnection boundService = boundServices.get(i);
             if (boundService.canRetrieveInteractiveWindowsLocked()) {
+                userState.setAccessibilityFocusOnlyInActiveWindow(false);
                 observingWindows = true;
             }
         }
+        userState.setAccessibilityFocusOnlyInActiveWindow(true);
 
         // Gets all valid displays and start tracking windows of each display if there is at least
         // one bound service that can retrieve window content.
@@ -2930,6 +2976,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         /**
+         * Gets a point within the accessibility focused node where we can send down and up events
+         * to perform a click.
+         *
+         * @param outPoint The click point to populate.
+         * @return Whether accessibility a click point was found and set.
+         */
+        // TODO: (multi-display) Make sure this works for multiple displays.
+        boolean getAccessibilityFocusClickPointInScreen(Point outPoint) {
+            return getInteractionBridge()
+                    .getAccessibilityFocusClickPointInScreenNotLocked(outPoint);
+        }
+
+    /**
          * Perform an accessibility action on the view that currently has accessibility focus.
          * Has no effect if no item has accessibility focus, if the item with accessibility
          * focus does not expose the specified action, or if the action fails.
@@ -2945,6 +3004,43 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return false;
             }
             return focus.performAction(action.getId());
+        }
+
+        public boolean getAccessibilityFocusClickPointInScreenNotLocked(Point outPoint) {
+            AccessibilityNodeInfo focus = getAccessibilityFocusNotLocked();
+            if (focus == null) {
+                return false;
+            }
+
+            synchronized (mLock) {
+                Rect boundsInScreen = mTempRect;
+                focus.getBoundsInScreen(boundsInScreen);
+
+                // Apply magnification if needed.
+                MagnificationSpec spec = getCompatibleMagnificationSpecLocked(focus.getWindowId());
+                if (spec != null && !spec.isNop()) {
+                    boundsInScreen.offset((int) -spec.offsetX, (int) -spec.offsetY);
+                    boundsInScreen.scale(1 / spec.scale);
+                }
+
+                // Clip to the window bounds.
+                Rect windowBounds = mTempRect1;
+                getWindowBounds(focus.getWindowId(), windowBounds);
+                if (!boundsInScreen.intersect(windowBounds)) {
+                    return false;
+                }
+
+                // Clip to the screen bounds.
+                Point screenSize = mTempPoint;
+                mDefaultDisplay.getRealSize(screenSize);
+                if (!boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y)) {
+                    return false;
+                }
+
+                outPoint.set(boundsInScreen.centerX(), boundsInScreen.centerY());
+            }
+
+            return true;
         }
 
         private AccessibilityNodeInfo getAccessibilityFocusNotLocked() {

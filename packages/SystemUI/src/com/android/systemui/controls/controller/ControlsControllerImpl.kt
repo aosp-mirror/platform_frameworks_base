@@ -44,6 +44,7 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.globalactions.GlobalActionsDialog
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -79,6 +80,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     private var userChanging: Boolean = true
+    private var userStructure: UserStructure
 
     private var seedingInProgress = false
     private val seedingCallbacks = mutableListOf<Consumer<Boolean>>()
@@ -97,7 +99,7 @@ class ControlsControllerImpl @Inject constructor (
     internal var auxiliaryPersistenceWrapper: AuxiliaryPersistenceWrapper
 
     init {
-        val userStructure = UserStructure(context, currentUser)
+        userStructure = UserStructure(context, currentUser)
 
         persistenceWrapper = optionalWrapper.orElseGet {
             ControlsFavoritePersistenceWrapper(
@@ -116,7 +118,7 @@ class ControlsControllerImpl @Inject constructor (
     private fun setValuesForUser(newUser: UserHandle) {
         Log.d(TAG, "Changing to user: $newUser")
         currentUser = newUser
-        val userStructure = UserStructure(context, currentUser)
+        userStructure = UserStructure(context, currentUser)
         persistenceWrapper.changeFileAndBackupManager(
                 userStructure.file,
                 BackupManager(userStructure.userContext)
@@ -191,6 +193,16 @@ class ControlsControllerImpl @Inject constructor (
                 val favoriteComponentSet = Favorites.getAllStructures().map {
                     it.componentName
                 }.toSet()
+
+                // When a component is uninstalled, allow seeding to happen again if the user
+                // reinstalls the app
+                val prefs = userStructure.userContext.getSharedPreferences(
+                    GlobalActionsDialog.PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
+                val completedSeedingPackageSet = prefs.getStringSet(
+                    GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
+                val servicePackageSet = serviceInfoSet.map { it.packageName }
+                prefs.edit().putStringSet(GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED,
+                    completedSeedingPackageSet.intersect(servicePackageSet)).apply()
 
                 var changed = false
                 favoriteComponentSet.subtract(serviceInfoSet).forEach {
@@ -508,13 +520,6 @@ class ControlsControllerImpl @Inject constructor (
         if (!confirmAvailability()) return
         executor.execute {
             Favorites.replaceControls(structureInfo)
-            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
-        }
-    }
-
-    override fun resetFavorites() {
-        executor.execute {
-            Favorites.clear()
             persistenceWrapper.storeFavorites(Favorites.getAllStructures())
         }
     }

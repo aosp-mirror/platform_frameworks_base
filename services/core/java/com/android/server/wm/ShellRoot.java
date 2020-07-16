@@ -60,7 +60,10 @@ public class ShellRoot {
         mToken = new WindowToken(
                 dc.mWmService, client.asBinder(), windowType, true, dc, true, false);
         mSurfaceControl = mToken.makeChildSurface(null)
-                .setContainerLayer().setName("Shell Root Leash " + dc.getDisplayId()).build();
+                .setContainerLayer()
+                .setName("Shell Root Leash " + dc.getDisplayId())
+                .setCallsite("ShellRoot")
+                .build();
         mToken.getPendingTransaction().show(mSurfaceControl);
     }
 
@@ -104,7 +107,7 @@ public class ShellRoot {
                         0 /* windowCornerRadius */),
                 mDisplayContent.mWmService.mSurfaceAnimationRunner);
         mToken.startAnimation(mToken.getPendingTransaction(), adapter, false /* hidden */,
-                ANIMATION_TYPE_WINDOW_ANIMATION, null /* animationFinishedCallback */);
+                ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
     WindowInfo getWindowInfo() {

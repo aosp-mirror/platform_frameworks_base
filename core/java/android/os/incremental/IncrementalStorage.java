@@ -418,6 +418,17 @@ public final class IncrementalStorage {
     private static final int INCFS_MAX_ADD_DATA_SIZE = 128;
 
     /**
+     * Permanently disable readlogs collection.
+     */
+    public void disableReadLogs() {
+        try {
+            mService.disableReadLogs(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Deserialize and validate v4 signature bytes.
      */
     private static void validateV4Signature(@Nullable byte[] v4signatureBytes)

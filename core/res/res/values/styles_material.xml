@@ -491,6 +491,10 @@ please see styles_device_defaults.xml.
         <item name="textColor">#66000000</item>
     </style>
 
+    <style name="TextAppearance.Material.Notification.Conversation.AppName" parent="TextAppearance.Material.Notification.Title">
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="TextAppearance.Material.ListItem" parent="TextAppearance.Material.Subhead" />
     <style name="TextAppearance.Material.ListItemSecondary" parent="TextAppearance.Material.Body1" />
 

@@ -44,7 +44,8 @@ StatsPuller::StatsPuller(const int tagId, const int64_t coolDownNs, const int64_
 
 bool StatsPuller::Pull(const int64_t eventTimeNs, std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
-    int64_t elapsedTimeNs = getElapsedRealtimeNs();
+    const int64_t elapsedTimeNs = getElapsedRealtimeNs();
+    const int64_t systemUptimeMillis = getSystemUptimeMillis();
     StatsdStats::getInstance().notePull(mTagId);
     const bool shouldUseCache =
             (mLastEventTimeNs == eventTimeNs) || (elapsedTimeNs - mLastPullTimeNs < mCoolDownNs);
@@ -67,16 +68,18 @@ bool StatsPuller::Pull(const int64_t eventTimeNs, std::vector<std::shared_ptr<Lo
     if (!mHasGoodData) {
         return mHasGoodData;
     }
-    const int64_t pullDurationNs = getElapsedRealtimeNs() - elapsedTimeNs;
-    StatsdStats::getInstance().notePullTime(mTagId, pullDurationNs);
-    const bool pullTimeOut = pullDurationNs > mPullTimeoutNs;
+    const int64_t pullElapsedDurationNs = getElapsedRealtimeNs() - elapsedTimeNs;
+    const int64_t pullSystemUptimeDurationMillis = getSystemUptimeMillis() - systemUptimeMillis;
+    StatsdStats::getInstance().notePullTime(mTagId, pullElapsedDurationNs);
+    const bool pullTimeOut = pullElapsedDurationNs > mPullTimeoutNs;
     if (pullTimeOut) {
         // Something went wrong. Discard the data.
         mCachedData.clear();
         mHasGoodData = false;
-        StatsdStats::getInstance().notePullTimeout(mTagId);
+        StatsdStats::getInstance().notePullTimeout(
+                mTagId, pullSystemUptimeDurationMillis, NanoToMillis(pullElapsedDurationNs));
         ALOGW("Pull for atom %d exceeds timeout %lld nano seconds.", mTagId,
-              (long long)pullDurationNs);
+              (long long)pullElapsedDurationNs);
         return mHasGoodData;
     }
 

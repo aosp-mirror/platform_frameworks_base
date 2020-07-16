@@ -25,6 +25,7 @@ import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -161,26 +162,8 @@ public class PartialConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_SetsTextApplicationName() throws Exception {
-        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
-        mInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                true,
-                false);
-        final TextView textView = mInfo.findViewById(R.id.pkg_name);
-        assertTrue(textView.getText().toString().contains("App Name"));
-        assertEquals(VISIBLE, mInfo.findViewById(R.id.header).getVisibility());
-    }
-
-    @Test
     public void testBindNotification_SetsName() {
+        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("Package");
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -193,15 +176,13 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 true,
                 false);
         final TextView textView = mInfo.findViewById(R.id.name);
-        assertTrue(textView.getText().toString().contains("title"));
+        assertTrue(textView.getText().toString().equals("Package"));
     }
 
+
     @Test
-    public void testBindNotification_groupSetsPackageIcon() {
-        mEntry.getSbn().getNotification().extras.putBoolean(EXTRA_IS_GROUP_CONVERSATION, true);
-        final Drawable iconDrawable = mock(Drawable.class);
-        when(mMockPackageManager.getApplicationIcon(any(ApplicationInfo.class)))
-                .thenReturn(iconDrawable);
+    public void testBindNotification_setsIcon() {
+        when(mMockPackageManager.getApplicationIcon((ApplicationInfo) any())).thenReturn(mDrawable);
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -213,34 +194,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 null,
                 true,
                 false);
-        final ImageView iconView = mInfo.findViewById(R.id.conversation_icon);
-        assertEquals(iconDrawable, iconView.getDrawable());
-    }
-
-    @Test
-    public void testBindNotification_notGroupSetsMessageIcon() {
-        Notification n = new Notification.Builder(mContext, TEST_CHANNEL_NAME)
-                .setStyle(new Notification.MessagingStyle(
-                        new Person.Builder().setName("me").build())
-                .addMessage(new Notification.MessagingStyle.Message("hello", 0,
-                        new Person.Builder().setName("friend").setIcon(mIcon).build())))
-                .build();
-        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
-                n, UserHandle.CURRENT, null, 0);
-        mEntry.setSbn(mSbn);
-        mEntry.getSbn().getNotification().extras.putBoolean(EXTRA_IS_GROUP_CONVERSATION, false);
-        mInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                true,
-                false);
-        final ImageView iconView = mInfo.findViewById(R.id.conversation_icon);
+        final ImageView iconView = mInfo.findViewById(R.id.icon);
         assertEquals(mDrawable.hashCode() + "", mDrawable, iconView.getDrawable());
     }
 
@@ -259,8 +213,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 false);
         final TextView nameView = mInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
-        final TextView dividerView = mInfo.findViewById(R.id.group_divider);
-        assertEquals(GONE, dividerView.getVisibility());
     }
 
     @Test
@@ -288,68 +240,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         final TextView nameView = mInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
         assertTrue(nameView.getText().toString().contains("Proxied"));
-    }
-
-    @Test
-    public void testBindNotification_GroupNameHiddenIfNoGroup() throws Exception {
-        mInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                true,
-                false);
-        final TextView groupNameView = mInfo.findViewById(R.id.group_name);
-        assertEquals(GONE, groupNameView.getVisibility());
-        final TextView dividerView = mInfo.findViewById(R.id.group_divider);
-        assertEquals(GONE, dividerView.getVisibility());
-    }
-
-    @Test
-    public void testBindNotification_SetsGroupNameIfNonNull() throws Exception {
-        mNotificationChannel.setGroup("test_group_id");
-        final NotificationChannelGroup notificationChannelGroup =
-                new NotificationChannelGroup("test_group_id", "Test Group Name");
-        when(mMockINotificationManager.getNotificationChannelGroupForPackage(
-                eq("test_group_id"), eq(TEST_PACKAGE_NAME), eq(TEST_UID)))
-                .thenReturn(notificationChannelGroup);
-        mInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                true,
-                false);
-        final TextView groupNameView = mInfo.findViewById(R.id.group_name);
-        assertEquals(View.VISIBLE, groupNameView.getVisibility());
-        assertEquals("Test Group Name", groupNameView.getText());
-        final TextView dividerView = mInfo.findViewById(R.id.group_divider);
-        assertEquals(View.VISIBLE, dividerView.getVisibility());
-    }
-
-    @Test
-    public void testBindNotification_SetsTextChannelName() {
-        mInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                true,
-                false);
-        final TextView textView = mInfo.findViewById(R.id.parent_channel_name);
-        assertEquals(TEST_CHANNEL_NAME, textView.getText());
     }
 
     @Test

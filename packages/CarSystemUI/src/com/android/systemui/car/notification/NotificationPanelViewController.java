@@ -48,17 +48,21 @@ import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.window.OverlayPanelViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /** View controller for the notification panel. */
 @Singleton
-public class NotificationPanelViewController extends OverlayPanelViewController {
+public class NotificationPanelViewController extends OverlayPanelViewController
+        implements CommandQueue.Callbacks {
 
     private static final boolean DEBUG = true;
     private static final String TAG = "NotificationPanelViewController";
@@ -68,12 +72,14 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
     private final CarServiceProvider mCarServiceProvider;
     private final IStatusBarService mBarService;
     private final CommandQueue mCommandQueue;
+    private final Executor mUiBgExecutor;
     private final NotificationDataManager mNotificationDataManager;
     private final CarUxRestrictionManagerWrapper mCarUxRestrictionManagerWrapper;
     private final CarNotificationListener mCarNotificationListener;
     private final NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private final StatusBarStateController mStatusBarStateController;
     private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
+    private final NotificationVisibilityLogger mNotificationVisibilityLogger;
 
     private float mInitialBackgroundAlpha;
     private float mBackgroundAlphaDiff;
@@ -98,6 +104,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
             @Main Resources resources,
             OverlayViewGlobalStateController overlayViewGlobalStateController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
+            @UiBackground Executor uiBgExecutor,
 
             /* Other things */
             CarServiceProvider carServiceProvider,
@@ -110,6 +117,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
             CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper,
             CarNotificationListener carNotificationListener,
             NotificationClickHandlerFactory notificationClickHandlerFactory,
+            NotificationVisibilityLogger notificationVisibilityLogger,
 
             /* Things that need to be replaced */
             StatusBarStateController statusBarStateController
@@ -121,12 +129,15 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
         mCarServiceProvider = carServiceProvider;
         mBarService = barService;
         mCommandQueue = commandQueue;
+        mUiBgExecutor = uiBgExecutor;
         mNotificationDataManager = notificationDataManager;
         mCarUxRestrictionManagerWrapper = carUxRestrictionManagerWrapper;
         mCarNotificationListener = carNotificationListener;
         mNotificationClickHandlerFactory = notificationClickHandlerFactory;
         mStatusBarStateController = statusBarStateController;
+        mNotificationVisibilityLogger = notificationVisibilityLogger;
 
+        mCommandQueue.addCallback(this);
         // Notification background setup.
         mInitialBackgroundAlpha = (float) mResources.getInteger(
                 R.integer.config_initialNotificationBackgroundAlpha) / 100;
@@ -151,9 +162,33 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
                         .config_enableHeadsUpNotificationWhenNotificationShadeOpen);
     }
 
+    // CommandQueue.Callbacks
+
+    @Override
+    public void animateExpandNotificationsPanel() {
+        if (!isPanelExpanded()) {
+            toggle();
+        }
+    }
+
+    @Override
+    public void animateCollapsePanels(int flags, boolean force) {
+        if (isPanelExpanded()) {
+            toggle();
+        }
+    }
+
+    // OverlayViewController
+
     @Override
     protected void onFinishInflate() {
         reinflate();
+    }
+
+    @Override
+    protected void hideInternal() {
+        super.hideInternal();
+        mNotificationVisibilityLogger.stop();
     }
 
     @Override
@@ -197,6 +232,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
                 mUnseenCountUpdateListener.onUnseenCountUpdate(
                         mNotificationDataManager.getUnseenNotificationCount());
             }
+            mCarNotificationListener.setNotificationsShown(
+                    mNotificationDataManager.getSeenNotifications());
+            // This logs both when the notification panel is expanded and when the notification
+            // panel is scrolled.
+            mNotificationVisibilityLogger.log(isPanelExpanded());
         });
 
         mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
@@ -332,6 +372,8 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
         mNotificationDataManager.clearAll();
     }
 
+    // OverlayPanelViewController
+
     @Override
     protected boolean shouldAnimateCollapsePanel() {
         return true;
@@ -364,6 +406,30 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
     }
 
     @Override
+    protected void onPanelVisible(boolean visible) {
+        super.onPanelVisible(visible);
+        mUiBgExecutor.execute(() -> {
+            try {
+                if (visible) {
+                    // When notification panel is open even just a bit, we want to clear
+                    // notification effects.
+                    boolean clearNotificationEffects =
+                            mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
+                    mBarService.onPanelRevealed(clearNotificationEffects,
+                            mNotificationDataManager.getVisibleNotifications().size());
+                } else {
+                    mBarService.onPanelHidden();
+                }
+            } catch (RemoteException ex) {
+                // Won't fail unless the world has ended.
+                Log.e(TAG, String.format(
+                        "Unable to notify StatusBarService of panel visibility: %s", visible));
+            }
+        });
+
+    }
+
+    @Override
     protected void onPanelExpanded(boolean expand) {
         super.onPanelExpanded(expand);
 
@@ -372,6 +438,9 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
                 Log.v(TAG, "clearing notification effects from setExpandedHeight");
             }
             clearNotificationEffects();
+        }
+        if (!expand) {
+            mNotificationVisibilityLogger.log(isPanelExpanded());
         }
     }
 

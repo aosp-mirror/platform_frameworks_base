@@ -42,6 +42,7 @@
         android:layout_height="1dp" />
     <ImageView
         android:id="@+id/control_detail_open_in_app"
+        android:contentDescription="@string/controls_open_app"
         android:src="@drawable/ic_open_in_new"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:tint="@color/control_primary_text"

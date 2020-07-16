@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Vee uit"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Kan nie gepasmaakte luitoon byvoeg nie"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Kan nie gepasmaakte luitoon uitvee nie"</string>
+    <string name="app_label" msgid="3091611356093417332">"Klanke"</string>
 </resources>

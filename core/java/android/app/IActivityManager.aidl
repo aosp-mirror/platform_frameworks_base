@@ -677,4 +677,10 @@ interface IActivityManager {
      * Return whether the app freezer is supported (true) or not (false) by this system.
      */
     boolean isAppFreezerSupported();
+
+
+    /**
+     * Kills uid with the reason of permission change.
+     */
+    void killUidForPermissionChange(int appId, int userId, String reason);
 }

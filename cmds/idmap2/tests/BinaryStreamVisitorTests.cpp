@@ -48,6 +48,11 @@ TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
   ASSERT_TRUE(result2);
   const auto idmap2 = std::move(*result2);
 
+  ASSERT_EQ(idmap1->GetHeader()->GetFulfilledPolicies(),
+            idmap2->GetHeader()->GetFulfilledPolicies());
+  ASSERT_EQ(idmap1->GetHeader()->GetEnforceOverlayable(),
+            idmap2->GetHeader()->GetEnforceOverlayable());
+  ASSERT_EQ(idmap1->GetHeader()->GetTargetPath(), idmap2->GetHeader()->GetTargetPath());
   ASSERT_EQ(idmap1->GetHeader()->GetTargetCrc(), idmap2->GetHeader()->GetTargetCrc());
   ASSERT_EQ(idmap1->GetHeader()->GetTargetPath(), idmap2->GetHeader()->GetTargetPath());
   ASSERT_EQ(idmap1->GetData().size(), 1U);

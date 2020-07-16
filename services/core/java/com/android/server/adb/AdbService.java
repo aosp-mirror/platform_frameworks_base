@@ -34,6 +34,7 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -241,12 +242,7 @@ public class AdbService extends IAdbManager.Stub {
     private AdbService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-
-        boolean secureAdbEnabled = AdbProperties.secure().orElse(false);
-        boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
-        if (secureAdbEnabled && !dataEncrypted) {
-            mDebuggingManager = new AdbDebuggingManager(context);
-        }
+        mDebuggingManager = new AdbDebuggingManager(context);
 
         initAdbState();
         LocalServices.addService(AdbManagerInternal.class, new AdbManagerInternalImpl());
@@ -511,6 +507,14 @@ public class AdbService extends IAdbManager.Stub {
         if (mDebuggingManager != null) {
             mDebuggingManager.setAdbEnabled(enable, transportType);
         }
+    }
+
+    @Override
+    public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
+            ParcelFileDescriptor err, String[] args) {
+        return new AdbShellCommand(this).exec(
+                this, in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
+                args);
     }
 
     @Override

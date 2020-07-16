@@ -117,10 +117,10 @@ public final class ShareTargetPredictorTest {
 
     @Test
     public void testPredictTargets() {
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc1"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc2"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc3"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc4"));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc1", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc2", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc3", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc4", 0));
 
         when(mPackageData1.getConversationInfo("sc1")).thenReturn(mock(ConversationInfo.class));
         when(mPackageData1.getConversationInfo("sc2")).thenReturn(mock(ConversationInfo.class));
@@ -165,12 +165,12 @@ public final class ShareTargetPredictorTest {
 
     @Test
     public void testPredictTargets_reachTargetsLimit() {
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc1"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc2"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc3"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc4"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc5"));
-        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc6"));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc1", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc2", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc3", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc4", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc5", 0));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc6", 0));
 
         when(mPackageData1.getConversationInfo("sc1")).thenReturn(mock(ConversationInfo.class));
         when(mPackageData1.getConversationInfo("sc2")).thenReturn(mock(ConversationInfo.class));
@@ -247,6 +247,41 @@ public final class ShareTargetPredictorTest {
         verify(mUpdatePredictionsMethod).accept(mAppTargetCaptor.capture());
         assertThat(mAppTargetCaptor.getValue()).isEmpty();
         verify(mDataManager, never()).getShareShortcuts(any(), anyInt());
+    }
+
+    @Test
+    public void testPredictTargets_noSharingHistoryRankedByShortcutRank() {
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc1", 3));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc2", 2));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc3", 1));
+        mShareShortcuts.add(buildShareShortcut(PACKAGE_2, CLASS_2, "sc4", 0));
+
+        when(mPackageData1.getConversationInfo("sc1")).thenReturn(mock(ConversationInfo.class));
+        when(mPackageData1.getConversationInfo("sc2")).thenReturn(mock(ConversationInfo.class));
+        when(mPackageData2.getConversationInfo("sc3")).thenReturn(mock(ConversationInfo.class));
+        // "sc4" does not have a ConversationInfo.
+
+        mPredictor.predictTargets();
+
+        verify(mUpdatePredictionsMethod).accept(mAppTargetCaptor.capture());
+        List<AppTarget> res = mAppTargetCaptor.getValue();
+        assertEquals(4, res.size());
+
+        assertEquals("sc4", res.get(0).getId().getId());
+        assertEquals(CLASS_2, res.get(0).getClassName());
+        assertEquals(PACKAGE_2, res.get(0).getPackageName());
+
+        assertEquals("sc3", res.get(1).getId().getId());
+        assertEquals(CLASS_2, res.get(1).getClassName());
+        assertEquals(PACKAGE_2, res.get(1).getPackageName());
+
+        assertEquals("sc2", res.get(2).getId().getId());
+        assertEquals(CLASS_1, res.get(2).getClassName());
+        assertEquals(PACKAGE_1, res.get(2).getPackageName());
+
+        assertEquals("sc1", res.get(3).getId().getId());
+        assertEquals(CLASS_1, res.get(3).getClassName());
+        assertEquals(PACKAGE_1, res.get(3).getPackageName());
     }
 
     @Test
@@ -348,19 +383,20 @@ public final class ShareTargetPredictorTest {
     }
 
     private static ShareShortcutInfo buildShareShortcut(
-            String packageName, String className, String shortcutId) {
-        ShortcutInfo shortcutInfo = buildShortcut(packageName, shortcutId);
+            String packageName, String className, String shortcutId, int rank) {
+        ShortcutInfo shortcutInfo = buildShortcut(packageName, shortcutId, rank);
         ComponentName componentName = new ComponentName(packageName, className);
         return new ShareShortcutInfo(shortcutInfo, componentName);
     }
 
-    private static ShortcutInfo buildShortcut(String packageName, String shortcutId) {
+    private static ShortcutInfo buildShortcut(String packageName, String shortcutId, int rank) {
         Context mockContext = mock(Context.class);
         when(mockContext.getPackageName()).thenReturn(packageName);
         when(mockContext.getUserId()).thenReturn(USER_ID);
         when(mockContext.getUser()).thenReturn(UserHandle.of(USER_ID));
         ShortcutInfo.Builder builder = new ShortcutInfo.Builder(mockContext, shortcutId)
                 .setShortLabel(shortcutId)
+                .setRank(rank)
                 .setIntent(new Intent("TestIntent"));
         return builder.build();
     }

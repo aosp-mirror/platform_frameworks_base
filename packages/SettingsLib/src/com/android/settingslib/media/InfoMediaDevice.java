@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK;
+import static android.media.MediaRoute2Info.FEATURE_REMOTE_VIDEO_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
@@ -28,6 +30,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
+
+import java.util.List;
 
 /**
  * InfoMediaDevice extends MediaDevice to represents wifi device.
@@ -55,14 +59,14 @@ public class InfoMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        //TODO(b/120669861): Return remote device icon uri once api is ready.
-        return BluetoothUtils.buildBtRainbowDrawable(mContext,
-                mContext.getDrawable(getDrawableResId()), getId().hashCode());
+        final Drawable drawable = getIconWithoutBackground();
+        setColorFilter(drawable);
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
     }
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return mContext.getDrawable(getDrawableResId());
+        return mContext.getDrawable(getDrawableResIdByFeature());
     }
 
     @VisibleForTesting
@@ -80,6 +84,21 @@ public class InfoMediaDevice extends MediaDevice {
                 resId = R.drawable.ic_media_speaker_device;
                 break;
         }
+        return resId;
+    }
+
+    @VisibleForTesting
+    int getDrawableResIdByFeature() {
+        int resId;
+        final List<String> features = mRouteInfo.getFeatures();
+        if (features.contains(FEATURE_REMOTE_GROUP_PLAYBACK)) {
+            resId = R.drawable.ic_media_group_device;
+        } else if (features.contains(FEATURE_REMOTE_VIDEO_PLAYBACK)) {
+            resId = R.drawable.ic_media_display_device;
+        } else {
+            resId = R.drawable.ic_media_speaker_device;
+        }
+
         return resId;
     }
 

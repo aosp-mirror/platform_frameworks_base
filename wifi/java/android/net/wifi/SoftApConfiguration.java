@@ -165,7 +165,8 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * The operating band of the AP.
-     * One of the band types from {@link @BandType}.
+     * One or combination of the following band type:
+     * {@link #BAND_2GHZ}, {@link #BAND_5GHZ}, {@link #BAND_6GHZ}.
      */
     private final @BandType int mBand;
 
@@ -181,7 +182,11 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * The operating security type of the AP.
-     * One of the security types from {@link @SecurityType}
+     * One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WPA2_PSK},
+     * {@link #SECURITY_TYPE_WPA3_SAE_TRANSITION},
+     * {@link #SECURITY_TYPE_WPA3_SAE}
      */
     private final @SecurityType int mSecurityType;
 
@@ -393,8 +398,12 @@ public final class SoftApConfiguration implements Parcelable {
     }
 
     /**
-     * Returns {@link BandType} set to be the band for the AP.
-     * {@link Builder#setBand(@BandType int)}.
+     * Returns band type set to be the band for the AP.
+     *
+     * One or combination of the following band type:
+     * {@link #BAND_2GHZ}, {@link #BAND_5GHZ}, {@link #BAND_6GHZ}.
+     *
+     * {@link Builder#setBand(int)}.
      *
      * @hide
      */
@@ -679,15 +688,19 @@ public final class SoftApConfiguration implements Parcelable {
         /**
          * Specifies that this AP should use specific security type with the given ASCII passphrase.
          *
-         * @param securityType one of the security types from {@link @SecurityType}.
-         * @param passphrase The passphrase to use for sepcific {@link @SecurityType} configuration
-         * or null with {@link @SecurityType#SECURITY_TYPE_OPEN}.
+         * @param securityType One of the following security types:
+         * {@link #SECURITY_TYPE_OPEN},
+         * {@link #SECURITY_TYPE_WPA2_PSK},
+         * {@link #SECURITY_TYPE_WPA3_SAE_TRANSITION},
+         * {@link #SECURITY_TYPE_WPA3_SAE}.
+         * @param passphrase The passphrase to use for sepcific {@code securityType} configuration
+         * or null with {@link #SECURITY_TYPE_OPEN}.
          *
          * @return Builder for chaining.
          * @throws IllegalArgumentException when the passphrase length is invalid and
-         *         {@code securityType} is not {@link @SecurityType#SECURITY_TYPE_OPEN}
+         *         {@code securityType} is not {@link #SECURITY_TYPE_OPEN}
          *         or non-null passphrase and {@code securityType} is
-         *         {@link @SecurityType#SECURITY_TYPE_OPEN}.
+         *         {@link #SECURITY_TYPE_OPEN}.
          */
         @NonNull
         public Builder setPassphrase(@Nullable String passphrase, @SecurityType int securityType) {
@@ -735,9 +748,10 @@ public final class SoftApConfiguration implements Parcelable {
         /**
          * Specifies the band for the AP.
          * <p>
-         * <li>If not set, defaults to BAND_2GHZ {@link @BandType}.</li>
+         * <li>If not set, defaults to {@link #BAND_2GHZ}.</li>
          *
-         * @param band One or combination of the band types from {@link @BandType}.
+         * @param band One or combination of the following band type:
+         * {@link #BAND_2GHZ}, {@link #BAND_5GHZ}, {@link #BAND_6GHZ}.
          * @return Builder for chaining.
          */
         @NonNull
@@ -758,7 +772,7 @@ public final class SoftApConfiguration implements Parcelable {
          * <p>
          * The default for the channel is a the special value 0 to have the framework
          * auto-select a valid channel from the band configured with
-         * {@link #setBand(@BandType int)}.
+         * {@link #setBand(int)}.
          *
          * The channel auto selection will offload to driver when
          * {@link SoftApCapability#areFeaturesSupported(
@@ -871,7 +885,8 @@ public final class SoftApConfiguration implements Parcelable {
 
         /**
          * Configure the Soft AP to require manual user control of client association.
-         * If disabled (the default) then any client can associate to this Soft AP using the
+         * If disabled (the default) then any client which isn't in the blocked list
+         * {@link #getBlockedClientList()} can associate to this Soft AP using the
          * correct credentials until the Soft AP capacity is reached (capacity is hardware, carrier,
          * or user limited - using {@link #setMaxNumberOfClients(int)}).
          *
@@ -931,21 +946,19 @@ public final class SoftApConfiguration implements Parcelable {
         }
 
         /**
-         * This method together with {@link setClientControlByUserEnabled(boolean)} control client
-         * connections to the AP. If client control by user is disabled using the above method then
-         * this API has no effect and clients are allowed to associate to the AP (within limit of
-         * max number of clients).
+         * This API configures the list of clients which are blocked and cannot associate
+         * to the Soft AP.
          *
-         * If client control by user is enabled then this API this API configures the list of
-         * clients which are blocked. These are rejected.
+         * <p>
+         * This method requires hardware support. Hardware support can be determined using
+         * {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#areFeaturesSupported(int)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT}
          *
-         * All other clients which attempt to associate, whose MAC addresses are on neither list,
-         * are:
-         * <ul>
-         * <li>Rejected</li>
-         * <li>A callback {@link WifiManager.SoftApCallback#onBlockedClientConnecting(WifiClient)}
-         * is issued (which allows the user to add them to the allowed client list if desired).<li>
-         * </ul>
+         * <p>
+         * If the method is called on a device without hardware support then starting the soft AP
+         * using {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} will fail with
+         * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
          *
          * @param blockedClientList list of clients which are not allowed to associate to the AP.
          * @return Builder for chaining.

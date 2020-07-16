@@ -95,7 +95,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     public void testOnGoingToSleep_UpdatesKeyguardGoingAway() {
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
-        verify(mUpdateMonitor).setKeyguardGoingAway(false);
+        verify(mUpdateMonitor).dispatchKeyguardGoingAway(false);
         verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
     }
 

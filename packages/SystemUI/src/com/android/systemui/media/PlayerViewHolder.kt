@@ -44,9 +44,11 @@ class PlayerViewHolder private constructor(itemView: View) {
     val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
     val seamlessIcon = itemView.requireViewById<ImageView>(R.id.media_seamless_image)
     val seamlessText = itemView.requireViewById<TextView>(R.id.media_seamless_text)
+    val seamlessFallback = itemView.requireViewById<ImageView>(R.id.media_seamless_fallback)
 
     // Seek bar
     val seekBar = itemView.requireViewById<SeekBar>(R.id.media_progress_bar)
+    val progressTimes = itemView.requireViewById<ViewGroup>(R.id.notification_media_progress_time)
     val elapsedTimeView = itemView.requireViewById<TextView>(R.id.media_elapsed_time)
     val totalTimeView = itemView.requireViewById<TextView>(R.id.media_total_time)
 
@@ -92,8 +94,16 @@ class PlayerViewHolder private constructor(itemView: View) {
          * @param parent Parent of inflated view.
          */
         @JvmStatic fun create(inflater: LayoutInflater, parent: ViewGroup): PlayerViewHolder {
-            val v = inflater.inflate(R.layout.media_view, parent, false)
-            return PlayerViewHolder(v)
+            val mediaView = inflater.inflate(R.layout.media_view, parent, false)
+            // Because this media view (a TransitionLayout) is used to measure and layout the views
+            // in various states before being attached to its parent, we can't depend on the default
+            // LAYOUT_DIRECTION_INHERIT to correctly resolve the ltr direction.
+            mediaView.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
+            return PlayerViewHolder(mediaView).apply {
+                // Media playback is in the direction of tape, not time, so it stays LTR
+                seekBar.layoutDirection = View.LAYOUT_DIRECTION_LTR
+                progressTimes.layoutDirection = View.LAYOUT_DIRECTION_LTR
+            }
         }
     }
 }

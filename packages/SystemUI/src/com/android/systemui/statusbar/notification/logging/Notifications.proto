@@ -33,13 +33,16 @@ message Notification {
     optional bool is_group_summary = 5;
 
     // The section of the shade that the notification is in.
-    // See NotificationSectionsManager.PriorityBucket.
+    // Sections follow NotificationSectionsManager.PriorityBucket but enum constants do not,
+    // as PriorityBucket order changes from time to time, while logs need to have stable meanings.
     enum NotificationSection {
         SECTION_UNKNOWN = 0;
         SECTION_HEADS_UP = 1;
-        SECTION_PEOPLE = 2;
-        SECTION_ALERTING = 3;
-        SECTION_SILENT = 4;
+        SECTION_MEDIA_CONTROLS = 2;
+        SECTION_PEOPLE = 3;
+        SECTION_ALERTING = 4;
+        SECTION_SILENT = 5;
+        SECTION_FOREGROUND_SERVICE = 6;
     }
     optional NotificationSection section = 6;
 }

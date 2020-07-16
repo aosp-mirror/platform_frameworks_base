@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"직장 프로필 사용 설정"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"직장 프로필을 사용 설정할 때까지 개인 앱이 차단됩니다."</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"개인 앱이 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>에 차단됩니다. IT 관리자가 <xliff:g id="NUMBER">%3$d</xliff:g>일 넘게 직장 프로필을 중지하도록 허용하지 않습니다."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"사용 설정"</string>
     <string name="me" msgid="6207584824693813140">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"태블릿 옵션"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 옵션"</string>
@@ -1621,16 +1619,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"삭제"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"향후 R 빌드에서는 백그라운드에서 시작된 <xliff:g id="PACKAGENAME">%1$s</xliff:g>의 포그라운드 서비스에 더 이상 사용 중인 상태에서 필요한 권한이 부여되지 않습니다. go/r-bg-fgs-restriction 페이지에서 버그 신고를 제출하세요."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"접근성 기능을 사용하시겠습니까?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"볼륨 키 2개를 몇 초 동안 길게 누르면 접근성 기능이 사용 설정됩니다. 이렇게 되면 기기 작동 방식이 달라질 수 있습니다.\n\n현재 기능:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n설정 &gt; 접근성에서 선택한 기능을 변경할 수 있습니다."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"볼륨 키 2개를 몇 초 동안 길게 누르면 접근성 기능이 사용 설정됩니다. 이때 기기 작동 방식이 달라질 수 있습니다.\n\n현재 기능:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n설정 &gt; 접근성에서 선택한 기능을 변경할 수 있습니다."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"볼륨 키 2개를 몇 초 동안 길게 누르면 <xliff:g id="SERVICE">%1$s</xliff:g> 접근성 기능이 사용 설정됩니다. 이렇게 되면 기기 작동 방식이 달라질 수 있습니다.\n\n설정 &gt; 접근성에서 이 단축키를 다른 기능으로 변경할 수 있습니다."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"사용 설정"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"사용"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"사용 안 함"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"사용"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"사용 안함"</string>
@@ -2057,10 +2054,10 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"직장"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"개인 뷰"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"직장 뷰"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"직장 앱과 공유할 수 없는 콘텐츠"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 관리자가 직장 프로필의 앱에서 이 콘텐츠를 공유하도록 허용하지 않습니다."</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"직장 앱으로 열 수 없는 콘텐츠"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 관리자가 직장 프로필의 앱에서 이 콘텐츠를 열도록 허용하지 않습니다."</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"직장 앱과 공유할 수 없음"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 관리자가 이 콘텐츠를 직장 프로필의 앱과 공유할 수 있도록 허용하지 않았습니다."</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"직장 앱으로 열 수 없음"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 관리자가 이 콘텐츠를 직장 프로필의 앱에서 열 수 있도록 허용하지 않았습니다."</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"개인 앱과 공유할 수 없는 콘텐츠"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 공유하도록 허용하지 않습니다."</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"개인 앱으로 열 수 없는 콘텐츠"</string>

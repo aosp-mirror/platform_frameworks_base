@@ -211,8 +211,8 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Алдаа"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Wireless debugging"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Боломжтой төхөөрөмжүүдийг харах болох ашиглахын тулд wireless debugging-г асаана уу"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Хурдан хариу үйлдлийн кодоор төхөөрөмжийг хослуул"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Хурдан хариу үйлдлийн кодын сканнер ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR кодоор төхөөрөмжийг хослуул"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодын сканнер ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Хослуулах кодоор төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Зургаан оронтой кодыг ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Хослуулсан төхөөрөмжүүд"</string>
@@ -226,12 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi хослуулах код"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Хослуулалт амжилтгүй боллоо"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Төхөөрөмжийг ижил сүлжээнд холбосон эсэхийг шалгана уу."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Төхөөрөмжийг хослуулж байна…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Төхөөрөмжийг хослуулж чадсангүй. Хурдан хариу үйлдлийн код буруу эсвэл төхөөрөмжийг ижил сүлжээнд холбоогүй байна."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Төхөөрөмжийг хослуулж чадсангүй. QR код буруу эсвэл төхөөрөмжийг ижил сүлжээнд холбоогүй байна."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP хаяг ба порт"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Хурдан хариу үйлдлийн кодыг скан хийх"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR кодыг скан хийх"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi сүлжээнд холбогдоно уу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, дебаг хийх, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Алдаа мэдээлэх товчлол"</string>
@@ -552,6 +552,6 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Төхөөрөмжийн өгөгдмөл"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Идэвхгүй болгосон"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Идэвхжүүлсэн"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Энэ өөрчлөлтийг хэрэгжүүлэхийн тулд таны төхөөрөмжийг дахин асаах ёстой. Одоо дахин асаах эсвэл болино уу."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Энэ өөрчлөлтийг хэрэгжүүлэхийн тулд таны төхөөрөмжийг дахин асаах ёстой. Одоо дахин асаах эсвэл цуцлана уу."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Утастай чихэвч"</string>
 </resources>

@@ -577,6 +577,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                 }
+                // The display is trusted since it is created by system.
+                mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
             }
             return mInfo;
         }

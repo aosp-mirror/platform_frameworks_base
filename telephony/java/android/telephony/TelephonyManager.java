@@ -38,6 +38,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
+import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -1885,12 +1886,23 @@ public class TelephonyManager {
      * Returns the unique device ID, for example, the IMEI for GSM and the MEID
      * or ESN for CDMA phones. Return null if device ID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
-     * is an app that owns a managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}) on any
+     *     active subscription.
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -1927,12 +1939,23 @@ public class TelephonyManager {
      * Returns the unique device ID of a subscription, for example, the IMEI for
      * GSM and the MEID for CDMA phones. Return null if device ID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
-     * is an app that owns a managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}) on any
+     *     active subscription.
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -1985,18 +2008,23 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>This API requires one of the following:
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
      * <ul>
-     *     <li>The caller holds the READ_PRIVILEGED_PHONE_STATE permission.</li>
-     *     <li>If the caller is the device or profile owner, the caller holds the
-     *     {@link Manifest.permission#READ_PHONE_STATE} permission.</li>
-     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()} on any
-     *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}) on any
+     *     active subscription.
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
      * </ul>
-     * <p>The profile owner is an app that owns a managed profile on the device; for more details
-     * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
-     * Access by profile owners is deprecated and will be removed in a future release.
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -2058,12 +2086,23 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
-     * is an app that owns a managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}) on any
+     *     active subscription.
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -2085,12 +2124,23 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
-     * is an app that owns a managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}) on any
+     *     active subscription.
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -2158,12 +2208,25 @@ public class TelephonyManager {
     /**
      * Returns the Network Access Identifier (NAI). Return null if NAI is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
+     *
+     * <p>If the calling app does not meet one of these requirements then this method will behave
+     * as follows:
      *
      * <ul>
      *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
@@ -2182,12 +2245,25 @@ public class TelephonyManager {
     /**
      * Returns the NAI. Return null if NAI is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
+     *
+     * <p>If the calling app does not meet one of these requirements then this method will behave
+     * as follows:
      *
      * <ul>
      *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
@@ -3775,12 +3851,22 @@ public class TelephonyManager {
      * Returns the serial number of the SIM, if applicable. Return null if it is
      * unavailable.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -3803,12 +3889,22 @@ public class TelephonyManager {
      * Returns the serial number for the given subscription, if applicable. Return null if it is
      * unavailable.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -4047,12 +4143,22 @@ public class TelephonyManager {
      * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
      * Return null if it is unavailable.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -4076,12 +4182,22 @@ public class TelephonyManager {
      * for a subscription.
      * Return null if it is unavailable.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
+     * the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
@@ -8195,6 +8311,140 @@ public class TelephonyManager {
             Rlog.e(TAG, "setAllowedNetworkTypes RemoteException", ex);
         }
         return false;
+    }
+
+    /** @hide */
+    @IntDef({
+            ALLOWED_NETWORK_TYPES_REASON_POWER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AllowedNetworkTypesReason{}
+
+    /**
+     * To indicate allowed network type change is requested by power manager.
+     * Power Manger configuration won't affect the settings configured through
+     * {@link setAllowedNetworkTypes} and will result in allowing network types that are in both
+     * configurations (i.e intersection of both sets).
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 0;
+
+    /**
+     * Set the allowed network types of the device and
+     * provide the reason triggering the allowed network change.
+     * This can be called for following reasons
+     * <ol>
+     * <li>Allowed network types control by power manager
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
+     * </ol>
+     * This API will result in allowing an intersection of allowed network types for all reasons,
+     * including the configuration done through {@link setAllowedNetworkTypes}.
+     * While this API and {@link setAllowedNetworkTypes} is controlling allowed network types
+     * on device, user preference will still be set through {@link #setPreferredNetworkTypeBitmask}.
+     * Thus resultant network type configured on modem will be an intersection of the network types
+     * from setAllowedNetworkTypesForReason, {@link setAllowedNetworkTypes}
+     * and {@link #setPreferredNetworkTypeBitmask}.
+     *
+     * @param reason the reason the allowed network type change is taking place
+     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setAllowedNetworkTypesForReason(@AllowedNetworkTypesReason int reason,
+            @NetworkTypeBitMask long allowedNetworkTypes) {
+        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+            throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setAllowedNetworkTypesForReason(getSubId(), reason,
+                        allowedNetworkTypes);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setAllowedNetworkTypesForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the allowed network types for certain reason.
+     *
+     * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
+     * specific reason. For effective allowed network types configured on device,
+     * query {@link getEffectiveAllowedNetworkTypes}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *s
+     * @param reason the reason the allowed network type change is taking place
+     * @return the allowed network type bitmask
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
+            @AllowedNetworkTypesReason int reason) {
+        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+            throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getAllowedNetworkTypesForReason(getSubId(), reason);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getAllowedNetworkTypesForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return -1;
+    }
+
+    /**
+     * Get bit mask of all network types.
+     *
+     * @return bit mask of all network types
+     * @hide
+     */
+    public static @NetworkTypeBitMask long getAllNetworkTypesBitmask() {
+        return NETWORK_STANDARDS_FAMILY_BITMASK_3GPP | NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2;
+    }
+
+    /**
+     * Get the allowed network types configured on the device.
+     * This API will return an intersection of allowed network types for all reasons,
+     * including the configuration done through setAllowedNetworkTypes
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return the allowed network type bitmask
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NetworkTypeBitMask long getEffectiveAllowedNetworkTypes() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getEffectiveAllowedNetworkTypes(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getEffectiveAllowedNetworkTypes RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**

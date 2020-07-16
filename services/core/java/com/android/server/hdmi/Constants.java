@@ -483,6 +483,39 @@ final class Constants {
     static final String PROPERTY_STRIP_AUDIO_TV_NO_SYSTEM_AUDIO =
         "persist.sys.hdmi.property_strip_audio_tv_no_system_audio";
 
+    /**
+     * Determines playback device action upon receiving routing control messages.
+     * <ul>
+     * <li><b>none</b> No action taken.
+     * <li><b>wake_up_only</b> PowerManager.wakeUp() is called.
+     * <li><b>wake_up_and_send_active_source</b> Same as above and
+     *     additionally <Active Source> is sent.
+     * </ul>
+     */
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL =
+            "ro.hdmi.cec.source.playback_device_action_on_routing_control";
+
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_NONE = "none";
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_WAKE_UP_ONLY = "wake_up_only";
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_WAKE_UP_AND_SEND_ACTIVE_SOURCE =
+            "wake_up_and_send_active_source";
+
+    /**
+     * Property to decide the device behaviour when <Active Source> is lost.
+     *
+     * <p>This property applies to playback devices.
+     * <p>Possible values are:
+     * <ul>
+     * <li><b>none</b> No power state change (default).
+     * <li><b>standby_now</b> PowerManager.goToSleep() is called.
+     * </ul>
+     */
+    static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
+            "ro.hdmi.cec.source.power_state_change_on_active_source_lost";
+
+    static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
+    static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
+
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
     static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;

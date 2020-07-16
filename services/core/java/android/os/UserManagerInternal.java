@@ -27,6 +27,7 @@ import com.android.server.pm.RestrictionsSet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * @hide Only for use within the system server.
@@ -217,6 +218,13 @@ public abstract class UserManagerInternal {
      * @return the array of user ids.
      */
     public abstract int[] getUserIds();
+
+    /**
+     * Internal implementation of getUsers does not check permissions.
+     * This improves performance for calls from inside system server which already have permissions
+     * checked.
+     */
+    public abstract @NonNull List<UserInfo> getUsers(boolean excludeDying);
 
     /**
      * Checks if the {@code callingUserId} and {@code targetUserId} are same or in same group

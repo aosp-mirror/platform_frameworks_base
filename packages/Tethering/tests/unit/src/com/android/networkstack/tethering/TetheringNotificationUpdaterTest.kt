@@ -19,6 +19,10 @@ package com.android.networkstack.tethering
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.net.ConnectivityManager.TETHERING_WIFI
 import android.os.Handler
@@ -51,6 +55,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
@@ -350,5 +355,27 @@ class TetheringNotificationUpdaterTest {
                 .getBoolean(R.bool.config_upstream_roaming_notification)
         notificationUpdater.onUpstreamCapabilitiesChanged(ROAMING_CAPABILITIES)
         verifyNotificationCancelled(listOf(NO_UPSTREAM_NOTIFICATION_ID, ROAMING_NOTIFICATION_ID))
+    }
+
+    @Test
+    fun testGetSettingsPackageName() {
+        val defaultSettingsPackageName = "com.android.settings"
+        val testSettingsPackageName = "com.android.test.settings"
+        val pm = mock(PackageManager::class.java)
+        doReturn(null).`when`(pm).resolveActivity(any(), anyInt())
+        assertEquals(defaultSettingsPackageName,
+                TetheringNotificationUpdater.getSettingsPackageName(pm))
+
+        val resolveInfo = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply {
+                name = "test"
+                applicationInfo = ApplicationInfo().apply {
+                    packageName = testSettingsPackageName
+                }
+            }
+        }
+        doReturn(resolveInfo).`when`(pm).resolveActivity(any(), anyInt())
+        assertEquals(testSettingsPackageName,
+                TetheringNotificationUpdater.getSettingsPackageName(pm))
     }
 }

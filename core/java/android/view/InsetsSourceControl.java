@@ -45,7 +45,7 @@ public class InsetsSourceControl implements Parcelable {
     public InsetsSourceControl(InsetsSourceControl other) {
         mType = other.mType;
         if (other.mLeash != null) {
-            mLeash = new SurfaceControl(other.mLeash);
+            mLeash = new SurfaceControl(other.mLeash, "InsetsSourceControl");
         } else {
             mLeash = null;
         }

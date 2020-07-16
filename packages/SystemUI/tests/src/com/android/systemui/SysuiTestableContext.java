@@ -67,27 +67,35 @@ public class SysuiTestableContext extends TestableContext {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-        mRegisteredReceivers.add(receiver);
+        if (receiver != null) {
+            mRegisteredReceivers.add(receiver);
+        }
         return super.registerReceiver(receiver, filter);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
-        mRegisteredReceivers.add(receiver);
+        if (receiver != null) {
+            mRegisteredReceivers.add(receiver);
+        }
         return super.registerReceiver(receiver, filter, broadcastPermission, scheduler);
     }
 
     @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
-        mRegisteredReceivers.add(receiver);
+        if (receiver != null) {
+            mRegisteredReceivers.add(receiver);
+        }
         return super.registerReceiverAsUser(receiver, user, filter, broadcastPermission, scheduler);
     }
 
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
-        mRegisteredReceivers.remove(receiver);
+        if (receiver != null) {
+            mRegisteredReceivers.remove(receiver);
+        }
         super.unregisterReceiver(receiver);
     }
 }

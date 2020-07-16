@@ -90,6 +90,9 @@ class WindowSurfaceController {
 
     private final SurfaceControl.Transaction mTmpTransaction;
 
+    // Used to track whether we have called detach children on the way to invisibility.
+    boolean mChildrenDetached;
+
     WindowSurfaceController(String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
@@ -113,7 +116,8 @@ class WindowSurfaceController {
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
-                .setMetadata(METADATA_OWNER_UID, ownerUid);
+                .setMetadata(METADATA_OWNER_UID, ownerUid)
+                .setCallsite("WindowSurfaceController");
 
         final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags &
                 WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
@@ -129,6 +133,7 @@ class WindowSurfaceController {
                 .setName(name + "(BLAST)")
                 .setHidden(false)
                 .setBLASTLayer()
+                .setCallsite("WindowSurfaceController")
                 .build();
         }
 
@@ -144,6 +149,7 @@ class WindowSurfaceController {
 
     void detachChildren() {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SEVER CHILDREN");
+        mChildrenDetached = true;
         if (mSurfaceControl != null) {
             mSurfaceControl.detachChildren();
         }
@@ -489,12 +495,12 @@ class WindowSurfaceController {
     }
 
     void getSurfaceControl(SurfaceControl outSurfaceControl) {
-        outSurfaceControl.copyFrom(mSurfaceControl);
+        outSurfaceControl.copyFrom(mSurfaceControl, "WindowSurfaceController.getSurfaceControl");
     }
 
     void getBLASTSurfaceControl(SurfaceControl outSurfaceControl) {
         if (mBLASTSurfaceControl != null) {
-            outSurfaceControl.copyFrom(mBLASTSurfaceControl);
+            outSurfaceControl.copyFrom(mBLASTSurfaceControl, "WindowSurfaceController.getBLASTSurfaceControl");
         }
     }
 

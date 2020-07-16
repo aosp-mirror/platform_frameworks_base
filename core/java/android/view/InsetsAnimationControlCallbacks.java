@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 
 /**
@@ -64,4 +65,15 @@ public interface InsetsAnimationControlCallbacks {
      * previous calls to applySurfaceParams.
      */
     void releaseSurfaceControlFromRt(SurfaceControl sc);
+
+    /**
+     * Reports that the perceptibility of the given types has changed to the given value.
+     *
+     * A type is perceptible if it is not (almost) entirely off-screen and not (almost) entirely
+     * transparent.
+     *
+     * @param types the (public) types whose perceptibility has changed
+     * @param perceptible true, if the types are now perceptible, false if they are not perceptible
+     */
+    void reportPerceptible(@InsetsType int types, boolean perceptible);
 }

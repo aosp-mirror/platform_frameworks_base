@@ -680,7 +680,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     *<p>Devices capable of streaming concurrently with other devices as described by
+     *<p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as described by
      * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
      * following guaranteed streams (when streaming concurrently with other devices)</p>
      *
@@ -696,16 +696,21 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation.
+     *
      * <p> For guaranteed concurrent stream configurations:</p>
-     * <p> s720p refers to the camera device's resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * <p> sVGA refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * VGA resolution (640X480) whichever is lower. </p>
+     * <p> s720p refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
      * 720p(1280X720) whichever is lower. </p>
-     * <p> s1440p refers to the camera device's resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * <p> s1440p refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
      * 1440p(1920X1440) whichever is lower. </p>
      * <p>MONOCHROME-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
      * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}) devices
      * supporting {@link android.graphics.ImageFormat#Y8 Y8} support substituting {@code YUV}
      * streams with {@code Y8} in all guaranteed stream combinations for the device's hardware level
      * and capabilities.</p>
+     *
      *
      * <p>Devices capable of outputting HEIC formats ({@link StreamConfigurationMap#getOutputFormats}
      * contains {@link android.graphics.ImageFormat#HEIC}) will support substituting {@code JPEG}

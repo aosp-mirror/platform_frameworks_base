@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.util.mockito.capture
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +36,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
@@ -69,7 +71,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         `when`(mediaHost.visible).thenReturn(false)
         triggerVisibilityListener()
 
-        verify(mediaHeaderView).visibility = eq(GONE)
+        verify(mediaHeaderView, atLeastOnce()).visibility = eq(GONE)
     }
     @Test
     fun testAttach_visibleOnKeyguard() {
@@ -79,7 +81,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 .thenReturn(true)
         triggerVisibilityListener()
 
-        verify(mediaHeaderView).visibility = eq(VISIBLE)
+        verify(mediaHeaderView, atLeastOnce()).visibility = eq(VISIBLE)
     }
     @Test
     fun testAttach_hiddenOnKeyguard_whenNotificationsAreHidden() {
@@ -89,12 +91,12 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 .thenReturn(false)
         triggerVisibilityListener()
 
-        verify(mediaHeaderView).visibility = eq(GONE)
+        verify(mediaHeaderView, atLeastOnce()).visibility = eq(GONE)
     }
 
     private fun triggerVisibilityListener() {
         keyguardMediaController.attach(mediaHeaderView)
-        verify(mediaHost).visibleChangedListener = visibilityListener.capture()
+        verify(mediaHost).addVisibilityChangeListener(capture(visibilityListener))
         visibilityListener.value.invoke(true)
     }
 }

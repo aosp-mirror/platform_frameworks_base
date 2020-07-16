@@ -19,6 +19,9 @@ java_test_host {
         "tradefed",
         "junit",
     ],
+    static_libs: [
+        "frameworks-base-hostutils",
+    ],
     test_suites: ["general-tests"],
     java_resources: [
         ":com.android.overlaytest.overlaid",
@@ -28,5 +31,6 @@ java_test_host {
         ":OverlayRemountedTest_Target",
         ":OverlayRemountedTest_TargetUpgrade",
         ":OverlayRemountedTest_Overlay",
+        ":OverlayRemountedTest_Overlay_SameCert",
     ],
 }

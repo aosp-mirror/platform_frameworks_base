@@ -280,7 +280,7 @@ class InsetsSourceProvider {
         }
         final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
-                ANIMATION_TYPE_INSETS_CONTROL, null /* animationFinishedCallback */);
+                ANIMATION_TYPE_INSETS_CONTROL);
 
         // The leash was just created. We cannot dispatch it until its surface transaction is
         // applied. Otherwise, the client's operation to the leash might be overwritten by us.
@@ -351,12 +351,26 @@ class InsetsSourceProvider {
     }
 
     private void updateVisibility() {
-        final boolean isClientControlled = mControlTarget != null
-                && mControlTarget.isClientControlled();
-        mSource.setVisible(mServerVisible && (!isClientControlled || mClientVisible));
+        mSource.setVisible(mServerVisible && (isMirroredSource() || mClientVisible));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
                 mServerVisible, mClientVisible);
+    }
+
+    private boolean isMirroredSource() {
+        if (mWin == null) {
+            return false;
+        }
+        final int[] provides = mWin.mAttrs.providesInsetsTypes;
+        if (provides == null) {
+            return false;
+        }
+        for (int i = 0; i < provides.length; i++) {
+            if (provides[i] == ITYPE_IME) {
+                return true;
+            }
+        }
+        return false;
     }
 
     InsetsSourceControl getControl(InsetsControlTarget target) {

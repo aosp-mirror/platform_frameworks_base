@@ -46,7 +46,8 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE,
         SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME,
         SoftInputShowHideReason.HIDE_DOCKED_STACK_ATTACHED,
-        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION})
+        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
+        SoftInputShowHideReason.HIDE_BUBBLES})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -140,4 +141,10 @@ public @interface SoftInputShowHideReason {
      * intercept touch from app window.
      */
     int HIDE_RECENTS_ANIMATION = 18;
+
+    /**
+     * Hide soft input when {@link com.android.systemui.bubbles.BubbleController} is expanding,
+     * switching, or collapsing Bubbles.
+     */
+    int HIDE_BUBBLES = 19;
 }

@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -42,8 +43,6 @@ public class MessagingLinearLayout extends ViewGroup {
     private int mSpacing;
 
     private int mMaxDisplayedLines = Integer.MAX_VALUE;
-
-    private IMessagingLayout mMessagingLayout;
 
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -292,12 +291,40 @@ public class MessagingLinearLayout extends ViewGroup {
         mMaxDisplayedLines = numberLines;
     }
 
-    public void setMessagingLayout(IMessagingLayout layout) {
-        mMessagingLayout = layout;
+    public IMessagingLayout getMessagingLayout() {
+        View view = this;
+        while (true) {
+            ViewParent p = view.getParent();
+            if (p instanceof View) {
+                view = (View) p;
+                if (view instanceof IMessagingLayout) {
+                    return (IMessagingLayout) view;
+                }
+            } else {
+                return null;
+            }
+        }
     }
 
-    public IMessagingLayout getMessagingLayout() {
-        return mMessagingLayout;
+    @Override
+    public int getBaseline() {
+        // When placed in a horizontal linear layout (as is the case in a single-line MessageGroup),
+        // align with the last visible child (which is the one that will be displayed in the single-
+        // line group.
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            final View child = getChildAt(i);
+            if (isGone(child)) {
+                continue;
+            }
+            final int childBaseline = child.getBaseline();
+            if (childBaseline == -1) {
+                return -1;
+            }
+            MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+            return lp.topMargin + childBaseline;
+        }
+        return super.getBaseline();
     }
 
     public interface MessagingChild {

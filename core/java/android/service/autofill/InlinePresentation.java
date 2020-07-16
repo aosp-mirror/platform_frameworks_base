@@ -50,7 +50,11 @@ public final class InlinePresentation implements Parcelable {
 
     /**
      * Indicates whether the UI should be pinned, hence non-scrollable and non-filterable, in the
-     * host.
+     * host. However, it's eventually up to the host whether the UI is pinned or not.
+     *
+     * <p> Also a {@link Dataset} with a pinned inline presentation will not be replaced by the
+     * new data set returned from authentication intent. See
+     * {@link Dataset.Builder#setAuthentication(android.content.IntentSender)} for more information.
      */
     private final boolean mPinned;
 
@@ -90,7 +94,11 @@ public final class InlinePresentation implements Parcelable {
      *   Specifies the UI specification for the inline suggestion.
      * @param pinned
      *   Indicates whether the UI should be pinned, hence non-scrollable and non-filterable, in the
-     *   host.
+     *   host. However, it's eventually up to the host whether the UI is pinned or not.
+     *
+     *   <p> Also a {@link Dataset} with a pinned inline presentation will not be replaced by the
+     *   new data set returned from authentication intent. See
+     *   {@link Dataset.Builder#setAuthentication(android.content.IntentSender)} for more information.
      */
     @DataClass.Generated.Member
     public InlinePresentation(
@@ -126,7 +134,11 @@ public final class InlinePresentation implements Parcelable {
 
     /**
      * Indicates whether the UI should be pinned, hence non-scrollable and non-filterable, in the
-     * host.
+     * host. However, it's eventually up to the host whether the UI is pinned or not.
+     *
+     * <p> Also a {@link Dataset} with a pinned inline presentation will not be replaced by the
+     * new data set returned from authentication intent. See
+     * {@link Dataset.Builder#setAuthentication(android.content.IntentSender)} for more information.
      */
     @DataClass.Generated.Member
     public boolean isPinned() {
@@ -232,7 +244,7 @@ public final class InlinePresentation implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1586992400667L,
+            time = 1593131904745L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/service/autofill/InlinePresentation.java",
             inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.widget.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final  boolean mPinned\npublic @android.annotation.NonNull @android.annotation.Size(min=0L) java.lang.String[] getAutofillHints()\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")

@@ -1613,15 +1613,15 @@
     <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
     <string name="face_error_canceled">Face operation canceled.</string>
-    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=54] -->
+    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=68] -->
     <string name="face_error_user_canceled">Face unlock canceled by user.</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=71] -->
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=77] -->
     <string name="face_error_lockout_permanent">Too many attempts. Face unlock disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
-    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=52] -->
+    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=59] -->
     <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
     <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
     <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
@@ -4362,9 +4362,6 @@
     <string name="kg_text_message_separator" product="default">" \u2014 "</string>
     <!-- The delete-widget drop target button text -->
     <string name="kg_reordering_delete_drop_target_text">Remove</string>
-
-    <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
-    <string name="allow_while_in_use_permission_in_fgs">The background started foreground service from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will not have while-in-use permission in future R builds. Please see go/r-bg-fgs-restriction and file a bugreport.</string>
 
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->

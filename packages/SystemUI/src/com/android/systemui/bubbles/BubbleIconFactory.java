@@ -15,13 +15,16 @@
  */
 package com.android.systemui.bubbles;
 
-import android.app.Notification;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -50,15 +53,14 @@ public class BubbleIconFactory extends BaseIconFactory {
     /**
      * Returns the drawable that the developer has provided to display in the bubble.
      */
-    Drawable getBubbleDrawable(Context context, ShortcutInfo shortcutInfo,
-            Notification.BubbleMetadata metadata) {
+    Drawable getBubbleDrawable(@NonNull final Context context,
+            @Nullable final ShortcutInfo shortcutInfo, @Nullable final Icon ic) {
         if (shortcutInfo != null) {
             LauncherApps launcherApps =
                     (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
             int density = context.getResources().getConfiguration().densityDpi;
             return launcherApps.getShortcutIconDrawable(shortcutInfo, density);
         } else {
-            Icon ic = metadata.getIcon();
             if (ic != null) {
                 if (ic.getType() == Icon.TYPE_URI
                         || ic.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
@@ -76,15 +78,36 @@ public class BubbleIconFactory extends BaseIconFactory {
      * Returns a {@link BitmapInfo} for the app-badge that is shown on top of each bubble. This
      * will include the workprofile indicator on the badge if appropriate.
      */
-    BitmapInfo getBadgeBitmap(Drawable userBadgedAppIcon) {
+    BitmapInfo getBadgeBitmap(Drawable userBadgedAppIcon, boolean isImportantConversation) {
         Bitmap userBadgedBitmap = createIconBitmap(
                 userBadgedAppIcon, 1f, getBadgeSize());
-
-        Canvas c = new Canvas();
         ShadowGenerator shadowGenerator = new ShadowGenerator(getBadgeSize());
-        c.setBitmap(userBadgedBitmap);
-        shadowGenerator.recreateIcon(Bitmap.createBitmap(userBadgedBitmap), c);
-        return createIconBitmap(userBadgedBitmap);
+        if (!isImportantConversation) {
+            Canvas c = new Canvas();
+            c.setBitmap(userBadgedBitmap);
+            shadowGenerator.recreateIcon(Bitmap.createBitmap(userBadgedBitmap), c);
+            return createIconBitmap(userBadgedBitmap);
+        } else {
+            float ringStrokeWidth = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.importance_ring_stroke_width);
+            int importantConversationColor = mContext.getResources().getColor(
+                    com.android.settingslib.R.color.important_conversation, null);
+            Bitmap badgeAndRing = Bitmap.createBitmap(userBadgedBitmap.getWidth(),
+                    userBadgedBitmap.getHeight(), userBadgedBitmap.getConfig());
+            Canvas c = new Canvas(badgeAndRing);
+            Rect dest = new Rect((int) ringStrokeWidth, (int) ringStrokeWidth,
+                    c.getHeight() - (int) ringStrokeWidth, c.getWidth() - (int) ringStrokeWidth);
+            c.drawBitmap(userBadgedBitmap, null, dest, null);
+            Paint ringPaint = new Paint();
+            ringPaint.setStyle(Paint.Style.STROKE);
+            ringPaint.setColor(importantConversationColor);
+            ringPaint.setAntiAlias(true);
+            ringPaint.setStrokeWidth(ringStrokeWidth);
+            c.drawCircle(c.getWidth() / 2, c.getHeight() / 2, c.getWidth() / 2 - ringStrokeWidth,
+                    ringPaint);
+            shadowGenerator.recreateIcon(Bitmap.createBitmap(badgeAndRing), c);
+            return createIconBitmap(badgeAndRing);
+        }
     }
 
     /**

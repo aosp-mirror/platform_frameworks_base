@@ -16,10 +16,7 @@
 
 package com.android.systemui.car.navigationbar;
 
-import static android.view.WindowInsets.Type.systemBars;
-
 import android.content.Context;
-import android.graphics.Insets;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -74,32 +71,15 @@ public class CarNavigationBarView extends LinearLayout {
             mDarkIconManager.setShouldLog(true);
             Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         }
-        // needs to be clickable so that it will receive ACTION_MOVE events
+        // Needs to be clickable so that it will receive ACTION_MOVE events.
         setClickable(true);
+        // Needs to not be focusable so rotary won't highlight the entire nav bar.
+        setFocusable(false);
     }
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
-        applyMargins(windowInsets.getInsets(systemBars()));
         return windowInsets;
-    }
-
-    private void applyMargins(Insets insets) {
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            View child = getChildAt(i);
-            if (child.getLayoutParams() instanceof LayoutParams) {
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                if (lp.rightMargin != insets.right || lp.leftMargin != insets.left
-                        || lp.topMargin != insets.top || lp.bottomMargin != insets.bottom) {
-                    lp.rightMargin = insets.right;
-                    lp.leftMargin = insets.left;
-                    lp.topMargin = insets.top;
-                    lp.bottomMargin = insets.bottom;
-                    child.requestLayout();
-                }
-            }
-        }
     }
 
     // Used to forward touch events even if the touch was initiated from a child component

@@ -38,6 +38,7 @@ using android::util::ProtoOutputStream;
 using std::lock_guard;
 using std::shared_ptr;
 using std::string;
+using std::to_string;
 using std::vector;
 
 const int FIELD_ID_BEGIN_TIME = 1;
@@ -436,9 +437,18 @@ void StatsdStats::notePullDataError(int pullAtomId) {
     mPulledAtomStats[pullAtomId].dataError++;
 }
 
-void StatsdStats::notePullTimeout(int pullAtomId) {
+void StatsdStats::notePullTimeout(int pullAtomId,
+                                  int64_t pullUptimeMillis,
+                                  int64_t pullElapsedMillis) {
     lock_guard<std::mutex> lock(mLock);
-    mPulledAtomStats[pullAtomId].pullTimeout++;
+    PulledAtomStats& pulledAtomStats = mPulledAtomStats[pullAtomId];
+    pulledAtomStats.pullTimeout++;
+
+    if (pulledAtomStats.pullTimeoutMetadata.size() == kMaxTimestampCount) {
+        pulledAtomStats.pullTimeoutMetadata.pop_front();
+    }
+
+    pulledAtomStats.pullTimeoutMetadata.emplace_back(pullUptimeMillis, pullElapsedMillis);
 }
 
 void StatsdStats::notePullExceedMaxDelay(int pullAtomId) {
@@ -630,6 +640,7 @@ void StatsdStats::resetInternalLocked() {
         pullStats.second.unregisteredCount = 0;
         pullStats.second.atomErrorCount = 0;
         pullStats.second.binderCallFailCount = 0;
+        pullStats.second.pullTimeoutMetadata.clear();
     }
     mAtomMetricStats.clear();
     mActivationBroadcastGuardrailStats.clear();
@@ -786,6 +797,20 @@ void StatsdStats::dumpStats(int out) const {
                 pair.second.pullUidProviderNotFound, pair.second.pullerNotFound,
                 pair.second.registeredCount, pair.second.unregisteredCount,
                 pair.second.atomErrorCount);
+        if (pair.second.pullTimeoutMetadata.size() > 0) {
+            string uptimeMillis = "(pull timeout system uptime millis) ";
+            string pullTimeoutMillis = "(pull timeout elapsed time millis) ";
+            for (const auto& stats : pair.second.pullTimeoutMetadata) {
+                uptimeMillis.append(to_string(stats.pullTimeoutUptimeMillis)).append(",");;
+                pullTimeoutMillis.append(to_string(stats.pullTimeoutElapsedMillis)).append(",");
+            }
+            uptimeMillis.pop_back();
+            uptimeMillis.push_back('\n');
+            pullTimeoutMillis.pop_back();
+            pullTimeoutMillis.push_back('\n');
+            dprintf(out, "%s", uptimeMillis.c_str());
+            dprintf(out, "%s", pullTimeoutMillis.c_str());
+        }
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {

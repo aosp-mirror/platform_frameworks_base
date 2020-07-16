@@ -26,8 +26,11 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import android.content.Context;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 
+import libcore.io.Streams;
+
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -46,8 +49,20 @@ import java.util.zip.ZipFile;
 @RunWith(JUnit4.class)
 public class SourceStampVerifierTest {
 
-    private final Context mContext =
-            InstrumentationRegistry.getInstrumentation().getTargetContext();
+    private final Context mContext = ApplicationProvider.getApplicationContext();
+
+    private File mPrimaryApk;
+    private File mSecondaryApk;
+
+    @After
+    public void tearDown() throws Exception {
+        if (mPrimaryApk != null) {
+            mPrimaryApk.delete();
+        }
+        if (mSecondaryApk != null) {
+            mSecondaryApk.delete();
+        }
+    }
 
     @Test
     public void testSourceStamp_noStamp() throws Exception {
@@ -63,17 +78,11 @@ public class SourceStampVerifierTest {
 
     @Test
     public void testSourceStamp_correctSignature() throws Exception {
-        File testApk = getApk("SourceStampVerifierTest/valid-stamp.apk");
-        ZipFile apkZipFile = new ZipFile(testApk);
-        ZipEntry stampCertZipEntry = apkZipFile.getEntry("stamp-cert-sha256");
-        int size = (int) stampCertZipEntry.getSize();
-        byte[] expectedStampCertHash = new byte[size];
-        try (InputStream inputStream = apkZipFile.getInputStream(stampCertZipEntry)) {
-            inputStream.read(expectedStampCertHash);
-        }
+        mPrimaryApk = getApk("SourceStampVerifierTest/valid-stamp.apk");
+        byte[] expectedStampCertHash = getSourceStampCertificateHashFromApk(mPrimaryApk);
 
         SourceStampVerificationResult result =
-                SourceStampVerifier.verify(testApk.getAbsolutePath());
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
 
         assertTrue(result.isPresent());
         assertTrue(result.isVerified());
@@ -85,10 +94,10 @@ public class SourceStampVerifierTest {
 
     @Test
     public void testSourceStamp_signatureMissing() throws Exception {
-        File testApk = getApk("SourceStampVerifierTest/stamp-without-block.apk");
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-without-block.apk");
 
         SourceStampVerificationResult result =
-                SourceStampVerifier.verify(testApk.getAbsolutePath());
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
 
         assertTrue(result.isPresent());
         assertFalse(result.isVerified());
@@ -97,10 +106,10 @@ public class SourceStampVerifierTest {
 
     @Test
     public void testSourceStamp_certificateMismatch() throws Exception {
-        File testApk = getApk("SourceStampVerifierTest/stamp-certificate-mismatch.apk");
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-certificate-mismatch.apk");
 
         SourceStampVerificationResult result =
-                SourceStampVerifier.verify(testApk.getAbsolutePath());
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
 
         assertTrue(result.isPresent());
         assertFalse(result.isVerified());
@@ -108,11 +117,35 @@ public class SourceStampVerifierTest {
     }
 
     @Test
-    public void testSourceStamp_apkHashMismatch() throws Exception {
-        File testApk = getApk("SourceStampVerifierTest/stamp-apk-hash-mismatch.apk");
+    public void testSourceStamp_apkHashMismatch_v1SignatureScheme() throws Exception {
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-apk-hash-mismatch-v1.apk");
 
         SourceStampVerificationResult result =
-                SourceStampVerifier.verify(testApk.getAbsolutePath());
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
+
+        assertTrue(result.isPresent());
+        assertFalse(result.isVerified());
+        assertNull(result.getCertificate());
+    }
+
+    @Test
+    public void testSourceStamp_apkHashMismatch_v2SignatureScheme() throws Exception {
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-apk-hash-mismatch-v2.apk");
+
+        SourceStampVerificationResult result =
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
+
+        assertTrue(result.isPresent());
+        assertFalse(result.isVerified());
+        assertNull(result.getCertificate());
+    }
+
+    @Test
+    public void testSourceStamp_apkHashMismatch_v3SignatureScheme() throws Exception {
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-apk-hash-mismatch-v3.apk");
+
+        SourceStampVerificationResult result =
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
 
         assertTrue(result.isPresent());
         assertFalse(result.isVerified());
@@ -121,10 +154,10 @@ public class SourceStampVerifierTest {
 
     @Test
     public void testSourceStamp_malformedSignature() throws Exception {
-        File testApk = getApk("SourceStampVerifierTest/stamp-malformed-signature.apk");
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-malformed-signature.apk");
 
         SourceStampVerificationResult result =
-                SourceStampVerifier.verify(testApk.getAbsolutePath());
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
 
         assertTrue(result.isPresent());
         assertFalse(result.isVerified());
@@ -133,21 +166,14 @@ public class SourceStampVerifierTest {
 
     @Test
     public void testSourceStamp_multiApk_validStamps() throws Exception {
-        File testApk1 = getApk("SourceStampVerifierTest/valid-stamp.apk");
-        File testApk2 = getApk("SourceStampVerifierTest/valid-stamp.apk");
-        ZipFile apkZipFile = new ZipFile(testApk1);
-        ZipEntry stampCertZipEntry = apkZipFile.getEntry("stamp-cert-sha256");
-        int size = (int) stampCertZipEntry.getSize();
-        byte[] expectedStampCertHash = new byte[size];
-        try (InputStream inputStream = apkZipFile.getInputStream(stampCertZipEntry)) {
-            inputStream.read(expectedStampCertHash);
-        }
+        mPrimaryApk = getApk("SourceStampVerifierTest/valid-stamp.apk");
+        mSecondaryApk = getApk("SourceStampVerifierTest/valid-stamp.apk");
+        byte[] expectedStampCertHash = getSourceStampCertificateHashFromApk(mPrimaryApk);
         List<String> apkFiles = new ArrayList<>();
-        apkFiles.add(testApk1.getAbsolutePath());
-        apkFiles.add(testApk2.getAbsolutePath());
+        apkFiles.add(mPrimaryApk.getAbsolutePath());
+        apkFiles.add(mSecondaryApk.getAbsolutePath());
 
-        SourceStampVerificationResult result =
-                SourceStampVerifier.verify(apkFiles);
+        SourceStampVerificationResult result = SourceStampVerifier.verify(apkFiles);
 
         assertTrue(result.isPresent());
         assertTrue(result.isVerified());
@@ -159,14 +185,13 @@ public class SourceStampVerifierTest {
 
     @Test
     public void testSourceStamp_multiApk_invalidStamps() throws Exception {
-        File testApk1 = getApk("SourceStampVerifierTest/valid-stamp.apk");
-        File testApk2 = getApk("SourceStampVerifierTest/stamp-apk-hash-mismatch.apk");
+        mPrimaryApk = getApk("SourceStampVerifierTest/valid-stamp.apk");
+        mSecondaryApk = getApk("SourceStampVerifierTest/stamp-apk-hash-mismatch-v3.apk");
         List<String> apkFiles = new ArrayList<>();
-        apkFiles.add(testApk1.getAbsolutePath());
-        apkFiles.add(testApk2.getAbsolutePath());
+        apkFiles.add(mPrimaryApk.getAbsolutePath());
+        apkFiles.add(mSecondaryApk.getAbsolutePath());
 
-        SourceStampVerificationResult result =
-                SourceStampVerifier.verify(apkFiles);
+        SourceStampVerificationResult result = SourceStampVerifier.verify(apkFiles);
 
         assertTrue(result.isPresent());
         assertFalse(result.isVerified());
@@ -174,10 +199,16 @@ public class SourceStampVerifierTest {
     }
 
     private File getApk(String apkPath) throws IOException {
-        File testApk = File.createTempFile("SourceStampApk", ".apk");
+        File apk = File.createTempFile("SourceStampApk", ".apk");
         try (InputStream inputStream = mContext.getAssets().open(apkPath)) {
-            Files.copy(inputStream, testApk.toPath(), REPLACE_EXISTING);
+            Files.copy(inputStream, apk.toPath(), REPLACE_EXISTING);
         }
-        return testApk;
+        return apk;
+    }
+
+    private byte[] getSourceStampCertificateHashFromApk(File apk) throws IOException {
+        ZipFile apkZipFile = new ZipFile(apk);
+        ZipEntry stampCertZipEntry = apkZipFile.getEntry("stamp-cert-sha256");
+        return Streams.readFully(apkZipFile.getInputStream(stampCertZipEntry));
     }
 }

@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Басып чыгаруу <xliff:g id="OWNER_APP">%s</xliff:g> тарабынан өчүрүлдү."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Жумуш профилиңизди күйгүзүңүз"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Жумуш профилиңизди күйгүзмөйүнчө жеке колдонмолоруңуз бөгөттөлгөн боюнча калат"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Жеке колдонмолор <xliff:g id="DATE">%1$s</xliff:g> саат <xliff:g id="TIME">%2$s</xliff:g> бөгөттөлөт. IT администраторуңуз жумуш профилиңизди <xliff:g id="NUMBER">%3$d</xliff:g> күндөн ашык убакытка өчүрүүгө уруксат бербейт."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Күйгүзүү"</string>
     <string name="me" msgid="6207584824693813140">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Планшет мүмкүнчүлүктөрү"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV параметрлери"</string>
@@ -538,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Колдонмого сүрөт жыйнагыңызды өзгөртүүгө мүмкүнчүлүк берет."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"медиа жыйнагыңыз сакталган жерлерди окуу"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Колдонмого медиа жыйнагыңыз сакталган жерлерди окууга мүмкүнчүлүк берет."</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Сиз экениңизди ырастаңыз"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Өзүңүздү ырастаңыз"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометрикалык аппарат жеткиликсиз"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Аныктыгын текшерүү жокко чыгарылды"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Таанылган жок"</string>
@@ -1110,7 +1108,7 @@
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
-    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Системанын кээ бир функциялары иштебеши мүмкүн"</string>
+    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> иштөөдө"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Көбүрөөк маалымат үчүн же колдонмону токтотуш үчүн таптап коюңуз."</string>
@@ -1311,7 +1309,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Мүчүлүштүктөр USB аркылуу оңдолууда"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Өчүрүү үчүн тийип коюңуз"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB аркылуу мүчүлүштүктөрдү оңдоону өчүрүүнү тандаңыз."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Мүчүлүштүктөрдү зымсыз оңдоо иштетилди"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Мүчүлүштүктөр Wi-Fi аркылуу оңдолууда"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Мүчүлүштүктөрдү зымсыз оңдоону өчүрүү үчүн таптап коюңуз"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоону өчүрүңүз."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Сыноо программасынын режими иштетилди"</string>
@@ -1549,7 +1547,7 @@
     <string name="sending" msgid="206925243621664438">"Жөнөтүлүүдө…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Серепчи иштетилсинби?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Чалуу кабыл алынсынбы?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"Дайыма"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"Ар дайым"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Бир жолу гана"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s жумуш профилин колдоого албайт"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Планшет"</string>
@@ -1621,17 +1619,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес көрсөтүлгөндөн кийин, телефондун кулпусун ачуу үчүн Google аккаунтуңузга кирүүгө туура келет.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайталап көрсөңүз болот."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Алып салуу"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Фондогу <xliff:g id="PACKAGENAME">%1$s</xliff:g> кызматы активдүү режимде иштеп баштап, кийинки R курамаларында колдонуу учурунда уруксаты болбойт. Төмөнкү бөлүмгө өтүп, мүчүлүштүк тууралуу кабарды тапшырыңыз: go/r-bg-fgs-restriction."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Атайын мүмкүнчүлүктөр күйгүзүлсүнбү?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып турса, атайын мүмкүнчүлүктөр күйгүзүлөт. Бул түзмөгүңүздүн ишин өзгөртүшү мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Атайын мүмкүнчүлүктөрдү иштетесизби?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Атайын мүмкүнчүлүктөр функциясын иштетүү үчүн, үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды өзгөртүү үчүн, Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> күйгүзүлсүнбү?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып турса, <xliff:g id="SERVICE">%1$s</xliff:g>, атайын мүмкүнчүлүктөр күйгүзүлөт. Бул түзмөгүңүздүн ишин өзгөртүшү мүмкүн.\n\nБул ыкчам баскычты Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн башка функцияга өзгөртө аласыз."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Күйгүзүлсүн"</string>
-    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Күйгүзүлбөсүн"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматын иштетүү үчүн, үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nБаскычтардын ушул айкалышын башка функцияга дайындоо үчүн, Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ооба"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Жок"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"КҮЙҮК"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨЧҮК"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматына түзмөгүңүздү толугу менен көзөмөлдөөгө уруксат бересизби?"</string>
@@ -1645,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Жок"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны колдонуп баштоо үчүн аны таптап коюңуз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Атайын мүмкүнчүлүктөр баскычы менен колдонгуңуз келген функцияларды тандаңыз"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Үн деңгээлинин баскычтары менен колдонгуңуз келген функцияларды тандаңыз"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Үндү катуулатуу/акырындатуу баскычтары менен кайсы функцияларды иштеткиңиз келет?"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> өчүрүлдү"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Кыска жолдорду түзөтүү"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Бүттү"</string>
@@ -1653,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Кыска жолду колдонуу"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстү инверсиялоо"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Түсүн тууралоо"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтарын басып туруңуз. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтарын басып туруңуз. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын колдонуу үчүн үнүн чоңойтуп/кичирейтүү баскычтарын үч секунд коё бербей басып туруңуз"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Атайын мүмкүнчүлүктөр баскычын таптаганыңызда иштей турган функцияны тандаңыз:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн функцияны тандаңыз (эки манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
@@ -2057,18 +2054,18 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Жумуш"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Жеке көрүнүш"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Жумуш көрүнүшү"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Бул мазмунду жумуш колдонмолору аркылуу бөлүшүүгө болбойт"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT администраторуңуз бул мазмунду жумуш профилиңиздеги колдонмолор аркылуу бөлүшүүгө тыюу салды"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Бул нерсени жумуш колдонмолору аркылуу бөлүшүүгө болбойт"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT администраторуңуз бул нерсени жумуш профилиңиздеги колдонмолор аркылуу бөлүшүүгө тыюу салды"</string>
     <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Жумуш колдонмолору менен ачууга болбойт"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT администраторуңуз бул мазмунду жумуш профилиңиздеги колдонмолор менен ачууга тыюу салды"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT администраторуңуз бул нерсени жумуш профилиңиздеги колдонмолор менен ачууга тыюу салды"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Бул мазмунду жеке колдонмолор аркылуу бөлүшүүгө болбойт"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT администраторуңуз бул мазмунду жеке профилиңиздеги колдонмолор аркылуу бөлүшүүгө тыюу салды"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT администраторуңуз бул нерсени жеке профилиңиздеги колдонмолор аркылуу бөлүшүүгө тыюу салды"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Жеке колдонмолор менен ачууга болбойт"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT администраторуңуз бул мазмунду жеке профилиңиздеги колдонмолор менен ачууга тыюу салды"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT администраторуңуз бул нерсени жеке профилиңиздеги колдонмолор менен ачууга тыюу салды"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Жумуш профили тындырылган"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Күйгүзүү"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Жумуш колдонмолору бул мазмунду колдоого алышпайт"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Жумуш колдонмолору бул мазмунду ача алышпайт"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Бул нерсени колдоого ала турган жумуш колдонмолору жок"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Бул нерсени ача турган жумуш колдонмолору жок"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Жеке колдонмолор бул мазмунду колдоого алышпайт"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Жеке колдонмолор бул мазмунду ача алышпайт"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM карта тармагынын кулпусун ачуучу PIN код"</string>

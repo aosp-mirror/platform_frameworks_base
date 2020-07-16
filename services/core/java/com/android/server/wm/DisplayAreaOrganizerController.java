@@ -114,7 +114,8 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     void onDisplayAreaAppeared(IDisplayAreaOrganizer organizer, DisplayArea da) {
         try {
-            SurfaceControl outSurfaceControl = new SurfaceControl(da.getSurfaceControl());
+            SurfaceControl outSurfaceControl = new SurfaceControl(da.getSurfaceControl(),
+                    "DisplayAreaOrganizerController.onDisplayAreaAppeared");
             organizer.onDisplayAreaAppeared(da.getDisplayAreaInfo(), outSurfaceControl);
         } catch (RemoteException e) {
             // Oh well...

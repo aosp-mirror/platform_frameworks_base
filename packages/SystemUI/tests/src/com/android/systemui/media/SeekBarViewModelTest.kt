@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest
 
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.FakeRepeatableExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 
@@ -39,6 +40,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -71,7 +73,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        viewModel = SeekBarViewModel(fakeExecutor)
+        viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor))
         mockController = mock(MediaController::class.java)
         whenever(mockController.sessionToken).thenReturn(token1)
         mockTransport = mock(MediaController.TransportControls::class.java)
@@ -203,7 +205,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun updateElapsedTime() {
-        // GIVEN that the PlaybackState contins the current position
+        // GIVEN that the PlaybackState contains the current position
         val position = 200L
         val state = PlaybackState.Builder().run {
             setState(PlaybackState.STATE_PLAYING, position, 1f)
@@ -245,7 +247,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleSeek() {
+    fun onSeek() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         viewModel.updateController(mockController)
         // WHEN user input is dispatched
@@ -257,19 +259,73 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleProgressChangedUser() {
+    fun onSeekWithFalse() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         viewModel.updateController(mockController)
-        // WHEN user starts dragging the seek bar
-        val pos = 42
-        viewModel.seekBarListener.onProgressChanged(SeekBar(context), pos, true)
+        // WHEN a false is received during the seek gesture
+        val pos = 42L
+        with(viewModel) {
+            onSeekStarting()
+            onSeekFalse()
+            onSeek(pos)
+        }
         fakeExecutor.runAllReady()
-        // THEN transport controls should be used
-        verify(mockTransport).seekTo(pos.toLong())
+        // THEN the seek is rejected and the transport never receives seekTo
+        verify(mockTransport, never()).seekTo(pos)
     }
 
     @Test
-    fun handleProgressChangedOther() {
+    fun onSeekProgress() {
+        val pos = 42L
+        with(viewModel) {
+            onSeekStarting()
+            onSeekProgress(pos)
+        }
+        fakeExecutor.runAllReady()
+        // THEN then elapsed time should be updated
+        assertThat(viewModel.progress.value!!.elapsedTime).isEqualTo(pos)
+    }
+
+    @Test
+    fun onSeekProgressWithSeekStarting() {
+        val pos = 42L
+        with(viewModel) {
+            onSeekProgress(pos)
+        }
+        fakeExecutor.runAllReady()
+        // THEN then elapsed time should not be updated
+        assertThat(viewModel.progress.value!!.elapsedTime).isNull()
+    }
+
+    @Test
+    fun onProgressChangedFromUser() {
+        // WHEN user starts dragging the seek bar
+        val pos = 42
+        val bar = SeekBar(context)
+        with(viewModel.seekBarListener) {
+            onStartTrackingTouch(bar)
+            onProgressChanged(bar, pos, true)
+        }
+        fakeExecutor.runAllReady()
+        // THEN then elapsed time should be updated
+        assertThat(viewModel.progress.value!!.elapsedTime).isEqualTo(pos)
+    }
+
+    @Test
+    fun onProgressChangedFromUserWithoutStartTrackingTouch() {
+        // WHEN user starts dragging the seek bar
+        val pos = 42
+        val bar = SeekBar(context)
+        with(viewModel.seekBarListener) {
+            onProgressChanged(bar, pos, true)
+        }
+        fakeExecutor.runAllReady()
+        // THEN then elapsed time should not be updated
+        assertThat(viewModel.progress.value!!.elapsedTime).isNull()
+    }
+
+    @Test
+    fun onProgressChangedNotFromUser() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         viewModel.updateController(mockController)
         // WHEN user starts dragging the seek bar
@@ -281,7 +337,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleStartTrackingTouch() {
+    fun onStartTrackingTouch() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         viewModel.updateController(mockController)
         // WHEN user starts dragging the seek bar
@@ -296,7 +352,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleStopTrackingTouch() {
+    fun onStopTrackingTouch() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         viewModel.updateController(mockController)
         // WHEN user ends drag
@@ -308,6 +364,26 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
         // THEN transport controls should be used
         verify(mockTransport).seekTo(pos.toLong())
+    }
+
+    @Test
+    fun onStopTrackingTouchAfterProgress() {
+        whenever(mockController.getTransportControls()).thenReturn(mockTransport)
+        viewModel.updateController(mockController)
+        // WHEN user starts dragging the seek bar
+        val pos = 42
+        val progPos = 84
+        val bar = SeekBar(context).apply {
+            progress = pos
+        }
+        with(viewModel.seekBarListener) {
+            onStartTrackingTouch(bar)
+            onProgressChanged(bar, progPos, true)
+            onStopTrackingTouch(bar)
+        }
+        fakeExecutor.runAllReady()
+        // THEN then elapsed time should be updated
+        verify(mockTransport).seekTo(eq(pos.toLong()))
     }
 
     @Test
@@ -368,7 +444,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         // AND the playback state is playing
         val state = PlaybackState.Builder().run {
-            setState(PlaybackState.STATE_STOPPED, 200L, 1f)
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
@@ -394,6 +470,90 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         // THEN another task is queued
         assertThat(fakeExecutor.numPending()).isEqualTo(1)
+    }
+
+    @Test
+    fun noQueuePollTaskWhenSeeking() {
+        // GIVEN listening
+        viewModel.listening = true
+        // AND the playback state is playing
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
+        viewModel.updateController(mockController)
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // WHEN seek starts
+        viewModel.onSeekStarting()
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // THEN an update task is not queued because we don't want it fighting with the user when
+        // they are trying to move the thumb.
+        assertThat(fakeExecutor.numPending()).isEqualTo(0)
+    }
+
+    @Test
+    fun queuePollTaskWhenDoneSeekingWithFalse() {
+        // GIVEN listening
+        viewModel.listening = true
+        // AND the playback state is playing
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
+        viewModel.updateController(mockController)
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // WHEN seek finishes after a false
+        with(viewModel) {
+            onSeekStarting()
+            onSeekFalse()
+            onSeek(42L)
+        }
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // THEN an update task is queued because the gesture was ignored and progress was restored.
+        assertThat(fakeExecutor.numPending()).isEqualTo(1)
+    }
+
+    @Test
+    fun noQueuePollTaskWhenDoneSeeking() {
+        // GIVEN listening
+        viewModel.listening = true
+        // AND the playback state is playing
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
+        viewModel.updateController(mockController)
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // WHEN seek finishes after a false
+        with(viewModel) {
+            onSeekStarting()
+            onSeek(42L)
+        }
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // THEN no update task is queued because we are waiting for an updated playback state to be
+        // returned in response to the seek.
+        assertThat(fakeExecutor.numPending()).isEqualTo(0)
     }
 
     @Test

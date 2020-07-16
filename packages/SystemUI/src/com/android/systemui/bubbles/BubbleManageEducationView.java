@@ -17,18 +17,16 @@
 package com.android.systemui.bubbles;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.recents.TriangleShape;
 
 /**
  * Educational view to highlight the manage button that allows a user to configure the settings
@@ -36,8 +34,9 @@ import com.android.systemui.recents.TriangleShape;
  */
 public class BubbleManageEducationView extends LinearLayout {
 
-    private View mPointerView;
     private View mManageView;
+    private TextView mTitleTextView;
+    private TextView mDescTextView;
 
     public BubbleManageEducationView(Context context) {
         this(context, null);
@@ -61,6 +60,8 @@ public class BubbleManageEducationView extends LinearLayout {
         super.onFinishInflate();
 
         mManageView = findViewById(R.id.manage_education_view);
+        mTitleTextView = findViewById(R.id.user_education_title);
+        mDescTextView = findViewById(R.id.user_education_description);
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[] {android.R.attr.colorAccent,
@@ -70,26 +71,8 @@ public class BubbleManageEducationView extends LinearLayout {
         ta.recycle();
 
         textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, true);
-        ((TextView) findViewById(R.id.user_education_description)).setTextColor(textColor);
-
-        final Resources res = getResources();
-        final int pointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
-        final int pointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
-
-        ShapeDrawable triangleShape =
-                new ShapeDrawable(TriangleShape.create(
-                        pointerWidth, pointerHeight, false /* isPointingUp */));
-        triangleShape.setTint(bgColor);
-
-        mPointerView = findViewById(R.id.user_education_pointer);
-        mPointerView.setBackground(triangleShape);
-    }
-
-    /**
-     * Specifies the x value this pointer should point to.
-     */
-    public void setPointerPosition(int x) {
-        mPointerView.setTranslationX(x - (mPointerView.getWidth() / 2));
+        mTitleTextView.setTextColor(textColor);
+        mDescTextView.setTextColor(textColor);
     }
 
     /**
@@ -105,5 +88,19 @@ public class BubbleManageEducationView extends LinearLayout {
      */
     public int getManageViewHeight() {
         return mManageView.getHeight();
+    }
+
+    @Override
+    public void setLayoutDirection(int direction) {
+        super.setLayoutDirection(direction);
+        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            mManageView.setBackgroundResource(R.drawable.bubble_stack_user_education_bg_rtl);
+            mTitleTextView.setGravity(Gravity.RIGHT);
+            mDescTextView.setGravity(Gravity.RIGHT);
+        } else {
+            mManageView.setBackgroundResource(R.drawable.bubble_stack_user_education_bg);
+            mTitleTextView.setGravity(Gravity.LEFT);
+            mDescTextView.setGravity(Gravity.LEFT);
+        }
     }
 }

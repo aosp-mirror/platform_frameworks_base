@@ -18,8 +18,10 @@ package com.android.systemui.bubbles.dagger;
 
 import android.app.INotificationManager;
 import android.content.Context;
+import android.content.pm.LauncherApps;
 import android.view.WindowManager;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.bubbles.BubbleDataRepository;
@@ -70,7 +72,9 @@ public interface BubbleModule {
             BubbleDataRepository bubbleDataRepository,
             SysUiState sysUiState,
             INotificationManager notifManager,
-            WindowManager windowManager) {
+            IStatusBarService statusBarService,
+            WindowManager windowManager,
+            LauncherApps launcherApps) {
         return new BubbleController(
                 context,
                 notificationShadeWindowController,
@@ -91,6 +95,8 @@ public interface BubbleModule {
                 bubbleDataRepository,
                 sysUiState,
                 notifManager,
-                windowManager);
+                statusBarService,
+                windowManager,
+                launcherApps);
     }
 }

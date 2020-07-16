@@ -62,6 +62,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -102,6 +103,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     private Set<NotificationChannel> mDefaultNotificationChannelSet = new HashSet<>();
     private StatusBarNotification mSbn;
     private NotificationEntry mEntry;
+    private UiEventLoggerFake mUiEventLogger = new UiEventLoggerFake();
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
@@ -187,6 +189,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -211,6 +214,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -231,13 +235,12 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
-        final TextView dividerView = mNotificationInfo.findViewById(R.id.group_divider);
-        assertEquals(GONE, dividerView.getVisibility());
     }
 
     @Test
@@ -262,6 +265,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 entry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -283,13 +287,12 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
         final TextView groupNameView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(GONE, groupNameView.getVisibility());
-        final TextView dividerView = mNotificationInfo.findViewById(R.id.group_divider);
-        assertEquals(GONE, dividerView.getVisibility());
     }
 
     @Test
@@ -311,14 +314,13 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
         final TextView groupNameView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(View.VISIBLE, groupNameView.getVisibility());
         assertEquals("Test Group Name", groupNameView.getText());
-        final TextView dividerView = mNotificationInfo.findViewById(R.id.group_divider);
-        assertEquals(View.VISIBLE, dividerView.getVisibility());
     }
 
     @Test
@@ -334,6 +336,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -354,6 +357,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -378,6 +382,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -398,6 +403,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 true,
                 true);
@@ -422,6 +428,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                     latch.countDown();
                 },
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -445,6 +452,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -468,6 +476,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                     assertEquals(mNotificationChannel, c);
                 },
                 null,
+                mUiEventLogger,
                 false,
                 false,
                 true);
@@ -488,6 +497,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -502,6 +512,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> { },
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -525,6 +536,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                     latch.countDown();
                 },
                 null,
+                mUiEventLogger,
                 true,
                 true,
                 true);
@@ -549,6 +561,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -571,6 +584,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -593,6 +607,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 true,
                 true);
@@ -617,6 +632,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -636,6 +652,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -655,12 +672,35 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
         mTestableLooper.processAllMessages();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), any());
+    }
+
+    @Test
+    public void testBindNotification_LogsOpen() throws Exception {
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                null,
+                null,
+                mUiEventLogger,
+                true,
+                false,
+                true);
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_OPEN.getId(),
+                mUiEventLogger.eventId(0));
     }
 
     @Test
@@ -677,6 +717,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -702,6 +743,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -727,6 +769,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -736,6 +779,13 @@ public class NotificationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), any());
         assertEquals(originalImportance, mNotificationChannel.getImportance());
+
+        assertEquals(2, mUiEventLogger.numLogs());
+        assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_OPEN.getId(),
+                mUiEventLogger.eventId(0));
+        // The SAVE_IMPORTANCE event is logged whenever importance is saved, even if unchanged.
+        assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_SAVE_IMPORTANCE.getId(),
+                mUiEventLogger.eventId(1));
     }
 
     @Test
@@ -753,6 +803,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -779,6 +830,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -795,6 +847,12 @@ public class NotificationInfoTest extends SysuiTestCase {
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_LOW, updated.getValue().getImportance());
+
+        assertEquals(2, mUiEventLogger.numLogs());
+        assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_OPEN.getId(),
+                mUiEventLogger.eventId(0));
+        assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_SAVE_IMPORTANCE.getId(),
+                mUiEventLogger.eventId(1));
     }
 
     @Test
@@ -811,6 +869,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -844,6 +903,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -877,6 +937,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -913,6 +974,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -948,6 +1010,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 true);
@@ -974,6 +1037,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -1003,6 +1067,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -1035,6 +1100,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false);
@@ -1046,6 +1112,10 @@ public class NotificationInfoTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), eq(TEST_UID), eq(mNotificationChannel));
+
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_OPEN.getId(),
+                mUiEventLogger.eventId(0));
     }
 
     @Test
@@ -1062,6 +1132,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false
@@ -1094,6 +1165,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false
@@ -1119,6 +1191,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                mUiEventLogger,
                 true,
                 false,
                 false

@@ -19,13 +19,16 @@ package com.android.systemui.statusbar.notification
 import android.app.Notification
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.os.Handler
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.ConversationLayout
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentView
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -62,7 +65,8 @@ class ConversationNotificationProcessor @Inject constructor(
 class ConversationNotificationManager @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
     private val notificationGroupManager: NotificationGroupManager,
-    private val context: Context
+    private val context: Context,
+    @Main private val mainHandler: Handler
 ) {
     // Need this state to be thread safe, since it's accessed from the ui thread
     // (NotificationEntryListener) and a bg thread (NotificationContentInflater)
@@ -72,32 +76,41 @@ class ConversationNotificationManager @Inject constructor(
 
     init {
         notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
-
             override fun onNotificationRankingUpdated(rankingMap: RankingMap) {
                 fun getLayouts(view: NotificationContentView) =
                         sequenceOf(view.contractedChild, view.expandedChild, view.headsUpChild)
                 val ranking = Ranking()
-                states.keys.asSequence()
+                val activeConversationEntries = states.keys.asSequence()
                         .mapNotNull { notificationEntryManager.getActiveNotificationUnfiltered(it) }
-                        .forEach { entry ->
-                            if (rankingMap.getRanking(entry.sbn.key, ranking) &&
-                                    ranking.isConversation) {
-                                val important = ranking.channel.isImportantConversation
-                                var changed = false
-                                entry.row?.layouts?.asSequence()
-                                        ?.flatMap(::getLayouts)
-                                        ?.mapNotNull { it as? ConversationLayout }
-                                        ?.forEach {
-                                            if (important != it.isImportantConversation) {
-                                                it.setIsImportantConversation(important)
-                                                changed = true
-                                            }
-                                        }
-                                if (changed) {
-                                    notificationGroupManager.updateIsolation(entry)
-                                }
+                for (entry in activeConversationEntries) {
+                    if (rankingMap.getRanking(entry.sbn.key, ranking) && ranking.isConversation) {
+                        val important = ranking.channel.isImportantConversation
+                        val layouts = entry.row?.layouts?.asSequence()
+                                ?.flatMap(::getLayouts)
+                                ?.mapNotNull { it as? ConversationLayout }
+                                ?: emptySequence()
+                        var changed = false
+                        for (layout in layouts) {
+                            if (important == layout.isImportantConversation) {
+                                continue
+                            }
+                            changed = true
+                            if (important && entry.isMarkedForUserTriggeredMovement) {
+                                // delay this so that it doesn't animate in until after
+                                // the notif has been moved in the shade
+                                mainHandler.postDelayed({
+                                    layout.setIsImportantConversation(
+                                            important, true /* animate */)
+                                }, IMPORTANCE_ANIMATION_DELAY.toLong())
+                            } else {
+                                layout.setIsImportantConversation(important)
                             }
                         }
+                        if (changed) {
+                            notificationGroupManager.updateIsolation(entry)
+                        }
+                    }
+                }
             }
 
             override fun onEntryInflated(entry: NotificationEntry) {
@@ -177,9 +190,16 @@ class ConversationNotificationManager @Inject constructor(
 
     private fun resetBadgeUi(row: ExpandableNotificationRow): Unit =
             (row.layouts?.asSequence() ?: emptySequence())
-                    .flatMap { layout -> layout.allViews.asSequence()}
+                    .flatMap { layout -> layout.allViews.asSequence() }
                     .mapNotNull { view -> view as? ConversationLayout }
                     .forEach { convoLayout -> convoLayout.setUnreadCount(0) }
 
     private data class ConversationState(val unreadCount: Int, val notification: Notification)
+
+    companion object {
+        private const val IMPORTANCE_ANIMATION_DELAY =
+                StackStateAnimator.ANIMATION_DURATION_STANDARD +
+                StackStateAnimator.ANIMATION_DURATION_PRIORITY_CHANGE +
+                100
+    }
 }

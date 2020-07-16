@@ -520,6 +520,12 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT = 13;
 
+    /**
+     * Action to show Launcher's all apps.
+     * @hide
+     */
+    public static final int GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS = 14;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**

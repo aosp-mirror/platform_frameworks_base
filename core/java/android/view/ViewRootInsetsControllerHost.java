@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONT
 
 import android.annotation.NonNull;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
@@ -120,13 +121,12 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
         if (mViewRoot.mView.isHardwareAccelerated()) {
-            mApplier.scheduleApply(false /* earlyWakeup */, params);
+            mApplier.scheduleApply(params);
         } else {
             // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
-            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */,
-                    false /* earlyWakeup */, params);
+            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */, params);
         }
     }
 
@@ -228,5 +228,25 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return null;
         }
         return mViewRoot.getTitle().toString();
+    }
+
+    @Override
+    public int dipToPx(int dips) {
+        if (mViewRoot != null) {
+            return mViewRoot.dipToPx(dips);
+        }
+        return 0;
+    }
+
+    @Override
+    public IBinder getWindowToken() {
+        if (mViewRoot == null) {
+            return null;
+        }
+        final View view = mViewRoot.getView();
+        if (view == null) {
+            return null;
+        }
+        return view.getWindowToken();
     }
 }

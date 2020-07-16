@@ -22,11 +22,12 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
-import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.net.module.util.Inet4AddressUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -632,7 +633,6 @@ public class WifiInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     public boolean is24GHz() {
         return ScanResult.is24GHz(mFrequency);
@@ -640,11 +640,17 @@ public class WifiInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     @UnsupportedAppUsage
     public boolean is5GHz() {
         return ScanResult.is5GHz(mFrequency);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean is6GHz() {
+        return ScanResult.is6GHz(mFrequency);
     }
 
     /**

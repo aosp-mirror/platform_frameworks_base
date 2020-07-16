@@ -226,7 +226,7 @@ public final class MediaRoute2Info implements Parcelable {
     public static final int TYPE_GROUP = 2000;
 
     /**
-     * Media feature: Live audio.
+     * Route feature: Live audio.
      * <p>
      * A route that supports live audio routing will allow the media audio stream
      * to be sent to supported destinations.  This can include internal speakers or
@@ -241,7 +241,7 @@ public final class MediaRoute2Info implements Parcelable {
     public static final String FEATURE_LIVE_AUDIO = "android.media.route.feature.LIVE_AUDIO";
 
     /**
-     * Media feature: Live video.
+     * Route feature: Live video.
      * <p>
      * A route that supports live video routing will allow a mirrored version
      * of the device's primary display or a customized
@@ -262,7 +262,14 @@ public final class MediaRoute2Info implements Parcelable {
     public static final String FEATURE_LIVE_VIDEO = "android.media.route.feature.LIVE_VIDEO";
 
     /**
-     * Media feature: Remote playback.
+     * Route feature: Local playback.
+     * @hide
+     */
+    public static final String FEATURE_LOCAL_PLAYBACK =
+            "android.media.route.feature.LOCAL_PLAYBACK";
+
+    /**
+     * Route feature: Remote playback.
      * <p>
      * A route that supports remote playback routing will allow an application to send
      * requests to play content remotely to supported destinations.
@@ -283,7 +290,7 @@ public final class MediaRoute2Info implements Parcelable {
             "android.media.route.feature.REMOTE_PLAYBACK";
 
     /**
-     * Media feature: Remote audio playback.
+     * Route feature: Remote audio playback.
      * <p>
      * A route that supports remote audio playback routing will allow an application to send
      * requests to play audio content remotely to supported destinations.
@@ -295,7 +302,7 @@ public final class MediaRoute2Info implements Parcelable {
             "android.media.route.feature.REMOTE_AUDIO_PLAYBACK";
 
     /**
-     * Media feature: Remote video playback.
+     * Route feature: Remote video playback.
      * <p>
      * A route that supports remote video playback routing will allow an application to send
      * requests to play video content remotely to supported destinations.
@@ -305,6 +312,14 @@ public final class MediaRoute2Info implements Parcelable {
      */
     public static final String FEATURE_REMOTE_VIDEO_PLAYBACK =
             "android.media.route.feature.REMOTE_VIDEO_PLAYBACK";
+
+    /**
+     * Route feature: Remote group playback.
+     * <p>
+     * @hide
+     */
+    public static final String FEATURE_REMOTE_GROUP_PLAYBACK =
+            "android.media.route.feature.REMOTE_GROUP_PLAYBACK";
 
     final String mId;
     final CharSequence mName;
@@ -317,9 +332,10 @@ public final class MediaRoute2Info implements Parcelable {
     @ConnectionState
     final int mConnectionState;
     final String mClientPackageName;
-    final int mVolume;
-    final int mVolumeMax;
     final int mVolumeHandling;
+    final int mVolumeMax;
+    final int mVolume;
+    final String mAddress;
     final Bundle mExtras;
     final String mProviderId;
 
@@ -336,6 +352,7 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeHandling = builder.mVolumeHandling;
         mVolumeMax = builder.mVolumeMax;
         mVolume = builder.mVolume;
+        mAddress = builder.mAddress;
         mExtras = builder.mExtras;
         mProviderId = builder.mProviderId;
     }
@@ -353,6 +370,7 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeHandling = in.readInt();
         mVolumeMax = in.readInt();
         mVolume = in.readInt();
+        mAddress = in.readString();
         mExtras = in.readBundle();
         mProviderId = in.readString();
     }
@@ -483,6 +501,15 @@ public final class MediaRoute2Info implements Parcelable {
         return mVolume;
     }
 
+    /**
+     * Gets the hardware address of the route if available.
+     * @hide
+     */
+    @Nullable
+    public String getAddress() {
+        return mAddress;
+    }
+
     @Nullable
     public Bundle getExtras() {
         return mExtras == null ? null : new Bundle(mExtras);
@@ -564,6 +591,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && (mVolumeHandling == other.mVolumeHandling)
                 && (mVolumeMax == other.mVolumeMax)
                 && (mVolume == other.mVolume)
+                && Objects.equals(mAddress, other.mAddress)
                 && Objects.equals(mProviderId, other.mProviderId);
     }
 
@@ -572,7 +600,7 @@ public final class MediaRoute2Info implements Parcelable {
         // Note: mExtras is not included.
         return Objects.hash(mId, mName, mFeatures, mType, mIsSystem, mIconUri, mDescription,
                 mConnectionState, mClientPackageName, mVolumeHandling, mVolumeMax, mVolume,
-                mProviderId);
+                mAddress, mProviderId);
     }
 
     @Override
@@ -614,6 +642,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeInt(mVolumeHandling);
         dest.writeInt(mVolumeMax);
         dest.writeInt(mVolume);
+        dest.writeString(mAddress);
         dest.writeBundle(mExtras);
         dest.writeString(mProviderId);
     }
@@ -637,6 +666,7 @@ public final class MediaRoute2Info implements Parcelable {
         int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         int mVolumeMax;
         int mVolume;
+        String mAddress;
         Bundle mExtras;
         String mProviderId;
 
@@ -669,24 +699,7 @@ public final class MediaRoute2Info implements Parcelable {
          * @param routeInfo the existing instance to copy data from.
          */
         public Builder(@NonNull MediaRoute2Info routeInfo) {
-            Objects.requireNonNull(routeInfo, "routeInfo must not be null");
-
-            mId = routeInfo.mId;
-            mName = routeInfo.mName;
-            mFeatures = new ArrayList<>(routeInfo.mFeatures);
-            mType = routeInfo.mType;
-            mIsSystem = routeInfo.mIsSystem;
-            mIconUri = routeInfo.mIconUri;
-            mDescription = routeInfo.mDescription;
-            mConnectionState = routeInfo.mConnectionState;
-            mClientPackageName = routeInfo.mClientPackageName;
-            mVolumeHandling = routeInfo.mVolumeHandling;
-            mVolumeMax = routeInfo.mVolumeMax;
-            mVolume = routeInfo.mVolume;
-            if (routeInfo.mExtras != null) {
-                mExtras = new Bundle(routeInfo.mExtras);
-            }
-            mProviderId = routeInfo.mProviderId;
+            this(routeInfo.mId, routeInfo);
         }
 
         /**
@@ -715,6 +728,7 @@ public final class MediaRoute2Info implements Parcelable {
             mVolumeHandling = routeInfo.mVolumeHandling;
             mVolumeMax = routeInfo.mVolumeMax;
             mVolume = routeInfo.mVolume;
+            mAddress = routeInfo.mAddress;
             if (routeInfo.mExtras != null) {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
@@ -861,6 +875,16 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setVolume(int volume) {
             mVolume = volume;
+            return this;
+        }
+
+        /**
+         * Sets the hardware address of the route.
+         * @hide
+         */
+        @NonNull
+        public Builder setAddress(String address) {
+            mAddress = address;
             return this;
         }
 

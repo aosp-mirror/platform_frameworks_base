@@ -206,10 +206,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Neleidžiama spausdinti (<xliff:g id="OWNER_APP">%s</xliff:g>)."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Įjunkite darbo profilį"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Asmeninės programos bus užblokuotos, kol įjungsite darbo profilį"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Asmeninės programos bus užblokuotos <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. IT administratorius neleidžia palikti darbo profilio išjungto ilgiau nei <xliff:g id="NUMBER">%3$d</xliff:g> d."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Įjungti"</string>
     <string name="me" msgid="6207584824693813140">"Aš"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetinio kompiuterio parinktys"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"„Android TV“ parinktys"</string>
@@ -1665,7 +1663,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%1$d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Pašalinti"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Fone pradėtai priekinio plano paslaugai iš „<xliff:g id="PACKAGENAME">%1$s</xliff:g>“ nebus suteiktas leidimas naudojimo metu būsimose R versijose. Apsilankykite go/r-bg-fgs-restriction ir pateikite pranešimą apie riktą."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kai spartusis klavišas įjungtas, paspaudus abu garsumo mygtukus ir palaikius 3 sekundes bus įjungta pritaikymo neįgaliesiems funkcija."</string>

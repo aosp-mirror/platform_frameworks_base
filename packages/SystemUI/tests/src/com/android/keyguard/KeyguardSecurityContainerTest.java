@@ -18,7 +18,9 @@ package com.android.keyguard;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -110,6 +112,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
         mKeyguardSecurityContainer.startDisappearAnimation(null);
         verify(mSecurityView).startDisappearAnimation(eq(null));
-        verify(mWindowInsetsController).hide(eq(ime()));
+        verify(mWindowInsetsController).controlWindowInsetsAnimation(eq(ime()), anyLong(), any(),
+                any(), any());
     }
 }

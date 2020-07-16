@@ -8,10 +8,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -37,10 +37,12 @@ public class ScreenshotHelper {
         private int mSource;
         private boolean mHasStatusBar;
         private boolean mHasNavBar;
-        private Bitmap mBitmap;
+        private Bundle mBitmapBundle;
         private Rect mBoundsInScreen;
         private Insets mInsets;
         private int mTaskId;
+        private int mUserId;
+        private ComponentName mTopComponent;
 
         ScreenshotRequest(int source, boolean hasStatus, boolean hasNav) {
             mSource = source;
@@ -48,24 +50,29 @@ public class ScreenshotHelper {
             mHasNavBar = hasNav;
         }
 
-        ScreenshotRequest(
-                int source, Bitmap bitmap, Rect boundsInScreen, Insets insets, int taskId) {
+        ScreenshotRequest(int source, Bundle bitmapBundle, Rect boundsInScreen, Insets insets,
+                int taskId, int userId, ComponentName topComponent) {
             mSource = source;
-            mBitmap = bitmap;
+            mBitmapBundle = bitmapBundle;
             mBoundsInScreen = boundsInScreen;
             mInsets = insets;
             mTaskId = taskId;
+            mUserId = userId;
+            mTopComponent = topComponent;
         }
 
         ScreenshotRequest(Parcel in) {
             mSource = in.readInt();
             mHasStatusBar = in.readBoolean();
             mHasNavBar = in.readBoolean();
+
             if (in.readInt() == 1) {
-                mBitmap = in.readParcelable(Bitmap.class.getClassLoader());
+                mBitmapBundle = in.readBundle(getClass().getClassLoader());
                 mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader());
                 mInsets = in.readParcelable(Insets.class.getClassLoader());
                 mTaskId = in.readInt();
+                mUserId = in.readInt();
+                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader());
             }
         }
 
@@ -81,8 +88,8 @@ public class ScreenshotHelper {
             return mHasNavBar;
         }
 
-        public Bitmap getBitmap() {
-            return mBitmap;
+        public Bundle getBitmapBundle() {
+            return mBitmapBundle;
         }
 
         public Rect getBoundsInScreen() {
@@ -97,6 +104,15 @@ public class ScreenshotHelper {
             return mTaskId;
         }
 
+
+        public int getUserId() {
+            return mUserId;
+        }
+
+        public ComponentName getTopComponent() {
+            return mTopComponent;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -107,14 +123,16 @@ public class ScreenshotHelper {
             dest.writeInt(mSource);
             dest.writeBoolean(mHasStatusBar);
             dest.writeBoolean(mHasNavBar);
-            if (mBitmap == null) {
+            if (mBitmapBundle == null) {
                 dest.writeInt(0);
             } else {
                 dest.writeInt(1);
-                dest.writeParcelable(mBitmap, 0);
+                dest.writeBundle(mBitmapBundle);
                 dest.writeParcelable(mBoundsInScreen, 0);
                 dest.writeParcelable(mInsets, 0);
                 dest.writeInt(mTaskId);
+                dest.writeInt(mUserId);
+                dest.writeParcelable(mTopComponent, 0);
             }
         }
 
@@ -234,19 +252,22 @@ public class ScreenshotHelper {
     /**
      * Request that provided image be handled as if it was a screenshot.
      *
-     * @param screenshot         The bitmap to treat as the screen shot.
+     * @param screenshotBundle   Bundle containing the buffer and color space of the screenshot.
      * @param boundsInScreen     The bounds in screen coordinates that the bitmap orginated from.
      * @param insets             The insets that the image was shown with, inside the screenbounds.
      * @param taskId             The taskId of the task that the screen shot was taken of.
+     * @param userId             The userId of user running the task provided in taskId.
+     * @param topComponent       The component name of the top component running in the task.
      * @param handler            A handler used in case the screenshot times out
      * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
      *                           screenshot was taken.
      */
-    public void provideScreenshot(@NonNull Bitmap screenshot, @NonNull Rect boundsInScreen,
-            @NonNull Insets insets, int taskId, int source,
+    public void provideScreenshot(@NonNull Bundle screenshotBundle, @NonNull Rect boundsInScreen,
+            @NonNull Insets insets, int taskId, int userId, ComponentName topComponent, int source,
             @NonNull Handler handler, @Nullable Consumer<Uri> completionConsumer) {
         ScreenshotRequest screenshotRequest =
-                new ScreenshotRequest(source, screenshot, boundsInScreen, insets, taskId);
+                new ScreenshotRequest(source, screenshotBundle, boundsInScreen, insets, taskId,
+                        userId, topComponent);
         takeScreenshot(WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_TIMEOUT_MS,
                 handler, screenshotRequest, completionConsumer);
     }
@@ -295,7 +316,7 @@ public class ScreenshotHelper {
             };
             msg.replyTo = new Messenger(h);
 
-            if (mScreenshotConnection == null) {
+            if (mScreenshotConnection == null || mScreenshotService == null) {
                 final ComponentName serviceComponent = ComponentName.unflattenFromString(
                         mContext.getResources().getString(
                                 com.android.internal.R.string.config_screenshotServiceComponent));
@@ -330,8 +351,11 @@ public class ScreenshotHelper {
                                 mContext.unbindService(mScreenshotConnection);
                                 mScreenshotConnection = null;
                                 mScreenshotService = null;
-                                handler.removeCallbacks(mScreenshotTimeout);
-                                notifyScreenshotError();
+                                // only log an error if we're still within the timeout period
+                                if (handler.hasCallbacks(mScreenshotTimeout)) {
+                                    handler.removeCallbacks(mScreenshotTimeout);
+                                    notifyScreenshotError();
+                                }
                             }
                         }
                     }

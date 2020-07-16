@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Afdrukken uitgeschakeld door <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Schakel je werkprofiel in"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Je persoonlijke apps zijn geblokkeerd totdat je je werkprofiel inschakelt"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Apps die worden gebruikt voor persoonlijke doeleinden, worden geblokkeerd op <xliff:g id="DATE">%1$s</xliff:g> om <xliff:g id="TIME">%2$s</xliff:g>. Je IT-beheerder staat niet toe dat je werkprofiel langer dan <xliff:g id="NUMBER">%3$d</xliff:g> dagen is uitgeschakeld."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Inschakelen"</string>
     <string name="me" msgid="6207584824693813140">"Ik"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletopties"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opties voor Android TV"</string>
@@ -239,7 +237,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefoonopties"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Uitschakelen"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Voeding"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Aan/uit"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Opnieuw opstarten"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Bugrapport"</string>
@@ -953,11 +951,11 @@
     <string name="autofill_area" msgid="8289022370678448983">"Gebied"</string>
     <string name="autofill_emirate" msgid="2544082046790551168">"Emiraat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"je webbladwijzers en -geschiedenis lezen"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bladwijzers in de systeemeigen browser. Let op: deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bookmarks in de systeemeigen browser. Let op: deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"webbladwijzers en -geschiedenis schrijven"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je tablet. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden.."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Hiermee kan de app de browsergeschiedenis of opgeslagen bladwijzers bewerken op je Android TV-apparaat. Hierdoor kan de app mogelijk browsergegevens wissen of aanpassen. Opmerking: Dit recht kan niet worden afgedwongen door andere browsers of andere apps met internetmogelijkheden."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je tablet. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden.."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Hiermee kan de app de browsergeschiedenis of opgeslagen bookmarks bewerken op je Android TV-apparaat. Hierdoor kan de app mogelijk browsergegevens wissen of aanpassen. Opmerking: Dit recht kan niet worden afgedwongen door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"een wekker instellen"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"voicemail toevoegen"</string>
@@ -1550,7 +1548,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Browser starten?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Gesprek accepteren?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Altijd"</string>
-    <string name="activity_resolver_use_once" msgid="948462794469672658">"Één keer"</string>
+    <string name="activity_resolver_use_once" msgid="948462794469672658">"Eén keer"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ondersteunt werkprofielen niet"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Tv"</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Verwijderen"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"De op de achtergrond gestarte voorgrondservice van <xliff:g id="PACKAGENAME">%1$s</xliff:g> heeft geen rechten tijdens gebruik in toekomstige R-builds. Ga naar go/r-bg-fgs-restriction en dien een bugrapport in."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Snelkoppeling toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Als de snelkoppeling is ingeschakeld, kun je drie seconden op beide volumeknoppen drukken om een toegankelijkheidsfunctie te starten."</string>
@@ -1789,7 +1786,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Vraag pin voor losmaken"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vraag patroon voor losmaken"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vraag om ontgrendelingspatroon voor losmaken"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Vraag wachtwoord voor losmaken"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Geïnstalleerd door je beheerder"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Geüpdatet door je beheerder"</string>
@@ -1912,7 +1909,7 @@
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo starten…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Apparaat resetten…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>
-    <string name="conference_call" msgid="5731633152336490471">"Telefonische vergadering"</string>
+    <string name="conference_call" msgid="5731633152336490471">"Conferencecall"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Knopinfo"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Games"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Muziek en audio"</string>

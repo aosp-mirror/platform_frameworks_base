@@ -213,7 +213,7 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean isNonIdleWhitelisted(String packageName) throws RemoteException {
+        boolean isNonIdleWhitelisted(String packageName) {
             return mNonIdleWhitelistApps.contains(packageName);
         }
 
@@ -516,7 +516,7 @@ public class AppStandbyControllerTests {
         UsageEvents.Event ev = new UsageEvents.Event();
         ev.mPackage = packageName;
         ev.mEventType = eventType;
-        controller.reportEvent(ev, elapsedTime, USER_ID);
+        controller.reportEvent(ev, USER_ID);
     }
 
     private int getStandbyBucket(AppStandbyController controller, String packageName) {

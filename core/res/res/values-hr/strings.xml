@@ -204,10 +204,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Ispis je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Uključite poslovni profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše su osobne aplikacije blokirane dok ne uključite poslovni profil"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Osobne aplikacije blokirat će se <xliff:g id="DATE">%1$s</xliff:g> u <xliff:g id="TIME">%2$s</xliff:g>. Vaš IT administrator ne dopušta da vaš poslovni profil ostane isključen dulje od <xliff:g id="NUMBER">%3$d</xliff:g> dana."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Uključi"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije tabletnog uređaja"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcije Android TV-a"</string>
@@ -241,7 +239,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zaključavanje zaslona"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Uključi"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitne službe"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Izvješće o bugovima"</string>
@@ -1150,7 +1148,7 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Otvaranje pomoću aplikacije"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvaranje pomoću aplikacije %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otvori"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvaranje veza s <xliff:g id="HOST">%1$s</xliff:g> u aplikaciji"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvaranje veza sa stranice <xliff:g id="HOST">%1$s</xliff:g> u aplikaciji"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvaranje veza u aplikaciji"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otvaranje veza u aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otvaranje veza s <xliff:g id="HOST">%1$s</xliff:g> u aplikaciji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
@@ -1643,7 +1641,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ukloni"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Usluga u prednjem planu s <xliff:g id="PACKAGENAME">%1$s</xliff:g> pokrenuta u pozadini neće imati dopuštenje tijekom upotrebe u budućim R kompilacijama. Pogledajte go/r-bg-fgs-restriction i pošaljite izvješće o programskoj pogrešci."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite li pojačati zvuk iznad preporučene razine?\n\nDugotrajno slušanje glasne glazbe može vam oštetiti sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li upotrebljavati prečac za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kad je taj prečac uključen, pritiskom na obje tipke za glasnoću na tri sekunde pokrenut će se značajka pristupačnosti."</string>
@@ -1669,7 +1666,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Odabir značajki za upotrebu pomoću gumba za Pristupačnost"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Odabir značajki za upotrebu pomoću prečaca tipki za glasnoću"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usluga <xliff:g id="SERVICE_NAME">%s</xliff:g> je isključena"</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Uredi prečace"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Uredite prečace"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gotovo"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Isključi prečac"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Upotrijebi prečac"</string>
@@ -2091,14 +2088,14 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Posao"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Osobni prikaz"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Poslovni prikaz"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"To se ne može dijeliti pomoću poslovnih aplikacija"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Vaš IT administrator ne dopušta vam dijeljenje tog sadržaja pomoću aplikacija s vašeg poslovnog profila"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"To se ne može otvoriti pomoću poslovnih aplikacija"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Vaš IT administrator ne dopušta vam otvaranje tog sadržaja pomoću aplikacija s vašeg poslovnog profila"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nije moguće dijeljenje s poslovnim aplikacijama"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Vaš IT administrator ne dopušta vam dijeljenje tog sadržaja s aplikacijama na vašem poslovnom profilu"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nije moguće otvaranje pomoću poslovnih aplikacija"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Vaš IT administrator ne dopušta vam otvaranje tog sadržaja pomoću aplikacija na vašem poslovnom profilu"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"To se ne može dijeliti pomoću osobnih aplikacija"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Vaš IT administrator ne dopušta vam dijeljenje tog sadržaja pomoću aplikacija s vašeg osobnog profila"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"To se ne može otvoriti pomoću osobnih aplikacija"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Vaš IT administrator ne dopušta vam otvaranje tog sadržaja pomoću aplikacija s vašeg osobnog profila"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nije moguće otvaranje pomoću osobnih aplikacija"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Vaš IT administrator ne dopušta vam otvaranje tog sadržaja pomoću aplikacija na vašem osobnom profilu"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Poslovni je profil pauziran"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Uključi"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Nijedna poslovna aplikacija ne može podržati taj sadržaj"</string>

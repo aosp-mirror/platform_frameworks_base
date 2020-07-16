@@ -24,7 +24,9 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -47,10 +49,15 @@ public class OverlayViewGlobalStateController {
     private static final int UNKNOWN_Z_ORDER = -1;
     private final SystemUIOverlayWindowController mSystemUIOverlayWindowController;
     private final CarNavigationBarController mCarNavigationBarController;
+
+    private boolean mIsOccluded;
+
     @VisibleForTesting
     Map<OverlayViewController, Integer> mZOrderMap;
     @VisibleForTesting
     SortedMap<Integer, OverlayViewController> mZOrderVisibleSortedMap;
+    @VisibleForTesting
+    Set<OverlayViewController> mViewsHiddenForOcclusion;
     @VisibleForTesting
     OverlayViewController mHighestZOrder;
 
@@ -63,6 +70,7 @@ public class OverlayViewGlobalStateController {
         mCarNavigationBarController = carNavigationBarController;
         mZOrderMap = new HashMap<>();
         mZOrderVisibleSortedMap = new TreeMap<>();
+        mViewsHiddenForOcclusion = new HashSet<>();
     }
 
     /**
@@ -91,6 +99,10 @@ public class OverlayViewGlobalStateController {
      */
     public void showView(OverlayViewController viewController, @Nullable Runnable show) {
         debugLog();
+        if (mIsOccluded && !viewController.shouldShowWhenOccluded()) {
+            mViewsHiddenForOcclusion.add(viewController);
+            return;
+        }
         if (mZOrderVisibleSortedMap.isEmpty()) {
             setWindowVisible(true);
         }
@@ -147,6 +159,10 @@ public class OverlayViewGlobalStateController {
      */
     public void hideView(OverlayViewController viewController, @Nullable Runnable hide) {
         debugLog();
+        if (mIsOccluded && mViewsHiddenForOcclusion.contains(viewController)) {
+            mViewsHiddenForOcclusion.remove(viewController);
+            return;
+        }
         if (!viewController.isInflated()) {
             Log.d(TAG, "Content cannot be hidden since it isn't inflated: "
                     + viewController.getClass().getName());
@@ -240,6 +256,43 @@ public class OverlayViewGlobalStateController {
         return mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowHUN();
     }
 
+    /**
+     * Set the OverlayViewWindow to be in occluded or unoccluded state. When OverlayViewWindow is
+     * occluded, all views mounted to it that are not configured to be shown during occlusion will
+     * be hidden.
+     */
+    public void setOccluded(boolean occluded) {
+        if (occluded) {
+            // Hide views before setting mIsOccluded to true so the regular hideView logic is used,
+            // not the one used during occlusion.
+            hideViewsForOcclusion();
+            mIsOccluded = true;
+        } else {
+            mIsOccluded = false;
+            // show views after setting mIsOccluded to false so the regular showView logic is used,
+            // not the one used during occlusion.
+            showViewsHiddenForOcclusion();
+        }
+    }
+
+    private void hideViewsForOcclusion() {
+        HashSet<OverlayViewController> viewsCurrentlyShowing = new HashSet<>(
+                mZOrderVisibleSortedMap.values());
+        viewsCurrentlyShowing.forEach(overlayController -> {
+            if (!overlayController.shouldShowWhenOccluded()) {
+                hideView(overlayController, overlayController::hideInternal);
+                mViewsHiddenForOcclusion.add(overlayController);
+            }
+        });
+    }
+
+    private void showViewsHiddenForOcclusion() {
+        mViewsHiddenForOcclusion.forEach(overlayViewController -> {
+            showView(overlayViewController, overlayViewController::showInternal);
+        });
+        mViewsHiddenForOcclusion.clear();
+    }
+
     private void debugLog() {
         if (!DEBUG) {
             return;
@@ -250,5 +303,8 @@ public class OverlayViewGlobalStateController {
         Log.d(TAG, "mZOrderVisibleSortedMap: " + mZOrderVisibleSortedMap);
         Log.d(TAG, "mZOrderMap.size(): " + mZOrderMap.size());
         Log.d(TAG, "mZOrderMap: " + mZOrderMap);
+        Log.d(TAG, "mIsOccluded: " + mIsOccluded);
+        Log.d(TAG, "mViewsHiddenForOcclusion: " + mViewsHiddenForOcclusion);
+        Log.d(TAG, "mViewsHiddenForOcclusion.size(): " + mViewsHiddenForOcclusion.size());
     }
 }

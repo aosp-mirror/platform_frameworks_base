@@ -19,11 +19,13 @@ package com.android.systemui.wm;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
@@ -36,6 +38,7 @@ import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.internal.view.IInputMethodManager;
 import com.android.systemui.TransactionPool;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -53,12 +56,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     private static final boolean DEBUG = false;
 
+    // NOTE: All these constants came from InsetsController.
     public static final int ANIMATION_DURATION_SHOW_MS = 275;
     public static final int ANIMATION_DURATION_HIDE_MS = 340;
     public static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static final int DIRECTION_NONE = 0;
     private static final int DIRECTION_SHOW = 1;
     private static final int DIRECTION_HIDE = 2;
+    private static final int FLOATING_IME_BOTTOM_INSET = -80;
 
     SystemWindows mSystemWindows;
     final Handler mHandler;
@@ -221,6 +226,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             if (!activeControl.getSurfacePosition().equals(lastSurfacePosition)
                                     && mAnimation != null) {
                                 startAnimation(mImeShowing, true /* forceRestart */);
+                            } else if (!mImeShowing) {
+                                removeImeSurface();
                             }
                         });
                     }
@@ -266,9 +273,18 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
-            // Set frame, but only if the new frame isn't empty -- this maintains continuity
             final Rect newFrame = imeSource.getFrame();
-            if (newFrame.height() != 0) {
+            final boolean isFloating = newFrame.height() == 0 && show;
+            if (isFloating) {
+                // This is likely a "floating" or "expanded" IME, so to get animations, just
+                // pretend the ime has some size just below the screen.
+                mImeFrame.set(newFrame);
+                final int floatingInset = (int) (
+                        mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId).density()
+                                * FLOATING_IME_BOTTOM_INSET);
+                mImeFrame.bottom -= floatingInset;
+            } else if (newFrame.height() != 0) {
+                // Don't set a new frame if it's empty and hiding -- this maintains continuity
                 mImeFrame.set(newFrame);
             }
             if (DEBUG) {
@@ -313,6 +329,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 SurfaceControl.Transaction t = mTransactionPool.acquire();
                 float value = (float) animation.getAnimatedValue();
                 t.setPosition(mImeSourceControl.getLeash(), x, value);
+                final float alpha = isFloating ? (value - hiddenY) / (shownY - hiddenY) : 1.f;
+                t.setAlpha(mImeSourceControl.getLeash(), alpha);
                 dispatchPositionChanged(mDisplayId, imeTop(value), t);
                 t.apply();
                 mTransactionPool.release(t);
@@ -324,6 +342,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 public void onAnimationStart(Animator animation) {
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
                     t.setPosition(mImeSourceControl.getLeash(), x, startY);
+                    final float alpha = isFloating ? (startY - hiddenY) / (shownY - hiddenY) : 1.f;
+                    t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
                                 + imeTop(hiddenY) + "->" + imeTop(shownY)
@@ -348,10 +368,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
                     if (!mCancelled) {
                         t.setPosition(mImeSourceControl.getLeash(), x, endY);
+                        t.setAlpha(mImeSourceControl.getLeash(), 1.f);
                     }
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
                         t.hide(mImeSourceControl.getLeash());
+                        removeImeSurface();
                     }
                     t.apply();
                     mTransactionPool.release(t);
@@ -374,6 +396,19 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    void removeImeSurface() {
+        final IInputMethodManager imms = getImms();
+        if (imms != null) {
+            try {
+                // Remove the IME surface to make the insets invisible for
+                // non-client controlled insets.
+                imms.removeImeSurface();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to remove IME surface.", e);
+            }
+        }
+    }
+
     /**
      * Allows other things to synchronize with the ime position
      */
@@ -382,9 +417,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          * Called when the IME position is starting to animate.
          *
          * @param hiddenTop The y position of the top of the IME surface when it is hidden.
-         * @param shownTop The y position of the top of the IME surface when it is shown.
-         * @param showing {@code true} when we are animating from hidden to shown, {@code false}
-         *                            when animating from shown to hidden.
+         * @param shownTop  The y position of the top of the IME surface when it is shown.
+         * @param showing   {@code true} when we are animating from hidden to shown, {@code false}
+         *                  when animating from shown to hidden.
          */
         default void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean showing, SurfaceControl.Transaction t) {}
@@ -405,5 +440,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         default void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {}
+    }
+
+    public IInputMethodManager getImms() {
+        return IInputMethodManager.Stub.asInterface(
+                ServiceManager.getService(Context.INPUT_METHOD_SERVICE));
     }
 }

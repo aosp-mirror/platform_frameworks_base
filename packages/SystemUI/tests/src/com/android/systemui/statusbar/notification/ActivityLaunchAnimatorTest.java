@@ -36,6 +36,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,6 +53,7 @@ import org.mockito.junit.MockitoRule;
 @TestableLooper.RunWithLooper
 public class ActivityLaunchAnimatorTest extends SysuiTestCase {
 
+    private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private ActivityLaunchAnimator mLaunchAnimator;
     @Mock
     private ActivityLaunchAnimator.Callback mCallback;
@@ -80,8 +83,8 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
                 mCallback,
                 mNotificationPanelViewController,
                 mNotificationShadeDepthController,
-                mNotificationContainer);
-
+                mNotificationContainer,
+                mExecutor);
     }
 
     @Test

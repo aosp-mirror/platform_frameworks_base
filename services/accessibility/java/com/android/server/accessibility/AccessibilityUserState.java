@@ -104,6 +104,7 @@ class AccessibilityUserState {
     private boolean mIsDisplayMagnificationEnabled;
     private boolean mIsFilterKeyEventsEnabled;
     private boolean mIsPerformGesturesEnabled;
+    private boolean mAccessibilityFocusOnlyInActiveWindow;
     private boolean mIsTextHighContrastEnabled;
     private boolean mIsTouchExplorationEnabled;
     private boolean mServiceHandlesDoubleTap;
@@ -685,6 +686,13 @@ class AccessibilityUserState {
         mIsPerformGesturesEnabled = enabled;
     }
 
+    public boolean isAccessibilityFocusOnlyInActiveWindow() {
+        return mAccessibilityFocusOnlyInActiveWindow;
+    }
+
+    public void setAccessibilityFocusOnlyInActiveWindow(boolean enabled) {
+        mAccessibilityFocusOnlyInActiveWindow = enabled;
+    }
     public ComponentName getServiceChangingSoftKeyboardModeLocked() {
         return mServiceChangingSoftKeyboardMode;
     }

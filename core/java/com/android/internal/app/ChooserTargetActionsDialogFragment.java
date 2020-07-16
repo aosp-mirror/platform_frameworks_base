@@ -26,7 +26,6 @@ import static java.util.stream.Collectors.toList;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ComponentName;
@@ -34,21 +33,25 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Shows a dialog with actions to take on a chooser target.
@@ -68,47 +71,86 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
         mTargetInfos = targets;
     }
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    /**
+     * Recreate the layout from scratch to match new Sharesheet redlines
+     */
+    public View onCreateView(LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            Bundle savedInstanceState) {
+
+        // Make the background transparent to show dialog rounding
+        Optional.of(getDialog()).map(Dialog::getWindow)
+                .ifPresent(window -> {
+                    window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                });
 
         // Fetch UI details from target info
-        List<Pair<CharSequence, Drawable>> items = mTargetInfos.stream().map(dri -> {
-            return new Pair<>(getItemLabel(dri), getItemIcon(dri));
+        List<Pair<Drawable, CharSequence>> items = mTargetInfos.stream().map(dri -> {
+            return new Pair<>(getItemIcon(dri), getItemLabel(dri));
         }).collect(toList());
 
+        View v = inflater.inflate(R.layout.chooser_dialog, container, false);
+
+        TextView title = v.findViewById(R.id.title);
+        ImageView icon = v.findViewById(R.id.icon);
+        RecyclerView rv = v.findViewById(R.id.listContainer);
+
         final ResolveInfoPresentationGetter pg = getProvidingAppPresentationGetter();
-        return new Builder(getContext())
-                .setTitle(pg.getLabel())
-                .setIcon(pg.getIcon(mUserHandle))
-                .setCancelable(true)
-                .setAdapter(getAdapterForContent(items), this)
-                .create();
+        title.setText(pg.getLabel());
+        icon.setImageDrawable(pg.getIcon(mUserHandle));
+        rv.setAdapter(new VHAdapter(items));
+
+        return v;
     }
 
-    protected ArrayAdapter<Pair<CharSequence, Drawable>> getAdapterForContent(
-            List<Pair<CharSequence, Drawable>> items) {
-        return new ArrayAdapter<Pair<CharSequence, Drawable>>(getContext(),
-                R.layout.chooser_dialog_item, R.id.text, items) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v =  super.getView(position, convertView, parent); // super recycles views
-                TextView label = v.findViewById(R.id.text);
-                ImageView icon = v.findViewById(R.id.icon);
+    class VHAdapter extends RecyclerView.Adapter<VH> {
 
-                Pair<CharSequence, Drawable> pair = getItem(position);
-                label.setText(pair.first);
+        List<Pair<Drawable, CharSequence>> mItems;
 
-                // Hide icon view if one isn't available
-                if (pair.second == null) {
-                    icon.setVisibility(View.GONE);
-                } else {
-                    icon.setImageDrawable(pair.second);
-                    icon.setVisibility(View.VISIBLE);
-                }
+        VHAdapter(List<Pair<Drawable, CharSequence>> items) {
+            mItems = items;
+        }
 
-                return v;
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new VH(LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.chooser_dialog_item, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.bind(mItems.get(position), position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mItems.size();
+        }
+    }
+
+    class VH extends RecyclerView.ViewHolder {
+        TextView mLabel;
+        ImageView mIcon;
+
+        VH(@NonNull View itemView) {
+            super(itemView);
+            mLabel = itemView.findViewById(R.id.text);
+            mIcon = itemView.findViewById(R.id.icon);
+        }
+
+        public void bind(Pair<Drawable, CharSequence> item, int position) {
+            mLabel.setText(item.second);
+
+            if (item.first == null) {
+                mIcon.setVisibility(View.GONE);
+            } else {
+                mIcon.setVisibility(View.VISIBLE);
+                mIcon.setImageDrawable(item.first);
             }
-        };
+
+            itemView.setOnClickListener(v -> onClick(getDialog(), position));
+        }
     }
 
     @Override

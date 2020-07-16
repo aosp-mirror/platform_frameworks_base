@@ -43,23 +43,47 @@ TEST(AlarmTrackerTest, TestTriggerTimestamp) {
     alarm.set_offset_millis(15 * MS_PER_SEC);
     alarm.set_period_millis(60 * 60 * MS_PER_SEC);  // 1hr
     int64_t startMillis = 100000000 * MS_PER_SEC;
+    int64_t nextAlarmTime = startMillis / MS_PER_SEC + 15;
     AlarmTracker tracker(startMillis, startMillis, alarm, kConfigKey, subscriberAlarmMonitor);
 
-    EXPECT_EQ(tracker.mAlarmSec, (int64_t)(startMillis / MS_PER_SEC + 15));
+    EXPECT_EQ(tracker.mAlarmSec, nextAlarmTime);
 
     uint64_t currentTimeSec = startMillis / MS_PER_SEC + 10;
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> firedAlarmSet =
         subscriberAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     EXPECT_TRUE(firedAlarmSet.empty());
     tracker.informAlarmsFired(currentTimeSec * NS_PER_SEC, firedAlarmSet);
-    EXPECT_EQ(tracker.mAlarmSec, (int64_t)(startMillis / MS_PER_SEC + 15));
+    EXPECT_EQ(tracker.mAlarmSec, nextAlarmTime);
+    EXPECT_EQ(tracker.getAlarmTimestampSec(), nextAlarmTime);
 
     currentTimeSec = startMillis / MS_PER_SEC + 7000;
+    nextAlarmTime = startMillis / MS_PER_SEC + 15 + 2 * 60 * 60;
     firedAlarmSet = subscriberAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     ASSERT_EQ(firedAlarmSet.size(), 1u);
     tracker.informAlarmsFired(currentTimeSec * NS_PER_SEC, firedAlarmSet);
     EXPECT_TRUE(firedAlarmSet.empty());
-    EXPECT_EQ(tracker.mAlarmSec, (int64_t)(startMillis / MS_PER_SEC + 15 + 2 * 60 * 60));
+    EXPECT_EQ(tracker.mAlarmSec, nextAlarmTime);
+    EXPECT_EQ(tracker.getAlarmTimestampSec(), nextAlarmTime);
+
+    // Alarm fires exactly on time.
+    currentTimeSec = startMillis / MS_PER_SEC + 15 + 2 * 60 * 60;
+    nextAlarmTime = startMillis / MS_PER_SEC + 15 + 3 * 60 * 60;
+    firedAlarmSet = subscriberAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
+    ASSERT_EQ(firedAlarmSet.size(), 1u);
+    tracker.informAlarmsFired(currentTimeSec * NS_PER_SEC, firedAlarmSet);
+    EXPECT_TRUE(firedAlarmSet.empty());
+    EXPECT_EQ(tracker.mAlarmSec, nextAlarmTime);
+    EXPECT_EQ(tracker.getAlarmTimestampSec(), nextAlarmTime);
+
+    // Alarm fires exactly 1 period late.
+    currentTimeSec = startMillis / MS_PER_SEC + 15 + 4 * 60 * 60;
+    nextAlarmTime = startMillis / MS_PER_SEC + 15 + 5 * 60 * 60;
+    firedAlarmSet = subscriberAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
+    ASSERT_EQ(firedAlarmSet.size(), 1u);
+    tracker.informAlarmsFired(currentTimeSec * NS_PER_SEC, firedAlarmSet);
+    EXPECT_TRUE(firedAlarmSet.empty());
+    EXPECT_EQ(tracker.mAlarmSec, nextAlarmTime);
+    EXPECT_EQ(tracker.getAlarmTimestampSec(), nextAlarmTime);
 }
 
 }  // namespace statsd

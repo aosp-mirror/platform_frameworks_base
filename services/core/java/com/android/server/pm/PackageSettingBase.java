@@ -422,6 +422,11 @@ public abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).suspended;
     }
 
+    boolean isSuspendedBy(String suspendingPackage, int userId) {
+        final PackageUserState state = readUserState(userId);
+        return state.suspendParams != null && state.suspendParams.containsKey(suspendingPackage);
+    }
+
     void addOrUpdateSuspension(String suspendingPackage, SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras, int userId) {
         final PackageUserState existingUserState = modifyUserState(userId);

@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha inhabilitado la impresión."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa tu perfil de trabajo"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Tus aplicaciones personales estarán bloqueadas hasta que actives tu perfil de trabajo"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Las aplicaciones personales se bloquearán el <xliff:g id="DATE">%1$s</xliff:g> a las <xliff:g id="TIME">%2$s</xliff:g>. Tu administrador de TI no permite que tu perfil de trabajo esté más de <xliff:g id="NUMBER">%3$d</xliff:g> días desactivado."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activar"</string>
     <string name="me" msgid="6207584824693813140">"Yo"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opciones del tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opciones de Android TV"</string>
@@ -1151,7 +1149,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Capturar imagen con %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Capturar imagen"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"Usar siempre para esta acción"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"Utiliza otra aplicación"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"Usar otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Elegir una aplicación para el dispositivo USB"</string>
@@ -1313,7 +1311,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecciona para inhabilitar la depuración inalámbrica."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Toca para desactivar la depuración inalámbrica."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modo de agente de prueba habilitado"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Restablece los ajustes de fábrica para inhabilitar el modo de agente de prueba."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Se ha habilitado la consola en serie"</string>
@@ -1621,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"El servicio en primer plano que se inició en segundo plano en <xliff:g id="PACKAGENAME">%1$s</xliff:g> no tendrá permisos en compilaciones R futuras mientras se estén usando. Ve a go/r-bg-fgs-restriction y envía un informe de errores."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos fuertes durante mucho tiempo puede dañar los oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"¿Quieres activar las funciones de accesibilidad?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Al mantener pulsadas ambas teclas de volumen durante unos segundos, se activan las funciones de accesibilidad, que pueden cambiar el funcionamiento del dispositivo.\n\nFunciones actuales:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuedes cambiar las funciones seleccionadas en Ajustes &gt; Accesibilidad."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"¿Activar funciones de accesibilidad?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Al mantener pulsadas las dos teclas de volumen durante unos segundos, se activan las funciones de accesibilidad, que pueden cambiar el funcionamiento del dispositivo.\n\nFunciones actuales:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuedes cambiar las funciones seleccionadas en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"¿Quieres activar <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa <xliff:g id="SERVICE">%1$s</xliff:g>, una función de accesibilidad. Esta función puede modificar el funcionamiento del dispositivo.\n\nPuedes asignar este acceso directo a otra función en Ajustes &gt; Accesibilidad."</string>
@@ -1644,8 +1641,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una función para empezar a usarla:"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Seleccionar qué funciones usar con el botón Accesibilidad"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Seleccionar qué funciones usar con la tecla de volumen"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Selecciona qué funciones usar con el botón Accesibilidad"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Selecciona qué funciones usar con la tecla de volumen"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Se ha desactivado <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
@@ -1653,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar acceso directo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de color"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Al mantener pulsadas las teclas de volumen, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> se ha activado."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Al mantener pulsadas las teclas de volumen, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> se ha desactivado."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Al mantener pulsadas las teclas de volumen, se ha activado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Se han mantenido pulsadas las teclas de volumen. Se ha desactivado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Para utilizar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, mantén pulsadas ambas teclas de volumen durante 3 segundos"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Selecciona la función que se utilizará cuando toques el botón Accesibilidad:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Elige la función que se utilizará con el gesto de accesibilidad (deslizar dos dedos hacia arriba desde la parte inferior de la pantalla):"</string>
@@ -2057,10 +2054,10 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ver contenido personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ver contenido de trabajo"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"No se puede compartir con una aplicación de trabajo"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Tu administrador de TI no te permite compartir este contenido con ninguna aplicación de tu perfil de trabajo"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"No se puede compartir con aplicaciones de trabajo"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Tu administrador de TI no te permite compartir este contenido con aplicaciones de tu perfil de trabajo"</string>
     <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"No se puede abrir con una aplicación de trabajo"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Tu administrador de TI no te permite abrir este contenido con ninguna aplicación de tu perfil de trabajo"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Tu administrador de TI no te permite abrir este contenido con aplicaciones de tu perfil de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"No se puede compartir con una aplicación personal"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Tu administrador de TI no te permite compartir este contenido con ninguna aplicación de tu perfil personal"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"No se puede abrir con una aplicación personal"</string>

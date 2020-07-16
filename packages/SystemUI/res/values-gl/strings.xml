@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estirar ata ocupar todo"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Facer captura"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Desbloquea o teléfono para ver máis opcións"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Desbloquea a tableta para ver máis opcións"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Desbloquea o dispositivo para ver máis opcións"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"enviou unha imaxe"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Gardando captura de pantalla…"</string>
@@ -457,8 +454,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de novo para abrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Pasa o dedo cara arriba para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Pasa o dedo cara arriba para tentalo de novo"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Este dispositivo está xestionado pola túa organización"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Este dispositivo está xestionado por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence á túa organización"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Pasa o dedo desde a icona para acceder ao asistente de voz"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Pasa o dedo desde a icona para acceder á cámara"</string>
@@ -513,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Xestionar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Entrantes"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Notificacións novas"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silencio"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificacións"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
@@ -524,21 +521,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"O perfil pódese supervisar"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"É posible que se supervise a rede"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"É posible que se supervise a rede"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"A túa organización xestiona este dispositivo e pode controlar o tráfico de rede"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> xestiona este dispositivo e pode controlar o tráfico de rede"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"A túa organización xestiona o dispositivo, que está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> xestiona o dispositivo, que está conectado a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"A túa organización xestiona o dispositivo"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> xestiona o dispositivo."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"A túa organización xestiona o dispositivo, que está conectado a dúas VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> xestiona o dispositivo, que está conectado a dúas VPN"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"A túa organización é propietaria deste dispositivo e pode controlar o tráfico de rede"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> é a organización propietaria deste dispositivo e pode controlar o tráfico de rede"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Este dispositivo pertence á túa organización e está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence á túa organización"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Este dispositivo pertence á túa organización e está conectado a varias VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a varias VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"A túa organización pode controlar o tráfico de rede do teu perfil de traballo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> pode controlar o tráfico de rede do teu perfil de traballo"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"É posible que se controle a rede"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"O dispositivo está conectado a dúas VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"O perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"O perfil persoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"O dispositivo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a varias VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"O teu perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"O teu perfil persoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Este dispositivo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Xestión de dispositivos"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Supervisión do perfil"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Supervisión de rede"</string>
@@ -548,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Desactivar VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconectar VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver políticas"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co dispositivo e a información de localización deste último.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"A túa organización xestiona o teu dispositivo.\n\nO administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co dispositivo e a información de localización deste último.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO teu administrador de TI pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información de localización deste último.\n\nPara obter máis información, contacta co teu administrador de TI."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertence á túa organización.\n\nO teu administrador de TI pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información de localización deste último.\n\nPara obter máis información, contacta co teu administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"A túa organización instalou unha autoridade de certificación neste dispositivo. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"A túa organización instalou unha autoridade de certificación no teu perfil de traballo. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Este dispositivo ten unha autoridade de certificación instalada. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
@@ -722,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Móstrase na parte superior da sección de conversas en forma de burbulla flotante e aparece a imaxe do perfil na pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> non admite opcións de configuración específicas para conversas"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non admite funcións de conversa"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Non hai burbullas recentes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"As burbullas recentes e ignoradas aparecerán aquí."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificacións non se poden modificar."</string>
@@ -923,6 +920,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Pausar"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Ir ao seguinte"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Ir ao anterior"</string>
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Cambiar tamaño"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"O teléfono apagouse pola calor"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"O teu teléfono funciona agora con normalidade"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O teléfono estaba moi quente, apagouse para que arrefríe e agora funciona con normalidade.\n\nÉ posible que estea moi quente se:\n	• Usas aplicacións que requiren moitos recursos (como aplicacións de navegación, vídeos e xogos)\n	• Descargas/cargas ficheiros grandes\n	• Usas o teléfono a alta temperatura"</string>
@@ -1005,22 +1003,25 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Mover á parte superior dereita"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Mover á parte infer. esquerda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Mover á parte inferior dereita"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignorar"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Ignorar burbulla"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Non mostrar a conversa como burbulla"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatear usando burbullas"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"As conversas novas aparecen como iconas flotantes ou burbullas. Toca para abrir a burbulla e arrastra para movela."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controlar as burbullas en calquera momento"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla as burbullas"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Para desactivar as burbullas nesta aplicación, toca Xestionar"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entendido"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Configuración de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Actualizouse a navegación do sistema. Para facer cambios, vai a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Para actualizar a navegación do sistema, vai a Configuración"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Mostrar na parte superior da sección de conversas"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar imaxe do perfil na pantalla de bloqueo"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"A conversa definiuse como prioritaria"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"As conversas prioritarias farán o seguinte:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Mostraranse na parte superior da sección de conversas"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrarán a imaxe do perfil na pantalla de bloqueo"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Mostrar como burbulla flotante sobre outras apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromper modo Non molestar"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entendido"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Configuración"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ampliación da ventá de superposición"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventá de superposición"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controis de ampliación da ventá"</string>
@@ -1045,7 +1046,9 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Para reorganizar os controis, mantenos premidos e arrástraos"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Quitáronse todos os controis"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Non se gardaron os cambios"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Non se puido cargar a lista de todos os controis."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras aplicacións"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Non se puideron cargar os controis. Comproba a aplicación <xliff:g id="APP">%s</xliff:g> para asegurarte de que non se modificase a súa configuración."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Non hai controis compatibles que estean dispoñibles"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outra"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Engadir ao control de dispositivos"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Engadir"</string>
@@ -1061,10 +1064,17 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirma o cambio para <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasar o dedo para ver máis"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendacións"</string>
-    <string name="controls_media_close_session" msgid="9023534788828414585">"Pechar esta sesión multimedia"</string>
+    <string name="controls_media_title" msgid="1746947284862928133">"Contido multimedia"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Oculta a sesión actual."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Configuración"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo. Comproba a app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Erro. Tentando de novo…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Quitouse o dispositivo"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Non se atopou"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"O control non está dispoñible"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Non se puido acceder a: <xliff:g id="DEVICE">%1$s</xliff:g>. Comproba a aplicación <xliff:g id="APPLICATION">%2$s</xliff:g> para asegurarte de que o control aínda estea dispoñible e que non se modificase a configuración da aplicación."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Abrir aplicación"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Non se puido cargar o estado"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Téntao de novo"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>

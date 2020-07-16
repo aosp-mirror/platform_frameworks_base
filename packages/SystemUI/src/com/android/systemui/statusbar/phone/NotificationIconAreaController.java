@@ -19,6 +19,7 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -55,6 +56,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final KeyguardBypassController mBypassController;
     private final DozeParameters mDozeParameters;
+    private final BubbleController mBubbleController;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -101,7 +103,8 @@ public class NotificationIconAreaController implements DarkReceiver,
             KeyguardBypassController keyguardBypassController,
             NotificationMediaManager notificationMediaManager,
             NotificationListener notificationListener,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            BubbleController bubbleController) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
@@ -112,6 +115,7 @@ public class NotificationIconAreaController implements DarkReceiver,
         mWakeUpCoordinator = wakeUpCoordinator;
         wakeUpCoordinator.addListener(this);
         mBypassController = keyguardBypassController;
+        mBubbleController = bubbleController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
 
         initializeNotificationAreaViews(context);
@@ -289,6 +293,9 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (hidePulsing && entry.showingPulsing()
                 && (!mWakeUpCoordinator.getNotificationsFullyHidden()
                         || !entry.isPulseSuppressed())) {
+            return false;
+        }
+        if (mBubbleController.isBubbleExpanded(entry)) {
             return false;
         }
         return true;
@@ -572,6 +579,9 @@ public class NotificationIconAreaController implements DarkReceiver,
                     .setInterpolator(Interpolators.LINEAR)
                     .setDuration(AOD_ICONS_APPEAR_DURATION)
                     .start();
+        } else {
+            mAodIcons.setAlpha(1.0f);
+            mAodIcons.setTranslationY(0);
         }
     }
 

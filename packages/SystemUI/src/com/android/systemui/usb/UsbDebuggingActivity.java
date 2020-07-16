@@ -16,13 +16,19 @@
 
 package com.android.systemui.usb;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.debug.IAdbManager;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,13 +39,25 @@ import android.widget.CheckBox;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
+import javax.inject.Inject;
 
 public class UsbDebuggingActivity extends AlertActivity
                                   implements DialogInterface.OnClickListener {
     private static final String TAG = "UsbDebuggingActivity";
 
     private CheckBox mAlwaysAllow;
+    private UsbDisconnectedReceiver mDisconnectedReceiver;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private String mKey;
+    private boolean mServiceNotified;
+
+    @Inject
+    public UsbDebuggingActivity(BroadcastDispatcher broadcastDispatcher) {
+        super();
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -49,6 +67,10 @@ public class UsbDebuggingActivity extends AlertActivity
         window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
 
         super.onCreate(icicle);
+
+        if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0) {
+            mDisconnectedReceiver = new UsbDisconnectedReceiver(this);
+        }
 
         Intent intent = getIntent();
         String fingerprints = intent.getStringExtra("fingerprints");
@@ -83,10 +105,82 @@ public class UsbDebuggingActivity extends AlertActivity
         super.onWindowAttributesChanged(params);
     }
 
+    private class UsbDisconnectedReceiver extends BroadcastReceiver {
+        private final Activity mActivity;
+        UsbDisconnectedReceiver(Activity activity) {
+            mActivity = activity;
+        }
+
+        @Override
+        public void onReceive(Context content, Intent intent) {
+            String action = intent.getAction();
+            if (!UsbManager.ACTION_USB_STATE.equals(action)) {
+                return;
+            }
+            boolean connected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
+            if (!connected) {
+                notifyService(false);
+                mActivity.finish();
+            }
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mDisconnectedReceiver != null) {
+            IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
+            mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (mDisconnectedReceiver != null) {
+            mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        // If the ADB service has not yet been notified due to this dialog being closed in some
+        // other way then notify the service to deny the connection to ensure system_server sends
+        // a response to adbd.
+        if (!mServiceNotified) {
+            notifyService(false);
+        }
+        super.onDestroy();
+    }
+
     @Override
     public void onClick(DialogInterface dialog, int which) {
         boolean allow = (which == AlertDialog.BUTTON_POSITIVE);
         boolean alwaysAllow = allow && mAlwaysAllow.isChecked();
+        notifyService(allow, alwaysAllow);
+        finish();
+    }
+
+    /**
+     * Notifies the ADB service as to whether the current ADB request should be allowed; if the
+     * request is allowed it is only allowed for this session, and the user should be prompted again
+     * on subsequent requests from this key.
+     *
+     * @param allow whether the connection should be allowed for this session
+     */
+    private void notifyService(boolean allow) {
+        notifyService(allow, false);
+    }
+
+    /**
+     * Notifies the ADB service as to whether the current ADB request should be allowed, and if
+     * subsequent requests from this key should be allowed without user consent.
+     *
+     * @param allow whether the connection should be allowed
+     * @param alwaysAllow whether subsequent requests from this key should be allowed without user
+     *                    consent
+     */
+    private void notifyService(boolean allow, boolean alwaysAllow) {
         try {
             IBinder b = ServiceManager.getService(ADB_SERVICE);
             IAdbManager service = IAdbManager.Stub.asInterface(b);
@@ -95,9 +189,9 @@ public class UsbDebuggingActivity extends AlertActivity
             } else {
                 service.denyDebugging();
             }
+            mServiceNotified = true;
         } catch (Exception e) {
             Log.e(TAG, "Unable to notify Usb service", e);
         }
-        finish();
     }
 }

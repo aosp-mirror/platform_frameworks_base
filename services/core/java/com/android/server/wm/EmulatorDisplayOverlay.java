@@ -62,10 +62,14 @@ class EmulatorDisplayOverlay {
                     .setName("EmulatorDisplayOverlay")
                     .setBufferSize(mScreenSize.x, mScreenSize.y)
                     .setFormat(PixelFormat.TRANSLUCENT)
+                    .setCallsite("EmulatorDisplayOverlay")
                     .build();
             t.setLayer(ctrl, zOrder);
             t.setPosition(ctrl, 0, 0);
             t.show(ctrl);
+            // Ensure we aren't considered as obscuring for Input purposes.
+            InputMonitor.setTrustedOverlayInputInfo(ctrl, t,
+                    dc.getDisplayId(), "EmulatorDisplayOverlay");
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }

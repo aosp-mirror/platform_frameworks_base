@@ -53,24 +53,27 @@ class UniqueObjectHostView(
         // size.
         val (cachedWidth, cachedHeight) = measurementManager.onMeasure(measurementInput)
 
-        if (!isCurrentHost()) {
-            // We're not currently the host, let's use the dimension from our cache
-            // The goal here is that the view will always have a consistent measuring, regardless
-            // if it's attached or not.
-            // The behavior is therefore very similar to the view being persistently attached to
-            // this host, which can prevent flickers. It also makes sure that we always know
-            // the size of the view during transitions even if it has never been attached here
-            // before.
-            setMeasuredDimension(cachedWidth + paddingHorizontal, cachedHeight + paddingVertical)
-        } else {
+        if (isCurrentHost()) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-            // Let's update our cache
             getChildAt(0)?.requiresRemeasuring = false
         }
+        // The goal here is that the view will always have a consistent measuring, regardless
+        // if it's attached or not.
+        // The behavior is therefore very similar to the view being persistently attached to
+        // this host, which can prevent flickers. It also makes sure that we always know
+        // the size of the view during transitions even if it has never been attached here
+        // before.
+        // We previously still measured the size when the view was attached, but this doesn't
+        // work properly because we can set the measuredState while still attached to the
+        // old host, which will trigger an inconsistency in height
+        setMeasuredDimension(cachedWidth + paddingHorizontal, cachedHeight + paddingVertical)
     }
 
     override fun addView(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
-        if (child?.measuredWidth == 0 || measuredWidth == 0 || child?.requiresRemeasuring == true) {
+        if (child == null) {
+            throw IllegalArgumentException("child must be non-null")
+        }
+        if (child.measuredWidth == 0 || measuredWidth == 0 || child.requiresRemeasuring == true) {
             super.addView(child, index, params)
             return
         }
@@ -78,11 +81,13 @@ class UniqueObjectHostView(
         // right size when being attached to this view
         invalidate()
         addViewInLayout(child, index, params, true /* preventRequestLayout */)
+        // RTL properties are normally resolved in onMeasure(), which we are intentionally skipping
+        child.resolveRtlPropertiesIfNeeded()
         val left = paddingLeft
         val top = paddingTop
         val paddingHorizontal = paddingStart + paddingEnd
         val paddingVertical = paddingTop + paddingBottom
-        child!!.layout(left,
+        child.layout(left,
                 top,
                 left + measuredWidth - paddingHorizontal,
                 top + measuredHeight - paddingVertical)

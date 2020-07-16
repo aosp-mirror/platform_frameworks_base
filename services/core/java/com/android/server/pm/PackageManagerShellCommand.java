@@ -125,7 +125,6 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -291,7 +290,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "get-stagedsessions":
                     return runListStagedSessions();
                 case "uninstall-system-updates":
-                    return uninstallSystemUpdates();
+                    String packageName = getNextArg();
+                    return uninstallSystemUpdates(packageName);
                 case "rollback-app":
                     return runRollbackApp();
                 case "get-moduleinfo":
@@ -409,15 +409,22 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int uninstallSystemUpdates() {
+    private int uninstallSystemUpdates(String packageName) {
         final PrintWriter pw = getOutPrintWriter();
-        List<String> failedUninstalls = new LinkedList<>();
+        boolean failedUninstalls = false;
         try {
-            final ParceledListSlice<ApplicationInfo> packages =
-                    mInterface.getInstalledApplications(
-                            PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
             final IPackageInstaller installer = mInterface.getPackageInstaller();
-            List<ApplicationInfo> list = packages.getList();
+            final List<ApplicationInfo> list;
+            if (packageName == null) {
+                final ParceledListSlice<ApplicationInfo> packages =
+                        mInterface.getInstalledApplications(
+                                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
+                list = packages.getList();
+            } else {
+                list = new ArrayList<>(1);
+                list.add(mInterface.getApplicationInfo(packageName,
+                        PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM));
+            }
             for (ApplicationInfo info : list) {
                 if (info.isUpdatedSystemApp()) {
                     pw.println("Uninstalling updates to " + info.packageName + "...");
@@ -430,7 +437,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                             PackageInstaller.STATUS_FAILURE);
                     if (status != PackageInstaller.STATUS_SUCCESS) {
-                        failedUninstalls.add(info.packageName);
+                        failedUninstalls = true;
+                        pw.println("Couldn't uninstall package: " + info.packageName);
                     }
                 }
             }
@@ -440,10 +448,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     + e.getMessage() + "]");
             return 0;
         }
-        if (!failedUninstalls.isEmpty()) {
-            pw.println("Failure [Couldn't uninstall packages: "
-                    + TextUtils.join(", ", failedUninstalls)
-                    + "]");
+        if (failedUninstalls) {
             return 0;
         }
         pw.println("Success");
@@ -2281,7 +2286,7 @@ class PackageManagerShellCommand extends ShellCommand {
         if (grant) {
             mPermissionManager.grantRuntimePermission(pkg, perm, translatedUserId);
         } else {
-            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUserId);
+            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUserId, null);
         }
         return 0;
     }
@@ -3824,9 +3829,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  get-harmful-app-warning [--user <USER_ID>] <PACKAGE>");
         pw.println("    Return the harmful app warning message for the given app, if present");
         pw.println();
-        pw.println("  uninstall-system-updates");
-        pw.println("    Remove updates to all system applications and fall back to their /system " +
-                "version.");
+        pw.println("  uninstall-system-updates [<PACKAGE>]");
+        pw.println("    Removes updates to the given system application and falls back to its");
+        pw.println("    /system version. Does nothing if the given package is not a system app.");
+        pw.println("    If no package is specified, removes updates to all system applications.");
         pw.println("");
         pw.println("  get-moduleinfo [--all | --installed] [module-name]");
         pw.println("    Displays module info. If module-name is specified only that info is shown");

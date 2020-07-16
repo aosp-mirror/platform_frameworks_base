@@ -113,6 +113,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * Scrim opacity when the phone is about to wake-up.
      */
     public static final float WAKE_SENSOR_SCRIM_ALPHA = 0.6f;
+
+    /**
+     * Scrim opacity when bubbles are expanded.
+     */
+    public static final float BUBBLE_SCRIM_ALPHA = 0.6f;
+
     /**
      * The default scrim under the shade and dialogs.
      * This should not be lower than 0.54, otherwise we won't pass GAR.

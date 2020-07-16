@@ -182,7 +182,7 @@ public final class SyncResultReceiver extends IResultReceiver.Stub {
     }
 
     /** @hide */
-    public static final class TimeoutException extends RuntimeException {
+    public static final class TimeoutException extends Exception {
         private TimeoutException(String msg) {
             super(msg);
         }

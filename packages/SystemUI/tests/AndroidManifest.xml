@@ -74,6 +74,11 @@
             android:excludeFromRecents="true"
             android:exported="false" />
 
+        <activity android:name="com.android.systemui.controls.management.TestControlsRequestDialog"
+                  android:exported="false"
+                  android:excludeFromRecents="true"
+                  />
+
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
             tools:replace="android:authorities"

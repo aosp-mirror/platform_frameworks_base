@@ -19,6 +19,8 @@ package com.android.tests.rollback;
 import static com.android.cts.rollback.lib.RollbackInfoSubject.assertThat;
 import static com.android.cts.rollback.lib.RollbackUtils.getUniqueRollbackInfoForPackage;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -59,11 +61,12 @@ public class NetworkStagedRollbackTest {
     private static final TestApp NETWORK_STACK = new TestApp("NetworkStack",
             getNetworkStackPackageName(), -1, false, findNetworkStackApk());
 
-    private static File findNetworkStackApk() {
+    private static File[] findNetworkStackApk() {
         for (String name : NETWORK_STACK_APK_NAMES) {
             final File apk = new File("/system/priv-app/" + name + "/" + name + ".apk");
             if (apk.isFile()) {
-                return apk;
+                final File dir = new File("/system/priv-app/" + name);
+                return dir.listFiles((d, f) -> f.startsWith(name));
             }
         }
         throw new RuntimeException("Can't find NetworkStackApk");
@@ -91,13 +94,22 @@ public class NetworkStagedRollbackTest {
     }
 
     @Test
+    public void cleanUp() {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        rm.getRecentlyCommittedRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        assertThat(rm.getAvailableRollbacks()).isEmpty();
+        assertThat(rm.getRecentlyCommittedRollbacks()).isEmpty();
+        uninstallNetworkStackPackage();
+    }
+
+    @Test
     public void testNetworkFailedRollback_Phase1() throws Exception {
         // Remove available rollbacks and uninstall NetworkStack on /data/
         RollbackManager rm = RollbackUtils.getRollbackManager();
         String networkStack = getNetworkStackPackageName();
-
-        rm.expireRollbackForPackage(networkStack);
-        uninstallNetworkStackPackage();
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                 networkStack)).isNull();
@@ -152,9 +164,6 @@ public class NetworkStagedRollbackTest {
         // Remove available rollbacks and uninstall NetworkStack on /data/
         RollbackManager rm = RollbackUtils.getRollbackManager();
         String networkStack = getNetworkStackPackageName();
-
-        rm.expireRollbackForPackage(networkStack);
-        uninstallNetworkStackPackage();
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                 networkStack)).isNull();

@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」已停用列印功能。"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"開啟工作資料夾"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系統已封鎖你的個人應用程式；你必須開啟工作資料夾，這些應用程式才會解除封鎖"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"系統將於 <xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g> 封鎖個人應用程式。IT 管理員不允許工作資料夾關閉超過 <xliff:g id="NUMBER">%3$d</xliff:g> 天。"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"開啟"</string>
     <string name="me" msgid="6207584824693813140">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板電腦選項"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 選項"</string>
@@ -1621,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"你的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求你透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"來自「<xliff:g id="PACKAGENAME">%1$s</xliff:g>」的背景啟動前景服務不會具備未來 R 版本的使用狀態權限。請前往 go/r-bg-fgs-restriction 並提交錯誤報告。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙捷徑嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"要開啟無障礙功能嗎？"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更所選功能。"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更選取的功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"要開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按住音量調高鍵和調低鍵數秒，即可開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」無障礙功能。這麼做可能會改變裝置的運作方式。\n\n你可以在 [設定] &gt; [無障礙設定] 中變更這個快速鍵觸發的功能。"</string>
@@ -1795,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由你的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"為了延長電池續航力，省電模式會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"為了延長電池續航力，省電模式會執行以下動作：\n\n•開啟深色主題\n•關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
@@ -1921,7 +1918,7 @@
     <string name="app_category_social" msgid="2278269325488344054">"社交和通訊"</string>
     <string name="app_category_news" msgid="1172762719574964544">"新聞和雜誌"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"地圖和導航"</string>
-    <string name="app_category_productivity" msgid="1844422703029557883">"生產應用"</string>
+    <string name="app_category_productivity" msgid="1844422703029557883">"工作效率"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB 偵錯"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"點"</string>
@@ -2002,9 +1999,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"顯示在畫面上的其他應用程式上層"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用節約耗電量模式以延長電池續航力"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"節約耗電量"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"節約耗電量模式已關閉"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"省電模式已關閉"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"手機電力充足，各項功能不再受到限制。"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"平板電腦電力充足，各項功能不再受到限制。"</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"裝置電力充足，各項功能不再受到限制。"</string>

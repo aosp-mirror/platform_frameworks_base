@@ -75,7 +75,7 @@ public:
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
-        if (mIsPulled && mCondition) {
+        if (mIsPulled && mCondition == ConditionState::kTrue) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
@@ -84,7 +84,7 @@ public:
     // ValueMetric needs special logic if it's a pulled atom.
     void onStatsdInitCompleted(const int64_t& eventTimeNs) override {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mIsPulled && mCondition) {
+        if (mIsPulled && mCondition == ConditionState::kTrue) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
@@ -313,6 +313,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestSlicedState);
     FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithMap);
     FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);

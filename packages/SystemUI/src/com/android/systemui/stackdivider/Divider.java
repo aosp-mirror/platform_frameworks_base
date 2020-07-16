@@ -127,7 +127,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                         snap.calculateNonDismissingSnapTarget(position);
                 sdl.resizeSplits(target.position, t);
 
-                if (isSplitActive()) {
+                if (isSplitActive() && mHomeStackResizable) {
                     WindowManagerProxy.applyHomeTasksMinimized(sdl, mSplits.mSecondary.token, t);
                 }
                 if (mWindowManagerProxy.queueSyncTransactionIfWaiting(t)) {
@@ -193,10 +193,11 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
             @Override
             public void onKeyguardShowingChanged() {
-                if (!isDividerVisible() || mView == null) {
+                if (!isSplitActive() || mView == null) {
                     return;
                 }
                 mView.setHidden(mKeyguardStateController.isShowing());
+                mImePositionProcessor.updateAdjustForIme();
             }
 
             @Override
@@ -253,7 +254,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             mSplitLayout.mSecondary = new Rect(mRotateSplitLayout.mSecondary);
             mRotateSplitLayout = null;
         }
-        update(newConfig);
+        if (isSplitActive()) {
+            update(newConfig);
+        }
     }
 
     Handler getHandler() {
@@ -283,8 +286,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
      * while this only cares if some things are (eg. while entering/exiting as well).
      */
     private boolean isSplitActive() {
-        return mSplits.mPrimary.topActivityType != ACTIVITY_TYPE_UNDEFINED
-                || mSplits.mSecondary.topActivityType != ACTIVITY_TYPE_UNDEFINED;
+        return mSplits.mPrimary != null && mSplits.mSecondary != null
+                && (mSplits.mPrimary.topActivityType != ACTIVITY_TYPE_UNDEFINED
+                        || mSplits.mSecondary.topActivityType != ACTIVITY_TYPE_UNDEFINED);
     }
 
     private void addDivider(Configuration configuration) {
@@ -326,11 +330,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void onTaskVanished() {
         mHandler.post(this::removeDivider);
-    }
-
-    void onTasksReady() {
-        mHandler.post(() -> update(mDisplayController.getDisplayContext(
-                mContext.getDisplayId()).getResources().getConfiguration()));
     }
 
     private void updateVisibility(final boolean visible) {
@@ -387,6 +386,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         }
         // Always set this because we could be entering split when mMinimized is already true
         wct.setFocusable(mSplits.mPrimary.token, !mMinimized);
+        boolean onlyFocusable = true;
 
         // Update home-stack resizability
         final boolean homeResizableChanged = mHomeStackResizable != homeStackResizable;
@@ -395,6 +395,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             if (isDividerVisible()) {
                 WindowManagerProxy.applyHomeTasksMinimized(
                         mSplitLayout, mSplits.mSecondary.token, wct);
+                onlyFocusable = false;
             }
         }
 
@@ -416,7 +417,15 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             }
         }
         updateTouchable();
-        mWindowManagerProxy.applySyncTransaction(wct);
+        if (onlyFocusable) {
+            // If we are only setting focusability, a sync transaction isn't necessary (in fact it
+            // can interrupt other animations), so see if it can be submitted on pending instead.
+            if (!mSplits.mDivider.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
+                WindowOrganizer.applyTransaction(wct);
+            }
+        } else {
+            mWindowManagerProxy.applySyncTransaction(wct);
+        }
     }
 
     void setAdjustedForIme(boolean adjustedForIme) {
@@ -428,7 +437,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     private void updateTouchable() {
-        mWindowManager.setTouchable((mHomeStackResizable || !mMinimized) && !mAdjustedForIme);
+        mWindowManager.setTouchable(!mAdjustedForIme);
     }
 
     /**
@@ -523,8 +532,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     void ensureMinimizedSplit() {
-        setHomeMinimized(true /* minimized */, mSplits.mSecondary.isResizable());
-        if (!isDividerVisible()) {
+        setHomeMinimized(true /* minimized */, mHomeStackResizable);
+        if (mView != null && !isDividerVisible()) {
             // Wasn't in split-mode yet, so enter now.
             if (DEBUG) {
                 Slog.d(TAG, " entering split mode with minimized=true");
@@ -535,7 +544,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void ensureNormalSplit() {
         setHomeMinimized(false /* minimized */, mHomeStackResizable);
-        if (!isDividerVisible()) {
+        if (mView != null && !isDividerVisible()) {
             // Wasn't in split-mode, so enter now.
             if (DEBUG) {
                 Slog.d(TAG, " enter split mode unminimized ");

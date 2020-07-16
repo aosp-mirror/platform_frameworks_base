@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Fitur pencetakan dinonaktifkan oleh <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktifkan profil kerja Anda"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikasi pribadi Anda diblokir hingga Anda mengaktifkan profil kerja Anda"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikasi pribadi akan diblokir pada tanggal <xliff:g id="DATE">%1$s</xliff:g> pukul <xliff:g id="TIME">%2$s</xliff:g>. Admin IT tidak mengizinkan profil kerja Anda nonaktif selama lebih dari <xliff:g id="NUMBER">%3$d</xliff:g> hari."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktifkan"</string>
     <string name="me" msgid="6207584824693813140">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsi tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opsi Android TV"</string>
@@ -341,7 +339,7 @@
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Mengizinkan aplikasi menambahkan pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"meng-uninstal pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
-    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ubah rute panggilan keluar"</string>
+    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"alihkan panggilan keluar"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Memungkinkan aplikasi melihat nomor yang dihubungi saat melakukan panggilan keluar dengan opsi untuk mengalihkan panggilan ke nomor lain atau membatalkan panggilan sepenuhnya."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"jawab panggilan telepon"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Mengizinkan aplikasi menjawab panggilan telepon masuk."</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hapus"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Layanan latar depan yang dimulai oleh latar belakang dari <xliff:g id="PACKAGENAME">%1$s</xliff:g> tidak akan memiliki izin saat-sedang-digunakan pada build R masa mendatang Lihat go/r-bg-fgs-restriction dan kirim laporan bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
@@ -1653,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversi Warna"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Koreksi Warna"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tombol volume yang ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> diaktifkan."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tombol volume yang ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dinonaktifkan."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> diaktifkan."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dinonaktifkan."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tekan dan tahan kedua tombol volume selama tiga detik untuk menggunakan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Pilih fitur yang akan digunakan saat mengetuk tombol aksesibilitas:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Pilih fitur yang akan digunakan dengan gestur aksesibilitas (geser ke atas dari bawah layar dengan dua jari):"</string>
@@ -1901,7 +1898,7 @@
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Beberapa fitur tidak dapat digunakan"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Profil kerja terkunci"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Ketuk untuk membuka kunci profil kerja"</string>
-    <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Tersambung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Terhubung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Ketuk untuk melihat file"</string>
     <string name="pin_target" msgid="8036028973110156895">"Pasang pin"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"Pasang pin <xliff:g id="LABEL">%1$s</xliff:g>"</string>

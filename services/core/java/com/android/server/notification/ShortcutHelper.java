@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Helper for querying shortcuts.
@@ -100,9 +102,13 @@ public class ShortcutHelper {
             HashMap<String, String> shortcutBubbles = mActiveShortcutBubbles.get(packageName);
             ArrayList<String> bubbleKeysToRemove = new ArrayList<>();
             if (shortcutBubbles != null) {
+                // Copy to avoid a concurrent modification exception when we remove bubbles from
+                // shortcutBubbles.
+                final Set<String> shortcutIds = new HashSet<>(shortcutBubbles.keySet());
+
                 // If we can't find one of our bubbles in the shortcut list, that bubble needs
                 // to be removed.
-                for (String shortcutId : shortcutBubbles.keySet()) {
+                for (String shortcutId : shortcutIds) {
                     boolean foundShortcut = false;
                     for (int i = 0; i < shortcuts.size(); i++) {
                         if (shortcuts.get(i).getId().equals(shortcutId)) {
@@ -249,8 +255,11 @@ public class ShortcutHelper {
                 if (!TextUtils.isEmpty(shortcutId)) {
                     packageBubbles.remove(shortcutId);
                 } else {
+                    // Copy the shortcut IDs to avoid a concurrent modification exception.
+                    final Set<String> shortcutIds = new HashSet<>(packageBubbles.keySet());
+
                     // Check if there was a matching entry
-                    for (String pkgShortcutId : packageBubbles.keySet()) {
+                    for (String pkgShortcutId : shortcutIds) {
                         String entryKey = packageBubbles.get(pkgShortcutId);
                         if (r.getKey().equals(entryKey)) {
                             // No longer has shortcut id so remove it

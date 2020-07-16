@@ -33,7 +33,8 @@
         android:layout_height="wrap_content"
         android:paddingBottom="16dp"
         android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
-        android:maxLines="1"
+        android:maxLines="2"
+        android:ellipsize="end"
         android:text="@string/bubbles_user_education_title"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
@@ -41,6 +42,7 @@
         android:id="@+id/user_education_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
         android:text="@string/bubbles_user_education_description"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>

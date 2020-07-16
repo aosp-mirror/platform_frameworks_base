@@ -18,6 +18,7 @@ package android.hardware.hdmi;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.hardware.hdmi.HdmiControlManager.ControlCallbackResult;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -38,6 +39,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 public class HdmiSwitchClient extends HdmiClient {
 
     private static final String TAG = "HdmiSwitchClient";
@@ -187,11 +189,8 @@ public class HdmiSwitchClient extends HdmiClient {
      * <p>This returns an empty list when the current device does not have HDMI input.
      *
      * @return a list of {@link HdmiPortInfo}
-     *
-     * @hide
      */
     @NonNull
-    @SystemApi
     public List<HdmiPortInfo> getPortInfo() {
         try {
             return mService.getPortInfo();

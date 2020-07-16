@@ -711,6 +711,13 @@ public class ConnectivityDiagnosticsManager {
      * not currently registered. If a ConnectivityDiagnosticsCallback instance is registered with
      * multiple NetworkRequests, an IllegalArgumentException will be thrown.
      *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * callbacks in {@link ConnectivityManager}. Registering a callback with this method will count
+     * toward this limit. If this limit is exceeded, an exception will be thrown. To avoid hitting
+     * this issue and to conserve resources, make sure to unregister the callbacks with
+     * {@link #unregisterConnectivityDiagnosticsCallback}.
+     *
      * @param request The NetworkRequest that will be used to match with Networks for which
      *     callbacks will be fired
      * @param e The Executor to be used for running the callback method invocations
@@ -718,6 +725,7 @@ public class ConnectivityDiagnosticsManager {
      *     System
      * @throws IllegalArgumentException if the same callback instance is registered with multiple
      *     NetworkRequests
+     * @throws RuntimeException if the app already has too many callbacks registered.
      */
     public void registerConnectivityDiagnosticsCallback(
             @NonNull NetworkRequest request,

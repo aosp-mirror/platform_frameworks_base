@@ -44,7 +44,7 @@ import java.util.Objects;
 /**
  * Class for representing how a blob can be shared.
  *
- * Note that this class is not thread-safe, callers need to take of synchronizing access.
+ * Note that this class is not thread-safe, callers need to take care of synchronizing access.
  */
 class BlobAccessMode {
     @Retention(RetentionPolicy.SOURCE)
@@ -125,6 +125,14 @@ class BlobAccessMode {
         }
 
         return false;
+    }
+
+    int getAccessType() {
+        return mAccessType;
+    }
+
+    int getNumWhitelistedPackages() {
+        return mWhitelistedPackages.size();
     }
 
     void dump(IndentingPrintWriter fout) {

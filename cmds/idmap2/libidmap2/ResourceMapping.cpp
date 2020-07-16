@@ -61,8 +61,7 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
                               const ResourceId& target_resource) {
   static constexpr const PolicyBitmask sDefaultPolicies =
       PolicyFlags::ODM_PARTITION | PolicyFlags::OEM_PARTITION | PolicyFlags::SYSTEM_PARTITION |
-      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE |
-      PolicyFlags::ACTOR_SIGNATURE;
+      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE;
 
   // If the resource does not have an overlayable definition, allow the resource to be overlaid if
   // the overlay is preinstalled or signed with the same signature as the target.
@@ -292,13 +291,6 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
                                                        const PolicyBitmask& fulfilled_policies,
                                                        bool enforce_overlayable,
                                                        LogInfo& log_info) {
-  if (enforce_overlayable) {
-    log_info.Info(LogMessage() << "fulfilled_policies="
-                               << ConcatPolicies(BitmaskToPolicies(fulfilled_policies))
-                               << " enforce_overlayable="
-                               << (enforce_overlayable ? "true" : "false"));
-  }
-
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true /* invalidate_caches */,
                                          false /* filter_incompatible_configs*/)) {

@@ -19,6 +19,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -27,6 +28,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -56,10 +58,14 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock
     NotificationMediaManager mNotificationMediaManager;
     @Mock
+    NotificationIconContainer mNotificationIconContainer;
+    @Mock
     DozeParameters mDozeParameters;
     @Mock
     NotificationShadeWindowView mNotificationShadeWindowView;
     private NotificationIconAreaController mController;
+    @Mock
+    private BubbleController mBubbleController;
 
     @Before
     public void setup() {
@@ -67,11 +73,11 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
 
         when(mStatusBar.getNotificationShadeWindowView()).thenReturn(mNotificationShadeWindowView);
         when(mNotificationShadeWindowView.findViewById(anyInt())).thenReturn(
-                        mock(NotificationIconContainer.class));
+                mNotificationIconContainer);
 
         mController = new NotificationIconAreaController(mContext, mStatusBar,
                 mStatusBarStateController, mWakeUpCoordinator, mKeyguardBypassController,
-                mNotificationMediaManager, mListener, mDozeParameters);
+                mNotificationMediaManager, mListener, mDozeParameters, mBubbleController);
     }
 
     @Test
@@ -86,5 +92,13 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
         mController.mSettingsListener.onStatusBarIconsBehaviorChanged(false);
 
         assertTrue(mController.shouldShouldLowPriorityIcons());
+    }
+
+    @Test
+    public void testAppearResetsTranslation() {
+        when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
+        mController.appearAodIcons();
+        verify(mNotificationIconContainer).setTranslationY(0);
+        verify(mNotificationIconContainer).setAlpha(1.0f);
     }
 }

@@ -25,12 +25,16 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import static java.lang.Integer.max;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Handler;
@@ -48,9 +52,13 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
+import android.view.WindowInsetsAnimationControlListener;
+import android.view.WindowInsetsAnimationController;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -64,6 +72,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -100,6 +109,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     private static final UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
 
+    private static final long IME_DISAPPEAR_DURATION_MS = 125;
+
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
 
@@ -125,6 +136,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private int mActivePointerId = -1;
     private boolean mIsDragging;
     private float mStartTouchY = -1;
+    private boolean mDisappearAnimRunning;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -148,22 +160,29 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 public WindowInsets onProgress(WindowInsets windowInsets,
                         List<WindowInsetsAnimation> list) {
                     int translationY = 0;
-                    for (WindowInsetsAnimation animation : list) {
-                        if ((animation.getTypeMask() & WindowInsets.Type.ime()) == 0) {
-                            continue;
+                    if (mDisappearAnimRunning) {
+                        mSecurityViewFlipper.setTranslationY(
+                                mInitialBounds.bottom - mFinalBounds.bottom);
+                    } else {
+                        for (WindowInsetsAnimation animation : list) {
+                            if ((animation.getTypeMask() & WindowInsets.Type.ime()) == 0) {
+                                continue;
+                            }
+                            final int paddingBottom = (int) MathUtils.lerp(
+                                    mInitialBounds.bottom - mFinalBounds.bottom, 0,
+                                    animation.getInterpolatedFraction());
+                            translationY += paddingBottom;
                         }
-                        final int paddingBottom = (int) MathUtils.lerp(
-                                mInitialBounds.bottom - mFinalBounds.bottom, 0,
-                                animation.getInterpolatedFraction());
-                        translationY += paddingBottom;
+                        mSecurityViewFlipper.setTranslationY(translationY);
                     }
-                    mSecurityViewFlipper.setTranslationY(translationY);
                     return windowInsets;
                 }
 
                 @Override
                 public void onEnd(WindowInsetsAnimation animation) {
-                    mSecurityViewFlipper.setTranslationY(0);
+                    if (!mDisappearAnimRunning) {
+                        mSecurityViewFlipper.setTranslationY(0);
+                    }
                 }
             };
 
@@ -376,8 +395,51 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     public boolean startDisappearAnimation(Runnable onFinishRunnable) {
+        mDisappearAnimRunning = true;
         if (mCurrentSecuritySelection == SecurityMode.Password) {
-            mSecurityViewFlipper.getWindowInsetsController().hide(WindowInsets.Type.ime());
+            mSecurityViewFlipper.getWindowInsetsController().controlWindowInsetsAnimation(ime(),
+                    IME_DISAPPEAR_DURATION_MS,
+                    Interpolators.LINEAR, null, new WindowInsetsAnimationControlListener() {
+
+
+                        @Override
+                        public void onReady(@NonNull WindowInsetsAnimationController controller,
+                                int types) {
+                            ValueAnimator anim = ValueAnimator.ofFloat(1f, 0f);
+                            anim.addUpdateListener(animation -> {
+                                if (controller.isCancelled()) {
+                                    return;
+                                }
+                                Insets shownInsets = controller.getShownStateInsets();
+                                Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0,
+                                        (int) (-shownInsets.bottom / 4
+                                                * anim.getAnimatedFraction())));
+                                controller.setInsetsAndAlpha(insets,
+                                        (float) animation.getAnimatedValue(),
+                                        anim.getAnimatedFraction());
+                            });
+                            anim.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    controller.finish(false);
+                                }
+                            });
+                            anim.setDuration(IME_DISAPPEAR_DURATION_MS);
+                            anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+                            anim.start();
+                        }
+
+                        @Override
+                        public void onFinished(
+                                @NonNull WindowInsetsAnimationController controller) {
+                            mDisappearAnimRunning = false;
+                        }
+
+                        @Override
+                        public void onCancelled(
+                                @Nullable WindowInsetsAnimationController controller) {
+                        }
+                    });
         }
         if (mCurrentSecuritySelection != SecurityMode.None) {
             return getSecurityView(mCurrentSecuritySelection).startDisappearAnimation(
@@ -887,6 +949,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     @Override
     public void reset() {
         mSecurityViewFlipper.reset();
+        mDisappearAnimRunning = false;
     }
 
     @Override

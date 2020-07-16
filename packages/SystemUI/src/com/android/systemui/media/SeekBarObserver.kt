@@ -19,6 +19,7 @@ package com.android.systemui.media
 import android.text.format.DateUtils
 import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
+import com.android.systemui.R
 
 /**
  * Observer for changes from SeekBarViewModel.
@@ -27,10 +28,18 @@ import androidx.lifecycle.Observer
  */
 class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarViewModel.Progress> {
 
+    val seekBarDefaultMaxHeight = holder.seekBar.context.resources
+        .getDimensionPixelSize(R.dimen.qs_media_enabled_seekbar_height)
+    val seekBarDisabledHeight = holder.seekBar.context.resources
+        .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_height)
+
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
         if (!data.enabled) {
+            if (holder.seekBar.maxHeight != seekBarDisabledHeight) {
+                holder.seekBar.maxHeight = seekBarDisabledHeight
+            }
             holder.seekBar.setEnabled(false)
             holder.seekBar.getThumb().setAlpha(0)
             holder.seekBar.setProgress(0)
@@ -41,6 +50,10 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
 
         holder.seekBar.getThumb().setAlpha(if (data.seekAvailable) 255 else 0)
         holder.seekBar.setEnabled(data.seekAvailable)
+
+        if (holder.seekBar.maxHeight != seekBarDefaultMaxHeight) {
+            holder.seekBar.maxHeight = seekBarDefaultMaxHeight
+        }
 
         data.elapsedTime?.let {
             holder.seekBar.setProgress(it)

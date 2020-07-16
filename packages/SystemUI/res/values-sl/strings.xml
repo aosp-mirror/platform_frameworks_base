@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Raztegnitev čez zaslon"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Posnetek zaslona"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Za več možnosti odklenite telefon"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Za več možnosti odklenite tablični računalnik"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Za več možnosti odklenite napravo"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslal(-a) sliko"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Shranjev. posnetka zaslona ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Shranjevanje posnetka zaslona ..."</string>
@@ -461,8 +458,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Znova se dotaknite, da odprete"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Povlecite navzgor, da odprete"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Povlecite navzgor za vnovičen poskus"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"To napravo upravlja vaša organizacija"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"To napravo upravlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Ta naprava pripada vaši organizaciji"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Povlecite z ikone za telefon"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Povlecite z ikone za glasovnega pomočnika"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Povlecite z ikone za fotoaparat"</string>
@@ -519,7 +516,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši vse"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljanje"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Zgodovina"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Dohodno"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Novo"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiho"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obvestila"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pogovori"</string>
@@ -530,21 +527,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil je morda nadziran"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Omrežje je lahko nadzorovano"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Omrežje je morda nadzorovano"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"To napravo upravlja vaša organizacija in lahko nadzira omrežni promet."</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"To napravo upravlja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in lahko nadzira omrežni promet."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Naprava, ki jo upravlja vaša organizacija, je povezana z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Naprava, ki jo upravlja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, je povezana z aplikacijo <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Napravo upravlja vaša organizacija"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Napravo upravlja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Naprava, ki jo upravlja vaša organizacija, je povezana z omrežji VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Naprava, ki jo upravlja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, je povezana z omrežji VPN"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizacija je lastnica te naprave in lahko nadzira omrežni promet"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Organizacija <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> je lastnica te naprave in lahko nadzira omrežni promet"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ta naprava pripada vaši organizaciji in je povezana v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana v aplikacijo <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ta naprava pripada vaši organizaciji"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Ta naprava pripada vaši organizaciji in je povezana v omrežja VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana v omrežja VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Vaša organizacija lahko nadzira omrežni promet v vašem delovnem profilu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> lahko nadzira omrežni promet v vašem delovnem profilu"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Omrežje je morda nadzorovano"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Naprava je povezana z omrežji VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Delovni profil je povezan z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Osebni profil je povezan z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Naprava je povezana z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Ta naprava je povezana v omrežja VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Delovni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Osebni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ta naprava je povezava v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje naprav"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Nadzor nad profilom"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Nadzor omrežja"</string>
@@ -554,8 +551,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Onemogoči VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Prekini povezavo z VPN-jem"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Prikaži pravilnike"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Napravo upravlja organizacija <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, z napravo povezane podatke in podatke o lokaciji naprave.\n\nZa več informacij se obrnite na skrbnika."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Napravo upravlja vaša organizacija.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, z napravo povezane podatke in podatke o lokaciji naprave.\n\nZa več informacij se obrnite na skrbnika."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nSkrbnik za IT lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, z napravo povezane podatke in podatke o lokaciji naprave.\n\nZa več informacij se obrnite na skrbnika za IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Ta naprava pripada vaši organizaciji.\n\nSkrbnik za IT lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, z napravo povezane podatke in podatke o lokaciji naprave.\n\nZa več informacij se obrnite na skrbnika za IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Vaša organizacija je v to napravo namestila overitelja potrdil. Varni omrežni promet se lahko nadzira ali spreminja."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Vaša organizacija je v vaš delovni profil namestila overitelja potrdil. Varni omrežni promet se lahko nadzira ali spreminja."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tej napravi je nameščen overitelj potrdil. Varni omrežni promet se lahko nadzira ali spreminja."</string>
@@ -601,29 +598,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"omogoči"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"onemogoči"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Izbira druge izhodne naprave"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
-    <string name="screen_pinning_description" msgid="8699395373875667743">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, povlecite navzgor in pridržite."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za pregled."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za začetni zaslon."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacija je pripeta"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, povlecite navzgor in pridržite."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, pridržite gumb za pregled."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"S tem ostane vidna, dokler je ne odpnete. Če jo želite odpeti, pridržite gumb za začetni zaslon."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostopni so lahko osebni podatki (na primer stiki in vsebina e-poštnih sporočil)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Pripeta aplikacija lahko odpre druge aplikacije."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Če želite odpeti to aplikacijo, hkrati pridržite gumba za nazaj in za pregled."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Če želite odpeti to aplikacijo, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Če želite odpeti to aplikacijo, povlecite navzgor in pridržite."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Razumem"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je pripeta"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je odpeta"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Želite skriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Znova se bo pojavila, ko jo naslednjič vklopite v nastavitvah."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Skrij"</string>
@@ -736,7 +725,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikaz na vrhu razdelka s pogovorom in v plavajočem oblačku, prikaz profilne slike na zaklenjenem zaslonu"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednost"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira posebnih nastavitev za pogovore"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ni nedavnih oblačkov"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tukaj bodo prikazani tako nedavni kot tudi opuščeni oblački"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
@@ -941,6 +930,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Začasno ustavi"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Preskoči na naslednjega"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Preskoči na prejšnjega"</string>
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Spremeni velikost"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tel. izklopljen zaradi vročine"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Zdaj telefon normalno deluje"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon je bil prevroč, zato se je izklopil, da se ohladi. Zdaj normalno deluje.\n\nTelefon lahko postane prevroč ob:\n	• uporabi aplikacij, ki intenzivno porabljajo sredstva (npr. za igranje iger, videoposnetke ali navigacijo)\n	• prenosu ali nalaganju velikih datotek\n	• uporabi telefona pri visokih temp."</string>
@@ -1023,22 +1013,25 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Premakni zgoraj desno"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Premakni spodaj levo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Premakni spodaj desno"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Opusti"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Opusti oblaček"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Pogovora ne prikaži v oblačku"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Klepet z oblački"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novi pogovori so prikazani kot lebdeče ikone ali oblački. Če želite odpreti oblaček, se ga dotaknite. Če ga želite premakniti, ga povlecite."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljanje oblačkov kadar koli"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljanje oblačkov"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Dotaknite se »Upravljanje«, da izklopite oblačke iz te aplikacije"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Razumem"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Nastavitve za <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Krmarjenje po sistemu je posodobljeno. Če želite opraviti spremembe, odprite nastavitve."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Če želite posodobiti krmarjenje po sistemu, odprite nastavitve"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje pripravljenosti"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazano na vrhu razdelka s pogovorom"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikaz profilne slike na zaklenjenem zaslonu"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Pogovor je nastavljen kot prednosten"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prednostni pogovori bodo:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazani na vrhu razdelka s pogovorom"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazali profilno sliko na zaklenjenem zaslonu"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Prikazano kot lebdeč oblaček čez druge aplikacije"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Preglasi način »ne moti«"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"V redu"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nastavitve"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Prekrivno povečevalno okno"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Povečevalno okno"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrolniki povečevalnega okna"</string>
@@ -1065,7 +1058,9 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Seznama vseh kontrolnikov ni bilo mogoče naložiti."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Prikaz drugih aplikacij"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrolnikov ni bilo mogoče naložiti. Preverite aplikacijo <xliff:g id="APP">%s</xliff:g> in se prepričajte, da se njene nastavitve niso spremenile."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Združljivi kontrolniki niso na voljo"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajanje med kontrolnike naprave"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
@@ -1081,10 +1076,17 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Potrdite spremembo za napravo <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Če si želite ogledati več, povlecite"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nalaganje priporočil"</string>
-    <string name="controls_media_close_session" msgid="9023534788828414585">"Zapri to sejo predstavnosti"</string>
+    <string name="controls_media_title" msgid="1746947284862928133">"Predstavnost"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Skrije trenutno sejo."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skrij"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Nadaljuj"</string>
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavitve"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Napaka, vnovični poskus …"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Naprava je bila odstranjena"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Ni mogoče najti"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrolnik ni na voljo"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Ni bilo mogoče dostopiti do: <xliff:g id="DEVICE">%1$s</xliff:g>. Preverite aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g> in se prepričajte, da je kontrolnik še vedno na voljo ter da se nastavitve aplikacije niso spremenile."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Odpri aplikacijo"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Stanja ni mogoče naložiti"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Napaka, poskusite znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"V teku"</string>

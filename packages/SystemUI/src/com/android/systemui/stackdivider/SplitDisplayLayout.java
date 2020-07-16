@@ -16,8 +16,6 @@
 
 package com.android.systemui.stackdivider;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -113,11 +111,6 @@ public class SplitDisplayLayout {
         }
     }
 
-    boolean isMinimized() {
-        return mTiles.mSecondary.topActivityType == ACTIVITY_TYPE_HOME
-                || mTiles.mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS;
-    }
-
     DividerSnapAlgorithm getSnapAlgorithm() {
         if (mSnapAlgorithm == null) {
             updateResources();
@@ -129,14 +122,14 @@ public class SplitDisplayLayout {
         return mSnapAlgorithm;
     }
 
-    DividerSnapAlgorithm getMinimizedSnapAlgorithm() {
+    DividerSnapAlgorithm getMinimizedSnapAlgorithm(boolean homeStackResizable) {
         if (mMinimizedSnapAlgorithm == null) {
             updateResources();
             boolean isHorizontalDivision = !mDisplayLayout.isLandscape();
             mMinimizedSnapAlgorithm = new DividerSnapAlgorithm(mContext.getResources(),
                     mDisplayLayout.width(), mDisplayLayout.height(), mDividerSize,
                     isHorizontalDivision, mDisplayLayout.stableInsets(), getPrimarySplitSide(),
-                    true /* isMinimized */);
+                    true /* isMinimized */, homeStackResizable);
         }
         return mMinimizedSnapAlgorithm;
     }
@@ -168,8 +161,9 @@ public class SplitDisplayLayout {
                 mDisplayLayout.height(), mDividerSize);
     }
 
-    Rect calcMinimizedHomeStackBounds() {
-        DividerSnapAlgorithm.SnapTarget miniMid = getMinimizedSnapAlgorithm().getMiddleTarget();
+    Rect calcResizableMinimizedHomeStackBounds() {
+        DividerSnapAlgorithm.SnapTarget miniMid =
+                getMinimizedSnapAlgorithm(true /* resizable */).getMiddleTarget();
         Rect homeBounds = new Rect();
         DockedDividerUtils.calculateBoundsForPosition(miniMid.position,
                 DockedDividerUtils.invertDockSide(getPrimarySplitSide()), homeBounds,

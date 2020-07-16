@@ -1685,6 +1685,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final NeededUriGrants resultGrants = collectGrants(resultData, r.resultTo);
 
         synchronized (mGlobalLock) {
+            // Sanity check in case activity was removed before entering global lock.
+            if (!r.isInHistory()) {
+                return true;
+            }
+
             // Keep track of the root activity of the task before we finish it
             final Task tr = r.getTask();
             final ActivityRecord rootR = tr.getRootActivity();
@@ -3819,7 +3824,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             userId = activity.mUserId;
         }
-        return !DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId);
+        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId, false);
     }
 
     @Override
@@ -4873,6 +4878,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
 
+                if (isInPictureInPictureMode(activity)) {
+                    throw new IllegalStateException("Activity is already in PIP mode");
+                }
+
                 final boolean canEnterPictureInPicture = activity.checkEnterPictureInPictureState(
                         "requestPictureInPictureMode", /* beforeStopping */ false);
                 if (!canEnterPictureInPicture) {
@@ -5404,7 +5413,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean hideDialogsSet = Settings.Global.getInt(mContext.getContentResolver(),
                 HIDE_ERROR_DIALOGS, 0) != 0;
         mShowDialogs = inputMethodExists
-                && ActivityTaskManager.currentUiModeSupportsErrorDialogs(mContext)
+                && ActivityTaskManager.currentUiModeSupportsErrorDialogs(config)
                 && !hideDialogsSet;
     }
 
@@ -6165,12 +6174,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             assertPackageMatchesCallingUid(callingPackage);
-            synchronized (mGlobalLock) {
-                return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
-                        realCallingUid, callingPackage, callingFeatureId, intents, resolvedTypes,
-                        resultTo, options, userId, validateIncomingUser, originatingPendingIntent,
-                        allowBackgroundActivityStart);
-            }
+            return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
+                    realCallingUid, callingPackage, callingFeatureId, intents, resolvedTypes,
+                    resultTo, options, userId, validateIncomingUser, originatingPendingIntent,
+                    allowBackgroundActivityStart);
         }
 
         @Override
@@ -6181,13 +6188,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             assertPackageMatchesCallingUid(callingPackage);
-            synchronized (mGlobalLock) {
-                return getActivityStartController().startActivityInPackage(uid, realCallingPid,
-                        realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
-                        resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
-                        reason, validateIncomingUser, originatingPendingIntent,
-                        allowBackgroundActivityStart);
-            }
+            return getActivityStartController().startActivityInPackage(uid, realCallingPid,
+                    realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
+                    resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
+                    reason, validateIncomingUser, originatingPendingIntent,
+                    allowBackgroundActivityStart);
         }
 
         @Override
@@ -6817,7 +6822,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                     mWindowManager.closeSystemDialogs(reason);
 
-                    mRootWindowContainer.closeSystemDialogs();
+                    mRootWindowContainer.closeSystemDialogActivities(reason);
                 }
                 // Call into AM outside the synchronized block.
                 mAmInternal.broadcastCloseSystemDialogs(reason);

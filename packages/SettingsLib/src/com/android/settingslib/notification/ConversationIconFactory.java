@@ -86,7 +86,7 @@ public class ConversationIconFactory extends BaseIconFactory {
     /**
      * Returns the conversation info drawable
      */
-    private Drawable getBaseIconDrawable(ShortcutInfo shortcutInfo) {
+    public Drawable getBaseIconDrawable(ShortcutInfo shortcutInfo) {
         return mLauncherApps.getShortcutIconDrawable(shortcutInfo, mFillResIconDpi);
     }
 
@@ -94,7 +94,7 @@ public class ConversationIconFactory extends BaseIconFactory {
      * Get the {@link Drawable} that represents the app icon, badged with the work profile icon
      * if appropriate.
      */
-    private Drawable getAppBadge(String packageName, int userId) {
+    public Drawable getAppBadge(String packageName, int userId) {
         Drawable badge = null;
         try {
             final ApplicationInfo appInfo = mPackageManager.getApplicationInfoAsUser(

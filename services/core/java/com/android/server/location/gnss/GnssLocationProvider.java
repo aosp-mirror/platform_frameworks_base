@@ -678,8 +678,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
                 GnssLocationProvider.this::onNetworkAvailable, mLooper, mNIHandler);
 
-        sendMessage(INITIALIZE_HANDLER, 0, null);
-
         mGnssStatusListenerHelper = new GnssStatusListenerHelper(mContext, mHandler) {
             @Override
             protected boolean isAvailableInPlatform() {
@@ -746,6 +744,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         setProperties(PROPERTIES);
         setAllowed(true);
+
+        sendMessage(INITIALIZE_HANDLER, 0, null);
     }
 
     /**

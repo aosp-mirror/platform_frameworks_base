@@ -20,6 +20,7 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
+import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.server.testutils.TestUtils.strictMock;
 
@@ -38,11 +39,13 @@ import static org.mockito.Mockito.when;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -56,6 +59,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.IntConsumer;
 
 /**
@@ -106,6 +112,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_X = 301;
     public static final float DEFAULT_Y = 299;
+    public static final PointF DEFAULT_POINT = new PointF(DEFAULT_X, DEFAULT_Y);
 
     private static final int DISPLAY_0 = 0;
 
@@ -327,6 +334,107 @@ public class FullScreenMagnificationGestureHandlerTest {
         });
     }
 
+    @Test
+    public void testTwoFingersOneTap_zoomedState_dispatchMotionEvents() {
+        goFromStateIdleTo(STATE_ZOOMED);
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
+        send(pointerEvent(ACTION_POINTER_UP, DEFAULT_X * 2, DEFAULT_Y));
+        send(upEvent());
+
+        assertIn(STATE_ZOOMED);
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_POINTER_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_POINTER_UP));
+        expectedActions.add(Integer.valueOf(ACTION_UP));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+
+        returnToNormalFrom(STATE_ZOOMED);
+    }
+
+    @Test
+    public void testThreeFingersOneTap_zoomedState_dispatchMotionEvents() {
+        goFromStateIdleTo(STATE_ZOOMED);
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+        PointF pointer3 = new PointF(DEFAULT_X * 2, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}));
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2, pointer3}));
+        send(pointerEvent(ACTION_POINTER_UP, new PointF[] {pointer1, pointer2, pointer3}));
+        send(pointerEvent(ACTION_POINTER_UP, new PointF[] {pointer1, pointer2, pointer3}));
+        send(upEvent());
+
+        assertIn(STATE_ZOOMED);
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_POINTER_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_POINTER_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_POINTER_UP));
+        expectedActions.add(Integer.valueOf(ACTION_POINTER_UP));
+        expectedActions.add(Integer.valueOf(ACTION_UP));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+
+        returnToNormalFrom(STATE_ZOOMED);
+    }
+
+    @Test
+    public void testFirstFingerSwipe_TwoPinterDownAndZoomedState_panningState() {
+        goFromStateIdleTo(STATE_ZOOMED);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}));
+        //The minimum movement to transit to panningState.
+        final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        pointer1.offset(sWipeMinDistance + 1, 0);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}));
+        assertIn(STATE_PANNING);
+
+        assertIn(STATE_PANNING);
+        returnToNormalFrom(STATE_PANNING);
+    }
+
+    @Test
+    public void testSecondFingerSwipe_TwoPinterDownAndZoomedState_panningState() {
+        goFromStateIdleTo(STATE_ZOOMED);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}));
+        //The minimum movement to transit to panningState.
+        final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        pointer2.offset(sWipeMinDistance + 1, 0);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}));
+        assertIn(STATE_PANNING);
+
+        assertIn(STATE_PANNING);
+        returnToNormalFrom(STATE_PANNING);
+    }
+
+    private void assertActionsInOrder(List<MotionEvent> actualEvents,
+            List<Integer> expectedActions) {
+        assertTrue(actualEvents.size() == expectedActions.size());
+        final int size = actualEvents.size();
+        for (int i = 0; i < size; i++) {
+            final int expectedAction = expectedActions.get(i);
+            final int actualAction = actualEvents.get(i).getActionMasked();
+            assertTrue(String.format(
+                    "%dth action %s is not matched, actual events : %s, ", i,
+                    MotionEvent.actionToString(expectedAction), actualEvents),
+                    actualAction == expectedAction);
+        }
+    }
+
     private void assertZoomsImmediatelyOnSwipeFrom(int state) {
         goFromStateIdleTo(state);
         swipeAndHold();
@@ -467,6 +575,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                     goFromStateIdleTo(STATE_ZOOMED);
                     send(downEvent());
                     send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
+                    fastForward(ViewConfiguration.getTapTimeout());
                 } break;
                 case STATE_SCALING_AND_PANNING: {
                     goFromStateIdleTo(STATE_PANNING);
@@ -619,40 +728,67 @@ public class FullScreenMagnificationGestureHandlerTest {
                 MotionEvent.ACTION_UP, x, y, 0));
     }
 
-    private MotionEvent pointerEvent(int action, float x, float y) {
-        MotionEvent.PointerProperties defPointerProperties = new MotionEvent.PointerProperties();
-        defPointerProperties.id = 0;
-        defPointerProperties.toolType = MotionEvent.TOOL_TYPE_FINGER;
-        MotionEvent.PointerProperties pointerProperties = new MotionEvent.PointerProperties();
-        pointerProperties.id = 1;
-        pointerProperties.toolType = MotionEvent.TOOL_TYPE_FINGER;
 
-        MotionEvent.PointerCoords defPointerCoords = new MotionEvent.PointerCoords();
-        defPointerCoords.x = DEFAULT_X;
-        defPointerCoords.y = DEFAULT_Y;
-        MotionEvent.PointerCoords pointerCoords = new MotionEvent.PointerCoords();
-        pointerCoords.x = x;
-        pointerCoords.y = y;
+    private MotionEvent pointerEvent(int action, float x, float y) {
+        return pointerEvent(action, new PointF[] {DEFAULT_POINT, new PointF(x, y)});
+    }
+
+    private MotionEvent pointerEvent(int action, PointF[] pointersPosition) {
+        final MotionEvent.PointerProperties[] PointerPropertiesArray =
+                new MotionEvent.PointerProperties[pointersPosition.length];
+        for (int i = 0; i < pointersPosition.length; i++) {
+            MotionEvent.PointerProperties pointerProperties = new MotionEvent.PointerProperties();
+            pointerProperties.id = i;
+            pointerProperties.toolType = MotionEvent.TOOL_TYPE_FINGER;
+            PointerPropertiesArray[i] = pointerProperties;
+        }
+
+        final MotionEvent.PointerCoords[] pointerCoordsArray =
+                new MotionEvent.PointerCoords[pointersPosition.length];
+        for (int i = 0; i < pointersPosition.length; i++) {
+            MotionEvent.PointerCoords pointerCoords = new MotionEvent.PointerCoords();
+            pointerCoords.x = pointersPosition[i].x;
+            pointerCoords.y = pointersPosition[i].y;
+            pointerCoordsArray[i] = pointerCoords;
+        }
 
         return MotionEvent.obtain(
-            /* downTime */ mClock.now(),
-            /* eventTime */ mClock.now(),
-            /* action */ action,
-            /* pointerCount */ 2,
-            /* pointerProperties */ new MotionEvent.PointerProperties[] {
-                    defPointerProperties, pointerProperties},
-            /* pointerCoords */ new MotionEvent.PointerCoords[] { defPointerCoords, pointerCoords },
-            /* metaState */ 0,
-            /* buttonState */ 0,
-            /* xPrecision */ 1.0f,
-            /* yPrecision */ 1.0f,
-            /* deviceId */ 0,
-            /* edgeFlags */ 0,
-            /* source */ InputDevice.SOURCE_TOUCHSCREEN,
-            /* flags */ 0);
+                /* downTime */ mClock.now(),
+                /* eventTime */ mClock.now(),
+                /* action */ action,
+                /* pointerCount */ pointersPosition.length,
+                /* pointerProperties */ PointerPropertiesArray,
+                /* pointerCoords */ pointerCoordsArray,
+                /* metaState */ 0,
+                /* buttonState */ 0,
+                /* xPrecision */ 1.0f,
+                /* yPrecision */ 1.0f,
+                /* deviceId */ 0,
+                /* edgeFlags */ 0,
+                /* source */ InputDevice.SOURCE_TOUCHSCREEN,
+                /* flags */ 0);
     }
+
 
     private String stateDump() {
         return "\nCurrent state dump:\n" + mMgh + "\n" + mHandler.getPendingMessages();
+    }
+
+    private class EventCaptor implements EventStreamTransformation {
+        List<MotionEvent> mEvents = new ArrayList<>();
+
+        @Override
+        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+            mEvents.add(event.copy());
+        }
+
+        @Override
+        public void setNext(EventStreamTransformation next) {
+        }
+
+        @Override
+        public EventStreamTransformation getNext() {
+            return null;
+        }
     }
 }

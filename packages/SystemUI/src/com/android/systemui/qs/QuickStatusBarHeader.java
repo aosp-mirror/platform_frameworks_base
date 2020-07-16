@@ -15,6 +15,7 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
@@ -36,11 +37,14 @@ import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.DisplayCutout;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -54,6 +58,7 @@ import androidx.lifecycle.LifecycleRegistry;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -142,7 +147,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
     private boolean mHasTopCutout = false;
+    private int mStatusBarPaddingTop = 0;
     private int mRoundedCornerPadding = 0;
+    private int mContentMarginStart;
+    private int mContentMarginEnd;
+    private int mWaterfallTopInset;
+    private int mCutOutPaddingLeft;
+    private int mCutOutPaddingRight;
+    private float mExpandedHeaderAlpha = 1.0f;
+    private float mKeyguardExpansionFraction;
 
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -328,6 +341,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
+        mStatusBarPaddingTop = resources.getDimensionPixelSize(R.dimen.status_bar_padding_top);
 
         // Update height for a few views, especially due to landscape mode restricting space.
         mHeaderTextContainerView.getLayoutParams().height =
@@ -337,6 +351,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mSystemIconsView.getLayoutParams().height = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
+
+        ViewGroup.LayoutParams lp = getLayoutParams();
+        if (mQsDisabled) {
+            lp.height = resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.quick_qs_offset_height);
+        } else {
+            lp.height = WRAP_CONTENT;
+        }
+        setLayoutParams(lp);
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
@@ -350,7 +373,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     private void updateHeaderTextContainerAlphaAnimator() {
         mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
-                .addFloat(mHeaderTextContainerView, "alpha", 0, 0, 1)
+                .addFloat(mHeaderTextContainerView, "alpha", 0, 0, mExpandedHeaderAlpha)
                 .build();
     }
 
@@ -397,6 +420,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 updateResources();
             }
         }
+        mKeyguardExpansionFraction = keyguardExpansionFraction;
     }
 
     public void disable(int state1, int state2, boolean animate) {
@@ -422,31 +446,48 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        // Handle padding of QuickStatusBarHeader
-        setPadding(mRoundedCornerPadding, getPaddingTop(), mRoundedCornerPadding,
-                getPaddingBottom());
-
-        // Handle padding of SystemIconsView
+        // Handle padding of the clock
         DisplayCutout cutout = insets.getDisplayCutout();
         Pair<Integer, Integer> cornerCutoutPadding = StatusBarWindowView.cornerCutoutMargins(
                 cutout, getDisplay());
         Pair<Integer, Integer> padding =
                 StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
-                        cutout, cornerCutoutPadding, mRoundedCornerPadding);
-        final int waterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
-        int statusBarPaddingLeft = isLayoutRtl()
-                ? getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end)
-                : getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start);
-        int statusBarPaddingRight = isLayoutRtl()
-                ? getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start)
-                : getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end);
-        mSystemIconsView.setPadding(
-                Math.max(padding.first + statusBarPaddingLeft - mRoundedCornerPadding, 0),
-                waterfallTopInset,
-                Math.max(padding.second + statusBarPaddingRight - mRoundedCornerPadding, 0),
-                0);
-
+                        cutout, cornerCutoutPadding, -1);
+        mCutOutPaddingLeft = padding.first;
+        mCutOutPaddingRight = padding.second;
+        mWaterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
+        updateClockPadding();
         return super.onApplyWindowInsets(insets);
+    }
+
+    private void updateClockPadding() {
+        int clockPaddingLeft = 0;
+        int clockPaddingRight = 0;
+
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+        int leftMargin = lp.leftMargin;
+        int rightMargin = lp.rightMargin;
+
+        // The clock might collide with cutouts, let's shift it out of the way.
+        // We only do that if the inset is bigger than our own padding, since it's nicer to
+        // align with
+        if (mCutOutPaddingLeft > 0) {
+            // if there's a cutout, let's use at least the rounded corner inset
+            int cutoutPadding = Math.max(mCutOutPaddingLeft, mRoundedCornerPadding);
+            int contentMarginLeft = isLayoutRtl() ? mContentMarginEnd : mContentMarginStart;
+            clockPaddingLeft = Math.max(cutoutPadding - contentMarginLeft - leftMargin, 0);
+        }
+        if (mCutOutPaddingRight > 0) {
+            // if there's a cutout, let's use at least the rounded corner inset
+            int cutoutPadding = Math.max(mCutOutPaddingRight, mRoundedCornerPadding);
+            int contentMarginRight = isLayoutRtl() ? mContentMarginStart : mContentMarginEnd;
+            clockPaddingRight = Math.max(cutoutPadding - contentMarginRight - rightMargin, 0);
+        }
+
+        mSystemIconsView.setPadding(clockPaddingLeft,
+                mWaterfallTopInset + mStatusBarPaddingTop,
+                clockPaddingRight,
+                0);
     }
 
     @Override
@@ -558,24 +599,45 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         return color == Color.WHITE ? 0 : 1;
     }
 
-    public void setMargins(int sideMargins) {
-        for (int i = 0; i < getChildCount(); i++) {
-            View v = getChildAt(i);
-            // Prevents these views from getting set a margin.
-            // The Icon views all have the same padding set in XML to be aligned.
-            if (v == mSystemIconsView || v == mQuickQsStatusIcons || v == mHeaderQsPanel
-                    || v == mHeaderTextContainerView) {
-                continue;
-            }
-            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
-            lp.leftMargin = sideMargins;
-            lp.rightMargin = sideMargins;
-        }
-    }
-
     @NonNull
     @Override
     public Lifecycle getLifecycle() {
         return mLifecycle;
+    }
+
+    public void setContentMargins(int marginStart, int marginEnd) {
+        mContentMarginStart = marginStart;
+        mContentMarginEnd = marginEnd;
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view == mHeaderQsPanel) {
+                // QS panel doesn't lays out some of its content full width
+                mHeaderQsPanel.setContentMargins(marginStart, marginEnd);
+            } else {
+                MarginLayoutParams lp = (MarginLayoutParams) view.getLayoutParams();
+                lp.setMarginStart(marginStart);
+                lp.setMarginEnd(marginEnd);
+                view.setLayoutParams(lp);
+            }
+        }
+        updateClockPadding();
+    }
+
+    public void setExpandedScrollAmount(int scrollY) {
+        // The scrolling of the expanded qs has changed. Since the header text isn't part of it,
+        // but would overlap content, we're fading it out.
+        float newAlpha = 1.0f;
+        if (mHeaderTextContainerView.getHeight() > 0) {
+            newAlpha = MathUtils.map(0, mHeaderTextContainerView.getHeight() / 2.0f, 1.0f, 0.0f,
+                    scrollY);
+            newAlpha = Interpolators.ALPHA_OUT.getInterpolation(newAlpha);
+        }
+        mHeaderTextContainerView.setScrollY(scrollY);
+        if (newAlpha != mExpandedHeaderAlpha) {
+            mExpandedHeaderAlpha = newAlpha;
+            mHeaderTextContainerView.setAlpha(MathUtils.lerp(0.0f, mExpandedHeaderAlpha,
+                    mKeyguardExpansionFraction));
+            updateHeaderTextContainerAlphaAnimator();
+        }
     }
 }

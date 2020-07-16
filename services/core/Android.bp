@@ -95,12 +95,11 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.power-java",
         "android.hardware.power-V1.0-java",
-        "android.hardware.tv.cec-V1.0-java",
         "android.hardware.vibrator-java",
         "android.net.ipsec.ike.stubs.module_lib",
         "app-compat-annotations",
-        "framework-tethering-stubs-module_libs_api",
-        "service-permission-stubs",
+        "framework-tethering.stubs.module_lib",
+        "service-permission.stubs.system_server",
     ],
 
     required: [
@@ -117,6 +116,7 @@ java_library_static {
         "android.hardware.health-V2.0-java",
         "android.hardware.health-V2.1-java",
         "android.hardware.light-java",
+        "android.hardware.tv.cec-V1.0-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.2-java",

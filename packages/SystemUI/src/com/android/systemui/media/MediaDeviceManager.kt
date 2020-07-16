@@ -16,15 +16,16 @@
 
 package com.android.systemui.media
 
-import android.app.Notification
 import android.content.Context
-import android.service.notification.StatusBarNotification
 import android.media.MediaRouter2Manager
-import android.media.session.MediaSession
 import android.media.session.MediaController
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.Dumpable
+import com.android.systemui.dump.DumpManager
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,11 +38,17 @@ class MediaDeviceManager @Inject constructor(
     private val context: Context,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
-    private val featureFlag: MediaFeatureFlag,
-    @Main private val fgExecutor: Executor
-) {
+    @Main private val fgExecutor: Executor,
+    private val mediaDataManager: MediaDataManager,
+    private val dumpManager: DumpManager
+) : MediaDataManager.Listener, Dumpable {
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val entries: MutableMap<String, Token> = mutableMapOf()
+
+    init {
+        mediaDataManager.addListener(this)
+        dumpManager.registerDumpable(javaClass.name, this)
+    }
 
     /**
      * Add a listener for changes to the media route (ie. device).
@@ -53,28 +60,40 @@ class MediaDeviceManager @Inject constructor(
      */
     fun removeListener(listener: Listener) = listeners.remove(listener)
 
-    fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
-        if (featureFlag.enabled && isMediaNotification(sbn)) {
-            var tok = entries[key]
-            if (tok == null) {
-                val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
-                        as MediaSession.Token?
-                val controller = MediaController(context, token)
-                tok = Token(key, controller, localMediaManagerFactory.create(sbn.packageName))
-                entries[key] = tok
-                tok.start()
+    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+        if (oldKey != null && oldKey != key) {
+            val oldEntry = entries.remove(oldKey)
+            oldEntry?.stop()
+        }
+        var entry = entries[key]
+        if (entry == null || entry?.token != data.token) {
+            entry?.stop()
+            val controller = data.token?.let {
+                MediaController(context, it)
             }
-        } else {
-            onNotificationRemoved(key)
+            entry = Token(key, controller, localMediaManagerFactory.create(data.packageName))
+            entries[key] = entry
+            entry.start()
         }
     }
 
-    fun onNotificationRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String) {
         val token = entries.remove(key)
         token?.stop()
         token?.let {
             listeners.forEach {
                 it.onKeyRemoved(key)
+            }
+        }
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+        with(pw) {
+            println("MediaDeviceManager state:")
+            entries.forEach {
+                key, entry ->
+                println("  key=$key")
+                entry.dump(fd, pw, args)
             }
         }
     }
@@ -96,9 +115,11 @@ class MediaDeviceManager @Inject constructor(
 
     private inner class Token(
         val key: String,
-        val controller: MediaController,
+        val controller: MediaController?,
         val localMediaManager: LocalMediaManager
     ) : LocalMediaManager.DeviceCallback {
+        val token
+            get() = controller?.sessionToken
         private var started = false
         private var current: MediaDevice? = null
             set(value) {
@@ -118,6 +139,17 @@ class MediaDeviceManager @Inject constructor(
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
         }
+        fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+            val route = controller?.let {
+                mr2manager.getRoutingSessionForMediaController(it)
+            }
+            with(pw) {
+                println("    current device is ${current?.name}")
+                val type = controller?.playbackInfo?.playbackType
+                println("    PlaybackType=$type (1 for local, 2 for remote)")
+                println("    route=$route")
+            }
+        }
         override fun onDeviceListUpdate(devices: List<MediaDevice>?) = fgExecutor.execute {
             updateCurrent()
         }
@@ -128,10 +160,14 @@ class MediaDeviceManager @Inject constructor(
         }
         private fun updateCurrent() {
             val device = localMediaManager.getCurrentConnectedDevice()
-            val route = mr2manager.getRoutingSessionForMediaController(controller)
-            // If we get a null route, then don't trust the device. Just set to null to disable the
-            // output switcher chip.
-            current = if (route != null) device else null
+            controller?.let {
+                val route = mr2manager.getRoutingSessionForMediaController(it)
+                // If we get a null route, then don't trust the device. Just set to null to disable the
+                // output switcher chip.
+                current = if (route != null) device else null
+            } ?: run {
+                current = device
+            }
         }
     }
 }

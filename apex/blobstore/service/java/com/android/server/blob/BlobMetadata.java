@@ -29,6 +29,8 @@ import static android.app.blob.XmlTags.TAG_COMMITTER;
 import static android.app.blob.XmlTags.TAG_LEASEE;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_RDONLY;
+import static android.text.format.Formatter.FLAG_IEC_UNITS;
+import static android.text.format.Formatter.formatFileSize;
 
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_COMMIT_TIME;
@@ -54,12 +56,16 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.DumpArgs;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -148,10 +154,10 @@ class BlobMetadata {
         }
     }
 
-    void removeInvalidCommitters(SparseArray<String> packages) {
+    void removeCommittersFromUnknownPkgs(SparseArray<String> knownPackages) {
         synchronized (mMetadataLock) {
             mCommitters.removeIf(committer ->
-                    !committer.packageName.equals(packages.get(committer.uid)));
+                    !committer.packageName.equals(knownPackages.get(committer.uid)));
         }
     }
 
@@ -194,16 +200,27 @@ class BlobMetadata {
         }
     }
 
-    void removeInvalidLeasees(SparseArray<String> packages) {
+    void removeLeaseesFromUnknownPkgs(SparseArray<String> knownPackages) {
         synchronized (mMetadataLock) {
             mLeasees.removeIf(leasee ->
-                    !leasee.packageName.equals(packages.get(leasee.uid)));
+                    !leasee.packageName.equals(knownPackages.get(leasee.uid)));
         }
     }
 
-    boolean hasLeases() {
+    void removeExpiredLeases() {
         synchronized (mMetadataLock) {
-            return !mLeasees.isEmpty();
+            mLeasees.removeIf(leasee -> !leasee.isStillValid());
+        }
+    }
+
+    boolean hasValidLeases() {
+        synchronized (mMetadataLock) {
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                if (mLeasees.valueAt(i).isStillValid()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -220,8 +237,7 @@ class BlobMetadata {
             // Check if packageName already holds a lease on the blob.
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
-                if (leasee.equals(callingPackage, callingUid)
-                        && leasee.isStillValid()) {
+                if (leasee.isStillValid() && leasee.equals(callingPackage, callingUid)) {
                     return true;
                 }
             }
@@ -253,25 +269,32 @@ class BlobMetadata {
 
     boolean isALeasee(@Nullable String packageName, int uid) {
         synchronized (mMetadataLock) {
-            return isAnAccessor(mLeasees, packageName, uid);
+            final Leasee leasee = getAccessor(mLeasees, packageName, uid);
+            return leasee != null && leasee.isStillValid();
         }
     }
 
     private static <T extends Accessor> boolean isAnAccessor(@NonNull ArraySet<T> accessors,
             @Nullable String packageName, int uid) {
         // Check if the package is an accessor of the data blob.
+        return getAccessor(accessors, packageName, uid) != null;
+    }
+
+    private static <T extends Accessor> T getAccessor(@NonNull ArraySet<T> accessors,
+            @Nullable String packageName, int uid) {
+        // Check if the package is an accessor of the data blob.
         for (int i = 0, size = accessors.size(); i < size; ++i) {
             final Accessor accessor = accessors.valueAt(i);
             if (packageName != null && uid != INVALID_UID
                     && accessor.equals(packageName, uid)) {
-                return true;
+                return (T) accessor;
             } else if (packageName != null && accessor.packageName.equals(packageName)) {
-                return true;
+                return (T) accessor;
             } else if (uid != INVALID_UID && accessor.uid == uid) {
-                return true;
+                return (T) accessor;
             }
         }
-        return false;
+        return null;
     }
 
     boolean isALeasee(@NonNull String packageName) {
@@ -292,11 +315,11 @@ class BlobMetadata {
 
     private boolean hasOtherLeasees(@Nullable String packageName, int uid) {
         synchronized (mMetadataLock) {
-            if (mCommitters.size() > 1 || mLeasees.size() > 1) {
-                return true;
-            }
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
+                if (!leasee.isStillValid()) {
+                    continue;
+                }
                 // TODO: Also exclude packages which are signed with same cert?
                 if (packageName != null && uid != INVALID_UID
                         && !leasee.equals(packageName, uid)) {
@@ -316,6 +339,9 @@ class BlobMetadata {
         synchronized (mMetadataLock) {
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
+                if (!leasee.isStillValid()) {
+                    continue;
+                }
                 if (leasee.uid == uid && leasee.packageName.equals(packageName)) {
                     final int descriptionResId = leasee.descriptionResEntryName == null
                             ? Resources.ID_NULL
@@ -331,7 +357,9 @@ class BlobMetadata {
     }
 
     void forEachLeasee(Consumer<Leasee> consumer) {
-        mLeasees.forEach(consumer);
+        synchronized (mMetadataLock) {
+            mLeasees.forEach(consumer);
+        }
     }
 
     File getBlobFile() {
@@ -349,14 +377,20 @@ class BlobMetadata {
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
         }
-        synchronized (mMetadataLock) {
-            return createRevocableFdLocked(fd, callingPackage);
+        try {
+            if (BlobStoreConfig.shouldUseRevocableFdForReads()) {
+                return createRevocableFd(fd, callingPackage);
+            } else {
+                return new ParcelFileDescriptor(fd);
+            }
+        } catch (IOException e) {
+            IoUtils.closeQuietly(fd);
+            throw e;
         }
     }
 
-    @GuardedBy("mMetadataLock")
     @NonNull
-    private ParcelFileDescriptor createRevocableFdLocked(FileDescriptor fd,
+    private ParcelFileDescriptor createRevocableFd(FileDescriptor fd,
             String callingPackage) throws IOException {
         final RevocableFileDescriptor revocableFd =
                 new RevocableFileDescriptor(mContext, fd);
@@ -384,6 +418,26 @@ class BlobMetadata {
         return revocableFd.getRevocableFileDescriptor();
     }
 
+    void destroy() {
+        revokeAllFds();
+        getBlobFile().delete();
+    }
+
+    private void revokeAllFds() {
+        synchronized (mRevocableFds) {
+            for (int i = 0, pkgCount = mRevocableFds.size(); i < pkgCount; ++i) {
+                final ArraySet<RevocableFileDescriptor> packageFds =
+                        mRevocableFds.valueAt(i);
+                if (packageFds == null) {
+                    continue;
+                }
+                for (int j = 0, fdCount = packageFds.size(); j < fdCount; ++j) {
+                    packageFds.valueAt(j).revoke();
+                }
+            }
+        }
+    }
+
     boolean shouldBeDeleted(boolean respectLeaseWaitTime) {
         // Expired data blobs
         if (getBlobHandle().isExpired()) {
@@ -392,7 +446,7 @@ class BlobMetadata {
 
         // Blobs with no active leases
         if ((!respectLeaseWaitTime || hasLeaseWaitTimeElapsedForAll())
-                && !hasLeases()) {
+                && !hasValidLeases()) {
             return true;
         }
 
@@ -410,55 +464,101 @@ class BlobMetadata {
         return true;
     }
 
-    void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
-        fout.println("blobHandle:");
-        fout.increaseIndent();
-        mBlobHandle.dump(fout, dumpArgs.shouldDumpFull());
-        fout.decreaseIndent();
-
-        fout.println("Committers:");
-        fout.increaseIndent();
-        if (mCommitters.isEmpty()) {
-            fout.println("<empty>");
-        } else {
-            for (int i = 0, count = mCommitters.size(); i < count; ++i) {
+    StatsEvent dumpAsStatsEvent(int atomTag) {
+        synchronized (mMetadataLock) {
+            ProtoOutputStream proto = new ProtoOutputStream();
+            // Write Committer data to proto format
+            for (int i = 0, size = mCommitters.size(); i < size; ++i) {
                 final Committer committer = mCommitters.valueAt(i);
-                fout.println("committer " + committer.toString());
-                fout.increaseIndent();
-                committer.dump(fout);
-                fout.decreaseIndent();
+                final long token = proto.start(
+                        BlobStatsEventProto.BlobCommitterListProto.COMMITTER);
+                proto.write(BlobStatsEventProto.BlobCommitterProto.UID, committer.uid);
+                proto.write(BlobStatsEventProto.BlobCommitterProto.COMMIT_TIMESTAMP_MILLIS,
+                        committer.commitTimeMs);
+                proto.write(BlobStatsEventProto.BlobCommitterProto.ACCESS_MODE,
+                        committer.blobAccessMode.getAccessType());
+                proto.write(BlobStatsEventProto.BlobCommitterProto.NUM_WHITELISTED_PACKAGE,
+                        committer.blobAccessMode.getNumWhitelistedPackages());
+                proto.end(token);
             }
-        }
-        fout.decreaseIndent();
+            final byte[] committersBytes = proto.getBytes();
 
-        fout.println("Leasees:");
-        fout.increaseIndent();
-        if (mLeasees.isEmpty()) {
-            fout.println("<empty>");
-        } else {
-            for (int i = 0, count = mLeasees.size(); i < count; ++i) {
+            proto = new ProtoOutputStream();
+            // Write Leasee data to proto format
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
-                fout.println("leasee " + leasee.toString());
-                fout.increaseIndent();
-                leasee.dump(mContext, fout);
-                fout.decreaseIndent();
+                final long token = proto.start(BlobStatsEventProto.BlobLeaseeListProto.LEASEE);
+                proto.write(BlobStatsEventProto.BlobLeaseeProto.UID, leasee.uid);
+                proto.write(BlobStatsEventProto.BlobLeaseeProto.LEASE_EXPIRY_TIMESTAMP_MILLIS,
+                        leasee.expiryTimeMillis);
+                proto.end(token);
             }
-        }
-        fout.decreaseIndent();
+            final byte[] leaseesBytes = proto.getBytes();
 
-        fout.println("Open fds:");
-        fout.increaseIndent();
-        if (mRevocableFds.isEmpty()) {
-            fout.println("<empty>");
-        } else {
-            for (int i = 0, count = mRevocableFds.size(); i < count; ++i) {
-                final String packageName = mRevocableFds.keyAt(i);
-                final ArraySet<RevocableFileDescriptor> packageFds =
-                        mRevocableFds.valueAt(i);
-                fout.println(packageName + "#" + packageFds.size());
-            }
+            // Construct the StatsEvent to represent this Blob
+            return StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(mBlobId)
+                    .writeLong(getSize())
+                    .writeLong(mBlobHandle.getExpiryTimeMillis())
+                    .writeByteArray(committersBytes)
+                    .writeByteArray(leaseesBytes)
+                    .build();
         }
-        fout.decreaseIndent();
+    }
+
+    void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
+        synchronized (mMetadataLock) {
+            fout.println("blobHandle:");
+            fout.increaseIndent();
+            mBlobHandle.dump(fout, dumpArgs.shouldDumpFull());
+            fout.decreaseIndent();
+            fout.println("size: " + formatFileSize(mContext, getSize(), FLAG_IEC_UNITS));
+
+            fout.println("Committers:");
+            fout.increaseIndent();
+            if (mCommitters.isEmpty()) {
+                fout.println("<empty>");
+            } else {
+                for (int i = 0, count = mCommitters.size(); i < count; ++i) {
+                    final Committer committer = mCommitters.valueAt(i);
+                    fout.println("committer " + committer.toString());
+                    fout.increaseIndent();
+                    committer.dump(fout);
+                    fout.decreaseIndent();
+                }
+            }
+            fout.decreaseIndent();
+
+            fout.println("Leasees:");
+            fout.increaseIndent();
+            if (mLeasees.isEmpty()) {
+                fout.println("<empty>");
+            } else {
+                for (int i = 0, count = mLeasees.size(); i < count; ++i) {
+                    final Leasee leasee = mLeasees.valueAt(i);
+                    fout.println("leasee " + leasee.toString());
+                    fout.increaseIndent();
+                    leasee.dump(mContext, fout);
+                    fout.decreaseIndent();
+                }
+            }
+            fout.decreaseIndent();
+
+            fout.println("Open fds:");
+            fout.increaseIndent();
+            if (mRevocableFds.isEmpty()) {
+                fout.println("<empty>");
+            } else {
+                for (int i = 0, count = mRevocableFds.size(); i < count; ++i) {
+                    final String packageName = mRevocableFds.keyAt(i);
+                    final ArraySet<RevocableFileDescriptor> packageFds =
+                            mRevocableFds.valueAt(i);
+                    fout.println(packageName + "#" + packageFds.size());
+                }
+            }
+            fout.decreaseIndent();
+        }
     }
 
     void writeToXml(XmlSerializer out) throws IOException {
@@ -635,7 +735,7 @@ class BlobMetadata {
         }
 
         boolean isStillValid() {
-            return expiryTimeMillis == 0 || expiryTimeMillis <= System.currentTimeMillis();
+            return expiryTimeMillis == 0 || expiryTimeMillis >= System.currentTimeMillis();
         }
 
         void dump(@NonNull Context context, @NonNull IndentingPrintWriter fout) {

@@ -134,6 +134,7 @@ class InlineSuggestionSessionController {
         mImeClientFieldId = imeFieldId;
 
         if (mSession != null) {
+            mSession.consumeInlineSuggestionsResponse(InlineSuggestionSession.EMPTY_RESPONSE);
             // Initiates the callback to Autofill if there is a pending matching session.
             // Otherwise updates the session with the Ime status.
             if (!mSession.isCallbackInvoked() && match(mSession.getRequestInfo())) {

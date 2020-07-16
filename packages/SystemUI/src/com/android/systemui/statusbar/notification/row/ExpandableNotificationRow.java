@@ -1122,9 +1122,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setGutsView(MenuItem item) {
-        if (mGuts != null && item.getGutsView() instanceof NotificationGuts.GutsContent) {
-            ((NotificationGuts.GutsContent) item.getGutsView()).setGutsParent(mGuts);
-            mGuts.setGutsContent((NotificationGuts.GutsContent) item.getGutsView());
+        if (getGuts() != null && item.getGutsView() instanceof NotificationGuts.GutsContent) {
+            getGuts().setGutsContent((NotificationGuts.GutsContent) item.getGutsView());
         }
     }
 

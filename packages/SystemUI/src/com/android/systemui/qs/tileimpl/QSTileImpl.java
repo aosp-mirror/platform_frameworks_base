@@ -14,8 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
+import static androidx.lifecycle.Lifecycle.State.STARTED;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
@@ -432,17 +432,19 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     private void handleSetListeningInternal(Object listener, boolean listening) {
+        // This should be used to go from resumed to paused. Listening for ON_RESUME and ON_PAUSE
+        // in this lifecycle will determine the listening window.
         if (listening) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "handleSetListening true");
-                mLifecycle.markState(RESUMED);
+                mLifecycle.setCurrentState(RESUMED);
                 handleSetListening(listening);
                 refreshState(); // Ensure we get at least one refresh after listening.
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 if (DEBUG) Log.d(TAG, "handleSetListening false");
-                mLifecycle.markState(DESTROYED);
+                mLifecycle.setCurrentState(STARTED);
                 handleSetListening(listening);
             }
         }

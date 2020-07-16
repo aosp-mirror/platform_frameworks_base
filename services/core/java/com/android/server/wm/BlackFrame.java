@@ -50,6 +50,7 @@ public class BlackFrame {
                     .setName("BlackSurface")
                     .setColorLayer()
                     .setParent(surfaceControl)
+                    .setCallsite("BlackSurface")
                     .build();
             transaction.setWindowCrop(surface, w, h);
             transaction.setAlpha(surface, 1);

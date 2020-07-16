@@ -433,13 +433,21 @@ public class ActivityTaskManager {
         }
     }
 
-    /** Returns whether the current UI mode supports error dialogs (ANR, crash, etc). */
-    public static boolean currentUiModeSupportsErrorDialogs(@NonNull Context context) {
-        final Configuration config = context.getResources().getConfiguration();
+    /**
+     * @return whether the UI mode of the given config supports error dialogs (ANR, crash, etc).
+     * @hide
+     */
+    public static boolean currentUiModeSupportsErrorDialogs(@NonNull Configuration config) {
         int modeType = config.uiMode & Configuration.UI_MODE_TYPE_MASK;
         return (modeType != Configuration.UI_MODE_TYPE_CAR
                 && !(modeType == Configuration.UI_MODE_TYPE_WATCH && Build.IS_USER)
                 && modeType != Configuration.UI_MODE_TYPE_TELEVISION
                 && modeType != Configuration.UI_MODE_TYPE_VR_HEADSET);
+    }
+
+    /** @return whether the current UI mode supports error dialogs (ANR, crash, etc). */
+    public static boolean currentUiModeSupportsErrorDialogs(@NonNull Context context) {
+        final Configuration config = context.getResources().getConfiguration();
+        return currentUiModeSupportsErrorDialogs(config);
     }
 }

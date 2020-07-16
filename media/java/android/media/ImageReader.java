@@ -200,6 +200,20 @@ public class ImageReader implements AutoCloseable {
      * </table>
      * Using other combinations may result in {@link IllegalArgumentException}.
      * </p>
+     * <p>
+     * If the {@link ImageReader} is used as an output target for a {@link
+     * android.hardware.camera2.CameraDevice}, and if the usage flag contains
+     * {@link HardwareBuffer#USAGE_VIDEO_ENCODE}, the timestamps of the
+     * {@link Image images} produced by the {@link ImageReader} won't be in the same timebase as
+     * {@link android.os.SystemClock#elapsedRealtimeNanos}, even if
+     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is
+     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME}.
+     * Instead, the timestamps will be roughly in the same timebase as in
+     * {@link android.os.SystemClock#uptimeMillis}, so that A/V synchronization could work for
+     * video recording. In this case, the timestamps from the {@link ImageReader} with
+     * {@link HardwareBuffer#USAGE_VIDEO_ENCODE} usage flag may not be directly comparable with
+     * timestamps of other streams or capture result metadata.
+     * </p>
      * @param width The default width in pixels of the Images that this reader will produce.
      * @param height The default height in pixels of the Images that this reader will produce.
      * @param format The format of the Image that this reader will produce. This must be one of the

@@ -33,6 +33,7 @@ import org.junit.runner.RunWith;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Random;
 
 /**
  * Internal tests for {@link StatsEvent}.
@@ -638,6 +639,165 @@ public class StatsEventTest {
 
         assertWithMessage("ERROR_ATOM_ID_INVALID_POSITION should be the only error in the mask")
                 .that(errorMask).isEqualTo(StatsEvent.ERROR_ATOM_ID_INVALID_POSITION);
+
+        assertThat(statsEvent.getNumBytes()).isEqualTo(buffer.position());
+
+        statsEvent.release();
+    }
+
+    @Test
+    public void testLargePulledEvent() {
+        final int expectedAtomId = 10_020;
+        byte[] field1 = new byte[10 * 1024];
+        new Random().nextBytes(field1);
+
+        final long minTimestamp = SystemClock.elapsedRealtimeNanos();
+        final StatsEvent statsEvent =
+                StatsEvent.newBuilder().setAtomId(expectedAtomId).writeByteArray(field1).build();
+        final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
+
+        assertThat(statsEvent.getAtomId()).isEqualTo(expectedAtomId);
+
+        final ByteBuffer buffer =
+                ByteBuffer.wrap(statsEvent.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+
+        assertWithMessage("Root element in buffer is not TYPE_OBJECT")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_OBJECT);
+
+        assertWithMessage("Incorrect number of elements in root object")
+                .that(buffer.get())
+                .isEqualTo(3);
+
+        assertWithMessage("First element is not timestamp")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_LONG);
+
+        assertWithMessage("Incorrect timestamp")
+                .that(buffer.getLong())
+                .isIn(Range.closed(minTimestamp, maxTimestamp));
+
+        assertWithMessage("Second element is not atom id")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_INT);
+
+        assertWithMessage("Incorrect atom id").that(buffer.getInt()).isEqualTo(expectedAtomId);
+
+        assertWithMessage("Third element is not byte array")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_BYTE_ARRAY);
+
+        final byte[] field1Actual = getByteArrayFromByteBuffer(buffer);
+        assertWithMessage("Incorrect field 1").that(field1Actual).isEqualTo(field1);
+
+        assertThat(statsEvent.getNumBytes()).isEqualTo(buffer.position());
+
+        statsEvent.release();
+    }
+
+    @Test
+    public void testPulledEventOverflow() {
+        final int expectedAtomId = 10_020;
+        byte[] field1 = new byte[50 * 1024];
+        new Random().nextBytes(field1);
+
+        final long minTimestamp = SystemClock.elapsedRealtimeNanos();
+        final StatsEvent statsEvent =
+                StatsEvent.newBuilder().setAtomId(expectedAtomId).writeByteArray(field1).build();
+        final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
+
+        assertThat(statsEvent.getAtomId()).isEqualTo(expectedAtomId);
+
+        final ByteBuffer buffer =
+                ByteBuffer.wrap(statsEvent.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+
+        assertWithMessage("Root element in buffer is not TYPE_OBJECT")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_OBJECT);
+
+        assertWithMessage("Incorrect number of elements in root object")
+                .that(buffer.get())
+                .isEqualTo(3);
+
+        assertWithMessage("First element is not timestamp")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_LONG);
+
+        assertWithMessage("Incorrect timestamp")
+                .that(buffer.getLong())
+                .isIn(Range.closed(minTimestamp, maxTimestamp));
+
+        assertWithMessage("Second element is not atom id")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_INT);
+
+        assertWithMessage("Incorrect atom id").that(buffer.getInt()).isEqualTo(expectedAtomId);
+
+        assertWithMessage("Third element is not errors type")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_ERRORS);
+
+        final int errorMask = buffer.getInt();
+
+        assertWithMessage("ERROR_OVERFLOW should be the only error in the error mask")
+                .that(errorMask)
+                .isEqualTo(StatsEvent.ERROR_OVERFLOW);
+
+        assertThat(statsEvent.getNumBytes()).isEqualTo(buffer.position());
+
+        statsEvent.release();
+    }
+
+    @Test
+    public void testPushedEventOverflow() {
+        final int expectedAtomId = 10_020;
+        byte[] field1 = new byte[10 * 1024];
+        new Random().nextBytes(field1);
+
+        final long minTimestamp = SystemClock.elapsedRealtimeNanos();
+        final StatsEvent statsEvent = StatsEvent.newBuilder()
+                                              .setAtomId(expectedAtomId)
+                                              .writeByteArray(field1)
+                                              .usePooledBuffer()
+                                              .build();
+        final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
+
+        assertThat(statsEvent.getAtomId()).isEqualTo(expectedAtomId);
+
+        final ByteBuffer buffer =
+                ByteBuffer.wrap(statsEvent.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+
+        assertWithMessage("Root element in buffer is not TYPE_OBJECT")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_OBJECT);
+
+        assertWithMessage("Incorrect number of elements in root object")
+                .that(buffer.get())
+                .isEqualTo(3);
+
+        assertWithMessage("First element is not timestamp")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_LONG);
+
+        assertWithMessage("Incorrect timestamp")
+                .that(buffer.getLong())
+                .isIn(Range.closed(minTimestamp, maxTimestamp));
+
+        assertWithMessage("Second element is not atom id")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_INT);
+
+        assertWithMessage("Incorrect atom id").that(buffer.getInt()).isEqualTo(expectedAtomId);
+
+        assertWithMessage("Third element is not errors type")
+                .that(buffer.get())
+                .isEqualTo(StatsEvent.TYPE_ERRORS);
+
+        final int errorMask = buffer.getInt();
+
+        assertWithMessage("ERROR_OVERFLOW should be the only error in the error mask")
+                .that(errorMask)
+                .isEqualTo(StatsEvent.ERROR_OVERFLOW);
 
         assertThat(statsEvent.getNumBytes()).isEqualTo(buffer.position());
 

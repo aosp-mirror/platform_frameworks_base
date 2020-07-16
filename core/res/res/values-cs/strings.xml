@@ -206,10 +206,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Zapněte pracovní profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše osobní aplikace jsou zablokovány, dokud nezapnete pracovní profil"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Osobní aplikace budou zablokovány <xliff:g id="DATE">%1$s</xliff:g> v <xliff:g id="TIME">%2$s</xliff:g>. Administrátor IT nepovoluje vypnutí pracovního profilu na déle než tento počet dní: <xliff:g id="NUMBER">%3$d</xliff:g>."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Zapnout"</string>
     <string name="me" msgid="6207584824693813140">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabletu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Možnosti zařízení Android TV"</string>
@@ -1665,7 +1663,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemčení telefonu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odebrat"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Služba v popředí z balíčku <xliff:g id="PACKAGENAME">%1$s</xliff:g>, která byla spuštěna na pozadí, v budoucích sestavenách typu R nebude mít oprávnění ke spuštění při používání. Přejděte na adresu go/r-bg-fgs-restriction a vyplňte zprávu o chybě."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšit hlasitost nad doporučenou úroveň?\n\nDlouhodobý poslech hlasitého zvuku může poškodit sluch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použít zkratku přístupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Když je tato zkratka zapnutá, můžete funkci přístupnosti spustit tím, že na tři sekundy podržíte obě tlačítka hlasitosti."</string>
@@ -1698,7 +1695,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Převrácení barev"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Oprava barev"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Byla podržena tlačítka hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Byla podržena tlačítka hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Byla podržena tlačítka hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> byla vypnuta."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Chcete-li používat službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tři sekundy podržte stisknutá obě tlačítka hlasitosti"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Určete, jakou funkci aktivujete klepnutím na tlačítko přístupnosti:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Určete, jakou funkci aktivujete pomocí gesta přístupnosti (přejetí dvěma prsty ze spodní části obrazovky nahoru):"</string>

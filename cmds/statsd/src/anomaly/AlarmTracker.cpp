@@ -60,11 +60,11 @@ void AlarmTracker::addSubscription(const Subscription& subscription) {
 }
 
 int64_t AlarmTracker::findNextAlarmSec(int64_t currentTimeSec) {
-    if (currentTimeSec <= mAlarmSec) {
+    if (currentTimeSec < mAlarmSec) {
         return mAlarmSec;
     }
     int64_t periodsForward =
-        ((currentTimeSec - mAlarmSec) * MS_PER_SEC - 1) / mAlarmConfig.period_millis() + 1;
+        ((currentTimeSec - mAlarmSec) * MS_PER_SEC) / mAlarmConfig.period_millis() + 1;
     return mAlarmSec + periodsForward * mAlarmConfig.period_millis() / MS_PER_SEC;
 }
 

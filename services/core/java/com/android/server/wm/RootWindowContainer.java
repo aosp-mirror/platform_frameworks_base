@@ -40,6 +40,7 @@ import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
+import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
@@ -662,10 +663,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    void setSecureSurfaceState(int userId, boolean disabled) {
+    void setSecureSurfaceState(int userId) {
         forAllWindows((w) -> {
             if (w.mHasSurface && userId == w.mShowUserId) {
-                w.mWinAnimator.setSecureLocked(disabled);
+                w.mWinAnimator.setSecureLocked(w.isSecureLocked());
             }
         }, true /* traverseTopToBottom */);
     }
@@ -989,9 +990,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         // Remove all deferred displays stacks, tasks, and activities.
-        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
-            mChildren.get(displayNdx).checkCompleteDeferredRemoval();
-        }
+        handleCompleteDeferredRemoval();
 
         forAllDisplays(dc -> {
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
@@ -2376,7 +2375,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         // triggered after contents are drawn on the display.
                         if (display.isSingleTaskInstance()) {
                             display.mDisplayContent.prepareAppTransition(
-                                    TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false);
+                                    TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false,
+                                    0 /* flags */, true /* forceOverride*/);
                         }
                         stack.awakeFromSleepingLocked();
                         if (display.isSingleTaskInstance()) {
@@ -2392,6 +2392,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             // activity here.
                             resumeFocusedStacksTopActivities();
                         }
+                        // The visibility update must not be called before resuming the top, so the
+                        // display orientation can be updated first if needed. Otherwise there may
+                        // have redundant configuration changes due to apply outdated display
+                        // orientation (from keyguard) to activity.
+                        stack.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                                false /* preserveWindows */);
                     }
                 }
             }
@@ -3121,12 +3127,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return hasVisibleActivities;
     }
 
-    void closeSystemDialogs() {
+    void closeSystemDialogActivities(String reason) {
         forAllActivities((r) -> {
-            if ((r.info.flags & ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                r.finishIfPossible("close-sys", true /* oomAdj */);
+            if ((r.info.flags & ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0
+                    || shouldCloseAssistant(r, reason)) {
+                r.finishIfPossible(reason, true /* oomAdj */);
             }
         });
+    }
+
+    private boolean shouldCloseAssistant(ActivityRecord r, String reason) {
+        if (!r.isActivityTypeAssistant()) return false;
+        if (reason == SYSTEM_DIALOG_REASON_ASSIST) return false;
+        // When the assistant is configured to be on top of the dream, it will have higher z-order
+        // than other activities. If it is also opaque, it will prevent other activities from
+        // starting. We want to close the assistant on closeSystemDialogs to allow other activities
+        // to start, e.g. on home button press.
+        return mWmService.mAssistantOnTopOfDream;
     }
 
     FinishDisabledPackageActivitiesHelper mFinishDisabledPackageActivitiesHelper =
@@ -3570,12 +3587,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    public void dump(PrintWriter pw, String prefix) {
+    @Override
+    public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
         pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedStack());
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final DisplayContent display = getChildAt(i);
-            display.dump(pw, prefix, true /* dumpAll */);
+            display.dump(pw, prefix, dumpAll);
         }
         pw.println();
     }

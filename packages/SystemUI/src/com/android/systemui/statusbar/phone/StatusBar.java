@@ -97,6 +97,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -1156,6 +1157,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
                 backdrop.findViewById(R.id.backdrop_back), mScrimController, mLockscreenWallpaper);
+        float maxWallpaperZoom = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_wallpaperMaxScale);
+        mNotificationShadeDepthControllerLazy.get().addListener(depth -> {
+            float scale = MathUtils.lerp(maxWallpaperZoom, 1f, depth);
+            backdrop.setPivotX(backdrop.getWidth() / 2f);
+            backdrop.setPivotY(backdrop.getHeight() / 2f);
+            backdrop.setScaleX(scale);
+            backdrop.setScaleY(scale);
+        });
 
         mNotificationPanelViewController.setUserSetupComplete(mUserSetup);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
@@ -1275,7 +1285,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mActivityLaunchAnimator = new ActivityLaunchAnimator(
                 mNotificationShadeWindowViewController, this, mNotificationPanelViewController,
                 mNotificationShadeDepthControllerLazy.get(),
-                (NotificationListContainer) mStackScroller);
+                (NotificationListContainer) mStackScroller, mContext.getMainExecutor());
 
         // TODO: inject this.
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
@@ -1772,6 +1782,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void setPanelExpanded(boolean isExpanded) {
+        if (mPanelExpanded != isExpanded) {
+            mNotificationLogger.onPanelExpandedChanged(isExpanded);
+        }
         mPanelExpanded = isExpanded;
         updateHideIconsForBouncer(false /* animate */);
         mNotificationShadeWindowController.setPanelExpanded(isExpanded);
@@ -2090,7 +2103,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * Called when another window is about to transfer it's input focus.
      */
-    public void onInputFocusTransfer(boolean start, float velocity) {
+    public void onInputFocusTransfer(boolean start, boolean cancel, float velocity) {
         if (!mCommandQueue.panelsEnabled()) {
             return;
         }
@@ -2098,7 +2111,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (start) {
             mNotificationPanelViewController.startWaitingForOpenPanelGesture();
         } else {
-            mNotificationPanelViewController.stopWaitingForOpenPanelGesture(velocity);
+            mNotificationPanelViewController.stopWaitingForOpenPanelGesture(cancel, velocity);
         }
     }
 
@@ -2253,6 +2266,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updateHideIconsForBouncer(false /* animate */);
             }
         }
+
+        updateBubblesVisibility();
     }
 
     @Override
@@ -2268,6 +2283,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mLightBarController.onStatusBarAppearanceChanged(appearanceRegions, barModeChanged,
                 mStatusBarMode, navbarColorManagedByIme);
+
+        updateBubblesVisibility();
     }
 
     @Override
@@ -2311,6 +2328,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int barMode = barMode(mTransientShown, mAppearance);
         if (updateBarMode(barMode)) {
             mLightBarController.onStatusBarModeChanged(barMode);
+            updateBubblesVisibility();
         }
     }
 
@@ -2393,6 +2411,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     // Called by NavigationBarFragment
     void setQsScrimEnabled(boolean scrimEnabled) {
         mNotificationPanelViewController.setQsScrimEnabled(scrimEnabled);
+    }
+
+    /** Temporarily hides Bubbles if the status bar is hidden. */
+    private void updateBubblesVisibility() {
+        mBubbleController.onStatusBarVisibilityChanged(
+                mStatusBarMode != MODE_LIGHTS_OUT
+                        && mStatusBarMode != MODE_LIGHTS_OUT_TRANSPARENT
+                        && !mStatusBarWindowHidden);
     }
 
     void checkBarMode(@TransitionMode int mode, @WindowVisibleState int windowState,
@@ -2865,7 +2891,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     // Visibility reporting
-
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         if (visibleToUser) {
             handleVisibleToUserChangedImpl(visibleToUser);
@@ -2887,12 +2912,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    /**
-     * The LEDs are turned off when the notification panel is shown, even just a little bit.
-     * See also StatusBar.setPanelExpanded for another place where we attempt to do this.
-     */
-    private void handleVisibleToUserChangedImpl(boolean visibleToUser) {
+    // Visibility reporting
+
+    void handleVisibleToUserChangedImpl(boolean visibleToUser) {
         if (visibleToUser) {
+            /* The LEDs are turned off when the notification panel is shown, even just a little bit.
+             * See also StatusBar.setPanelExpanded for another place where we attempt to do this. */
             boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
             boolean clearNotificationEffects =
                     !mPresenter.isPresenterFullyCollapsed() &&
@@ -3969,7 +3994,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mIsKeyguard && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else if (mBubbleController.isStackExpanded()) {
-            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
+            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED, mUnlockScrimCallback);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }

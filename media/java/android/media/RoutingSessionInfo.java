@@ -220,7 +220,7 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets information about how volume is handled on the session.
+     * Gets the information about how volume is handled on the session.
      *
      * @return {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
      * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}.

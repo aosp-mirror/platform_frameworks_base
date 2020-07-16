@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
@@ -87,7 +86,6 @@ import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
-import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
 import static com.android.server.wm.TaskProto.DISPLAY_ID;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
@@ -249,11 +247,6 @@ class ActivityStack extends Task {
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
 
-    /** Detach this stack from its display when animation completes. */
-    // TODO: maybe tie this to WindowContainer#removeChild some how...
-    // TODO: This is no longer set. Okay to remove or was the set removed by accident?
-    private boolean mDeferRemoval;
-
     // If this is true, we are in the bounds animating mode. The task will be down or upscaled to
     // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
     // would otherwise apply while resizing, while resizing in the bounds animating mode.
@@ -268,9 +261,6 @@ class ActivityStack extends Task {
 
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
-
-    /** Stores the override windowing-mode from before a transient mode change (eg. split) */
-    private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
@@ -662,19 +652,6 @@ class ActivityStack extends Task {
     }
 
     /**
-     * A transient windowing mode is one which activities enter into temporarily. Examples of this
-     * are Split window modes and pip. Non-transient modes are modes that displays can adopt.
-     *
-     * @param windowingMode the windowingMode to test for transient-ness.
-     * @return {@code true} if the windowing mode is transient, {@code false} otherwise.
-     */
-    private static boolean isTransientWindowingMode(int windowingMode) {
-        return windowingMode == WINDOWING_MODE_PINNED
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-    }
-
-    /**
      * Specialization of {@link #setWindowingMode(int)} for this subclass.
      *
      * @param preferredWindowingMode the preferred windowing mode. This may not be honored depending
@@ -698,11 +675,6 @@ class ActivityStack extends Task {
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final Task topTask = getTopMostTask();
         int windowingMode = preferredWindowingMode;
-        if (preferredWindowingMode == WINDOWING_MODE_UNDEFINED
-                && isTransientWindowingMode(currentMode)) {
-            // Leaving a transient mode. Interpret UNDEFINED as "restore"
-            windowingMode = mRestoreOverrideWindowingMode;
-        }
 
         // Need to make sure windowing mode is supported. If we in the process of creating the stack
         // no need to resolve the windowing mode again as it is already resolved to the right mode.
@@ -712,29 +684,16 @@ class ActivityStack extends Task {
                 windowingMode = WINDOWING_MODE_UNDEFINED;
             }
         }
-        if (taskDisplayArea.getRootSplitScreenPrimaryTask() == this
-                && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-            // Resolution to split-screen secondary for the primary split-screen stack means
-            // we want to leave split-screen mode.
-            windowingMode = mRestoreOverrideWindowingMode;
-        }
 
         final boolean alreadyInSplitScreenMode = taskDisplayArea.isSplitScreenModeActivated();
 
-        // Take any required action due to us not supporting the preferred windowing mode.
-        if (alreadyInSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
+        if (creating && alreadyInSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
                 && isActivityTypeStandardOrUndefined()) {
-            final boolean preferredSplitScreen =
-                    preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    || preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-            if (preferredSplitScreen || creating) {
-                // Looks like we can't launch in split screen mode or the stack we are launching
-                // doesn't support split-screen mode, go ahead an dismiss split-screen and display a
-                // warning toast about it.
-                mAtmService.getTaskChangeNotificationController()
-                        .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed(this);
-            }
+            // If the stack is being created explicitly in fullscreen mode, dismiss split-screen
+            // and display a warning toast about it.
+            mAtmService.getTaskChangeNotificationController()
+                    .notifyActivityDismissingDockedStack();
+            taskDisplayArea.onSplitScreenModeDismissed(this);
         }
 
         if (currentMode == windowingMode) {
@@ -797,9 +756,6 @@ class ActivityStack extends Task {
                         + " while there is already one isn't currently supported");
                 //return;
             }
-            if (isTransientWindowingMode(windowingMode) && !isTransientWindowingMode(currentMode)) {
-                mRestoreOverrideWindowingMode = currentOverrideMode;
-            }
 
             mTmpRect2.setEmpty();
             if (windowingMode != WINDOWING_MODE_FULLSCREEN) {
@@ -819,6 +775,22 @@ class ActivityStack extends Task {
 
         mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
+
+        final boolean pinnedToFullscreen = currentMode == WINDOWING_MODE_PINNED
+                && windowingMode == WINDOWING_MODE_FULLSCREEN;
+        if (pinnedToFullscreen && topActivity != null && !isForceHidden()) {
+            mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
+            try {
+                // Report orientation as soon as possible so that the display can freeze earlier if
+                // the display orientation will be changed. Because the surface bounds of activity
+                // may have been set to fullscreen but the activity hasn't redrawn its content yet,
+                // the rotation animation needs to capture snapshot earlier to avoid animating from
+                // an intermediate state.
+                topActivity.reportDescendantOrientationChangeIfNeeded();
+            } finally {
+                mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(false);
+            }
+        }
     }
 
     @Override
@@ -835,7 +807,7 @@ class ActivityStack extends Task {
     /** Resume next focusable stack after reparenting to another display. */
     void postReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
-                true /* moveParentsToTop */);
+                true /* moveDisplayToTop */);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
         // Update visibility of activities before notifying WM. This way it won't try to resize
         // windows that are no longer visible.
@@ -982,8 +954,6 @@ class ActivityStack extends Task {
     void awakeFromSleepingLocked() {
         // Ensure activities are no longer sleeping.
         forAllActivities((Consumer<ActivityRecord>) (r) -> r.setSleeping(false));
-        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */);
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             mPausingActivity.activityPaused(true);
@@ -1704,7 +1674,8 @@ class ActivityStack extends Task {
             // happens to be sitting towards the end.
             if (next.attachedToProcess()) {
                 next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* activityChange */, false /* updateOomAdj */);
+                        true /* activityChange */, false /* updateOomAdj */,
+                        false /* addPendingTopUid */);
             } else if (!next.isProcessRunning()) {
                 // Since the start-process is asynchronous, if we already know the process of next
                 // activity isn't running, we can start the process earlier to save the time to wait
@@ -1861,7 +1832,8 @@ class ActivityStack extends Task {
             next.setState(RESUMED, "resumeTopActivityInnerLocked");
 
             next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                    true /* activityChange */, true /* updateOomAdj */);
+                    true /* activityChange */, true /* updateOomAdj */,
+                    true /* addPendingTopUid */);
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
@@ -2084,7 +2056,12 @@ class ActivityStack extends Task {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
                     } else if (getDisplay().isSingleTaskInstance()) {
+                        // If a new task is being launched in a single task display, we don't need
+                        // to play normal animation, but need to trigger a callback when an app
+                        // transition is actually handled. So ignore already prepared activity, and
+                        // override it.
                         transit = TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
+                        keepCurTransition = false;
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
                         // supporting picture-in-picture while pausing only if the starting activity
@@ -2466,7 +2443,7 @@ class ActivityStack extends Task {
         forAllActivities(ActivityRecord::removeLaunchTickRunnable);
     }
 
-    private void updateTransitLocked(int transit, ActivityOptions options) {
+    private void updateTransitLocked(int transit, ActivityOptions options, boolean forceOverride) {
         if (options != null) {
             ActivityRecord r = topRunningActivity();
             if (r != null && !r.isState(RESUMED)) {
@@ -2475,7 +2452,8 @@ class ActivityStack extends Task {
                 ActivityOptions.abort(options);
             }
         }
-        getDisplay().mDisplayContent.prepareAppTransition(transit, false);
+        getDisplay().mDisplayContent.prepareAppTransition(transit, false,
+                0 /* flags */, forceOverride);
     }
 
     final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,
@@ -2495,8 +2473,17 @@ class ActivityStack extends Task {
             // nothing to do!
             if (noAnimation) {
                 ActivityOptions.abort(options);
+            } else if (isSingleTaskInstance()) {
+                // When a task is moved front on the display which can only contain one task, start
+                // a special transition.
+                // {@link AppTransitionController#handleAppTransitionReady} later picks up the
+                // transition, and schedules
+                // {@link ITaskStackListener#onSingleTaskDisplayDrawn} callback which is triggered
+                // after contents are drawn on the display.
+                updateTransitLocked(TRANSIT_SHOW_SINGLE_TASK_DISPLAY, options,
+                        true /* forceOverride */);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options, false /* forceOverride */);
             }
             return;
         }
@@ -2542,9 +2529,13 @@ class ActivityStack extends Task {
                     mStackSupervisor.mNoAnimActivities.add(r);
                 }
                 ActivityOptions.abort(options);
+            } else if (isSingleTaskInstance()) {
+                updateTransitLocked(TRANSIT_SHOW_SINGLE_TASK_DISPLAY, options,
+                        true /* forceOverride */);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options, false /* forceOverride */);
             }
+
             // If a new task is moved to the front, then mark the existing top activity as
             // supporting
 
@@ -3252,22 +3243,19 @@ class ActivityStack extends Task {
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        pw.println(prefix + "mStackId=" + getRootTaskId());
-        pw.println(prefix + "mDeferRemoval=" + mDeferRemoval);
-        pw.println(prefix + "mBounds=" + getRawBounds().toShortString());
-        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).dump(pw, prefix + "  ", dumpAll);
-        }
+        super.dump(pw, prefix, dumpAll);
         if (!mExitingActivities.isEmpty()) {
             pw.println();
-            pw.println("  Exiting application tokens:");
+            pw.println(prefix + "Exiting application tokens:");
+            final String doublePrefix = prefix + "  ";
             for (int i = mExitingActivities.size() - 1; i >= 0; i--) {
                 WindowToken token = mExitingActivities.get(i);
-                pw.print("  Exiting App #"); pw.print(i);
+                pw.print(doublePrefix + "Exiting App #" + i);
                 pw.print(' '); pw.print(token);
                 pw.println(':');
-                token.dump(pw, "    ", dumpAll);
+                token.dump(pw, doublePrefix, dumpAll);
             }
+            pw.println();
         }
         mAnimatingActivityRegistry.dump(pw, "AnimatingApps:", prefix);
     }
@@ -3324,15 +3312,12 @@ class ActivityStack extends Task {
     }
 
     /** Returns true if a removal action is still being deferred. */
-    boolean checkCompleteDeferredRemoval() {
+    boolean handleCompleteDeferredRemoval() {
         if (isAnimating(TRANSITION | CHILDREN)) {
             return true;
         }
-        if (mDeferRemoval) {
-            removeImmediately();
-        }
 
-        return super.checkCompleteDeferredRemoval();
+        return super.handleCompleteDeferredRemoval();
     }
 
     public DisplayInfo getDisplayInfo() {
@@ -3400,7 +3385,6 @@ class ActivityStack extends Task {
             mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
         }
 
-        proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(ANIMATING_BOUNDS, mBoundsAnimating);
 
         if (mSurfaceControl != null) {

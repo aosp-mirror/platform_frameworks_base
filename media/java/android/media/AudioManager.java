@@ -4599,6 +4599,12 @@ public class AudioManager {
 
     /**
      * @hide
+     * Volume behavior for an audio device that has no particular volume behavior set. Invalid as
+     * an argument to {@link #setDeviceVolumeBehavior(int, String, int)}.
+     */
+    public static final int DEVICE_VOLUME_BEHAVIOR_UNSET = -1;
+    /**
+     * @hide
      * Volume behavior for an audio device where a software attenuation is applied
      * @see #setDeviceVolumeBehavior(int, String, int)
      */
@@ -4646,6 +4652,18 @@ public class AudioManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceVolumeBehavior {}
+
+    /** @hide */
+    @IntDef({
+            DEVICE_VOLUME_BEHAVIOR_UNSET,
+            DEVICE_VOLUME_BEHAVIOR_VARIABLE,
+            DEVICE_VOLUME_BEHAVIOR_FULL,
+            DEVICE_VOLUME_BEHAVIOR_FIXED,
+            DEVICE_VOLUME_BEHAVIOR_ABSOLUTE,
+            DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceVolumeBehaviorState {}
 
     /**
      * @hide
@@ -4713,7 +4731,7 @@ public class AudioManager {
      * @return the volume behavior for the device
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @DeviceVolumeBehavior int getDeviceVolumeBehavior(int deviceType,
+    public @DeviceVolumeBehaviorState int getDeviceVolumeBehavior(int deviceType,
             @Nullable String deviceAddress) {
         // verify arguments
         AudioDeviceInfo.enforceValidAudioDeviceTypeOut(deviceType);
@@ -4728,8 +4746,8 @@ public class AudioManager {
      * @return the volume behavior for the device
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @DeviceVolumeBehavior int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device)
-    {
+    public @DeviceVolumeBehaviorState int getDeviceVolumeBehavior(
+            @NonNull AudioDeviceAttributes device) {
         // verify arguments (validity of device type is enforced in server)
         Objects.requireNonNull(device);
         // communicate with service

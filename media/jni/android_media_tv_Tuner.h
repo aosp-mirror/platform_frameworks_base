@@ -130,7 +130,7 @@ struct MediaEvent : public RefBase {
     jweak mMediaEventObj;
     jweak mLinearBlockObj;
     C2HandleIon* mIonHandle;
-    std::shared_ptr<C2Buffer> mC2Buffer;
+    std::weak_ptr<C2Buffer> mC2Buffer;
 };
 
 struct Filter : public RefBase {

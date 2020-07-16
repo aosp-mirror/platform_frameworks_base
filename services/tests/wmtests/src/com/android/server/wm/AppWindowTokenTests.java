@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -37,7 +38,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
@@ -64,11 +65,11 @@ import android.view.WindowManager;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
 
 /**
  * Tests for the {@link ActivityRecord} class.
@@ -295,6 +296,27 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRespectTopFullscreenOrientation() {
+        final Configuration displayConfig = mActivity.mDisplayContent.getConfiguration();
+        final Configuration activityConfig = mActivity.getConfiguration();
+        mActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, displayConfig.orientation);
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, activityConfig.orientation);
+
+        final ActivityRecord topActivity = WindowTestUtils.createTestActivityRecord(mStack);
+        topActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, displayConfig.orientation);
+        // Although the activity requested portrait, it is not the top activity that determines
+        // the display orientation. So it should be able to inherit the orientation from parent.
+        // Otherwise its configuration will be inconsistent that its orientation is portrait but
+        // other screen configurations are in landscape, e.g. screenWidthDp, screenHeightDp, and
+        // window configuration.
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, activityConfig.orientation);
+    }
+
+    @Test
     public void testReportOrientationChange() {
         mActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -384,12 +406,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertHasStartingWindow(activity2);
 
         // Assert that bottom activity is allowed to do animation.
+        ArrayList<WindowContainer> sources = new ArrayList<>();
+        sources.add(activity2);
         doReturn(true).when(activity2).okToAnimate();
         doReturn(true).when(activity2).isAnimating();
-        final OnAnimationFinishedCallback onAnimationFinishedCallback =
-                mock(OnAnimationFinishedCallback.class);
-        assertTrue(activity2.applyAnimation(null, TRANSIT_ACTIVITY_OPEN, true, false,
-                onAnimationFinishedCallback));
+        assertTrue(activity2.applyAnimation(null, TRANSIT_ACTIVITY_OPEN, true, false, sources));
     }
 
     @Test
@@ -430,6 +451,32 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // The activity was visible by mVisibleSetFromTransferredStartingWindow, so after its
         // starting window is transferred, it should restore to invisible.
         assertFalse(middle.isVisible());
+    }
+
+    @Test
+    public void testTransferStartingWindowSetFixedRotation() {
+        final ActivityRecord topActivity = createTestActivityRecordForGivenTask(mTask);
+        topActivity.setVisible(false);
+        mTask.positionChildAt(topActivity, POSITION_TOP);
+        mActivity.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false);
+        waitUntilHandlersIdle();
+
+        // Make activities to have different rotation from it display and set fixed rotation
+        // transform to activity1.
+        int rotation = (mDisplayContent.getRotation() + 1) % 4;
+        mDisplayContent.setFixedRotationLaunchingApp(mActivity, rotation);
+        doReturn(rotation).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(topActivity);
+
+        // Make sure the fixed rotation transform linked to activity2 when adding starting window
+        // on activity2.
+        topActivity.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, mActivity.appToken.asBinder(),
+                false, false, false, true, false);
+        waitUntilHandlersIdle();
+        assertTrue(topActivity.hasFixedRotationTransform());
     }
 
     private ActivityRecord createIsolatedTestActivityRecord() {

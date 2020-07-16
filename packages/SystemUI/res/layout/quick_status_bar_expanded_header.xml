@@ -29,10 +29,10 @@
     android:clipToPadding="false"
     android:paddingTop="0dp"
     android:paddingEnd="0dp"
-    android:paddingBottom="10dp"
     android:paddingStart="0dp"
     android:elevation="4dp" >
 
+    <!-- The clock -->
     <include layout="@layout/quick_status_bar_header_system_icons" />
 
     <!-- Status icons within the panel itself (and not in the top-most status bar) -->
@@ -51,6 +51,7 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
+        android:paddingBottom="10dp"
         android:importantForAccessibility="yes" />
 
     <TextView

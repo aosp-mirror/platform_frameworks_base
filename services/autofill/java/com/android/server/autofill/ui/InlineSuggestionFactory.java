@@ -53,9 +53,9 @@ final class InlineSuggestionFactory {
 
     public static InlineSuggestion createInlineAuthentication(
             @NonNull InlineSuggestionsRequest request, @NonNull FillResponse response,
-            @NonNull AutofillId autofillId,
             @NonNull AutoFillUI.AutoFillUiCallback client, @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService, int userId,
+            int sessionId) {
         final BiConsumer<Dataset, Integer> onClickFactory = (dataset, datasetIndex) -> {
             client.authenticate(response.getRequestId(),
                     datasetIndex, response.getAuthentication(), response.getClientState(),
@@ -66,7 +66,8 @@ final class InlineSuggestionFactory {
         InlinePresentation inlineAuthentication = response.getInlinePresentation();
         return createInlineAuthSuggestion(
                 mergedInlinePresentation(request, 0, inlineAuthentication),
-                remoteRenderService, onClickFactory, onErrorCallback, intentSenderConsumer,
+                remoteRenderService, userId, sessionId,
+                onClickFactory, onErrorCallback, intentSenderConsumer,
                 request.getHostInputToken(), request.getHostDisplayId());
     }
 
@@ -80,7 +81,8 @@ final class InlineSuggestionFactory {
             @NonNull List<Dataset> datasets,
             @NonNull AutofillId autofillId,
             @NonNull AutoFillUI.AutoFillUiCallback client, @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId) {
         if (sDebug) Slog.d(TAG, "createInlineSuggestionsResponse called");
         final Consumer<IntentSender> intentSenderConsumer = (intentSender) ->
                 client.startIntentSender(intentSender, new Intent());
@@ -90,7 +92,8 @@ final class InlineSuggestionFactory {
 
         return createInlineSuggestionsInternal(/* isAugmented= */ false, request,
                 datasets, autofillId,
-                onErrorCallback, onClickFactory, intentSenderConsumer, remoteRenderService);
+                onErrorCallback, onClickFactory, intentSenderConsumer, remoteRenderService, userId,
+                sessionId);
     }
 
     /**
@@ -104,15 +107,16 @@ final class InlineSuggestionFactory {
             @NonNull AutofillId autofillId,
             @NonNull InlineFillUi.InlineSuggestionUiCallback inlineSuggestionUiCallback,
             @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId) {
         if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
         return createInlineSuggestionsInternal(/* isAugmented= */ true, request,
                 datasets, autofillId, onErrorCallback,
                 (dataset, datasetIndex) ->
-                        inlineSuggestionUiCallback.autofill(dataset),
+                        inlineSuggestionUiCallback.autofill(dataset, datasetIndex),
                 (intentSender) ->
                         inlineSuggestionUiCallback.startIntentSender(intentSender, new Intent()),
-                remoteRenderService);
+                remoteRenderService, userId, sessionId);
     }
 
     @Nullable
@@ -121,7 +125,8 @@ final class InlineSuggestionFactory {
             @NonNull List<Dataset> datasets, @NonNull AutofillId autofillId,
             @NonNull Runnable onErrorCallback, @NonNull BiConsumer<Dataset, Integer> onClickFactory,
             @NonNull Consumer<IntentSender> intentSenderConsumer,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId) {
         SparseArray<Pair<Dataset, InlineSuggestion>> response = new SparseArray<>(datasets.size());
         for (int datasetIndex = 0; datasetIndex < datasets.size(); datasetIndex++) {
             final Dataset dataset = datasets.get(datasetIndex);
@@ -139,7 +144,8 @@ final class InlineSuggestionFactory {
             InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
                     datasetIndex,
                     mergedInlinePresentation(request, datasetIndex, inlinePresentation),
-                    onClickFactory, remoteRenderService, onErrorCallback, intentSenderConsumer,
+                    onClickFactory, remoteRenderService, userId, sessionId,
+                    onErrorCallback, intentSenderConsumer,
                     request.getHostInputToken(), request.getHostDisplayId());
             response.append(datasetIndex, Pair.create(dataset, inlineSuggestion));
         }
@@ -151,6 +157,7 @@ final class InlineSuggestionFactory {
             @NonNull InlinePresentation inlinePresentation,
             @NonNull BiConsumer<Dataset, Integer> onClickFactory,
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId,
             @NonNull Runnable onErrorCallback, @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable IBinder hostInputToken,
             int displayId) {
@@ -167,7 +174,8 @@ final class InlineSuggestionFactory {
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation,
                         () -> onClickFactory.accept(dataset, datasetIndex), onErrorCallback,
-                        intentSenderConsumer, remoteRenderService, hostInputToken, displayId));
+                        intentSenderConsumer, remoteRenderService, userId, sessionId,
+                        hostInputToken, displayId));
 
         return inlineSuggestion;
     }
@@ -175,6 +183,7 @@ final class InlineSuggestionFactory {
     private static InlineSuggestion createInlineAuthSuggestion(
             @NonNull InlinePresentation inlinePresentation,
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId,
             @NonNull BiConsumer<Dataset, Integer> onClickFactory, @NonNull Runnable onErrorCallback,
             @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable IBinder hostInputToken, int displayId) {
@@ -187,8 +196,8 @@ final class InlineSuggestionFactory {
                 createInlineContentProvider(inlinePresentation,
                         () -> onClickFactory.accept(null,
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
-                        onErrorCallback, intentSenderConsumer, remoteRenderService, hostInputToken,
-                        displayId));
+                        onErrorCallback, intentSenderConsumer, remoteRenderService, userId,
+                        sessionId, hostInputToken, displayId));
     }
 
     /**
@@ -216,12 +225,13 @@ final class InlineSuggestionFactory {
             @NonNull Runnable onErrorCallback,
             @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId,
             @Nullable IBinder hostInputToken,
             int displayId) {
         RemoteInlineSuggestionViewConnector
                 remoteInlineSuggestionViewConnector = new RemoteInlineSuggestionViewConnector(
-                remoteRenderService, inlinePresentation, hostInputToken, displayId, onClickAction,
-                onErrorCallback, intentSenderConsumer);
+                remoteRenderService, userId, sessionId, inlinePresentation, hostInputToken,
+                displayId, onClickAction, onErrorCallback, intentSenderConsumer);
         InlineContentProviderImpl inlineContentProvider = new InlineContentProviderImpl(
                 remoteInlineSuggestionViewConnector, null);
         return inlineContentProvider;

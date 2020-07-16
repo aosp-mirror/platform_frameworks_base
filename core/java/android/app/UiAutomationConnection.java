@@ -294,7 +294,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permission, userId);
+            mPermissionManager.revokeRuntimePermission(packageName, permission, userId, null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

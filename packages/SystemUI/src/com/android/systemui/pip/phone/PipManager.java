@@ -41,6 +41,7 @@ import android.window.WindowContainerTransaction;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
@@ -81,21 +82,30 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private InputConsumerController mInputConsumerController;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
+    private PipTaskOrganizer mPipTaskOrganizer;
     private PipAppOpsListener mAppOpsListener;
     private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
     private boolean mIsInFixedRotation;
 
     protected PipMenuActivityController mMenuController;
-    protected PipTaskOrganizer mPipTaskOrganizer;
 
     /**
      * Handler for display rotation changes.
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        if (!mPipTaskOrganizer.isInPip() || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
+            // Skip if we aren't in PIP or haven't actually entered PIP yet. We still need to update
+            // the display layout in the bounds handler in this case.
+            mPipBoundsHandler.onDisplayRotationChangedNotInPip(toRotation);
+            return;
+        }
+        // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
+        // the bounds for the next orientation using the destination bounds of the animation
+        // TODO: Techincally this should account for movement animation bounds as well
+        Rect currentBounds = mPipTaskOrganizer.getCurrentOrAnimatingBounds();
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
-                mPipTaskOrganizer.getLastReportedBounds(), mTmpInsetBounds, displayId, fromRotation,
-                toRotation, t);
+                currentBounds, mTmpInsetBounds, displayId, fromRotation, toRotation, t);
         if (changed) {
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
@@ -115,7 +125,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             }
 
             updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
-                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
+                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
         }
     };
 
@@ -165,7 +175,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         @Override
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-            if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
+            if (task.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_PINNED) {
                 return;
             }
@@ -193,7 +203,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mHandler.post(() -> updateMovementBounds(null /* toBounds */,
-                    false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */));
+                    false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */,
+                    null /* windowContainerTransaction */));
         }
 
         @Override
@@ -229,7 +240,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             DeviceConfigProxy deviceConfig,
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
-            PipTaskOrganizer pipTaskOrganizer) {
+            PipTaskOrganizer pipTaskOrganizer,
+            SysUiState sysUiState) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -250,7 +262,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm);
+                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
@@ -269,7 +281,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             if (stackInfo != null) {
                 // If SystemUI restart, and it already existed a pinned stack,
                 // register the pip input consumer to ensure touch can send to it.
-                mInputConsumerController.registerInputConsumer();
+                mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
             }
         } catch (RemoteException | UnsupportedOperationException e) {
             e.printStackTrace();
@@ -325,7 +337,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mTouchHandler.onShelfVisibilityChanged(visible, shelfHeight);
                 updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
                         false /* fromRotation */, false /* fromImeAdjustment */,
-                        true /* fromShelfAdjustment */);
+                        true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
             }
         });
     }
@@ -385,15 +397,16 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     }
 
     private void updateMovementBounds(@Nullable Rect toBounds, boolean fromRotation,
-            boolean fromImeAdjustment, boolean fromShelfAdjustment) {
+            boolean fromImeAdjustment, boolean fromShelfAdjustment,
+            WindowContainerTransaction wct) {
         // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
         // passing to mTouchHandler/mPipTaskOrganizer
         final Rect outBounds = new Rect(toBounds);
         mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 outBounds, mTmpDisplayInfo);
         // mTouchHandler would rely on the bounds populated from mPipTaskOrganizer
-        mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation,
-                fromImeAdjustment, fromShelfAdjustment);
+        mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation, fromImeAdjustment,
+                fromShelfAdjustment, wct);
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 outBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);

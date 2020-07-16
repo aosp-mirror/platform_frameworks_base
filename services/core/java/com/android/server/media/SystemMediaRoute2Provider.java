@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
 import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
+import static android.media.MediaRoute2Info.FEATURE_LOCAL_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
@@ -45,6 +46,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -58,8 +60,7 @@ import java.util.Objects;
 // TODO: check thread safety. We may need to use lock to protect variables.
 class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private static final String TAG = "MR2SystemProvider";
-    // TODO(b/156996903): Revert it when releasing the framework.
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
     static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
@@ -98,12 +99,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
     };
 
-    SystemMediaRoute2Provider(Context context, Callback callback) {
+    SystemMediaRoute2Provider(Context context) {
         super(sComponentName);
-        setCallback(callback);
 
         mIsSystemRouteProvider = true;
-
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
 
@@ -140,6 +139,13 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             });
         }
         updateVolume();
+    }
+
+    @Override
+    public void setCallback(Callback callback) {
+        super.setCallback(callback);
+        notifyProviderState();
+        notifySessionInfoUpdated();
     }
 
     @Override
@@ -216,6 +222,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // Do nothing since we don't support grouping volume yet.
     }
 
+    @Override
+    public void prepareReleaseSession(String sessionId) {
+        // Do nothing since the system session persists.
+    }
+
     public MediaRoute2Info getDefaultRoute() {
         return mDefaultRoute;
     }
@@ -257,6 +268,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 .setType(type)
                 .addFeature(FEATURE_LIVE_AUDIO)
                 .addFeature(FEATURE_LIVE_VIDEO)
+                .addFeature(FEATURE_LOCAL_PLAYBACK)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)
                 .build();
         updateProviderState();
@@ -354,6 +366,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     void notifySessionInfoUpdated() {
+        if (mCallback == null) {
+            return;
+        }
+
         RoutingSessionInfo sessionInfo;
         synchronized (mLock) {
             sessionInfo = mSessionInfos.get(0);

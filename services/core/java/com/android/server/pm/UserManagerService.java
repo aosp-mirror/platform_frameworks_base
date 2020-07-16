@@ -751,13 +751,19 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-        return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */ true);
+        return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */
+                true);
     }
 
     @Override
     public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
             boolean excludePreCreated) {
         checkManageOrCreateUsersPermission("query users");
+        return getUsersInternal(excludePartial, excludeDying, excludePreCreated);
+    }
+
+    private @NonNull List<UserInfo> getUsersInternal(boolean excludePartial, boolean excludeDying,
+            boolean excludePreCreated) {
         synchronized (mUsersLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             final int userSize = mUsers.size();
@@ -989,6 +995,15 @@ public class UserManagerService extends IUserManager.Stub {
 
         ensureCanModifyQuietMode(
                 callingPackage, Binder.getCallingUid(), userId, target != null, dontAskCredential);
+
+        if (onlyIfCredentialNotRequired && callingPackage.equals(
+                getPackageManagerInternal().getSystemUiServiceComponent().getPackageName())) {
+            // This is to prevent SysUI from accidentally allowing the profile to turned on
+            // without password when keyguard is still locked.
+            throw new SecurityException("SystemUI is not allowed to set "
+                    + "QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED");
+        }
+
         final long identity = Binder.clearCallingIdentity();
         try {
             if (enableQuietMode) {
@@ -996,7 +1011,17 @@ public class UserManagerService extends IUserManager.Stub {
                         userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
             }
-            mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
+            if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(userId)) {
+                KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
+                // Normally only attempt to auto-unlock unified challenge if keyguard is not showing
+                // (to stop turning profile on automatically via the QS tile), except when we
+                // are called with QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED, in which
+                // case always attempt to auto-unlock.
+                if (!km.isDeviceLocked(mLocalService.getProfileParentId(userId))
+                        || onlyIfCredentialNotRequired) {
+                    mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
+                }
+            }
             final boolean needToShowConfirmCredential = !dontAskCredential
                     && mLockPatternUtils.isSecure(userId)
                     && !StorageManager.isUserKeyUnlocked(userId);
@@ -1029,6 +1054,8 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void ensureCanModifyQuietMode(String callingPackage, int callingUid,
             @UserIdInt int targetUserId, boolean startIntent, boolean dontAskCredential) {
+        verifyCallingPackage(callingPackage, callingUid);
+
         if (hasManageUsersPermission()) {
             return;
         }
@@ -1050,7 +1077,6 @@ public class UserManagerService extends IUserManager.Stub {
             return;
         }
 
-        verifyCallingPackage(callingPackage, callingUid);
         final ShortcutServiceInternal shortcutInternal =
                 LocalServices.getService(ShortcutServiceInternal.class);
         if (shortcutInternal != null) {
@@ -2250,9 +2276,6 @@ public class UserManagerService extends IUserManager.Stub {
         // Managed profiles have their own specific rules.
         final boolean isManagedProfile = type.isManagedProfile();
         if (isManagedProfile) {
-            if (ActivityManager.isLowRamDeviceStatic()) {
-                return false;
-            }
             if (!mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_MANAGED_USERS)) {
                 return false;
@@ -3274,11 +3297,13 @@ public class UserManagerService extends IUserManager.Stub {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("createUser-" + flags);
         final long sessionId = logUserCreateJourneyBegin(nextProbableUserId, userType, flags);
+        UserInfo newUser = null;
         try {
-            return createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
-                    preCreate, disallowedPackages, t);
+            newUser = createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
+                        preCreate, disallowedPackages, t);
+            return newUser;
         } finally {
-            logUserCreateJourneyFinish(sessionId, nextProbableUserId);
+            logUserCreateJourneyFinish(sessionId, nextProbableUserId, newUser != null);
             t.traceEnd();
         }
     }
@@ -3297,10 +3322,11 @@ public class UserManagerService extends IUserManager.Stub {
         return sessionId;
     }
 
-    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId) {
+    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
         FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH);
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                       : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
     }
 
     private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,
@@ -5022,6 +5048,12 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public int[] getUserIds() {
             return UserManagerService.this.getUserIds();
+        }
+
+        @Override
+        public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
+            return UserManagerService.this.getUsersInternal(/*excludePartial= */ true,
+                    excludeDying, /* excludePreCreated= */ true);
         }
 
         @Override

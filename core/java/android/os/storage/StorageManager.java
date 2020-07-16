@@ -16,9 +16,11 @@
 
 package android.os.storage;
 
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
+import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
 import static android.app.AppOpsManager.OP_READ_MEDIA_IMAGES;
@@ -1365,6 +1367,7 @@ public class StorageManager {
                 String[] packageNames = ActivityThread.getPackageManager().getPackagesForUid(
                         android.os.Process.myUid());
                 if (packageNames == null || packageNames.length <= 0) {
+                    Log.w(TAG, "Missing package names; no storage volumes available");
                     return new StorageVolume[0];
                 }
                 packageName = packageNames[0];
@@ -1372,6 +1375,7 @@ public class StorageManager {
             final int uid = ActivityThread.getPackageManager().getPackageUid(packageName,
                     PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             if (uid <= 0) {
+                Log.w(TAG, "Missing UID; no storage volumes available");
                 return new StorageVolume[0];
             }
             return storageManager.getVolumeList(uid, packageName, flags);
@@ -1851,7 +1855,7 @@ public class StorageManager {
     /** {@hide} */
     public boolean checkPermissionReadAudio(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
                 READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
             return false;
         }
@@ -1862,7 +1866,7 @@ public class StorageManager {
     /** {@hide} */
     public boolean checkPermissionWriteAudio(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
                 WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
             return false;
         }
@@ -1873,7 +1877,7 @@ public class StorageManager {
     /** {@hide} */
     public boolean checkPermissionReadVideo(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
                 READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
             return false;
         }
@@ -1884,7 +1888,7 @@ public class StorageManager {
     /** {@hide} */
     public boolean checkPermissionWriteVideo(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
                 WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
             return false;
         }
@@ -1895,7 +1899,7 @@ public class StorageManager {
     /** {@hide} */
     public boolean checkPermissionReadImages(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
                 READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
             return false;
         }
@@ -1906,12 +1910,30 @@ public class StorageManager {
     /** {@hide} */
     public boolean checkPermissionWriteImages(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
                 WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
             return false;
         }
         return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
                 OP_WRITE_MEDIA_IMAGES);
+    }
+
+    private boolean checkExternalStoragePermissionAndAppOp(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId, String permission,
+            int op) {
+        // First check if app has MANAGE_EXTERNAL_STORAGE.
+        final int mode = mAppOps.noteOpNoThrow(OP_MANAGE_EXTERNAL_STORAGE, uid, packageName,
+                featureId, null);
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
+        if (mode == AppOpsManager.MODE_DEFAULT && mContext.checkPermission(
+                  MANAGE_EXTERNAL_STORAGE, pid, uid) == PERMISSION_GRANTED) {
+            return true;
+        }
+        // If app doesn't have MANAGE_EXTERNAL_STORAGE, then check if it has requested granular
+        // permission.
+        return checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId, permission, op);
     }
 
     /** {@hide} */

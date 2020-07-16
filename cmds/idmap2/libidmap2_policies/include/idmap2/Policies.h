@@ -21,8 +21,11 @@
 #include <string>
 #include <vector>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
+
+using android::base::StringPrintf;
 
 using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
@@ -48,6 +51,29 @@ inline static const std::array<std::pair<StringPiece, PolicyFlags>, 8> kPolicySt
     {kPolicySystem, PolicyFlags::SYSTEM_PARTITION},
     {kPolicyVendor, PolicyFlags::VENDOR_PARTITION},
 };
+
+inline static std::string PoliciesToDebugString(PolicyBitmask policies) {
+  std::string str;
+  uint32_t remaining = policies;
+  for (auto const& policy : kPolicyStringToFlag) {
+    if ((policies & policy.second) != policy.second) {
+      continue;
+    }
+    if (!str.empty()) {
+      str.append("|");
+    }
+    str.append(policy.first.data());
+    remaining &= ~policy.second;
+  }
+  if (remaining != 0) {
+    if (!str.empty()) {
+      str.append("|");
+    }
+    str.append(StringPrintf("0x%08x", remaining));
+  }
+  return !str.empty() ? str : "none";
+}
+
 }  // namespace android::idmap2::policy
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_POLICIES_H_

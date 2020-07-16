@@ -1,8 +1,10 @@
 package com.android.systemui.media
 
 import android.graphics.Rect
+import android.util.ArraySet
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
+import com.android.systemui.util.animation.DisappearParameters
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.UniqueObjectHostView
@@ -12,16 +14,13 @@ import javax.inject.Inject
 class MediaHost @Inject constructor(
     private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
-    private val mediaDataManager: MediaDataManager,
-    private val mediaDataManagerCombineLatest: MediaDataCombineLatest,
+    private val mediaDataFilter: MediaDataFilter,
     private val mediaHostStatesManager: MediaHostStatesManager
 ) : MediaHostState by state {
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
         private set
-    var visibleChangedListener: ((Boolean) -> Unit)? = null
-    var visible: Boolean = false
-        private set
+    private var visibleChangedListeners: ArraySet<(Boolean) -> Unit> = ArraySet()
 
     private val tmpLocationOnScreen: IntArray = intArrayOf(0, 0)
 
@@ -50,13 +49,17 @@ class MediaHost @Inject constructor(
         }
 
     private val listener = object : MediaDataManager.Listener {
-        override fun onMediaDataLoaded(key: String, data: MediaData) {
+        override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
             updateViewVisibility()
         }
 
         override fun onMediaDataRemoved(key: String) {
             updateViewVisibility()
         }
+    }
+
+    fun addVisibilityChangeListener(listener: (Boolean) -> Unit) {
+        visibleChangedListeners.add(listener)
     }
 
     /**
@@ -76,12 +79,12 @@ class MediaHost @Inject constructor(
                 // be a delay until the views and the controllers are initialized, leaving us
                 // with either a blank view or the controllers not yet initialized and the
                 // measuring wrong
-                mediaDataManagerCombineLatest.addListener(listener)
+                mediaDataFilter.addListener(listener)
                 updateViewVisibility()
             }
 
             override fun onViewDetachedFromWindow(v: View?) {
-                mediaDataManagerCombineLatest.removeListener(listener)
+                mediaDataFilter.removeListener(listener)
             }
         })
 
@@ -96,7 +99,7 @@ class MediaHost @Inject constructor(
                 }
                 // This will trigger a state change that ensures that we now have a state available
                 state.measurementInput = input
-                return mediaHostStatesManager.getPlayerDimensions(state)
+                return mediaHostStatesManager.updateCarouselDimensions(location, state)
             }
         }
 
@@ -109,17 +112,21 @@ class MediaHost @Inject constructor(
     }
 
     private fun updateViewVisibility() {
-        if (showsOnlyActiveMedia) {
-            visible = mediaDataManager.hasActiveMedia()
+        visible = if (showsOnlyActiveMedia) {
+            mediaDataFilter.hasActiveMedia()
         } else {
-            visible = mediaDataManager.hasAnyMedia()
+            mediaDataFilter.hasAnyMedia()
         }
-        hostView.visibility = if (visible) View.VISIBLE else View.GONE
-        visibleChangedListener?.invoke(visible)
+        val newVisibility = if (visible) View.VISIBLE else View.GONE
+        if (newVisibility != hostView.visibility) {
+            hostView.visibility = newVisibility
+            visibleChangedListeners.forEach {
+                it.invoke(visible)
+            }
+        }
     }
 
     class MediaHostStateHolder @Inject constructor() : MediaHostState {
-
         override var measurementInput: MeasurementInput? = null
             set(value) {
                 if (value?.equals(field) != true) {
@@ -144,6 +151,37 @@ class MediaHost @Inject constructor(
                 }
             }
 
+        override var visible: Boolean = true
+            set(value) {
+                if (field == value) {
+                    return
+                }
+                field = value
+                changedListener?.invoke()
+            }
+
+        override var falsingProtectionNeeded: Boolean = false
+            set(value) {
+                if (field == value) {
+                    return
+                }
+                field = value
+                changedListener?.invoke()
+            }
+
+        override var disappearParameters: DisappearParameters = DisappearParameters()
+            set(value) {
+                val newHash = value.hashCode()
+                if (lastDisappearHash.equals(newHash)) {
+                    return
+                }
+                field = value
+                lastDisappearHash = newHash
+                changedListener?.invoke()
+            }
+
+        private var lastDisappearHash = disappearParameters.hashCode()
+
         /**
          * A listener for all changes. This won't be copied over when invoking [copy]
          */
@@ -157,6 +195,9 @@ class MediaHost @Inject constructor(
             mediaHostState.expansion = expansion
             mediaHostState.showsOnlyActiveMedia = showsOnlyActiveMedia
             mediaHostState.measurementInput = measurementInput?.copy()
+            mediaHostState.visible = visible
+            mediaHostState.disappearParameters = disappearParameters.deepCopy()
+            mediaHostState.falsingProtectionNeeded = falsingProtectionNeeded
             return mediaHostState
         }
 
@@ -173,18 +214,41 @@ class MediaHost @Inject constructor(
             if (showsOnlyActiveMedia != other.showsOnlyActiveMedia) {
                 return false
             }
+            if (visible != other.visible) {
+                return false
+            }
+            if (falsingProtectionNeeded != other.falsingProtectionNeeded) {
+                return false
+            }
+            if (!disappearParameters.equals(other.disappearParameters)) {
+                return false
+            }
             return true
         }
 
         override fun hashCode(): Int {
             var result = measurementInput?.hashCode() ?: 0
             result = 31 * result + expansion.hashCode()
+            result = 31 * result + falsingProtectionNeeded.hashCode()
             result = 31 * result + showsOnlyActiveMedia.hashCode()
+            result = 31 * result + if (visible) 1 else 2
+            result = 31 * result + disappearParameters.hashCode()
             return result
         }
     }
 }
 
+/**
+ * A description of a media host state that describes the behavior whenever the media carousel
+ * is hosted. The HostState notifies the media players of changes to their properties, who
+ * in turn will create view states from it.
+ * When adding a new property to this, make sure to update the listener and notify them
+ * about the changes.
+ * In case you need to have a different rendering based on the state, you can add a new
+ * constraintState to the [MediaViewController]. Otherwise, similar host states will resolve
+ * to the same viewstate, a behavior that is described in [CacheKey]. Make sure to only update
+ * that key if the underlying view needs to have a different measurement.
+ */
 interface MediaHostState {
 
     /**
@@ -194,7 +258,8 @@ interface MediaHostState {
     var measurementInput: MeasurementInput?
 
     /**
-     * The expansion of the player, 0 for fully collapsed, 1 for fully expanded
+     * The expansion of the player, 0 for fully collapsed (up to 3 actions), 1 for fully expanded
+     * (up to 5 actions.)
      */
     var expansion: Float
 
@@ -202,6 +267,23 @@ interface MediaHostState {
      * Is this host only showing active media or is it showing all of them including resumption?
      */
     var showsOnlyActiveMedia: Boolean
+
+    /**
+     * If the view should be VISIBLE or GONE.
+     */
+    var visible: Boolean
+
+    /**
+     * Does this host need any falsing protection?
+     */
+    var falsingProtectionNeeded: Boolean
+
+    /**
+     * The parameters how the view disappears from this location when going to a host that's not
+     * visible. If modified, make sure to set this value again on the host to ensure the values
+     * are propagated
+     */
+    var disappearParameters: DisappearParameters
 
     /**
      * Get a copy of this view state, deepcopying all appropriate members

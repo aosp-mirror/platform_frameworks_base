@@ -77,7 +77,10 @@ public final class AutofillId implements Parcelable {
     @TestApi
     public static AutofillId withoutSession(@NonNull AutofillId id) {
         final int flags = id.mFlags & ~FLAG_HAS_SESSION;
-        return new AutofillId(flags, id.mViewId, id.mVirtualLongId, NO_SESSION);
+        final long virtualChildId =
+                ((id.mFlags & FLAG_IS_VIRTUAL_LONG) != 0) ? id.mVirtualLongId
+                        : id.mVirtualIntId;
+        return new AutofillId(flags, id.mViewId, virtualChildId, NO_SESSION);
     }
 
     /** @hide */

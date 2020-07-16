@@ -22,10 +22,14 @@ import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
+
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.annotation.CheckResult;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.companion.Association;
 import android.companion.AssociationRequest;
@@ -36,6 +40,7 @@ import android.companion.IFindDeviceCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
@@ -55,6 +60,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.text.BidiFormatter;
@@ -71,6 +77,7 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.PerUser;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.notification.NotificationAccessConfirmationActivityContract;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -112,6 +119,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManagerService";
 
+    private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
+    private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
+
     private static final String XML_TAG_ASSOCIATIONS = "associations";
     private static final String XML_TAG_ASSOCIATION = "association";
     private static final String XML_ATTR_PACKAGE = "package";
@@ -149,7 +159,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         ICompanionDeviceDiscoveryService.Stub::asInterface);
             }
         };
-
 
         registerPackageMonitor();
     }
@@ -194,6 +203,39 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 ActivityTaskManagerInternal.class);
         if (atmInternal != null) {
             atmInternal.setCompanionAppPackages(userHandle, companionAppPackages);
+        }
+
+        BackgroundThread.getHandler().sendMessageDelayed(
+                obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
+                MINUTES.toMillis(10));
+    }
+
+    void maybeGrantAutoRevokeExemptions() {
+        PackageManager pm = getContext().getPackageManager();
+        for (int userId : LocalServices.getService(UserManagerInternal.class).getUserIds()) {
+            SharedPreferences pref = getContext().getSharedPreferences(
+                    new File(Environment.getUserSystemDirectory(userId), PREF_FILE_NAME),
+                    Context.MODE_PRIVATE);
+            if (pref.getBoolean(PREF_KEY_AUTO_REVOKE_GRANTS_DONE, false)) {
+                continue;
+            }
+
+            try {
+                Set<Association> associations = readAllAssociations(userId);
+                if (associations == null) {
+                    continue;
+                }
+                for (Association a : associations) {
+                    try {
+                        int uid = pm.getPackageUidAsUser(a.companionAppPackage, userId);
+                        exemptFromAutoRevoke(a.companionAppPackage, uid);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.w(LOG_TAG, "Unknown companion package: " + a.companionAppPackage, e);
+                    }
+                }
+            } finally {
+                pref.edit().putBoolean(PREF_KEY_AUTO_REVOKE_GRANTS_DONE, true).apply();
+            }
         }
     }
 
@@ -294,8 +336,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         @Override
         public List<String> getAssociations(String callingPackage, int userId)
                 throws RemoteException {
-            checkCallerIsSystemOr(callingPackage, userId);
-            checkUsesFeature(callingPackage, getCallingUserId());
+            if (!callerCanManageCompanionDevices()) {
+                checkCallerIsSystemOr(callingPackage, userId);
+                checkUsesFeature(callingPackage, getCallingUserId());
+            }
             return new ArrayList<>(CollectionUtils.map(
                     readAllAssociations(userId, callingPackage),
                     a -> a.deviceAddress));
@@ -309,6 +353,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             checkCallerIsSystemOr(callingPackage);
             checkUsesFeature(callingPackage, getCallingUserId());
             removeAssociation(getCallingUserId(), callingPackage, deviceMacAddress);
+        }
+
+        private boolean callerCanManageCompanionDevices() {
+            return getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+                    == PackageManager.PERMISSION_GRANTED;
         }
 
         private void checkCallerIsSystemOr(String pkg) throws RemoteException {
@@ -468,6 +518,21 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             networkPolicyManager.removeUidPolicy(
                     packageInfo.applicationInfo.uid,
                     NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
+        }
+
+        exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
+    }
+
+    private void exemptFromAutoRevoke(String packageName, int uid) {
+        try {
+            mAppOpsManager.setMode(
+                    AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+                    uid,
+                    packageName,
+                    AppOpsManager.MODE_IGNORED);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG,
+                    "Error while granting auto revoke exemption for " + packageName, e);
         }
     }
 

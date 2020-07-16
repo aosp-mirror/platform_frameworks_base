@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> દ્વારા પ્રિન્ટ કરવાનું બંધ કરાયું છે."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"જ્યાં સુધી તમે કાર્યાલયની પ્રોફાઇલ ચાલુ ન કરો ત્યાં સુધી તમારી વ્યક્તિગત ઍપ બ્લૉક કરેલી રહે છે"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"વ્યક્તિગત ઍપને <xliff:g id="DATE">%1$s</xliff:g>ના રોજ <xliff:g id="TIME">%2$s</xliff:g> વાગ્યે બ્લૉક કરવામાં આવશે. તમારા IT વ્યવસ્થાપક તમારી ઑફિસની પ્રોફાઇલને <xliff:g id="NUMBER">%3$d</xliff:g> દિવસ કરતાં વધુ સમય માટે બંધ રાખવાની મંજૂરી આપતા નથી."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ચાલુ કરો"</string>
     <string name="me" msgid="6207584824693813140">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ટેબ્લેટ વિકલ્પો"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TVના વિકલ્પો"</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી. હજી <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને ફોનને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"દૂર કરો"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"બૅકગ્રાઉન્ડમાં શરૂ થયેલી <xliff:g id="PACKAGENAME">%1$s</xliff:g>ની ફોરગ્રાઉન્ડ સેવા પાસે ભવિષ્યની R બિલ્ડમાં ઉપયોગમાં હોય તે સમયની પરવાનગી હશે નહીં. કૃપા કરીને go/r-bg-fgs-restriction જુઓ અને ભૂલનો અહેવાલ દાખલ કરો."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
@@ -2057,10 +2054,10 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ઑફિસ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"વ્યક્તિગત વ્યૂ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ઑફિસ વ્યૂ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"આને ઑફિસ માટેની ઍપ સાથે શેર કરી શકતાં નથી"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"આને ઑફિસ માટેના ઍપ સાથે શેર કરી શકતાં નથી"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"તમારા IT વ્યવસ્થાપક તમને તમારી કાર્યાલયની પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ શેર કરવાની મંજૂરી આપતા નથી"</string>
     <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ઑફિસ માટેની ઍપ વડે આને ખોલી શકતાં નથી"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"તમારા IT વ્યવસ્થાપક તમને તમારી કાર્યાલયની પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ ખોલવાની મંજૂરી આપતા નથી"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"તમારા IT વ્યવસ્થાપક તમને તમારી ઑફિસની પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ ખોલવાની મંજૂરી આપતા નથી"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"આને વ્યક્તિગત ઍપ સાથે શેર કરી શકતાં નથી"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"તમારા IT વ્યવસ્થાપક તમને તમારી વ્યક્તિગત પ્રોફાઇલમાંની ઍપ વડે આ કન્ટેન્ટ શેર કરવાની મંજૂરી આપતા નથી"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"વ્યક્તિગત ઍપ વડે આને ખોલી શકતાં નથી"</string>

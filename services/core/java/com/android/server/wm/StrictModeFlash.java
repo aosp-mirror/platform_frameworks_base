@@ -48,12 +48,17 @@ class StrictModeFlash {
                     .setName("StrictModeFlash")
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
+                    .setCallsite("StrictModeFlash")
                     .build();
 
             // one more than Watermark? arbitrary.
             t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);
             t.setPosition(ctrl, 0, 0);
             t.show(ctrl);
+            // Ensure we aren't considered as obscuring for Input purposes.
+            InputMonitor.setTrustedOverlayInputInfo(ctrl, t, dc.getDisplayId(),
+                    "StrictModeFlash");
+
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }

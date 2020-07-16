@@ -51,6 +51,8 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.policy.SecurityController;
+import com.android.systemui.util.animation.DisappearParameters;
+import com.android.systemui.util.animation.UniqueObjectHostView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -108,12 +110,15 @@ public class QSPanelTest extends SysuiTestCase {
         mDependency.injectMockDependency(SecurityController.class);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mContext.addMockSystemService(Context.USER_SERVICE, mock(UserManager.class));
+        when(mMediaHost.getHostView()).thenReturn(new UniqueObjectHostView(getContext()));
+        when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
 
         mUiEventLogger = new UiEventLoggerFake();
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
                     mQSLogger, mMediaHost, mUiEventLogger);
+            mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
             mParentView.addView(mQsPanel);

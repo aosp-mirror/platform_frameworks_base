@@ -153,6 +153,11 @@ public class GroupCoalescer implements Dumpable {
             applyRanking(rankingMap);
             mHandler.onNotificationRankingUpdate(rankingMap);
         }
+
+        @Override
+        public void onNotificationsInitialized() {
+            mHandler.onNotificationsInitialized();
+        }
     };
 
     private void maybeEmitBatch(StatusBarNotification sbn) {

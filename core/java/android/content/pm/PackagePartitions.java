@@ -183,17 +183,20 @@ public class PackagePartitions {
 
         /** Returns whether the partition contains the specified file in its priv-app folder. */
         public boolean containsPrivApp(@NonNull File scanFile) {
-            return FileUtils.contains(mPrivAppFolder.getFile(), canonicalize(scanFile));
+            return mPrivAppFolder != null
+                    && FileUtils.contains(mPrivAppFolder.getFile(), canonicalize(scanFile));
         }
 
         /** Returns whether the partition contains the specified file in its app folder. */
         public boolean containsApp(@NonNull File scanFile) {
-            return FileUtils.contains(mAppFolder.getFile(), canonicalize(scanFile));
+            return mAppFolder != null
+                    && FileUtils.contains(mAppFolder.getFile(), canonicalize(scanFile));
         }
 
         /** Returns whether the partition contains the specified file in its overlay folder. */
         public boolean containsOverlay(@NonNull File scanFile) {
-            return FileUtils.contains(mOverlayFolder.getFile(), canonicalize(scanFile));
+            return mOverlayFolder != null
+                    && FileUtils.contains(mOverlayFolder.getFile(), canonicalize(scanFile));
         }
     }
 

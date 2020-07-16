@@ -29,9 +29,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="20dp"
+        android:gravity="center"
+        android:layoutDirection="ltr"
         android:paddingEnd="20dp"
-        android:gravity="center">
+        android:paddingStart="20dp">
 
         <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/home"
@@ -135,9 +136,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="@dimen/car_keyline_1"
-        android:paddingEnd="@dimen/car_keyline_1"
         android:gravity="center"
+        android:layoutDirection="ltr"
+        android:paddingEnd="@dimen/car_keyline_1"
+        android:paddingStart="@dimen/car_keyline_1"
         android:visibility="gone"
     />
 

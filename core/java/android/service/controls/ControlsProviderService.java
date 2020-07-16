@@ -296,6 +296,10 @@ public abstract class ControlsProviderService extends Service {
 
     /**
      * Request SystemUI to prompt the user to add a control to favorites.
+     * <br>
+     * SystemUI may not honor this request in some cases, for example if the requested
+     * {@link Control} is already a favorite, or the requesting package is not currently in the
+     * foreground.
      *
      * @param context A context
      * @param componentName Component name of the {@link ControlsProviderService}

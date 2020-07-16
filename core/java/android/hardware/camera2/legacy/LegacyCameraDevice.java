@@ -109,11 +109,12 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
         if (holder == null) {
             return new CaptureResultExtras(ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE,
-                    ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE, null);
+                    ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE, null,
+                    ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE);
         }
         return new CaptureResultExtras(holder.getRequestId(), holder.getSubsequeceId(),
                 /*afTriggerId*/0, /*precaptureTriggerId*/0, holder.getFrameNumber(),
-                /*partialResultCount*/1, errorStreamId, null);
+                /*partialResultCount*/1, errorStreamId, null, holder.getFrameNumber(), -1, -1);
     }
 
     /**

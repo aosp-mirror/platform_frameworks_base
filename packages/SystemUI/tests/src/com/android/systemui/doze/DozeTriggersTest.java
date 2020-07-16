@@ -41,12 +41,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
-import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -72,11 +70,12 @@ public class DozeTriggersTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private DockManager mDockManager;
+    @Mock
+    private ProximitySensor.ProximityCheck mProximityCheck;
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
     private Sensor mTapSensor;
     private FakeProximitySensor mProximitySensor;
-    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
@@ -91,8 +90,8 @@ public class DozeTriggersTest extends SysuiTestCase {
         mProximitySensor = new FakeProximitySensor(getContext().getResources(), asyncSensorManager);
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
-                asyncSensorManager, mFakeExecutor, wakeLock, true,
-                mDockManager, mProximitySensor, mock(DozeLog.class), mBroadcastDispatcher);
+                asyncSensorManager, wakeLock, true, mDockManager, mProximitySensor,
+                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher);
         waitForSensorManager();
     }
 

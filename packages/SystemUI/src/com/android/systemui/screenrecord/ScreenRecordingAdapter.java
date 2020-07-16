@@ -88,12 +88,6 @@ public class ScreenRecordingAdapter extends ArrayAdapter<ScreenRecordingAudioSou
         return layout;
     }
 
-    private void setDescription(LinearLayout layout, int description) {
-        if (description != Resources.ID_NULL) {
-            ((TextView) layout.getChildAt(1)).setText(description);
-        }
-    }
-
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         switch (getItem(position)) {

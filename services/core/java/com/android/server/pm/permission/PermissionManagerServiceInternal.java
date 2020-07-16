@@ -36,6 +36,7 @@ import java.util.function.Consumer;
  * TODO: Should be merged into PermissionManagerInternal, but currently uses internal classes.
  */
 public abstract class PermissionManagerServiceInternal extends PermissionManagerInternal {
+
     /**
      * Provider for package names.
      */
@@ -155,7 +156,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
         }
         public void onInstallPermissionGranted() {
         }
-        public void onPermissionRevoked(int uid, @UserIdInt int userId) {
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
         }
         public void onInstallPermissionRevoked() {
         }
@@ -455,4 +456,10 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     /** Called when a new user has been created. */
     public abstract void onNewUserCreated(@UserIdInt int userId);
+
+    /**
+     * Removes invalid permissions which are not {@link PermissionInfo#FLAG_HARD_RESTRICTED} or
+     * {@link PermissionInfo#FLAG_SOFT_RESTRICTED} from the input.
+     */
+    public abstract void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissions);
 }

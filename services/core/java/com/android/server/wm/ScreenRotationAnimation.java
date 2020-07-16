@@ -188,17 +188,20 @@ class ScreenRotationAnimation {
             mBackColorSurface = displayContent.makeChildSurface(null)
                     .setName("BackColorSurface")
                     .setColorLayer()
+                    .setCallsite("ScreenRotationAnimation")
                     .build();
 
             mScreenshotLayer = displayContent.makeOverlay()
                     .setName("RotationLayer")
                     .setBufferSize(mWidth, mHeight)
                     .setSecure(isSecure)
+                    .setCallsite("ScreenRotationAnimation")
                     .build();
 
             mEnterBlackFrameLayer = displayContent.makeOverlay()
                     .setName("EnterBlackFrameLayer")
                     .setContainerLayer()
+                    .setCallsite("ScreenRotationAnimation")
                     .build();
 
             // In case display bounds change, screenshot buffer and surface may mismatch so set a

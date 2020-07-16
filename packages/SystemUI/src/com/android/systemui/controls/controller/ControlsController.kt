@@ -21,7 +21,7 @@ import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.service.controls.actions.ControlAction
 import com.android.systemui.controls.ControlStatus
-import com.android.systemui.controls.UserAwareController
+import com.android.systemui.util.UserAwareController
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import java.util.function.Consumer
@@ -188,11 +188,6 @@ interface ControlsController : UserAwareController {
      * @return the number of current favorites for the given component
      */
     fun countFavoritesForComponent(componentName: ComponentName): Int
-
-    /**
-     * TEMPORARY for testing
-     */
-    fun resetFavorites()
 
     /**
      * Interface for structure to pass data to [ControlsFavoritingActivity].

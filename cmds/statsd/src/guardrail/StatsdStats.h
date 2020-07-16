@@ -101,7 +101,7 @@ public:
     // Per atom dimension key size limit
     static const std::map<int, std::pair<size_t, size_t>> kAtomDimensionKeySizeLimitMap;
 
-    const static int kMaxConfigCountPerUid = 10;
+    const static int kMaxConfigCountPerUid = 20;
     const static int kMaxAlertCountPerConfig = 100;
     const static int kMaxConditionCountPerConfig = 300;
     const static int kMaxMetricCountPerConfig = 1000;
@@ -352,7 +352,7 @@ public:
     /*
      * Records pull exceeds timeout for the puller.
      */
-    void notePullTimeout(int pullAtomId);
+    void notePullTimeout(int pullAtomId, int64_t pullUptimeMillis, int64_t pullElapsedMillis);
 
     /*
      * Records pull exceeds max delay for a metric.
@@ -498,6 +498,14 @@ public:
      */
     void dumpStats(int outFd) const;
 
+    typedef struct PullTimeoutMetadata {
+        int64_t pullTimeoutUptimeMillis;
+        int64_t pullTimeoutElapsedMillis;
+        PullTimeoutMetadata(int64_t uptimeMillis, int64_t elapsedMillis) :
+            pullTimeoutUptimeMillis(uptimeMillis),
+            pullTimeoutElapsedMillis(elapsedMillis) {/* do nothing */}
+    } PullTimeoutMetadata;
+
     typedef struct {
         long totalPull = 0;
         long totalPullFromCache = 0;
@@ -519,6 +527,7 @@ public:
         long unregisteredCount = 0;
         int32_t atomErrorCount = 0;
         long binderCallFailCount = 0;
+        std::list<PullTimeoutMetadata> pullTimeoutMetadata;
     } PulledAtomStats;
 
     typedef struct {
@@ -660,6 +669,8 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestAtomMetricsStats);
     FRIEND_TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit);
     FRIEND_TEST(StatsdStatsTest, TestAtomErrorStats);
+
+    FRIEND_TEST(StatsLogProcessorTest, InvalidConfigRemoved);
 };
 
 }  // namespace statsd

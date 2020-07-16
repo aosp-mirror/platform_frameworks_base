@@ -16,8 +16,6 @@
 
 package android.net.ip;
 
-import static android.net.shared.IpConfigurationParcelableUtil.fromStableParcelable;
-
 import android.content.Context;
 import android.net.DhcpResultsParcelable;
 import android.net.Layer2PacketParcelable;
@@ -118,7 +116,6 @@ public class IpClientUtil {
         // null or not.
         @Override
         public void onNewDhcpResults(DhcpResultsParcelable dhcpResults) {
-            mCb.onNewDhcpResults(fromStableParcelable(dhcpResults));
             mCb.onNewDhcpResults(dhcpResults);
         }
 

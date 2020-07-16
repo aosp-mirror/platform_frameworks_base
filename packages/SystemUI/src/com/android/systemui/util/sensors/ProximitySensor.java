@@ -222,7 +222,9 @@ public class ProximitySensor {
         if (mAlerting.getAndSet(true)) {
             return;
         }
-        mListeners.forEach(proximitySensorListener ->
+
+        List<ProximitySensorListener> listeners = new ArrayList<>(mListeners);
+        listeners.forEach(proximitySensorListener ->
                 proximitySensorListener.onSensorEvent(mLastEvent));
         mAlerting.set(false);
     }
@@ -247,22 +249,15 @@ public class ProximitySensor {
         private final ProximitySensor mSensor;
         private final DelayableExecutor mDelayableExecutor;
         private List<Consumer<Boolean>> mCallbacks = new ArrayList<>();
+        private final ProximitySensor.ProximitySensorListener mListener;
+        private final AtomicBoolean mRegistered = new AtomicBoolean();
 
         @Inject
-        public ProximityCheck(ProximitySensor sensor, DelayableExecutor delayableExecutor) {
+        public ProximityCheck(ProximitySensor sensor, @Main DelayableExecutor delayableExecutor) {
             mSensor = sensor;
             mSensor.setTag("prox_check");
             mDelayableExecutor = delayableExecutor;
-            mSensor.pause();
-            ProximitySensorListener listener = proximityEvent -> {
-                mCallbacks.forEach(
-                        booleanConsumer ->
-                                booleanConsumer.accept(
-                                        proximityEvent == null ? null : proximityEvent.getNear()));
-                mCallbacks.clear();
-                mSensor.pause();
-            };
-            mSensor.register(listener);
+            mListener = this::onProximityEvent;
         }
 
         /** Set a descriptive tag for the sensors registration. */
@@ -272,7 +267,7 @@ public class ProximitySensor {
 
         @Override
         public void run() {
-            mSensor.pause();
+            unregister();
             mSensor.alertListeners();
         }
 
@@ -284,10 +279,25 @@ public class ProximitySensor {
                 callback.accept(null);
             }
             mCallbacks.add(callback);
-            if (!mSensor.isRegistered()) {
-                mSensor.resume();
+            if (!mRegistered.getAndSet(true)) {
+                mSensor.register(mListener);
                 mDelayableExecutor.executeDelayed(this, timeoutMs);
             }
+        }
+
+        private void unregister() {
+            mSensor.unregister(mListener);
+            mRegistered.set(false);
+        }
+
+        private void onProximityEvent(ProximityEvent proximityEvent) {
+            mCallbacks.forEach(
+                    booleanConsumer ->
+                            booleanConsumer.accept(
+                                    proximityEvent == null ? null : proximityEvent.getNear()));
+            mCallbacks.clear();
+            unregister();
+            mRegistered.set(false);
         }
     }
 

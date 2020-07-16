@@ -40,8 +40,10 @@ import java.util.List;
  * resolve it to an activity.
  */
 public class DisplayResolveInfo implements TargetInfo {
-    // Temporary flag for new chooser delegate behavior.
-    private static final boolean ENABLE_CHOOSER_DELEGATE = true;
+    // Temporary flag for new chooser delegate behavior. There are occassional token
+    // permission errors from bouncing through the delegate. Watch out before reenabling:
+    // b/157272342 is one example but this issue has been reported many times
+    private static final boolean ENABLE_CHOOSER_DELEGATE = false;
 
     private final ResolveInfo mResolveInfo;
     private CharSequence mDisplayLabel;

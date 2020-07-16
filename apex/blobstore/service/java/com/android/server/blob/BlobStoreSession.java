@@ -27,10 +27,12 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.SEEK_SET;
+import static android.text.format.Formatter.FLAG_IEC_UNITS;
+import static android.text.format.Formatter.formatFileSize;
 
-import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_SESSION_CREATION_TIME;
+import static com.android.server.blob.BlobStoreConfig.getMaxPermittedPackages;
 import static com.android.server.blob.BlobStoreConfig.hasSessionExpired;
 
 import android.annotation.BytesLong;
@@ -42,7 +44,9 @@ import android.app.blob.IBlobStoreSession;
 import android.content.Context;
 import android.os.Binder;
 import android.os.FileUtils;
+import android.os.LimitExceededException;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
 import android.os.Trace;
@@ -54,11 +58,14 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.DumpArgs;
 import com.android.server.blob.BlobStoreManagerService.SessionStateChangeListener;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -72,7 +79,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-/** TODO: add doc */
+/**
+ * Class to represent the state corresponding to an ongoing
+ * {@link android.app.blob.BlobStoreManager.Session}
+ */
 @VisibleForTesting
 class BlobStoreSession extends IBlobStoreSession.Stub {
 
@@ -98,7 +108,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     private File mSessionFile;
 
     @GuardedBy("mRevocableFds")
-    private ArrayList<RevocableFileDescriptor> mRevocableFds = new ArrayList<>();
+    private final ArrayList<RevocableFileDescriptor> mRevocableFds = new ArrayList<>();
 
     // This will be accessed from only one thread at any point of time, so no need to grab
     // a lock for this.
@@ -208,27 +218,37 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 throw new IllegalStateException("Not allowed to write in state: "
                         + stateToString(mState));
             }
+        }
 
-            try {
-                return openWriteLocked(offsetBytes, lengthBytes);
-            } catch (IOException e) {
-                throw ExceptionUtils.wrap(e);
+        FileDescriptor fd = null;
+        try {
+            fd = openWriteInternal(offsetBytes, lengthBytes);
+            final RevocableFileDescriptor revocableFd = new RevocableFileDescriptor(mContext, fd);
+            synchronized (mSessionLock) {
+                if (mState != STATE_OPENED) {
+                    IoUtils.closeQuietly(fd);
+                    throw new IllegalStateException("Not allowed to write in state: "
+                            + stateToString(mState));
+                }
+                trackRevocableFdLocked(revocableFd);
+                return revocableFd.getRevocableFileDescriptor();
             }
+        } catch (IOException e) {
+            IoUtils.closeQuietly(fd);
+            throw ExceptionUtils.wrap(e);
         }
     }
 
-    @GuardedBy("mSessionLock")
     @NonNull
-    private ParcelFileDescriptor openWriteLocked(@BytesLong long offsetBytes,
+    private FileDescriptor openWriteInternal(@BytesLong long offsetBytes,
             @BytesLong long lengthBytes) throws IOException {
         // TODO: Add limit on active open sessions/writes/reads
-        FileDescriptor fd = null;
         try {
             final File sessionFile = getSessionFile();
             if (sessionFile == null) {
                 throw new IllegalStateException("Couldn't get the file for this session");
             }
-            fd = Os.open(sessionFile.getPath(), O_CREAT | O_RDWR, 0600);
+            final FileDescriptor fd = Os.open(sessionFile.getPath(), O_CREAT | O_RDWR, 0600);
             if (offsetBytes > 0) {
                 final long curOffset = Os.lseek(fd, offsetBytes, SEEK_SET);
                 if (curOffset != offsetBytes) {
@@ -239,10 +259,10 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             if (lengthBytes > 0) {
                 mContext.getSystemService(StorageManager.class).allocateBytes(fd, lengthBytes);
             }
+            return fd;
         } catch (ErrnoException e) {
-            e.rethrowAsIOException();
+            throw e.rethrowAsIOException();
         }
-        return createRevocableFdLocked(fd);
     }
 
     @Override
@@ -254,29 +274,46 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 throw new IllegalStateException("Not allowed to read in state: "
                         + stateToString(mState));
             }
-
-            try {
-                return openReadLocked();
-            } catch (IOException e) {
-                throw ExceptionUtils.wrap(e);
+            if (!BlobStoreConfig.shouldUseRevocableFdForReads()) {
+                try {
+                    return new ParcelFileDescriptor(openReadInternal());
+                } catch (IOException e) {
+                    throw ExceptionUtils.wrap(e);
+                }
             }
+        }
+
+        FileDescriptor fd = null;
+        try {
+            fd = openReadInternal();
+            final RevocableFileDescriptor revocableFd = new RevocableFileDescriptor(mContext, fd);
+            synchronized (mSessionLock) {
+                if (mState != STATE_OPENED) {
+                    IoUtils.closeQuietly(fd);
+                    throw new IllegalStateException("Not allowed to read in state: "
+                            + stateToString(mState));
+                }
+                trackRevocableFdLocked(revocableFd);
+                return revocableFd.getRevocableFileDescriptor();
+            }
+        } catch (IOException e) {
+            IoUtils.closeQuietly(fd);
+            throw ExceptionUtils.wrap(e);
         }
     }
 
-    @GuardedBy("mSessionLock")
     @NonNull
-    private ParcelFileDescriptor openReadLocked() throws IOException {
-        FileDescriptor fd = null;
+    private FileDescriptor openReadInternal() throws IOException {
         try {
             final File sessionFile = getSessionFile();
             if (sessionFile == null) {
                 throw new IllegalStateException("Couldn't get the file for this session");
             }
-            fd = Os.open(sessionFile.getPath(), O_RDONLY, 0);
+            final FileDescriptor fd = Os.open(sessionFile.getPath(), O_RDONLY, 0);
+            return fd;
         } catch (ErrnoException e) {
-            e.rethrowAsIOException();
+            throw e.rethrowAsIOException();
         }
-        return createRevocableFdLocked(fd);
     }
 
     @Override
@@ -294,6 +331,11 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             if (mState != STATE_OPENED) {
                 throw new IllegalStateException("Not allowed to change access type in state: "
                         + stateToString(mState));
+            }
+            if (mBlobAccessMode.getNumWhitelistedPackages() >= getMaxPermittedPackages()) {
+                throw new ParcelableException(new LimitExceededException(
+                        "Too many packages permitted to access the blob: "
+                                + mBlobAccessMode.getNumWhitelistedPackages()));
             }
             mBlobAccessMode.allowPackageAccess(packageName, certificate);
         }
@@ -397,7 +439,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             }
 
             mState = state;
-            revokeAllFdsLocked();
+            revokeAllFds();
 
             if (sendCallback) {
                 mListener.onStateChanged(this);
@@ -423,30 +465,36 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 mState = STATE_VERIFIED_VALID;
                 // Commit callback will be sent once the data is persisted.
             } else {
-                if (LOGV) {
-                    Slog.v(TAG, "Digest of the data didn't match the given BlobHandle.digest");
-                }
+                Slog.d(TAG, "Digest of the data ("
+                        + (mDataDigest == null ? "null" : BlobHandle.safeDigest(mDataDigest))
+                        + ") didn't match the given BlobHandle.digest ("
+                        + BlobHandle.safeDigest(mBlobHandle.digest) + ")");
                 mState = STATE_VERIFIED_INVALID;
+
+                FrameworkStatsLog.write(FrameworkStatsLog.BLOB_COMMITTED, getOwnerUid(), mSessionId,
+                        getSize(), FrameworkStatsLog.BLOB_COMMITTED__RESULT__DIGEST_MISMATCH);
                 sendCommitCallbackResult(COMMIT_RESULT_ERROR);
             }
             mListener.onStateChanged(this);
         }
     }
 
-    @GuardedBy("mSessionLock")
-    private void revokeAllFdsLocked() {
-        for (int i = mRevocableFds.size() - 1; i >= 0; --i) {
-            mRevocableFds.get(i).revoke();
+    void destroy() {
+        revokeAllFds();
+        getSessionFile().delete();
+    }
+
+    private void revokeAllFds() {
+        synchronized (mRevocableFds) {
+            for (int i = mRevocableFds.size() - 1; i >= 0; --i) {
+                mRevocableFds.get(i).revoke();
+            }
+            mRevocableFds.clear();
         }
-        mRevocableFds.clear();
     }
 
     @GuardedBy("mSessionLock")
-    @NonNull
-    private ParcelFileDescriptor createRevocableFdLocked(FileDescriptor fd)
-            throws IOException {
-        final RevocableFileDescriptor revocableFd =
-                new RevocableFileDescriptor(mContext, fd);
+    private void trackRevocableFdLocked(RevocableFileDescriptor revocableFd) {
         synchronized (mRevocableFds) {
             mRevocableFds.add(revocableFd);
         }
@@ -455,7 +503,6 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 mRevocableFds.remove(revocableFd);
             }
         });
-        return revocableFd.getRevocableFileDescriptor();
     }
 
     @Nullable
@@ -510,6 +557,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             fout.println("ownerUid: " + mOwnerUid);
             fout.println("ownerPkg: " + mOwnerPackageName);
             fout.println("creation time: " + BlobStoreUtils.formatTime(mCreationTimeMs));
+            fout.println("size: " + formatFileSize(mContext, getSize(), FLAG_IEC_UNITS));
 
             fout.println("blobHandle:");
             fout.increaseIndent();

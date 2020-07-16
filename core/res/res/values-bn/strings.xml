@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"অফিসের প্রোফাইল চালু করুন"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"আপনার অফিসের প্রোফাইল চালু না করা পর্যন্ত আপনার ব্যক্তিগত অ্যাপ ব্লক থাকে"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ব্যক্তিগত অ্যাপ <xliff:g id="DATE">%1$s</xliff:g>-এ <xliff:g id="TIME">%2$s</xliff:g>টার সময় ব্লক করা হবে। আপনার আইটি অ্যাডমিন আপনার অফিস প্রোফাইল <xliff:g id="NUMBER">%3$d</xliff:g> দিনের বেশি পজ করে রাখার অনুমতি দেয় না।"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"চালু করুন"</string>
     <string name="me" msgid="6207584824693813140">"আমাকে"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ট্যাবলেট বিকল্পগুলি"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-র বিকল্প"</string>
@@ -240,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"স্ক্রীণ লক"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"পাওয়ার বন্ধ করুন"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ফোন বন্ধ করুন"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"ফোন আবার চালু করুন"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"ফোন রিস্টার্ট করুন"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"জরুরী"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ত্রুটির প্রতিবেদন"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"সেশন শেষ করুন"</string>
@@ -1621,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%2$d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ফোন আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"সরান"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> থেকে শুরু হওয়া ফোরগ্রাউন্ড পরিষেবাটির ভবিষ্যতে আর বিল্ডগুলিতে ব্যবহারের অনুমতি নেই। go/r-bg-fgs-restriction দেখুন এবং বাগরিপোর্ট জমা দিন।"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"প্রস্তাবিত স্তরের চেয়ে বেশি উঁচুতে ভলিউম বাড়াবেন?\n\nউঁচু ভলিউমে বেশি সময় ধরে কিছু শুনলে আপনার শ্রবনশক্তির ক্ষতি হতে পারে।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"অ্যাক্সেসযোগ্যতা শর্টকাট ব্যবহার করবেন?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শর্টকাট চালু করা থাকাকালীন দুটি ভলিউম বোতাম একসাথে ৩ সেকেন্ড টিপে ধরে রাখলে একটি অ্যাকসেসিবিলিটি ফিচার চালু হবে।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"অ্যাক্সেসিবিলিটি ফিচার চালু করতে চান?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"উভয় ভলিউম কী কয়েক সেকেন্ড ধরে থাকলে অ্যাক্সেসিবিলিটি ফিচার চালু হয়ে যাবে। এর ফলে, আপনার ডিভাইস কীভাবে কাজ করবে সেটিতে পরিবর্তন হতে পারে।\n\nবর্তমান ফিচার:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nসেটিংস &gt; অ্যাক্সেসিবিলিটি থেকে আপনি বাছাই করা ফিচার পরিবর্তন করতে পারবেন।"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"উভয় ভলিউম কী কয়েক সেকেন্ড ধরে থাকলে অ্যাক্সেসিবিলিটি ফিচার চালু হয়ে যাবে। এর ফলে, আপনার ডিভাইস কীভাবে কাজ করবে সেটিতে পরিবর্তন হতে পারে।\n\nবর্তমান ফিচার:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nসেটিংস &gt; অ্যাক্সেসিবিলিটি বিকল্প থেকে আপনি বাছাই করা ফিচার পরিবর্তন করতে পারবেন।"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> চালু করতে চান?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"উভয় ভলিউম কী কয়েক সেকেন্ড ধরে থাকলে <xliff:g id="SERVICE">%1$s</xliff:g> চালু হয়ে যাবে। এটি একটি অ্যাক্সেসিবিলিটি ফিচার। এর ফলে, আপনার ডিভাইস কীভাবে কাজ করবে সেটিতে পরিবর্তন হতে পারে।\n\nসেটিংস &gt; অ্যাক্সেসিবিলিটি থেকে আপনি এই শর্টকাট পরিবর্তন করতে পারবেন।"</string>
@@ -2065,9 +2062,9 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"আইটি অ্যাডমিন আপনার ব্যক্তিগত প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট শেয়ার করার অনুমতি দেয় না"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ব্যক্তিগত অ্যাপের মাধ্যমে খোলা যাবে না"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"আইটি অ্যাডমিন আপনার ব্যক্তিগত প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট খোলার অনুমতি দেয় না"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"কাজের প্রোফাইল পজ করা আছে"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"অফিস প্রোফাইল বন্ধ করা আছে"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"চালু করুন"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"এই ধরনের কন্টেন্ট অফিসের অ্যাপের মাধ্যমে খুলে দেখা যাবে না"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"এই ধরনের কন্টেন্ট অফিস অ্যাপের মাধ্যমে খোলা যাবে না"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"এই ধরনের কন্টেন্ট অফিসের অ্যাপের মাধ্যমে খুলে দেখা যাবে না"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"এই ধরনের কন্টেন্ট ব্যক্তিগত অ্যাপের মাধ্যমে খোলা বা দেখা যাবে না"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"এই ধরনের কন্টেন্ট ব্যক্তিগত অ্যাপের মাধ্যমে খোলা যাবে না"</string>

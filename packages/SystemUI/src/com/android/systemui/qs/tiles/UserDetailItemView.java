@@ -95,14 +95,11 @@ public class UserDetailItemView extends LinearLayout {
         mAvatar.setDrawableWithBadge(picture, userId);
     }
 
-    public void setAvatarEnabled(boolean enabled) {
-        mAvatar.setEnabled(enabled);
-    }
-
     public void setDisabledByAdmin(boolean disabled) {
-        mRestrictedPadlock.setVisibility(disabled ? View.VISIBLE : View.GONE);
-        mName.setEnabled(!disabled);
-        mAvatar.setEnabled(!disabled);
+        if (mRestrictedPadlock != null) {
+            mRestrictedPadlock.setVisibility(disabled ? View.VISIBLE : View.GONE);
+        }
+        setEnabled(!disabled);
     }
 
     public void setEnabled(boolean enabled) {

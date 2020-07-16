@@ -477,14 +477,15 @@ status_t TextDumpsysSection::Execute(ReportWriter* writer) const {
 
     // Run dumping thread
     const uint64_t start = Nanotime();
-    std::thread worker([&]() {
+    std::thread worker([write_fd = std::move(dumpPipe.writeFd()), service = std::move(service),
+                        this]() mutable {
         // Don't crash the service if writing to a closed pipe (may happen if dumping times out)
         signal(SIGPIPE, sigpipe_handler);
-        status_t err = service->dump(dumpPipe.writeFd().get(), mArgs);
+        status_t err = service->dump(write_fd.get(), this->mArgs);
         if (err != OK) {
             ALOGW("[%s] dump thread failed. Error: %s", this->name.string(), strerror(-err));
         }
-        dumpPipe.writeFd().reset();
+        write_fd.reset();
     });
 
     // Collect dump content

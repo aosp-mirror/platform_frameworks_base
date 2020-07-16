@@ -24,6 +24,7 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -145,7 +146,8 @@ public class SizeCompatTests extends ActivityTestsBase {
         final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
 
         // The parent configuration doesn't change since the first resolved configuration, so the
-        // activity should fit in the parent naturally. (size=583x700).
+        // activity should fit in the parent naturally (size=583x700, appBounds=[9, 100 - 592, 800],
+        // horizontal offset = round((600 - 583) / 2) = 9)).
         assertFitted();
         final int offsetX = (int) ((1f + displayBounds.width() - appBounds.width()) / 2);
         // The bounds must be horizontal centered.
@@ -160,7 +162,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         assertFitted();
 
         // After the orientation of activity is changed, even display is not rotated, the aspect
-        // ratio should be the same (appBounds=[9, 100 - 592, 800], x-offset=round((600-583)/2)=9).
+        // ratio should be the same (bounds=[0, 0 - 600, 600], appBounds=[0, 100 - 600, 600]).
         assertEquals(appBounds.width(), appBounds.height() * aspectRatio, 0.5f /* delta */);
         // The notch is still on top.
         assertEquals(mActivity.getBounds().height(), appBounds.height() + notchHeight);
@@ -249,6 +251,13 @@ public class SizeCompatTests extends ActivityTestsBase {
         mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
         // Make sure IME cannot attach to the app, otherwise IME window will also be shifted.
         assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
+
+        // Recompute the natural configuration without resolving size compat configuration.
+        mActivity.clearSizeCompatMode();
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // It should keep non-attachable because the resolved bounds will be computed according to
+        // the aspect ratio that won't match its parent bounds.
+        assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
     }
 
     @Test
@@ -260,6 +269,8 @@ public class SizeCompatTests extends ActivityTestsBase {
 
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
         mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
+        mActivity.mDisplayContent.mInputMethodInputTarget =
+                mActivity.mDisplayContent.mInputMethodTarget;
         // Because the aspect ratio of display doesn't exceed the max aspect ratio of activity.
         // The activity should still fill its parent container and IME can attach to the activity.
         assertTrue(mActivity.matchParentBounds());
@@ -287,14 +298,29 @@ public class SizeCompatTests extends ActivityTestsBase {
 
         // Move the non-resizable activity to the new display.
         mStack.reparent(newDisplay.getDefaultTaskDisplayArea(), true /* onTop */);
-        // The configuration bounds should keep the same.
+        // The configuration bounds [820, 0 - 1820, 2500] should keep the same.
         assertEquals(origWidth, configBounds.width());
         assertEquals(origHeight, configBounds.height());
         assertScaled();
 
+        final Rect newDisplayBounds = newDisplay.getWindowConfiguration().getBounds();
         // The scaled bounds should exclude notch area (1000 - 100 == 360 * 2500 / 1000 = 900).
-        assertEquals(newDisplay.getBounds().height() - notchHeight,
+        assertEquals(newDisplayBounds.height() - notchHeight,
                 (int) ((float) mActivity.getBounds().width() * origHeight / origWidth));
+
+        // Recompute the natural configuration in the new display.
+        mActivity.clearSizeCompatMode();
+        mActivity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        // Because the display cannot rotate, the portrait activity will fit the short side of
+        // display with keeping portrait bounds [200, 0 - 700, 1000] in center.
+        assertEquals(newDisplayBounds.height(), configBounds.height());
+        assertEquals(configBounds.height() * newDisplayBounds.height() / newDisplayBounds.width(),
+                configBounds.width());
+        assertFitted();
+        // The appBounds should be [200, 100 - 700, 1000].
+        final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
+        assertEquals(configBounds.width(), appBounds.width());
+        assertEquals(configBounds.height() - notchHeight, appBounds.height());
     }
 
     @Test
@@ -487,10 +513,13 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testLaunchWithFixedRotationTransform() {
-        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
         final int dw = 1000;
         final int dh = 2500;
-        setUpDisplaySizeWithApp(dw, dh);
+        final int notchHeight = 200;
+        setUpApp(new TestDisplayContent.Builder(mService, dw, dh).setNotch(notchHeight).build());
+        addStatusBar(mActivity.mDisplayContent);
+
+        mActivity.setVisible(false);
         mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */);
         mActivity.mDisplayContent.mOpeningApps.add(mActivity);
@@ -502,29 +531,74 @@ public class SizeCompatTests extends ActivityTestsBase {
         // Display keeps in original orientation.
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
                 mActivity.mDisplayContent.getConfiguration().orientation);
-        // Activity bounds should be [350, 0 - 2150, 1000] in landscape. Its width=1000*1.8=1800.
+        // The width should be restricted by the max aspect ratio = 1000 * 1.8 = 1800.
         assertEquals((int) (dw * maxAspect), mActivity.getBounds().width());
-        // The bounds should be horizontal centered: (2500-1900)/2=350.
-        assertEquals((dh - mActivity.getBounds().width()) / 2, mActivity.getBounds().left);
+        // The notch is at the left side of the landscape activity. The bounds should be horizontal
+        // centered in the remaining area [200, 0 - 2500, 1000], so its left should be
+        // 200 + (2300 - 1800) / 2 = 450. The bounds should be [450, 0 - 2250, 1000].
+        assertEquals(notchHeight + (dh - notchHeight - mActivity.getBounds().width()) / 2,
+                mActivity.getBounds().left);
 
         // The letterbox needs a main window to layout.
-        addWindowToActivity(mActivity);
+        final WindowState w = addWindowToActivity(mActivity);
         // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
         mActivity.mRootWindowContainer.performSurfacePlacement();
-        // The letterbox insets should be [350, 0 - 350, 0].
+        // The letterbox insets should be [450, 0 - 250, 0].
         assertEquals(new Rect(mActivity.getBounds().left, 0, dh - mActivity.getBounds().right, 0),
                 mActivity.getLetterboxInsets());
+
+        final StatusBarController statusBarController =
+                mActivity.mDisplayContent.getDisplayPolicy().getStatusBarController();
+        // The activity doesn't fill the display, so the letterbox of the rotated activity is
+        // overlapped with the rotated content frame of status bar. Hence the status bar shouldn't
+        // be transparent.
+        assertFalse(statusBarController.isTransparentAllowed(w));
+
+        // Make the activity fill the display.
+        prepareUnresizable(10 /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
+        w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        // Refresh the letterbox.
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        // The letterbox should only cover the notch area, so status bar can be transparent.
+        assertEquals(new Rect(notchHeight, 0, 0, 0), mActivity.getLetterboxInsets());
+        assertTrue(statusBarController.isTransparentAllowed(w));
     }
 
-    private WindowState addWindowToActivity(ActivityRecord activity) {
+    private static WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
         final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
-                mService.mWindowManager, mock(Session.class), new TestIWindow(), params, mActivity);
+                activity.mWmService, mock(Session.class), new TestIWindow(), params, activity);
         WindowTestsBase.makeWindowVisible(w);
         w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
-        mActivity.addWindow(w);
+        activity.addWindow(w);
         return w;
+    }
+
+    private static void addStatusBar(DisplayContent displayContent) {
+        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
+        doReturn(true).when(displayPolicy).hasStatusBar();
+        displayPolicy.onConfigurationChanged();
+
+        final WindowTestUtils.TestWindowToken token = WindowTestUtils.createTestWindowToken(
+                WindowManager.LayoutParams.TYPE_STATUS_BAR, displayContent);
+        final WindowManager.LayoutParams attrs =
+                new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_STATUS_BAR);
+        attrs.gravity = android.view.Gravity.TOP;
+        attrs.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        attrs.setFitInsetsTypes(0 /* types */);
+        final WindowTestUtils.TestWindowState statusBar = new WindowTestUtils.TestWindowState(
+                displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
+        token.addWindow(statusBar);
+        statusBar.setRequestedSize(displayContent.mBaseDisplayWidth,
+                displayContent.getDisplayUiContext().getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height));
+
+        displayPolicy.addWindowLw(statusBar, attrs);
+        displayPolicy.beginLayoutLw(displayContent.mDisplayFrames,
+                displayContent.getConfiguration().uiMode);
     }
 
     /**

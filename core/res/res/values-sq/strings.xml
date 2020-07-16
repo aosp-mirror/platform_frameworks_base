@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivizo profilin e punës"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikacionet e tua personale janë bllokuar derisa të aktivizosh profilin tënd të punës"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikacionet personale do të bllokohen më <xliff:g id="DATE">%1$s</xliff:g> në <xliff:g id="TIME">%2$s</xliff:g>. Administratori yt i teknologjisë së informacionit nuk lejon që profili yt i punës të qëndrojë joaktiv për më shumë se <xliff:g id="NUMBER">%3$d</xliff:g> ditë."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivizo"</string>
     <string name="me" msgid="6207584824693813140">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsionet e tabletit"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opsionet e Android TV"</string>
@@ -1161,7 +1159,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Hap përsëri aplikacionin"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Dërgo koment"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Dërgo reagim"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Mbyll"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Vendose në heshtje deri kur të riniset pajisja"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Prit!"</string>
@@ -1313,7 +1311,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Përzgjidhe për të çaktivizuar korrigjimin e gabimeve të USB-së"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Korrigjimi përmes Wi-Fi është lidhur"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Trokit për të çaktivizuar korrigjimin përmes Wi-Fi"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Zgjidh për të çaktivizuar korrigjimin përmes Wi-Fi"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Zgjidh për të çaktivizuar korrigjimin përmes Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modaliteti i lidhjes së testimit është aktivizuar"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Paneli komandues i serisë është aktivizuar"</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Ke vizatuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses motivin tënd. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, do të të duhet ta shkyçësh telefonin duke përdorur një llogari mail-i.\n\n Provo sërish për <xliff:g id="NUMBER_2">%3$d</xliff:g> sekonda."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hiq"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Shërbimi në plan të parë i nisur në sfond nga <xliff:g id="PACKAGENAME">%1$s</xliff:g> nuk do të ketë lejen e nevojshme gjatë përdorimit në ndërtimet e ardhshme R. Shiko go/r-bg-fgs-restriction dhe dërgo një raport të defekteve në kod."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Të ngrihet volumi mbi nivelin e rekomanduar?\n\nDëgjimi me volum të lartë për periudha të gjata mund të dëmtojë dëgjimin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Të përdoret shkurtorja e qasshmërisë?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie."</string>
@@ -1654,7 +1651,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kthimi i ngjyrës"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i çaktivizuar."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Zgjidh një funksion për ta përdorur kur troket butonin e qasshmërisë:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me dy gishta):"</string>

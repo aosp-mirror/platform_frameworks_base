@@ -224,6 +224,7 @@
     <dimen name="notification_guts_conversation_icon_size">56dp</dimen>
     <dimen name="notification_guts_conversation_action_height">56dp</dimen>
     <dimen name="notification_guts_conversation_action_text_padding_start">32dp</dimen>
+    <dimen name="conversation_onboarding_bullet_gap_width">6dp</dimen>
 
     <!-- The height of the header in inline settings -->
     <dimen name="notification_guts_header_height">24dp</dimen>
@@ -482,7 +483,8 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_tile_height">106dp</dimen>
-    <dimen name="qs_tile_layout_margin_side">6dp</dimen>
+    <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
+    <dimen name="qs_tile_layout_margin_side">18dp</dimen>
     <dimen name="qs_tile_margin_horizontal">18dp</dimen>
     <dimen name="qs_tile_margin_horizontal_two_line">2dp</dimen>
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
@@ -498,7 +500,6 @@
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
-    <dimen name="qs_header_tile_margin_horizontal">4dp</dimen>
     <dimen name="qs_header_tile_margin_bottom">18dp</dimen>
     <dimen name="qs_page_indicator_width">16dp</dimen>
     <dimen name="qs_page_indicator_height">8dp</dimen>
@@ -630,10 +631,10 @@
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_face_pile_size">36dp</dimen>
+    <dimen name="conversation_single_line_face_pile_size">25dp</dimen>
 
     <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_avatar_size">24dp</dimen>
+    <dimen name="conversation_single_line_avatar_size">20dp</dimen>
 
     <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
@@ -973,7 +974,9 @@
     <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
 
     <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="floating_dismiss_gradient_height">176dp</dimen>
+    <dimen name="floating_dismiss_gradient_height">250dp</dimen>
+
+    <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
     <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>
@@ -1031,14 +1034,34 @@
     <dimen name="global_actions_grid_container_shadow_offset">20dp</dimen>
     <dimen name="global_actions_grid_container_negative_shadow_offset">-20dp</dimen>
 
+    <!-- Global actions grid -->
+    <dimen name="global_actions_grid_vertical_padding">3dp</dimen>
+    <dimen name="global_actions_grid_horizontal_padding">3dp</dimen>
+
+    <dimen name="global_actions_grid_item_side_margin">5dp</dimen>
+    <dimen name="global_actions_grid_item_vertical_margin">4dp</dimen>
+    <dimen name="global_actions_grid_item_width">64dp</dimen>
+    <dimen name="global_actions_grid_item_height">64dp</dimen>
+
+    <dimen name="global_actions_grid_item_icon_width">20dp</dimen>
+    <dimen name="global_actions_grid_item_icon_height">20dp</dimen>
+    <dimen name="global_actions_grid_item_icon_top_margin">12dp</dimen>
+    <dimen name="global_actions_grid_item_icon_side_margin">22dp</dimen>
+    <dimen name="global_actions_grid_item_icon_bottom_margin">4dp</dimen>
+
     <!-- Margins at the left and right of the power menu and home controls widgets. -->
-    <dimen name="global_actions_side_margin">16dp</dimen>
+    <dimen name="global_actions_side_margin">10dp</dimen>
 
     <!-- Amount to shift the layout when exiting/entering for controls activities -->
     <dimen name="global_actions_controls_y_translation">20dp</dimen>
 
     <!-- Shift quick access wallet down in Global Actions when Controls are unavailable -->
     <dimen name="global_actions_wallet_top_margin">40dp</dimen>
+
+    <!-- Shutdown and restart actions are larger in power options dialog -->
+    <dimen name="global_actions_power_dialog_item_height">190dp</dimen>
+    <dimen name="global_actions_power_dialog_item_width">255dp</dimen>
+    <dimen name="global_actions_power_dialog_item_bottom_margin">45dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
@@ -1057,9 +1080,7 @@
     <dimen name="edge_margin">8dp</dimen>
 
     <!-- The absolute side margins of quick settings -->
-    <dimen name="quick_settings_side_margins">16dp</dimen>
-    <dimen name="quick_settings_expanded_bottom_margin">16dp</dimen>
-    <dimen name="quick_settings_media_extra_bottom_margin">4dp</dimen>
+    <dimen name="quick_settings_bottom_margin_media">16dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
@@ -1096,6 +1117,8 @@
 
     <!-- Biometric Dialog values -->
     <dimen name="biometric_dialog_biometric_icon_size">64dp</dimen>
+    <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
+    <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
     <dimen name="biometric_dialog_corner_size">4dp</dimen>
     <!-- Y translation when showing/dismissing the dialog-->
     <dimen name="biometric_dialog_animation_translation_offset">350dp</dimen>
@@ -1198,17 +1221,13 @@
     <!-- Padding of bubble overflow empty state subtitle -->
     <dimen name="bubble_empty_overflow_subtitle_padding">50dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_height">4dp</dimen>
+    <dimen name="bubble_pointer_height">8dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_width">6dp</dimen>
+    <dimen name="bubble_pointer_width">12dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
     <dimen name="bubble_manage_button_height">48dp</dimen>
-    <!-- How far, horizontally, to animate the expanded view over when animating in/out. -->
-    <dimen name="bubble_expanded_animate_x_distance">100dp</dimen>
-    <!-- How far, vertically, to animate the expanded view over when animating in/out. -->
-    <dimen name="bubble_expanded_animate_y_distance">500dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->
@@ -1235,7 +1254,7 @@
     <!-- Bubbles user education views -->
     <dimen name="bubbles_manage_education_width">160dp</dimen>
     <!-- The inset from the top bound of the manage button to place the user education. -->
-    <dimen name="bubbles_manage_education_top_inset">10dp</dimen>
+    <dimen name="bubbles_manage_education_top_inset">65dp</dimen>
     <!-- Size of padding for the user education cling, this should at minimum be larger than
         individual_bubble_size + some padding. -->
     <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
@@ -1250,9 +1269,15 @@
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_album_size">52dp</dimen>
-    <dimen name="qs_seamless_icon_size">20dp</dimen>
-    <dimen name="qqs_media_spacing">8dp</dimen>
-    <dimen name="qqs_horizonal_tile_padding_bottom">8dp</dimen>
+    <dimen name="qs_media_icon_size">16dp</dimen>
+    <dimen name="qs_center_guideline_padding">10dp</dimen>
+    <dimen name="qs_seamless_icon_size">@dimen/qs_media_icon_size</dimen>
+    <dimen name="qs_seamless_fallback_icon_size">@dimen/qs_seamless_icon_size</dimen>
+    <dimen name="qs_seamless_fallback_end_margin">16dp</dimen>
+    <dimen name="qqs_media_spacing">16dp</dimen>
+    <dimen name="qs_footer_horizontal_margin">22dp</dimen>
+    <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
+    <dimen name="qs_media_enabled_seekbar_height">3dp</dimen>
 
     <dimen name="magnification_border_size">5dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>
@@ -1313,8 +1338,8 @@
     <dimen name="controls_management_editing_list_margin">48dp</dimen>
     <dimen name="controls_management_editing_divider_margin">24dp</dimen>
     <dimen name="controls_management_apps_extra_side_margin">8dp</dimen>
-    <dimen name="controls_management_apps_top_margin"></dimen>
     <dimen name="controls_management_zone_top_margin">32dp</dimen>
+    <dimen name="controls_management_status_side_margin">16dp</dimen>
     <dimen name="controls_management_page_indicator_height">24dp</dimen>
     <dimen name="controls_management_checkbox_size">25dp</dimen>
     <dimen name="controls_title_size">24sp</dimen>

@@ -165,6 +165,11 @@ binder::Status BinderIncrementalService::deleteStorage(int32_t storageId) {
     return ok();
 }
 
+binder::Status BinderIncrementalService::disableReadLogs(int32_t storageId) {
+    mImpl.disableReadLogs(storageId);
+    return ok();
+}
+
 binder::Status BinderIncrementalService::makeDirectory(int32_t storageId, const std::string& path,
                                                        int32_t* _aidl_return) {
     *_aidl_return = mImpl.makeDir(storageId, path);

@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> نے پرنٹنگ کو غیر فعال کر دیا ہے۔"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"اپنی دفتری پروفائل آن کریں"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"آپ کے ذاتی ایپس کو اس وقت تک بلاک کر دیا جاتا ہے جب تک کہ آپ اپنے ورک پروفایل کو آن نہیں کرتے"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"‏‫<xliff:g id="DATE">%1$s</xliff:g> کو <xliff:g id="TIME">%2$s</xliff:g> بجے ذاتی ایپس کو مسدود کر دیا جائے گا۔ آپ کا IT منتظم آپ کی دفتری پروفائل کو <xliff:g id="NUMBER">%3$d</xliff:g> دن سے زیادہ بند رکھنے کی اجازت نہیں دیتا ہے۔"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"آن کریں"</string>
     <string name="me" msgid="6207584824693813140">"میں"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ٹیبلیٹ کے اختیارات"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏Android TV اختیارات"</string>
@@ -1130,8 +1128,8 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"اس کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"‏%1$s کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"کھولیں"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"<xliff:g id="HOST">%1$s</xliff:g> لنکس کے ساتھ کھولیں"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"لنکس کے ساتھ کھولیں"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"‫‫<xliff:g id="HOST">%1$s</xliff:g> لنکس اس کے ساتھ کھولیں"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"اس کے ساتھ لنکس کھولیں"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> کے ذریعے لنکس کھولیں"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="HOST">%1$s</xliff:g> لنکس کو <xliff:g id="APPLICATION">%2$s</xliff:g> کے ذریعے کھولیں"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"رسائی دیں"</string>
@@ -1313,7 +1311,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏USB ڈیبگ کرنے کو غیر فعال کرنے کیلئے منتخب کریں۔"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"وائرلیس ڈیبگنگ منسلک ہے"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"وائرلیس ڈیبگنگ آف کرنے کے لیے تھپتھپائیں"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"وائرلیس ڈیبگنگ کرنے کو غیر فعال کرنے کے ليے منتخب کریں۔"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"وائرلیس ڈیبگنگ کو غیر فعال کرنے کے ليے منتخب کریں۔"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ٹیسٹ ہارنیس موڈ فعال ہے"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ٹیسٹ ہارنیس موڈ غیر فعال کرنے کے لیے فیکٹری ری سیٹ کریں۔"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"شمار کونسول فعال ہے"</string>
@@ -1588,7 +1586,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"اپنا پیٹرن ڈرا کریں"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"‏SIM PIN درج کریں"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"‏PIN درج کریں"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"‏‫PIN درج کریں"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"پاس ورڈ درج کریں"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‏SIM اب غیر فعال ہوگیا ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‏پسندیدہ PIN کوڈ درج کریں"</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا فون غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ہٹائیں"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏پس منظر <xliff:g id="PACKAGENAME">%1$s</xliff:g> سے شروع کی گئی پیش منظر کی سروس کو مستقبل کے R بلڈز میں استعمال کے دوران اجازت نہیں ہوگی۔ براہ کرم go/r-bg-fgs-restriction دیکھیں اور بگ رپورٹ دائر کریں۔"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ایکسیسبیلٹی شارٹ کٹ استعمال کریں؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"شارٹ کٹ آن ہونے پر، 3 سیکنڈ تک دونوں والیوم بٹنز کو دبانے سے ایک ایکسیسبیلٹی خصوصیت شروع ہو جائے گی۔"</string>
@@ -1761,7 +1758,7 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> سروس انسٹال ہو گئی"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"فعال کرنے کیلئے تھپتھپائیں"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"‏منتظم PIN درج کریں"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"‏PIN درج کریں"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"‏‫PIN درج کریں"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"غلط"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"‏موجودہ PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"‏نیا PIN"</string>

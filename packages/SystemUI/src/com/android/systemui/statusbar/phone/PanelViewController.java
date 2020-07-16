@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
@@ -319,6 +320,8 @@ public abstract class PanelViewController {
 
         mLockscreenGestureLogger.writeAtFractionalPosition(MetricsEvent.ACTION_PANEL_VIEW_EXPAND,
                 (int) (event.getX() / width * 100), (int) (event.getY() / height * 100), rot);
+        mLockscreenGestureLogger
+                .log(LockscreenUiEvent.LOCKSCREEN_UNLOCKED_NOTIFICATION_PANEL_EXPAND);
     }
 
     protected void maybeVibrateOnOpening() {
@@ -368,16 +371,31 @@ public abstract class PanelViewController {
             float vectorVel = (float) Math.hypot(
                     mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 
-            boolean expand = flingExpands(vel, vectorVel, x, y)
-                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel;
+            final boolean onKeyguard =
+                    mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+
+            final boolean expand;
+            if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
+                // If we get a cancel, put the shade back to the state it was in when the gesture
+                // started
+                if (onKeyguard) {
+                    expand = true;
+                } else {
+                    expand = !mPanelClosedOnDown;
+                }
+            } else {
+                expand = flingExpands(vel, vectorVel, x, y);
+            }
+
             mDozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                     mStatusBar.isFalsingThresholdNeeded(), mStatusBar.isWakeUpComingFromTouch());
             // Log collapse gesture if on lock screen.
-            if (!expand && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+            if (!expand && onKeyguard) {
                 float displayDensity = mStatusBar.getDisplayDensity();
                 int heightDp = (int) Math.abs((y - mInitialTouchY) / displayDensity);
                 int velocityDp = (int) Math.abs(vel / displayDensity);
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_UNLOCK, heightDp, velocityDp);
+                mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_UNLOCK);
             }
             fling(vel, expand, isFalseTouch(x, y));
             onTrackingStopped(expand);
@@ -456,7 +474,7 @@ public abstract class PanelViewController {
         }
     }
 
-    protected boolean isScrolledToBottom() {
+    protected boolean canCollapsePanelOnTouch() {
         return true;
     }
 
@@ -533,9 +551,9 @@ public abstract class PanelViewController {
         // the animation only to the last notification, and then jump to the maximum panel height so
         // clear all just fades in and the decelerating motion is towards the last notification.
         final boolean clearAllExpandHack = expand &&
-                shouldExpandToTopOfClearAll(getMaxPanelHeight() - getClearAllHeight());
+                shouldExpandToTopOfClearAll(getMaxPanelHeight() - getClearAllHeightWithPadding());
         if (clearAllExpandHack) {
-            target = getMaxPanelHeight() - getClearAllHeight();
+            target = getMaxPanelHeight() - getClearAllHeightWithPadding();
         }
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
             notifyExpandingFinished();
@@ -1026,9 +1044,9 @@ public abstract class PanelViewController {
     protected abstract boolean isClearAllVisible();
 
     /**
-     * @return the height of the clear all button, in pixels
+     * @return the height of the clear all button, in pixels including padding
      */
-    protected abstract int getClearAllHeight();
+    protected abstract int getClearAllHeightWithPadding();
 
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
@@ -1077,7 +1095,7 @@ public abstract class PanelViewController {
              * upwards. This allows closing the shade from anywhere inside the panel.
              *
              * We only do this if the current content is scrolled to the bottom,
-             * i.e isScrolledToBottom() is true and therefore there is no conflicting scrolling
+             * i.e canCollapsePanelOnTouch() is true and therefore there is no conflicting scrolling
              * gesture
              * possible.
              */
@@ -1088,7 +1106,7 @@ public abstract class PanelViewController {
             }
             final float x = event.getX(pointerIndex);
             final float y = event.getY(pointerIndex);
-            boolean scrolledToBottom = isScrolledToBottom();
+            boolean canCollapsePanel = canCollapsePanelOnTouch();
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
@@ -1135,7 +1153,7 @@ public abstract class PanelViewController {
                 case MotionEvent.ACTION_MOVE:
                     final float h = y - mInitialTouchY;
                     addMovement(event);
-                    if (scrolledToBottom || mTouchStartedInEmptyArea || mAnimatingOnDown) {
+                    if (canCollapsePanel || mTouchStartedInEmptyArea || mAnimatingOnDown) {
                         float hAbs = Math.abs(h);
                         float touchSlop = getTouchSlop(event);
                         if ((h < -touchSlop || (mAnimatingOnDown && hAbs > touchSlop))

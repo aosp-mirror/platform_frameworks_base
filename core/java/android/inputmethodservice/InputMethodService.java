@@ -471,6 +471,10 @@ public class InputMethodService extends AbstractInputMethodService {
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
+        if (!mViewsCreated) {
+            // The IME views are not ready, keep visible insets untouched.
+            mTmpInsets.visibleTopInsets = 0;
+        }
         if (isExtractViewShown()) {
             // In true fullscreen mode, we just say the window isn't covering
             // any content so we don't impact whatever is behind.
@@ -601,9 +605,6 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
                     + " ic=" + mInputConnection);
             // Unbind input is per process per display.
-            // TODO(b/150902448): free-up IME surface when target is changing.
-            //  e.g. DisplayContent#setInputMethodTarget()
-            removeImeSurface();
             onUnbindInput();
             mInputBinding = null;
             mInputConnection = null;

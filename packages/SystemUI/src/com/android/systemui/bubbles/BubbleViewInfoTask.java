@@ -37,8 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Parcelable;
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.PathParser;
@@ -53,6 +51,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Simple task to inflate views & load necessary info to display a bubble.
@@ -129,35 +128,10 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         @Nullable
         static BubbleViewInfo populate(Context c, BubbleStackView stackView,
                 BubbleIconFactory iconFactory, Bubble b, boolean skipInflation) {
-            final NotificationEntry entry = b.getEntry();
-            if (entry == null) {
-                // populate from ShortcutInfo when NotificationEntry is not available
-                final ShortcutInfo s = b.getShortcutInfo();
-                return populate(c, stackView, iconFactory, skipInflation || b.isInflated(),
-                        s.getPackage(), s.getUserHandle(), s, null);
-            }
-            final StatusBarNotification sbn = entry.getSbn();
-            final String bubbleShortcutId =  entry.getBubbleMetadata().getShortcutId();
-            final ShortcutInfo si = bubbleShortcutId == null
-                    ? null : entry.getRanking().getShortcutInfo();
-            return populate(
-                    c, stackView, iconFactory, skipInflation || b.isInflated(),
-                    sbn.getPackageName(), sbn.getUser(), si, entry);
-        }
-
-        private static BubbleViewInfo populate(
-                @NonNull final Context c,
-                @NonNull final BubbleStackView stackView,
-                @NonNull final BubbleIconFactory iconFactory,
-                final boolean isInflated,
-                @NonNull final String packageName,
-                @NonNull final UserHandle user,
-                @Nullable final ShortcutInfo shortcutInfo,
-                @Nullable final NotificationEntry entry) {
             BubbleViewInfo info = new BubbleViewInfo();
 
             // View inflation: only should do this once per bubble
-            if (!isInflated) {
+            if (!skipInflation && !b.isInflated()) {
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.imageView = (BadgedImageView) inflater.inflate(
                         R.layout.bubble_view, stackView, false /* attachToRoot */);
@@ -167,8 +141,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 info.expandedView.setStackView(stackView);
             }
 
-            if (shortcutInfo != null) {
-                info.shortcutInfo = shortcutInfo;
+            if (b.getShortcutInfo() != null) {
+                info.shortcutInfo = b.getShortcutInfo();
             }
 
             // App name & app icon
@@ -178,7 +152,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             Drawable appIcon;
             try {
                 appInfo = pm.getApplicationInfo(
-                        packageName,
+                        b.getPackageName(),
                         PackageManager.MATCH_UNINSTALLED_PACKAGES
                                 | PackageManager.MATCH_DISABLED_COMPONENTS
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
@@ -186,23 +160,24 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 if (appInfo != null) {
                     info.appName = String.valueOf(pm.getApplicationLabel(appInfo));
                 }
-                appIcon = pm.getApplicationIcon(packageName);
-                badgedIcon = pm.getUserBadgedIcon(appIcon, user);
+                appIcon = pm.getApplicationIcon(b.getPackageName());
+                badgedIcon = pm.getUserBadgedIcon(appIcon, b.getUser());
             } catch (PackageManager.NameNotFoundException exception) {
                 // If we can't find package... don't think we should show the bubble.
-                Log.w(TAG, "Unable to find package: " + packageName);
+                Log.w(TAG, "Unable to find package: " + b.getPackageName());
                 return null;
             }
 
             // Badged bubble image
             Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo,
-                    entry == null ? null : entry.getBubbleMetadata());
+                    b.getIcon());
             if (bubbleDrawable == null) {
                 // Default to app icon
                 bubbleDrawable = appIcon;
             }
 
-            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon);
+            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
+                    b.isImportantConversation());
             info.badgedAppIcon = badgedIcon;
             info.badgedBubbleImage = iconFactory.getBubbleBitmap(bubbleDrawable,
                     badgeBitmapInfo).icon;
@@ -222,8 +197,10 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                     Color.WHITE, WHITE_SCRIM_ALPHA);
 
             // Flyout
-            if (entry != null) {
-                info.flyoutMessage = extractFlyoutMessage(c, entry);
+            info.flyoutMessage = b.getFlyoutMessage();
+            if (info.flyoutMessage != null) {
+                info.flyoutMessage.senderAvatar =
+                        loadSenderAvatar(c, info.flyoutMessage.senderIcon);
             }
             return info;
         }
@@ -235,8 +212,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
      * notification, based on its type. Returns null if there should not be an update message.
      */
     @NonNull
-    static Bubble.FlyoutMessage extractFlyoutMessage(Context context,
-            NotificationEntry entry) {
+    static Bubble.FlyoutMessage extractFlyoutMessage(NotificationEntry entry) {
+        Objects.requireNonNull(entry);
         final Notification underlyingNotif = entry.getSbn().getNotification();
         final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
 
@@ -264,20 +241,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 if (latestMessage != null) {
                     bubbleMessage.message = latestMessage.getText();
                     Person sender = latestMessage.getSenderPerson();
-                    bubbleMessage.senderName = sender != null
-                            ? sender.getName()
-                            : null;
-
+                    bubbleMessage.senderName = sender != null ? sender.getName() : null;
                     bubbleMessage.senderAvatar = null;
-                    if (sender != null && sender.getIcon() != null) {
-                        if (sender.getIcon().getType() == Icon.TYPE_URI
-                                || sender.getIcon().getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
-                            context.grantUriPermission(context.getPackageName(),
-                                    sender.getIcon().getUri(),
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        }
-                        bubbleMessage.senderAvatar = sender.getIcon().loadDrawable(context);
-                    }
+                    bubbleMessage.senderIcon = sender != null ? sender.getIcon() : null;
                     return bubbleMessage;
                 }
             } else if (Notification.InboxStyle.class.equals(style)) {
@@ -305,5 +271,16 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         }
 
         return bubbleMessage;
+    }
+
+    @Nullable
+    static Drawable loadSenderAvatar(@NonNull final Context context, @Nullable final Icon icon) {
+        Objects.requireNonNull(context);
+        if (icon == null) return null;
+        if (icon.getType() == Icon.TYPE_URI || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+            context.grantUriPermission(context.getPackageName(),
+                    icon.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        return icon.loadDrawable(context);
     }
 }

@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.policy.SecurityController;
 public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
     protected static final String TAG = "QSSecurityFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG_FORCE_VISIBLE = false;
 
     private final View mRootView;
     private final TextView mFooterText;
@@ -60,7 +61,6 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private final SecurityController mSecurityController;
     private final ActivityStarter mActivityStarter;
     private final Handler mMainHandler;
-    private final View mDivider;
 
     private final UserManager mUm;
 
@@ -85,7 +85,6 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
-        mDivider = qsPanel == null ? null : qsPanel.getDivider();
         mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
     }
 
@@ -149,14 +148,19 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         final String vpnName = mSecurityController.getPrimaryVpnName();
         final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
         final CharSequence organizationName = mSecurityController.getDeviceOwnerOrganizationName();
-        final CharSequence workProfileName = mSecurityController.getWorkProfileOrganizationName();
+        final CharSequence workProfileOrganizationName =
+                mSecurityController.getWorkProfileOrganizationName();
+        final boolean isProfileOwnerOfOrganizationOwnedDevice =
+                mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
         // Update visibility of footer
-        mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile ||
-            vpnName != null || vpnNameWorkProfile != null;
+        mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile
+                || vpnName != null || vpnNameWorkProfile != null
+                || isProfileOwnerOfOrganizationOwnedDevice;
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
-                vpnNameWorkProfile, organizationName, workProfileName);
+                vpnNameWorkProfile, organizationName, workProfileOrganizationName,
+                isProfileOwnerOfOrganizationOwnedDevice);
         // Update the icon
         int footerIconId = R.drawable.ic_info_outline;
         if (vpnName != null || vpnNameWorkProfile != null) {
@@ -176,8 +180,9 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     protected CharSequence getFooterText(boolean isDeviceManaged, boolean hasWorkProfile,
             boolean hasCACerts, boolean hasCACertsInWorkProfile, boolean isNetworkLoggingEnabled,
             String vpnName, String vpnNameWorkProfile, CharSequence organizationName,
-            CharSequence workProfileName) {
-        if (isDeviceManaged) {
+            CharSequence workProfileOrganizationName,
+            boolean isProfileOwnerOfOrganizationOwnedDevice) {
+        if (isDeviceManaged || DEBUG_FORCE_VISIBLE) {
             if (hasCACerts || hasCACertsInWorkProfile || isNetworkLoggingEnabled) {
                 if (organizationName == null) {
                     return mContext.getString(
@@ -212,13 +217,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
                     organizationName);
         } // end if(isDeviceManaged)
         if (hasCACertsInWorkProfile) {
-            if (workProfileName == null) {
+            if (workProfileOrganizationName == null) {
                 return mContext.getString(
                         R.string.quick_settings_disclosure_managed_profile_monitoring);
             }
             return mContext.getString(
                     R.string.quick_settings_disclosure_named_managed_profile_monitoring,
-                    workProfileName);
+                    workProfileOrganizationName);
         }
         if (hasCACerts) {
             return mContext.getString(R.string.quick_settings_disclosure_monitoring);
@@ -239,6 +244,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             return mContext.getString(R.string.quick_settings_disclosure_named_vpn,
                     vpnName);
         }
+        if (isProfileOwnerOfOrganizationOwnedDevice) {
+            if (workProfileOrganizationName == null) {
+                return mContext.getString(R.string.quick_settings_disclosure_management);
+            }
+            return mContext.getString(R.string.quick_settings_disclosure_named_management,
+                    workProfileOrganizationName);
+        }
         return null;
     }
 
@@ -253,9 +265,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
     private void createDialog() {
         final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
+        boolean isProfileOwnerOfOrganizationOwnedDevice =
+                mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
         final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
         final CharSequence deviceOwnerOrganization =
                 mSecurityController.getDeviceOwnerOrganizationName();
+        final CharSequence workProfileOrganizationName =
+                mSecurityController.getWorkProfileOrganizationName();
         final boolean hasCACerts = mSecurityController.hasCACertInCurrentUser();
         final boolean hasCACertsInWorkProfile = mSecurityController.hasCACertInWorkProfile();
         final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
@@ -272,7 +288,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
         // device management section
         CharSequence managementMessage = getManagementMessage(isDeviceManaged,
-                deviceOwnerOrganization);
+                deviceOwnerOrganization, isProfileOwnerOfOrganizationOwnedDevice,
+                workProfileOrganizationName);
         if (managementMessage == null) {
             dialogView.findViewById(R.id.device_management_disclosures).setVisibility(View.GONE);
         } else {
@@ -280,7 +297,11 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             TextView deviceManagementWarning =
                     (TextView) dialogView.findViewById(R.id.device_management_warning);
             deviceManagementWarning.setText(managementMessage);
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
+            // Don't show the policies button for profile owner of org owned device, because there
+            // is no policies settings screen for it
+            if (!isProfileOwnerOfOrganizationOwnedDevice) {
+                mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
+            }
         }
 
         // ca certificate section
@@ -370,11 +391,18 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     }
 
     protected CharSequence getManagementMessage(boolean isDeviceManaged,
-            CharSequence organizationName) {
-        if (!isDeviceManaged) return null;
-        if (organizationName != null)
+            CharSequence organizationName, boolean isProfileOwnerOfOrganizationOwnedDevice,
+            CharSequence workProfileOrganizationName) {
+        if (!isDeviceManaged && !isProfileOwnerOfOrganizationOwnedDevice) {
+            return null;
+        }
+        if (isDeviceManaged && organizationName != null) {
             return mContext.getString(
                     R.string.monitoring_description_named_management, organizationName);
+        } else if (isProfileOwnerOfOrganizationOwnedDevice && workProfileOrganizationName != null) {
+            return mContext.getString(
+                    R.string.monitoring_description_named_management, workProfileOrganizationName);
+        }
         return mContext.getString(R.string.monitoring_description_management);
     }
 
@@ -451,8 +479,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             if (mFooterTextContent != null) {
                 mFooterText.setText(mFooterTextContent);
             }
-            mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
-            if (mDivider != null) mDivider.setVisibility(mIsVisible ? View.GONE : View.VISIBLE);
+            mRootView.setVisibility(mIsVisible || DEBUG_FORCE_VISIBLE ? View.VISIBLE : View.GONE);
         }
     };
 

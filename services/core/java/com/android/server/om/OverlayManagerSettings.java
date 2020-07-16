@@ -73,7 +73,7 @@ final class OverlayManagerSettings {
         remove(packageName, userId);
         insert(new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
                 baseCodePath, OverlayInfo.STATE_UNKNOWN, isEnabled, isMutable, priority,
-                overlayCategory, false /* hasConfiguratorActorPolicy */));
+                overlayCategory));
     }
 
     /**
@@ -158,26 +158,6 @@ final class OverlayManagerSettings {
             throw new BadKeyException(packageName, userId);
         }
         return mItems.get(idx).setState(state);
-    }
-
-    boolean hasConfiguratorActorPolicy(@NonNull final String packageName, final int userId) {
-        final int idx = select(packageName, userId);
-        if (idx < 0) {
-            throw new BadKeyException(packageName, userId);
-        }
-        return mItems.get(idx).hasConfiguratorActorPolicy();
-    }
-
-    /**
-     * Returns true if the settings were modified, false if they remain the same.
-     */
-    boolean setHasConfiguratorActorPolicy(@NonNull final String packageName, final int userId,
-            boolean hasPolicy) {
-        final int idx = select(packageName, userId);
-        if (idx < 0) {
-            throw new BadKeyException(packageName, userId);
-        }
-        return mItems.get(idx).setHasConfiguratorActorPolicy(hasPolicy);
     }
 
     List<OverlayInfo> getOverlaysForTarget(@NonNull final String targetPackageName,
@@ -343,17 +323,16 @@ final class OverlayManagerSettings {
         pw.println(item.mPackageName + ":" + item.getUserId() + " {");
         pw.increaseIndent();
 
-        pw.println("mPackageName................: " + item.mPackageName);
-        pw.println("mUserId.....................: " + item.getUserId());
-        pw.println("mTargetPackageName..........: " + item.getTargetPackageName());
-        pw.println("mTargetOverlayableName......: " + item.getTargetOverlayableName());
-        pw.println("mBaseCodePath...............: " + item.getBaseCodePath());
-        pw.println("mState......................: " + OverlayInfo.stateToString(item.getState()));
-        pw.println("mIsEnabled..................: " + item.isEnabled());
-        pw.println("mIsMutable..................: " + item.isMutable());
-        pw.println("mPriority...................: " + item.mPriority);
-        pw.println("mCategory...................: " + item.mCategory);
-        pw.println("mHasConfiguratorActorPolicy.: " + item.hasConfiguratorActorPolicy());
+        pw.println("mPackageName...........: " + item.mPackageName);
+        pw.println("mUserId................: " + item.getUserId());
+        pw.println("mTargetPackageName.....: " + item.getTargetPackageName());
+        pw.println("mTargetOverlayableName.: " + item.getTargetOverlayableName());
+        pw.println("mBaseCodePath..........: " + item.getBaseCodePath());
+        pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
+        pw.println("mIsEnabled.............: " + item.isEnabled());
+        pw.println("mIsMutable.............: " + item.isMutable());
+        pw.println("mPriority..............: " + item.mPriority);
+        pw.println("mCategory..............: " + item.mCategory);
 
         pw.decreaseIndent();
         pw.println("}");
@@ -392,9 +371,6 @@ final class OverlayManagerSettings {
             case "category":
                 pw.println(item.mCategory);
                 break;
-            case "hasconfiguratoractorpolicy":
-                pw.println(item.mHasConfiguratorActorPolicy);
-                break;
         }
     }
 
@@ -422,8 +398,6 @@ final class OverlayManagerSettings {
         private static final String ATTR_CATEGORY = "category";
         private static final String ATTR_USER_ID = "userId";
         private static final String ATTR_VERSION = "version";
-        private static final String ATTR_HAS_CONFIGURATOR_ACTOR_POLICY =
-                "hasConfiguratorActorPolicy";
 
         @VisibleForTesting
         static final int CURRENT_VERSION = 4;
@@ -461,6 +435,10 @@ final class OverlayManagerSettings {
                     // Throw an exception which will cause the overlay file to be ignored
                     // and overwritten.
                     throw new XmlPullParserException("old version " + oldVersion + "; ignoring");
+                case 3:
+                    // Upgrading from version 3 to 4 is not a breaking change so do not ignore the
+                    // overlay file.
+                    return;
                 default:
                     throw new XmlPullParserException("unrecognized version " + oldVersion);
             }
@@ -480,12 +458,9 @@ final class OverlayManagerSettings {
             final boolean isStatic = XmlUtils.readBooleanAttribute(parser, ATTR_IS_STATIC);
             final int priority = XmlUtils.readIntAttribute(parser, ATTR_PRIORITY);
             final String category = XmlUtils.readStringAttribute(parser, ATTR_CATEGORY);
-            final boolean hasConfiguratorActorPolicy = XmlUtils.readBooleanAttribute(parser,
-                    ATTR_HAS_CONFIGURATOR_ACTOR_POLICY);
 
             return new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
-                    baseCodePath, state, isEnabled, !isStatic, priority, category,
-                    hasConfiguratorActorPolicy);
+                    baseCodePath, state, isEnabled, !isStatic, priority, category);
         }
 
         public static void persist(@NonNull final ArrayList<SettingsItem> table,
@@ -520,8 +495,6 @@ final class OverlayManagerSettings {
             XmlUtils.writeBooleanAttribute(xml, ATTR_IS_STATIC, !item.mIsMutable);
             XmlUtils.writeIntAttribute(xml, ATTR_PRIORITY, item.mPriority);
             XmlUtils.writeStringAttribute(xml, ATTR_CATEGORY, item.mCategory);
-            XmlUtils.writeBooleanAttribute(xml, ATTR_HAS_CONFIGURATOR_ACTOR_POLICY,
-                    item.mHasConfiguratorActorPolicy);
             xml.endTag(null, TAG_ITEM);
         }
     }
@@ -538,14 +511,12 @@ final class OverlayManagerSettings {
         private boolean mIsMutable;
         private int mPriority;
         private String mCategory;
-        private boolean mHasConfiguratorActorPolicy;
 
         SettingsItem(@NonNull final String packageName, final int userId,
                 @NonNull final String targetPackageName,
                 @Nullable final String targetOverlayableName, @NonNull final String baseCodePath,
                 final @OverlayInfo.State int state, final boolean isEnabled,
-                final boolean isMutable, final int priority,  @Nullable String category,
-                final boolean hasConfiguratorActorPolicy) {
+                final boolean isMutable, final int priority,  @Nullable String category) {
             mPackageName = packageName;
             mUserId = userId;
             mTargetPackageName = targetPackageName;
@@ -557,7 +528,6 @@ final class OverlayManagerSettings {
             mCache = null;
             mIsMutable = isMutable;
             mPriority = priority;
-            mHasConfiguratorActorPolicy = hasConfiguratorActorPolicy;
         }
 
         private String getTargetPackageName() {
@@ -647,18 +617,6 @@ final class OverlayManagerSettings {
 
         private int getPriority() {
             return mPriority;
-        }
-
-        private boolean hasConfiguratorActorPolicy() {
-            return mHasConfiguratorActorPolicy;
-        }
-
-        private boolean setHasConfiguratorActorPolicy(boolean hasPolicy) {
-            if (mHasConfiguratorActorPolicy != hasPolicy) {
-                mHasConfiguratorActorPolicy = hasPolicy;
-                return true;
-            }
-            return false;
         }
     }
 

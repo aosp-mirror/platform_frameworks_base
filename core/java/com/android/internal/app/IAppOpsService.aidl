@@ -36,10 +36,10 @@ interface IAppOpsService {
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
-            boolean shouldCollectAsyncNotedOp, String message);
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
     int startOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag, boolean startIfModeDefault,
-            boolean shouldCollectAsyncNotedOp, String message);
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
     @UnsupportedAppUsage
     void finishOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag);
@@ -54,7 +54,8 @@ interface IAppOpsService {
 
     int noteProxyOperation(int code, int proxiedUid, String proxiedPackageName,
             String proxiedAttributionTag, int proxyUid, String proxyPackageName,
-            String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message);
+            String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message,
+            boolean shouldCollectMessage);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
@@ -76,6 +77,7 @@ interface IAppOpsService {
     void addHistoricalOps(in AppOpsManager.HistoricalOps ops);
     void resetHistoryParameters();
     void clearHistory();
+    void rebootHistory(long offlineDurationMillis);
     List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
     void setUidMode(int code, int uid, int mode);
     @UnsupportedAppUsage

@@ -388,18 +388,16 @@ class SurfaceAnimator {
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
                 .setName(surface + " - animation-leash")
-                .setColorLayer();
+                // TODO(b/151665759) Defer reparent calls
+                // We want the leash to be visible immediately because the transaction which shows
+                // the leash may be deferred but the reparent will not. This will cause the leashed
+                // surface to be invisible until the deferred transaction is applied. If this
+                // doesn't work, you will can see the 2/3 button nav bar flicker during seamless
+                // rotation.
+                .setHidden(hidden)
+                .setEffectLayer()
+                .setCallsite("SurfaceAnimator.createAnimationLeash");
         final SurfaceControl leash = builder.build();
-        if (!hidden) {
-            // TODO(b/151665759) Defer reparent calls
-            // We want the leash to be visible immediately but we want to set the effects on
-            // the layer. Since the transaction used in this function may be deferred, we apply
-            // another transaction immediately with the correct visibility and effects.
-            // If this doesn't work, you will can see the 2/3 button nav bar flicker during
-            // seamless rotation.
-            transactionFactory.get().unsetColor(leash).show(leash).apply();
-        }
-        t.unsetColor(leash);
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);
         t.show(leash);
@@ -431,16 +429,11 @@ class SurfaceAnimator {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        if (mAnimationStartDelayed) {
-            pw.print(" mAnimationStartDelayed="); pw.println(mAnimationStartDelayed);
-        } else {
-            pw.println();
-        }
-        pw.print(prefix); pw.println("Animation:");
+        pw.print(" mAnimationType=" + mAnimationType);
+        pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
+        pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
             mAnimation.dump(pw, prefix + "  ");
-        } else {
-            pw.print(prefix); pw.println("null");
         }
     }
 

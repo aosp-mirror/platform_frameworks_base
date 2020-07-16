@@ -60,7 +60,7 @@ java_defaults {
         "framework-minus-apex",
         "framework-res",
         "framework-tethering.impl",
-        "framework-wifi-stubs-module_libs_api",
+        "framework-wifi.stubs.module_lib",
     ],
     jni_libs: [
         // For mockito extended

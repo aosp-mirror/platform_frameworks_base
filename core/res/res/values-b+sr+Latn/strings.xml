@@ -204,10 +204,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Uključite poslovni profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Lične aplikacije su blokirane dok ne uključite poslovni profil"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Lične aplikacije će biti blokirane: <xliff:g id="DATE">%1$s</xliff:g> u <xliff:g id="TIME">%2$s</xliff:g>. IT administrator ne dozvoljava da poslovni profil bude isključen duže od <xliff:g id="NUMBER">%3$d</xliff:g> dana."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Uključi"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije za tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcije Android TV-a"</string>
@@ -1151,7 +1149,7 @@
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvorite pomoću aplikacije %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otvori"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otvarajte <xliff:g id="HOST">%1$s</xliff:g> linkove pomoću"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvaratej linkove pomoću"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otvaraj linkove pomoću"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otvarajte linkove pomoću aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otvarajte <xliff:g id="HOST">%1$s</xliff:g> linkove pomoću aplikacije <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Dozvoli pristup"</string>
@@ -1643,7 +1641,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Nacrtali ste šablon za otključavanje netačno <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Posle još <xliff:g id="NUMBER_1">%2$d</xliff:g> neuspešna(ih) pokušaja, od vas će biti zatraženo da otključate telefon pomoću naloga e-pošte.\n\nProbajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunde/i."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ukloni"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Usluga u prvom planu sa <xliff:g id="PACKAGENAME">%1$s</xliff:g> koja je pokrenuta u pozadini neće imati dozvolu tokom korišćenja u budućim R verzijama. Posetite go/r-bg-fgs-restriction i pošaljite izveštaj o grešci."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite da pojačate zvuk iznad preporučenog nivoa?\n\nSlušanje glasne muzike duže vreme može da vam ošteti sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li da koristite prečicu za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritisnite oba dugmeta za jačinu zvuka da biste pokrenuli funkciju pristupačnosti."</string>
@@ -1667,7 +1664,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odbij"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Dodirnite neku funkciju da biste počeli da je koristite:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Odaberite funkcije koje ćete koristiti sa dugmetom Pristupačnost"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Odaberite funkcije koje ćete koristiti sa tasterom jačine zvuka kao prečicom"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Odaberite funkcije za prečicu tasterom jačine zvuka"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usluga <xliff:g id="SERVICE_NAME">%s</xliff:g> je isključena"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Izmenite prečice"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gotovo"</string>
@@ -1675,8 +1672,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Koristi prečicu"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Zadržali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Zadržali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pritisnite i zadržite oba tastera za jačinu zvuka tri sekunde da biste koristili <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Odaberite funkciju koja će se koristiti pomoću pokreta za pristupačnost (pomoću dva prsta prevucite nagore od dna ekrana):"</string>
@@ -2101,7 +2098,7 @@
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT administrator vam ne dozvoljava da otvorite ovaj sadržaj pomoću aplikacija na ličnom profilu"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Poslovni profil je pauziran"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Uključi"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Nijedna aplikacija za posao ne može da podržava ovaj sadržaj"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Nijedna aplikacija za posao ne podržava ovaj sadržaj"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Nijedna aplikacija za posao ne može da otvori ovaj sadržaj"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Nijedna lična aplikacija ne može da podržava ovaj sadržaj"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Nijedna lična aplikacija ne može da otvori ovaj sadržaj"</string>

@@ -23,9 +23,16 @@ cc_defaults {
         "misc-*",
         "readability-*",
     ],
+    tidy_checks_as_errors: [
+        "modernize-*",
+        "-modernize-avoid-c-arrays",
+        "-modernize-use-trailing-return-type",
+        "android-*",
+        "misc-*",
+        "readability-*",
+    ],
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*",
     ],
 }
 
@@ -168,13 +175,13 @@ cc_binary {
     ],
     host_supported: true,
     srcs: [
+        "idmap2/CommandUtils.cpp",
         "idmap2/Create.cpp",
         "idmap2/CreateMultiple.cpp",
         "idmap2/Dump.cpp",
         "idmap2/Lookup.cpp",
         "idmap2/Main.cpp",
         "idmap2/Scan.cpp",
-        "idmap2/Verify.cpp",
     ],
     target: {
         android: {

@@ -302,8 +302,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onNotificatonStopDismissing() {
-        mInternalFalsingManager.onNotificatonStopDismissing();
+    public void onNotificationStopDismissing() {
+        mInternalFalsingManager.onNotificationStopDismissing();
     }
 
     @Override
@@ -312,8 +312,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onNotificatonStartDismissing() {
-        mInternalFalsingManager.onNotificatonStartDismissing();
+    public void onNotificationStartDismissing() {
+        mInternalFalsingManager.onNotificationStartDismissing();
     }
 
     @Override

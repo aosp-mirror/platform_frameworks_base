@@ -50,16 +50,16 @@ import dagger.Lazy;
 @Singleton
 public final class PhoneStateMonitor {
 
-    private static final int PHONE_STATE_AOD1 = 1;
-    private static final int PHONE_STATE_AOD2 = 2;
-    private static final int PHONE_STATE_BOUNCER = 3;
-    private static final int PHONE_STATE_UNLOCKED_LOCKSCREEN = 4;
-    private static final int PHONE_STATE_HOME = 5;
-    private static final int PHONE_STATE_OVERVIEW = 6;
-    private static final int PHONE_STATE_ALL_APPS = 7;
-    private static final int PHONE_STATE_APP_DEFAULT = 8;
-    private static final int PHONE_STATE_APP_IMMERSIVE = 9;
-    private static final int PHONE_STATE_APP_FULLSCREEN = 10;
+    public static final int PHONE_STATE_AOD1 = 1;
+    public static final int PHONE_STATE_AOD2 = 2;
+    public static final int PHONE_STATE_BOUNCER = 3;
+    public static final int PHONE_STATE_UNLOCKED_LOCKSCREEN = 4;
+    public static final int PHONE_STATE_HOME = 5;
+    public static final int PHONE_STATE_OVERVIEW = 6;
+    public static final int PHONE_STATE_ALL_APPS = 7;
+    public static final int PHONE_STATE_APP_DEFAULT = 8;
+    public static final int PHONE_STATE_APP_IMMERSIVE = 9;
+    public static final int PHONE_STATE_APP_FULLSCREEN = 10;
 
     private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
             PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
@@ -104,7 +104,7 @@ public final class PhoneStateMonitor {
         });
     }
 
-    int getPhoneState() {
+    public int getPhoneState() {
         int phoneState;
         if (isShadeFullscreen()) {
             phoneState = getPhoneLockscreenState();

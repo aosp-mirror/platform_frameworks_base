@@ -3158,7 +3158,7 @@
          @hide
     -->
     <permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"
-                android:protectionLevel="signature|installer" />
+                android:protectionLevel="signature|preinstalled" />
 
     <!-- @SystemApi Allows an application to manage (create, destroy,
          Z-order) application tokens in the window manager.
@@ -3534,6 +3534,8 @@
          @hide -->
     <permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID"
          android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
+
 
     <!-- Must be required by a {@link android.media.routing.MediaRouteService}
          to ensure that only the system can interact with it.
@@ -3656,7 +3658,8 @@
          <p>The package installer v2 APIs are still a work in progress and we're
          currently validating they work in all scenarios.
          <p>Not for use by third-party applications.
-         TODO(b/152310230): remove this permission once the APIs are confirmed to be sufficient.
+         TODO(b/152310230): use this permission to protect only Incremental installations
+         once the APIs are confirmed to be sufficient.
          @hide
     -->
     <permission android:name="com.android.permission.USE_INSTALLER_V2"
@@ -4847,7 +4850,7 @@
     <!-- @SystemApi Allows an application to turn on / off quiet mode.
          @hide -->
     <permission android:name="android.permission.MODIFY_QUIET_MODE"
-                android:protectionLevel="signature|privileged|wellbeing" />
+                android:protectionLevel="signature|privileged|wellbeing|development" />
 
     <!-- Allows internal management of the camera framework
          @hide -->
@@ -5024,6 +5027,10 @@
          @hide -->
     <permission android:name="android.permission.ACCESS_TV_DESCRAMBLER"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
+
+    <!-- Allows an application to create trusted displays. @hide -->
+    <permission android:name="android.permission.ADD_TRUSTED_DISPLAY"
+                android:protectionLevel="signature" />
 
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
@@ -5227,7 +5234,7 @@
         </activity>
 
         <activity android:name="com.android.internal.app.SuspendedAppActivity"
-                  android:theme="@style/Theme.Dialog.Confirmation"
+                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:excludeFromRecents="true"
                   android:process=":ui">
         </activity>

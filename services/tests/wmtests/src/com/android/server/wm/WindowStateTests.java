@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -66,7 +67,6 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Insets;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -228,21 +228,16 @@ public class WindowStateTests extends WindowTestsBase {
         appWindow.mAttrs.flags |= (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
         imeWindow.mAttrs.flags |= (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
 
-        // Visible app window with flags FLAG_NOT_FOCUSABLE or FLAG_ALT_FOCUSABLE_IM can't be IME
-        // target while an IME window can never be an IME target regardless of its visibility
-        // or flags.
-        assertFalse(appWindow.canBeImeTarget());
+        // Visible app window with flags can be IME target while an IME window can never be an IME
+        // target regardless of its visibility or flags.
+        assertTrue(appWindow.canBeImeTarget());
         assertFalse(imeWindow.canBeImeTarget());
 
-        // b/145812508: special legacy use-case for transparent/translucent windows.
-        appWindow.mAttrs.format = PixelFormat.TRANSPARENT;
-        assertTrue(appWindow.canBeImeTarget());
-
-        appWindow.mAttrs.format = PixelFormat.OPAQUE;
-        appWindow.mAttrs.flags &= ~FLAG_ALT_FOCUSABLE_IM;
+        // Verify PINNED windows can't be IME target.
+        int initialMode = appWindow.mActivityRecord.getWindowingMode();
+        appWindow.mActivityRecord.setWindowingMode(WINDOWING_MODE_PINNED);
         assertFalse(appWindow.canBeImeTarget());
-        appWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
-        assertTrue(appWindow.canBeImeTarget());
+        appWindow.mActivityRecord.setWindowingMode(initialMode);
 
         // Make windows invisible
         appWindow.hideLw(false /* doAnimation */);
@@ -646,6 +641,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
         win1.mHasSurface = true;
         win1.mSurfaceControl = mock(SurfaceControl.class);
+        win1.mAttrs.surfaceInsets.set(1, 2, 3, 4);
         win1.getFrameLw().offsetTo(WINDOW_OFFSET, 0);
         win1.updateSurfacePosition(t);
         win1.getTransformationMatrix(values, matrix);
@@ -690,6 +686,16 @@ public class WindowStateTests extends WindowTestsBase {
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertTrue(sameTokenWindow.needsRelativeLayeringToIme());
         sameTokenWindow.removeImmediately();
+        assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
+    }
+
+    @Test
+    public void testNeedsRelativeLayeringToIme_startingWindow() {
+        WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
+                mAppWindow.mToken, "SameTokenWindow");
+        mDisplayContent.mInputMethodTarget = mAppWindow;
+        sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
 }

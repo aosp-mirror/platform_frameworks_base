@@ -104,8 +104,6 @@ public class ManagedProfilePasswordCache {
                         // Generate auth-bound key to user 0 (since we the caller is user 0)
                         .setUserAuthenticationRequired(true)
                         .setUserAuthenticationValidityDurationSeconds(CACHE_TIMEOUT_SECONDS)
-                        // Only accessible after user 0's keyguard is unlocked
-                        .setUnlockedDeviceRequired(true)
                         .build());
                 key = generator.generateKey();
             } catch (GeneralSecurityException e) {
@@ -171,9 +169,13 @@ public class ManagedProfilePasswordCache {
     public void removePassword(int userId) {
         synchronized (mEncryptedPasswords) {
             String keyName = getEncryptionKeyName(userId);
+            String legacyKeyName = getLegacyEncryptionKeyName(userId);
             try {
                 if (mKeyStore.containsAlias(keyName)) {
                     mKeyStore.deleteEntry(keyName);
+                }
+                if (mKeyStore.containsAlias(legacyKeyName)) {
+                    mKeyStore.deleteEntry(legacyKeyName);
                 }
             } catch (KeyStoreException e) {
                 Slog.d(TAG, "Cannot delete key", e);
@@ -186,6 +188,14 @@ public class ManagedProfilePasswordCache {
     }
 
     private static String getEncryptionKeyName(int userId) {
+        return "com.android.server.locksettings.unified_profile_cache_v2_" + userId;
+    }
+
+    /**
+     * Returns the legacy keystore key name when setUnlockedDeviceRequired() was set explicitly.
+     * Only existed during Android 11 internal testing period.
+     */
+    private static String getLegacyEncryptionKeyName(int userId) {
         return "com.android.server.locksettings.unified_profile_cache_" + userId;
     }
 }

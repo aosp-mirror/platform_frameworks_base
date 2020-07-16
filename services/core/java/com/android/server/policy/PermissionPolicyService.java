@@ -825,7 +825,15 @@ public final class PermissionPolicyService extends SystemService {
                 return;
             }
 
-            if (pkgInfo == null || pkg == null || pkgInfo.requestedPermissions == null) {
+            if (pkgInfo == null || pkg == null || pkgInfo.applicationInfo == null
+                    || pkgInfo.requestedPermissions == null) {
+                return;
+            }
+
+            final int uid = pkgInfo.applicationInfo.uid;
+            if (uid == Process.ROOT_UID || uid == Process.SYSTEM_UID) {
+                // Root and system server always pass permission checks, so don't touch their app
+                // ops to keep compatibility.
                 return;
             }
 

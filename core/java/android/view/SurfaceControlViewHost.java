@@ -167,15 +167,27 @@ public class SurfaceControlViewHost {
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
             @Nullable IBinder hostToken) {
         mSurfaceControl = new SurfaceControl.Builder()
-            .setContainerLayer()
-            .setName("SurfaceControlViewHost")
-            .build();
+                .setContainerLayer()
+                .setName("SurfaceControlViewHost")
+                .setCallsite("SurfaceControlViewHost")
+                .build();
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
         mViewRoot = new ViewRootImpl(context, display, mWm);
         mViewRoot.forceDisableBLAST();
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        // We aren't on the UI thread here so we need to pass false to
+        // doDie
+        mViewRoot.die(false /* immediate */);
+    }
+
 
     /**
      * Return a SurfacePackage for the root SurfaceControl of the embedded hierarchy.
@@ -273,6 +285,6 @@ public class SurfaceControlViewHost {
      */
     public void release() {
         // ViewRoot will release mSurfaceControl for us.
-        mViewRoot.die(false /* immediate */);
+        mViewRoot.die(true /* immediate */);
     }
 }

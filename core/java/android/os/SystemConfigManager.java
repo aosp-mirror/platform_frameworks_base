@@ -88,4 +88,29 @@ public class SystemConfigManager {
             return Collections.emptyMap();
         }
     }
+
+    /**
+     * Returns a map that describes helper apps associated with carrier apps that, like the apps
+     * returned by {@link #getDisabledUntilUsedPreinstalledCarrierApps()}, should be disabled until
+     * the correct SIM is inserted into the device.
+     *
+     * <p>TODO(b/159069037) expose this and get rid of the other method that omits SDK version.
+     *
+     * @return A map with keys corresponding to package names returned by
+     *         {@link #getDisabledUntilUsedPreinstalledCarrierApps()} and values as lists of package
+     *         names of helper apps and the SDK versions when they were first added.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.READ_CARRIER_APP_INFO)
+    public @NonNull Map<String, List<CarrierAssociatedAppEntry>>
+            getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries() {
+        try {
+            return (Map<String, List<CarrierAssociatedAppEntry>>)
+                    mInterface.getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Caught remote exception", e);
+            return Collections.emptyMap();
+        }
+    }
 }

@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.Manifest;
 import android.content.rollback.RollbackInfo;
+import android.content.rollback.RollbackManager;
 
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
@@ -51,6 +52,17 @@ public class MultiUserRollbackTest {
     @After
     public void dropShellPermissions() {
         InstallUtils.dropShellPermissionIdentity();
+    }
+
+    @Test
+    public void cleanUp() {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        rm.getRecentlyCommittedRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        assertThat(rm.getAvailableRollbacks()).isEmpty();
+        assertThat(rm.getRecentlyCommittedRollbacks()).isEmpty();
     }
 
     @Test

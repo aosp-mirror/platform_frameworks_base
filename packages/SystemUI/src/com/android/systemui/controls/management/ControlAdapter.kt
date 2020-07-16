@@ -238,7 +238,7 @@ internal class ControlHolder(
             updateFavorite(!favorite.isChecked)
             favoriteCallback(wrapper.controlId, favorite.isChecked)
         }
-        applyRenderInfo(renderInfo)
+        applyRenderInfo(renderInfo, wrapper)
     }
 
     override fun updateFavorite(favorite: Boolean) {
@@ -254,12 +254,20 @@ internal class ControlHolder(
         return RenderInfo.lookup(itemView.context, component, deviceType)
     }
 
-    private fun applyRenderInfo(ri: RenderInfo) {
+    private fun applyRenderInfo(ri: RenderInfo, ci: ControlInterface) {
         val context = itemView.context
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
 
-        icon.setImageDrawable(ri.icon)
-        icon.setImageTintList(fg)
+        ci.customIcon?.let {
+            icon.setImageIcon(it)
+        } ?: run {
+            icon.setImageDrawable(ri.icon)
+
+            // Do not color app icons
+            if (ci.deviceType != DeviceTypes.TYPE_ROUTINE) {
+                icon.setImageTintList(fg)
+            }
+        }
     }
 }
 

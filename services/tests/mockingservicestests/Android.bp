@@ -21,7 +21,7 @@ android_test {
         "services.core",
         "services.net",
         "service-jobscheduler",
-        "service-permission",
+        "service-permission.impl",
         "service-blobstore",
         "androidx.test.runner",
         "androidx.test.ext.truth",

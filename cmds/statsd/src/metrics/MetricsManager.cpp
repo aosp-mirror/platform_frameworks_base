@@ -21,7 +21,6 @@
 #include <private/android_filesystem_config.h>
 
 #include "CountMetricProducer.h"
-#include "atoms_info.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
 #include "guardrail/StatsdStats.h"
@@ -361,20 +360,17 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
         protoOutput->end(token);
     }
 
-    mLastReportTimeNs = dumpTimeStampNs;
-    mLastReportWallClockNs = getWallClockNs();
+    // Do not update the timestamps when data is not cleared to avoid timestamps from being
+    // misaligned.
+    if (erase_data) {
+        mLastReportTimeNs = dumpTimeStampNs;
+        mLastReportWallClockNs = getWallClockNs();
+    }
     VLOG("=========================Metric Reports End==========================");
 }
 
 
 bool MetricsManager::checkLogCredentials(const LogEvent& event) {
-    // TODO(b/154856835): Remove this check once we get whitelist from the config.
-    if (android::util::AtomsInfo::kWhitelistedAtoms.find(event.GetTagId()) !=
-      android::util::AtomsInfo::kWhitelistedAtoms.end())
-    {
-        return true;
-    }
-
     if (mWhitelistedAtomIds.find(event.GetTagId()) != mWhitelistedAtomIds.end()) {
         return true;
     }

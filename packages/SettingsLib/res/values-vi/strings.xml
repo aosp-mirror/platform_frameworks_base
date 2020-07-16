@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chọn hồ sơ"</string>
     <string name="category_personal" msgid="6236798763159385225">"Cá nhân"</string>
-    <string name="category_work" msgid="4014193632325996115">"Cơ quan"</string>
+    <string name="category_work" msgid="4014193632325996115">"Công việc"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Tùy chọn cho nhà phát triển"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Bật tùy chọn nhà phát triển"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Đặt tùy chọn cho phát triển ứng dụng"</string>
@@ -549,7 +549,7 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa phiên khách"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Khách"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Cài đặt mặc định của thiết bị"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Theo giá trị mặc định của thiết bị"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Đã tắt"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Đã bật"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Bạn phải khởi động lại thiết bị để áp dụng sự thay đổi này. Hãy khởi động lại ngay hoặc hủy."</string>

@@ -73,6 +73,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -230,6 +231,10 @@ public class VoiceInteractionManagerService extends SystemService {
         private int mCurUser;
         private boolean mCurUserUnlocked;
         private boolean mCurUserSupported;
+
+        @GuardedBy("this")
+        private boolean mTemporarilyDisabled;
+
         private final boolean mEnableService;
 
         VoiceInteractionManagerServiceStub() {
@@ -316,8 +321,12 @@ public class VoiceInteractionManagerService extends SystemService {
                     Settings.Secure.VOICE_INTERACTION_SERVICE, userHandle);
             ComponentName curRecognizer = getCurRecognizer(userHandle);
             VoiceInteractionServiceInfo curInteractorInfo = null;
-            if (DEBUG) Slog.d(TAG, "curInteractorStr=" + curInteractorStr
-                    + " curRecognizer=" + curRecognizer);
+            if (DEBUG) {
+                Slog.d(TAG, "curInteractorStr=" + curInteractorStr
+                        + " curRecognizer=" + curRecognizer
+                        + " mEnableService=" + mEnableService
+                        + " mTemporarilyDisabled=" + mTemporarilyDisabled);
+            }
             if (curInteractorStr == null && curRecognizer != null && mEnableService) {
                 // If there is no interactor setting, that means we are upgrading
                 // from an older platform version.  If the current recognizer is not
@@ -472,10 +481,11 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         void switchImplementationIfNeededLocked(boolean force) {
-            if (!mCurUserSupported) {
+            if (!mCurUserSupported || mTemporarilyDisabled) {
                 if (DEBUG_USER) {
-                    Slog.d(TAG, "switchImplementationIfNeeded(): skipping on unsuported user "
-                            + mCurUser);
+                    Slog.d(TAG, "switchImplementationIfNeeded(): skipping: force= " + force
+                            + "mCurUserSupported=" + mCurUserSupported
+                            + "mTemporarilyDisabled=" + mTemporarilyDisabled);
                 }
                 if (mImpl != null) {
                     mImpl.shutdownLocked();
@@ -922,6 +932,25 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     return mImpl.getUserDisabledShowContextLocked(callingUid);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void setDisabled(boolean disabled) {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                if (mTemporarilyDisabled == disabled) {
+                    if (DEBUG) Slog.d(TAG, "setDisabled(): already " + disabled);
+                    return;
+                }
+                Slog.i(TAG, "setDisabled(): changing to " + disabled);
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mTemporarilyDisabled = disabled;
+                    switchImplementationIfNeeded(/* force= */ false);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1378,6 +1407,7 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)");
                 pw.println("  mEnableService: " + mEnableService);
+                pw.println("  mTemporarilyDisabled: " + mTemporarilyDisabled);
                 pw.println("  mCurUser: " + mCurUser);
                 pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);

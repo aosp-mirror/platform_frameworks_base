@@ -26,6 +26,15 @@ import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECU
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_TRUE;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ACCEPT_DATA_SHARE_REQUEST;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_EMPTY_DATA;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_IOEXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_WRITE_FINISHED;
+import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__REJECT_DATA_SHARE_REQUEST;
 import static com.android.internal.util.SyncResultReceiver.bundleFor;
 
 import android.annotation.NonNull;
@@ -95,6 +104,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A service used to observe the contents of the screen.
@@ -113,6 +123,14 @@ public final class ContentCaptureManagerService extends
     private static final int MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS =  1_000 * 60 * 5; // 5 minutes
     private static final int MAX_CONCURRENT_FILE_SHARING_REQUESTS = 10;
     private static final int DATA_SHARE_BYTE_BUFFER_LENGTH = 1_024;
+
+    // Needed to pass checkstyle_hook as names are too long for one line.
+    private static final int EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST =
+            CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST;
+    private static final int EVENT__DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED =
+            CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED;
+    private static final int EVENT__DATA_SHARE_WRITE_FINISHED =
+            CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_WRITE_FINISHED;
 
     private final LocalService mLocalService = new LocalService();
 
@@ -657,6 +675,10 @@ public final class ContentCaptureManagerService extends
                 if (mPackagesWithShareRequests.size() >= MAX_CONCURRENT_FILE_SHARING_REQUESTS
                         || mPackagesWithShareRequests.contains(request.getPackageName())) {
                     try {
+                        String serviceName = mServiceNameResolver.getServiceName(userId);
+                        ContentCaptureMetricsLogger.writeServiceEvent(
+                                EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST,
+                                serviceName, request.getPackageName());
                         clientAdapter.error(
                                 ContentCaptureManager.DATA_SHARE_ERROR_CONCURRENT_REQUEST);
                     } catch (RemoteException e) {
@@ -920,6 +942,7 @@ public final class ContentCaptureManagerService extends
         @NonNull private final DataShareRequest mDataShareRequest;
         @NonNull private final IDataShareWriteAdapter mClientAdapter;
         @NonNull private final ContentCaptureManagerService mParentService;
+        @NonNull private final AtomicBoolean mLoggedWriteFinish = new AtomicBoolean(false);
 
         DataShareCallbackDelegate(@NonNull DataShareRequest dataShareRequest,
                 @NonNull IDataShareWriteAdapter clientAdapter,
@@ -930,13 +953,16 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void accept(@NonNull IDataShareReadAdapter serviceAdapter) throws RemoteException {
+        public void accept(@NonNull IDataShareReadAdapter serviceAdapter) {
             Slog.i(TAG, "Data share request accepted by Content Capture service");
+            logServiceEvent(CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ACCEPT_DATA_SHARE_REQUEST);
 
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
             if (clientPipe == null) {
-                mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                serviceAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 return;
             }
 
@@ -945,10 +971,12 @@ public final class ContentCaptureManagerService extends
 
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> servicePipe = createPipe();
             if (servicePipe == null) {
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
                 bestEffortCloseFileDescriptors(sourceIn, sinkIn);
 
-                mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                serviceAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 return;
             }
 
@@ -957,8 +985,26 @@ public final class ContentCaptureManagerService extends
 
             mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
 
-            mClientAdapter.write(sourceIn);
-            serviceAdapter.start(sinkOut);
+            try {
+                mClientAdapter.write(sourceIn);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call write() the client operation", e);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
+                return;
+            }
+            try {
+                serviceAdapter.start(sinkOut);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call start() the service operation", e);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
+                return;
+            }
 
             // File descriptors received by remote apps will be copies of the current one. Close
             // the ones that belong to the system server, so there's only 1 open left for the
@@ -987,6 +1033,8 @@ public final class ContentCaptureManagerService extends
                     }
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to pipe client and service streams", e);
+                    logServiceEvent(
+                            CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_IOEXCEPTION);
 
                     sendErrorSignal(mClientAdapter, serviceAdapter,
                             ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
@@ -996,6 +1044,10 @@ public final class ContentCaptureManagerService extends
                                 .remove(mDataShareRequest.getPackageName());
                     }
                     if (receivedData) {
+                        if (!mLoggedWriteFinish.get()) {
+                            logServiceEvent(EVENT__DATA_SHARE_WRITE_FINISHED);
+                            mLoggedWriteFinish.set(true);
+                        }
                         try {
                             mClientAdapter.finish();
                         } catch (RemoteException e) {
@@ -1008,6 +1060,8 @@ public final class ContentCaptureManagerService extends
                         }
                     } else {
                         // Client or service may have crashed before sending.
+                        logServiceEvent(
+                                CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_EMPTY_DATA);
                         sendErrorSignal(mClientAdapter, serviceAdapter,
                                 ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                     }
@@ -1025,10 +1079,20 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void reject() throws RemoteException {
+        public void reject() {
             Slog.i(TAG, "Data share request rejected by Content Capture service");
+            logServiceEvent(CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__REJECT_DATA_SHARE_REQUEST);
 
-            mClientAdapter.rejected();
+            try {
+                mClientAdapter.rejected();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call rejected() the client operation", e);
+                try {
+                    mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                } catch (RemoteException e2) {
+                    Slog.w(TAG, "Failed to call error() the client operation", e2);
+                }
+            }
         }
 
         private void enforceDataSharingTtl(ParcelFileDescriptor sourceIn,
@@ -1048,11 +1112,16 @@ public final class ContentCaptureManagerService extends
                         && !sourceOut.getFileDescriptor().valid();
 
                 if (finishedSuccessfully) {
+                    if (!mLoggedWriteFinish.get()) {
+                        logServiceEvent(EVENT__DATA_SHARE_WRITE_FINISHED);
+                        mLoggedWriteFinish.set(true);
+                    }
                     Slog.i(TAG, "Content capture data sharing session terminated "
                             + "successfully for package '"
                             + mDataShareRequest.getPackageName()
                             + "'");
                 } else {
+                    logServiceEvent(EVENT__DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED);
                     Slog.i(TAG, "Reached the timeout of Content Capture data sharing session "
                             + "for package '"
                             + mDataShareRequest.getPackageName()
@@ -1122,6 +1191,13 @@ public final class ContentCaptureManagerService extends
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to call error() the service operation", e);
             }
+        }
+
+        private void logServiceEvent(int eventType) {
+            int userId = UserHandle.getCallingUserId();
+            String serviceName = mParentService.mServiceNameResolver.getServiceName(userId);
+            ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName,
+                    mDataShareRequest.getPackageName());
         }
     }
 }

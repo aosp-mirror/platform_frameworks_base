@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> desactivou a impresión."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa o perfil de traballo"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As túas aplicacións persoais están bloqueadas ata que actives o teu perfil de traballo"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"As aplicacións persoais bloquearanse o <xliff:g id="DATE">%1$s</xliff:g> á seguinte hora: <xliff:g id="TIME">%2$s</xliff:g>. O administrador de TI non permite que o teu perfil de traballo estea desactivado máis de <xliff:g id="NUMBER">%3$d</xliff:g> días."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activar"</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcións da tableta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcións de Android TV"</string>
@@ -856,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emerxencia"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Bloqueada pola rede"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"A tarxeta SIM está bloqueada con código PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta a guía do usuario ou ponte en contacto co servizo de asistencia ao cliente."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta a guía para usuarios ou ponte en contacto co servizo de asistencia ao cliente."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"A tarxeta SIM está bloqueada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Desbloqueando tarxeta SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
@@ -1621,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono a través dunha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eliminar"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Nas futuras compilacións R, o servizo en primeiro plano iniciado en segundo plano desde <xliff:g id="PACKAGENAME">%1$s</xliff:g> non terá permiso mentres estea en uso. Consulta go/r-bg-fgs-restriction e presenta un informe de erros."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade."</string>
@@ -1645,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tocar unha función para comezar a utilizala:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escoller as funcións que queres utilizar co botón Accesibilidade"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escoller as funcións que queres utilizar co atallo da tecla de volume"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolle as funcións que queres utilizar co atallo da tecla de volume"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g>: desactivouse"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atallos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Feito"</string>
@@ -1653,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atallo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de cor"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de cor"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activado."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desactivado."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Activouse o servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Desactivouse <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premidas as teclas do volume durante tres segudos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolle a función que queres utilizar cando toques o botón Accesibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolle a función que queres usar co xesto de accesibilidade (pasa dous dedos cara arriba desde a parte inferior da pantalla):"</string>
@@ -1788,7 +1785,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para soltar fixación"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Solicitar un padrón de desbloqueo antes de deixar de fixar a pantalla"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar un contrasinal para deixar de fixar a pantalla"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instalado polo teu administrador"</string>
@@ -2032,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ficheiros</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ficheiro</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Non hai persoas recomendadas coas que compartir contido"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Non hai recomendacións de persoas coas que compartir contido"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicacións"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inicio"</string>

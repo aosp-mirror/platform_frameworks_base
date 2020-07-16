@@ -38,156 +38,116 @@
         android:background="@drawable/rounded_bg_full"
         >
 
-        <!--  We have a known number of rows that can be shown; just design them all here -->
-        <LinearLayout
-            android:id="@+id/show_at_top_tip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:orientation="horizontal"
-            >
-            <ImageView
-                android:id="@+id/bell_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_notifications_alert"
-                android:tint="?android:attr/colorControlNormal" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:padding="12dp"
+        android:layout_gravity="center_horizontal"
+    >
 
-            <TextView
-                android:id="@+id/show_at_top_text"
+        <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
+        <ImageView
+            android:id="@+id/conversation_icon"
+            android:layout_width="@*android:dimen/conversation_avatar_size"
+            android:layout_height="@*android:dimen/conversation_avatar_size"
+            android:scaleType="centerCrop"
+            android:importantForAccessibility="no"
+        />
+
+        <FrameLayout
+            android:id="@+id/conversation_icon_badge"
+            android:layout_width="@*android:dimen/conversation_icon_size_badged"
+            android:layout_height="@*android:dimen/conversation_icon_size_badged"
+            android:layout_marginLeft="@*android:dimen/conversation_badge_side_margin"
+            android:layout_marginTop="@*android:dimen/conversation_badge_side_margin"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+        >
+            <ImageView
+                android:id="@+id/conversation_icon_badge_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@*android:drawable/conversation_badge_background"
+                android:forceHasOverlappingRendering="false"
+            />
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:forceHasOverlappingRendering="false"
+            />
+            <ImageView
+                android:id="@+id/conversation_icon_badge_ring"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical|start"
-                android:textSize="15sp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="@string/priority_onboarding_show_at_top_text"
-                style="@style/TextAppearance.NotificationInfo"
-                />
+                android:layout_gravity="center"
+                android:src="@*android:drawable/conversation_badge_ring"
+                android:forceHasOverlappingRendering="false"
+                android:clipToPadding="false"
+                android:scaleType="center"
+            />
+        </FrameLayout>
+    </FrameLayout>
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/show_avatar_tip"
+        <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:orientation="horizontal"
-            >
-            <ImageView
-                android:id="@+id/avatar_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_person"
-                android:tint="?android:attr/colorControlNormal" />
+            android:gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:text="@string/priority_onboarding_title"
+            style="@style/TextAppearance.NotificationImportanceChannel"
+        />
 
-            <TextView
-                android:id="@+id/avatar_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical|start"
-                android:textSize="15sp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="@string/priority_onboarding_show_avatar_text"
-                style="@style/TextAppearance.NotificationInfo"
-                />
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/material_grey_300" />
 
-        </LinearLayout>
-
-        <!-- These rows show optionally -->
-
-        <LinearLayout
-            android:id="@+id/floating_bubble_tip"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:orientation="horizontal"
-            >
+            android:gravity="start"
+            android:text="@string/priority_onboarding_behavior"
+            style="@style/TextAppearance.NotificationImportanceChannelGroup"
+        />
 
-            <ImageView
-                android:id="@+id/bubble_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_create_bubble"
-                android:tint="?android:attr/colorControlNormal" />
-
-            <TextView
-                android:id="@+id/bubble_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical|start"
-                android:textSize="15sp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="@string/priority_onboarding_appear_as_bubble_text"
-                style="@style/TextAppearance.NotificationInfo"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ignore_dnd_tip"
+        <TextView
+            android:id="@+id/behaviors"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:orientation="horizontal"
-            >
-
-            <ImageView
-                android:id="@+id/dnd_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/moon"
-                android:tint="?android:attr/colorControlNormal" />
-
-            <TextView
-                android:id="@+id/dnd_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical|start"
-                android:textSize="15sp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="@string/priority_onboarding_ignores_dnd_text"
-                style="@style/TextAppearance.NotificationInfo"
-                />
-
-        </LinearLayout>
+            android:gravity="start"
+            android:layout_marginTop="8dp"
+            style="@style/TextAppearance.NotificationImportanceChannelGroup"
+        />
 
         <!-- Bottom button container -->
         <RelativeLayout
             android:id="@+id/button_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:layout_marginTop="32dp"
             android:orientation="horizontal"
             >
+            <TextView
+                android:id="@+id/settings_button"
+                android:text="@string/priority_onboarding_settings_button_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:gravity="start|center_vertical"
+                android:minWidth="@dimen/notification_importance_toggle_size"
+                android:minHeight="@dimen/notification_importance_toggle_size"
+                android:maxWidth="125dp"
+                style="@style/TextAppearance.NotificationInfo.Button"/>
             <TextView
                 android:id="@+id/done_button"
                 android:text="@string/priority_onboarding_done_button_title"

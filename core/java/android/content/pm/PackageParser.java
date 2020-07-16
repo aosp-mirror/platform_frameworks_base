@@ -205,6 +205,7 @@ public class PackageParser {
     public static final String TAG_USES_PERMISSION_SDK_M = "uses-permission-sdk-m";
     public static final String TAG_USES_SDK = "uses-sdk";
     public static final String TAG_USES_SPLIT = "uses-split";
+    public static final String TAG_PROFILEABLE = "profileable";
 
     public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
     public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
@@ -459,6 +460,9 @@ public class PackageParser {
         public final SigningDetails signingDetails;
         public final boolean coreApp;
         public final boolean debuggable;
+        // This does not represent the actual manifest structure since the 'profilable' tag
+        // could be used with attributes other than 'shell'. Extend if necessary.
+        public final boolean profilableByShell;
         public final boolean multiArch;
         public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
@@ -470,15 +474,13 @@ public class PackageParser {
         public final int overlayPriority;
 
         public ApkLite(String codePath, String packageName, String splitName,
-                boolean isFeatureSplit,
-                String configForSplit, String usesSplitName, boolean isSplitRequired,
-                int versionCode, int versionCodeMajor,
-                int revisionCode, int installLocation, List<VerifierInfo> verifiers,
-                SigningDetails signingDetails, boolean coreApp,
-                boolean debuggable, boolean multiArch, boolean use32bitAbi,
-                boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits,
-                String targetPackageName, boolean overlayIsStatic, int overlayPriority,
-                int minSdkVersion, int targetSdkVersion) {
+                boolean isFeatureSplit, String configForSplit, String usesSplitName,
+                boolean isSplitRequired, int versionCode, int versionCodeMajor, int revisionCode,
+                int installLocation, List<VerifierInfo> verifiers, SigningDetails signingDetails,
+                boolean coreApp, boolean debuggable, boolean profilableByShell, boolean multiArch,
+                boolean use32bitAbi, boolean useEmbeddedDex, boolean extractNativeLibs,
+                boolean isolatedSplits, String targetPackageName, boolean overlayIsStatic,
+                int overlayPriority, int minSdkVersion, int targetSdkVersion) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -493,6 +495,7 @@ public class PackageParser {
             this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
             this.coreApp = coreApp;
             this.debuggable = debuggable;
+            this.profilableByShell = profilableByShell;
             this.multiArch = multiArch;
             this.use32bitAbi = use32bitAbi;
             this.useEmbeddedDex = useEmbeddedDex;
@@ -1374,9 +1377,11 @@ public class PackageParser {
         }
         SigningDetails verified;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying
+            // systemDir APKs are already trusted, save time by not verifying; since the signature
+            // is not verified and some system apps can have their V2+ signatures stripped allow
+            // pulling the certs from the jar signature.
             verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                        apkPath, minSignatureScheme);
+                        apkPath, SigningDetails.SignatureSchemeVersion.JAR);
         } else {
             verified = ApkSignatureVerifier.verify(apkPath, minSignatureScheme);
         }
@@ -1573,6 +1578,7 @@ public class PackageParser {
         int revisionCode = 0;
         boolean coreApp = false;
         boolean debuggable = false;
+        boolean profilableByShell = false;
         boolean multiArch = false;
         boolean use32bitAbi = false;
         boolean extractNativeLibs = true;
@@ -1638,6 +1644,10 @@ public class PackageParser {
                     final String attr = attrs.getAttributeName(i);
                     if ("debuggable".equals(attr)) {
                         debuggable = attrs.getAttributeBooleanValue(i, false);
+                        if (debuggable) {
+                            // Debuggable implies profileable
+                            profilableByShell = true;
+                        }
                     }
                     if ("multiArch".equals(attr)) {
                         multiArch = attrs.getAttributeBooleanValue(i, false);
@@ -1690,6 +1700,13 @@ public class PackageParser {
                         minSdkVersion = attrs.getAttributeIntValue(i, DEFAULT_MIN_SDK_VERSION);
                     }
                 }
+            } else if (TAG_PROFILEABLE.equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("shell".equals(attr)) {
+                        profilableByShell = attrs.getAttributeBooleanValue(i, profilableByShell);
+                    }
+                }
             }
         }
 
@@ -1707,8 +1724,9 @@ public class PackageParser {
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
                 configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
                 revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
-                multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits,
-                targetPackage, overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion);
+                profilableByShell, multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs,
+                isolatedSplits, targetPackage, overlayIsStatic, overlayPriority, minSdkVersion,
+                targetSdkVersion);
     }
 
     /**

@@ -84,6 +84,7 @@
 ?audio/sp-midi smf
 ?audio/x-matroska mka
 ?audio/x-pn-realaudio ra
+?audio/x-mpeg mp3
 
 ?image/bmp bmp
 ?image/heic heic

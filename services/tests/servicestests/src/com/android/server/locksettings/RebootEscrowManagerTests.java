@@ -43,6 +43,7 @@ import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
 import android.hardware.rebootescrow.IRebootEscrow;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
@@ -178,6 +179,13 @@ public class RebootEscrowManagerTests {
     }
 
     @Test
+    public void clearCredentials_HalFailure_NonFatal() throws Exception {
+        doThrow(ServiceSpecificException.class).when(mRebootEscrow).storeKey(any());
+        mService.clearRebootEscrow();
+        verify(mRebootEscrow).storeKey(eq(new byte[32]));
+    }
+
+    @Test
     public void armService_Success() throws Exception {
         RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
         mService.setRebootEscrowListener(mockListener);
@@ -197,6 +205,24 @@ public class RebootEscrowManagerTests {
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
         assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
+    }
+
+    @Test
+    public void armService_HalFailure_NonFatal() throws Exception {
+        RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
+        mService.setRebootEscrowListener(mockListener);
+        mService.prepareRebootEscrow();
+
+        clearInvocations(mRebootEscrow);
+        mService.callToRebootEscrowIfNeeded(PRIMARY_USER_ID, FAKE_SP_VERSION, FAKE_AUTH_TOKEN);
+        verify(mockListener).onPreparedForReboot(eq(true));
+        verify(mRebootEscrow, never()).storeKey(any());
+
+        assertNull(
+                mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
+        doThrow(ServiceSpecificException.class).when(mRebootEscrow).storeKey(any());
+        assertFalse(mService.armRebootEscrowIfNeeded());
+        verify(mRebootEscrow).storeKey(any());
     }
 
     @Test

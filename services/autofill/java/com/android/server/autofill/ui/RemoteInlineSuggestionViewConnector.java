@@ -46,6 +46,8 @@ final class RemoteInlineSuggestionViewConnector {
     @Nullable
     private final IBinder mHostInputToken;
     private final int mDisplayId;
+    private final int mUserId;
+    private final int mSessionId;
 
     @NonNull
     private final Runnable mOnAutofillCallback;
@@ -56,6 +58,7 @@ final class RemoteInlineSuggestionViewConnector {
 
     RemoteInlineSuggestionViewConnector(
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId,
             @NonNull InlinePresentation inlinePresentation,
             @Nullable IBinder hostInputToken,
             int displayId,
@@ -66,6 +69,8 @@ final class RemoteInlineSuggestionViewConnector {
         mInlinePresentation = inlinePresentation;
         mHostInputToken = hostInputToken;
         mDisplayId = displayId;
+        mUserId = userId;
+        mSessionId = sessionId;
 
         mOnAutofillCallback = onAutofillCallback;
         mOnErrorCallback = onErrorCallback;
@@ -82,7 +87,7 @@ final class RemoteInlineSuggestionViewConnector {
         if (mRemoteRenderService != null) {
             if (sDebug) Slog.d(TAG, "Request to recreate the UI");
             mRemoteRenderService.renderSuggestion(callback, mInlinePresentation, width, height,
-                    mHostInputToken, mDisplayId);
+                    mHostInputToken, mDisplayId, mUserId, mSessionId);
             return true;
         }
         return false;

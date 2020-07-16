@@ -19,16 +19,13 @@ package com.android.systemui.controls.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
-import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
-import android.os.Process
 import android.service.controls.Control
 import android.util.Log
 import android.util.TypedValue
@@ -36,7 +33,6 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
@@ -107,6 +103,22 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var dismissGlobalActions: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
 
+    private val collator = Collator.getInstance(context.resources.configuration.locales[0])
+    private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
+        it.getTitle()
+    }
+
+    private val onSeedingComplete = Consumer<Boolean> {
+        accepted ->
+            if (accepted) {
+                selectedStructure = controlsController.get().getFavorites().maxBy {
+                    it.controls.size
+                } ?: EMPTY_STRUCTURE
+                updatePreferences(selectedStructure)
+            }
+            reload(parent)
+    }
+
     override val available: Boolean
         get() = controlsController.get().available
 
@@ -117,18 +129,12 @@ class ControlsUiControllerImpl @Inject constructor (
     ): ControlsListingController.ControlsListingCallback {
         return object : ControlsListingController.ControlsListingCallback {
             override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
-                bgExecutor.execute {
-                    val collator = Collator.getInstance(context.resources.configuration.locales[0])
-                    val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
-                        it.loadLabel()
-                    }
-
-                    val mList = serviceInfos.toMutableList()
-                    mList.sortWith(localeComparator)
-                    lastItems = mList.map {
-                        SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
-                    }
-                    uiExecutor.execute {
+                val lastItems = serviceInfos.map {
+                    SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
+                }
+                uiExecutor.execute {
+                    parent.removeAllViews()
+                    if (lastItems.size > 0) {
                         onResult(lastItems)
                     }
                 }
@@ -145,8 +151,7 @@ class ControlsUiControllerImpl @Inject constructor (
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
 
-        val cb = Consumer<Boolean> { _ -> reload(parent) }
-        if (controlsController.get().addSeedingFavoritesCallback(cb)) {
+        if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
             listingCallback = createCallback(::showSeedingView)
         } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
             // only show initial view if there are really no favorites across any structure
@@ -189,8 +194,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showSeedingView(items: List<SelectionItem>) {
-        parent.removeAllViews()
-
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
         val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
@@ -198,8 +201,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
-        parent.removeAllViews()
-
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
@@ -263,7 +264,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
-        parent.removeAllViews()
         controlViewsById.clear()
 
         createListView()
@@ -274,8 +274,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun createMenu() {
         val items = arrayOf(
             context.resources.getString(R.string.controls_menu_add),
-            context.resources.getString(R.string.controls_menu_edit),
-            "Reset"
+            context.resources.getString(R.string.controls_menu_edit)
         )
         var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
 
@@ -300,10 +299,6 @@ class ControlsUiControllerImpl @Inject constructor (
                                 0 -> startFavoritingActivity(view.context, selectedStructure)
                                 // 1: Edit controls
                                 1 -> startEditingActivity(view.context, selectedStructure)
-                                // 2: TEMPORARY for reset controls
-                                2 -> showResetConfirmation()
-                                else -> Log.w(ControlsUiController.TAG,
-                                    "Unsupported index ($pos) on 'more' menu selection")
                             }
                             dismiss()
                         }
@@ -314,48 +309,18 @@ class ControlsUiControllerImpl @Inject constructor (
         })
     }
 
-    private fun showResetConfirmation() {
-        val builder = AlertDialog.Builder(
-            context,
-            android.R.style.Theme_DeviceDefault_Dialog_Alert
-        ).apply {
-            setMessage("For testing purposes: Would you like to " +
-                "reset your favorited device controls?")
-            setPositiveButton(
-                android.R.string.ok,
-                DialogInterface.OnClickListener { dialog, _ ->
-                    val userHandle = Process.myUserHandle()
-                    val userContext = context.createContextAsUser(userHandle, 0)
-                    val prefs = userContext.getSharedPreferences(
-                        "controls_prefs", Context.MODE_PRIVATE)
-                    prefs.edit().remove("SeedingCompleted").apply()
-                    controlsController.get().resetFavorites()
-                    dialog.dismiss()
-                    context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-            })
-            setNegativeButton(
-                android.R.string.cancel,
-                DialogInterface.OnClickListener {
-                    dialog, _ -> dialog.cancel()
-                }
-            )
-        }
-        builder.create().apply {
-            getWindow().apply {
-                setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-            }
-        }.show()
-    }
-
     private fun createDropDown(items: List<SelectionItem>) {
         items.forEach {
             RenderInfo.registerComponentIcon(it.componentName, it.icon)
         }
 
         val itemsByComponent = items.associateBy { it.componentName }
-        val itemsWithStructure = allStructures.mapNotNull {
+        val itemsWithStructure = mutableListOf<SelectionItem>()
+        allStructures.mapNotNullTo(itemsWithStructure) {
             itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
         }
+        itemsWithStructure.sortWith(localeComparator)
+
         val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
 
         var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
@@ -485,6 +450,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun updatePreferences(si: StructureInfo) {
+        if (si == EMPTY_STRUCTURE) return
         sharedPreferences.edit()
             .putString(PREF_COMPONENT, si.componentName.flattenToString())
             .putString(PREF_STRUCTURE, si.structure.toString())

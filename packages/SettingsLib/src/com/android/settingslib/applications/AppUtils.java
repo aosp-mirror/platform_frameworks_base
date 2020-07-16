@@ -19,10 +19,15 @@ package com.android.settingslib.applications;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.hardware.usb.IUsbManager;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -43,6 +48,15 @@ public class AppUtils {
      * robolectric does not yet have an implementation of it.
      */
     private static InstantAppDataProvider sInstantAppDataProvider = null;
+
+    private static final Intent sBrowserIntent;
+
+    static {
+        sBrowserIntent = new Intent()
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.parse("http:"));
+    }
 
     public static CharSequence getLaunchByDefaultSummary(ApplicationsState.AppEntry appEntry,
             IUsbManager usbManager, PackageManager pm, Context context) {
@@ -134,10 +148,23 @@ public class AppUtils {
     /**
      * Returns a boolean indicating whether a given package is a mainline module.
      */
-    public static boolean isMainlineModule(Context context, String packageName) {
-        final PackageManager pm = context.getPackageManager();
+    public static boolean isMainlineModule(PackageManager pm, String packageName) {
+        // Check if the package is listed among the system modules.
         try {
-            return pm.getModuleInfo(packageName, 0 /* flags */) != null;
+            pm.getModuleInfo(packageName, 0 /* flags */);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            //pass
+        }
+
+        try {
+            final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+            // Check if the package is contained in an APEX. There is no public API to properly
+            // check whether a given APK package comes from an APEX registered as module.
+            // Therefore we conservatively assume that any package scanned from an /apex path is
+            // a system package.
+            return pkg.applicationInfo.sourceDir.startsWith(
+                    Environment.getApexDirectory().getAbsolutePath());
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
@@ -152,5 +179,23 @@ public class AppUtils {
             int userId) {
         return com.android.settingslib.utils.applications.AppUtils.getAppContentDescription(context,
                 packageName, userId);
+    }
+
+    /**
+     * Returns a boolean indicating whether a given package is a browser app.
+     *
+     * An app is a "browser" if it has an activity resolution that wound up
+     * marked with the 'handleAllWebDataURI' flag.
+     */
+    public static boolean isBrowserApp(Context context, String packageName, int userId) {
+        sBrowserIntent.setPackage(packageName);
+        final List<ResolveInfo> list = context.getPackageManager().queryIntentActivitiesAsUser(
+                sBrowserIntent, PackageManager.MATCH_ALL, userId);
+        for (ResolveInfo info : list) {
+            if (info.activityInfo != null && info.handleAllWebDataURI) {
+                return true;
+            }
+        }
+        return false;
     }
 }

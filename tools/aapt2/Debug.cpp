@@ -252,29 +252,6 @@ class ValueBodyPrinter : public ConstValueVisitor {
   Printer* printer_;
 };
 
-std::string OverlayablePoliciesToString(PolicyFlags policies) {
-  std::string str;
-
-  uint32_t remaining = policies;
-  for (auto const& policy : kPolicyStringToFlag) {
-    if ((policies & policy.second) != policy.second) {
-      continue;
-    }
-    if (!str.empty()) {
-      str.append("|");
-    }
-    str.append(policy.first.data());
-    remaining &= ~policy.second;
-  }
-  if (remaining != 0) {
-    if (!str.empty()) {
-      str.append("|");
-    }
-    str.append(StringPrintf("0x%08x", remaining));
-  }
-  return !str.empty() ? str : "none";
-}
-
 }  // namespace
 
 void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options,
@@ -575,7 +552,7 @@ void Debug::DumpOverlayable(const ResourceTable& table, text::Printer* printer) 
               overlayable_item.overlayable->name.c_str(),
               overlayable_item.overlayable->actor.c_str());
           const auto policy_subsection = StringPrintf(R"(policies="%s")",
-              OverlayablePoliciesToString(overlayable_item.policies).c_str());
+              android::idmap2::policy::PoliciesToDebugString(overlayable_item.policies).c_str());
           const auto value =
             StringPrintf("%s/%s", to_string(type->type).data(), entry->name.c_str());
           items.push_back(DumpOverlayableEntry{overlayable_section, policy_subsection, value});

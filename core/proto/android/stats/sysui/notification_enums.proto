@@ -26,4 +26,5 @@ enum NotificationImportance {  // Constants from NotificationManager.java
   IMPORTANCE_LOW = 2;  // Shows in shade, maybe status bar, no buzz/beep.
   IMPORTANCE_DEFAULT = 3;  // Shows everywhere, makes noise, no heads-up.
   IMPORTANCE_HIGH = 4;  // Shows everywhere, makes noise, heads-up, may full-screen.
+  IMPORTANCE_IMPORTANT_CONVERSATION = 5;  // High + isImportantConversation().
 }

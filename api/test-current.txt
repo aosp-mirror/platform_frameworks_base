@@ -32,6 +32,7 @@ package android {
   }
 
   public static final class R.bool {
+    field public static final int config_assistantOnTopOfDream = 17891333; // 0x1110005
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
   }
 
@@ -193,6 +194,7 @@ package android.app {
     method public static int opToDefaultMode(@NonNull String);
     method public static String opToPermission(int);
     method public static int permissionToOpCode(String);
+    method @RequiresPermission("android.permission.MANAGE_APPOPS") public void rebootHistory(long);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void reloadNonHistoricalState();
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void resetHistoryParameters();
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void setHistoryParameters(int, long, int);
@@ -1294,6 +1296,130 @@ package android.hardware.display {
     method public android.graphics.Point getStableDisplaySize();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+  }
+
+}
+
+package android.hardware.hdmi {
+
+  public final class HdmiControlManager {
+    method @Nullable public android.hardware.hdmi.HdmiSwitchClient getSwitchClient();
+    method @RequiresPermission("android.permission.HDMI_CEC") public void setStandbyMode(boolean);
+    field public static final String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
+    field public static final int AVR_VOLUME_MUTED = 101; // 0x65
+    field public static final int CLEAR_TIMER_STATUS_CEC_DISABLE = 162; // 0xa2
+    field public static final int CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION = 160; // 0xa0
+    field public static final int CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE = 161; // 0xa1
+    field public static final int CLEAR_TIMER_STATUS_TIMER_CLEARED = 128; // 0x80
+    field public static final int CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_INFO_AVAILABLE = 2; // 0x2
+    field public static final int CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_MATCHING = 1; // 0x1
+    field public static final int CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_RECORDING = 0; // 0x0
+    field public static final int CONTROL_STATE_CHANGED_REASON_SETTING = 1; // 0x1
+    field public static final int CONTROL_STATE_CHANGED_REASON_STANDBY = 3; // 0x3
+    field public static final int CONTROL_STATE_CHANGED_REASON_START = 0; // 0x0
+    field public static final int CONTROL_STATE_CHANGED_REASON_WAKEUP = 2; // 0x2
+    field public static final int DEVICE_EVENT_ADD_DEVICE = 1; // 0x1
+    field public static final int DEVICE_EVENT_REMOVE_DEVICE = 2; // 0x2
+    field public static final int DEVICE_EVENT_UPDATE_DEVICE = 3; // 0x3
+    field public static final String EXTRA_MESSAGE_EXTRA_PARAM1 = "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
+    field public static final String EXTRA_MESSAGE_ID = "android.hardware.hdmi.extra.MESSAGE_ID";
+    field public static final int ONE_TOUCH_RECORD_ALREADY_RECORDING = 18; // 0x12
+    field public static final int ONE_TOUCH_RECORD_CEC_DISABLED = 51; // 0x33
+    field public static final int ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION = 49; // 0x31
+    field public static final int ONE_TOUCH_RECORD_DISALLOW_TO_COPY = 13; // 0xd
+    field public static final int ONE_TOUCH_RECORD_DISALLOW_TO_FUTHER_COPIES = 14; // 0xe
+    field public static final int ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN = 50; // 0x32
+    field public static final int ONE_TOUCH_RECORD_INVALID_EXTERNAL_PHYSICAL_ADDRESS = 10; // 0xa
+    field public static final int ONE_TOUCH_RECORD_INVALID_EXTERNAL_PLUG_NUMBER = 9; // 0x9
+    field public static final int ONE_TOUCH_RECORD_MEDIA_PROBLEM = 21; // 0x15
+    field public static final int ONE_TOUCH_RECORD_MEDIA_PROTECTED = 19; // 0x13
+    field public static final int ONE_TOUCH_RECORD_NOT_ENOUGH_SPACE = 22; // 0x16
+    field public static final int ONE_TOUCH_RECORD_NO_MEDIA = 16; // 0x10
+    field public static final int ONE_TOUCH_RECORD_NO_OR_INSUFFICIENT_CA_ENTITLEMENTS = 12; // 0xc
+    field public static final int ONE_TOUCH_RECORD_NO_SOURCE_SIGNAL = 20; // 0x14
+    field public static final int ONE_TOUCH_RECORD_OTHER_REASON = 31; // 0x1f
+    field public static final int ONE_TOUCH_RECORD_PARENT_LOCK_ON = 23; // 0x17
+    field public static final int ONE_TOUCH_RECORD_PLAYING = 17; // 0x11
+    field public static final int ONE_TOUCH_RECORD_PREVIOUS_RECORDING_IN_PROGRESS = 48; // 0x30
+    field public static final int ONE_TOUCH_RECORD_RECORDING_ALREADY_TERMINATED = 27; // 0x1b
+    field public static final int ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE = 3; // 0x3
+    field public static final int ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE = 1; // 0x1
+    field public static final int ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE = 2; // 0x2
+    field public static final int ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT = 4; // 0x4
+    field public static final int ONE_TOUCH_RECORD_RECORDING_TERMINATED_NORMALLY = 26; // 0x1a
+    field public static final int ONE_TOUCH_RECORD_UNABLE_ANALOGUE_SERVICE = 6; // 0x6
+    field public static final int ONE_TOUCH_RECORD_UNABLE_DIGITAL_SERVICE = 5; // 0x5
+    field public static final int ONE_TOUCH_RECORD_UNABLE_SELECTED_SERVICE = 7; // 0x7
+    field public static final int ONE_TOUCH_RECORD_UNSUPPORTED_CA = 11; // 0xb
+    field public static final int OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT = 1; // 0x1
+    field public static final int OSD_MESSAGE_AVR_VOLUME_CHANGED = 2; // 0x2
+    field public static final int POWER_STATUS_ON = 0; // 0x0
+    field public static final int POWER_STATUS_STANDBY = 1; // 0x1
+    field public static final int POWER_STATUS_TRANSIENT_TO_ON = 2; // 0x2
+    field public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3; // 0x3
+    field public static final int POWER_STATUS_UNKNOWN = -1; // 0xffffffff
+    field @Deprecated public static final int RESULT_ALREADY_IN_PROGRESS = 4; // 0x4
+    field public static final int RESULT_COMMUNICATION_FAILED = 7; // 0x7
+    field public static final int RESULT_EXCEPTION = 5; // 0x5
+    field public static final int RESULT_INCORRECT_MODE = 6; // 0x6
+    field public static final int RESULT_SOURCE_NOT_AVAILABLE = 2; // 0x2
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+    field public static final int RESULT_TARGET_NOT_AVAILABLE = 3; // 0x3
+    field public static final int RESULT_TIMEOUT = 1; // 0x1
+    field public static final int TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED = 3; // 0x3
+    field public static final int TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION = 1; // 0x1
+    field public static final int TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE = 2; // 0x2
+    field public static final int TIMER_RECORDING_RESULT_EXTRA_NO_ERROR = 0; // 0x0
+    field public static final int TIMER_RECORDING_TYPE_ANALOGUE = 2; // 0x2
+    field public static final int TIMER_RECORDING_TYPE_DIGITAL = 1; // 0x1
+    field public static final int TIMER_RECORDING_TYPE_EXTERNAL = 3; // 0x3
+    field public static final int TIMER_STATUS_MEDIA_INFO_NOT_PRESENT = 2; // 0x2
+    field public static final int TIMER_STATUS_MEDIA_INFO_PRESENT_NOT_PROTECTED = 0; // 0x0
+    field public static final int TIMER_STATUS_MEDIA_INFO_PRESENT_PROTECTED = 1; // 0x1
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_CA_NOT_SUPPORTED = 6; // 0x6
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_CLOCK_FAILURE = 10; // 0xa
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_DATE_OUT_OF_RANGE = 2; // 0x2
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_DUPLICATED = 14; // 0xe
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_INVALID_EXTERNAL_PHYSICAL_NUMBER = 5; // 0x5
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_INVALID_EXTERNAL_PLUG_NUMBER = 4; // 0x4
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_INVALID_SEQUENCE = 3; // 0x3
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_NO_CA_ENTITLEMENTS = 7; // 0x7
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_NO_FREE_TIME = 1; // 0x1
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_PARENTAL_LOCK_ON = 9; // 0x9
+    field public static final int TIMER_STATUS_NOT_PROGRAMMED_UNSUPPORTED_RESOLUTION = 8; // 0x8
+    field public static final int TIMER_STATUS_PROGRAMMED_INFO_ENOUGH_SPACE = 8; // 0x8
+    field public static final int TIMER_STATUS_PROGRAMMED_INFO_MIGHT_NOT_ENOUGH_SPACE = 11; // 0xb
+    field public static final int TIMER_STATUS_PROGRAMMED_INFO_NOT_ENOUGH_SPACE = 9; // 0x9
+    field public static final int TIMER_STATUS_PROGRAMMED_INFO_NO_MEDIA_INFO = 10; // 0xa
+  }
+
+  public final class HdmiControlServiceWrapper {
+    ctor public HdmiControlServiceWrapper();
+    method @NonNull public android.hardware.hdmi.HdmiControlManager createHdmiControlManager();
+    method @BinderThread public void setDeviceTypes(@NonNull int[]);
+    method @BinderThread public void setPortInfo(@NonNull java.util.List<android.hardware.hdmi.HdmiPortInfo>);
+    field public static final int DEVICE_PURE_CEC_SWITCH = 6; // 0x6
+  }
+
+  public final class HdmiPortInfo implements android.os.Parcelable {
+    ctor public HdmiPortInfo(int, int, int, boolean, boolean, boolean);
+    method public int describeContents();
+    method public int getAddress();
+    method public int getId();
+    method public int getType();
+    method public boolean isArcSupported();
+    method public boolean isCecSupported();
+    method public boolean isMhlSupported();
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiPortInfo> CREATOR;
+    field public static final int PORT_INPUT = 0; // 0x0
+    field public static final int PORT_OUTPUT = 1; // 0x1
+  }
+
+  public class HdmiSwitchClient {
+    method public int getDeviceType();
+    method @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
+    method public void sendKeyEvent(int, boolean);
+    method public void sendVendorCommand(int, byte[], boolean);
   }
 
 }
@@ -3198,6 +3324,7 @@ package android.provider {
     field public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
     field public static final String POWER_MENU_LOCKED_SHOW_CONTENT = "power_menu_locked_show_content";
+    field public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
@@ -4977,6 +5104,7 @@ package android.view {
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method public int getType();
     method public boolean hasAccess(int);
+    field public static final int FLAG_TRUSTED = 128; // 0x80
     field public static final int TYPE_EXTERNAL = 2; // 0x2
     field public static final int TYPE_INTERNAL = 1; // 0x1
     field public static final int TYPE_OVERLAY = 4; // 0x4
@@ -5021,7 +5149,7 @@ package android.view {
   }
 
   public final class SurfaceControl implements android.os.Parcelable {
-    ctor public SurfaceControl(@NonNull android.view.SurfaceControl);
+    ctor public SurfaceControl(@NonNull android.view.SurfaceControl, @NonNull String);
     method public static long acquireFrameRateFlexibilityToken();
     method public boolean isSameSurface(@NonNull android.view.SurfaceControl);
     method public static void releaseFrameRateFlexibilityToken(long);
@@ -5374,6 +5502,19 @@ package android.widget {
 
   public class Toolbar extends android.view.ViewGroup {
     method @Nullable public android.view.View getNavigationView();
+  }
+
+}
+
+package android.widget.inline {
+
+  public class InlineContentView extends android.view.ViewGroup {
+    method public void setChildSurfacePackageUpdater(@Nullable android.widget.inline.InlineContentView.SurfacePackageUpdater);
+  }
+
+  public static interface InlineContentView.SurfacePackageUpdater {
+    method public void getSurfacePackage(@NonNull java.util.function.Consumer<android.view.SurfaceControlViewHost.SurfacePackage>);
+    method public void onSurfacePackageReleased();
   }
 
 }

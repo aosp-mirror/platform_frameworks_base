@@ -73,6 +73,7 @@ import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -1503,12 +1504,21 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void removeTask(Task task, boolean killProcess, boolean removeFromRecents, String reason) {
-        task.removeTaskActivitiesLocked(reason);
-        cleanUpRemovedTaskLocked(task, killProcess, removeFromRecents);
-        mService.getLockTaskController().clearLockedTask(task);
-        mService.getTaskChangeNotificationController().notifyTaskStackChanged();
-        if (task.isPersistable) {
-            mService.notifyTaskPersisterLocked(null, true);
+        if (task.mInRemoveTask) {
+            // Prevent recursion.
+            return;
+        }
+        task.mInRemoveTask = true;
+        try {
+            task.performClearTask(reason);
+            cleanUpRemovedTaskLocked(task, killProcess, removeFromRecents);
+            mService.getLockTaskController().clearLockedTask(task);
+            mService.getTaskChangeNotificationController().notifyTaskStackChanged();
+            if (task.isPersistable) {
+                mService.notifyTaskPersisterLocked(null, true);
+            }
+        } finally {
+            task.mInRemoveTask = false;
         }
     }
 
@@ -1809,7 +1819,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isAnimating(TRANSITION | PARENTS,
-                    ANIMATION_TYPE_APP_TRANSITION);
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
             if (!animating || mService.mShuttingDown) {
@@ -1886,7 +1896,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     public void dump(PrintWriter pw, String prefix) {
         pw.println();
         pw.println("ActivityStackSupervisor state:");
-        mRootWindowContainer.dump(pw, prefix);
+        mRootWindowContainer.dump(pw, prefix, true /* dumpAll */);
         getKeyguardController().dump(pw, prefix);
         mService.getLockTaskController().dump(pw, prefix);
         pw.print(prefix);
@@ -2176,7 +2186,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed(task.getStack());
+                taskDisplayArea.onSplitScreenModeDismissed((ActivityStack) task);
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }

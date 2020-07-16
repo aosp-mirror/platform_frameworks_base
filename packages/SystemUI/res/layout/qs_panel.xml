@@ -48,18 +48,25 @@
         android:clipChildren="false"
         android:background="@drawable/qs_bg_gradient" />
 
-
-    <com.android.systemui.qs.QSPanel
-        android:id="@+id/quick_settings_panel"
-        android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
+    <com.android.systemui.qs.NonInterceptingScrollView
+        android:id="@+id/expanded_qs_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:background="@android:color/transparent"
-        android:focusable="true"
-        android:accessibilityTraversalBefore="@android:id/edit">
-        <include layout="@layout/qs_footer_impl" />
-    </com.android.systemui.qs.QSPanel>
+        android:importantForAccessibility="no"
+        android:layout_weight="1">
+        <com.android.systemui.qs.QSPanel
+            android:id="@+id/quick_settings_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:accessibilityTraversalBefore="@android:id/edit">
+            <include layout="@layout/qs_footer_impl" />
+            <include layout="@layout/qs_media_divider"
+                android:id="@+id/divider"/>
+        </com.android.systemui.qs.QSPanel>
+    </com.android.systemui.qs.NonInterceptingScrollView>
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 

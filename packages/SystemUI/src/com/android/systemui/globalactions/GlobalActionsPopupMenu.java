@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.LayoutDirection;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.WindowManager;
@@ -53,6 +54,7 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
 
         // required to show above the global actions dialog
         setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+        setInputMethodMode(INPUT_METHOD_NOT_NEEDED);
         setModal(true);
 
         mGlobalActionsSidePadding = res.getDimensionPixelSize(R.dimen.global_actions_side_margin);
@@ -106,7 +108,11 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
             listView.setPadding(0, mMenuVerticalPadding, 0, mMenuVerticalPadding);
 
             setWidth(width);
-            setHorizontalOffset(getAnchorView().getWidth() - mGlobalActionsSidePadding - width);
+            if (getAnchorView().getLayoutDirection() == LayoutDirection.LTR) {
+                setHorizontalOffset(getAnchorView().getWidth() - mGlobalActionsSidePadding - width);
+            } else {
+                setHorizontalOffset(mGlobalActionsSidePadding);
+            }
         }
 
         super.show();

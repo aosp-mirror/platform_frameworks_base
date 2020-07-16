@@ -85,6 +85,9 @@ final class MediaButtonReceiverHolder {
             return null;
         }
         ComponentName componentName = ComponentName.unflattenFromString(tokens[0]);
+        if (componentName == null) {
+            return null;
+        }
         int userId = Integer.parseInt(tokens[1]);
         // Guess component type if the OS version is updated from the older version.
         int componentType = (tokens.length == 3)

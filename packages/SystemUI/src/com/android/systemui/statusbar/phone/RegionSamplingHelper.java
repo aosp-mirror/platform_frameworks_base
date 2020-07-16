@@ -41,7 +41,6 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private final View mSampledView;
 
     private final CompositionSamplingListener mSamplingListener;
-    private final Runnable mUpdateSamplingListener = this::updateSamplingListener;
 
     /**
      * The requested sampling bounds that we want to sample from
@@ -59,6 +58,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private float mLastMedianLuma;
     private float mCurrentMedianLuma;
     private boolean mWaitingOnDraw;
+    private boolean mIsDestroyed;
 
     // Passing the threshold of this luminance value will make the button black otherwise white
     private final float mLuminanceThreshold;
@@ -130,6 +130,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     void stopAndDestroy() {
         stop();
         mSamplingListener.destroy();
+        mIsDestroyed = true;
     }
 
     @Override
@@ -229,12 +230,17 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         pw.println("  sampleView isAttached: " + mSampledView.isAttachedToWindow());
         pw.println("  sampleView isScValid: " + (mSampledView.isAttachedToWindow()
                 ? mSampledView.getViewRootImpl().getSurfaceControl().isValid()
-                : "false"));
+                : "notAttached"));
+        pw.println("  mSamplingEnabled: " + mSamplingEnabled);
         pw.println("  mSamplingListenerRegistered: " + mSamplingListenerRegistered);
         pw.println("  mSamplingRequestBounds: " + mSamplingRequestBounds);
+        pw.println("  mRegisteredSamplingBounds: " + mRegisteredSamplingBounds);
         pw.println("  mLastMedianLuma: " + mLastMedianLuma);
         pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
         pw.println("  mWindowVisible: " + mWindowVisible);
+        pw.println("  mWaitingOnDraw: " + mWaitingOnDraw);
+        pw.println("  mRegisteredStopLayer: " + mRegisteredStopLayer);
+        pw.println("  mIsDestroyed: " + mIsDestroyed);
     }
 
     public interface SamplingCallback {

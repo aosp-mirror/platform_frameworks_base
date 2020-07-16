@@ -23,26 +23,80 @@ import android.media.session.MediaSession
 
 /** State of a media view. */
 data class MediaData(
+    val userId: Int,
     val initialized: Boolean = false,
     val backgroundColor: Int,
+    /**
+     * App name that will be displayed on the player.
+     */
     val app: String?,
+    /**
+     * Icon shown on player, close to app name.
+     */
     val appIcon: Drawable?,
+    /**
+     * Artist name.
+     */
     val artist: CharSequence?,
+    /**
+     * Song name.
+     */
     val song: CharSequence?,
+    /**
+     * Album artwork.
+     */
     val artwork: Icon?,
+    /**
+     * List of actions that can be performed on the player: prev, next, play, pause, etc.
+     */
     val actions: List<MediaAction>,
+    /**
+     * Same as above, but shown on smaller versions of the player, like in QQS or keyguard.
+     */
     val actionsToShowInCompact: List<Int>,
-    val packageName: String?,
+    /**
+     * Package name of the app that's posting the media.
+     */
+    val packageName: String,
+    /**
+     * Unique media session identifier.
+     */
     val token: MediaSession.Token?,
+    /**
+     * Action to perform when the player is tapped.
+     * This is unrelated to {@link #actions}.
+     */
     val clickIntent: PendingIntent?,
+    /**
+     * Where the media is playing: phone, headphones, ear buds, remote session.
+     */
     val device: MediaDeviceData?,
-    val notificationKey: String = "INVALID"
+    /**
+     * When active, a player will be displayed on keyguard and quick-quick settings.
+     * This is unrelated to the stream being playing or not, a player will not be active if
+     * timed out, or in resumption mode.
+     */
+    var active: Boolean,
+    /**
+     * Action that should be performed to restart a non active session.
+     */
+    var resumeAction: Runnable?,
+    /**
+     * Indicates that this player is a resumption player (ie. It only shows a play actions which
+     * will start the app and start playing).
+     */
+    var resumption: Boolean = false,
+    /**
+     * Notification key for cancelling a media player after a timeout (when not using resumption.)
+     */
+    val notificationKey: String? = null,
+    var hasCheckedForResume: Boolean = false
 )
 
 /** State of a media action. */
 data class MediaAction(
     val drawable: Drawable?,
-    val intent: PendingIntent?,
+    val action: Runnable?,
     val contentDescription: CharSequence?
 )
 

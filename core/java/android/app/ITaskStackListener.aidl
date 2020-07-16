@@ -216,4 +216,16 @@ oneway interface ITaskStackListener {
      *                             in {@link android.content.pm.ActivityInfo}.
      */
      void onTaskRequestedOrientationChanged(int taskId, int requestedOrientation);
+
+    /**
+     * Called when a rotation is about to start on the foreground activity.
+     * This applies for:
+     *   * free sensor rotation
+     *   * forced rotation
+     *   * rotation settings set through adb command line
+     *   * rotation that occurs when rotation tile is toggled in quick settings
+     *
+     * @param displayId id of the display where activity will rotate
+     */
+     void onActivityRotation(int displayId);
 }

@@ -22,13 +22,17 @@ import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.INTER
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC_AND_INTERNAL;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.media.MediaCodecInfo;
 import android.media.MediaMuxer;
 import android.media.MediaRecorder;
+import android.media.ThumbnailUtils;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjection;
@@ -40,6 +44,7 @@ import android.os.ServiceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -55,9 +60,9 @@ import java.util.Date;
  */
 public class ScreenMediaRecorder {
     private static final int TOTAL_NUM_TRACKS = 1;
-    private static final int VIDEO_BIT_RATE = 10000000;
     private static final int VIDEO_FRAME_RATE = 30;
-    private static final int AUDIO_BIT_RATE = 16;
+    private static final int VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO = 6;
+    private static final int AUDIO_BIT_RATE = 196000;
     private static final int AUDIO_SAMPLE_RATE = 44100;
     private static final int MAX_DURATION_MS = 60 * 60 * 1000;
     private static final long MAX_FILESIZE_BYTES = 5000000000L;
@@ -108,7 +113,7 @@ public class ScreenMediaRecorder {
 
         // Set up audio source
         if (mAudioSource == MIC) {
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         }
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
 
@@ -121,10 +126,16 @@ public class ScreenMediaRecorder {
         wm.getDefaultDisplay().getRealMetrics(metrics);
         int screenWidth = metrics.widthPixels;
         int screenHeight = metrics.heightPixels;
+        int refereshRate = (int) wm.getDefaultDisplay().getRefreshRate();
+        int vidBitRate = screenHeight * screenWidth * refereshRate / VIDEO_FRAME_RATE
+                * VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO;
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        mMediaRecorder.setVideoEncodingProfileLevel(
+                MediaCodecInfo.CodecProfileLevel.AVCProfileHigh,
+                MediaCodecInfo.CodecProfileLevel.AVCLevel42);
         mMediaRecorder.setVideoSize(screenWidth, screenHeight);
-        mMediaRecorder.setVideoFrameRate(VIDEO_FRAME_RATE);
-        mMediaRecorder.setVideoEncodingBitRate(VIDEO_BIT_RATE);
+        mMediaRecorder.setVideoFrameRate(refereshRate);
+        mMediaRecorder.setVideoEncodingBitRate(vidBitRate);
         mMediaRecorder.setMaxDuration(MAX_DURATION_MS);
         mMediaRecorder.setMaxFileSize(MAX_FILESIZE_BYTES);
 
@@ -155,7 +166,7 @@ public class ScreenMediaRecorder {
                 mAudioSource == MIC_AND_INTERNAL) {
             mTempAudioFile = File.createTempFile("temp", ".aac",
                     mContext.getCacheDir());
-            mAudio = new ScreenInternalAudioRecorder(mTempAudioFile.getAbsolutePath(), mContext,
+            mAudio = new ScreenInternalAudioRecorder(mTempAudioFile.getAbsolutePath(),
                     mMediaProjection, mAudioSource == MIC_AND_INTERNAL);
         }
 
@@ -164,7 +175,7 @@ public class ScreenMediaRecorder {
     /**
     * Start screen recording
     */
-    void start() throws IOException, RemoteException {
+    void start() throws IOException, RemoteException, IllegalStateException {
         Log.d(TAG, "start recording");
         prepare();
         mMediaRecorder.start();
@@ -194,7 +205,7 @@ public class ScreenMediaRecorder {
         }
     }
 
-    private  void recordInternalAudio() {
+    private  void recordInternalAudio() throws IllegalStateException {
         if (mAudioSource == INTERNAL || mAudioSource == MIC_AND_INTERNAL) {
             mAudio.start();
         }
@@ -203,7 +214,7 @@ public class ScreenMediaRecorder {
     /**
      * Store recorded video
      */
-    Uri save() throws IOException {
+    protected SavedRecording save() throws IOException {
         String fileName = new SimpleDateFormat("'screen-'yyyyMMdd-HHmmss'.mp4'")
                 .format(new Date());
 
@@ -241,8 +252,38 @@ public class ScreenMediaRecorder {
         OutputStream os = resolver.openOutputStream(itemUri, "w");
         Files.copy(mTempVideoFile.toPath(), os);
         os.close();
-        mTempVideoFile.delete();
         if (mTempAudioFile != null) mTempAudioFile.delete();
-        return itemUri;
+        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        Size size = new Size(metrics.widthPixels, metrics.heightPixels);
+        SavedRecording recording = new SavedRecording(itemUri, mTempVideoFile, size);
+        mTempVideoFile.delete();
+        return recording;
+    }
+
+    /**
+    * Object representing the recording
+    */
+    public class SavedRecording {
+
+        private Uri mUri;
+        private Bitmap mThumbnailBitmap;
+
+        protected SavedRecording(Uri uri, File file, Size thumbnailSize) {
+            mUri = uri;
+            try {
+                mThumbnailBitmap = ThumbnailUtils.createVideoThumbnail(
+                        file, thumbnailSize, null);
+            } catch (IOException e) {
+                Log.e(TAG, "Error creating thumbnail", e);
+            }
+        }
+
+        public Uri getUri() {
+            return mUri;
+        }
+
+        public @Nullable Bitmap getThumbnail() {
+            return mThumbnailBitmap;
+        }
     }
 }

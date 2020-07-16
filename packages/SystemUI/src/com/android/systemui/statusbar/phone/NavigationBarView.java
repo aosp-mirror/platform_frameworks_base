@@ -35,6 +35,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
+import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -73,6 +74,7 @@ import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -139,6 +141,7 @@ public class NavigationBarView extends FrameLayout implements
     private boolean mInCarMode = false;
     private boolean mDockedStackExists;
     private boolean mImeVisible;
+    private boolean mScreenOn = true;
 
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
     private final ContextualButtonGroup mContextualButtonGroup;
@@ -158,6 +161,14 @@ public class NavigationBarView extends FrameLayout implements
      */
     private ScreenPinningNotify mScreenPinningNotify;
     private Rect mSamplingBounds = new Rect();
+    /**
+     * When quickswitching between apps of different orientations, we draw a secondary home handle
+     * in the position of the first app's orientation. This rect represents the region of that
+     * home handle so we can apply the correct light/dark luma on that.
+     * @see {@link NavigationBarFragment#mOrientationHandle}
+     */
+    @Nullable
+    private Rect mOrientedHandleSamplingRegion;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -315,8 +326,8 @@ public class NavigationBarView extends FrameLayout implements
 
         mNavColorSampleMargin = getResources()
                         .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
-        mEdgeBackGestureHandler = new EdgeBackGestureHandler(
-                context, mOverviewProxyService, mSysUiFlagContainer, mPluginManager);
+        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService,
+                mSysUiFlagContainer, mPluginManager, this::updateStates);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
@@ -327,6 +338,10 @@ public class NavigationBarView extends FrameLayout implements
 
                     @Override
                     public Rect getSampledRegion(View sampledView) {
+                        if (mOrientedHandleSamplingRegion != null) {
+                            return mOrientedHandleSamplingRegion;
+                        }
+
                         updateSamplingRect();
                         return mSamplingBounds;
                     }
@@ -358,6 +373,11 @@ public class NavigationBarView extends FrameLayout implements
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (isGesturalMode(mNavBarMode) && mImeVisible
+                && event.getAction() == MotionEvent.ACTION_DOWN) {
+            SysUiStatsLog.write(SysUiStatsLog.IME_TOUCH_REPORTED,
+                    (int) event.getX(), (int) event.getY());
+        }
         return shouldDeadZoneConsumeTouchEvents(event) || super.onInterceptTouchEvent(event);
     }
 
@@ -560,6 +580,7 @@ public class NavigationBarView extends FrameLayout implements
 
     /** To be called when screen lock/unlock state changes */
     public void onScreenStateChanged(boolean isScreenOn) {
+        mScreenOn = isScreenOn;
         if (isScreenOn) {
             if (isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode)) {
                 mRegionSamplingHelper.start(mSamplingBounds);
@@ -809,7 +830,7 @@ public class NavigationBarView extends FrameLayout implements
      */
     public void updateSlippery() {
         setSlippery(!isQuickStepSwipeUpEnabled() ||
-                (mPanelView.isFullyExpanded() && !mPanelView.isCollapsing()));
+                (mPanelView != null && mPanelView.isFullyExpanded() && !mPanelView.isCollapsing()));
     }
 
     private void setSlippery(boolean slippery) {
@@ -895,6 +916,11 @@ public class NavigationBarView extends FrameLayout implements
                     displaySize.y);
             mSamplingBounds.set(samplingBounds);
         }
+    }
+
+    void setOrientedHandleSamplingRegion(Rect orientedHandleSamplingRegion) {
+        mOrientedHandleSamplingRegion = orientedHandleSamplingRegion;
+        mRegionSamplingHelper.updateSamplingRect();
     }
 
     @Override
@@ -1190,6 +1216,8 @@ public class NavigationBarView extends FrameLayout implements
                         mIsVertical ? "true" : "false",
                         getLightTransitionsController().getCurrentDarkIntensity()));
 
+        pw.println("      mOrientedHandleSamplingRegion: " + mOrientedHandleSamplingRegion);
+
         dumpButton(pw, "back", getBackButton());
         dumpButton(pw, "home", getHomeButton());
         dumpButton(pw, "rcnt", getRecentsButton());
@@ -1197,7 +1225,11 @@ public class NavigationBarView extends FrameLayout implements
         dumpButton(pw, "a11y", getAccessibilityButton());
 
         pw.println("    }");
+        pw.println("    mScreenOn: " + mScreenOn);
 
+        if (mNavigationInflaterView != null) {
+            mNavigationInflaterView.dump(pw);
+        }
         mContextualButtonGroup.dump(pw);
         mRecentsOnboarding.dump(pw);
         mRegionSamplingHelper.dump(pw);

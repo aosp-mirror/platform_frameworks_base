@@ -16,6 +16,8 @@
 
 package com.android.server.people.prediction;
 
+import static java.util.Collections.reverseOrder;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -39,6 +41,7 @@ import com.android.server.people.data.PackageData;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -85,7 +88,9 @@ class ShareTargetPredictor extends AppTargetPredictor {
         List<ShareTarget> shareTargets = getDirectShareTargets();
         SharesheetModelScorer.computeScore(shareTargets, getShareEventType(mIntentFilter),
                 System.currentTimeMillis());
-        Collections.sort(shareTargets, (t1, t2) -> -Float.compare(t1.getScore(), t2.getScore()));
+        Collections.sort(shareTargets,
+                Comparator.comparing(ShareTarget::getScore, reverseOrder())
+                        .thenComparing(t -> t.getAppTarget().getRank()));
         List<AppTarget> res = new ArrayList<>();
         for (int i = 0; i < Math.min(getPredictionContext().getPredictedTargetCount(),
                 shareTargets.size()); i++) {
@@ -135,6 +140,7 @@ class ShareTargetPredictor extends AppTargetPredictor {
                     new AppTargetId(shortcutInfo.getId()),
                     shortcutInfo)
                     .setClassName(shareShortcut.getTargetComponent().getClassName())
+                    .setRank(shortcutInfo.getRank())
                     .build();
             String packageName = shortcutInfo.getPackage();
             int userId = shortcutInfo.getUserId();

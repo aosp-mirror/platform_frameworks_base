@@ -95,7 +95,7 @@ public final class ContentSuggestionsManager {
         try {
             mService.provideContextBitmap(mUser, bitmap, imageContextRequestExtras);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -117,7 +117,7 @@ public final class ContentSuggestionsManager {
         try {
             mService.provideContextImage(mUser, taskId, imageContextRequestExtras);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -146,7 +146,7 @@ public final class ContentSuggestionsManager {
             mService.suggestContentSelections(
                     mUser, request, new SelectionsCallbackWrapper(callback, callbackExecutor));
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -173,7 +173,7 @@ public final class ContentSuggestionsManager {
             mService.classifyContentSelections(
                     mUser, request, new ClassificationsCallbackWrapper(callback, callbackExecutor));
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -193,7 +193,7 @@ public final class ContentSuggestionsManager {
         try {
             mService.notifyInteraction(mUser, requestId, interaction);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -213,9 +213,10 @@ public final class ContentSuggestionsManager {
             mService.isEnabled(mUser, receiver);
             return receiver.getIntResult() != 0;
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get the enable status.");
         }
-        return false;
     }
 
     /**

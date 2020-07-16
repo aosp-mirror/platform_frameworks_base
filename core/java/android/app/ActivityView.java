@@ -33,7 +33,10 @@ import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -102,6 +105,14 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     public ActivityView(
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
             boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
+        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay, false);
+    }
+
+    /** @hide */
+    public ActivityView(
+            @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
+            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
+            boolean disableSurfaceViewBackgroundLayer) {
         super(context, attrs, defStyle);
         if (useTaskOrganizer()) {
             mTaskEmbedder = new TaskOrganizerTaskEmbedder(context, this);
@@ -109,7 +120,7 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance,
                     usePublicVirtualDisplay);
         }
-        mSurfaceView = new SurfaceView(context);
+        mSurfaceView = new SurfaceView(context, null, 0, 0, disableSurfaceViewBackgroundLayer);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha
         // as master to synchronize surface view's alpha value.
         mSurfaceView.setAlpha(super.getAlpha());
@@ -352,18 +363,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     }
 
     /**
-     * Release this container. Activity launching will no longer be permitted.
-     * <p>Note: Calling this method is allowed after
-     * {@link StateCallback#onActivityViewReady(ActivityView)} callback was triggered and before
-     * {@link StateCallback#onActivityViewDestroyed(ActivityView)}.
-     *
-     * @see StateCallback
+     * Release this container if it is initialized. Activity launching will no longer be permitted.
      */
     public void release() {
-        if (!mTaskEmbedder.isInitialized()) {
-            throw new IllegalStateException(
-                    "Trying to release container that is not initialized.");
-        }
         performRelease();
     }
 
@@ -408,6 +410,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
+        private final DisplayInfo mTempDisplayInfo = new DisplayInfo();
+        private final DisplayMetrics mTempMetrics = new DisplayMetrics();
+
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
             if (!mTaskEmbedder.isInitialized()) {
@@ -416,13 +421,21 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
                 mTmpTransaction.reparent(mTaskEmbedder.getSurfaceControl(),
                         mSurfaceView.getSurfaceControl()).apply();
             }
+            mTaskEmbedder.resizeTask(getWidth(), getHeight());
             mTaskEmbedder.start();
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
-            mTaskEmbedder.resizeTask(width, height);
-            mTaskEmbedder.notifyBoundsChanged();
+            final Display display = getVirtualDisplay().getDisplay();
+            if (!display.getDisplayInfo(mTempDisplayInfo)) {
+                return;
+            }
+            mTempDisplayInfo.getAppMetrics(mTempMetrics);
+            if (width != mTempMetrics.widthPixels || height != mTempMetrics.heightPixels) {
+                mTaskEmbedder.resizeTask(width, height);
+                mTaskEmbedder.notifyBoundsChanged();
+            }
         }
 
         @Override
@@ -479,7 +492,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             return;
         }
         mSurfaceView.getHolder().removeCallback(mSurfaceCallback);
-        mTaskEmbedder.release();
+        if (mTaskEmbedder.isInitialized()) {
+            mTaskEmbedder.release();
+        }
         mTaskEmbedder.setListener(null);
 
         mGuard.close();

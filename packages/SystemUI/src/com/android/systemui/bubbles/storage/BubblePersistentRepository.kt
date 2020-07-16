@@ -54,6 +54,7 @@ class BubblePersistentRepository @Inject constructor(
 
     fun readFromDisk(): List<BubbleEntity> {
         synchronized(bubbleFile) {
+            if (!bubbleFile.exists()) return emptyList()
             try { return bubbleFile.openRead().use(::readXml) } catch (e: Throwable) {
                 Log.e(TAG, "Failed to open bubble file", e)
             }

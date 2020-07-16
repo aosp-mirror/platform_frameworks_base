@@ -16,17 +16,18 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-
-    <solid
-        android:color="@color/transparent"/>
+    android:shape="oval"
+>
+    <solid android:color="@color/transparent" />
 
     <stroke
         android:color="@color/conversation_important_highlight"
-        android:width="2dp"/>
+        android:width="@dimen/importance_ring_stroke_width"
+    />
 
     <size
-        android:width="26dp"
-        android:height="26dp"/>
+        android:width="@dimen/importance_ring_size"
+        android:height="@dimen/importance_ring_size"
+    />
 </shape>
 

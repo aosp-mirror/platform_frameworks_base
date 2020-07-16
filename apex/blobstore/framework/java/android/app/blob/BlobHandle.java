@@ -51,6 +51,7 @@ public final class BlobHandle implements Parcelable {
     };
 
     private static final int LIMIT_BLOB_TAG_LENGTH = 128; // characters
+    private static final int LIMIT_BLOB_LABEL_LENGTH = 100; // characters
 
     /**
      * Cyrptographically secure hash algorithm used to generate hash of the blob this handle is
@@ -128,6 +129,9 @@ public final class BlobHandle implements Parcelable {
      *
      * @param digest the SHA-256 hash of the blob this is representing.
      * @param label a label indicating what the blob is, that can be surfaced to the user.
+     *              The length of the label cannot be more than 100 characters. It is recommended
+     *              to keep this brief. This may be truncated and ellipsized if it is too long
+     *              to be displayed to the user.
      * @param expiryTimeMillis the time in secs after which the blob should be invalidated and not
      *                         allowed to be accessed by any other app,
      *                         in {@link System#currentTimeMillis()} timebase or {@code 0} to
@@ -205,9 +209,9 @@ public final class BlobHandle implements Parcelable {
         final BlobHandle other = (BlobHandle) obj;
         return this.algorithm.equals(other.algorithm)
                 && Arrays.equals(this.digest, other.digest)
-                && this.label.equals(other.label)
+                && this.label.toString().equals(other.label.toString())
                 && this.expiryTimeMillis == other.expiryTimeMillis
-                && this.tag.equals(tag);
+                && this.tag.equals(other.tag);
     }
 
     @Override
@@ -219,7 +223,7 @@ public final class BlobHandle implements Parcelable {
     public void dump(IndentingPrintWriter fout, boolean dumpFull) {
         if (dumpFull) {
             fout.println("algo: " + algorithm);
-            fout.println("digest: " + (dumpFull ? encodeDigest() : safeDigest()));
+            fout.println("digest: " + (dumpFull ? encodeDigest(digest) : safeDigest(digest)));
             fout.println("label: " + label);
             fout.println("expiryMs: " + expiryTimeMillis);
             fout.println("tag: " + tag);
@@ -233,6 +237,7 @@ public final class BlobHandle implements Parcelable {
         Preconditions.checkArgumentIsSupported(SUPPORTED_ALGOS, algorithm);
         Preconditions.checkByteArrayNotEmpty(digest, "digest");
         Preconditions.checkStringNotEmpty(label, "label must not be null");
+        Preconditions.checkArgument(label.length() <= LIMIT_BLOB_LABEL_LENGTH, "label too long");
         Preconditions.checkArgumentNonnegative(expiryTimeMillis,
                 "expiryTimeMillis must not be negative");
         Preconditions.checkStringNotEmpty(tag, "tag must not be null");
@@ -243,19 +248,20 @@ public final class BlobHandle implements Parcelable {
     public String toString() {
         return "BlobHandle {"
                 + "algo:" + algorithm + ","
-                + "digest:" + safeDigest() + ","
+                + "digest:" + safeDigest(digest) + ","
                 + "label:" + label + ","
                 + "expiryMs:" + expiryTimeMillis + ","
                 + "tag:" + tag
                 + "}";
     }
 
-    private String safeDigest() {
-        final String digestStr = encodeDigest();
+    /** @hide */
+    public static String safeDigest(@NonNull byte[] digest) {
+        final String digestStr = encodeDigest(digest);
         return digestStr.substring(0, 2) + ".." + digestStr.substring(digestStr.length() - 2);
     }
 
-    private String encodeDigest() {
+    private static String encodeDigest(@NonNull byte[] digest) {
         return Base64.encodeToString(digest, Base64.NO_WRAP);
     }
 

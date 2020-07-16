@@ -22,7 +22,7 @@
         android:color="#ffffff"/>
 
     <size
-        android:width="26dp"
-        android:height="26dp"/>
+        android:width="20dp"
+        android:height="20dp"/>
 </shape>
 

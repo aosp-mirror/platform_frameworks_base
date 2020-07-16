@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
@@ -25,6 +26,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_C
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
@@ -2189,16 +2191,25 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
+            if (callingUid == Process.SYSTEM_UID
+                    || checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+                flags |= VIRTUAL_DISPLAY_FLAG_TRUSTED;
+            } else {
+                flags &= ~VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
+            }
+
             // Sometimes users can have sensitive information in system decoration windows. An app
             // could create a virtual display with system decorations support and read the user info
             // from the surface.
             // We should only allow adding flag VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
-            // to virtual displays that are owned by the system.
-            if (callingUid != Process.SYSTEM_UID
-                    && (flags & VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
-                if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "createVirtualDisplay()")) {
+            // to trusted virtual displays.
+            final int trustedDisplayWithSysDecorFlag =
+                    (VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+                            | VIRTUAL_DISPLAY_FLAG_TRUSTED);
+            if ((flags & trustedDisplayWithSysDecorFlag)
+                    == VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+                    && !checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "createVirtualDisplay()")) {
                     throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
-                }
             }
 
             final long token = Binder.clearCallingIdentity();

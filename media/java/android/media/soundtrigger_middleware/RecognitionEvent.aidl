@@ -43,9 +43,9 @@ parcelable RecognitionEvent {
     boolean triggerInData;
     /**
      * Audio format of either the trigger in event data or to use for capture of the rest of the
-     * utterance.
+     * utterance. May be null when no audio is available for this event type.
      */
-    AudioConfig audioConfig;
+    @nullable AudioConfig audioConfig;
     /** Additional data. */
     byte[] data;
 }

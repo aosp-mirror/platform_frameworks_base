@@ -67,8 +67,8 @@ class MultiFingerMultiTap extends GestureMatcher {
         Preconditions.checkArgumentPositive(taps, "Tap count must greater than 0.");
         mTargetTapCount = taps;
         mTargetFingerCount = fingers;
-        mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop() * fingers;
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop() * fingers;
 
         mBases = new PointF[mTargetFingerCount];
         for (int i = 0; i < mBases.length; i++) {

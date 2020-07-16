@@ -264,6 +264,7 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
+        ":resourcemanager_aidl",
         ":storaged_aidl",
         ":vold_aidl",
 
@@ -292,13 +293,13 @@ filegroup {
 java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
-        "framework-media-stubs-module_libs_api",
-        "framework-mediaprovider-stubs-module_libs_api",
-        "framework-permission-stubs-module_libs_api",
-        "framework-sdkextensions-stubs-module_libs_api",
-        "framework-statsd-stubs-module_libs_api",
-        "framework-tethering-stubs-module_libs_api",
-        "framework-wifi-stubs-module_libs_api",
+        "framework-media.stubs.module_lib",
+        "framework-mediaprovider.stubs.module_lib",
+        "framework-permission.stubs.module_lib",
+        "framework-sdkextensions.stubs.module_lib",
+        "framework-statsd.stubs.module_lib",
+        "framework-tethering.stubs.module_lib",
+        "framework-wifi.stubs.module_lib",
     ],
     sdk_version: "module_current",
     visibility: [":__pkg__"],
@@ -533,6 +534,8 @@ java_library {
     static_libs: [
         "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
+        // Additional dependencies needed to build the ike API classes.
+        "ike-internals",
     ],
     apex_available: ["//apex_available:platform"],
     visibility: [
@@ -700,7 +703,6 @@ filegroup {
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/com/android/internal/util/TokenBucket.java",
-        "core/java/android/net/shared/*.java",
     ],
 }
 
@@ -708,7 +710,6 @@ filegroup {
     name: "framework-services-net-module-wifi-shared-srcs",
     srcs: [
         "core/java/android/net/DhcpResults.java",
-        "core/java/android/net/shared/InetAddressUtils.java",
         "core/java/android/net/util/IpUtils.java",
         "core/java/android/util/LocalLog.java",
     ],
@@ -725,7 +726,6 @@ filegroup {
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
     ],
 }
 
@@ -1162,7 +1162,6 @@ java_library {
     srcs: [
         "core/java/android/content/pm/BaseParceledListSlice.java",
         "core/java/android/content/pm/ParceledListSlice.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
         "core/java/android/os/HandlerExecutor.java",
         "core/java/com/android/internal/util/AsyncChannel.java",
         "core/java/com/android/internal/util/AsyncService.java",

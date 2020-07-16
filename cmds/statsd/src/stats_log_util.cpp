@@ -81,6 +81,9 @@ const int FIELD_ID_ATOM_ERROR_COUNT = 18;
 const int FIELD_ID_BINDER_CALL_FAIL_COUNT = 19;
 const int FIELD_ID_PULL_UID_PROVIDER_NOT_FOUND = 20;
 const int FIELD_ID_PULLER_NOT_FOUND = 21;
+const int FIELD_ID_PULL_TIMEOUT_METADATA = 22;
+const int FIELD_ID_PULL_TIMEOUT_METADATA_UPTIME_MILLIS = 1;
+const int FIELD_ID_PULL_TIMEOUT_METADATA_ELAPSED_MILLIS = 2;
 
 // for AtomMetricStats proto
 const int FIELD_ID_ATOM_METRIC_STATS = 17;
@@ -497,6 +500,16 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
                        (long long)pair.second.pullUidProviderNotFound);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULLER_NOT_FOUND,
                        (long long)pair.second.pullerNotFound);
+    for (const auto& pullTimeoutMetadata : pair.second.pullTimeoutMetadata) {
+        uint64_t timeoutMetadataToken = protoOutput->start(FIELD_TYPE_MESSAGE |
+                                                           FIELD_ID_PULL_TIMEOUT_METADATA |
+                                                           FIELD_COUNT_REPEATED);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_TIMEOUT_METADATA_UPTIME_MILLIS,
+                           pullTimeoutMetadata.pullTimeoutUptimeMillis);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_TIMEOUT_METADATA_ELAPSED_MILLIS,
+                           pullTimeoutMetadata.pullTimeoutElapsedMillis);
+        protoOutput->end(timeoutMetadataToken);
+    }
     protoOutput->end(token);
 }
 
@@ -540,6 +553,10 @@ int64_t getElapsedRealtimeSec() {
 
 int64_t getElapsedRealtimeMillis() {
     return ::android::elapsedRealtime();
+}
+
+int64_t getSystemUptimeMillis() {
+    return ::android::uptimeMillis();
 }
 
 int64_t getWallClockNs() {

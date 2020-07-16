@@ -46,7 +46,9 @@ class KeyguardMediaController @Inject constructor(
         })
     }
 
-    private var view: MediaHeaderView? = null
+    var visibilityChangedListener: ((Boolean) -> Unit)? = null
+    var view: MediaHeaderView? = null
+        private set
 
     /**
      * Attach this controller to a media view, initializing its state
@@ -54,13 +56,17 @@ class KeyguardMediaController @Inject constructor(
     fun attach(mediaView: MediaHeaderView) {
         view = mediaView
         // First let's set the desired state that we want for this host
-        mediaHost.visibleChangedListener = { updateVisibility() }
+        mediaHost.addVisibilityChangeListener { updateVisibility() }
         mediaHost.expansion = 0.0f
         mediaHost.showsOnlyActiveMedia = true
+        mediaHost.falsingProtectionNeeded = true
 
         // Let's now initialize this view, which also creates the host view for us.
         mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
         mediaView.setContentView(mediaHost.hostView)
+
+        // Ensure the visibility is correct
+        updateVisibility()
     }
 
     private fun updateVisibility() {
@@ -70,6 +76,11 @@ class KeyguardMediaController @Inject constructor(
                 !bypassController.bypassEnabled &&
                 keyguardOrUserSwitcher &&
                 notifLockscreenUserManager.shouldShowLockscreenNotifications()
-        view?.visibility = if (shouldBeVisible) View.VISIBLE else View.GONE
+        val previousVisibility = view?.visibility ?: View.GONE
+        val newVisibility = if (shouldBeVisible) View.VISIBLE else View.GONE
+        view?.visibility = newVisibility
+        if (previousVisibility != newVisibility) {
+            visibilityChangedListener?.invoke(shouldBeVisible)
+        }
     }
 }

@@ -189,11 +189,6 @@ void ValueMetricProducer::onStateChanged(int64_t eventTimeNs, int32_t atomId,
     VLOG("ValueMetric %lld onStateChanged time %lld, State %d, key %s, %d -> %d",
          (long long)mMetricId, (long long)eventTimeNs, atomId, primaryKey.toString().c_str(),
          oldState.mValue.int_value, newState.mValue.int_value);
-    // If condition is not true or metric is not active, we do not need to pull
-    // for this state change.
-    if (mCondition != ConditionState::kTrue || !mIsActive) {
-        return;
-    }
 
     // If old and new states are in the same StateGroup, then we do not need to
     // pull for this state change.
@@ -202,6 +197,12 @@ void ValueMetricProducer::onStateChanged(int64_t eventTimeNs, int32_t atomId,
     mapStateValue(atomId, &oldStateCopy);
     mapStateValue(atomId, &newStateCopy);
     if (oldStateCopy == newStateCopy) {
+        return;
+    }
+
+    // If condition is not true or metric is not active, we do not need to pull
+    // for this state change.
+    if (mCondition != ConditionState::kTrue || !mIsActive) {
         return;
     }
 
@@ -412,7 +413,6 @@ void ValueMetricProducer::resetBase() {
     for (auto& slice : mCurrentBaseInfo) {
         for (auto& baseInfo : slice.second) {
             baseInfo.hasBase = false;
-            baseInfo.hasCurrentState = false;
         }
     }
     mHasGlobalBase = false;
@@ -625,7 +625,6 @@ void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<Log
             auto it = mCurrentBaseInfo.find(whatKey);
             for (auto& baseInfo : it->second) {
                 baseInfo.hasBase = false;
-                baseInfo.hasCurrentState = false;
             }
         }
     }
@@ -820,6 +819,8 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         Interval& interval = intervals[i];
         interval.valueIndex = i;
         Value value;
+        baseInfo.hasCurrentState = true;
+        baseInfo.currentState = stateKey;
         if (!getDoubleOrLong(event, matcher, value)) {
             VLOG("Failed to get value %d from event %s", i, event.ToString().c_str());
             StatsdStats::getInstance().noteBadValueType(mMetricId);
@@ -907,7 +908,6 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
             interval.hasValue = true;
         }
         interval.sampleSize += 1;
-        baseInfo.currentState = stateKey;
     }
 
     // Only trigger the tracker if all intervals are correct
@@ -951,6 +951,7 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                                    const int64_t& nextBucketStartTimeNs) {
     if (mCondition == ConditionState::kUnknown) {
         StatsdStats::getInstance().noteBucketUnknownCondition(mMetricId);
+        invalidateCurrentBucketWithoutResetBase(eventTimeNs, BucketDropReason::CONDITION_UNKNOWN);
     }
 
     VLOG("finalizing bucket for %ld, dumping %d slices", (long)mCurrentBucketStartTimeNs,
@@ -959,7 +960,10 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
     int64_t bucketEndTime = fullBucketEndTimeNs;
     int64_t numBucketsForward = calcBucketsForwardCount(eventTimeNs);
-    if (numBucketsForward > 1) {
+
+    // Skip buckets if this is a pulled metric or a pushed metric that is diffed.
+    if (numBucketsForward > 1 && (mIsPulled || mUseDiff)) {
+
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
         StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
         // Something went wrong. Maybe the device was sleeping for a long time. It is better

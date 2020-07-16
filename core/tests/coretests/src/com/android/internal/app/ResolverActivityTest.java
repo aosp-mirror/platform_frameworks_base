@@ -592,7 +592,6 @@ public class ResolverActivityTest {
                 TextUtils.equals(initialText, currentText));
     }
 
-    @Ignore // b/148156663
     @Test
     public void testWorkTab_noPersonalApps_canStartWorkApps()
             throws InterruptedException {
@@ -617,8 +616,10 @@ public class ResolverActivityTest {
         waitForIdle();
         // wait for the share sheet to expand
         Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
-        onView(first(allOf(withText(workResolvedComponentInfos.get(0)
-                .getResolveInfoAt(0).activityInfo.applicationInfo.name), isCompletelyDisplayed())))
+        onView(first(allOf(
+                withText(workResolvedComponentInfos.get(0)
+                        .getResolveInfoAt(0).activityInfo.applicationInfo.name),
+                isDisplayed())))
                 .perform(click());
         onView(withId(R.id.button_once))
                 .perform(click());

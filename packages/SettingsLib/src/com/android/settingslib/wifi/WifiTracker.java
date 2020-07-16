@@ -900,9 +900,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 updateNetworkInfo(info);
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.RSSI_CHANGED_ACTION.equals(action)) {
-                NetworkInfo info =
-                        mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
-                updateNetworkInfo(info);
+                updateNetworkInfo(/* networkInfo= */ null);
             }
         }
     };
@@ -948,7 +946,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 // We don't send a NetworkInfo object along with this message, because even if we
                 // fetch one from ConnectivityManager, it might be older than the most recent
                 // NetworkInfo message we got via a WIFI_STATE_CHANGED broadcast.
-                updateNetworkInfo(null);
+                updateNetworkInfo(/* networkInfo= */ null);
             }
         }
     }

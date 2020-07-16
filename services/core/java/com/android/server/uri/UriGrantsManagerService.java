@@ -77,6 +77,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -113,8 +114,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private static final boolean DEBUG = false;
     private static final String TAG = "UriGrantsManagerService";
     // Maximum number of persisted Uri grants a package is allowed
-    private static final int MAX_PERSISTED_URI_GRANTS = 128;
-    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = true;
+    private static final int MAX_PERSISTED_URI_GRANTS = 512;
+    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = false;
 
     private final Object mLock = new Object();
     private final H mH;
@@ -122,6 +123,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     PackageManagerInternal mPmInternal;
 
     /** File storing persisted {@link #mGrantedUriPermissions}. */
+    @GuardedBy("mLock")
     private final AtomicFile mGrantFile;
 
     /** XML constants used in {@link #mGrantFile} */
@@ -142,6 +144,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      * This optimized lookup structure maps from {@link UriPermission#targetUid}
      * to {@link UriPermission#uri} to {@link UriPermission}.
      */
+    @GuardedBy("mLock")
     private final SparseArray<ArrayMap<GrantUri, UriPermission>>
             mGrantedUriPermissions = new SparseArray<>();
 
@@ -206,39 +209,44 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
     }
 
+    @Override
+    public void grantUriPermissionFromOwner(IBinder token, int fromUid, String targetPkg,
+            Uri uri, final int modeFlags, int sourceUserId, int targetUserId) {
+        grantUriPermissionFromOwnerUnlocked(token, fromUid, targetPkg, uri, modeFlags, sourceUserId,
+                targetUserId);
+    }
+
     /**
      * @param uri This uri must NOT contain an embedded userId.
      * @param sourceUserId The userId in which the uri is to be resolved.
      * @param targetUserId The userId of the app that receives the grant.
      */
-    @Override
-    public void grantUriPermissionFromOwner(IBinder token, int fromUid, String targetPkg, Uri uri,
-            final int modeFlags, int sourceUserId, int targetUserId) {
+    private void grantUriPermissionFromOwnerUnlocked(IBinder token, int fromUid, String targetPkg,
+            Uri uri, final int modeFlags, int sourceUserId, int targetUserId) {
         targetUserId = mAmInternal.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), targetUserId, false, ALLOW_FULL_ONLY,
                 "grantUriPermissionFromOwner", null);
-        synchronized(mLock) {
-            UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
-            if (owner == null) {
-                throw new IllegalArgumentException("Unknown owner: " + token);
-            }
-            if (fromUid != Binder.getCallingUid()) {
-                if (Binder.getCallingUid() != myUid()) {
-                    // Only system code can grant URI permissions on behalf
-                    // of other users.
-                    throw new SecurityException("nice try");
-                }
-            }
-            if (targetPkg == null) {
-                throw new IllegalArgumentException("null target");
-            }
-            if (uri == null) {
-                throw new IllegalArgumentException("null uri");
-            }
 
-            grantUriPermission(fromUid, targetPkg, new GrantUri(sourceUserId, uri, modeFlags),
-                    modeFlags, owner, targetUserId);
+        UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
+        if (owner == null) {
+            throw new IllegalArgumentException("Unknown owner: " + token);
         }
+        if (fromUid != Binder.getCallingUid()) {
+            if (Binder.getCallingUid() != myUid()) {
+                // Only system code can grant URI permissions on behalf
+                // of other users.
+                throw new SecurityException("nice try");
+            }
+        }
+        if (targetPkg == null) {
+            throw new IllegalArgumentException("null target");
+        }
+        if (uri == null) {
+            throw new IllegalArgumentException("null uri");
+        }
+
+        grantUriPermissionUnlocked(fromUid, targetPkg, new GrantUri(sourceUserId, uri, modeFlags),
+                modeFlags, owner, targetUserId);
     }
 
     @Override
@@ -362,7 +370,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 persistChanged |= prefixPerm.takePersistableModes(modeFlags);
             }
 
-            persistChanged |= maybePrunePersistedUriGrants(uid);
+            persistChanged |= maybePrunePersistedUriGrantsLocked(uid);
 
             if (persistChanged) {
                 schedulePersistUriGrants();
@@ -374,8 +382,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     public void clearGrantedUriPermissions(String packageName, int userId) {
         mAmInternal.enforceCallingPermission(
                 CLEAR_APP_GRANTED_URI_PERMISSIONS, "clearGrantedUriPermissions");
-        synchronized(mLock) {
-            removeUriPermissionsForPackage(packageName, userId, true, true);
+        synchronized (mLock) {
+            removeUriPermissionsForPackageLocked(packageName, userId, true, true);
         }
     }
 
@@ -416,11 +424,11 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
             if (exactPerm != null) {
                 persistChanged |= exactPerm.releasePersistableModes(modeFlags);
-                removeUriPermissionIfNeeded(exactPerm);
+                removeUriPermissionIfNeededLocked(exactPerm);
             }
             if (prefixPerm != null) {
                 persistChanged |= prefixPerm.releasePersistableModes(modeFlags);
-                removeUriPermissionIfNeeded(prefixPerm);
+                removeUriPermissionIfNeededLocked(prefixPerm);
             }
 
             if (persistChanged) {
@@ -441,8 +449,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      * @param targetOnly When {@code true}, only remove permissions where the app is the target,
      * not source.
      */
-    void removeUriPermissionsForPackage(
-            String packageName, int userHandle, boolean persistable, boolean targetOnly) {
+    @GuardedBy("mLock")
+    private void removeUriPermissionsForPackageLocked(String packageName, int userHandle,
+            boolean persistable, boolean targetOnly) {
         if (userHandle == UserHandle.USER_ALL && packageName == null) {
             throw new IllegalArgumentException("Must narrow by either package or user");
         }
@@ -494,7 +503,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     }
 
     /** Returns if the ContentProvider has granted a uri to callingUid */
-    boolean checkAuthorityGrants(int callingUid, ProviderInfo cpi, int userId, boolean checkUser) {
+    @GuardedBy("mLock")
+    private boolean checkAuthorityGrantsLocked(int callingUid, ProviderInfo cpi, int userId,
+            boolean checkUser) {
         final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
         if (perms != null) {
             for (int i = perms.size() - 1; i >= 0; i--) {
@@ -530,7 +541,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      *
      * @return if any mutations occured that require persisting.
      */
-    private boolean maybePrunePersistedUriGrants(int uid) {
+    @GuardedBy("mLock")
+    private boolean maybePrunePersistedUriGrantsLocked(int uid) {
         final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(uid);
         if (perms == null) return false;
         if (perms.size() < MAX_PERSISTED_URI_GRANTS) return false;
@@ -552,14 +564,14 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             if (DEBUG) Slog.v(TAG, "Trimming grant created at " + perm.persistedCreateTime);
 
             perm.releasePersistableModes(~0);
-            removeUriPermissionIfNeeded(perm);
+            removeUriPermissionIfNeededLocked(perm);
         }
 
         return true;
     }
 
     /** Like checkGrantUriPermission, but takes an Intent. */
-    NeededUriGrants checkGrantUriPermissionFromIntent(int callingUid,
+    private NeededUriGrants checkGrantUriPermissionFromIntentUnlocked(int callingUid,
             String targetPkg, Intent intent, int mode, NeededUriGrants needed, int targetUserId) {
         if (DEBUG) Slog.v(TAG,
                 "Checking URI perm to data=" + (intent != null ? intent.getData() : null)
@@ -598,7 +610,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
         if (data != null) {
             GrantUri grantUri = GrantUri.resolve(contentUserHint, data, mode);
-            targetUid = checkGrantUriPermission(callingUid, targetPkg, grantUri, mode, targetUid);
+            targetUid = checkGrantUriPermissionUnlocked(callingUid, targetPkg, grantUri, mode,
+                    targetUid);
             if (targetUid > 0) {
                 if (needed == null) {
                     needed = new NeededUriGrants(targetPkg, targetUid, mode);
@@ -611,7 +624,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 Uri uri = clip.getItemAt(i).getUri();
                 if (uri != null) {
                     GrantUri grantUri = GrantUri.resolve(contentUserHint, uri, mode);
-                    targetUid = checkGrantUriPermission(callingUid, targetPkg,
+                    targetUid = checkGrantUriPermissionUnlocked(callingUid, targetPkg,
                             grantUri, mode, targetUid);
                     if (targetUid > 0) {
                         if (needed == null) {
@@ -622,7 +635,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 } else {
                     Intent clipIntent = clip.getItemAt(i).getIntent();
                     if (clipIntent != null) {
-                        NeededUriGrants newNeeded = checkGrantUriPermissionFromIntent(
+                        NeededUriGrants newNeeded = checkGrantUriPermissionFromIntentUnlocked(
                                 callingUid, targetPkg, clipIntent, mode, needed, targetUserId);
                         if (newNeeded != null) {
                             needed = newNeeded;
@@ -635,7 +648,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         return needed;
     }
 
-    void readGrantedUriPermissions() {
+    @GuardedBy("mLock")
+    private void readGrantedUriPermissionsLocked() {
         if (DEBUG) Slog.v(TAG, "readGrantedUriPermissions()");
 
         final long now = System.currentTimeMillis();
@@ -681,7 +695,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                             if (targetUid != -1) {
                                 final GrantUri grantUri = new GrantUri(sourceUserId, uri,
                                         prefix ? Intent.FLAG_GRANT_PREFIX_URI_PERMISSION : 0);
-                                final UriPermission perm = findOrCreateUriPermission(
+                                final UriPermission perm = findOrCreateUriPermissionLocked(
                                         sourcePkg, targetPkg, targetUid, grantUri);
                                 perm.initPersistedModes(modeFlags, createdTime);
                             }
@@ -703,7 +717,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
     }
 
-    private UriPermission findOrCreateUriPermission(String sourcePkg,
+    @GuardedBy("mLock")
+    private UriPermission findOrCreateUriPermissionLocked(String sourcePkg,
             String targetPkg, int targetUid, GrantUri grantUri) {
         ArrayMap<GrantUri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
         if (targetUris == null) {
@@ -740,15 +755,18 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             return;
         }
 
-        final UriPermission perm = findOrCreateUriPermission(
-                pi.packageName, targetPkg, targetUid, grantUri);
+        final UriPermission perm;
+        synchronized (mLock) {
+            perm = findOrCreateUriPermissionLocked(pi.packageName, targetPkg, targetUid, grantUri);
+        }
         perm.grantModes(modeFlags, owner);
         mPmInternal.grantImplicitAccess(UserHandle.getUserId(targetUid), null,
                 UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false /*direct*/);
     }
 
     /** Like grantUriPermissionUnchecked, but takes an Intent. */
-    void grantUriPermissionUncheckedFromIntent(NeededUriGrants needed, UriPermissionOwner owner) {
+    private void grantUriPermissionUncheckedFromIntent(NeededUriGrants needed,
+            UriPermissionOwner owner) {
         if (needed == null) {
             return;
         }
@@ -759,7 +777,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
     }
 
-    void grantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
+    private void grantUriPermissionUnlocked(int callingUid, String targetPkg, GrantUri grantUri,
             final int modeFlags, UriPermissionOwner owner, int targetUserId) {
         if (targetPkg == null) {
             throw new NullPointerException("targetPkg");
@@ -767,7 +785,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         int targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
                 targetUserId);
 
-        targetUid = checkGrantUriPermission(callingUid, targetPkg, grantUri, modeFlags, targetUid);
+        targetUid = checkGrantUriPermissionUnlocked(callingUid, targetPkg, grantUri, modeFlags,
+                targetUid);
         if (targetUid < 0) {
             return;
         }
@@ -775,7 +794,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         grantUriPermissionUnchecked(targetUid, targetPkg, grantUri, modeFlags, owner);
     }
 
-    void revokeUriPermission(String targetPackage, int callingUid, GrantUri grantUri,
+    private void revokeUriPermission(String targetPackage, int callingUid, GrantUri grantUri,
             final int modeFlags) {
         if (DEBUG) Slog.v(TAG, "Revoking all granted permissions to " + grantUri);
 
@@ -788,8 +807,19 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             return;
         }
 
+        final boolean callerHoldsPermissions = checkHoldingPermissionsUnlocked(pi, grantUri,
+                callingUid, modeFlags);
+        synchronized (mLock) {
+            revokeUriPermissionLocked(targetPackage, callingUid, grantUri, modeFlags,
+                    callerHoldsPermissions);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void revokeUriPermissionLocked(String targetPackage, int callingUid, GrantUri grantUri,
+            final int modeFlags, final boolean callerHoldsPermissions) {
         // Does the caller have this permission on the URI?
-        if (!checkHoldingPermissions(pi, grantUri, callingUid, modeFlags)) {
+        if (!callerHoldsPermissions) {
             // If they don't have direct access to the URI, then revoke any
             // ownerless URI permissions that have been granted to them.
             final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
@@ -861,7 +891,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      * the given {@link ProviderInfo}. Final permission checking is always done
      * in {@link ContentProvider}.
      */
-    private boolean checkHoldingPermissions(
+    private boolean checkHoldingPermissionsUnlocked(
             ProviderInfo pi, GrantUri grantUri, int uid, final int modeFlags) {
         if (DEBUG) Slog.v(TAG, "checkHoldingPermissions: uri=" + grantUri + " uid=" + uid);
         if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
@@ -870,11 +900,17 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 return false;
             }
         }
-        return checkHoldingPermissionsInternal(pi, grantUri, uid, modeFlags, true);
+        return checkHoldingPermissionsInternalUnlocked(pi, grantUri, uid, modeFlags, true);
     }
 
-    private boolean checkHoldingPermissionsInternal(ProviderInfo pi,
+    private boolean checkHoldingPermissionsInternalUnlocked(ProviderInfo pi,
             GrantUri grantUri, int uid, final int modeFlags, boolean considerUidPermissions) {
+        // We must never hold our local mLock in this method, since we may need
+        // to call into ActivityManager for dynamic permission checks
+        if (Thread.holdsLock(mLock)) {
+            throw new IllegalStateException("Must never hold local mLock");
+        }
+
         if (pi.applicationInfo.uid == uid) {
             return true;
         } else if (!pi.exported) {
@@ -968,7 +1004,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         return readMet && writeMet && forceMet;
     }
 
-    private void removeUriPermissionIfNeeded(UriPermission perm) {
+    @GuardedBy("mLock")
+    private void removeUriPermissionIfNeededLocked(UriPermission perm) {
         if (perm.modeFlags != 0) {
             return;
         }
@@ -985,6 +1022,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private UriPermission findUriPermissionLocked(int targetUid, GrantUri grantUri) {
         final ArrayMap<GrantUri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
         if (targetUris != null) {
@@ -1020,7 +1058,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
      * If you already know the uid of the target, you can supply it in
      * lastTargetUid else set that to -1.
      */
-    int checkGrantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
+    private int checkGrantUriPermissionUnlocked(int callingUid, String targetPkg, GrantUri grantUri,
             int modeFlags, int lastTargetUid) {
         if (!Intent.isAccessUriMode(modeFlags)) {
             return -1;
@@ -1076,7 +1114,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         boolean targetHoldsPermission = false;
         if (targetUid >= 0) {
             // First...  does the target actually need this permission?
-            if (checkHoldingPermissions(pi, grantUri, targetUid, modeFlags)) {
+            if (checkHoldingPermissionsUnlocked(pi, grantUri, targetUid, modeFlags)) {
                 // No need to grant the target this permission.
                 if (DEBUG) Slog.v(TAG,
                         "Target " + targetPkg + " already has full permission to " + grantUri);
@@ -1144,7 +1182,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
          */
         boolean specialCrossUserGrant = targetUid >= 0
                 && UserHandle.getUserId(targetUid) != grantUri.sourceUserId
-                && checkHoldingPermissionsInternal(pi, grantUri, callingUid,
+                && checkHoldingPermissionsInternalUnlocked(pi, grantUri, callingUid,
                 modeFlags, false /*without considering the uid permissions*/);
 
         // Second...  is the provider allowing granting of URI permissions?
@@ -1179,9 +1217,13 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         // Third...  does the caller itself have permission to access this uri?
-        if (!checkHoldingPermissions(pi, grantUri, callingUid, modeFlags)) {
+        if (!checkHoldingPermissionsUnlocked(pi, grantUri, callingUid, modeFlags)) {
             // Require they hold a strong enough Uri permission
-            if (!checkUriPermission(grantUri, callingUid, modeFlags)) {
+            final boolean res;
+            synchronized (mLock) {
+                res = checkUriPermissionLocked(grantUri, callingUid, modeFlags);
+            }
+            if (!res) {
                 if (android.Manifest.permission.MANAGE_DOCUMENTS.equals(pi.readPermission)) {
                     throw new SecurityException(
                             "UID " + callingUid + " does not have permission to " + grantUri
@@ -1200,13 +1242,14 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     /**
      * @param userId The userId in which the uri is to be resolved.
      */
-    int checkGrantUriPermission(int callingUid, String targetPkg, Uri uri, int modeFlags,
-            int userId) {
-        return checkGrantUriPermission(callingUid, targetPkg,
+    private int checkGrantUriPermissionUnlocked(int callingUid, String targetPkg, Uri uri,
+            int modeFlags, int userId) {
+        return checkGrantUriPermissionUnlocked(callingUid, targetPkg,
                 new GrantUri(userId, uri, modeFlags), modeFlags, -1);
     }
 
-    boolean checkUriPermission(GrantUri grantUri, int uid, final int modeFlags) {
+    @GuardedBy("mLock")
+    private boolean checkUriPermissionLocked(GrantUri grantUri, int uid, final int modeFlags) {
         final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
         final int minStrength = persistable ? UriPermission.STRENGTH_PERSISTABLE
                 : UriPermission.STRENGTH_OWNED;
@@ -1238,7 +1281,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         return false;
     }
 
-    private void writeGrantedUriPermissions() {
+    @GuardedBy("mLock")
+    private void writeGrantedUriPermissionsLocked() {
         if (DEBUG) Slog.v(TAG, "writeGrantedUriPermissions()");
 
         final long startTime = SystemClock.uptimeMillis();
@@ -1299,34 +1343,35 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case PERSIST_URI_GRANTS_MSG: {
-                    writeGrantedUriPermissions();
+                    synchronized (mLock) {
+                        writeGrantedUriPermissionsLocked();
+                    }
                     break;
                 }
             }
         }
     }
 
-    final class LocalService implements UriGrantsManagerInternal {
+    private final class LocalService implements UriGrantsManagerInternal {
         @Override
         public void removeUriPermissionIfNeeded(UriPermission perm) {
             synchronized (mLock) {
-                UriGrantsManagerService.this.removeUriPermissionIfNeeded(perm);
+                UriGrantsManagerService.this.removeUriPermissionIfNeededLocked(perm);
             }
         }
 
         @Override
         public void revokeUriPermission(String targetPackage, int callingUid, GrantUri grantUri,
                 int modeFlags) {
-            synchronized (mLock) {
-                UriGrantsManagerService.this.revokeUriPermission(
-                        targetPackage, callingUid, grantUri, modeFlags);
-            }
+            UriGrantsManagerService.this.revokeUriPermission(
+                    targetPackage, callingUid, grantUri, modeFlags);
         }
 
         @Override
         public boolean checkUriPermission(GrantUri grantUri, int uid, int modeFlags) {
             synchronized (mLock) {
-                return UriGrantsManagerService.this.checkUriPermission(grantUri, uid, modeFlags);
+                return UriGrantsManagerService.this.checkUriPermissionLocked(grantUri, uid,
+                        modeFlags);
             }
         }
 
@@ -1334,83 +1379,73 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         public int checkGrantUriPermission(int callingUid, String targetPkg, Uri uri, int modeFlags,
                 int userId) {
             enforceNotIsolatedCaller("checkGrantUriPermission");
-            synchronized (mLock) {
-                return UriGrantsManagerService.this.checkGrantUriPermission(
-                        callingUid, targetPkg, uri, modeFlags, userId);
-            }
+            return UriGrantsManagerService.this.checkGrantUriPermissionUnlocked(
+                    callingUid, targetPkg, uri, modeFlags, userId);
         }
 
         @Override
         public NeededUriGrants checkGrantUriPermissionFromIntent(Intent intent, int callingUid,
                 String targetPkg, int targetUserId) {
-            synchronized (mLock) {
-                final int mode = (intent != null) ? intent.getFlags() : 0;
-                return UriGrantsManagerService.this.checkGrantUriPermissionFromIntent(
-                        callingUid, targetPkg, intent, mode, null, targetUserId);
-            }
+            final int mode = (intent != null) ? intent.getFlags() : 0;
+            return UriGrantsManagerService.this.checkGrantUriPermissionFromIntentUnlocked(
+                    callingUid, targetPkg, intent, mode, null, targetUserId);
         }
 
         @Override
         public void grantUriPermissionUncheckedFromIntent(NeededUriGrants needed,
                 UriPermissionOwner owner) {
-            synchronized (mLock) {
-                UriGrantsManagerService.this.grantUriPermissionUncheckedFromIntent(needed, owner);
-            }
+            UriGrantsManagerService.this.grantUriPermissionUncheckedFromIntent(needed, owner);
         }
 
         @Override
         public void onSystemReady() {
             synchronized (mLock) {
-                UriGrantsManagerService.this.readGrantedUriPermissions();
+                UriGrantsManagerService.this.readGrantedUriPermissionsLocked();
             }
         }
 
         @Override
         public IBinder newUriPermissionOwner(String name) {
             enforceNotIsolatedCaller("newUriPermissionOwner");
-            synchronized(mLock) {
-                UriPermissionOwner owner = new UriPermissionOwner(this, name);
-                return owner.getExternalToken();
-            }
+            UriPermissionOwner owner = new UriPermissionOwner(this, name);
+            return owner.getExternalToken();
         }
 
         @Override
         public void removeUriPermissionsForPackage(String packageName, int userHandle,
                 boolean persistable, boolean targetOnly) {
-            synchronized(mLock) {
-                UriGrantsManagerService.this.removeUriPermissionsForPackage(
+            synchronized (mLock) {
+                UriGrantsManagerService.this.removeUriPermissionsForPackageLocked(
                         packageName, userHandle, persistable, targetOnly);
             }
         }
 
         @Override
         public void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode, int userId) {
-            synchronized(mLock) {
-                final UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
-                if (owner == null) {
-                    throw new IllegalArgumentException("Unknown owner: " + token);
-                }
+            final UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
+            if (owner == null) {
+                throw new IllegalArgumentException("Unknown owner: " + token);
+            }
 
-                if (uri == null) {
-                    owner.removeUriPermissions(mode);
-                } else {
-                    owner.removeUriPermission(new GrantUri(userId, uri, mode), mode);
-                }
+            if (uri == null) {
+                owner.removeUriPermissions(mode);
+            } else {
+                owner.removeUriPermission(new GrantUri(userId, uri, mode), mode);
             }
         }
 
         @Override
         public boolean checkAuthorityGrants(int callingUid, ProviderInfo cpi, int userId,
                 boolean checkUser) {
-            synchronized(mLock) {
-                return UriGrantsManagerService.this.checkAuthorityGrants(
+            synchronized (mLock) {
+                return UriGrantsManagerService.this.checkAuthorityGrantsLocked(
                         callingUid, cpi, userId, checkUser);
             }
         }
 
         @Override
         public void dump(PrintWriter pw, boolean dumpAll, String dumpPackage) {
-            synchronized(mLock) {
+            synchronized (mLock) {
                 boolean needSep = false;
                 boolean printedAnything = false;
                 if (mGrantedUriPermissions.size() > 0) {

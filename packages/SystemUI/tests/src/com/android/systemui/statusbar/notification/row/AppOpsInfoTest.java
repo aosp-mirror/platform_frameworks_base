@@ -49,6 +49,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
@@ -69,6 +70,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
     private final PackageManager mMockPackageManager = mock(PackageManager.class);
     private final NotificationGuts mGutsParent = mock(NotificationGuts.class);
     private StatusBarNotification mSbn;
+    private UiEventLoggerFake mUiEventLogger = new UiEventLoggerFake();
 
     @Before
     public void setUp() throws Exception {
@@ -94,7 +96,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_SetsTextApplicationName() {
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, new ArraySet<>());
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, new ArraySet<>());
         final TextView textView = mAppOpsInfo.findViewById(R.id.pkgname);
         assertTrue(textView.getText().toString().contains("App Name"));
     }
@@ -104,7 +106,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
         final Drawable iconDrawable = mock(Drawable.class);
         when(mMockPackageManager.getApplicationIcon(any(ApplicationInfo.class)))
                 .thenReturn(iconDrawable);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, new ArraySet<>());
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, new ArraySet<>());
         final ImageView iconView = mAppOpsInfo.findViewById(R.id.pkgicon);
         assertEquals(iconDrawable, iconView.getDrawable());
     }
@@ -120,12 +122,20 @@ public class AppOpsInfoTest extends SysuiTestCase {
             assertEquals(expectedOps, ops);
             assertEquals(TEST_UID, uid);
             latch.countDown();
-        }, mSbn, expectedOps);
+        }, mSbn, mUiEventLogger, expectedOps);
 
         final View settingsButton = mAppOpsInfo.findViewById(R.id.settings);
         settingsButton.performClick();
         // Verify that listener was triggered.
         assertEquals(0, latch.getCount());
+    }
+
+    @Test
+    public void testBindNotification_LogsOpen() throws Exception {
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, new ArraySet<>());
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(NotificationAppOpsEvent.NOTIFICATION_APP_OPS_OPEN.getId(),
+                mUiEventLogger.eventId(0));
     }
 
     @Test
@@ -139,19 +149,19 @@ public class AppOpsInfoTest extends SysuiTestCase {
             assertEquals(expectedOps, ops);
             assertEquals(TEST_UID, uid);
             latch.countDown();
-        }, mSbn, expectedOps);
+        }, mSbn, mUiEventLogger, expectedOps);
 
         final View okButton = mAppOpsInfo.findViewById(R.id.ok);
         okButton.performClick();
         assertEquals(1, latch.getCount());
-        verify(mGutsParent, times(1)).closeControls(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mGutsParent, times(1)).closeControls(eq(okButton), anyBoolean());
     }
 
     @Test
     public void testPrompt_camera() {
         ArraySet<Integer> expectedOps = new ArraySet<>();
         expectedOps.add(OP_CAMERA);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is using the camera.", prompt.getText());
     }
@@ -160,7 +170,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
     public void testPrompt_mic() {
         ArraySet<Integer> expectedOps = new ArraySet<>();
         expectedOps.add(OP_RECORD_AUDIO);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is using the microphone.", prompt.getText());
     }
@@ -169,7 +179,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
     public void testPrompt_overlay() {
         ArraySet<Integer> expectedOps = new ArraySet<>();
         expectedOps.add(OP_SYSTEM_ALERT_WINDOW);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is displaying over other apps on your screen.", prompt.getText());
     }
@@ -179,7 +189,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
         ArraySet<Integer> expectedOps = new ArraySet<>();
         expectedOps.add(OP_CAMERA);
         expectedOps.add(OP_RECORD_AUDIO);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is using the microphone and camera.", prompt.getText());
     }
@@ -190,7 +200,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
         expectedOps.add(OP_CAMERA);
         expectedOps.add(OP_RECORD_AUDIO);
         expectedOps.add(OP_SYSTEM_ALERT_WINDOW);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is displaying over other apps on your screen and using"
                 + " the microphone and camera.", prompt.getText());
@@ -201,7 +211,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
         ArraySet<Integer> expectedOps = new ArraySet<>();
         expectedOps.add(OP_CAMERA);
         expectedOps.add(OP_SYSTEM_ALERT_WINDOW);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is displaying over other apps on your screen and using"
                 + " the camera.", prompt.getText());
@@ -212,7 +222,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
         ArraySet<Integer> expectedOps = new ArraySet<>();
         expectedOps.add(OP_RECORD_AUDIO);
         expectedOps.add(OP_SYSTEM_ALERT_WINDOW);
-        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, expectedOps);
+        mAppOpsInfo.bindGuts(mMockPackageManager, null, mSbn, mUiEventLogger, expectedOps);
         TextView prompt = mAppOpsInfo.findViewById(R.id.prompt);
         assertEquals("This app is displaying over other apps on your screen and using"
                 + " the microphone.", prompt.getText());

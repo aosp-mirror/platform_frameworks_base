@@ -586,12 +586,26 @@ public final class CameraManager {
      * priority when accessing the camera, and this method will succeed even if the camera device is
      * in use by another camera API client. Any lower-priority application that loses control of the
      * camera in this way will receive an
-     * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback.</p>
+     * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback.
+     * Opening the same camera ID twice in the same application will similarly cause the
+     * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback
+     * being fired for the {@link CameraDevice} from the first open call and all ongoing tasks
+     * being droppped.</p>
      *
      * <p>Once the camera is successfully opened, {@link CameraDevice.StateCallback#onOpened} will
      * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
      * for operation by calling {@link CameraDevice#createCaptureSession} and
      * {@link CameraDevice#createCaptureRequest}</p>
+     *
+     * <p>Before API level 30, when the application tries to open multiple {@link CameraDevice} of
+     * different IDs and the device does not support opening such combination, either the
+     * {@link #openCamera} will fail and throw a {@link CameraAccessException} or one or more of
+     * already opened {@link CameraDevice} will be disconnected and receive
+     * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback. Which
+     * behavior will happen depends on the device implementation and can vary on different devices.
+     * Starting in API level 30, if the device does not support the combination of cameras being
+     * opened, it is guaranteed the {@link #openCamera} call will fail and none of existing
+     * {@link CameraDevice} will be disconnected.</p>
      *
      * <!--
      * <p>Since the camera device will be opened asynchronously, any asynchronous operations done
@@ -618,7 +632,8 @@ public final class CameraManager {
      *             {@code null} to use the current thread's {@link android.os.Looper looper}.
      *
      * @throws CameraAccessException if the camera is disabled by device policy,
-     * has been disconnected, or is being used by a higher-priority camera API client.
+     * has been disconnected, is being used by a higher-priority camera API client, or the device
+     * has reached its maximal resource and cannot open this camera device.
      *
      * @throws IllegalArgumentException if cameraId or the callback was null,
      * or the cameraId does not match any currently or previously available

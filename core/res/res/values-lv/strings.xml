@@ -204,10 +204,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Darba profila ieslēgšana"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Jūsu personīgās lietotnes būs bloķētas, līdz ieslēgsiet savu darba profilu."</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Personīgās lietotnes tiks bloķētas šādā datumā: <xliff:g id="DATE">%1$s</xliff:g>, plkst. <xliff:g id="TIME">%2$s</xliff:g>. Jūsu IT administrators neatļauj atspējot darba profilu ilgāk par <xliff:g id="NUMBER">%3$d</xliff:g> dienām."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ieslēgt"</string>
     <string name="me" msgid="6207584824693813140">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV opcijas"</string>
@@ -1643,7 +1641,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">"  — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Noņemt"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Fonā sāktam priekšplāna pakalpojumam no pakotnes <xliff:g id="PACKAGENAME">%1$s</xliff:g> nebūs atļaujas “while-in-use” turpmākajās R versijās. Lūdzu, skatiet vietni go/r-bg-fgs-restriction un iesniedziet kļūdas pārskatu."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vai palielināt skaļumu virs ieteicamā līmeņa?\n\nIlgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kad īsinājumtaustiņš ir ieslēgts, nospiežot abas skaļuma pogas un 3 sekundes turot tās, tiks aktivizēta pieejamības funkcija."</string>

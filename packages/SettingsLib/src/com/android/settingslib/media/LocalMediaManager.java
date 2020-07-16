@@ -20,7 +20,6 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.media.RoutingSessionInfo;
 import android.text.TextUtils;
@@ -409,7 +408,8 @@ public class LocalMediaManager implements BluetoothCallback {
         synchronized (mMediaDevicesLock) {
             for (MediaDevice device : mMediaDevices) {
                 if (device instanceof BluetoothMediaDevice) {
-                    if (isActiveDevice(((BluetoothMediaDevice) device).getCachedDevice())) {
+                    if (isActiveDevice(((BluetoothMediaDevice) device).getCachedDevice())
+                            && device.isConnected()) {
                         return device;
                     }
                 } else if (device instanceof PhoneMediaDevice) {
@@ -422,8 +422,22 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     private boolean isActiveDevice(CachedBluetoothDevice device) {
-        return device.isActiveDevice(BluetoothProfile.A2DP)
-                || device.isActiveDevice(BluetoothProfile.HEARING_AID);
+        boolean isActiveDeviceA2dp = false;
+        boolean isActiveDeviceHearingAid = false;
+        final A2dpProfile a2dpProfile = mLocalBluetoothManager.getProfileManager().getA2dpProfile();
+        if (a2dpProfile != null) {
+            isActiveDeviceA2dp = device.getDevice().equals(a2dpProfile.getActiveDevice());
+        }
+        if (!isActiveDeviceA2dp) {
+            final HearingAidProfile hearingAidProfile = mLocalBluetoothManager.getProfileManager()
+                    .getHearingAidProfile();
+            if (hearingAidProfile != null) {
+                isActiveDeviceHearingAid =
+                        hearingAidProfile.getActiveDevices().contains(device.getDevice());
+            }
+        }
+
+        return isActiveDeviceA2dp || isActiveDeviceHearingAid;
     }
 
     private Collection<DeviceCallback> getCallbacks() {

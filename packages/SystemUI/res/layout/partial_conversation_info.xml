@@ -35,7 +35,7 @@
         android:clipChildren="false"
         android:clipToPadding="false">
         <ImageView
-            android:id="@+id/conversation_icon"
+            android:id="@+id/icon"
             android:layout_width="@dimen/notification_guts_conversation_icon_size"
             android:layout_height="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
@@ -46,66 +46,19 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:orientation="vertical"
-
             android:layout_height="wrap_content"
             android:minHeight="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
             android:gravity="center_vertical"
             android:layout_alignEnd="@id/conversation_icon"
             android:layout_toEndOf="@id/conversation_icon">
-            <LinearLayout
+            <TextView
+                android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="start"
-                android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/TextAppearance.NotificationImportanceChannel"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    style="@style/TextAppearance.NotificationImportanceHeader"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:text="@*android:string/notification_header_divider_symbol" />
-                <TextView
-                    android:id="@+id/parent_channel_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/TextAppearance.NotificationImportanceChannel"/>
-
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/pkg_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/TextAppearance.NotificationImportanceChannelGroup"
-                    android:ellipsize="end"
-                    android:maxLines="1"/>
-                <TextView
-                    android:id="@+id/group_divider"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    style="@style/TextAppearance.NotificationImportanceHeader"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:text="@*android:string/notification_header_divider_symbol" />
-                <TextView
-                    android:id="@+id/group_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
-            </LinearLayout>
+                android:ellipsize="end"
+                android:textDirection="locale"
+                style="@style/TextAppearance.NotificationImportanceChannel"/>
             <TextView
                 android:id="@+id/delegate_name"
                 android:layout_width="match_parent"
@@ -115,6 +68,7 @@
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
                 android:ellipsize="end"
+                android:textDirection="locale"
                 android:text="@string/notification_delegate_header"
                 android:maxLines="1" />
 
@@ -159,18 +113,21 @@
                 android:layout_height="wrap_content"
                 android:clipChildren="false"
                 android:clipToPadding="false"
+                android:layout_centerVertical="true"
                 android:orientation="horizontal">
                 <ImageView
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_width="wrap_content"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_info"
+                    android:layout_centerVertical="true"
                     android:tint="?android:attr/textColorPrimary"
                     android:layout_marginEnd="8dp"/>
                 <TextView
                     android:id="@+id/non_configurable_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
                     style="@style/TextAppearance.NotificationImportanceChannelGroup" />
             </LinearLayout>
         </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>

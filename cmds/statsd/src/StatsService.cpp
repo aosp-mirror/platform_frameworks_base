@@ -267,8 +267,11 @@ void StatsService::dumpIncidentSection(int out) {
     for (const ConfigKey& configKey : mConfigManager->GetAllConfigKeys()) {
         uint64_t reportsListToken =
                 proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS_LIST);
+        // Don't include the current bucket to avoid skipping buckets.
+        // If we need to include the current bucket later, consider changing to NO_TIME_CONSTRAINTS
+        // or other alternatives to avoid skipping buckets for pulled metrics.
         mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
-                                 true /* includeCurrentBucket */, false /* erase_data */,
+                                 false /* includeCurrentBucket */, false /* erase_data */,
                                  ADB_DUMP,
                                  FAST,
                                  &proto);

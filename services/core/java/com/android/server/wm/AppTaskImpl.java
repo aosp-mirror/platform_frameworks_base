@@ -83,7 +83,8 @@ class AppTaskImpl extends IAppTask.Stub {
                 if (task == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
-                return mService.getRecentTasks().createRecentTaskInfo(task);
+                return mService.getRecentTasks().createRecentTaskInfo(task,
+                        false /* stripExtras */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

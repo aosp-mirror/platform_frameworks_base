@@ -39,6 +39,8 @@
     <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- ACCESS_BACKGROUND_LOCATION is needed for testing purposes only. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -201,6 +203,9 @@
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
 
+    <!-- Permission required for IncrementalLogCollectionTest -->
+    <uses-permission android:name="android.permission.LOADER_USAGE_STATS" />
+
     <!-- Permission required for storage tests - FuseDaemonHostTest -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
@@ -305,6 +310,12 @@
 
     <!-- Permission needed for CTS test - PrivilegedLocationPermissionTest -->
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
+
+    <!-- Permissions required for GTS test - GtsDialerAudioTestCases -->
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+
+    <!-- Permissions required for CTS test - AdbManagerTest -->
+    <uses-permission android:name="android.permission.MANAGE_DEBUGGING" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"କଷ୍ଟମ୍‍ ରିଙ୍ଗଟୋନ୍‍ ଯୋଡ଼ିପାରିବ ନାହିଁ"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"କଷ୍ଟମ୍‍ ରିଙ୍ଗଟୋନ୍‍ ଡିଲିଟ୍‍ କରିପାରିବ ନାହିଁ"</string>
+    <string name="app_label" msgid="3091611356093417332">"ସାଉଣ୍ଡ"</string>
 </resources>

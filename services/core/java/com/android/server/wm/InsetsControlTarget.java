@@ -62,11 +62,8 @@ interface InsetsControlTarget {
         return false;
     }
 
-    /**
-     * Returns {@code true} if the object controlling the insets is on client.
-     */
-    default boolean isClientControlled() {
-        return true;
+    /** Returns {@code target.getWindow()}, or null if {@code target} is {@code null}. */
+    static WindowState asWindowOrNull(InsetsControlTarget target) {
+        return target != null ? target.getWindow() : null;
     }
-
 }

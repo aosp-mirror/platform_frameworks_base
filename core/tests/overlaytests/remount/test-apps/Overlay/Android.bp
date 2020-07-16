@@ -19,3 +19,9 @@ android_test_helper_app {
         "com.android.overlaytest.overlay",
     ],
 }
+
+android_test_helper_app {
+    name: "OverlayRemountedTest_Overlay_SameCert",
+    certificate: ":rro-remounted-test-a",
+    sdk_version: "current",
+}

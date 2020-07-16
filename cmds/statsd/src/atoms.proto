@@ -43,6 +43,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/tethering.proto";
 import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
@@ -144,8 +145,7 @@ message Atom {
         PacketWakeupOccurred packet_wakeup_occurred = 44 [(module) = "framework"];
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
         AnomalyDetected anomaly_detected = 46 [(module) = "statsd"];
-        AppBreadcrumbReported app_breadcrumb_reported =
-                47 [(allow_from_any_uid) = true, (module) = "statsd"];
+        AppBreadcrumbReported app_breadcrumb_reported = 47 [(module) = "statsd"];
         AppStartOccurred app_start_occurred = 48 [(module) = "framework", (module) = "statsdtest"];
         AppStartCanceled app_start_canceled = 49 [(module) = "framework"];
         AppStartFullyDrawn app_start_fully_drawn = 50 [(module) = "framework"];
@@ -156,7 +156,7 @@ message Atom {
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55 [(module) = "framework"];
         ShutdownSequenceReported shutdown_sequence_reported = 56 [(module) = "framework"];
         BootSequenceReported boot_sequence_reported = 57;
-        DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true, (module) = "statsd"];
+        DaveyOccurred davey_occurred = 58 [(module) = "statsd"];
         OverlayStateChanged overlay_state_changed =
                 59 [(module) = "framework", (module) = "statsdtest"];
         ForegroundServiceStateChanged foreground_service_state_changed
@@ -185,15 +185,14 @@ message Atom {
         WTFOccurred wtf_occurred = 80 [(module) = "framework"];
         LowMemReported low_mem_reported = 81 [(module) = "framework"];
         GenericAtom generic_atom = 82;
-        KeyValuePairsAtom key_value_pairs_atom =
-                83 [(allow_from_any_uid) = true, (module) = "framework", (module) = "statsd"];
+        KeyValuePairsAtom key_value_pairs_atom = 83 [(module) = "framework", (module) = "statsd"];
         VibratorStateChanged vibrator_state_changed = 84 [(module) = "framework"];
         DeferredJobStatsReported deferred_job_stats_reported = 85 [(module) = "framework"];
         ThermalThrottlingStateChanged thermal_throttling = 86 [deprecated=true];
         BiometricAcquired biometric_acquired = 87 [(module) = "framework"];
         BiometricAuthenticated biometric_authenticated = 88 [(module) = "framework"];
         BiometricErrorOccurred biometric_error_occurred = 89 [(module) = "framework"];
-        UiEventReported ui_event_reported = 90 [(module) = "framework"];
+        UiEventReported ui_event_reported = 90 [(module) = "framework", (module) = "sysui"];
         BatteryHealthSnapshot battery_health_snapshot = 91;
         SlowIo slow_io = 92;
         BatteryCausedShutdown battery_caused_shutdown = 93;
@@ -316,7 +315,7 @@ message Atom {
         AssistGestureFeedbackReported assist_gesture_feedback_reported = 175 [(module) = "sysui"];
         AssistGestureProgressReported assist_gesture_progress_reported = 176 [(module) = "sysui"];
         TouchGestureClassified touch_gesture_classified = 177 [(module) = "framework"];
-        HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true, (module) = "framework"];
+        HiddenApiUsed hidden_api_used = 178 [(module) = "framework"];
         StyleUIChanged style_ui_changed = 179 [(module) = "sysui"];
         PrivacyIndicatorsInteracted privacy_indicators_interacted =
                 180 [(module) = "permissioncontroller"];
@@ -382,7 +381,7 @@ message Atom {
         UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
         CameraActionEvent camera_action_event = 227 [(module) = "framework"];
         AppCompatibilityChangeReported app_compatibility_change_reported =
-            228 [(allow_from_any_uid) = true, (module) = "framework"];
+                228 [(module) = "framework"];
         PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed =
                 230 [(module) = "car"];
@@ -419,7 +418,7 @@ message Atom {
         DisplayJankReported display_jank_reported = 257;
         AppStandbyBucketChanged app_standby_bucket_changed = 258 [(module) = "framework"];
         SharesheetStarted sharesheet_started = 259 [(module) = "framework"];
-        RankingSelected ranking_selected = 260 [(module) = "framework"];
+        RankingSelected ranking_selected = 260 [(module) = "framework", (module) = "sysui"];
         TvSettingsUIInteracted tvsettings_ui_interacted = 261 [(module) = "tv_settings"];
         LauncherStaticLayout launcher_snapshot = 262 [(module) = "sysui"];
         PackageInstallerV2Reported package_installer_v2_reported = 263 [(module) = "framework"];
@@ -444,6 +443,48 @@ message Atom {
         TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         MediaOutputOpSwitchReported mediaoutput_op_switch_reported =
             277 [(module) = "settings"];
+        CellBroadcastMessageFiltered cb_message_filtered =
+            278 [(module) = "cellbroadcast"];
+        TvTunerDvrStatus tv_tuner_dvr_status = 279 [(module) = "framework"];
+        TvCasSessionOpenStatus tv_cas_session_open_status =
+            280 [(module) = "framework"];
+        AssistantInvocationReported assistant_invocation_reported = 281 [(module) = "framework"];
+        DisplayWakeReported display_wake_reported = 282 [(module) = "framework"];
+        CarUserHalModifyUserRequestReported car_user_hal_modify_user_request_reported =
+            283 [(module) = "car"];
+        CarUserHalModifyUserResponseReported car_user_hal_modify_user_response_reported =
+            284 [(module) = "car"];
+        CarUserHalPostSwitchResponseReported car_user_hal_post_switch_response_reported =
+            285 [(module) = "car"];
+        CarUserHalInitialUserInfoRequestReported car_user_hal_initial_user_info_request_reported =
+            286 [(module) = "car"];
+        CarUserHalInitialUserInfoResponseReported car_user_hal_initial_user_info_response_reported =
+            287 [(module) = "car"];
+        CarUserHalUserAssociationRequestReported car_user_hal_user_association_request_reported =
+            288 [(module) = "car"];
+        CarUserHalSetUserAssociationResponseReported car_user_hal_set_user_association_response_reported =
+            289 [(module) = "car"];
+        NetworkIpProvisioningReported network_ip_provisioning_reported =
+            290 [(module) = "network_stack"];
+        NetworkDhcpRenewReported network_dhcp_renew_reported = 291 [(module) = "network_stack"];
+        NetworkValidationReported network_validation_reported = 292 [(module) = "network_stack"];
+        NetworkStackQuirkReported network_stack_quirk_reported = 293 [(module) = "network_stack"];
+        MediametricsAudioRecordDeviceUsageReported mediametrics_audiorecorddeviceusage_reported =
+            294;
+        MediametricsAudioThreadDeviceUsageReported mediametrics_audiothreaddeviceusage_reported =
+            295;
+        MediametricsAudioTrackDeviceUsageReported mediametrics_audiotrackdeviceusage_reported =
+            296;
+        MediametricsAudioDeviceConnectionReported mediametrics_audiodeviceconnection_reported =
+            297;
+        BlobCommitted blob_committed = 298 [(module) = "framework"];
+        BlobLeased blob_leased = 299 [(module) = "framework"];
+        BlobOpened blob_opened = 300 [(module) = "framework"];
+        ContactsProviderStatusReported contacts_provider_status_reported = 301;
+        KeystoreKeyEventReported keystore_key_event_reported = 302;
+        NetworkTetheringReported  network_tethering_reported =
+            303 [(module) = "network_tethering"];
+        ImeTouchReported ime_touch_reported = 304 [(module) = "sysui"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -541,10 +582,13 @@ message Atom {
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
-        DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
+        BlobInfo blob_info = 10081 [(module) = "framework"];
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
+        DNDModeProto dnd_mode_rule = 10084 [(module) = "framework"];
+        GeneralExternalStorageAccessStats general_external_storage_access_stats =
+            10085 [(module) = "mediaprovider"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3018,6 +3062,18 @@ message ExclusionRectStateChanged {
 }
 
 /**
+ * Logs when IME is on.
+ *
+ * Logged from: /packages/SystemUI/src/com/android/systemui/
+                statusbar/phone/NavigationBarView.java
+ *
+ */
+message ImeTouchReported {
+    optional int32 x_coordinate = 1;  // X coordinate for ACTION_DOWN event.
+    optional int32 y_coordinate = 2;  // Y coordinate for ACTION_DOWN event.
+}
+
+/**
  * Logs when Launcher (HomeScreen) UI has changed or was interacted.
  *
  * Logged from:
@@ -4499,6 +4555,31 @@ message VmsClientConnectionStateChanged {
     optional State state  = 2;
 }
 
+message MimeTypes {
+    repeated string mime_types = 1;
+}
+
+/**
+ * Logs statistics regarding accesses to external storage.
+ * All stats are normalized for one day period.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java
+ */
+message GeneralExternalStorageAccessStats {
+    optional int32 uid = 1 [(is_uid) = true];
+    // Total number of accesses like creation, open, delete and rename/update.
+    // Includes file path and ContentResolver accesses
+    optional uint32 total_accesses = 2;
+    // Number of file path accesses, as opposed to file path and ContentResolver.
+    optional uint32 file_path_accesses = 3;
+    // Number of accesses on secondary volumes like SD cards.
+    // Includes file path and ContentResolver accesses
+    optional uint32 secondary_storage_accesses = 4;
+    // Comma-separated list of mime types that were accessed.
+    optional MimeTypes mime_types_accessed = 5;
+}
+
 /**
  * Logs when MediaProvider has successfully finished scanning a storage volume.
  *
@@ -4868,6 +4949,98 @@ message SnapshotMergeReported {
     // containing the dm-snapshot's copy-on-write data generated during a
     // Virtual A/B update.
     optional int64 cow_file_size_bytes = 5;
+}
+
+/**
+ * Event representing when BlobStoreManager.Session#commit() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobCommitted {
+    // Uid of the Blob committer
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob committed
+    optional int64 blob_id = 2;
+
+    // Size of the Blob
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Commit Succeeded
+        SUCCESS = 1;
+        // Commit Failed: Error occurred during commit
+        ERROR_DURING_COMMIT = 2;
+        // Commit Failed: Digest of the data did not match Blob digest
+        DIGEST_MISMATCH = 3;
+        // Commit Failed: Allowed count limit exceeded
+        COUNT_LIMIT_EXCEEDED = 4;
+    }
+    optional Result result = 4;
+}
+
+/**
+ * Event representing when BlobStoreManager#acquireLease() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobLeased{
+    // Uid of the Blob leasee
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob leased or 0 if the Blob does not exist
+    optional int64 blob_id = 2;
+
+    // Size of the Blob or 0 if the Blob does not exist
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Lease Succeeded
+        SUCCESS = 1;
+        // Lease Failed: Blob does not exist
+        BLOB_DNE = 2;
+        // Lease Failed: Leasee does not have access to the Blob
+        ACCESS_NOT_ALLOWED = 3;
+        // Lease Failed: Leasee requested an invalid expiry duration
+        LEASE_EXPIRY_INVALID = 4;
+        // Lease Failed: Leasee has exceeded the total data lease limit
+        DATA_SIZE_LIMIT_EXCEEDED = 5;
+        // Leasee Failed: Allowed count limit exceeded
+        COUNT_LIMIT_EXCEEDED = 6;
+    }
+    optional Result result = 4;
+}
+
+/**
+ * Event representing when BlobStoreManager#openBlob() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobOpened{
+    // Uid of the Blob opener
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob opened or 0 if the Blob does not exist
+    optional int64 blob_id = 2;
+
+    // Size of the Blob or 0 if the Blob does not exist
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Open Succeeded
+        SUCCESS = 1;
+        // Open Failed: Blob does not exist
+        BLOB_DNE = 2;
+        // Open Failed: Opener does not have access to the Blob
+        ACCESS_NOT_ALLOWED = 3;
+    }
+    optional Result result = 4;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5798,7 +5971,7 @@ message ProcessStatsProto {
     optional string process = 1;
 
     // Uid of the process.
-    optional int32 uid = 2;
+    optional int32 uid = 2 [(is_uid) = true];
 
     // Information about how often kills occurred
     message Kill {
@@ -5825,13 +5998,16 @@ message ProcessStatsProto {
     repeated ProcessStatsAssociationProto assocs = 7;
 }
 
-// Next Tag: 5
+// Next Tag: 6
 message ProcessStatsAssociationProto {
     // Procss Name of the associated process (client process of service binding)
     optional string assoc_process_name = 1;
 
     // Package Name of the associated package (client package of service binding)
-    optional string assoc_package_name = 2;
+    optional string assoc_package_name = 2 [deprecated = true];
+
+    // UID of the associated process/package (client package of service binding)
+    optional int32 assoc_uid = 5 [(is_uid) = true];
 
     // Total count of the times this association (service binding) appeared.
     optional int32 total_count = 3;
@@ -5986,6 +6162,10 @@ message ProcessStatsAvailablePagesProto {
  */
 message ProcStats {
     optional ProcessStatsSectionProto proc_stats_section = 1;
+    // Data pulled from device into this is sometimes sharded across multiple atoms to work around
+    // a size limit. When this happens, this shard ID will contain an increasing 1-indexed integer
+    // with the number of this shard.
+    optional int32 shard_id = 2;
 }
 
 /**
@@ -6056,6 +6236,76 @@ message PackageNotificationChannelPreferences {
     optional bool is_demoted_conversation = 9;
     // Indicates if the channel is a conversation that was marked as important by the user.
     optional bool is_important_conversation = 10;
+}
+
+/**
+ * Atom that represents an item in the list of Do Not Disturb rules, pulled from
+ * NotificationManagerService.java.
+ */
+message DNDModeProto {
+    enum Mode {
+        ROOT_CONFIG = -1;  // Used to distinguish the config (one per user) from the rules.
+        ZEN_MODE_OFF = 0;
+        ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
+        ZEN_MODE_NO_INTERRUPTIONS = 2;
+        ZEN_MODE_ALARMS = 3;
+    }
+    optional int32 user = 1;  // Android user ID (0, 1, 10, ...)
+    optional bool enabled = 2;  // true for ROOT_CONFIG if a manualRule is enabled
+    optional bool channels_bypassing = 3; // only valid for ROOT_CONFIG
+    optional Mode zen_mode = 4;
+    // id is one of the system default rule IDs, or empty
+    // May also be "MANUAL_RULE" to indicate app-activation of the manual rule.
+    optional string id = 5;
+    optional int32 uid = 6 [(is_uid) = true]; // currently only SYSTEM_UID or 0 for other
+    optional DNDPolicyProto policy = 7;
+}
+
+/**
+ * Atom that represents a Do Not Disturb policy, an optional detail proto for DNDModeProto.
+ */
+message DNDPolicyProto {
+    enum State {
+        STATE_UNSET = 0;
+        STATE_ALLOW = 1;
+        STATE_DISALLOW = 2;
+    }
+    optional State calls = 1;
+    optional State repeat_callers = 2;
+    optional State messages = 3;
+    optional State conversations = 4;
+    optional State reminders = 5;
+    optional State events = 6;
+    optional State alarms = 7;
+    optional State media = 8;
+    optional State system = 9;
+    optional State fullscreen = 10;
+    optional State lights = 11;
+    optional State peek = 12;
+    optional State status_bar = 13;
+    optional State badge = 14;
+    optional State ambient = 15;
+    optional State notification_list = 16;
+
+    enum PeopleType {
+        PEOPLE_UNSET = 0;
+        PEOPLE_ANYONE = 1;
+        PEOPLE_CONTACTS = 2;
+        PEOPLE_STARRED = 3;
+        PEOPLE_NONE = 4;
+    }
+
+    optional PeopleType allow_calls_from = 17;
+    optional PeopleType allow_messages_from = 18;
+
+    enum ConversationType {
+        CONV_UNSET = 0;
+        CONV_ANYONE = 1;
+        CONV_IMPORTANT = 2;
+        CONV_NONE = 3;
+    }
+
+    optional ConversationType allow_conversations_from = 19;
 }
 
 /**
@@ -6309,6 +6559,16 @@ message ContentCaptureServiceEvents {
         SET_WHITELIST = 3;
         SET_DISABLED = 4;
         ON_USER_DATA_REMOVED = 5;
+        ON_DATA_SHARE_REQUEST = 6;
+        ACCEPT_DATA_SHARE_REQUEST = 7;
+        REJECT_DATA_SHARE_REQUEST = 8;
+        DATA_SHARE_WRITE_FINISHED = 9;
+        DATA_SHARE_ERROR_IOEXCEPTION = 10;
+        DATA_SHARE_ERROR_EMPTY_DATA = 11;
+        DATA_SHARE_ERROR_CLIENT_PIPE_FAIL = 12;
+        DATA_SHARE_ERROR_SERVICE_PIPE_FAIL = 13;
+        DATA_SHARE_ERROR_CONCURRENT_REQUEST = 14;
+        DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED = 15;
     }
     optional Event event = 1;
     // component/package of content capture service.
@@ -6680,6 +6940,24 @@ message AppCompacted {
 }
 
 /**
+ * Logs when a Tethering event occurs.
+ *
+ */
+message NetworkTetheringReported {
+  // tethering error code
+  optional android.stats.connectivity.ErrorCode error_code = 1;
+
+  // tethering downstream type
+  optional android.stats.connectivity.DownstreamType downstream_type = 2;
+
+  // transport type of upstream network
+  optional android.stats.connectivity.UpstreamType upstream_type = 3;
+
+  // The user type of Tethering
+  optional android.stats.connectivity.UserType user_type= 4;
+}
+
+/**
  * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
  * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
  *
@@ -6714,6 +6992,172 @@ message NetworkDnsEventReported {
 
     // The sample rate of DNS stats (to statsd) is 1/sampling_rate_denom.
     optional int32 sampling_rate_denom = 9;
+}
+
+/**
+ * logs the CapportApiData info
+ * Logged from:
+ * packages/modules/NetworkStack/src/com/android/server/connectivity/NetworkMonitor.java
+ */
+message CapportApiData {
+    // The TTL of the network connection provided by captive portal
+    optional int32 remaining_ttl_secs = 1;
+
+    // The limit traffic data of the network connection provided by captive portal
+    optional int32 remaining_bytes = 2;
+
+    // Is portal url option included in the DHCP packet (Yes, No)
+    optional bool has_portal_url = 3;
+
+    // Is venue info (e.g. store info, maps, flight status) included (Yes, No)
+    optional bool has_venue_info = 4;
+}
+
+/**
+ * logs a network Probe Event
+ * Logged from:
+ * packages/modules/NetworkStack/src/com/android/server/connectivity/NetworkMonitor.java
+ */
+message ProbeEvent {
+    // The probe type (http or https, or captive portal API...)
+    optional android.stats.connectivity.ProbeType probe_type = 1;
+
+    // The latency in microseconds of the probe event
+    optional int32 latency_micros = 2;
+
+    // The result of the probe event
+    optional android.stats.connectivity.ProbeResult probe_result = 3;
+
+    // The CaptivePortal API info
+    optional CapportApiData capport_api_data = 4;
+}
+
+/**
+ * log each ProbeEvent in ProbeEvents
+ * Logged from:
+ * packages/modules/NetworkStack/src/com/android/server/connectivity/NetworkMonitor.java
+ */
+message ProbeEvents {
+    // Record probe event during the validation
+    repeated ProbeEvent probe_event = 1;
+}
+
+/**
+ * The DHCP (Dynamic Host Configuration Protocol) session info
+ * Logged from:
+ * packages/modules/NetworkStack/src/android/net/dhcp/DhcpClient.java
+ */
+message DhcpSession {
+    // The DHCP Feature(s) enabled in this session
+    repeated android.stats.connectivity.DhcpFeature used_features = 1;
+
+    // The discover packet (re)transmit count
+    optional int32 discover_count = 2;
+
+    // The request packet (re)transmit count
+    optional int32 request_count = 3;
+
+    // The IPv4 address conflict count
+    // (only be meaningful when duplicate address detection is enabled)
+    optional int32 conflict_count = 4;
+
+    // The DHCP packet parsing error code in this session
+    // (defined in android.net.metrics.DhcpErrorEvent)
+    repeated android.stats.connectivity.DhcpErrorCode error_code = 5;
+
+    // The result of DHCP hostname transliteration
+    optional android.stats.connectivity.HostnameTransResult ht_result = 6;
+}
+
+/**
+ * Logs Network IP provisioning event
+ * Logged from:
+ * packages/modules/NetworkStack/src/com/android/networkstack/metrics/NetworkIpProvisioningMetrics.java
+ */
+message NetworkIpProvisioningReported {
+    // Transport type (WIFI, CELLULAR, BLUETOOTH, ..)
+    optional android.stats.connectivity.TransportType transport_type = 1;
+
+    // The latency in microseconds of IP Provisioning over IPV4
+    optional int32 ipv4_latency_micros = 2;
+
+    // The latency in microseconds of IP Provisioning over IPV6
+    optional int32 ipv6_latency_micros = 3;
+
+    // The time duration between provisioning start and end (success or failure)
+    optional int64 provisioning_duration_micros = 4;
+
+    // The specific disconnect reason for this IP provisioning
+    optional android.stats.connectivity.DisconnectCode disconnect_code = 5;
+
+    // Log DHCP session info (Only valid for IPv4)
+    optional DhcpSession dhcp_session = 6 [(log_mode) = MODE_BYTES];
+
+    // The random number between 0 ~ 999 for sampling
+    optional int32 random_number = 7;
+}
+
+/**
+ * Logs Network DHCP Renew event
+ * Logged from:
+ * packages/modules/NetworkStack/src/android/net/dhcp/DhcpClient.java
+ */
+message NetworkDhcpRenewReported {
+    // Transport type (WIFI, CELLULAR, BLUETOOTH, ..)
+    optional android.stats.connectivity.TransportType transport_type = 1;
+
+    // The request packet (re)transmit count
+    optional int32 request_count = 2;
+
+    // The latency in microseconds of DHCP Renew
+    optional int32 latency_micros = 3;
+
+    // The DHCP error code is defined in android.net.metrics.DhcpErrorEvent
+    optional android.stats.connectivity.DhcpErrorCode error_code = 4;
+
+    // The result of DHCP renew
+    optional android.stats.connectivity.DhcpRenewResult renew_result = 5;
+
+    // The random number between 0 ~ 999 for sampling
+    optional int32 random_number = 6;
+}
+
+/**
+ * Logs Network Validation event
+ * Logged from:
+ * packages/modules/NetworkStack/src/com/android/server/connectivity/NetworkMonitor.java
+ */
+message NetworkValidationReported {
+    // Transport type (WIFI, CELLULAR, BLUETOOTH, ..)
+    optional android.stats.connectivity.TransportType transport_type = 1;
+
+    // Record each probe event
+    optional ProbeEvents probe_events = 2 [(log_mode) = MODE_BYTES];
+
+    // The result of the network validation
+    optional android.stats.connectivity.ValidationResult validation_result = 3;
+
+    // The latency in microseconds of network validation
+    optional int32 latency_micros = 4;
+
+    // The validation index (the first validation attempt or second, third...)
+    optional int32 validation_index = 5;
+
+    // The random number between 0 ~ 999 for sampling
+    optional int32 random_number = 6;
+}
+
+/**
+ * Logs NetworkStack Quirk event
+ * Logged from:
+ * packages/modules/NetworkStack/src/com/android/networkstack/
+ */
+message NetworkStackQuirkReported {
+    // Transport type (WIFI, CELLULAR, BLUETOOTH, ..)
+    optional android.stats.connectivity.TransportType transport_type = 1;
+
+    // Record each Quirk event
+    optional android.stats.connectivity.NetworkQuirkEvent event = 2;
 }
 
 /**
@@ -7992,6 +8436,245 @@ message CarPowerStateChanged {
 }
 
 /**
+ * Logs when Car User Hal is requested to switch/create/remove user.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalModifyUserRequestReported {
+    // Request id for the request.
+    optional int32 request_id = 1;
+    // Request type.
+    enum RequestType {
+        UNKNOWN = 0;
+        // Car user manager requested user switch.
+        SWITCH_REQUEST_ANDROID = 1;
+        // OEM requested User switch.
+        SWITCH_REQUEST_OEM = 2;
+        // Hal switch requested after android switch using activity manager.
+        SWITCH_REQUEST_LEGACY = 3;
+        // Create User
+        CREATE_REQUEST = 4;
+        // Remove User
+        REMOVE_REQUEST = 5;
+    }
+    optional RequestType request_type = 2;
+    // Android User id of the current user which can only be 0, 10, 11 and so on.
+    // -1 if not available.
+    optional int32 user_id = 3;
+    // VHAL flags of the current user. (-1 if not available)
+    optional int32 user_flags = 4;
+    // Android User id of the target user for switch/create/remove. It can only
+    // be 0, 10, 11 and so on. -1 if not available.
+    optional int32 target_user_id = 5;
+    // VHAL flags of the target user for switch/create/remove. (-1 if not available)
+    optional int32 target_user_flags = 6;
+    // Request timeout Milliseconds (-1 if not available)
+    optional int32 timeout_millis = 7;
+}
+
+/**
+ * Logs when Car User Hal responds to switch/create user request.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalModifyUserResponseReported {
+    // Request id of the request associated with the response.
+    optional int32 request_id = 1;
+    // Car user hal callback status.
+    enum CallbackStatus {
+        UNKNOWN = 0;
+        // Hal response was invalid.
+        INVALID = 1;
+        // Hal response was ok.
+        OK = 2;
+        // Hal timeout during set call.
+        HAL_SET_TIMEOUT = 3;
+        // Hal response timeout.
+        HAL_RESPONSE_TIMEOUT = 4;
+        // Hal responded with wrong info.
+        WRONG_HAL_RESPONSE = 5;
+        // Hal is processing multiple requests simultaneously.
+        CONCURRENT_OPERATION = 6;
+    }
+    optional CallbackStatus callback_status = 2;
+
+    // Hal request status for user switch/create/remove.
+    enum HalRequestStatus {
+        UNSPECIFIED = 0;
+        // Hal request for user switch/create is successful.
+        SUCCESS = 1;
+        // Hal request for user switch/create failed.
+        FAILURE = 2;
+    }
+    optional HalRequestStatus request_status = 3;
+}
+
+/**
+ * Logs when post switch response is posted to Car User Hal.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalPostSwitchResponseReported {
+    // Request id.
+    optional int32 request_id = 1;
+
+    // Android user switch status.
+    enum UserSwitchStatus {
+        UNKNOWN = 0;
+        // Android user switch is successful.
+        SUCCESS = 1;
+        // Android user switch failed.
+        FAILURE = 2;
+    }
+    optional UserSwitchStatus switch_status = 2;
+}
+
+/**
+ * Logs when initial user information is requested from Car User Hal.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalInitialUserInfoRequestReported {
+    // Request id for the request.
+    optional int32 request_id = 1;
+
+    // Request type for initial user information.
+    enum InitialUserInfoRequestType {
+        UNKNOWN = 0;
+        // At the first time Android was booted (or after a factory reset).
+        FIRST_BOOT = 1;
+        // At the first time Android was booted after the system was updated.
+        FIRST_BOOT_AFTER_OTA = 2;
+        // When Android was booted "from scratch".
+        COLD_BOOT = 3;
+        // When Android was resumed after the system was suspended to memory.
+        RESUME = 4;
+    }
+    optional InitialUserInfoRequestType request_type = 2;
+    // Request timeout Milliseconds (-1 if not available)
+    optional int32 timeout_millis = 3;
+}
+
+/**
+ * Logs when Car User Hal responds to initial user information requests.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalInitialUserInfoResponseReported {
+    // Request id of the request associated with the response.
+    optional int32 request_id = 1;
+    // Car user hal callback status.
+    enum CallbackStatus {
+        UNKNOWN = 0;
+        // Hal response was invalid.
+        INVALID = 1;
+        // Hal response was ok.
+        OK = 2;
+        // Hal timeout during set call.
+        HAL_SET_TIMEOUT = 3;
+        // Hal response timeout.
+        HAL_RESPONSE_TIMEOUT = 4;
+        // Hal responded with wrong info.
+        WRONG_HAL_RESPONSE = 5;
+        // Hal is processing multiple requests simultaneously.
+        CONCURRENT_OPERATION = 6;
+    }
+    optional CallbackStatus callback_status = 2;
+    // Response for initial user information request.
+    enum InitialUserInfoResponseAction {
+        UNSPECIFIED = 0;
+        // Let the Android System decide what to do.
+        DEFAULT = 1;
+        // Switch to an existing Android user.
+        SWITCH = 2;
+        // Create a new Android user (and switch to it).
+        CREATE = 3;
+    }
+    optional InitialUserInfoResponseAction response_action = 3;
+    // Android User id of the target user which can only be 0, 10, 11 and so on.
+    // -1 if not available.
+    optional int32 target_user = 4;
+    // VHAL flags of the current user. (-1 if not available)
+    optional int32 target_user_flags = 5;
+    // User locales
+    optional string user_locales = 6;
+}
+
+/**
+ * Logs when set user association is requested from Car User Hal.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalUserAssociationRequestReported {
+    // Request id for the request.
+    optional int32 request_id = 1;
+    // Request type.
+    enum RequestType {
+        UNKNOWN = 0;
+        // For setting user association information.
+        SET = 1;
+        // For getting user association information.
+        GET = 2;
+    }
+    optional RequestType request_type = 2;
+    // Android User id of the current user which can only be 0, 10, 11 and so on.
+    // -1 if not available.
+    optional int32 current_user_id = 3;
+    // VHAL flags of the current user. (-1 if not available)
+    optional int32 current_user_flags = 4;
+    // Number of the set associations requested.
+    optional int32 number_associations = 5;
+    // Concatenated string for the types from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_types = 6;
+    // Concatenated string for the values from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_values = 7;
+}
+
+/**
+ * Logs when Car User Hal responds to set user association requests.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalSetUserAssociationResponseReported {
+    // Request id of the request associated with the response.
+    optional int32 request_id = 1;
+    // Car user hal callback status.
+    enum CallbackStatus {
+        UNKNOWN = 0;
+        // Hal response was invalid.
+        INVALID = 1;
+        // Hal response was ok.
+        OK = 2;
+        // Hal timeout during set call.
+        HAL_SET_TIMEOUT = 3;
+        // Hal response timeout.
+        HAL_RESPONSE_TIMEOUT = 4;
+        // Hal responded with wrong info.
+        WRONG_HAL_RESPONSE = 5;
+        // Hal is processing multiple requests simultaneously.
+        CONCURRENT_OPERATION = 6;
+    }
+    optional CallbackStatus callback_status = 2;
+    // Number of the set associations in the response.
+    optional int32 number_associations = 3;
+    // Concatenated string for the types from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_types = 4;
+    // Concatenated string for the values from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_values = 5;
+}
+
+/**
  * Logs whether GarageMode is entered.
  *
  * Logged from:
@@ -9042,6 +9725,7 @@ message RuntimeAppOpAccess {
         UNIFORM = 1;
         RARELY_USED = 2;
         BOOT_TIME_SAMPLING = 3;
+        UNIFORM_OPS = 4;
     }
 
     // sampling strategy used to collect this message
@@ -9134,8 +9818,10 @@ message IntegrityRulesPushed {
 /**
  * Logs when a cell broadcast message is received on the device.
  *
- * Logged from CellBroadcastService module:
+ * Logged from Cell Broadcast module and platform:
  *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ *   packages/apps/CellBroadcastReceiver/
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/CellBroadcastServiceManager.java
  */
 message CellBroadcastMessageReported {
     // The type of Cell Broadcast message
@@ -9146,8 +9832,40 @@ message CellBroadcastMessageReported {
         CDMA_SPC = 3;
     }
 
+    // The parts of the cell broadcast message pipeline
+    enum ReportSource {
+        UNKNOWN_SOURCE = 0;
+        FRAMEWORK = 1;
+        CB_SERVICE = 2;
+        CB_RECEIVER_APP = 3;
+    }
+
     // GSM, CDMA, CDMA-SCP
     optional CbType type = 1;
+
+    // The source of the report
+    optional ReportSource source = 2;
+}
+
+/**
+ * Logs when a cell broadcast message is filtered out, or otherwise intentionally not sent to CBR.
+ *
+ * Logged from CellBroadcastService module:
+ *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ */
+message CellBroadcastMessageFiltered {
+    enum FilterReason {
+        NOT_FILTERED = 0;
+        DUPLICATE_MESSAGE = 1;
+        GEOFENCED_MESSAGE = 2;
+        AREA_INFO_MESSAGE = 3;
+    }
+
+    // GSM, CDMA, CDMA-SCP
+    optional CellBroadcastMessageReported.CbType type = 1;
+
+    // The source of the report
+    optional FilterReason filter = 2;
 }
 
 /**
@@ -9174,6 +9892,7 @@ message CellBroadcastMessageError {
         UNEXPECTED_GSM_MESSAGE_TYPE_FROM_FWK = 12;
         UNEXPECTED_CDMA_MESSAGE_TYPE_FROM_FWK = 13;
         UNEXPECTED_CDMA_SCP_MESSAGE_TYPE_FROM_FWK = 14;
+        NO_CONNECTION_TO_CB_SERVICE = 15;
     }
 
     // What kind of error occurred
@@ -9205,6 +9924,100 @@ message TvTunerStateChanged {
     //  new state
     optional State state = 2;
 }
+
+/**
+ * Logs the status of a dvr playback or record.
+ * This is atom ID 279.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/tv/tuner/dvr
+ */
+message TvTunerDvrStatus {
+    enum Type {
+        UNKNOWN_TYPE = 0;
+        PLAYBACK = 1; // is a playback
+        RECORD = 2; // is a record
+    }
+    enum State {
+        UNKNOWN_STATE = 0;
+        STARTED = 1; // DVR is started
+        STOPPED = 2; // DVR is stopped
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    // DVR type
+    optional Type type = 2;
+    //  DVR state
+    optional State state = 3;
+    //  Identify the segment of a record or playback
+    optional int32 segment_id = 4;
+    // indicate how many overflow or underflow happened between started to stopped
+    optional int32 overflow_underflow_count = 5;
+}
+
+/**
+ * Logs when a cas session opened through MediaCas.
+ * This is atom ID 280.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/MediaCas.java
+ */
+message TvCasSessionOpenStatus {
+    enum State {
+        UNKNOWN = 0;
+        SUCCEEDED = 1; // indicate that the session is opened successfully.
+        FAILED = 2; // indicate that the session isn’t opened successfully.
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    //  Cas system Id
+    optional int32 cas_system_id = 2;
+    // State of the session
+    optional State state = 3;
+}
+
+/**
+ * Logs for ContactsProvider general usage.
+ * This is atom ID 301.
+ *
+ * Logged from:
+ *   packages/providers/ContactsProvider/src/com/android/providers/contacts/ContactsProvider2.java
+ */
+message ContactsProviderStatusReported {
+    enum ApiType {
+        UNKNOWN_API = 0;
+        QUERY = 1;
+        // INSERT includes insert and bulkInsert, and inserts triggered by applyBatch.
+        INSERT = 2;
+        // UPDATE and DELETE includes update/delete and the ones triggered by applyBatch.
+        UPDATE = 3;
+        DELETE = 4;
+    }
+
+    enum ResultType {
+        UNKNOWN_RESULT = 0;
+        SUCCESS = 1;
+        FAIL = 2;
+        ILLEGAL_ARGUMENT = 3;
+        UNSUPPORTED_OPERATION = 4;
+    }
+
+    enum CallerType {
+        UNSPECIFIED_CALLER_TYPE = 0;
+        CALLER_IS_SYNC_ADAPTER = 1;
+        CALLER_IS_NOT_SYNC_ADAPTER = 2;
+    }
+
+    optional ApiType api_type = 1;
+    // Defined in
+    // packages/providers/ContactsProvider/src/com/android/providers/contacts/ContactsProvider2.java
+    optional int32 uri_type = 2;
+    optional CallerType caller_type = 3;
+    optional ResultType result_type = 4;
+    optional int32 result_count = 5;
+    optional int64 latency_micros = 6;
+}
+
 /**
  * Logs when an app is frozen or unfrozen.
  *
@@ -9398,7 +10211,7 @@ message GnssStats {
     optional int64 time_to_first_fix_reports = 3;
 
     // Total pulled reported time to first fix (in milli-seconds) since boot
-    optional int64 time_to_first_fix_milli_s = 4;
+    optional int64 time_to_first_fix_millis = 4;
 
     // Number of position accuracy reports since boot
     optional int64 position_accuracy_reports = 5;
@@ -9721,15 +10534,20 @@ message AccessibilityServiceReported {
     optional android.stats.accessibility.ServiceStatus service_status = 2;
 }
 
-message DisplayWakeReason {
+/**
+ * Logs when display wake up.
+ *
+ * Logged from:
+ *   services/core/java/com/android/server/power/Notifier.java
+ */
+
+message DisplayWakeReported {
     // Wake_up_reason code
     // If LOWORD(wake_up_reason) = 0
     //     reference to HIWORD(wake_up_reason) PowerManager.WAKE_REASON_XXX
     //     else reference wake_up_reason to
-    //     frameworks/base/services/core/java/com/android/server/power/Notifier.java#DispWakeupReason
+    //     services/core/java/com/android/server/power/Notifier.java#onWakeUp
     optional int32 wake_up_reason = 1;
-    // Count of wake up by reason
-    optional int32 wake_times = 2;
 }
 
 /**
@@ -9902,4 +10720,454 @@ message MediaOutputOpSwitchReported {
 
     // The amount of applied devices within a remote dynamic group after a switching is done.
     optional int32 applied_device_count_within_remote_group = 9;
+}
+
+/**
+ * Logs when the Assistant is invoked.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/assist/AssistManager.java
+ */
+message AssistantInvocationReported {
+
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+
+    // The registered Assistant's uid and package (as for UiEventReported).
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
+
+    // An identifier used to disambiguate which logs refer to a particular invocation of the
+    // Assistant  (as for UiEventReported).
+    optional int32 instance_id = 4;
+
+    // The state of the device at the time of invocation.
+    enum DeviceState {
+        UNKNOWN_DEVICE_STATE = 0;
+        AOD1 = 1;
+        AOD2 = 2;
+        BOUNCER = 3;
+        UNLOCKED_LOCKSCREEN = 4;
+        LAUNCHER_HOME = 5;
+        LAUNCHER_OVERVIEW = 6;
+        LAUNCHER_ALL_APPS = 7;
+        APP_DEFAULT = 8;
+        APP_IMMERSIVE = 9;
+        APP_FULLSCREEN = 10;
+    }
+    optional DeviceState device_state = 5;
+
+    // Whether the Assistant handles were showing at the time of invocation.
+    optional bool assistant_handles_showing = 6;
+}
+
+/**
+ * Logs when an AudioRecord finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioRecordDeviceUsageReported {
+    // The devices connected to this AudioRecord.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<INPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The client-server buffer framecount.
+    // The framecount is generally between 960 - 48000 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the AudioRecord.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio input flags used to construct the AudioRecord.
+    // A string OR from system/media/audio/include/system/audio-base.h audio_input_flags_t
+    optional string flags = 8;
+
+    // The santized package name of the audio client associated with the AudioRecord.
+    // See getSanitizedPackageNameAndVersionCode() in
+    // frameworks/av/services/mediametrics/MediaMetricsService.cpp
+    optional string package_name = 9;
+
+    // The selected device id (nonzero if a non-default device is selected)
+    optional int32 selected_device_id = 10;
+
+    // The caller of the AudioRecord.
+    // See lookup<CALLER_NAME>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string caller = 11;
+
+    // The audio source for AudioRecord.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_source_t
+    optional string source = 12;
+}
+
+/**
+ * Logs when an AudioThread finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioThreadDeviceUsageReported {
+    // The devices connected to this audio thread.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // (for record threads):
+    // See lookup<INPUT_DEVICE> in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // (for playback threads):
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The framecount of the buffer delivered to (or from) the HAL.
+    // The framecount is generally ~960 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the audio thread.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio flags used to construct the thread
+    // (for record threads):
+    // A string OR from system/media/audio/include/system/audio-base.h audio_input_flags_t
+    // (for playback threads):
+    // A string OR from system/media/audio/include/system/audio-base.h audio_output_flags_t
+    optional string flags = 8;
+
+    // The number of underruns encountered for a playback thread or the
+    // number of overruns encountered for a capture thread.
+    optional int32 xruns = 9;
+
+    // The type of thread
+    // A thread type enumeration from
+    // frameworks/av/mediametrics/services/Translate.h
+    optional string type = 10;
+}
+
+/**
+ * Logs when an AudioTrack finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioTrackDeviceUsageReported {
+    // The output devices connected to this AudioTrack.
+    // A string OR of various output device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The client-server buffer framecount.
+    // The framecount is generally between 960 - 48000 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    // A static track (see traits) may have a very large framecount.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the AudioTrack.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio flags used to construct the AudioTrack.
+    // A string OR from system/media/audio/include/system/audio-base.h audio_output_flags_t
+    optional string flags = 8;
+
+    // The number of underruns encountered.
+    optional int32 xruns = 9;
+
+    // The santized package name of the audio client associated with the AudioTrack.
+    // See getSanitizedPackageNameAndVersionCode() in
+    // frameworks/av/services/mediametrics/MediaMetricsService.cpp
+    optional string package_name = 10;
+
+    // The latency of the last sample in the buffer in milliseconds.
+    optional float device_latency_millis = 11;
+
+    // The startup time in milliseconds from start() to sample played.
+    optional float device_startup_millis = 12;
+
+    // The average volume of the track on the device [ 0.f - 1.f ]
+    optional float device_volume = 13;
+
+    // The selected device id (nonzero if a non-default device is selected)
+    optional int32 selected_device_id = 14;
+
+    // The stream_type category for the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_stream_type_t
+    optional string stream_type = 15;
+
+    // The usage for the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_usage_t
+    optional string usage = 16;
+
+    // The content type of the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_content_type_t
+    optional string content_type = 17;
+
+    // The caller of the AudioTrack.
+    // See lookup<CALLER_NAME>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string caller = 18;
+
+    // The traits of the AudioTrack.
+    // A string OR of different traits, may be empty string.
+    // Only "static" is supported for R.
+    // See lookup<TRACK_TRAITS>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string traits = 19;
+}
+
+/**
+ * Logs the status of an audio device connection attempt.
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioDeviceConnectionReported {
+    // The input devices represented by this report.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<INPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string input_devices = 1;
+
+    // The output devices represented by this report.
+    // A string OR of various output device categories.
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string output_devices = 2;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 3;
+
+    // The result of the audio device connection.
+    // 0 indicates success: connection verified.
+    // 1 indicates unknown: connection not verified or not known if diverted properly.
+    // Other values indicate specific status.
+    // See DeviceConnectionResult in frameworks/av/services/mediametrics/AudioTypes.h
+    optional int32 result = 4;
+
+    // Average milliseconds of time to connect
+    optional float time_to_connect_millis = 5;
+
+    // Number of connections if aggregated statistics, otherwise 1.
+    optional int32 connection_count = 6;
+}
+
+/**
+ * Logs: i) creation of different types of cryptographic keys in the keystore,
+ * ii) operations performed using the keys,
+ * iii) attestation of the keys
+ * Logged from: system/security/keystore/key_event_log_handler.cpp
+ */
+message KeystoreKeyEventReported {
+
+    enum Algorithm {
+        /** Asymmetric algorithms. */
+        RSA = 1;
+        // 2 removed, do not reuse.
+        EC = 3;
+        /** Block cipher algorithms */
+        AES = 32;
+        TRIPLE_DES = 33;
+        /** MAC algorithms */
+        HMAC = 128;
+    };
+    /** Algorithm associated with the key */
+    optional Algorithm algorithm = 1;
+
+    /** Size of the key */
+    optional int32 key_size = 2;
+
+    enum KeyOrigin {
+        /** Generated in keymaster.  Should not exist outside the TEE. */
+        GENERATED = 0;
+        /** Derived inside keymaster.  Likely exists off-device. */
+        DERIVED = 1;
+        /** Imported into keymaster.  Existed as cleartext in Android. */
+        IMPORTED = 2;
+        /** Keymaster did not record origin. */
+        UNKNOWN = 3;
+        /** Securely imported into Keymaster. */
+        SECURELY_IMPORTED = 4;
+    };
+    /* Logs whether the key was generated, imported, securely imported, or derived.*/
+    optional KeyOrigin key_origin = 3;
+
+    enum HardwareAuthenticatorType {
+        NONE = 0;
+        PASSWORD = 1;
+        FINGERPRINT = 2;
+        // Additional entries must be powers of 2.
+    };
+    /**
+     * What auth types does this key require? If none,
+     * then no auth required.
+     */
+    optional HardwareAuthenticatorType user_auth_type = 4;
+
+    /**
+     * If user authentication is required, is the requirement time based? If it
+     * is not time based then this field will not be used and the key is per
+     * operation. Per operation keys must be user authenticated on each usage.
+     */
+    optional int32 user_auth_key_timeout_secs = 5;
+
+    /**
+     * padding mode, digest, block_mode and purpose should ideally be repeated
+     * fields. However, since statsd does not support repeated fields in
+     * pushed atoms, they are represented using bitmaps.
+     */
+
+    /** Track which padding mode is being used.*/
+    optional int32 padding_mode_bitmap = 6;
+
+    /** Track which digest is being used. */
+    optional int32 digest_bitmap = 7;
+
+    /** Track what block mode is being used (for encryption). */
+    optional int32 block_mode_bitmap = 8;
+
+    /** Track what purpose is this key serving. */
+    optional int32 purpose_bitmap = 9;
+
+    enum EcCurve {
+        P_224 = 0;
+        P_256 = 1;
+        P_384 = 2;
+        P_521 = 3;
+    };
+    /** Which ec curve was selected if elliptic curve cryptography is in use **/
+    optional EcCurve ec_curve = 10;
+
+    enum KeyBlobUsageRequirements {
+        STANDALONE = 0;
+        REQUIRES_FILE_SYSTEM = 1;
+    };
+    /** Standalone or is a file system required */
+    optional KeyBlobUsageRequirements key_blob_usage_reqs = 11;
+
+    enum Type {
+        key_operation = 0;
+        key_creation = 1;
+        key_attestation = 2;
+    }
+    /** Key creation event, operation event or attestation event? */
+    optional Type type = 12;
+
+    /** Was the key creation, operation, or attestation successful? */
+    optional bool was_successful = 13;
+
+    /** Response code or error code */
+    optional int32 error_code = 14;
+}
+
+// Blob Committer stats
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobCommitterProto {
+    // Committer app's uid
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Unix epoch timestamp of the commit in milliseconds
+    optional int64 commit_timestamp_millis = 2;
+
+    // Flags of what access types the committer has set for the Blob
+    optional int32 access_mode = 3;
+
+    // Number of packages that have been whitelisted for ACCESS_TYPE_WHITELIST
+    optional int32 num_whitelisted_package = 4;
+}
+
+// Blob Leasee stats
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobLeaseeProto {
+    // Leasee app's uid
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Unix epoch timestamp for lease expiration in milliseconds
+    optional int64 lease_expiry_timestamp_millis = 2;
+}
+
+// List of Blob Committers
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobCommitterListProto {
+    repeated BlobCommitterProto committer = 1;
+}
+
+// List of Blob Leasees
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobLeaseeListProto {
+    repeated BlobLeaseeProto leasee = 1;
+}
+
+/**
+ * Logs the current state of a Blob committed with BlobStoreManager
+ *
+ * Pulled from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobInfo {
+    // Id of the Blob
+    optional int64 blob_id = 1;
+
+    // Size of the Blob data
+    optional int64 size = 2;
+
+    // Unix epoch timestamp of the Blob's expiration in milliseconds
+    optional int64 expiry_timestamp_millis = 3;
+
+    // List of committers of this Blob
+    optional BlobCommitterListProto committers = 4;
+
+    // List of leasees of this Blob
+    optional BlobLeaseeListProto leasees = 5;
 }

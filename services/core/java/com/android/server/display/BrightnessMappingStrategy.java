@@ -28,6 +28,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.Spline;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
@@ -348,9 +349,9 @@ public abstract class BrightnessMappingStrategy {
 
     // Normalize entire brightness range to 0 - 1.
     protected static float normalizeAbsoluteBrightness(int brightness) {
-        brightness = MathUtils.constrain(brightness,
-                PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
-        return (float) brightness / PowerManager.BRIGHTNESS_ON;
+        return BrightnessSynchronizer.brightnessIntToFloat(brightness,
+                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
     }
 
     private Pair<float[], float[]> insertControlPoint(

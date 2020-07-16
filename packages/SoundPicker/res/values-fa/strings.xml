@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"حذف"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"افزودن آهنگ زنگ سفارشی ممکن نیست"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"حذف آهنگ زنگ سفارشی ممکن نیست"</string>
+    <string name="app_label" msgid="3091611356093417332">"صداها"</string>
 </resources>

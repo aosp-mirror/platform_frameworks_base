@@ -2214,11 +2214,11 @@ public final class ProcessList {
                 app.setHasForegroundActivities(true);
             }
 
-            final Map<String, Pair<String, Long>> pkgDataInfoMap;
-            final Map<String, Pair<String, Long>> whitelistedAppDataInfoMap;
+            Map<String, Pair<String, Long>> pkgDataInfoMap;
+            Map<String, Pair<String, Long>> whitelistedAppDataInfoMap;
             boolean bindMountAppStorageDirs = false;
             boolean bindMountAppsData = mAppDataIsolationEnabled
-                    && UserHandle.isApp(app.uid)
+                    && (UserHandle.isApp(app.uid) || UserHandle.isIsolated(app.uid))
                     && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info);
 
             // Get all packages belongs to the same shared uid. sharedPackages is empty array
@@ -2266,6 +2266,13 @@ public final class ProcessList {
                 }
             }
 
+            // If it's an isolated process, it should not even mount its own app data directories,
+            // since it has no access to them anyway.
+            if (app.isolated) {
+                pkgDataInfoMap = null;
+                whitelistedAppDataInfoMap = null;
+            }
+
             final Process.ProcessStartResult startResult;
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
@@ -2276,13 +2283,14 @@ public final class ProcessList {
             } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
+                // We can't isolate app data and storage data as parent zygote already did that.
                 startResult = appZygote.getProcess().start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, isTopApp,
                         app.mDisabledCompatChanges, pkgDataInfoMap, whitelistedAppDataInfoMap,
-                        bindMountAppsData, bindMountAppStorageDirs,
+                        false, false,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,

@@ -157,8 +157,8 @@ public class PhoneStateListener {
      * Listen for changes to the device's cell location. Note that
      * this will result in frequent callbacks to the listener.
      * {@more}
-     * Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION
-     * ACCESS_COARSE_LOCATION}
+     * Requires Permission: {@link android.Manifest.permission#ACCESS_FINE_LOCATION
+     * ACCESS_FINE_LOCATION}
      * <p>
      * If you need regular location updates but want more control over
      * the update interval or location precision, you can set up a listener
@@ -218,6 +218,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to observed cell info.
+     *
+     * Listening to this event requires the {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission.
      *
      * @see #onCellInfoChanged
      */
@@ -340,6 +343,10 @@ public class PhoneStateListener {
     /**
      *  Listen for display info changed event.
      *
+     *  Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     *  READ_PHONE_STATE} or that the calling app has carrier privileges (see
+     *  {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      *  @see #onDisplayInfoChanged
      */
     public static final int LISTEN_DISPLAY_INFO_CHANGED = 0x00100000;
@@ -457,6 +464,9 @@ public class PhoneStateListener {
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
      * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
+     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
+     * of whether the calling app has carrier privileges.
+     *
      * @see #onRegistrationFailed
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
@@ -467,6 +477,9 @@ public class PhoneStateListener {
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
      * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
+     * of whether the calling app has carrier privileges.
      *
      * @see #onBarringInfoChanged
      */
@@ -564,6 +577,11 @@ public class PhoneStateListener {
      * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * The instance of {@link ServiceState} passed as an argument here will have various levels of
+     * location information stripped from it depending on the location permissions that your app
+     * holds. Only apps holding the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission will
+     * receive all the information in {@link ServiceState}.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE

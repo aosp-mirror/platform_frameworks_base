@@ -19,11 +19,13 @@ package android.wm;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.perftests.utils.PerfTestActivity;
 import android.provider.Settings;
 
@@ -61,24 +63,32 @@ public class WindowManagerPerfTestBase {
     @BeforeClass
     public static void setUpOnce() {
         final Context context = getInstrumentation().getContext();
-        sOriginalStayOnWhilePluggedIn = Settings.Global.getInt(context.getContentResolver(),
+        final int stayOnWhilePluggedIn = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
-        // Keep the device awake during testing.
-        setStayOnWhilePluggedIn(BatteryManager.BATTERY_PLUGGED_USB);
+        sOriginalStayOnWhilePluggedIn = -1;
+        if (stayOnWhilePluggedIn != BatteryManager.BATTERY_PLUGGED_ANY) {
+            sOriginalStayOnWhilePluggedIn = stayOnWhilePluggedIn;
+            // Keep the device awake during testing.
+            setStayOnWhilePluggedIn(BatteryManager.BATTERY_PLUGGED_ANY);
+        }
 
         if (!BASE_OUT_PATH.exists()) {
             executeShellCommand("mkdir -p " + BASE_OUT_PATH);
         }
-        // In order to be closer to the real use case.
-        executeShellCommand("input keyevent KEYCODE_WAKEUP");
-        executeShellCommand("wm dismiss-keyguard");
+        if (!context.getSystemService(PowerManager.class).isInteractive()
+                || context.getSystemService(KeyguardManager.class).isKeyguardLocked()) {
+            executeShellCommand("input keyevent KEYCODE_WAKEUP");
+            executeShellCommand("wm dismiss-keyguard");
+        }
         context.startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     @AfterClass
     public static void tearDownOnce() {
-        setStayOnWhilePluggedIn(sOriginalStayOnWhilePluggedIn);
+        if (sOriginalStayOnWhilePluggedIn != -1) {
+            setStayOnWhilePluggedIn(sOriginalStayOnWhilePluggedIn);
+        }
     }
 
     private static void setStayOnWhilePluggedIn(int value) {

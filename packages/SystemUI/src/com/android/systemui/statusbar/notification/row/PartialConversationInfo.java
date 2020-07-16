@@ -89,7 +89,7 @@ public class PartialConversationInfo extends LinearLayout implements
 
     private OnClickListener mOnDone = v -> {
         mPressedApply = true;
-        closeControls(v, true);
+        mGutsContainer.closeControls(v, true);
     };
 
     public PartialConversationInfo(Context context, AttributeSet attrs) {
@@ -132,6 +132,7 @@ public class PartialConversationInfo extends LinearLayout implements
 
         View done = findViewById(R.id.done);
         done.setOnClickListener(mOnDone);
+        done.setAccessibilityDelegate(mGutsContainer.getAccessibilityDelegate());
     }
 
     private void bindActions() {
@@ -147,8 +148,7 @@ public class PartialConversationInfo extends LinearLayout implements
     }
 
     private void bindHeader() {
-        bindConversationDetails();
-
+        bindPackage();
         // Delegate
         bindDelegate();
     }
@@ -172,56 +172,11 @@ public class PartialConversationInfo extends LinearLayout implements
                         mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
                 mChannelEditorDialogController.setOnFinishListener(() -> {
                     mPresentingChannelEditorDialog = false;
-                    closeControls(this, false);
+                    mGutsContainer.closeControls(this, false);
                 });
                 mChannelEditorDialogController.show();
             }
         });
-    }
-
-    private void bindConversationDetails() {
-        final TextView channelName = findViewById(R.id.parent_channel_name);
-        channelName.setText(mNotificationChannel.getName());
-
-        bindGroup();
-        bindName();
-        bindPackage();
-        bindIcon();
-    }
-
-    private void bindName() {
-        TextView name = findViewById(R.id.name);
-        Bundle extras = mSbn.getNotification().extras;
-        CharSequence nameString = extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE, "");
-        if (TextUtils.isEmpty(nameString)) {
-            nameString = extras.getCharSequence(Notification.EXTRA_TITLE, "");
-        }
-        name.setText(nameString);
-    }
-
-    private void bindIcon() {
-        ImageView image = findViewById(R.id.conversation_icon);
-        if (mSbn.getNotification().extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION, false)) {
-            // TODO: maybe use a generic group icon, or a composite of recent senders
-            image.setImageDrawable(mPkgIcon);
-        } else {
-            final List<Notification.MessagingStyle.Message> messages =
-                    Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                            (Parcelable[]) mSbn.getNotification().extras.get(
-                                    Notification.EXTRA_MESSAGES));
-
-            final Notification.MessagingStyle.Message latestMessage =
-                    Notification.MessagingStyle.findLatestIncomingMessage(messages);
-            Icon personIcon = null;
-            if (latestMessage != null && latestMessage.getSenderPerson() != null) {
-                personIcon = latestMessage.getSenderPerson().getIcon();
-            }
-            if (personIcon != null) {
-                image.setImageIcon(latestMessage.getSenderPerson().getIcon());
-            } else {
-                image.setImageDrawable(mPkgIcon);
-            }
-        }
     }
 
     private void bindPackage() {
@@ -240,7 +195,10 @@ public class PartialConversationInfo extends LinearLayout implements
         } catch (PackageManager.NameNotFoundException e) {
             mPkgIcon = mPm.getDefaultActivityIcon();
         }
-        ((TextView) findViewById(R.id.pkg_name)).setText(mAppName);
+        TextView name = findViewById(R.id.name);
+        name.setText(mAppName);
+        ImageView image = findViewById(R.id.icon);
+        image.setImageDrawable(mPkgIcon);
     }
 
     private void bindDelegate() {
@@ -269,14 +227,11 @@ public class PartialConversationInfo extends LinearLayout implements
             }
         }
         TextView groupNameView = findViewById(R.id.group_name);
-        View groupDivider = findViewById(R.id.group_divider);
         if (groupName != null) {
             groupNameView.setText(groupName);
             groupNameView.setVisibility(VISIBLE);
-            groupDivider.setVisibility(VISIBLE);
         } else {
             groupNameView.setVisibility(GONE);
-            groupDivider.setVisibility(GONE);
         }
     }
 
@@ -318,25 +273,6 @@ public class PartialConversationInfo extends LinearLayout implements
                         R.string.notification_channel_controls_closed_accessibility, mAppName));
             }
         }
-    }
-
-    /**
-     * Closes the controls and commits the updated importance values (indirectly).
-     *
-     * <p><b>Note,</b> this will only get called once the view is dismissing. This means that the
-     * user does not have the ability to undo the action anymore.
-     */
-    @VisibleForTesting
-    void closeControls(View v, boolean save) {
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, save, false /* force */);
     }
 
     @Override

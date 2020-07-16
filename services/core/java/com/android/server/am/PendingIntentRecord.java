@@ -187,7 +187,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 + " intent="
                 + (requestIntent != null
                         ? requestIntent.toShortString(false, true, false, false) : "<null>")
-                + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}";
+                + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}"
+                + " requestCode=" + requestCode;
         }
 
         String typeName() {
@@ -499,6 +500,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             WeakReference<PendingIntentRecord> current = controller.mIntentSenderRecords.get(key);
             if (current == ref) {
                 controller.mIntentSenderRecords.remove(key);
+                controller.decrementUidStatLocked(this);
             }
         }
     }

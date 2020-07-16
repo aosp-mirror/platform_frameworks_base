@@ -228,6 +228,13 @@ public class Process {
      */
     public static final int EXT_OBB_RW_GID = 1079;
 
+    /**
+     * GID that corresponds to the INTERNET permission.
+     * Must match the value of AID_INET.
+     * @hide
+     */
+    public static final int INET_GID = 3003;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 

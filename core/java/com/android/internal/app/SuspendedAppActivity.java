@@ -26,6 +26,7 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
+import android.app.KeyguardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -208,7 +209,30 @@ public class SuspendedAppActivity extends AlertActivity
         ap.mPositiveButtonText = getString(android.R.string.ok);
         ap.mNeutralButtonText = resolveNeutralButtonText();
         ap.mPositiveButtonListener = ap.mNeutralButtonListener = this;
+
+        requestDismissKeyguardIfNeeded(ap.mMessage);
+
         setupAlert();
+    }
+
+    private void requestDismissKeyguardIfNeeded(CharSequence dismissMessage) {
+        final KeyguardManager km = getSystemService(KeyguardManager.class);
+        if (km.isKeyguardLocked()) {
+            km.requestDismissKeyguard(this, dismissMessage,
+                    new KeyguardManager.KeyguardDismissCallback() {
+                        @Override
+                        public void onDismissError() {
+                            Slog.e(TAG, "Error while dismissing keyguard."
+                                    + " Keeping the dialog visible.");
+                        }
+
+                        @Override
+                        public void onDismissCancelled() {
+                            Slog.w(TAG, "Keyguard dismiss was cancelled. Finishing.");
+                            SuspendedAppActivity.this.finish();
+                        }
+                    });
+        }
     }
 
     @Override

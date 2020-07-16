@@ -27,13 +27,13 @@
         android:gravity="end|center_vertical"
         android:clickable="true"
         android:background="@drawable/kg_user_switcher_rounded_bg"
+        sysui:activatedTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
         sysui:regularTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher">
     <TextView android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
             android:layout_marginEnd="12dp"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
             />
     <com.android.systemui.statusbar.phone.UserAvatarView android:id="@+id/user_picture"
             android:layout_width="@dimen/kg_framed_avatar_size"

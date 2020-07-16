@@ -16,34 +16,23 @@
 package com.android.server.location;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
-import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
+import android.app.ActivityManagerInternal;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.UserInfo;
-import android.os.Handler;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.server.LocalServices;
 import com.android.server.location.UserInfoHelper.UserListener;
 
 import org.junit.After;
@@ -51,15 +40,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class UserInfoHelperTest {
+
+    private static class TestUserInfoHelper extends UserInfoHelper {
+        TestUserInfoHelper(Context context) {
+            super(context);
+        }
+    }
 
     private static final int USER1_ID = 1;
     private static final int USER1_MANAGED_ID = 11;
@@ -70,69 +61,30 @@ public class UserInfoHelperTest {
 
     @Mock private Context mContext;
     @Mock private UserManager mUserManager;
+    @Mock private ActivityManagerInternal mActivityManagerInternal;
 
-    private StaticMockitoSession mMockingSession;
-    private List<BroadcastReceiver> mBroadcastReceivers = new ArrayList<>();
-
-    private UserInfoHelper mHelper;
+    private TestUserInfoHelper mHelper;
 
     @Before
     public void setUp() {
-        mMockingSession = mockitoSession()
-                .initMocks(this)
-                .spyStatic(ActivityManager.class)
-                .strictness(Strictness.WARN)
-                .startMocking();
+        initMocks(this);
 
+        LocalServices.addService(ActivityManagerInternal.class, mActivityManagerInternal);
         doReturn(mUserManager).when(mContext).getSystemService(UserManager.class);
-        doAnswer(invocation -> {
-            mBroadcastReceivers.add(invocation.getArgument(0));
-            return null;
-        }).when(mContext).registerReceiverAsUser(any(BroadcastReceiver.class), any(
-                UserHandle.class), any(IntentFilter.class), isNull(), any(Handler.class));
-        doReturn(USER1_PROFILES).when(mUserManager).getProfileIdsWithDisabled(USER1_ID);
-        doReturn(USER2_PROFILES).when(mUserManager).getProfileIdsWithDisabled(USER2_ID);
-        doReturn(new UserInfo(USER1_ID, "", 0)).when(mUserManager).getProfileParent(
-                USER1_MANAGED_ID);
-        doReturn(new UserInfo(USER2_ID, "", 0)).when(mUserManager).getProfileParent(
-                USER2_MANAGED_ID);
 
-        doReturn(USER1_ID).when(ActivityManager::getCurrentUser);
+        doReturn(USER1_PROFILES).when(mUserManager).getEnabledProfileIds(USER1_ID);
+        doReturn(USER2_PROFILES).when(mUserManager).getEnabledProfileIds(USER2_ID);
+        doReturn(true).when(mActivityManagerInternal).isCurrentProfile(USER1_ID);
+        doReturn(true).when(mActivityManagerInternal).isCurrentProfile(USER1_MANAGED_ID);
+        doReturn(USER1_PROFILES).when(mActivityManagerInternal).getCurrentProfileIds();
 
-        mHelper = new UserInfoHelper(mContext);
+        mHelper = new TestUserInfoHelper(mContext);
         mHelper.onSystemReady();
     }
 
     @After
     public void tearDown() {
-        if (mMockingSession != null) {
-            mMockingSession.finishMocking();
-        }
-    }
-
-    private void switchUser(int userId) {
-        doReturn(userId).when(ActivityManager::getCurrentUser);
-        Intent intent = new Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE,
-                userId);
-        for (BroadcastReceiver broadcastReceiver : mBroadcastReceivers) {
-            broadcastReceiver.onReceive(mContext, intent);
-        }
-    }
-
-    private void startUser(int userId) {
-        Intent intent = new Intent(Intent.ACTION_USER_STARTED).putExtra(Intent.EXTRA_USER_HANDLE,
-                userId);
-        for (BroadcastReceiver broadcastReceiver : mBroadcastReceivers) {
-            broadcastReceiver.onReceive(mContext, intent);
-        }
-    }
-
-    private void stopUser(int userId) {
-        Intent intent = new Intent(Intent.ACTION_USER_STOPPED).putExtra(Intent.EXTRA_USER_HANDLE,
-                userId);
-        for (BroadcastReceiver broadcastReceiver : mBroadcastReceivers) {
-            broadcastReceiver.onReceive(mContext, intent);
-        }
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
     }
 
     @Test
@@ -140,16 +92,21 @@ public class UserInfoHelperTest {
         UserListener listener = mock(UserListener.class);
         mHelper.addListener(listener);
 
-        switchUser(USER1_ID);
-        verify(listener, never()).onUserChanged(anyInt(), anyInt());
+        mHelper.dispatchOnCurrentUserChanged(USER1_ID, USER2_ID);
+        verify(listener, times(1)).onUserChanged(USER1_ID, UserListener.CURRENT_USER_CHANGED);
+        verify(listener, times(1)).onUserChanged(USER1_MANAGED_ID,
+                UserListener.CURRENT_USER_CHANGED);
+        verify(listener, times(1)).onUserChanged(USER2_ID, UserListener.CURRENT_USER_CHANGED);
+        verify(listener, times(1)).onUserChanged(USER2_MANAGED_ID,
+                UserListener.CURRENT_USER_CHANGED);
 
-        switchUser(USER2_ID);
-        verify(listener, times(1)).onUserChanged(USER1_ID, UserListener.USER_SWITCHED);
-        verify(listener, times(1)).onUserChanged(USER2_ID, UserListener.USER_SWITCHED);
-
-        switchUser(USER1_ID);
-        verify(listener, times(2)).onUserChanged(USER1_ID, UserListener.USER_SWITCHED);
-        verify(listener, times(2)).onUserChanged(USER2_ID, UserListener.USER_SWITCHED);
+        mHelper.dispatchOnCurrentUserChanged(USER2_ID, USER1_ID);
+        verify(listener, times(2)).onUserChanged(USER2_ID, UserListener.CURRENT_USER_CHANGED);
+        verify(listener, times(2)).onUserChanged(USER2_MANAGED_ID,
+                UserListener.CURRENT_USER_CHANGED);
+        verify(listener, times(2)).onUserChanged(USER1_ID, UserListener.CURRENT_USER_CHANGED);
+        verify(listener, times(2)).onUserChanged(USER1_MANAGED_ID,
+                UserListener.CURRENT_USER_CHANGED);
     }
 
     @Test
@@ -157,11 +114,11 @@ public class UserInfoHelperTest {
         UserListener listener = mock(UserListener.class);
         mHelper.addListener(listener);
 
-        startUser(USER1_ID);
+        mHelper.dispatchOnUserStarted(USER1_ID);
         verify(listener).onUserChanged(USER1_ID, UserListener.USER_STARTED);
 
-        startUser(USER2_ID);
-        verify(listener).onUserChanged(USER2_ID, UserListener.USER_STARTED);
+        mHelper.dispatchOnUserStarted(USER1_MANAGED_ID);
+        verify(listener).onUserChanged(USER1_MANAGED_ID, UserListener.USER_STARTED);
     }
 
     @Test
@@ -169,24 +126,22 @@ public class UserInfoHelperTest {
         UserListener listener = mock(UserListener.class);
         mHelper.addListener(listener);
 
-        stopUser(USER1_ID);
-        verify(listener).onUserChanged(USER1_ID, UserListener.USER_STOPPED);
-
-        stopUser(USER2_ID);
+        mHelper.dispatchOnUserStopped(USER2_ID);
         verify(listener).onUserChanged(USER2_ID, UserListener.USER_STOPPED);
+
+        mHelper.dispatchOnUserStopped(USER2_MANAGED_ID);
+        verify(listener).onUserChanged(USER2_MANAGED_ID, UserListener.USER_STOPPED);
     }
 
     @Test
     public void testCurrentUserIds() {
         assertThat(mHelper.getCurrentUserIds()).isEqualTo(USER1_PROFILES);
 
-        switchUser(USER2_ID);
+        doReturn(true).when(mActivityManagerInternal).isCurrentProfile(USER2_ID);
+        doReturn(true).when(mActivityManagerInternal).isCurrentProfile(USER2_MANAGED_ID);
+        doReturn(USER2_PROFILES).when(mActivityManagerInternal).getCurrentProfileIds();
 
         assertThat(mHelper.getCurrentUserIds()).isEqualTo(USER2_PROFILES);
-
-        switchUser(USER1_ID);
-
-        assertThat(mHelper.getCurrentUserIds()).isEqualTo(USER1_PROFILES);
     }
 
     @Test
@@ -196,7 +151,11 @@ public class UserInfoHelperTest {
         assertThat(mHelper.isCurrentUserId(USER2_ID)).isFalse();
         assertThat(mHelper.isCurrentUserId(USER2_MANAGED_ID)).isFalse();
 
-        switchUser(USER2_ID);
+        doReturn(false).when(mActivityManagerInternal).isCurrentProfile(USER1_ID);
+        doReturn(false).when(mActivityManagerInternal).isCurrentProfile(USER1_MANAGED_ID);
+        doReturn(true).when(mActivityManagerInternal).isCurrentProfile(USER2_ID);
+        doReturn(true).when(mActivityManagerInternal).isCurrentProfile(USER2_MANAGED_ID);
+        doReturn(USER2_PROFILES).when(mActivityManagerInternal).getCurrentProfileIds();
 
         assertThat(mHelper.isCurrentUserId(USER1_ID)).isFalse();
         assertThat(mHelper.isCurrentUserId(USER2_ID)).isTrue();

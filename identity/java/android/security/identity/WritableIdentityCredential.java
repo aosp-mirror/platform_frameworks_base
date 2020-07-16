@@ -56,10 +56,10 @@ public abstract class WritableIdentityCredential {
      * authority doesn't care about the nature of the security hardware. If called, however, this
      * method must be called before {@link #personalize(PersonalizationData)}.
      *
-     * @param challenge is a byte array whose contents should be unique, fresh and provided by
-     *                  the issuing authority. The value provided is embedded in the attestation
-     *                  extension and enables the issuing authority to verify that the attestation
-     *                  certificate is fresh.
+     * @param challenge is a non-empty byte array whose contents should be unique, fresh and
+     *                  provided by the issuing authority. The value provided is embedded in the
+     *                  attestation extension and enables the issuing authority to verify that the
+     *                  attestation certificate is fresh.
      * @return the X.509 certificate for this credential's CredentialKey.
      */
     public abstract @NonNull Collection<X509Certificate> getCredentialKeyCertificateChain(

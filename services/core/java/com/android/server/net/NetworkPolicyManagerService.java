@@ -578,6 +578,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final NetworkPolicyLogger mLogger = new NetworkPolicyLogger();
 
+    /** List of apps indexed by appId and whether they have the internet permission */
+    @GuardedBy("mUidRulesFirstLock")
+    private final SparseBooleanArray mInternetPermissionMap = new SparseBooleanArray();
+
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
 
@@ -958,7 +962,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // update rules for UID, since it might be subject to
                 // global background data policy
                 if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
+                // Clear the cache for the app
                 synchronized (mUidRulesFirstLock) {
+                    mInternetPermissionMap.delete(UserHandle.getAppId(uid));
                     updateRestrictionRulesForUidUL(uid);
                 }
             }
@@ -1000,7 +1006,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     synchronized (mUidRulesFirstLock) {
                         // Remove any persistable state for the given user; both cleaning up after a
                         // USER_REMOVED, and one last sanity check during USER_ADDED
-                        removeUserStateUL(userId, true);
+                        removeUserStateUL(userId, true, false);
                         // Removing outside removeUserStateUL since that can also be called when
                         // user resets app preferences.
                         mMeteredRestrictedUids.remove(userId);
@@ -2613,7 +2619,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         setUidPolicyUncheckedUL(uid, policy, false);
 
         final boolean notifyApp;
-        if (!isUidValidForWhitelistRules(uid)) {
+        if (!isUidValidForWhitelistRulesUL(uid)) {
             notifyApp = false;
         } else {
             final boolean wasBlacklisted = oldPolicy == POLICY_REJECT_METERED_BACKGROUND;
@@ -2689,7 +2695,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * if any changes that are made.
      */
     @GuardedBy("mUidRulesFirstLock")
-    boolean removeUserStateUL(int userId, boolean writePolicy) {
+    boolean removeUserStateUL(int userId, boolean writePolicy, boolean updateGlobalRules) {
 
         mLogger.removingUserState(userId);
         boolean changed = false;
@@ -2719,7 +2725,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             changed = true;
         }
         synchronized (mNetworkPoliciesSecondLock) {
-            updateRulesForGlobalChangeAL(true);
+            if (updateGlobalRules) {
+                updateRulesForGlobalChangeAL(true);
+            }
             if (writePolicy && changed) {
                 writePolicyAL();
             }
@@ -3859,7 +3867,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // quick check: if this uid doesn't have INTERNET permission, it
                         // doesn't have network access anyway, so it is a waste to mess
                         // with it here.
-                        if (hasInternetPermissions(uid)) {
+                        if (hasInternetPermissionUL(uid)) {
                             uidRules.put(uid, FIREWALL_RULE_DENY);
                         }
                     }
@@ -3874,7 +3882,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mUidRulesFirstLock")
     void updateRuleForAppIdleUL(int uid) {
-        if (!isUidValidForBlacklistRules(uid)) return;
+        if (!isUidValidForBlacklistRulesUL(uid)) return;
 
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRuleForAppIdleUL: " + uid );
@@ -4056,18 +4064,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     // TODO: the MEDIA / DRM restriction might not be needed anymore, in which case both
     // methods below could be merged into a isUidValidForRules() method.
-    private boolean isUidValidForBlacklistRules(int uid) {
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isUidValidForBlacklistRulesUL(int uid) {
         // allow rules on specific system services, and any apps
         if (uid == android.os.Process.MEDIA_UID || uid == android.os.Process.DRM_UID
-            || (UserHandle.isApp(uid) && hasInternetPermissions(uid))) {
+                || isUidValidForWhitelistRulesUL(uid)) {
             return true;
         }
 
         return false;
     }
 
-    private boolean isUidValidForWhitelistRules(int uid) {
-        return UserHandle.isApp(uid) && hasInternetPermissions(uid);
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isUidValidForWhitelistRulesUL(int uid) {
+        return UserHandle.isApp(uid) && hasInternetPermissionUL(uid);
     }
 
     /**
@@ -4143,12 +4153,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * <p>
      * Useful for the cases where the lack of network access can simplify the rules.
      */
-    private boolean hasInternetPermissions(int uid) {
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean hasInternetPermissionUL(int uid) {
         try {
-            if (mIPm.checkUidPermission(Manifest.permission.INTERNET, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return false;
+            final int appId = UserHandle.getAppId(uid);
+            final boolean hasPermission;
+            if (mInternetPermissionMap.indexOfKey(appId) < 0) {
+                hasPermission =
+                        mIPm.checkUidPermission(Manifest.permission.INTERNET, uid)
+                                == PackageManager.PERMISSION_GRANTED;
+                mInternetPermissionMap.put(appId, hasPermission);
+            } else {
+                hasPermission = mInternetPermissionMap.get(appId);
             }
+            return hasPermission;
         } catch (RemoteException e) {
         }
         return true;
@@ -4253,7 +4271,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void updateRulesForDataUsageRestrictionsULInner(int uid) {
-        if (!isUidValidForWhitelistRules(uid)) {
+        if (!isUidValidForWhitelistRulesUL(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict data rules for uid " + uid);
             return;
         }
@@ -4400,6 +4418,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      * @return the new computed rules for the uid
      */
+    @GuardedBy("mUidRulesFirstLock")
     private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean paroled) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
@@ -4413,8 +4432,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @GuardedBy("mUidRulesFirstLock")
     private int updateRulesForPowerRestrictionsULInner(int uid, int oldUidRules, boolean paroled) {
-        if (!isUidValidForBlacklistRules(uid)) {
+        if (!isUidValidForBlacklistRulesUL(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict power rules for uid " + uid);
             return RULE_NONE;
         }
@@ -5198,7 +5218,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void resetUserState(int userId) {
             synchronized (mUidRulesFirstLock) {
-                boolean changed = removeUserStateUL(userId, false);
+                boolean changed = removeUserStateUL(userId, false, true);
                 changed = addDefaultRestrictBackgroundWhitelistUidsUL(userId) || changed;
                 if (changed) {
                     synchronized (mNetworkPoliciesSecondLock) {

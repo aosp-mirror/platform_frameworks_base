@@ -18,6 +18,7 @@ package com.android.networkstack.tethering;
 
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
+import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
@@ -39,6 +40,7 @@ import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHERING_WIFI_P2P;
+import static android.net.TetheringManager.TETHERING_WIGIG;
 import static android.net.TetheringManager.TETHER_ERROR_INTERNAL_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_SERVICE_UNAVAIL;
@@ -62,6 +64,7 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
 
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
@@ -70,6 +73,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.EthernetManager;
@@ -109,7 +113,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceSpecificException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -232,6 +235,7 @@ public class Tethering {
     private final TetheringThreadExecutor mExecutor;
     private final TetheringNotificationUpdater mNotificationUpdater;
     private final UserManager mUserManager;
+    private final BpfCoordinator mBpfCoordinator;
     private final PrivateAddressCoordinator mPrivateAddressCoordinator;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
     // All the usage of mTetheringEventCallback should run in the same thread.
@@ -320,6 +324,36 @@ public class Tethering {
 
         // Load tethering configuration.
         updateConfiguration();
+
+        // Must be initialized after tethering configuration is loaded because BpfCoordinator
+        // constructor needs to use the configuration.
+        mBpfCoordinator = mDeps.getBpfCoordinator(
+                new BpfCoordinator.Dependencies() {
+                    @NonNull
+                    public Handler getHandler() {
+                        return mHandler;
+                    }
+
+                    @NonNull
+                    public INetd getNetd() {
+                        return mNetd;
+                    }
+
+                    @NonNull
+                    public NetworkStatsManager getNetworkStatsManager() {
+                        return mContext.getSystemService(NetworkStatsManager.class);
+                    }
+
+                    @NonNull
+                    public SharedLog getSharedLog() {
+                        return mLog;
+                    }
+
+                    @Nullable
+                    public TetheringConfiguration getTetherConfig() {
+                        return mConfig;
+                    }
+                });
 
         startStateMachineUpdaters();
     }
@@ -462,7 +496,8 @@ public class Tethering {
             if (up) {
                 maybeTrackNewInterfaceLocked(iface);
             } else {
-                if (ifaceNameToType(iface) == TETHERING_BLUETOOTH) {
+                if (ifaceNameToType(iface) == TETHERING_BLUETOOTH
+                        || ifaceNameToType(iface) == TETHERING_WIGIG) {
                     stopTrackingInterfaceLocked(iface);
                 } else {
                     // Ignore usb0 down after enabling RNDIS.
@@ -484,6 +519,8 @@ public class Tethering {
 
         if (cfg.isWifi(iface)) {
             return TETHERING_WIFI;
+        } else if (cfg.isWigig(iface)) {
+            return TETHERING_WIGIG;
         } else if (cfg.isWifiP2p(iface)) {
             return TETHERING_WIFI_P2P;
         } else if (cfg.isUsb(iface)) {
@@ -779,9 +816,28 @@ public class Tethering {
         }
     }
 
+    private boolean isProvisioningNeededButUnavailable() {
+        return isTetherProvisioningRequired() && !doesEntitlementPackageExist();
+    }
+
     boolean isTetherProvisioningRequired() {
         final TetheringConfiguration cfg = mConfig;
         return mEntitlementMgr.isTetherProvisioningRequired(cfg);
+    }
+
+    private boolean doesEntitlementPackageExist() {
+        // provisioningApp must contain package and class name.
+        if (mConfig.provisioningApp.length != 2) {
+            return false;
+        }
+
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo(mConfig.provisioningApp[0], GET_ACTIVITIES);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     // TODO: Figure out how to update for local hotspot mode interfaces.
@@ -1704,6 +1760,9 @@ public class Tethering {
                     chooseUpstreamType(true);
                     mTryCell = false;
                 }
+
+                // TODO: Check the upstream interface if it is managed by BPF offload.
+                mBpfCoordinator.startPolling();
             }
 
             @Override
@@ -1716,6 +1775,7 @@ public class Tethering {
                     mTetherUpstream = null;
                     reportUpstreamChanged(null);
                 }
+                mBpfCoordinator.stopPolling();
             }
 
             private boolean updateUpstreamWanted() {
@@ -2138,14 +2198,14 @@ public class Tethering {
     // gservices could set the secure setting to 1 though to enable it on a build where it
     // had previously been turned off.
     boolean isTetheringSupported() {
-        final int defaultVal =
-                SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1;
+        final int defaultVal = mDeps.isTetheringDenied() ? 0 : 1;
         final boolean tetherSupported = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0;
         final boolean tetherEnabledInSettings = tetherSupported
                 && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
 
-        return tetherEnabledInSettings && hasTetherableConfiguration();
+        return tetherEnabledInSettings && hasTetherableConfiguration()
+                && !isProvisioningNeededButUnavailable();
     }
 
     void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer, @Nullable String[] args) {
@@ -2207,6 +2267,11 @@ public class Tethering {
         pw.println("Hardware offload:");
         pw.increaseIndent();
         mOffloadController.dump(pw);
+        pw.decreaseIndent();
+
+        pw.println("BPF offload:");
+        pw.increaseIndent();
+        mBpfCoordinator.dump(pw);
         pw.decreaseIndent();
 
         pw.println("Private address coordinator:");
@@ -2341,9 +2406,9 @@ public class Tethering {
 
         mLog.log("adding TetheringInterfaceStateMachine for: " + iface);
         final TetherState tetherState = new TetherState(
-                new IpServer(iface, mLooper, interfaceType, mLog, mNetd,
+                new IpServer(iface, mLooper, interfaceType, mLog, mNetd, mBpfCoordinator,
                              makeControlCallback(), mConfig.enableLegacyDhcpServer,
-                             mConfig.enableBpfOffload, mPrivateAddressCoordinator,
+                             mConfig.isBpfOffloadEnabled(), mPrivateAddressCoordinator,
                              mDeps.getIpServerDependencies()));
         mTetherStates.put(iface, tetherState);
         tetherState.ipServer.start();

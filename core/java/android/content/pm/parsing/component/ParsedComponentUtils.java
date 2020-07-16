@@ -20,7 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -29,9 +32,6 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.VisibleForTesting;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 /** @hide */
 class ParsedComponentUtils {
@@ -60,16 +60,27 @@ class ParsedComponentUtils {
         component.setName(className);
         component.setPackageName(packageName);
 
-        if (useRoundIcon) {
-            component.icon = array.getResourceId(roundIconAttr, 0);
+        int roundIconVal = useRoundIcon ? array.getResourceId(roundIconAttr, 0) : 0;
+        if (roundIconVal != 0) {
+            component.icon = roundIconVal;
+            component.nonLocalizedLabel = null;
+        } else {
+            int iconVal = array.getResourceId(iconAttr, 0);
+            if (iconVal != 0) {
+                component.icon = iconVal;
+                component.nonLocalizedLabel = null;
+            }
         }
 
-        if (component.icon == 0) {
-            component.icon = array.getResourceId(iconAttr, 0);
+        int logoVal = array.getResourceId(logoAttr, 0);
+        if (logoVal != 0) {
+            component.logo = logoVal;
         }
 
-        component.logo = array.getResourceId(logoAttr, 0);
-        component.banner = array.getResourceId(bannerAttr, 0);
+        int bannerVal = array.getResourceId(bannerAttr, 0);
+        if (bannerVal != 0) {
+            component.banner = bannerVal;
+        }
 
         if (descriptionAttr != null) {
             component.descriptionRes = array.getResourceId(descriptionAttr, 0);

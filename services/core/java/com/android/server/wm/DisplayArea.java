@@ -253,6 +253,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                     req = mLastKeyguardForcedOrientation;
                 }
             }
+            mLastOrientationSource = win;
             return req;
         }
     }
@@ -290,7 +291,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
+            if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
                 scheduleAnimation();
             }
         }

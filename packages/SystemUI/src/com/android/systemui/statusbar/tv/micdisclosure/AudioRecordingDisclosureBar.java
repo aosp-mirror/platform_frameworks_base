@@ -29,6 +29,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.Gravity;
@@ -63,6 +65,9 @@ public class AudioRecordingDisclosureBar implements
     // CtsSystemUiHostTestCases:TvMicrophoneCaptureIndicatorTest
     private static final String LAYOUT_PARAMS_TITLE = "MicrophoneCaptureIndicator";
 
+    private static final String EXEMPT_PACKAGES_LIST = "sysui_mic_disclosure_exempt";
+    private static final String FORCED_PACKAGES_LIST = "sysui_mic_disclosure_forced";
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"STATE_"}, value = {
             STATE_NOT_SHOWN,
@@ -94,9 +99,10 @@ public class AudioRecordingDisclosureBar implements
     private View mIconTextsContainer;
     private View mIconContainerBg;
     private View mIcon;
-    private View mBgRight;
+    private View mBgEnd;
     private View mTextsContainers;
     private TextView mTextView;
+    private boolean mIsLtr;
 
     @State private int mState = STATE_NOT_SHOWN;
 
@@ -134,11 +140,18 @@ public class AudioRecordingDisclosureBar implements
         mExemptPackages = new ArraySet<>(
                 Arrays.asList(mContext.getResources().getStringArray(
                         R.array.audio_recording_disclosure_exempt_apps)));
+        mExemptPackages.addAll(Arrays.asList(getGlobalStringArray(EXEMPT_PACKAGES_LIST)));
+        mExemptPackages.removeAll(Arrays.asList(getGlobalStringArray(FORCED_PACKAGES_LIST)));
 
         mAudioActivityObservers = new AudioActivityObserver[]{
                 new RecordAudioAppOpObserver(mContext, this),
                 new MicrophoneForegroundServicesObserver(mContext, this),
         };
+    }
+
+    private String[] getGlobalStringArray(String setting) {
+        String result = Settings.Global.getString(mContext.getContentResolver(), setting);
+        return TextUtils.isEmpty(result) ? new String[0] : result.split(",");
     }
 
     @UiThread
@@ -220,6 +233,9 @@ public class AudioRecordingDisclosureBar implements
             Log.d(TAG, "Showing indicator for " + packageName + " (" + label + ")...");
         }
 
+        mIsLtr = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_LTR;
+
         // Inflate the indicator view
         mIndicatorView = LayoutInflater.from(mContext).inflate(
                 R.layout.tv_audio_recording_indicator,
@@ -229,7 +245,17 @@ public class AudioRecordingDisclosureBar implements
         mIcon = mIconTextsContainer.findViewById(R.id.icon_mic);
         mTextsContainers = mIconTextsContainer.findViewById(R.id.texts_container);
         mTextView = mTextsContainers.findViewById(R.id.text);
-        mBgRight = mIndicatorView.findViewById(R.id.bg_right);
+        mBgEnd = mIndicatorView.findViewById(R.id.bg_end);
+
+        // Swap background drawables depending on layout directions (both drawables have rounded
+        // corners only on one side)
+        if (mIsLtr) {
+            mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
+            mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
+        } else {
+            mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
+            mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
+        }
 
         // Set up the notification text
         mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
@@ -249,7 +275,8 @@ public class AudioRecordingDisclosureBar implements
 
                                 // Now that the width of the indicator has been assigned, we can
                                 // move it in from off the screen.
-                                final int initialOffset = mIndicatorView.getWidth();
+                                final int initialOffset =
+                                        (mIsLtr ? 1 : -1) * mIndicatorView.getWidth();
                                 final AnimatorSet set = new AnimatorSet();
                                 set.setDuration(ANIMATION_DURATION);
                                 set.playTogether(
@@ -282,7 +309,7 @@ public class AudioRecordingDisclosureBar implements
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+        layoutParams.gravity = Gravity.TOP | (mIsLtr ? Gravity.RIGHT : Gravity.LEFT);
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
@@ -305,7 +332,7 @@ public class AudioRecordingDisclosureBar implements
                 ObjectAnimator.ofFloat(mIconTextsContainer, View.TRANSLATION_X, 0),
                 ObjectAnimator.ofFloat(mIconContainerBg, View.ALPHA, 1f),
                 ObjectAnimator.ofFloat(mTextsContainers, View.ALPHA, 1f),
-                ObjectAnimator.ofFloat(mBgRight, View.ALPHA, 1f));
+                ObjectAnimator.ofFloat(mBgEnd, View.ALPHA, 1f));
         set.setDuration(ANIMATION_DURATION);
         set.addListener(
                 new AnimatorListenerAdapter() {
@@ -322,13 +349,13 @@ public class AudioRecordingDisclosureBar implements
     @UiThread
     private void minimize() {
         if (DEBUG) Log.d(TAG, "Minimizing...");
-        final int targetOffset = mTextsContainers.getWidth();
+        final int targetOffset = (mIsLtr ? 1 : -1) * mTextsContainers.getWidth();
         final AnimatorSet set = new AnimatorSet();
         set.playTogether(
                 ObjectAnimator.ofFloat(mIconTextsContainer, View.TRANSLATION_X, targetOffset),
                 ObjectAnimator.ofFloat(mIconContainerBg, View.ALPHA, 0f),
                 ObjectAnimator.ofFloat(mTextsContainers, View.ALPHA, 0f),
-                ObjectAnimator.ofFloat(mBgRight, View.ALPHA, 0f));
+                ObjectAnimator.ofFloat(mBgEnd, View.ALPHA, 0f));
         set.setDuration(ANIMATION_DURATION);
         set.addListener(
                 new AnimatorListenerAdapter() {
@@ -345,8 +372,8 @@ public class AudioRecordingDisclosureBar implements
     @UiThread
     private void hide() {
         if (DEBUG) Log.d(TAG, "Hiding...");
-        final int targetOffset =
-                mIndicatorView.getWidth() - (int) mIconTextsContainer.getTranslationX();
+        final int targetOffset = (mIsLtr ? 1 : -1) * (mIndicatorView.getWidth()
+                - (int) mIconTextsContainer.getTranslationX());
         final AnimatorSet set = new AnimatorSet();
         set.playTogether(
                 ObjectAnimator.ofFloat(mIndicatorView, View.TRANSLATION_X, targetOffset),
@@ -399,7 +426,7 @@ public class AudioRecordingDisclosureBar implements
         mIcon = null;
         mTextsContainers = null;
         mTextView = null;
-        mBgRight = null;
+        mBgEnd = null;
 
         mState = STATE_NOT_SHOWN;
 

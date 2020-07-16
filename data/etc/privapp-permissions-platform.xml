@@ -233,6 +233,7 @@ applications that come with the platform
         <!-- Permissions required for reading and logging compat changes -->
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.REGISTER_STATS_PULL_ATOM" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -378,6 +379,9 @@ applications that come with the platform
         <permission name="android.permission.SET_WALLPAPER" />
         <permission name="android.permission.SET_WALLPAPER_COMPONENT" />
         <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
+        <!-- Permissions required for Incremental CTS tests -->
+        <permission name="com.android.permission.USE_INSTALLER_V2"/>
+        <permission name="android.permission.LOADER_USAGE_STATS"/>
         <!-- Permission required to test system only camera devices. -->
         <permission name="android.permission.SYSTEM_CAMERA" />
         <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
@@ -418,6 +422,10 @@ applications that come with the platform
         <permission name="android.permission.TV_INPUT_HARDWARE" />
         <!-- Permission required for CTS test - PrivilegedLocationPermissionTest -->
         <permission name="android.permission.LOCATION_HARDWARE" />
+        <!-- Permissions required for GTS test - GtsDialerAudioTestCases -->
+        <permission name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+        <!-- Permissions required for CTS test - AdbManagerTest -->
+        <permission name="android.permission.MANAGE_DEBUGGING" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

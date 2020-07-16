@@ -52,6 +52,9 @@ import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -64,6 +67,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private static final String TAG = KeyButtonView.class.getSimpleName();
 
     private final boolean mPlaySounds;
+    private final UiEventLogger mUiEventLogger;
     private int mContentDescriptionRes;
     private long mDownTime;
     private int mCode;
@@ -72,7 +76,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private boolean mIsVertical;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
-    private boolean mLongClicked;
+    @VisibleForTesting boolean mLongClicked;
     private OnClickListener mOnClickListener;
     private final KeyButtonRipple mRipple;
     private final OverviewProxyService mOverviewProxyService;
@@ -82,6 +86,40 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private float mDarkIntensity;
     private boolean mHasOvalBg = false;
 
+    @VisibleForTesting
+    public enum NavBarButtonEvent implements UiEventLogger.UiEventEnum {
+
+        @UiEvent(doc = "The home button was pressed in the navigation bar.")
+        NAVBAR_HOME_BUTTON_TAP(533),
+
+        @UiEvent(doc = "The back button was pressed in the navigation bar.")
+        NAVBAR_BACK_BUTTON_TAP(534),
+
+        @UiEvent(doc = "The overview button was pressed in the navigation bar.")
+        NAVBAR_OVERVIEW_BUTTON_TAP(535),
+
+        @UiEvent(doc = "The home button was long-pressed in the navigation bar.")
+        NAVBAR_HOME_BUTTON_LONGPRESS(536),
+
+        @UiEvent(doc = "The back button was long-pressed in the navigation bar.")
+        NAVBAR_BACK_BUTTON_LONGPRESS(537),
+
+        @UiEvent(doc = "The overview button was long-pressed in the navigation bar.")
+        NAVBAR_OVERVIEW_BUTTON_LONGPRESS(538),
+
+        NONE(0);  // an event we should not log
+
+        private final int mId;
+
+        NavBarButtonEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
@@ -104,12 +142,14 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     public KeyButtonView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, InputManager.getInstance());
+        this(context, attrs, defStyle, InputManager.getInstance(), new UiEventLoggerImpl());
     }
 
     @VisibleForTesting
-    public KeyButtonView(Context context, AttributeSet attrs, int defStyle, InputManager manager) {
+    public KeyButtonView(Context context, AttributeSet attrs, int defStyle, InputManager manager,
+            UiEventLogger uiEventLogger) {
         super(context, attrs);
+        mUiEventLogger = uiEventLogger;
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.KeyButtonView,
                 defStyle, 0);
@@ -326,13 +366,48 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 
+    private void logSomePresses(int action, int flags) {
+        boolean longPressSet = (flags & KeyEvent.FLAG_LONG_PRESS) != 0;
+        NavBarButtonEvent uiEvent = NavBarButtonEvent.NONE;
+        if (action == MotionEvent.ACTION_UP && mLongClicked) {
+            return;  // don't log the up after a long press
+        }
+        if (action == MotionEvent.ACTION_DOWN && !longPressSet) {
+            return;  // don't log a down unless it is also the long press marker
+        }
+        if ((flags & KeyEvent.FLAG_CANCELED) != 0
+                || (flags & KeyEvent.FLAG_CANCELED_LONG_PRESS) != 0) {
+            return;  // don't log various cancels
+        }
+        switch(mCode) {
+            case KeyEvent.KEYCODE_BACK:
+                uiEvent = longPressSet
+                        ? NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS
+                        : NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
+                break;
+            case KeyEvent.KEYCODE_HOME:
+                uiEvent = longPressSet
+                        ? NavBarButtonEvent.NAVBAR_HOME_BUTTON_LONGPRESS
+                        : NavBarButtonEvent.NAVBAR_HOME_BUTTON_TAP;
+                break;
+            case KeyEvent.KEYCODE_APP_SWITCH:
+                uiEvent = longPressSet
+                        ? NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS
+                        : NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
+                break;
+        }
+        if (uiEvent != NavBarButtonEvent.NONE) {
+            mUiEventLogger.log(uiEvent);
+        }
+    }
+
     private void sendEvent(int action, int flags, long when) {
         mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_NAV_BUTTON_EVENT)
                 .setType(MetricsEvent.TYPE_ACTION)
                 .setSubtype(mCode)
                 .addTaggedData(MetricsEvent.FIELD_NAV_ACTION, action)
                 .addTaggedData(MetricsEvent.FIELD_FLAGS, flags));
-        // TODO(b/122195391): Added logs to make sure sysui is sending back button events
+        logSomePresses(action, flags);
         if (mCode == KeyEvent.KEYCODE_BACK && flags != KeyEvent.FLAG_LONG_PRESS) {
             Log.i(TAG, "Back button event: " + KeyEvent.actionToString(action));
             if (action == MotionEvent.ACTION_UP) {
@@ -366,6 +441,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
     @Override
     public void abortCurrentGesture() {
+        Log.d("b/63783866", "KeyButtonView.abortCurrentGesture");
         setPressed(false);
         mRipple.abortDelayedRipple();
         mGestureAborted = true;

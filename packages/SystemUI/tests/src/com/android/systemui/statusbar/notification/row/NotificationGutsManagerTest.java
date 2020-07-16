@@ -64,7 +64,10 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -126,6 +129,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private ChannelEditorDialogController mChannelEditorDialogController;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     @Mock private CurrentUserContextTracker mContextTracker;
+    @Mock private BubbleController mBubbleController;
     @Mock(answer = Answers.RETURNS_SELF)
     private PriorityOnboardingDialogController.Builder mBuilder;
     private Provider<PriorityOnboardingDialogController.Builder> mProvider = () -> mBuilder;
@@ -138,6 +142,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectTestDependency(BubbleController.class, mBubbleController);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
@@ -146,7 +151,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
                 () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
                 mINotificationManager, mLauncherApps, mShortcutManager,
-                mChannelEditorDialogController, mContextTracker, mProvider);
+                mChannelEditorDialogController, mContextTracker, mProvider, mBubbleController,
+                new UiEventLoggerFake());
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -359,6 +365,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(false),
                 eq(false),
                 eq(true) /* wasShownHighPriority */);
@@ -391,6 +398,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(true),
                 eq(false),
                 eq(false) /* wasShownHighPriority */);
@@ -421,6 +429,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(false),
                 eq(false),
                 eq(false) /* wasShownHighPriority */);

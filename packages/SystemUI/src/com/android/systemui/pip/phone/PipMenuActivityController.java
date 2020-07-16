@@ -197,7 +197,7 @@ public class PipMenuActivityController {
     }
 
     public void onActivityPinned() {
-        mInputConsumerController.registerInputConsumer();
+        mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
     }
 
     public void onActivityUnpinned() {

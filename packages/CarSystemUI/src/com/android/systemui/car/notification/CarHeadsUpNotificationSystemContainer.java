@@ -24,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import com.android.car.notification.R;
 import com.android.car.notification.headsup.CarHeadsUpNotificationContainer;
@@ -44,7 +43,7 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
     private final OverlayViewGlobalStateController mOverlayViewGlobalStateController;
 
     private final ViewGroup mWindow;
-    private final FrameLayout mHeadsUpContentFrame;
+    private final ViewGroup mHeadsUpContentFrame;
 
     @Inject
     CarHeadsUpNotificationSystemContainer(Context context,

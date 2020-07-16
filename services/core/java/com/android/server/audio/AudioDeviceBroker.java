@@ -38,6 +38,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 
@@ -329,11 +330,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
         final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
                 suppressNoisyIntent, a2dpVolume);
 
+        final String name = TextUtils.emptyIfNull(device.getName());
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE + MediaMetrics.SEPARATOR
                 + "postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent")
                 .set(MediaMetrics.Property.STATE, state == BluetoothProfile.STATE_CONNECTED
                         ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
                 .set(MediaMetrics.Property.INDEX, a2dpVolume)
+                .set(MediaMetrics.Property.NAME, name)
                 .record();
 
         // operations of removing and posting messages related to A2DP device state change must be

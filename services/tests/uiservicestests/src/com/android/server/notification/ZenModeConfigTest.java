@@ -101,8 +101,36 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
                 priorityMessageSenders, suppressedVisualEffects, 0, priorityConversationsSenders);
-
         assertEquals(expectedPolicy, config.toNotificationPolicy(zenPolicy));
+    }
+
+    @Test
+    public void testZenConfigToZenPolicy() {
+        ZenPolicy expected = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowReminders(true)
+                .allowEvents(true)
+                .showLights(false)
+                .showBadges(false)
+                .showInAmbientDisplay(false)
+                .build();
+
+        ZenModeConfig config = getMutedAllConfig();
+        config.allowAlarms = true;
+        config.allowReminders = true;
+        config.allowEvents = true;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+        ZenPolicy actual = config.toZenPolicy();
+
+        assertEquals(expected.getVisualEffectBadge(), actual.getVisualEffectBadge());
+        assertEquals(expected.getPriorityCategoryAlarms(), actual.getPriorityCategoryAlarms());
+        assertEquals(expected.getPriorityCategoryReminders(),
+                actual.getPriorityCategoryReminders());
+        assertEquals(expected.getPriorityCategoryEvents(), actual.getPriorityCategoryEvents());
+        assertEquals(expected.getVisualEffectLights(), actual.getVisualEffectLights());
+        assertEquals(expected.getVisualEffectAmbient(), actual.getVisualEffectAmbient());
     }
 
     @Test

@@ -44,6 +44,7 @@ import android.window.IWindowOrganizerController;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Server side implementation for the interface for organizing windows
@@ -142,7 +144,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         // operations so we don't end up splitting effects between the WM
                         // pending transaction and the BLASTSync transaction.
                         if (syncId >= 0) {
-                            mBLASTSyncEngine.addToSyncSet(syncId, wc);
+                            addToSyncSet(syncId, wc);
                         }
 
                         int containerEffect = applyWindowContainerChange(wc, entry.getValue());
@@ -164,7 +166,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             continue;
                         }
                         if (syncId >= 0) {
-                            mBLASTSyncEngine.addToSyncSet(syncId, wc);
+                            addToSyncSet(syncId, wc);
                         }
                         effects |= sanitizeAndApplyHierarchyOp(wc, hop);
                     }
@@ -396,24 +398,39 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return mDisplayAreaOrganizerController;
     }
 
+    @VisibleForTesting
     int startSyncWithOrganizer(IWindowContainerTransactionCallback callback) {
         int id = mBLASTSyncEngine.startSyncSet(this);
         mTransactionCallbacksByPendingSyncId.put(id, callback);
         return id;
     }
 
+    @VisibleForTesting
     void setSyncReady(int id) {
         mBLASTSyncEngine.setReady(id);
     }
 
+    @VisibleForTesting
+    void addToSyncSet(int syncId, WindowContainer wc) {
+        mBLASTSyncEngine.addToSyncSet(syncId, wc);
+    }
+
     @Override
-    public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
+    public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
         final IWindowContainerTransactionCallback callback =
                 mTransactionCallbacksByPendingSyncId.get(mSyncId);
+
+        SurfaceControl.Transaction mergedTransaction = new SurfaceControl.Transaction();
+        for (WindowContainer container : windowContainersReady) {
+            container.mergeBlastSyncTransaction(mergedTransaction);
+        }
 
         try {
             callback.onTransactionReady(mSyncId, mergedTransaction);
         } catch (RemoteException e) {
+            // If there's an exception when trying to send the mergedTransaction to the client, we
+            // should immediately apply it here so the transactions aren't lost.
+            mergedTransaction.apply();
         }
 
         mTransactionCallbacksByPendingSyncId.remove(mSyncId);
@@ -442,6 +459,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 .setBufferSize(bounds.width(), bounds.height())
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setParent(wc.getParentSurfaceControl())
+                .setCallsite("WindowOrganizerController.takeScreenshot")
                 .build();
 
         Surface surface = new Surface();
@@ -449,7 +467,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         surface.attachAndQueueBufferWithColorSpace(buffer.getGraphicBuffer(), null);
         surface.release();
 
-        outSurfaceControl.copyFrom(screenshot);
+        outSurfaceControl.copyFrom(screenshot, "WindowOrganizerController.takeScreenshot");
         return true;
     }
 

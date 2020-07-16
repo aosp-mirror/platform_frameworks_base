@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.widget.ViewPager;
@@ -29,6 +30,8 @@ import com.android.internal.widget.ViewPager;
  * <p>This class is used for the intent resolver and share sheet's tabbed view.
  */
 public class ResolverViewPager extends ViewPager {
+
+    private boolean mSwipingEnabled = true;
 
     public ResolverViewPager(Context context) {
         super(context);
@@ -69,5 +72,18 @@ public class ResolverViewPager extends ViewPager {
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    /**
+     * Sets whether swiping sideways should happen.
+     * <p>Note that swiping is always disabled for RTL layouts (b/159110029 for context).
+     */
+    void setSwipingEnabled(boolean swipingEnabled) {
+        mSwipingEnabled = swipingEnabled;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return !isLayoutRtl() && mSwipingEnabled && super.onInterceptTouchEvent(ev);
     }
 }

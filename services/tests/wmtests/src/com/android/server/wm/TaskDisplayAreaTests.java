@@ -28,14 +28,17 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -150,9 +153,9 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testDisplayPositionWithPinnedStack() {
-        // Make sure the display is system owned display which capable to move the stack to top.
+        // Make sure the display is trusted display which capable to move the stack to top.
         spyOn(mDisplayContent);
-        doReturn(false).when(mDisplayContent).isUntrustedVirtualDisplay();
+        doReturn(true).when(mDisplayContent).isTrusted();
 
         // The display contains pinned stack that was added in {@link #setUp}.
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
@@ -205,6 +208,40 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 false /* reuseCandidate */);
         assertGetOrCreateStack(windowingMode, ACTIVITY_TYPE_DREAM, candidateTask,
                 false /* reuseCandidate */);
+    }
+
+    @Test
+    public void testGetOrientation_nonResizableHomeStackWithHomeActivityPendingVisibilityChange() {
+        final RootWindowContainer rootWindowContainer = mWm.mAtmService.mRootWindowContainer;
+        final TaskDisplayArea defaultTaskDisplayArea =
+                rootWindowContainer.getDefaultTaskDisplayArea();
+
+        final ActivityStack rootHomeTask = defaultTaskDisplayArea.getRootHomeTask();
+        rootHomeTask.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
+
+        final ActivityStack primarySplitTask =
+                new ActivityTestsBase.StackBuilder(rootWindowContainer)
+                .setTaskDisplayArea(defaultTaskDisplayArea)
+                .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setOnTop(true)
+                .setCreateActivity(true)
+                .build();
+        ActivityRecord primarySplitActivity = primarySplitTask.getTopNonFinishingActivity();
+        assertNotNull(primarySplitActivity);
+        primarySplitActivity.setState(RESUMED,
+                "testGetOrientation_nonResizableHomeStackWithHomeActivityPendingVisibilityChange");
+
+        ActivityRecord homeActivity = rootHomeTask.getTopNonFinishingActivity();
+        if (homeActivity == null) {
+            homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                    .setStack(rootHomeTask).setCreateTask(true).build();
+        }
+        homeActivity.setVisible(false);
+        homeActivity.mVisibleRequested = true;
+        assertFalse(rootHomeTask.isVisible());
+
+        assertEquals(rootWindowContainer.getOrientation(), rootHomeTask.getOrientation());
     }
 
     private void assertGetOrCreateStack(int windowingMode, int activityType, Task candidateTask,

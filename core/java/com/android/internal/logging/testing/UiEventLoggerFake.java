@@ -35,13 +35,15 @@ public class UiEventLoggerFake implements UiEventLogger {
         public final int eventId;
         public final int uid;
         public final String packageName;
-        public final InstanceId instanceId;  // Used only for WithInstanceId variant
+        public final InstanceId instanceId;  // Used only for WithInstanceId variants
+        public final int position;  // Used only for Position variants
 
         FakeUiEvent(int eventId, int uid, String packageName) {
             this.eventId = eventId;
             this.uid = uid;
             this.packageName = packageName;
             this.instanceId = null;
+            this.position = 0;
         }
 
         FakeUiEvent(int eventId, int uid, String packageName, InstanceId instanceId) {
@@ -49,6 +51,15 @@ public class UiEventLoggerFake implements UiEventLogger {
             this.uid = uid;
             this.packageName = packageName;
             this.instanceId = instanceId;
+            this.position = 0;
+        }
+
+        FakeUiEvent(int eventId, int uid, String packageName, InstanceId instanceId, int position) {
+            this.eventId = eventId;
+            this.uid = uid;
+            this.packageName = packageName;
+            this.instanceId = instanceId;
+            this.position = position;
         }
     }
 
@@ -90,6 +101,23 @@ public class UiEventLoggerFake implements UiEventLogger {
         final int eventId = event.getId();
         if (eventId > 0) {
             mLogs.add(new FakeUiEvent(eventId, uid, packageName, instance));
+        }
+    }
+
+    @Override
+    public void logWithPosition(UiEventEnum event, int uid, String packageName, int position) {
+        final int eventId = event.getId();
+        if (eventId > 0) {
+            mLogs.add(new FakeUiEvent(eventId, uid, packageName, null, position));
+        }
+    }
+
+    @Override
+    public void logWithInstanceIdAndPosition(UiEventEnum event, int uid, String packageName,
+            InstanceId instance, int position) {
+        final int eventId = event.getId();
+        if (eventId > 0) {
+            mLogs.add(new FakeUiEvent(eventId, uid, packageName, instance, position));
         }
     }
 }

@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
+import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
@@ -246,6 +247,7 @@ public class IntentForwarderActivity extends Activity  {
         int selectedProfile = findSelectedProfile(className);
         sanitizeIntent(intentReceived);
         intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
+        intentReceived.putExtra(EXTRA_CALLING_USER, UserHandle.of(callingUserId));
         startActivityAsCaller(intentReceived, null, null, false, userId);
         finish();
     }

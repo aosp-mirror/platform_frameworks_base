@@ -47,7 +47,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -82,6 +81,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingAppliedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingUpdatedEvent;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -95,6 +95,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -125,6 +126,7 @@ import javax.inject.Singleton;
 @Singleton
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
+    private final SystemClock mClock;
     private final FeatureFlags mFeatureFlags;
     private final NotifCollectionLogger mLogger;
     private final LogBufferEulogizer mEulogizer;
@@ -142,20 +144,24 @@ public class NotifCollection implements Dumpable {
 
     private boolean mAttached = false;
     private boolean mAmDispatchingToOtherCode;
+    private long mInitializedTimestamp = 0;
 
     @Inject
     public NotifCollection(
             IStatusBarService statusBarService,
-            DumpManager dumpManager,
+            SystemClock clock,
             FeatureFlags featureFlags,
             NotifCollectionLogger logger,
-            LogBufferEulogizer logBufferEulogizer) {
+            LogBufferEulogizer logBufferEulogizer,
+            DumpManager dumpManager) {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
+        mClock = clock;
+        mFeatureFlags = featureFlags;
         mLogger = logger;
         mEulogizer = logBufferEulogizer;
+
         dumpManager.registerDumpable(TAG, this);
-        mFeatureFlags = featureFlags;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -376,9 +382,9 @@ public class NotifCollection implements Dumpable {
 
         final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
-            throw mEulogizer.record(
-                    new IllegalStateException("No notification to remove with key "
-                            + sbn.getKey()));
+            // TODO (b/160008901): Throw an exception here
+            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey());
+            return;
         }
 
         entry.mCancellationReason = reason;
@@ -394,6 +400,10 @@ public class NotifCollection implements Dumpable {
         dispatchEventsAndRebuildList();
     }
 
+    private void onNotificationsInitialized() {
+        mInitializedTimestamp = mClock.uptimeMillis();
+    }
+
     private void postNotification(
             StatusBarNotification sbn,
             Ranking ranking) {
@@ -401,7 +411,7 @@ public class NotifCollection implements Dumpable {
 
         if (entry == null) {
             // A new notification!
-            entry = new NotificationEntry(sbn, ranking, SystemClock.uptimeMillis());
+            entry = new NotificationEntry(sbn, ranking, mClock.uptimeMillis());
             mEventQueue.add(new InitEntryEvent(entry));
             mEventQueue.add(new BindEntryEvent(entry, sbn));
             mNotificationSet.put(sbn.getKey(), entry);
@@ -628,6 +638,23 @@ public class NotifCollection implements Dumpable {
         }
     }
 
+    // While the NotificationListener is connecting to NotificationManager, there is a short period
+    // during which it's possible for us to receive events about notifications we don't yet know
+    // about (or that otherwise don't make sense). Until that race condition is fixed, we create a
+    // "forgiveness window" of five seconds during which we won't crash if we receive nonsensical
+    // messages from system server.
+    private void crashIfNotInitializing(RuntimeException exception) {
+        final boolean isRecentlyInitialized = mInitializedTimestamp == 0
+                || mClock.uptimeMillis() - mInitializedTimestamp
+                        < INITIALIZATION_FORGIVENESS_WINDOW;
+
+        if (isRecentlyInitialized) {
+            mLogger.logIgnoredError(exception.getMessage());
+        } else {
+            throw mEulogizer.record(exception);
+        }
+    }
+
     private static Ranking requireRanking(RankingMap rankingMap, String key) {
         // TODO: Modify RankingMap so that we don't have to make a copy here
         Ranking ranking = new Ranking();
@@ -742,6 +769,11 @@ public class NotifCollection implements Dumpable {
         public void onNotificationRankingUpdate(RankingMap rankingMap) {
             NotifCollection.this.onNotificationRankingUpdate(rankingMap);
         }
+
+        @Override
+        public void onNotificationsInitialized() {
+            NotifCollection.this.onNotificationsInitialized();
+        }
     };
 
     private static final String TAG = "NotifCollection";
@@ -773,4 +805,6 @@ public class NotifCollection implements Dumpable {
 
     static final int REASON_NOT_CANCELED = -1;
     public static final int REASON_UNKNOWN = 0;
+
+    private static final long INITIALIZATION_FORGIVENESS_WINDOW = TimeUnit.SECONDS.toMillis(5);
 }

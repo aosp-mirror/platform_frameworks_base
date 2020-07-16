@@ -280,7 +280,7 @@ public class AudioTrack extends PlayerBase
     /**
      * Encapsulation metadata type for framework tuner information.
      *
-     * TODO(b/147778408) Link: Fill in Tuner API info.
+     * Refer to the Android Media TV Tuner API for details.
      */
     public static final int ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER = 1;
 

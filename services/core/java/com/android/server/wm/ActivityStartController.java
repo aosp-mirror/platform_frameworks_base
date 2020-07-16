@@ -52,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.ActivityStarter.DefaultFactory;
 import com.android.server.wm.ActivityStarter.Factory;
@@ -402,6 +403,7 @@ public class ActivityStartController {
             // potentially acquire activity manager lock that leads to deadlock.
             for (int i = 0; i < intents.length; i++) {
                 Intent intent = intents[i];
+                NeededUriGrants intentGrants = null;
 
                 // Refuse possible leaked file descriptors.
                 if (intent.hasFileDescriptors()) {
@@ -418,6 +420,14 @@ public class ActivityStartController {
                         0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
+                // Carefully collect grants without holding lock
+                if (aInfo != null) {
+                    intentGrants = mSupervisor.mService.mUgmInternal
+                            .checkGrantUriPermissionFromIntent(intent, filterCallingUid,
+                                    aInfo.applicationInfo.packageName,
+                                    UserHandle.getUserId(aInfo.applicationInfo.uid));
+                }
+
                 if (aInfo != null) {
                     if ((aInfo.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
@@ -433,6 +443,7 @@ public class ActivityStartController {
                         ? options
                         : null;
                 starters[i] = obtainStarter(intent, reason)
+                        .setIntentGrants(intentGrants)
                         .setCaller(caller)
                         .setResolvedType(resolvedTypes[i])
                         .setActivityInfo(aInfo)

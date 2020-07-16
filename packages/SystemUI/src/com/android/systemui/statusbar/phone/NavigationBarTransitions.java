@@ -57,7 +57,6 @@ public final class NavigationBarTransitions extends BarTransitions implements
     }
 
     private final NavigationBarView mView;
-    private final IStatusBarService mBarService;
     private final LightBarTransitionsController mLightTransitionsController;
     private final boolean mAllowAutoDimWallpaperNotVisible;
     private boolean mWallpaperVisible;
@@ -82,8 +81,6 @@ public final class NavigationBarTransitions extends BarTransitions implements
     public NavigationBarTransitions(NavigationBarView view, CommandQueue commandQueue) {
         super(view, R.drawable.nav_background);
         mView = view;
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mLightTransitionsController = new LightBarTransitionsController(
                 view.getContext(), this, commandQueue);
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()

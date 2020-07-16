@@ -77,7 +77,8 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 mock(NotificationEntryManagerLogger::class.java),
                 sectionsManager,
                 personNotificationIdentifier,
-                HighPriorityProvider(personNotificationIdentifier)
+                HighPriorityProvider(personNotificationIdentifier,
+                    mock(NotificationGroupManager::class.java))
         )
     }
 

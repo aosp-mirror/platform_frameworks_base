@@ -94,4 +94,7 @@
 
     <!-- Define minimal size of the tap area -->
     <dimen name="min_tap_target_size">48dp</dimen>
+
+    <!-- Size of advanced icon -->
+    <dimen name="advanced_icon_size">18dp</dimen>
 </resources>

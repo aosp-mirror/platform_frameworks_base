@@ -50,9 +50,4 @@ public class MediaHeaderView extends ExpandableView {
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
     }
-
-    @Override
-    public boolean wantsAddAndRemoveAnimations() {
-        return false;
-    }
 }

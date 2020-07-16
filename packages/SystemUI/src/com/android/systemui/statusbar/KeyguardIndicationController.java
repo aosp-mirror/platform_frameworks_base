@@ -16,9 +16,16 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
@@ -28,11 +35,15 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -43,6 +54,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -78,15 +90,20 @@ public class KeyguardIndicationController implements StateListener,
     private static final float BOUNCE_ANIMATION_FINAL_Y = 0f;
 
     private final Context mContext;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTextView;
+    private KeyguardIndicationTextView mDisclosure;
     private final IBatteryStats mBatteryInfo;
     private final SettableWakeLock mWakeLock;
     private final DockManager mDockManager;
+    private final DevicePolicyManager mDevicePolicyManager;
+    private final UserManager mUserManager;
 
+    private BroadcastReceiver mBroadcastReceiver;
     private LockscreenLockIconController mLockIconController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -105,6 +122,7 @@ public class KeyguardIndicationController implements StateListener,
     private int mChargingWattage;
     private int mBatteryLevel;
     private long mChargingTimeRemaining;
+    private float mDisclosureMaxAlpha;
     private String mMessageToShowOnScreenOn;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -128,8 +146,13 @@ public class KeyguardIndicationController implements StateListener,
             StatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DockManager dockManager,
-            IBatteryStats iBatteryStats) {
+            BroadcastDispatcher broadcastDispatcher,
+            DevicePolicyManager devicePolicyManager,
+            IBatteryStats iBatteryStats,
+            UserManager userManager) {
         mContext = context;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mDevicePolicyManager = devicePolicyManager;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -139,6 +162,7 @@ public class KeyguardIndicationController implements StateListener,
         mWakeLock = new SettableWakeLock(
                 wakeLockBuilder.setTag("Doze:KeyguardIndication").build(), TAG);
         mBatteryInfo = iBatteryStats;
+        mUserManager = userManager;
 
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
         mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
@@ -151,7 +175,24 @@ public class KeyguardIndicationController implements StateListener,
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
         mInitialTextColorState = mTextView != null ?
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
+        mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
+        mDisclosureMaxAlpha = mDisclosure.getAlpha();
         updateIndication(false /* animate */);
+        updateDisclosure();
+
+        if (mBroadcastReceiver == null) {
+            // Update the disclosure proactively to avoid IPC on the critical path.
+            mBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    updateDisclosure();
+                }
+            };
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+            intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+            mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter);
+        }
     }
 
     public void setLockIconController(LockscreenLockIconController lockIconController) {
@@ -188,6 +229,54 @@ public class KeyguardIndicationController implements StateListener,
             mUpdateMonitorCallback = new BaseKeyguardCallback();
         }
         return mUpdateMonitorCallback;
+    }
+
+    private void updateDisclosure() {
+        // NOTE: Because this uses IPC, avoid calling updateDisclosure() on a critical path.
+        if (whitelistIpcs(this::isOrganizationOwnedDevice)) {
+            CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
+            if (organizationName != null) {
+                mDisclosure.switchIndication(mContext.getResources().getString(
+                        R.string.do_disclosure_with_name, organizationName));
+            } else {
+                mDisclosure.switchIndication(R.string.do_disclosure_generic);
+            }
+            mDisclosure.setVisibility(View.VISIBLE);
+        } else {
+            mDisclosure.setVisibility(View.GONE);
+        }
+    }
+
+    private boolean isOrganizationOwnedDevice() {
+        return mDevicePolicyManager.isDeviceManaged()
+                || mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile();
+    }
+
+    @Nullable
+    private CharSequence getOrganizationOwnedDeviceOrganizationName() {
+        if (mDevicePolicyManager.isDeviceManaged()) {
+            return mDevicePolicyManager.getDeviceOwnerOrganizationName();
+        } else if (mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()) {
+            return getWorkProfileOrganizationName();
+        }
+        return null;
+    }
+
+    private CharSequence getWorkProfileOrganizationName() {
+        final int profileId = getWorkProfileUserId(UserHandle.myUserId());
+        if (profileId == UserHandle.USER_NULL) {
+            return null;
+        }
+        return mDevicePolicyManager.getOrganizationNameForUser(profileId);
+    }
+
+    private int getWorkProfileUserId(int userId) {
+        for (final UserInfo userInfo : mUserManager.getProfiles(userId)) {
+            if (userInfo.isManagedProfile()) {
+                return userInfo.id;
+            }
+        }
+        return UserHandle.USER_NULL;
     }
 
     public void setVisible(boolean visible) {
@@ -571,6 +660,11 @@ public class KeyguardIndicationController implements StateListener,
     @Override
     public void onDozingChanged(boolean isDozing) {
         setDozing(isDozing);
+    }
+
+    @Override
+    public void onDozeAmountChanged(float linear, float eased) {
+        mDisclosure.setAlpha((1 - linear) * mDisclosureMaxAlpha);
     }
 
     @Override

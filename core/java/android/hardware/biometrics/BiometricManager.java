@@ -26,6 +26,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.util.Slog;
 
 /**
@@ -82,6 +84,9 @@ public class BiometricManager {
      *
      * <p>Types may combined via bitwise OR into a single integer representing multiple
      * authenticators (e.g. <code>DEVICE_CREDENTIAL | BIOMETRIC_WEAK</code>).
+     *
+     * @see #canAuthenticate(int)
+     * @see BiometricPrompt.Builder#setAllowedAuthenticators(int)
      */
     public interface Authenticators {
         /**
@@ -116,22 +121,29 @@ public class BiometricManager {
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Strong</strong>, as defined by the Android CDD.
+         * requirements for <strong>Class 3</strong> (formerly <strong>Strong</strong>), as defined
+         * by the Android CDD.
+         *
+         * <p>This corresponds to {@link KeyProperties#AUTH_BIOMETRIC_STRONG} during key generation.
+         *
+         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
          */
         int BIOMETRIC_STRONG = 0x000F;
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Weak</strong>, as defined by the Android CDD.
+         * requirements for <strong>Class 2</strong> (formerly <strong>Weak</strong>), as defined by
+         * the Android CDD.
          *
          * <p>Note that this is a superset of {@link #BIOMETRIC_STRONG} and is defined such that
-         * <code>BIOMETRIC_STRONG | BIOMETRIC_WEAK == BIOMETRIC_WEAK</code>.
+         * {@code BIOMETRIC_STRONG | BIOMETRIC_WEAK == BIOMETRIC_WEAK}.
          */
         int BIOMETRIC_WEAK = 0x00FF;
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Convenience</strong>, as defined by the Android CDD.
+         * requirements for <strong>Class 1</strong> (formerly <strong>Convenience</strong>), as
+         * defined by the Android CDD.
          *
          * <p>This constant is intended for use by {@link android.provider.DeviceConfig} to adjust
          * the reported strength of a biometric sensor. It is not a valid parameter for any of the
@@ -153,6 +165,11 @@ public class BiometricManager {
          * The non-biometric credential used to secure the device (i.e., PIN, pattern, or password).
          * This should typically only be used in combination with a biometric auth type, such as
          * {@link #BIOMETRIC_WEAK}.
+         *
+         * <p>This corresponds to {@link KeyProperties#AUTH_DEVICE_CREDENTIAL} during key
+         * generation.
+         *
+         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
          */
         int DEVICE_CREDENTIAL = 1 << 15;
     }

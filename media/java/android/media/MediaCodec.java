@@ -2762,7 +2762,7 @@ final public class MediaCodec {
                 builder.append(hexdigits.charAt(key[i] & 0x0f));
             }
             builder.append("], iv [");
-            for (int i = 0; i < key.length; i++) {
+            for (int i = 0; i < iv.length; i++) {
                 builder.append(hexdigits.charAt((iv[i] & 0xf0) >> 4));
                 builder.append(hexdigits.charAt(iv[i] & 0x0f));
             }

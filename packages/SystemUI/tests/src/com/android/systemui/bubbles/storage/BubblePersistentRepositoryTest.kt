@@ -20,6 +20,8 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,9 +31,9 @@ import org.junit.runner.RunWith
 class BubblePersistentRepositoryTest : SysuiTestCase() {
 
     private val bubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1"),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2"),
-            BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3")
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428, "title"),
+            BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0)
     )
     private lateinit var repository: BubblePersistentRepository
 
@@ -42,6 +44,11 @@ class BubblePersistentRepositoryTest : SysuiTestCase() {
 
     @Test
     fun testReadWriteOperation() {
+        // Verify read before write doesn't cause FileNotFoundException
+        val actual = repository.readFromDisk()
+        assertNotNull(actual)
+        assertTrue(actual.isEmpty())
+
         repository.persistsToDisk(bubbles)
         assertEquals(bubbles, repository.readFromDisk())
     }

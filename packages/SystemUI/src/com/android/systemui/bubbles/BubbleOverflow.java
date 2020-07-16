@@ -22,9 +22,9 @@ import static android.view.View.GONE;
 import static com.android.systemui.bubbles.BadgedImageView.DEFAULT_PATH_SIZE;
 
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -62,13 +62,12 @@ public class BubbleOverflow implements BubbleViewProvider {
 
     void setUpOverflow(ViewGroup parentViewGroup, BubbleStackView stackView) {
         updateDimensions();
-
         mExpandedView = (BubbleExpandedView) mInflater.inflate(
                 R.layout.bubble_expanded_view, parentViewGroup /* root */,
                 false /* attachToRoot */);
         mExpandedView.setOverflow(true);
         mExpandedView.setStackView(stackView);
-
+        mExpandedView.applyThemeAttrs();
         updateIcon(mContext, parentViewGroup);
     }
 
@@ -89,19 +88,23 @@ public class BubbleOverflow implements BubbleViewProvider {
                 false /* attachToRoot */);
         mOverflowBtn.setContentDescription(mContext.getResources().getString(
                 R.string.bubble_overflow_button_content_description));
+        Resources res = mContext.getResources();
 
-        TypedArray ta = mContext.obtainStyledAttributes(
-                new int[]{android.R.attr.colorBackgroundFloating});
-        int bgColor = ta.getColor(0, Color.WHITE /* default */);
-        ta.recycle();
-
+        // Set color for button icon and dot
         TypedValue typedValue = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.colorAccent, typedValue, true);
         int colorAccent = mContext.getColor(typedValue.resourceId);
         mOverflowBtn.getDrawable().setTint(colorAccent);
         mDotColor = colorAccent;
 
-        ColorDrawable bg = new ColorDrawable(bgColor);
+        // Set color for button and activity background
+        ColorDrawable bg = new ColorDrawable(res.getColor(R.color.bubbles_light));
+        final int mode = res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (mode == Configuration.UI_MODE_NIGHT_YES) {
+            bg = new ColorDrawable(res.getColor(R.color.bubbles_dark));
+        }
+
+        // Apply icon inset
         InsetDrawable fg = new InsetDrawable(mOverflowBtn.getDrawable(),
                 mBitmapSize - mIconBitmapSize /* inset */);
         AdaptiveIconDrawable adaptiveIconDrawable = new AdaptiveIconDrawable(bg, fg);
@@ -111,6 +114,7 @@ public class BubbleOverflow implements BubbleViewProvider {
                 null /* user */,
                 true /* shrinkNonAdaptiveIcons */).icon;
 
+        // Get path with dot location
         float scale = iconFactory.getNormalizer().getScale(mOverflowBtn.getDrawable(),
                 null /* outBounds */, null /* path */, null /* outMaskShape */);
         float radius = DEFAULT_PATH_SIZE / 2f;
@@ -121,12 +125,7 @@ public class BubbleOverflow implements BubbleViewProvider {
                 radius /* pivot y */);
         mPath.transform(matrix);
 
-        mOverflowBtn.setVisibility(GONE);
         mOverflowBtn.setRenderedBubble(this);
-    }
-
-    ImageView getBtn() {
-        return mOverflowBtn;
     }
 
     void setVisible(int visible) {

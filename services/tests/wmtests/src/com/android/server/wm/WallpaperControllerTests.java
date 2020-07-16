@@ -101,7 +101,6 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testWallpaperSizeWithFixedTransform() {
         // No wallpaper
         final DisplayContent dc = createNewDisplay();
-        dc.mWmService.mIsFixedRotationTransformEnabled = true;
 
         // No wallpaper WSA Surface
         WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),

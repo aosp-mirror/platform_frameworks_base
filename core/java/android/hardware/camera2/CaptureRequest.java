@@ -477,8 +477,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * A constrained high speed request list contains some constrained high speed capture requests
      * with certain interleaved pattern that is suitable for high speed preview/video streaming. An
      * active constrained high speed capture session only accepts constrained high speed request
-     * lists.  This method can be used to do the sanity check when a constrained high speed capture
-     * session receives a request list via {@link CameraCaptureSession#setRepeatingBurst} or
+     * lists.  This method can be used to do the correctness check when a constrained high speed
+     * capture session receives a request list via {@link CameraCaptureSession#setRepeatingBurst} or
      * {@link CameraCaptureSession#captureBurst}.  </p>
      *
      *

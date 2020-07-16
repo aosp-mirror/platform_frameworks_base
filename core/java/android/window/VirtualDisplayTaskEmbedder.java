@@ -365,8 +365,8 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
             // Found the topmost stack on target display. Now check if the topmost task's
             // description changed.
             if (taskInfo.taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mHost.onTaskBackgroundColorChanged(VirtualDisplayTaskEmbedder.this,
-                        taskInfo.taskDescription.getBackgroundColor());
+                mHost.post(()-> mHost.onTaskBackgroundColorChanged(VirtualDisplayTaskEmbedder.this,
+                        taskInfo.taskDescription.getBackgroundColor()));
             }
         }
 

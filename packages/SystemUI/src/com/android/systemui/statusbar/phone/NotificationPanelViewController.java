@@ -104,9 +104,9 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -166,6 +166,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
     private final StatusBarStateListener mStatusBarStateListener = new StatusBarStateListener();
     private final ExpansionCallback mExpansionCallback = new ExpansionCallback();
+    private final BiometricUnlockController mBiometricUnlockController;
     private final NotificationPanelView mView;
     private final MetricsLogger mMetricsLogger;
     private final ActivityManager mActivityManager;
@@ -227,7 +228,8 @@ public class NotificationPanelViewController extends PanelViewController {
                             mBarState == StatusBarState.KEYGUARD
                                     || mBarState == StatusBarState.SHADE_LOCKED;
                     if (!running && mFirstBypassAttempt && keyguardOrShadeLocked && !mDozing
-                            && !mDelayShowingKeyguardStatusBar) {
+                            && !mDelayShowingKeyguardStatusBar
+                            && !mBiometricUnlockController.isBiometricUnlock()) {
                         mFirstBypassAttempt = false;
                         animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                     }
@@ -433,6 +435,11 @@ public class NotificationPanelViewController extends PanelViewController {
     private Runnable mExpandAfterLayoutRunnable;
 
     /**
+     * Is this a collapse that started on the panel where we should allow the panel to intercept
+     */
+    private boolean mIsPanelCollapseOnQQS;
+
+    /**
      * If face auth with bypass is running for the first time after you turn on the screen.
      * (From aod or screen off)
      */
@@ -443,6 +450,7 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private boolean mDelayShowingKeyguardStatusBar;
 
+    private boolean mAnimatingQS;
     private int mOldLayoutDirection;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
@@ -486,6 +494,7 @@ public class NotificationPanelViewController extends PanelViewController {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
+            BiometricUnlockController biometricUnlockController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
@@ -510,6 +519,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mDisplayId = displayId;
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
+        mBiometricUnlockController = biometricUnlockController;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -1059,7 +1069,11 @@ public class NotificationPanelViewController extends PanelViewController {
                 mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
-                if (shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
+                if (mKeyguardShowing
+                        && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
+                    // Dragging down on the lockscreen statusbar should prohibit other interactions
+                    // immediately, otherwise we'll wait on the touchslop. This is to allow
+                    // dragging down to expanded quick settings directly on the lockscreen.
                     mView.getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 if (mQsExpansionAnimator != null) {
@@ -1092,9 +1106,10 @@ public class NotificationPanelViewController extends PanelViewController {
                     trackMovement(event);
                     return true;
                 }
-                if (Math.abs(h) > getTouchSlop(event)
+                if ((h > getTouchSlop(event) || (h < -getTouchSlop(event) && mQsExpanded))
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
+                    mView.getParent().requestDisallowInterceptTouchEvent(true);
                     mQsTracking = true;
                     onQsExpansionStarted();
                     notifyExpandingFinished();
@@ -1134,6 +1149,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mDownX = event.getX();
             mDownY = event.getY();
             mCollapsedOnDown = isFullyCollapsed();
+            mIsPanelCollapseOnQQS = canPanelCollapseOnQQS(mDownX, mDownY);
             mListenForHeadsUp = mCollapsedOnDown && mHeadsUpManager.hasPinnedHeadsUp();
             mAllowExpandForSmallExpansion = mExpectingSynthesizedDown;
             mTouchSlopExceededBeforeDown = mExpectingSynthesizedDown;
@@ -1147,6 +1163,24 @@ public class NotificationPanelViewController extends PanelViewController {
             // not down event at all.
             mLastEventSynthesizedDown = false;
         }
+    }
+
+    /**
+     * Can the panel collapse in this motion because it was started on QQS?
+     *
+     * @param downX the x location where the touch started
+     * @param downY the y location where the touch started
+     *
+     * @return true if the panel could be collapsed because it stared on QQS
+     */
+    private boolean canPanelCollapseOnQQS(float downX, float downY) {
+        if (mCollapsedOnDown || mKeyguardShowing || mQsExpanded) {
+            return false;
+        }
+        View header = mQs == null ? mKeyguardStatusBar : mQs.getHeader();
+        return downX >= mQsFrame.getX() && downX <= mQsFrame.getX() + mQsFrame.getWidth()
+                        && downY <= header.getBottom();
+
     }
 
     private void flingQsWithCurrentVelocity(float y, boolean isCancelMotionEvent) {
@@ -1328,11 +1362,15 @@ public class NotificationPanelViewController extends PanelViewController {
      *
      * @param velocity unit is in px / millis
      */
-    public void stopWaitingForOpenPanelGesture(final float velocity) {
+    public void stopWaitingForOpenPanelGesture(boolean cancel, final float velocity) {
         if (mExpectingSynthesizedDown) {
             mExpectingSynthesizedDown = false;
-            maybeVibrateOnOpening();
-            fling(velocity > 1f ? 1000f * velocity : 0, true /* expand */);
+            if (cancel) {
+                collapse(false /* delayed */, 1.0f /* speedUpFactor */);
+            } else {
+                maybeVibrateOnOpening();
+                fling(velocity > 1f ? 1000f * velocity : 0, true /* expand */);
+            }
             onTrackingStopped(false);
         }
     }
@@ -1856,6 +1894,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                mAnimatingQS = false;
                 notifyExpandingFinished();
                 mNotificationStackScroller.resetCheckSnoozeLeavebehind();
                 mQsExpansionAnimator = null;
@@ -1864,6 +1903,9 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
             }
         });
+        // Let's note that we're animating QS. Moving the animator here will cancel it immediately,
+        // so we need a separate flag.
+        mAnimatingQS = true;
         animator.start();
         mQsExpansionAnimator = animator;
         mQsAnimatorExpand = expanding;
@@ -1890,10 +1932,11 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected boolean isScrolledToBottom() {
+    protected boolean canCollapsePanelOnTouch() {
         if (!isInSettings()) {
             return mBarState == StatusBarState.KEYGUARD
-                    || mNotificationStackScroller.isScrolledToBottom();
+                    || mNotificationStackScroller.isScrolledToBottom()
+                    || mIsPanelCollapseOnQQS;
         } else {
             return true;
         }
@@ -2216,6 +2259,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScroller.onExpansionStarted();
         mIsExpanding = true;
         mQsExpandedWhenExpandingStarted = mQsFullyExpanded;
+        mMediaHierarchyManager.setCollapsingShadeFromQS(mQsExpandedWhenExpandingStarted &&
+                /* We also start expanding when flinging closed Qs. Let's exclude that */
+                !mAnimatingQS);
         if (mQsExpanded) {
             onQsExpansionStarted();
         }
@@ -2232,6 +2278,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpanding = false;
+        mMediaHierarchyManager.setCollapsingShadeFromQS(false);
         if (isFullyCollapsed()) {
             DejankUtils.postAfterTraversal(new Runnable() {
                 @Override
@@ -2393,8 +2440,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected int getClearAllHeight() {
-        return mNotificationStackScroller.getFooterViewHeight();
+    protected int getClearAllHeightWithPadding() {
+        return mNotificationStackScroller.getFooterViewHeightWithPadding();
     }
 
     @Override
@@ -2474,6 +2521,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
                                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+                        mLockscreenGestureLogger
+                            .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
                         startUnlockHintAnimation();
                     }
                 }
@@ -3069,7 +3118,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mBlockTouches || mQsFullyExpanded && mQs.onInterceptTouchEvent(event)) {
+                if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
                     return false;
                 }
                 initDownStates(event);
@@ -3096,7 +3145,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (mBlockTouches || (mQs != null && mQs.isCustomizing())) {
+                if (mBlockTouches || (mQsFullyExpanded && mQs != null
+                        && mQs.disallowPanelTouches())) {
                     return false;
                 }
 
@@ -3257,7 +3307,7 @@ public class NotificationPanelViewController extends PanelViewController {
             int velocityDp = Math.abs((int) (vel / displayDensity));
             if (start) {
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_DIALER, lengthDp, velocityDp);
-
+                mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_DIALER);
                 mFalsingManager.onLeftAffordanceOn();
                 if (mFalsingManager.shouldEnforceBouncer()) {
                     mStatusBar.executeRunnableDismissingKeyguard(
@@ -3272,6 +3322,7 @@ public class NotificationPanelViewController extends PanelViewController {
                         mLastCameraLaunchSource)) {
                     mLockscreenGestureLogger.write(
                             MetricsEvent.ACTION_LS_CAMERA, lengthDp, velocityDp);
+                    mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_CAMERA);
                 }
                 mFalsingManager.onCameraOn();
                 if (mFalsingManager.shouldEnforceBouncer()) {

@@ -40,10 +40,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Du hast <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Smartphone zu entsperren. Das Arbeitsprofil wird nun entfernt und alle Profildaten werden gelöscht."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%2$d</xliff:g> weiteren erfolglosen Versuchen wirst du aufgefordert, dein Tablet mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuche es in <xliff:g id="NUMBER_2">%3$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%2$d</xliff:g> weiteren erfolglosen Versuchen wirst du aufgefordert, dein Smartphone mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuche es in <xliff:g id="NUMBER_2">%3$d</xliff:g> Sekunden noch einmal."</string>
-    <!-- no translation found for global_action_lock_message (7092460751050168771) -->
-    <skip />
-    <!-- no translation found for global_action_lock_message (1024230056230539493) -->
-    <skip />
-    <!-- no translation found for global_action_lock_message (3165224897120346096) -->
-    <skip />
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Entsperre dein Smartphone für weitere Optionen"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Entsperre dein Tablet für weitere Optionen"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Entsperre dein Gerät für weitere Optionen"</string>
 </resources>

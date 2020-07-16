@@ -51,7 +51,7 @@ import java.util.function.Consumer;
  */
 public class AppPredictionPerUserService extends
         AbstractPerUserSystemService<AppPredictionPerUserService, AppPredictionManagerService>
-        implements RemoteAppPredictionService.RemoteAppPredictionServiceCallbacks {
+             implements RemoteAppPredictionService.RemoteAppPredictionServiceCallbacks {
 
     private static final String TAG = AppPredictionPerUserService.class.getSimpleName();
     private static final String PREDICT_USING_PEOPLE_SERVICE_PREFIX =
@@ -114,11 +114,8 @@ public class AppPredictionPerUserService extends
     public void onCreatePredictionSessionLocked(@NonNull AppPredictionContext context,
             @NonNull AppPredictionSessionId sessionId) {
         if (!mSessionInfos.containsKey(sessionId)) {
-            // TODO(b/157500121): remove below forceUsingPeopleService logic after testing
-            //  PeopleService for 2 weeks on Droidfood.
-            final boolean forceUsingPeopleService = context.getUiSurface().equals("share");
             mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context,
-                    forceUsingPeopleService || DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
+                    DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
                             PREDICT_USING_PEOPLE_SERVICE_PREFIX + context.getUiSurface(), false),
                     this::removeAppPredictionSessionInfo));
         }

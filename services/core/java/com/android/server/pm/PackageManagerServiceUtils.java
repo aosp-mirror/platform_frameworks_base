@@ -595,8 +595,8 @@ public class PackageManagerServiceUtils {
 
     /** Returns true to force apk verification if the package is considered privileged. */
     static boolean isApkVerificationForced(@Nullable PackageSetting ps) {
-        return ps != null && ps.isPrivileged() && (
-                isApkVerityEnabled() || isLegacyApkVerityEnabled());
+        // TODO(b/154310064): re-enable.
+        return false;
     }
 
     /**

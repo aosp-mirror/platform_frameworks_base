@@ -57,6 +57,8 @@ public class BubbleOverflowActivity extends Activity {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
     private LinearLayout mEmptyState;
+    private TextView mEmptyStateTitle;
+    private TextView mEmptyStateSubtitle;
     private ImageView mEmptyStateImage;
     private BubbleController mBubbleController;
     private BubbleOverflowAdapter mAdapter;
@@ -74,6 +76,20 @@ public class BubbleOverflowActivity extends Activity {
             }
             return false;
         }
+
+        @Override
+        public int getColumnCountForAccessibility(RecyclerView.Recycler recycler,
+                RecyclerView.State state) {
+            int bubbleCount = state.getItemCount();
+            int columnCount = super.getColumnCountForAccessibility(recycler, state);
+            if (bubbleCount < columnCount) {
+                // If there are 4 columns and bubbles <= 3,
+                // TalkBack says "AppName 1 of 4 in list 4 items"
+                // This is a workaround until TalkBack bug is fixed for GridLayoutManager
+                return bubbleCount;
+            }
+            return columnCount;
+        }
     }
 
     @Inject
@@ -85,10 +101,11 @@ public class BubbleOverflowActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bubble_overflow_activity);
-        setBackgroundColor();
 
-        mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
+        mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
+        mEmptyStateTitle = findViewById(R.id.bubble_overflow_empty_title);
+        mEmptyStateSubtitle = findViewById(R.id.bubble_overflow_empty_subtitle);
         mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
 
         updateDimensions();
@@ -126,32 +143,29 @@ public class BubbleOverflowActivity extends Activity {
      * Handle theme changes.
      */
     void updateTheme() {
-        final int mode =
-                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (mode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "Set overflow UI to light mode");
-                }
-                mEmptyStateImage.setImageDrawable(
-                        getResources().getDrawable(R.drawable.ic_empty_bubble_overflow_light));
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "Set overflow UI to dark mode");
-                }
-                mEmptyStateImage.setImageDrawable(
-                        getResources().getDrawable(R.drawable.ic_empty_bubble_overflow_dark));
-                break;
-        }
-    }
+        Resources res = getResources();
+        final int mode = res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
 
-    void setBackgroundColor() {
-        final TypedArray ta = getApplicationContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorBackgroundFloating});
-        int bgColor = ta.getColor(0, Color.WHITE);
-        ta.recycle();
-        findViewById(android.R.id.content).setBackgroundColor(bgColor);
+        mEmptyStateImage.setImageDrawable(isNightMode
+                ? res.getDrawable(R.drawable.ic_empty_bubble_overflow_dark)
+                : res.getDrawable(R.drawable.ic_empty_bubble_overflow_light));
+
+        findViewById(android.R.id.content)
+                .setBackgroundColor(isNightMode
+                        ? res.getColor(R.color.bubbles_dark)
+                        : res.getColor(R.color.bubbles_light));
+
+        final TypedArray typedArray = getApplicationContext().obtainStyledAttributes(
+                new int[]{android.R.attr.colorBackgroundFloating,
+                        android.R.attr.textColorSecondary});
+        int bgColor = typedArray.getColor(0, isNightMode ? Color.BLACK : Color.WHITE);
+        int textColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
+        textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, isNightMode);
+        typedArray.recycle();
+
+        mEmptyStateTitle.setTextColor(textColor);
+        mEmptyStateSubtitle.setTextColor(textColor);
     }
 
     void onDataChanged(List<Bubble> bubbles) {
@@ -204,6 +218,8 @@ public class BubbleOverflowActivity extends Activity {
 }
 
 class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.ViewHolder> {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowAdapter" : TAG_BUBBLES;
+
     private Context mContext;
     private Consumer<Bubble> mPromoteBubbleFromOverflow;
     private List<Bubble> mBubbles;
@@ -282,12 +298,10 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
                     }
                 });
 
-        Bubble.FlyoutMessage message = b.getFlyoutMessage();
-        if (message != null && message.senderName != null) {
-            vh.textView.setText(message.senderName.toString());
-        } else {
-            vh.textView.setText(b.getAppName());
-        }
+        CharSequence label = b.getShortcutInfo() != null
+                ? b.getShortcutInfo().getLabel()
+                : b.getAppName();
+        vh.textView.setText(label);
     }
 
     @Override

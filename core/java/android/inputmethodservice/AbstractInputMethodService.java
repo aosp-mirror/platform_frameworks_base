@@ -260,4 +260,10 @@ public abstract class AbstractInputMethodService extends Service
      */
     public void notifyUserActionIfNecessary() {
     }
+
+    /** @hide */
+    @Override
+    public final boolean isUiContext() {
+        return true;
+    }
 }

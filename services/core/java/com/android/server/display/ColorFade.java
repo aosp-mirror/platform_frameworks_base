@@ -588,8 +588,9 @@ final class ColorFade {
         if (mSurfaceControl == null) {
             Transaction t = new Transaction();
             try {
-                final SurfaceControl.Builder builder =
-                        new SurfaceControl.Builder(mSurfaceSession).setName("ColorFade");
+                final SurfaceControl.Builder builder = new SurfaceControl.Builder(mSurfaceSession)
+                        .setName("ColorFade")
+                        .setCallsite("ColorFade.createSurface");
                 if (mMode == MODE_FADE) {
                     builder.setColorLayer();
                 } else {

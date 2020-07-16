@@ -237,6 +237,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
         mHandler.obtainMessage(H.ON_TASK_DESCRIPTION_CHANGED, taskInfo).sendToTarget();
     }
 
+    @Override
+    public void onActivityRotation(int displayId) {
+        mHandler.obtainMessage(H.ON_ACTIVITY_ROTATION, displayId, 0 /* unused */)
+                .sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -260,6 +266,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_SINGLE_TASK_DISPLAY_EMPTY = 22;
         private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 23;
         private static final int ON_TASK_DESCRIPTION_CHANGED = 24;
+        private static final int ON_ACTIVITY_ROTATION = 25;
 
 
         public H(Looper looper) {
@@ -424,6 +431,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onTaskDescriptionChanged(info);
+                        }
+                        break;
+                    }
+                    case ON_ACTIVITY_ROTATION: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityRotation(msg.arg1);
                         }
                         break;
                     }

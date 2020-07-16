@@ -181,4 +181,11 @@ public interface WindowInsetsAnimationController {
      * @return {@code true} if the instance is cancelled, {@code false} otherwise.
      */
     boolean isCancelled();
+
+    /**
+     * @hide
+     * @return {@code true} when controller controls IME and IME has no insets (floating,
+     *  fullscreen or non-overlapping).
+     */
+    boolean hasZeroInsetsIme();
 }

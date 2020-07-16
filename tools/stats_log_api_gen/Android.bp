@@ -21,7 +21,6 @@ cc_binary_host {
     name: "stats-log-api-gen",
     srcs: [
         "Collation.cpp",
-        "atoms_info_writer.cpp",
         "java_writer.cpp",
         "java_writer_q.cpp",
         "main.cpp",

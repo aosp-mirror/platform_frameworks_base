@@ -29,6 +29,8 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -193,7 +195,7 @@ abstract class AbstractListenerManager<TRequest, TListener> {
     protected abstract void unregisterService() throws RemoteException;
 
     @Nullable
-    protected TRequest merge(@NonNull TRequest[] requests) {
+    protected TRequest merge(@NonNull List<TRequest> requests) {
         for (TRequest request : requests) {
             Preconditions.checkArgument(request == null,
                     "merge() has to be overridden for non-null requests.");
@@ -221,9 +223,9 @@ abstract class AbstractListenerManager<TRequest, TListener> {
             return mListeners.valueAt(0).getRequest();
         }
 
-        TRequest[] requests = (TRequest[]) new Object[mListeners.size()];
+        ArrayList<TRequest> requests = new ArrayList<>(mListeners.size());
         for (int index = 0; index < mListeners.size(); index++) {
-            requests[index] = mListeners.valueAt(index).getRequest();
+            requests.add(mListeners.valueAt(index).getRequest());
         }
         return merge(requests);
     }

@@ -199,6 +199,13 @@ final class HistoricalRegistry {
         mInMemoryLock = lock;
     }
 
+    HistoricalRegistry(@NonNull HistoricalRegistry other) {
+        this(other.mInMemoryLock);
+        mMode = other.mMode;
+        mBaseSnapshotInterval = other.mBaseSnapshotInterval;
+        mIntervalCompressionMultiplier = other.mIntervalCompressionMultiplier;
+    }
+
     void systemReady(@NonNull ContentResolver resolver) {
         final Uri uri = Settings.Global.getUriFor(Settings.Global.APPOP_HISTORY_PARAMETERS);
         resolver.registerContentObserver(uri, false, new ContentObserver(
@@ -223,9 +230,16 @@ final class HistoricalRegistry {
                     // When starting always adjust history to now.
                     final long lastPersistTimeMills =
                             mPersistence.getLastPersistTimeMillisDLocked();
+
                     if (lastPersistTimeMills > 0) {
-                        mPendingHistoryOffsetMillis =
-                                System.currentTimeMillis() - lastPersistTimeMills;
+                        mPendingHistoryOffsetMillis = System.currentTimeMillis()
+                                - lastPersistTimeMills;
+
+                        if (DEBUG) {
+                            Slog.i(LOG_TAG, "Time since last write: "
+                                    + TimeUtils.formatDuration(mPendingHistoryOffsetMillis)
+                                    + " by which to push history on next write");
+                        }
                     }
                 }
             }
@@ -597,6 +611,9 @@ final class HistoricalRegistry {
                     return;
                 }
                 clearHistoryOnDiskDLocked();
+                mNextPersistDueTimeMillis = 0;
+                mPendingHistoryOffsetMillis = 0;
+                mCurrentHistoricalOps = null;
             }
         }
     }
@@ -650,7 +667,15 @@ final class HistoricalRegistry {
         return mCurrentHistoricalOps;
     }
 
-    private void persistPendingHistory() {
+    void shutdown() {
+        synchronized (mInMemoryLock) {
+            if (mMode != AppOpsManager.HISTORICAL_MODE_DISABLED) {
+                persistPendingHistory();
+            }
+        }
+    }
+
+    void persistPendingHistory() {
         final List<HistoricalOps> pendingWrites;
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
@@ -844,13 +869,7 @@ final class HistoricalRegistry {
                     if (shortestFile == null) {
                         return 0;
                     }
-                    final String shortestNameNoExtension = shortestFile.getName()
-                            .replace(HISTORY_FILE_SUFFIX, "");
-                    try {
-                        return Long.parseLong(shortestNameNoExtension);
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
+                    return shortestFile.lastModified();
                 }
                 sHistoricalAppOpsDir.finishRead();
             } catch (Throwable e) {

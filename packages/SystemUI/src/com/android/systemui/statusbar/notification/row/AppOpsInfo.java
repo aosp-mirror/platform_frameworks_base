@@ -31,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 
@@ -50,9 +51,10 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     private MetricsLogger mMetricsLogger;
     private OnSettingsClickListener mOnSettingsClickListener;
     private NotificationGuts mGutsContainer;
+    private UiEventLogger mUiEventLogger;
 
     private OnClickListener mOnOk = v -> {
-        closeControls(v);
+        mGutsContainer.closeControls(v, false);
     };
 
     public AppOpsInfo(Context context, AttributeSet attrs) {
@@ -66,6 +68,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     public void bindGuts(final PackageManager pm,
             final OnSettingsClickListener onSettingsClick,
             final StatusBarNotification sbn,
+            final UiEventLogger uiEventLogger,
             ArraySet<Integer> activeOps) {
         mPkg = sbn.getPackageName();
         mSbn = sbn;
@@ -73,11 +76,13 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         mAppName = mPkg;
         mOnSettingsClickListener = onSettingsClick;
         mAppOps = activeOps;
+        mUiEventLogger = uiEventLogger;
 
         bindHeader();
         bindPrompt();
         bindButtons();
 
+        logUiEvent(NotificationAppOpsEvent.NOTIFICATION_APP_OPS_OPEN);
         mMetricsLogger = new MetricsLogger();
         mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, true);
     }
@@ -117,6 +122,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         });
         TextView ok = findViewById(R.id.ok);
         ok.setOnClickListener(mOnOk);
+        ok.setAccessibilityDelegate(mGutsContainer.getAccessibilityDelegate());
     }
 
     private String getPrompt() {
@@ -160,19 +166,6 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         }
     }
 
-    private void closeControls(View v) {
-        mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, false, false);
-    }
-
     @Override
     public void setGutsParent(NotificationGuts guts) {
         mGutsContainer = guts;
@@ -200,11 +193,22 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
+        logUiEvent(NotificationAppOpsEvent.NOTIFICATION_APP_OPS_CLOSE);
+        if (mMetricsLogger != null) {
+            mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
+        }
         return false;
     }
 
     @Override
     public int getActualHeight() {
         return getHeight();
+    }
+
+    private void logUiEvent(NotificationAppOpsEvent event) {
+        if (mSbn != null) {
+            mUiEventLogger.logWithInstanceId(event,
+                    mSbn.getUid(), mSbn.getPackageName(), mSbn.getInstanceId());
+        }
     }
 }

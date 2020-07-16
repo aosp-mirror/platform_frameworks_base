@@ -17,9 +17,12 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -27,15 +30,11 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.input.InputManager;
-import android.net.Uri;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -75,6 +74,8 @@ import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -86,8 +87,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
-    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
-
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -113,17 +112,20 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 }
             };
 
-    private final ContentObserver mFixedRotationObserver = new ContentObserver(
-            new Handler(Looper.getMainLooper())) {
+    private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updatedFixedRotation();
+        public void onTaskStackChanged() {
+            mGestureBlockingActivityRunning = isGestureBlockingActivityRunning();
         }
     };
 
     private final Context mContext;
     private final OverviewProxyService mOverviewProxyService;
-    private PluginManager mPluginManager;
+    private final Runnable mStateChangeCallback;
+
+    private final PluginManager mPluginManager;
+    // Activities which should not trigger Back gesture.
+    private final List<ComponentName> mGestureBlockingActivities = new ArrayList<>();
 
     private final Point mDisplaySize = new Point();
     private final int mDisplayId;
@@ -147,7 +149,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     // We temporarily disable back gesture when user is quickswitching
     // between apps of different orientations
     private boolean mDisabledForQuickstep;
-    private boolean mFixedRotationFlagEnabled;
 
     private final PointF mDownPoint = new PointF();
     private final PointF mEndPoint = new PointF();
@@ -162,6 +163,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private boolean mIsEnabled;
     private boolean mIsNavBarShownTransiently;
     private boolean mIsBackGestureAllowed;
+    private boolean mGestureBlockingActivityRunning;
 
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
@@ -196,20 +198,45 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             };
 
     public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService,
-            SysUiState sysUiFlagContainer, PluginManager pluginManager) {
+            SysUiState sysUiFlagContainer, PluginManager pluginManager,
+            Runnable stateChangeCallback) {
         super(Dependency.get(BroadcastDispatcher.class));
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mOverviewProxyService = overviewProxyService;
         mPluginManager = pluginManager;
-        Dependency.get(ProtoTracer.class).add(this);
+        mStateChangeCallback = stateChangeCallback;
+        ComponentName recentsComponentName = ComponentName.unflattenFromString(
+                context.getString(com.android.internal.R.string.config_recentsComponentName));
+        if (recentsComponentName != null) {
+            String recentsPackageName = recentsComponentName.getPackageName();
+            PackageManager manager = context.getPackageManager();
+            try {
+                Resources resources = manager.getResourcesForApplication(recentsPackageName);
+                int resId = resources.getIdentifier(
+                        "gesture_blocking_activities", "array", recentsPackageName);
 
+                if (resId == 0) {
+                    Log.e(TAG, "No resource found for gesture-blocking activities");
+                } else {
+                    String[] gestureBlockingActivities = resources.getStringArray(resId);
+                    for (String gestureBlockingActivity : gestureBlockingActivities) {
+                        mGestureBlockingActivities.add(
+                                ComponentName.unflattenFromString(gestureBlockingActivity));
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Failed to add gesture blocking activities", e);
+            }
+        }
+
+        Dependency.get(ProtoTracer.class).add(this);
         mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
                 ViewConfiguration.getLongPressTimeout());
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
-                mContext.getMainThreadHandler(), mContext, this::updateCurrentUserResources);
+                mContext.getMainThreadHandler(), mContext, this::onNavigationSettingsChanged);
 
         updateCurrentUserResources();
         sysUiFlagContainer.addCallback(sysUiFlags -> mSysUiFlags = sysUiFlags);
@@ -240,6 +267,14 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop() * backGestureSlop;
     }
 
+    private void onNavigationSettingsChanged() {
+        boolean wasBackAllowed = isHandlingGestures();
+        updateCurrentUserResources();
+        if (wasBackAllowed != isHandlingGestures()) {
+            mStateChangeCallback.run();
+        }
+    }
+
     @Override
     public void onUserSwitched(int newUserId) {
         updateIsEnabled();
@@ -251,13 +286,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
      */
     public void onNavBarAttached() {
         mIsAttached = true;
-        updatedFixedRotation();
-        if (mFixedRotationFlagEnabled) {
-            setRotationCallbacks(true);
-        }
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(FIXED_ROTATION_TRANSFORM_SETTING_NAME),
-                false /* notifyForDescendants */, mFixedRotationObserver, UserHandle.USER_ALL);
+        mOverviewProxyService.addCallback(mQuickSwitchListener);
         updateIsEnabled();
         startTracking();
     }
@@ -267,20 +296,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
      */
     public void onNavBarDetached() {
         mIsAttached = false;
-        if (mFixedRotationFlagEnabled) {
-            setRotationCallbacks(false);
-        }
-        mContext.getContentResolver().unregisterContentObserver(mFixedRotationObserver);
+        mOverviewProxyService.removeCallback(mQuickSwitchListener);
         updateIsEnabled();
         stopTracking();
-    }
-
-    private void setRotationCallbacks(boolean enable) {
-        if (enable) {
-            mOverviewProxyService.addCallback(mQuickSwitchListener);
-        } else {
-            mOverviewProxyService.removeCallback(mQuickSwitchListener);
-        }
     }
 
     /**
@@ -324,6 +342,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mGestureNavigationSettingsObserver.unregister();
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             mPluginManager.removePluginListener(this);
+            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -338,6 +357,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             updateDisplaySize();
             mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
                     mContext.getMainThreadHandler());
+            ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -491,6 +511,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mLogGesture = false;
             mInRejectedExclusion = false;
             mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
+                    && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
@@ -599,17 +620,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
-    private void updatedFixedRotation() {
-        boolean oldFlag = mFixedRotationFlagEnabled;
-        mFixedRotationFlagEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
-        if (oldFlag == mFixedRotationFlagEnabled) {
-            return;
-        }
-
-        setRotationCallbacks(mFixedRotationFlagEnabled);
-    }
-
     public void setInsets(int leftInset, int rightInset) {
         mLeftInset = leftInset;
         mRightInset = rightInset;
@@ -631,6 +641,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
+    }
+
+    private boolean isGestureBlockingActivityRunning() {
+        ActivityManager.RunningTaskInfo runningTask =
+                ActivityManagerWrapper.getInstance().getRunningTask();
+        ComponentName topActivity = runningTask == null ? null : runningTask.topActivity;
+        return topActivity != null && mGestureBlockingActivities.contains(topActivity);
     }
 
     @Override

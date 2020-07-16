@@ -1,0 +1,70 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.blob;
+
+option java_multiple_files = true;
+
+// The nested messages are used for statsd logging and should be kept in sync with the messages
+// of the same name in frameworks/base/cmds/statsd/src/atoms.proto
+message BlobStatsEventProto {
+  // Blob Committer stats
+  // Keep in sync between:
+  //     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+  //     frameworks/base/cmds/statsd/src/atoms.proto
+  message BlobCommitterProto {
+    // Committer app's uid
+    optional int32 uid = 1;
+
+    // Unix epoch timestamp of the commit in milliseconds
+    optional int64 commit_timestamp_millis = 2;
+
+    // Flags of what access types the committer has set for the Blob
+    optional int32 access_mode = 3;
+
+    // Number of packages that have been whitelisted for ACCESS_TYPE_WHITELIST
+    optional int32 num_whitelisted_package = 4;
+  }
+
+  // Blob Leasee stats
+  // Keep in sync between:
+  //     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+  //     frameworks/base/cmds/statsd/src/atoms.proto
+  message BlobLeaseeProto {
+    // Leasee app's uid
+    optional int32 uid = 1;
+
+    // Unix epoch timestamp for lease expiration in milliseconds
+    optional int64 lease_expiry_timestamp_millis = 2;
+  }
+
+  // List of Blob Committers
+  // Keep in sync between:
+  //     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+  //     frameworks/base/cmds/statsd/src/atoms.proto
+  message BlobCommitterListProto {
+    repeated BlobCommitterProto committer = 1;
+  }
+
+  // List of Blob Leasees
+  // Keep in sync between:
+  //     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+  //     frameworks/base/cmds/statsd/src/atoms.proto
+  message BlobLeaseeListProto {
+    repeated BlobLeaseeProto leasee = 1;
+  }
+}

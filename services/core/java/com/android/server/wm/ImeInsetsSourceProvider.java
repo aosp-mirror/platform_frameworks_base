@@ -18,12 +18,13 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 
-import android.graphics.PixelFormat;
 import android.view.InsetsSource;
 import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.protolog.common.ProtoLog;
+
+import java.io.PrintWriter;
 
 /**
  * Controller for IME inset source on the server. It's called provider as it provides the
@@ -31,7 +32,7 @@ import com.android.server.protolog.common.ProtoLog;
  */
 class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
-    private WindowState mImeTargetFromIme;
+    private InsetsControlTarget mImeTargetFromIme;
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
 
@@ -46,10 +47,12 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
      *
      * @param imeTarget imeTarget on which IME request is coming from.
      */
-    void scheduleShowImePostLayout(WindowState imeTarget) {
+    void scheduleShowImePostLayout(InsetsControlTarget imeTarget) {
         boolean targetChanged = mImeTargetFromIme != imeTarget
                 && mImeTargetFromIme != null && imeTarget != null && mShowImeRunner != null
-                && mImeTargetFromIme.mActivityRecord == imeTarget.mActivityRecord;
+                && imeTarget.getWindow() != null && mImeTargetFromIme.getWindow() != null
+                && mImeTargetFromIme.getWindow().mActivityRecord
+                        == imeTarget.getWindow().mActivityRecord;
         mImeTargetFromIme = imeTarget;
         if (targetChanged) {
             // target changed, check if new target can show IME.
@@ -61,7 +64,8 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
             return;
         }
 
-        ProtoLog.d(WM_DEBUG_IME, "Schedule IME show for %s", mImeTargetFromIme.getName());
+        ProtoLog.d(WM_DEBUG_IME, "Schedule IME show for %s", mImeTargetFromIme.getWindow() == null
+                ? mImeTargetFromIme : mImeTargetFromIme.getWindow().getName());
         mShowImeRunner = () -> {
             ProtoLog.d(WM_DEBUG_IME, "Run showImeRunner");
             // Target should still be the same.
@@ -126,14 +130,27 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
             return false;
         }
         ProtoLog.d(WM_DEBUG_IME, "dcTarget: %s mImeTargetFromIme: %s",
-                dcTarget.getName(), mImeTargetFromIme.getName());
+                dcTarget.getName(), mImeTargetFromIme.getWindow() == null
+                        ? mImeTargetFromIme : mImeTargetFromIme.getWindow().getName());
 
         return (!dcTarget.isClosing() && mImeTargetFromIme == dcTarget)
-                || (mImeTargetFromIme != null && dcTarget.getParentWindow() == mImeTargetFromIme
-                        && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer)
+                || (mImeTargetFromIme != null && mImeTargetFromIme.getWindow() != null
+                        && dcTarget.getParentWindow() == mImeTargetFromIme
+                        && dcTarget.mSubLayer > mImeTargetFromIme.getWindow().mSubLayer)
                 || mImeTargetFromIme == mDisplayContent.getImeFallback()
-                // If IME target is transparent but control target matches requesting window.
-                || (controlTarget == mImeTargetFromIme
-                        && PixelFormat.formatHasAlpha(dcTarget.mAttrs.format));
+                || controlTarget == mImeTargetFromIme
+                        && (mImeTargetFromIme.getWindow() == null 
+                                || !mImeTargetFromIme.getWindow().isClosing());
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        super.dump(pw, prefix);
+        if (mImeTargetFromIme != null) {
+            pw.print(prefix);
+            pw.print("showImePostLayout pending for mImeTargetFromIme=");
+            pw.print(mImeTargetFromIme);
+            pw.println();
+        }
     }
 }

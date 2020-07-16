@@ -52,6 +52,7 @@
         android:singleLine="true"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit = "marquee_forever"
+        android:textDirection="locale"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/icon"
         app:layout_constraintStart_toEndOf="@+id/icon" />
@@ -67,6 +68,7 @@
         android:focusable="false"
         android:maxLines="1"
         android:ellipsize="end"
+        android:textDirection="locale"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/barrier"/>
@@ -90,6 +92,7 @@
         android:focusable="false"
         android:maxLines="1"
         android:ellipsize="end"
+        android:textDirection="locale"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/favorite"
         app:layout_constraintTop_toTopOf="@id/favorite"

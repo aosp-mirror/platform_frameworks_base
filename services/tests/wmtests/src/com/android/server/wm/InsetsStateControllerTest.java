@@ -30,7 +30,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -41,7 +40,6 @@ import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
@@ -87,10 +85,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .setWindow(statusBar, null, null);
         statusBar.setControllableInsetProvider(getController().getSourceProvider(ITYPE_STATUS_BAR));
         final InsetsState state = getController().getInsetsForDispatch(statusBar);
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
-            assertNotEquals(ITYPE_STATUS_BAR, source.getType());
-        }
+        assertNull(state.peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
@@ -191,13 +186,23 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
     @Test
     public void testStripForDispatch_imeOrderChanged() {
-        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
+        // This can be the IME z-order target while app cannot be the IME z-order target.
+        // This is also the only IME control target in this test, so IME won't be invisible caused
+        // by the control-target change.
+        mDisplayContent.mInputMethodInputTarget = createWindow(null, TYPE_APPLICATION, "base");
 
-        // This window can be the IME target while app cannot be the IME target.
-        createWindow(null, TYPE_APPLICATION, "base");
+        // Make IME and stay visible during the test.
+        mImeWindow.setHasSurface(true);
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
+        getController().onImeControlTargetChanged(mDisplayContent.mInputMethodInputTarget);
+        final InsetsState requestedState = new InsetsState();
+        requestedState.getSource(ITYPE_IME).setVisible(true);
+        mDisplayContent.mInputMethodInputTarget.updateRequestedInsetsState(requestedState);
+        getController().onInsetsModified(mDisplayContent.mInputMethodInputTarget, requestedState);
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");
+        win.setHasSurface(true);
         final WindowToken parent = win.mToken;
         parent.removeChild(win);
         final WindowState app = spy(win);
@@ -209,7 +214,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.applySurfaceChangesTransaction();
 
         // app won't get visible IME insets while above IME even when IME is visible.
-        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertTrue(getController().getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
         assertFalse(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
 
         // Reset invocation counter.
@@ -223,8 +228,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Make sure app got notified.
         verify(app, atLeast(1)).notifyInsetsChanged();
 
-        // app will get visible IME insets while below IME when IME is visible.
-        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        // app will get visible IME insets while below IME.
         assertTrue(getController().getInsetsForDispatch(app).getSource(ITYPE_IME).isVisible());
     }
 

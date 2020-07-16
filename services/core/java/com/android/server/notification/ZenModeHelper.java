@@ -20,6 +20,10 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
+import static android.service.notification.DNDModeProto.ROOT_CONFIG;
+
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
+import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -67,6 +71,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -103,6 +108,7 @@ public class ZenModeHelper {
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
     @VisibleForTesting protected final NotificationManager mNotificationManager;
+    private final SysUiStatsEvent.BuilderFactory mStatsEventBuilderFactory;
     @VisibleForTesting protected ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
@@ -130,7 +136,8 @@ public class ZenModeHelper {
 
     private String[] mPriorityOnlyDndExemptPackages;
 
-    public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
+    public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders,
+            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory) {
         mContext = context;
         mHandler = new H(looper);
         addCallback(mMetrics);
@@ -148,6 +155,7 @@ public class ZenModeHelper {
         mFiltering = new ZenModeFiltering(mContext);
         mConditions = new ZenModeConditions(this, conditionProviders);
         mServiceConfig = conditionProviders.getConfig();
+        mStatsEventBuilderFactory = statsEventBuilderFactory;
     }
 
     public Looper getLooper() {
@@ -1168,6 +1176,72 @@ public class ZenModeHelper {
             case Global.ZEN_MODE_NO_INTERRUPTIONS: return 3;
             default: return 0;
         }
+    }
+
+    /**
+     * Generate pulled atoms about do not disturb configurations.
+     */
+    public void pullRules(List<StatsEvent> events) {
+        synchronized (mConfig) {
+            final int numConfigs = mConfigs.size();
+            int id = 0;
+            for (int i = 0; i < numConfigs; i++) {
+                final int user = mConfigs.keyAt(i);
+                final ZenModeConfig config = mConfigs.valueAt(i);
+                SysUiStatsEvent.Builder data = mStatsEventBuilderFactory.newBuilder()
+                        .setAtomId(DND_MODE_RULE)
+                        .writeInt(user)
+                        .writeBoolean(config.manualRule != null) // enabled
+                        .writeBoolean(config.areChannelsBypassingDnd)
+                        .writeInt(ROOT_CONFIG)
+                        .writeString("") // name, empty for root config
+                        .writeInt(Process.SYSTEM_UID) // system owns root config
+                        .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
+                        .writeByteArray(config.toZenPolicy().toProto());
+                events.add(data.build());
+                if (config.manualRule != null && config.manualRule.enabler != null) {
+                    ruleToProto(user, config.manualRule, events);
+                }
+                for (ZenRule rule : config.automaticRules.values()) {
+                    ruleToProto(user, rule, events);
+                }
+            }
+        }
+    }
+
+    private void ruleToProto(int user, ZenRule rule, List<StatsEvent> events) {
+        // Make the ID safe.
+        String id = rule.id == null ? "" : rule.id;
+        if (!ZenModeConfig.DEFAULT_RULE_IDS.contains(id)) {
+            id = "";
+        }
+
+        // Look for packages and enablers, enablers get priority.
+        String pkg = rule.pkg == null ? "" : rule.pkg;
+        if (rule.enabler != null) {
+            pkg = rule.enabler;
+            id = ZenModeConfig.MANUAL_RULE_ID;
+        }
+
+        // TODO: fetch the uid from the package manager
+        int uid = "android".equals(pkg) ? Process.SYSTEM_UID : 0;
+
+        SysUiStatsEvent.Builder data;
+        data = mStatsEventBuilderFactory.newBuilder()
+                .setAtomId(DND_MODE_RULE)
+                .writeInt(user)
+                .writeBoolean(rule.enabled)
+                .writeBoolean(false) // channels_bypassing unused for rules
+                .writeInt(rule.zenMode)
+                .writeString(id)
+                .writeInt(uid)
+                .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
+        byte[] policyProto = new byte[]{};
+        if (rule.zenPolicy != null) {
+            policyProto = rule.zenPolicy.toProto();
+        }
+        data.writeByteArray(policyProto);
+        events.add(data.build());
     }
 
     @VisibleForTesting

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -139,7 +140,8 @@ class AlertWindowNotification {
                 Uri.fromParts("package", packageName, null));
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
         // Calls into activity manager...
-        return PendingIntent.getActivity(context, mRequestCode, intent, FLAG_CANCEL_CURRENT);
+        return PendingIntent.getActivity(context, mRequestCode, intent,
+                FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
     }
 
     private void createNotificationChannel(Context context, String appName) {

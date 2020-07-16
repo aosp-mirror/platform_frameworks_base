@@ -59,6 +59,7 @@ public class BarController {
     private final int mTransparentFlag;
     private final int mStatusBarManagerId;
     private final int mTranslucentWmFlag;
+    private final int mWindowType;
     protected final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
     private StatusBarManagerInternal mStatusBarInternal;
@@ -77,13 +78,14 @@ public class BarController {
     private OnBarVisibilityChangedListener mVisibilityChangeListener;
 
     BarController(String tag, int displayId, int transientFlag, int unhideFlag, int translucentFlag,
-            int statusBarManagerId, int translucentWmFlag, int transparentFlag) {
+            int statusBarManagerId, int windowType, int translucentWmFlag, int transparentFlag) {
         mTag = "BarController." + tag;
         mDisplayId = displayId;
         mTransientFlag = transientFlag;
         mUnhideFlag = unhideFlag;
         mTranslucentFlag = translucentFlag;
         mStatusBarManagerId = statusBarManagerId;
+        mWindowType = windowType;
         mTranslucentWmFlag = translucentWmFlag;
         mTransparentFlag = transparentFlag;
         mHandler = new BarHandler();
@@ -168,7 +170,12 @@ public class BarController {
     }
 
     boolean isTransparentAllowed(WindowState win) {
-        return win == null || win.letterboxNotIntersectsOrFullyContains(mContentFrame);
+        if (win == null) {
+            return true;
+        }
+        final Rect rotatedContentFrame = win.mToken.getFixedRotationBarContentFrame(mWindowType);
+        final Rect contentFrame = rotatedContentFrame != null ? rotatedContentFrame : mContentFrame;
+        return !win.isLetterboxedOverlappingWith(contentFrame);
     }
 
     boolean setBarShowingLw(final boolean show) {

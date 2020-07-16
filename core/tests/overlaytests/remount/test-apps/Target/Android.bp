@@ -15,6 +15,7 @@
 android_test_helper_app {
     name: "OverlayRemountedTest_Target",
     sdk_version: "test_current",
+    certificate: ":rro-remounted-test-a",
     apex_available: [
         "com.android.overlaytest.overlaid",
     ],
@@ -23,6 +24,7 @@ android_test_helper_app {
 
 android_test_helper_app {
     name: "OverlayRemountedTest_TargetUpgrade",
+    certificate: ":rro-remounted-test-a",
     resource_dirs: ["res_upgrade"],
     sdk_version: "test_current",
 }

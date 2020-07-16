@@ -52,10 +52,13 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -68,12 +71,6 @@ public class ResourcesManager {
     private static final boolean DEBUG = false;
 
     private static ResourcesManager sResourcesManager;
-
-    /**
-     * Predicate that returns true if a WeakReference is gc'ed.
-     */
-    private static final Predicate<WeakReference<Resources>> sEmptyReferencePredicate =
-            weakRef -> weakRef == null || weakRef.get() == null;
 
     /**
      * The global compatibility settings.
@@ -100,6 +97,7 @@ public class ResourcesManager {
      */
     @UnsupportedAppUsage
     private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
+    private final ReferenceQueue<Resources> mResourcesReferencesQueue = new ReferenceQueue<>();
 
     private static class ApkKey {
         public final String path;
@@ -155,6 +153,7 @@ public class ResourcesManager {
         }
         public final Configuration overrideConfig = new Configuration();
         public final ArrayList<WeakReference<Resources>> activityResources = new ArrayList<>();
+        final ReferenceQueue<Resources> activityResourcesQueue = new ReferenceQueue<>();
     }
 
     /**
@@ -667,12 +666,15 @@ public class ResourcesManager {
             @NonNull CompatibilityInfo compatInfo) {
         final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
                 activityToken);
+        cleanupReferences(activityResources.activityResources,
+                activityResources.activityResourcesQueue);
 
         Resources resources = compatInfo.needsCompatResources() ? new CompatResources(classLoader)
                 : new Resources(classLoader);
         resources.setImpl(impl);
         resources.setCallbacks(mUpdateCallbacks);
-        activityResources.activityResources.add(new WeakReference<>(resources));
+        activityResources.activityResources.add(
+                new WeakReference<>(resources, activityResources.activityResourcesQueue));
         if (DEBUG) {
             Slog.d(TAG, "- creating new ref=" + resources);
             Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
@@ -682,11 +684,13 @@ public class ResourcesManager {
 
     private @NonNull Resources createResourcesLocked(@NonNull ClassLoader classLoader,
             @NonNull ResourcesImpl impl, @NonNull CompatibilityInfo compatInfo) {
+        cleanupReferences(mResourceReferences, mResourcesReferencesQueue);
+
         Resources resources = compatInfo.needsCompatResources() ? new CompatResources(classLoader)
                 : new Resources(classLoader);
         resources.setImpl(impl);
         resources.setCallbacks(mUpdateCallbacks);
-        mResourceReferences.add(new WeakReference<>(resources));
+        mResourceReferences.add(new WeakReference<>(resources, mResourcesReferencesQueue));
         if (DEBUG) {
             Slog.d(TAG, "- creating new ref=" + resources);
             Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
@@ -752,7 +756,6 @@ public class ResourcesManager {
             updateResourcesForActivity(token, overrideConfig, displayId,
                     false /* movedToDifferentDisplay */);
 
-            cleanupReferences(token);
             rebaseKeyForActivity(token, key);
 
             synchronized (this) {
@@ -778,10 +781,6 @@ public class ResourcesManager {
             final ActivityResources activityResources =
                     getOrCreateActivityResourcesStructLocked(activityToken);
 
-            // Clean up any dead references so they don't pile up.
-            ArrayUtils.unstableRemoveIf(activityResources.activityResources,
-                    sEmptyReferencePredicate);
-
             // Rebase the key's override config on top of the Activity's base override.
             if (key.hasOverrideConfiguration()
                     && !activityResources.overrideConfig.equals(Configuration.EMPTY)) {
@@ -794,21 +793,21 @@ public class ResourcesManager {
 
     /**
      * Check WeakReferences and remove any dead references so they don't pile up.
-     * @param activityToken optional token to clean up Activity resources
      */
-    private void cleanupReferences(IBinder activityToken) {
-        synchronized (this) {
-            if (activityToken != null) {
-                ActivityResources activityResources = mActivityResourceReferences.get(
-                        activityToken);
-                if (activityResources != null) {
-                    ArrayUtils.unstableRemoveIf(activityResources.activityResources,
-                            sEmptyReferencePredicate);
-                }
-            } else {
-                ArrayUtils.unstableRemoveIf(mResourceReferences, sEmptyReferencePredicate);
-            }
+    private static <T> void cleanupReferences(ArrayList<WeakReference<T>> references,
+            ReferenceQueue<T> referenceQueue) {
+        Reference<? extends T> enduedRef = referenceQueue.poll();
+        if (enduedRef == null) {
+            return;
         }
+
+        final HashSet<Reference<? extends T>> deadReferences = new HashSet<>();
+        for (; enduedRef != null; enduedRef = referenceQueue.poll()) {
+            deadReferences.add(enduedRef);
+        }
+
+        ArrayUtils.unstableRemoveIf(references,
+                (ref) -> ref == null || deadReferences.contains(ref));
     }
 
     /**
@@ -895,8 +894,6 @@ public class ResourcesManager {
                     compatInfo,
                     loaders == null ? null : loaders.toArray(new ResourcesLoader[0]));
             classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
-
-            cleanupReferences(activityToken);
 
             if (activityToken != null) {
                 rebaseKeyForActivity(activityToken, key);

@@ -544,6 +544,13 @@
     <style name="TextAppearance.NotificationImportanceChannelGroup">
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
+    </style>
+
+    <style name="TextAppearance.NotificationImportanceApp">
+        <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">@color/notification_guts_sub_text_color</item>
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
     </style>

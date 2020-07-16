@@ -60,6 +60,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.settingslib.Utils;
+import com.android.settingslib.utils.ThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -1588,6 +1589,15 @@ public class ApplicationsState {
             this.size = SIZE_UNKNOWN;
             this.sizeStale = true;
             ensureLabel(context);
+            // Speed up the cache of the icon and label description if they haven't been created.
+            ThreadUtils.postOnBackgroundThread(() -> {
+                if (this.icon == null) {
+                    this.ensureIconLocked(context);
+                }
+                if (this.labelDescription == null) {
+                    this.ensureLabelDescriptionLocked(context);
+                }
+            });
         }
 
         public void ensureLabel(Context context) {

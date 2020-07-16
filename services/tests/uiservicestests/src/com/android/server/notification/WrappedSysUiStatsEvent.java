@@ -88,9 +88,19 @@ public class WrappedSysUiStatsEvent {
             return index < mValues.size() ? mValues.get(index) : null;
         }
 
-        /** useful to make assertTrue() statemetns more readable. */
+        /** useful to make assertTrue() statements more readable. */
         public boolean getBoolean(int index) {
             return (Boolean) mValues.get(index);
+        }
+
+        /** useful to make assertTrue() statements more readable. */
+        public int getInt(int index) {
+            return (Integer) mValues.get(index);
+        }
+
+        /** useful to make assertTrue() statements more readable. */
+        public String getString(int index) {
+            return (String) mValues.get(index);
         }
 
         private void addValue(Object value) {

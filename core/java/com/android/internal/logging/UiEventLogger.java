@@ -60,4 +60,28 @@ public interface UiEventLogger {
      */
     void logWithInstanceId(@NonNull UiEventEnum event, int uid, @Nullable String packageName,
             @Nullable InstanceId instance);
+
+    /**
+     * Log an event with ranked-choice information along with package.
+     * Does nothing if event.getId() <= 0.
+     * @param event an enum implementing UiEventEnum interface.
+     * @param uid the uid of the relevant app, if known (0 otherwise).
+     * @param packageName the package name of the relevant app, if known (null otherwise).
+     * @param position the position picked.
+     */
+    void logWithPosition(@NonNull UiEventEnum event, int uid, @Nullable String packageName,
+            int position);
+
+    /**
+     * Log an event with ranked-choice information along with package and instance ID.
+     * Does nothing if event.getId() <= 0.
+     * @param event an enum implementing UiEventEnum interface.
+     * @param uid the uid of the relevant app, if known (0 otherwise).
+     * @param packageName the package name of the relevant app, if known (null otherwise).
+     * @param instance An identifier obtained from an InstanceIdSequence. If null, reduces to
+     *                 logWithPosition().
+     * @param position the position picked.
+     */
+    void logWithInstanceIdAndPosition(@NonNull UiEventEnum event, int uid,
+            @Nullable String packageName, @Nullable InstanceId instance, int position);
 }

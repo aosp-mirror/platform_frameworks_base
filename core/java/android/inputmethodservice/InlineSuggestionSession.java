@@ -38,6 +38,7 @@ import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -58,6 +59,9 @@ import java.util.function.Supplier;
 class InlineSuggestionSession {
     private static final String TAG = "ImsInlineSuggestionSession";
 
+    static final InlineSuggestionsResponse EMPTY_RESPONSE = new InlineSuggestionsResponse(
+            Collections.emptyList());
+
     @NonNull
     private final Handler mMainThreadHandler;
     @NonNull
@@ -72,6 +76,10 @@ class InlineSuggestionSession {
     private final Supplier<IBinder> mHostInputTokenSupplier;
     @NonNull
     private final Consumer<InlineSuggestionsResponse> mResponseConsumer;
+    // Indicate whether the previous call to the mResponseConsumer is empty or not. If it hasn't
+    // been called yet, the value would be null.
+    @Nullable
+    private Boolean mPreviousResponseIsEmpty;
 
 
     /**
@@ -141,7 +149,13 @@ class InlineSuggestionSession {
      */
     @MainThread
     void invalidate() {
+        try {
+            mCallback.onInlineSuggestionsSessionInvalidated();
+        } catch (RemoteException e) {
+            Log.w(TAG, "onInlineSuggestionsSessionInvalidated() remote exception:" + e);
+        }
         if (mResponseCallback != null) {
+            consumeInlineSuggestionsResponse(EMPTY_RESPONSE);
             mResponseCallback.invalidate();
             mResponseCallback = null;
         }
@@ -188,6 +202,17 @@ class InlineSuggestionSession {
         if (DEBUG) {
             Log.d(TAG, "IME receives response: " + response.getInlineSuggestions().size());
         }
+        consumeInlineSuggestionsResponse(response);
+    }
+
+    @MainThread
+    void consumeInlineSuggestionsResponse(@NonNull InlineSuggestionsResponse response) {
+        boolean isResponseEmpty = response.getInlineSuggestions().isEmpty();
+        if (isResponseEmpty && Boolean.TRUE.equals(mPreviousResponseIsEmpty)) {
+            // No-op if both the previous response and current response are empty.
+            return;
+        }
+        mPreviousResponseIsEmpty = isResponseEmpty;
         mResponseConsumer.accept(response);
     }
 

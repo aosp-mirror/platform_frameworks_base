@@ -481,16 +481,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId,
+            long managerRequestId, RoutingSessionInfo oldSession,
             MediaRoute2Info route, Bundle sessionHints) {
-        mService2.requestCreateSessionWithRouter2(router, requestId, route, sessionHints);
-    }
-
-    // Binder call
-    @Override
-    public void notifySessionHintsForCreatingSession(IMediaRouter2 router,
-            long uniqueRequestId, MediaRoute2Info route, Bundle sessionHints) {
-        mService2.notifySessionHintsForCreatingSession(router,
-                uniqueRequestId, route, sessionHints);
+        mService2.requestCreateSessionWithRouter2(router, requestId, managerRequestId,
+                oldSession, route, sessionHints);
     }
 
     // Binder call
@@ -558,8 +552,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSessionWithManager(IMediaRouter2Manager manager,
-            int requestId, String packageName, MediaRoute2Info route) {
-        mService2.requestCreateSessionWithManager(manager, requestId, packageName, route);
+            int requestId, RoutingSessionInfo oldSession, MediaRoute2Info route) {
+        mService2.requestCreateSessionWithManager(manager, requestId, oldSession, route);
     }
 
     // Binder call
@@ -891,8 +885,24 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 synchronized (mLock) {
+                    boolean wasA2dpOn = mGlobalBluetoothA2dpOn;
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
+                    if (wasA2dpOn != mGlobalBluetoothA2dpOn) {
+                        UserRecord userRecord = mUserRecords.get(mCurrentUserId);
+                        if (userRecord != null) {
+                            for (ClientRecord cr : userRecord.mClientRecords) {
+                                // mSelectedRouteId will be null for BT and phone speaker.
+                                if (cr.mSelectedRouteId == null) {
+                                    try {
+                                        cr.mClient.onGlobalA2dpChanged(mGlobalBluetoothA2dpOn);
+                                    } catch (RemoteException e) {
+                                        // Ignore exception
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

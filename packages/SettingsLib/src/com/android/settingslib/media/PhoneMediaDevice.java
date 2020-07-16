@@ -85,8 +85,9 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        return BluetoothUtils.buildBtRainbowDrawable(mContext,
-                mContext.getDrawable(getDrawableResId()), getId().hashCode());
+        final Drawable drawable = getIconWithoutBackground();
+        setColorFilter(drawable);
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class PhoneMediaDevice extends MediaDevice {
             case TYPE_HDMI:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
-                resId = com.android.internal.R.drawable.ic_bt_headphones_a2dp;
+                resId = R.drawable.ic_headphone;
                 break;
             case TYPE_BUILTIN_SPEAKER:
             default:

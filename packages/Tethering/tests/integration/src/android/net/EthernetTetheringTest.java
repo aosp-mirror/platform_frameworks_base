@@ -42,6 +42,7 @@ import android.net.dhcp.DhcpPacket;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.system.Os;
 import android.util.Log;
 
@@ -101,17 +102,21 @@ public class EthernetTetheringTest {
 
     private UiAutomation mUiAutomation =
             InstrumentationRegistry.getInstrumentation().getUiAutomation();
+    private boolean mRunTests;
 
     @Before
     public void setUp() throws Exception {
-        mHandlerThread = new HandlerThread(getClass().getSimpleName());
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
-        mTetheredInterfaceRequester = new TetheredInterfaceRequester(mHandler, mEm);
         // Needed to create a TestNetworkInterface, to call requestTetheredInterface, and to receive
         // tethered client callbacks.
         mUiAutomation.adoptShellPermissionIdentity(
                 MANAGE_TEST_NETWORKS, NETWORK_SETTINGS, TETHER_PRIVILEGED);
+        mRunTests = mTm.isTetheringSupported() && mEm != null;
+        assumeTrue(mRunTests);
+
+        mHandlerThread = new HandlerThread(getClass().getSimpleName());
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+        mTetheredInterfaceRequester = new TetheredInterfaceRequester(mHandler, mEm);
     }
 
     private void cleanUp() throws Exception {
@@ -135,7 +140,7 @@ public class EthernetTetheringTest {
     @After
     public void tearDown() throws Exception {
         try {
-            cleanUp();
+            if (mRunTests) cleanUp();
         } finally {
             mUiAutomation.dropShellPermissionIdentity();
         }
@@ -224,9 +229,19 @@ public class EthernetTetheringTest {
 
     }
 
+    private boolean isAdbOverNetwork() {
+        // If adb TCP port opened, this test may running by adb over network.
+        return (SystemProperties.getInt("persist.adb.tcp.port", -1) > -1)
+                || (SystemProperties.getInt("service.adb.tcp.port", -1) > -1);
+    }
+
     @Test
     public void testPhysicalEthernet() throws Exception {
         assumeTrue(mEm.isAvailable());
+        // Do not run this test if adb is over network and ethernet is connected.
+        // It is likely the adb run over ethernet, the adb would break when ethernet is switching
+        // from client mode to server mode. See b/160389275.
+        assumeFalse(isAdbOverNetwork());
 
         // Get an interface to use.
         final String iface = mTetheredInterfaceRequester.getInterface();
@@ -339,7 +354,7 @@ public class EthernetTetheringTest {
     private MyTetheringEventCallback enableEthernetTethering(String iface) throws Exception {
         return enableEthernetTethering(iface,
                 new TetheringRequest.Builder(TETHERING_ETHERNET)
-                .setExemptFromEntitlementCheck(true).build());
+                .setShouldShowEntitlementUi(false).build());
     }
 
     private int getMTU(TestNetworkInterface iface) throws SocketException {
@@ -510,7 +525,7 @@ public class EthernetTetheringTest {
         LinkAddress clientAddr = client == null ? null : new LinkAddress(client);
         return new TetheringRequest.Builder(TETHERING_ETHERNET)
                 .setStaticIpv4Addresses(localAddr, clientAddr)
-                .setExemptFromEntitlementCheck(true).build();
+                .setShouldShowEntitlementUi(false).build();
     }
 
     private void assertInvalidStaticIpv4Request(String iface, String local, String client)

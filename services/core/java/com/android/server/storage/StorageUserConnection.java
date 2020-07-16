@@ -62,7 +62,7 @@ import java.util.concurrent.TimeoutException;
 public final class StorageUserConnection {
     private static final String TAG = "StorageUserConnection";
 
-    public static final int REMOTE_TIMEOUT_SECONDS = 5;
+    public static final int REMOTE_TIMEOUT_SECONDS = 20;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -202,6 +202,7 @@ public final class StorageUserConnection {
         try {
             if (!latch.await(REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 // TODO(b/140025078): Call ActivityManager ANR API?
+                Slog.wtf(TAG, "Failed to bind to the ExternalStorageService for user " + mUserId);
                 throw new TimeoutException("Latch wait for " + reason + " elapsed");
             }
         } catch (InterruptedException e) {
@@ -413,20 +414,18 @@ public final class StorageUserConnection {
                         resetUserSessions();
                     }
                 };
-            }
 
-            Slog.i(TAG, "Binding to the ExternalStorageService for user " + mUserId);
-            if (mContext.bindServiceAsUser(new Intent().setComponent(name), mServiceConnection,
-                            Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
-                            UserHandle.of(mUserId))) {
-                Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
-                return mLatch;
-            } else {
-                synchronized (mLock) {
+                Slog.i(TAG, "Binding to the ExternalStorageService for user " + mUserId);
+                if (mContext.bindServiceAsUser(new Intent().setComponent(name), mServiceConnection,
+                        Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                        UserHandle.of(mUserId))) {
+                    Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
+                    return mLatch;
+                } else {
                     mIsConnecting = false;
+                    throw new ExternalStorageServiceException(
+                            "Failed to bind to the ExternalStorageService for user " + mUserId);
                 }
-                throw new ExternalStorageServiceException(
-                        "Failed to bind to the ExternalStorageService for user " + mUserId);
             }
         }
     }

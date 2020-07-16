@@ -77,6 +77,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     protected boolean mShouldTranslateContents;
     private boolean mTopAmountRounded;
     private float mDistanceToTopRoundness = -1;
+    private float[] mTmpCornerRadii = new float[8];
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -138,38 +139,22 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             bottomRoundness -= overShoot * mCurrentBottomRoundness
                     / (mCurrentTopRoundness + mCurrentBottomRoundness);
         }
-        getRoundedRectPath(left, top, right, bottom, topRoundness,
-                bottomRoundness, mTmpPath);
+        getRoundedRectPath(left, top, right, bottom, topRoundness, bottomRoundness, mTmpPath);
         return mTmpPath;
     }
 
-    public static void getRoundedRectPath(int left, int top, int right, int bottom,
+    public void getRoundedRectPath(int left, int top, int right, int bottom,
             float topRoundness, float bottomRoundness, Path outPath) {
         outPath.reset();
-        int width = right - left;
-        float topRoundnessX = topRoundness;
-        float bottomRoundnessX = bottomRoundness;
-        topRoundnessX = Math.min(width / 2, topRoundnessX);
-        bottomRoundnessX = Math.min(width / 2, bottomRoundnessX);
-        if (topRoundness > 0.0f) {
-            outPath.moveTo(left, top + topRoundness);
-            outPath.quadTo(left, top, left + topRoundnessX, top);
-            outPath.lineTo(right - topRoundnessX, top);
-            outPath.quadTo(right, top, right, top + topRoundness);
-        } else {
-            outPath.moveTo(left, top);
-            outPath.lineTo(right, top);
-        }
-        if (bottomRoundness > 0.0f) {
-            outPath.lineTo(right, bottom - bottomRoundness);
-            outPath.quadTo(right, bottom, right - bottomRoundnessX, bottom);
-            outPath.lineTo(left + bottomRoundnessX, bottom);
-            outPath.quadTo(left, bottom, left, bottom - bottomRoundness);
-        } else {
-            outPath.lineTo(right, bottom);
-            outPath.lineTo(left, bottom);
-        }
-        outPath.close();
+        mTmpCornerRadii[0] = topRoundness;
+        mTmpCornerRadii[1] = topRoundness;
+        mTmpCornerRadii[2] = topRoundness;
+        mTmpCornerRadii[3] = topRoundness;
+        mTmpCornerRadii[4] = bottomRoundness;
+        mTmpCornerRadii[5] = bottomRoundness;
+        mTmpCornerRadii[6] = bottomRoundness;
+        mTmpCornerRadii[7] = bottomRoundness;
+        outPath.addRoundRect(left, top, right, bottom, mTmpCornerRadii, Path.Direction.CW);
     }
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
@@ -188,9 +173,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             int right = getWidth() + (int) (mExtraWidthForClipping + left);
             int bottom = (int) Math.max(mMinimumHeightForClipping,
                     Math.max(getActualHeight() - mClipBottomAmount, top + mOutlineRadius));
-            ExpandableOutlineView.getRoundedRectPath(left, top, right, bottom, mOutlineRadius,
-                    0.0f,
-                    mClipPath);
+            getRoundedRectPath(left, top, right, bottom, mOutlineRadius, 0.0f, mClipPath);
             intersectPath = mClipPath;
         }
         boolean clipped = false;

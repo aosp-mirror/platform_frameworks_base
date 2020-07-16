@@ -225,6 +225,8 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
     @VisibleForTesting
     final class Receiver extends BroadcastReceiver {
 
+        private boolean mHasReceivedBattery = false;
+
         public void init() {
             // Register for Intent broadcasts for...
             IntentFilter filter = new IntentFilter();
@@ -234,6 +236,17 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler);
+            // Force get initial values. Relying on Sticky behavior until API for getting info.
+            if (!mHasReceivedBattery) {
+                // Get initial state
+                Intent intent = mContext.registerReceiver(
+                        null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                );
+                if (intent != null) {
+                    onReceive(mContext, intent);
+                }
+            }
         }
 
         @Override
@@ -246,6 +259,7 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
                     }
                 });
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                mHasReceivedBattery = true;
                 final int oldBatteryLevel = mBatteryLevel;
                 mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 100);
                 final int oldBatteryStatus = mBatteryStatus;
@@ -374,8 +388,10 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             BatteryStateSnapshot lastSnapshot) {
         // if we are now over 45% battery & 6 hours remaining so we can trigger hybrid
         // notification again
+        final long timeRemainingMillis = currentSnapshot.getTimeRemainingMillis();
         if (currentSnapshot.getBatteryLevel() >= CHARGE_CYCLE_PERCENT_RESET
-                && currentSnapshot.getTimeRemainingMillis() > SIX_HOURS_MILLIS) {
+                && (timeRemainingMillis > SIX_HOURS_MILLIS
+                || timeRemainingMillis == NO_ESTIMATE_AVAILABLE)) {
             mLowWarningShownThisChargeCycle = false;
             mSevereWarningShownThisChargeCycle = false;
             if (DEBUG) {
@@ -390,8 +406,8 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             mWarnings.showLowBatteryWarning(playSound);
             // mark if we've already shown a warning this cycle. This will prevent the notification
             // trigger from spamming users by only showing low/critical warnings once per cycle
-            if (currentSnapshot.getTimeRemainingMillis()
-                    <= currentSnapshot.getSevereThresholdMillis()
+            if ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
+                    && timeRemainingMillis <= currentSnapshot.getSevereThresholdMillis())
                     || currentSnapshot.getBatteryLevel()
                     <= currentSnapshot.getSevereLevelThreshold()) {
                 mSevereWarningShownThisChargeCycle = true;
@@ -426,15 +442,18 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             return false;
         }
 
+        final long timeRemainingMillis = snapshot.getTimeRemainingMillis();
         // Only show the low warning if enabled once per charge cycle & no battery saver
         final boolean canShowWarning = snapshot.isLowWarningEnabled()
                 && !mLowWarningShownThisChargeCycle && !snapshot.isPowerSaver()
-                && (snapshot.getTimeRemainingMillis() < snapshot.getLowThresholdMillis()
+                && ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
+                && timeRemainingMillis < snapshot.getLowThresholdMillis())
                 || snapshot.getBatteryLevel() <= snapshot.getLowLevelThreshold());
 
         // Only show the severe warning once per charge cycle
         final boolean canShowSevereWarning = !mSevereWarningShownThisChargeCycle
-                && (snapshot.getTimeRemainingMillis() < snapshot.getSevereThresholdMillis()
+                && ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
+                && timeRemainingMillis < snapshot.getSevereThresholdMillis())
                 || snapshot.getBatteryLevel() <= snapshot.getSevereLevelThreshold());
 
         final boolean canShow = canShowWarning || canShowSevereWarning;

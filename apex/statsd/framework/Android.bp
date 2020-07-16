@@ -20,8 +20,8 @@ genrule {
     name: "statslog-statsd-java-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --module statsd" +
-         " --javaPackage com.android.internal.util --javaClass StatsdStatsLog",
-    out: ["com/android/internal/util/StatsdStatsLog.java"],
+         " --javaPackage com.android.internal.statsd --javaClass StatsdStatsLog",
+    out: ["com/android/internal/statsd/StatsdStatsLog.java"],
 }
 
 java_library_static {
@@ -51,11 +51,6 @@ java_sdk_library {
     defaults: ["framework-module-defaults"],
     installable: true,
 
-    // TODO(b/155480189) - Remove naming_scheme once references have been resolved.
-    // Temporary java_sdk_library component naming scheme to use to ease the transition from separate
-    // modules to java_sdk_library.
-    naming_scheme: "framework-modules",
-
     srcs: [
         ":framework-statsd-sources",
     ],
@@ -65,7 +60,7 @@ java_sdk_library {
         "android.os",
         "android.util",
         // From :statslog-statsd-java-gen
-        "com.android.internal.util",
+        "com.android.internal.statsd",
     ],
 
     api_packages: [
@@ -79,6 +74,7 @@ java_sdk_library {
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd:__subpackages__", // statsd apex
+        "//frameworks/base/packages/Tethering", // Tethering
         "//frameworks/opt/net/wifi/service", // wifi service
         "//packages/providers/MediaProvider", // MediaProvider apk
     ],
@@ -94,26 +90,3 @@ java_sdk_library {
         "test_com.android.os.statsd",
     ],
 }
-
-android_test {
-    name: "FrameworkStatsdTest",
-    platform_apis: true,
-    srcs: [
-        // TODO(b/147705194): Use framework-statsd as a lib dependency instead.
-        ":framework-statsd-sources",
-        "test/**/*.java",
-    ],
-    manifest: "test/AndroidManifest.xml",
-    static_libs: [
-        "androidx.test.rules",
-        "truth-prebuilt",
-    ],
-    libs: [
-        "android.test.runner.stubs",
-        "android.test.base.stubs",
-    ],
-    test_suites: [
-        "device-tests",
-    ],
-}
-

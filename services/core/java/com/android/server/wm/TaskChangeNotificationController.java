@@ -61,6 +61,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 26;
     private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 27;
     private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 28;
+    private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 29;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -183,6 +184,10 @@ class TaskChangeNotificationController {
         l.onTaskRequestedOrientationChanged(m.arg1, m.arg2);
     };
 
+    private final TaskStackConsumer mNotifyOnActivityRotation = (l, m) -> {
+        l.onActivityRotation(m.arg1);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -276,6 +281,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG:
                     forAllRemoteListeners(mNotifyTaskRequestedOrientationChanged, msg);
+                    break;
+                case NOTIFY_ACTIVITY_ROTATED_MSG:
+                    forAllRemoteListeners(mNotifyOnActivityRotation, msg);
                     break;
             }
             if (msg.obj instanceof SomeArgs) {
@@ -572,6 +580,14 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG,
                 taskId, requestedOrientation);
         forAllLocalListeners(mNotifyTaskRequestedOrientationChanged, msg);
+        msg.sendToTarget();
+    }
+
+    /** @see android.app.ITaskStackListener#onActivityRotation(int) */
+    void notifyOnActivityRotation(int displayId) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_ROTATED_MSG,
+                displayId, 0 /* unused */);
+        forAllLocalListeners(mNotifyOnActivityRotation, msg);
         msg.sendToTarget();
     }
 }

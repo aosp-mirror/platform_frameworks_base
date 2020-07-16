@@ -17,7 +17,9 @@
 <!--
 This XML file declares which system packages should be initially installed for new users based on
 their user type. All system packages on the device should ideally have an entry in an xml file
-(keyed by its manifest name).
+(keyed by its manifest name), except auto-generated rro packages. Auto-generated RRO packages 
+(package name ends with ".auto_generated_rro_product__" or ".auto_generated_rro_vendor__")
+will be installed for new users according to corresponding overlay target packages.
 
 Base user-types (every user will be at least one of these types) are:
   SYSTEM    (user 0)
@@ -51,7 +53,7 @@ The following three examples should cover most normal cases:
 
 
 2. For a system package to be pre-installed on all human users (e.g. a web browser), i.e. to be
-installed on any user of type type FULL or PROFILE (since this covers all human users):
+installed on any user of type FULL or PROFILE (since this covers all human users):
 
    <install-in-user-type package="com.android.example">
        <install-in user-type="FULL" />

@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Tālumm., lai aizp. ekr."</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Stiepiet, lai aizp. ekr."</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Ekrānuzņēmums"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Atbloķējiet tālruni, lai skatītu citas opcijas."</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Atbloķējiet planšetdatoru, lai skatītu citas opcijas."</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Atbloķējiet ierīci, lai skatītu citas opcijas."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nosūtīts attēls"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Saglabā ekrānuzņēmumu…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Notiek ekrānuzņēmuma saglabāšana..."</string>
@@ -459,8 +456,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Pieskarieties vēlreiz, lai atvērtu"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Velciet augšup, lai atvērtu"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Velciet augšup, lai mēģinātu vēlreiz"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Šo ierīci pārvalda jūsu organizācija"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Šo ierīci pārvalda <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Šī ierīce pieder jūsu organizācijai."</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Lai lietotu tālruni, velciet no ikonas"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Lai lietotu balss palīgu, velciet no ikonas"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Lai lietotu kameru, velciet no ikonas"</string>
@@ -516,7 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Dzēst visu"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Pārvaldīt"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Vēsture"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Ienākošie"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Jauni"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Klusums"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Paziņojumi"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Sarunas"</string>
@@ -527,21 +524,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profilu var pārraudzīt"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Iespējams, tīklā veiktās darbības tiek pārraudzītas."</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Var tikt pārraudzītas tīklā veiktās darbības."</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"Jūsu organizācija pārvalda šo ierīci un var uzraudzīt tīkla datplūsmu."</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> pārvalda šo ierīci un var uzraudzīt tīkla datplūsmu."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Ierīci pārvalda jūsu organizācija, un tai ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Ierīci pārvalda <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, un tai ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Ierīci pārvalda jūsu organizācija"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Šo ierīci pārvalda <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Ierīci pārvalda jūsu organizācija un tai ir izveidots savienojums ar VPN."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Ierīci pārvalda <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, un tai ir izveidots savienojums ar VPN."</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Šī ierīce pieder jūsu organizācijai, un jūsu organizācija var uzraudzīt tīkla datplūsmu."</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Šī ierīce pieder organizācijai<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, un šī organizācija var uzraudzīt tīkla datplūsmu."</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Šī ierīce pieder jūsu organizācijai un ir saistīta ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> un ir savienota ar: <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Šī ierīce pieder jūsu organizācijai."</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Šī ierīce pieder jūsu organizācijai un ir savienota ar virtuālajiem privātajiem tīkliem."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Šī ierīce pieder organizācijai<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> un ir savienota ar virtuālajiem privātajiem tīkliem."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Jūsu organizācija var uzraudzīt jūsu darba profila tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> var uzraudzīt jūsu profila tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Var tikt pārraudzītas tīklā veiktās darbības."</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Ierīcei ir izveidots savienojums ar VPN."</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Darba profilam tika izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Personīgajam profilam ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Šī ierīce ir saistīta ar virtuālajiem privātajiem tīkliem."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jūsu darba profils ir savienots ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Jūsu personīgais profils ir saistīts ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Šī ierīce ir savienota ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Ierīces pārvaldība"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profila pārraudzība"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Tīkla pārraudzība"</string>
@@ -551,8 +548,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Atspējot VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Atvienot VPN tīklu"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Skatīt politikas"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes, ar ierīci saistītos datus un ierīces atrašanās vietas informāciju.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Jūsu ierīci pārvalda jūsu organizācija.\n\nAdministrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes, ar ierīci saistītos datus un ierīces atrašanās vietas informāciju.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nJūsu IT administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes, ar ierīci saistītos datus un ierīces atrašanās vietas informāciju.\n\nLai iegūtu plašāku informāciju, sazinieties ar IT administratoru."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Šī ierīce pieder jūsu organizācijai.\n\nJūsu IT administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes, ar ierīci saistītos datus un ierīces atrašanās vietas informāciju.\n\nLai iegūtu plašāku informāciju, sazinieties ar IT administratoru."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Jūsu organizācija instalēja sertifikātu šajā ierīcē. Jūsu drošā tīkla datplūsma var tikt uzraudzīta."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Jūsu organizācija instalēja sertifikātu jūsu darba profilā. Jūsu drošā tīkla datplūsma var tikt uzraudzīta."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Šajā ierīcē ir instalēts sertifikāts. Drošā tīkla datplūsma var tikt uzraudzīta."</string>
@@ -725,7 +722,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Parādās sarunu sadaļas augšdaļā un kā peldošs burbulis, kā arī bloķēšanas ekrānā tiek rādīts profila attēls"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Iestatījumi"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstīti atsevišķu sarunu iestatījumi."</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstītas sarunu funkcijas."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nav nesen aizvērtu burbuļu"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Šeit būs redzami nesen rādītie burbuļi un aizvērtie burbuļi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šos paziņojumus nevar modificēt."</string>
@@ -928,6 +925,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Apturēt"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Pāriet uz nākamo"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Pāriet uz iepriekšējo"</string>
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Mainīt lielumu"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tālrunis izslēgts karstuma dēļ"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Tagad jūsu tālrunis darbojas normāli"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Jūsu tālrunis bija pārkarsis un tika izslēgts. Tagad tas darbojas normāli.\n\nTālrunis var sakarst, ja:\n	• tiek izmantotas lietotnes, kas patērē daudz enerģijas (piem., spēles, video lietotnes vai navigācija);\n	• tiek lejupielādēti/augšupielādēti lieli faili;\n	• tālrunis tiek lietots augstā temperatūrā."</string>
@@ -1010,22 +1008,25 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Pārvietot augšpusē pa labi"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Pārvietot apakšpusē pa kreisi"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Pārvietot apakšpusē pa labi"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Nerādīt"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Nerādīt burbuli"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nerādīt sarunu burbuļos"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Tērzēšana, izmantojot burbuļus"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Jaunas sarunas tiek rādītas kā peldošas ikonas vai burbuļi. Pieskarieties, lai atvērtu burbuli. Velciet, lai to pārvietotu."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Pārvaldīt burbuļus jebkurā laikā"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Allaž pārvaldīt burbuļus"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Pieskarieties pogai “Pārvaldīt”, lai izslēgtu burbuļus no šīs lietotnes."</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Labi"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Lietotnes <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> iestatījumi"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistēmas navigācija ir atjaunināta. Lai veiktu izmaiņas, atveriet iestatījumus."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Atveriet iestatījumus, lai atjauninātu sistēmas navigāciju"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gaidstāve"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Saruna iestatīta kā prioritāra"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritārās sarunas:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Tiek rādītas sarunu sadaļas augšdaļā"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tiek rādīts profila attēls bloķēšanas ekrānā"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Tiek rādītas kā peldošs burbulis virs lietotnēm"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Var tikt rādītas režīmā “Netraucēt”"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Labi"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Iestatījumi"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Palielināšanas pārklājuma logs"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Palielināšanas logs"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Palielināšanas loga vadīklas"</string>
@@ -1051,7 +1052,9 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Lai pārkārtotu vadīklas, turiet un velciet tās"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Visas vadīklas ir noņemtas"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Izmaiņas nav saglabātas."</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nevarēja ielādēt sarakstu ar visām vadīklām."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Skatīt citas lietotnes"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nevarēja ielādēt vadīklas. Lietotnē <xliff:g id="APP">%s</xliff:g> pārbaudiet, vai nav mainīti lietotnes iestatījumi."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nav pieejamas saderīgas vadīklas"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Cita"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Pievienošana ierīču vadīklām"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Pievienot"</string>
@@ -1067,10 +1070,17 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Izmaiņu apstiprināšana ierīcei <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Velciet, lai skatītu citus vienumus"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Notiek ieteikumu ielāde"</string>
-    <string name="controls_media_close_session" msgid="9023534788828414585">"Aizvērt multivides sesiju"</string>
+    <string name="controls_media_title" msgid="1746947284862928133">"Multivide"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Paslēpiet pašreizējo sesiju."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Paslēpt"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Atsākt"</string>
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Radās kļūda. Mēģina vēlreiz…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Ierīce ir noņemta."</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Netika atrasta"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Vadīkla nav pieejama"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nevarēja piekļūt ierīcei “<xliff:g id="DEVICE">%1$s</xliff:g>”. Lietotnē <xliff:g id="APPLICATION">%2$s</xliff:g> pārbaudiet, vai vadīkla joprojām ir pieejama un vai nav mainīti lietotnes iestatījumi."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Atvērt lietotni"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Nevar ielādēt statusu."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Radās kļūda. Mēģiniet vēlreiz."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Sākta"</string>

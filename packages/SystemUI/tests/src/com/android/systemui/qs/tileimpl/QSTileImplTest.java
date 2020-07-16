@@ -14,6 +14,10 @@
 
 package com.android.systemui.qs.tileimpl;
 
+
+import static androidx.lifecycle.Lifecycle.State.DESTROYED;
+import static androidx.lifecycle.Lifecycle.State.RESUMED;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
@@ -23,6 +27,9 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -265,6 +272,42 @@ public class QSTileImplTest extends SysuiTestCase {
 
         mTile.handleSetListening(false);
         verify(mQsLogger).logTileChangeListening(SPEC, false);
+    }
+
+    @Test
+    public void testListeningTrue_stateAtLeastResumed() {
+        mTile.setListening(new Object(), true); // Listen with some object
+
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mTile.getLifecycle().getCurrentState().isAtLeast(RESUMED));
+    }
+
+    @Test
+    public void testTileDoesntStartResumed() {
+        assertFalse(mTile.getLifecycle().getCurrentState().isAtLeast(RESUMED));
+    }
+
+    @Test
+    public void testListeningFalse_stateAtMostCreated() {
+        Object o = new Object();
+        mTile.setListening(o, true);
+
+        mTile.setListening(o, false);
+
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mTile.getLifecycle().getCurrentState().isAtLeast(RESUMED));
+    }
+
+    @Test
+    public void testListeningFalse_stateNotDestroyed() {
+        Object o = new Object();
+        mTile.setListening(o, true);
+
+        mTile.setListening(o, false);
+
+        TestableLooper.get(this).processAllMessages();
+        assertNotEquals(DESTROYED, mTile.getLifecycle().getCurrentState());
     }
 
     private void assertEvent(UiEventLogger.UiEventEnum eventType,

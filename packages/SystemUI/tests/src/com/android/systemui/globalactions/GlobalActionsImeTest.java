@@ -18,6 +18,7 @@ package com.android.systemui.globalactions;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -39,6 +40,7 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,6 +54,11 @@ public class GlobalActionsImeTest extends SysuiTestCase {
     public ActivityTestRule<TestActivity> mActivityTestRule = new ActivityTestRule<>(
             TestActivity.class, false, false);
 
+    @After
+    public void tearDown() {
+        executeShellCommand("input keyevent HOME");
+    }
+
     /**
      * This test verifies that GlobalActions, which is frequently used to capture bugreports,
      * doesn't interfere with the IME, i.e. soft-keyboard state.
@@ -60,8 +67,16 @@ public class GlobalActionsImeTest extends SysuiTestCase {
     public void testGlobalActions_doesntStealImeControl() throws Exception {
         turnScreenOn();
         final TestActivity activity = mActivityTestRule.launchActivity(null);
+        boolean isImeVisible = waitUntil(activity::isImeVisible);
+        if (!isImeVisible) {
+            // Sometimes the keyboard is dismissed when run with other tests. Bringing it up again
+            // should improve test reliability
+            activity.showIme();
+            waitUntil("Ime is not visible", activity::isImeVisible);
+        }
 
-        waitUntil("Ime is visible", activity::isImeVisible);
+        // In some cases, IME is not controllable. e.g., floating IME or fullscreen IME.
+        final boolean activityControlledIme = activity.mControlsIme;
 
         executeShellCommand("input keyevent --longpress POWER");
 
@@ -72,9 +87,9 @@ public class GlobalActionsImeTest extends SysuiTestCase {
 
         runAssertionOnMainThread(() -> {
             assertTrue("IME should remain visible behind GlobalActions, but didn't",
-                    activity.mControlsIme);
-            assertTrue("App behind GlobalActions should remain in control of IME, but didn't",
                     activity.mImeVisible);
+            assertEquals("App behind GlobalActions should remain in control of IME, but didn't",
+                    activityControlledIme, activity.mControlsIme);
         });
     }
 
@@ -91,17 +106,23 @@ public class GlobalActionsImeTest extends SysuiTestCase {
 
     private static void waitUntil(String message, BooleanSupplier predicate)
             throws Exception {
+        if (!waitUntil(predicate)) {
+            fail(message);
+        }
+    }
+
+    private static boolean waitUntil(BooleanSupplier predicate) throws Exception {
         int sleep = 125;
         final long timeout = SystemClock.uptimeMillis() + 10_000;  // 10 second timeout
         while (SystemClock.uptimeMillis() < timeout) {
             if (predicate.getAsBoolean()) {
-                return; // okay
+                return true;
             }
             Thread.sleep(sleep);
             sleep *= 5;
             sleep = Math.min(2000, sleep);
         }
-        fail(message);
+        return false;
     }
 
     private static void executeShellCommand(String cmd) {
@@ -130,6 +151,7 @@ public class GlobalActionsImeTest extends SysuiTestCase {
             WindowInsetsController.OnControllableInsetsChangedListener,
             View.OnApplyWindowInsetsListener {
 
+        private EditText mEditText;
         boolean mHasFocus;
         boolean mControlsIme;
         boolean mImeVisible;
@@ -137,14 +159,16 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            mEditText = new EditText(this);
+            mEditText.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
+            setContentView(mEditText);
+            showIme();
+        }
 
-            EditText content = new EditText(this);
-            content.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
-            setContentView(content);
-            content.requestFocus();
-
+        private void showIme() {
+            mEditText.requestFocus();
             getWindow().getDecorView().setOnApplyWindowInsetsListener(this);
-            WindowInsetsController wic = content.getWindowInsetsController();
+            WindowInsetsController wic = mEditText.getWindowInsetsController();
             wic.addOnControllableInsetsChangedListener(this);
             wic.show(ime());
         }
@@ -167,7 +191,7 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         }
 
         boolean isImeVisible() {
-            return mHasFocus && mControlsIme && mImeVisible;
+            return mHasFocus && mImeVisible;
         }
 
         @Override

@@ -35,7 +35,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -56,9 +55,9 @@ public class DozeFactory {
     private final DockManager mDockManager;
     private final IWallpaperManager mWallpaperManager;
     private final ProximitySensor mProximitySensor;
+    private final ProximitySensor.ProximityCheck mProximityCheck;
     private final DelayedWakeLock.Builder mDelayedWakeLockBuilder;
     private final Handler mHandler;
-    private final DelayableExecutor mDelayableExecutor;
     private final BiometricUnlockController mBiometricUnlockController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DozeHost mDozeHost;
@@ -69,9 +68,8 @@ public class DozeFactory {
             AsyncSensorManager asyncSensorManager, AlarmManager alarmManager,
             WakefulnessLifecycle wakefulnessLifecycle, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DockManager dockManager, @Nullable IWallpaperManager wallpaperManager,
-            ProximitySensor proximitySensor,
+            ProximitySensor proximitySensor, ProximitySensor.ProximityCheck proximityCheck,
             DelayedWakeLock.Builder delayedWakeLockBuilder, @Main Handler handler,
-            DelayableExecutor delayableExecutor,
             BiometricUnlockController biometricUnlockController,
             BroadcastDispatcher broadcastDispatcher, DozeHost dozeHost) {
         mFalsingManager = falsingManager;
@@ -85,9 +83,9 @@ public class DozeFactory {
         mDockManager = dockManager;
         mWallpaperManager = wallpaperManager;
         mProximitySensor = proximitySensor;
+        mProximityCheck = proximityCheck;
         mDelayedWakeLockBuilder = delayedWakeLockBuilder;
         mHandler = handler;
-        mDelayableExecutor = delayableExecutor;
         mBiometricUnlockController = biometricUnlockController;
         mBroadcastDispatcher = broadcastDispatcher;
         mDozeHost = dozeHost;
@@ -112,8 +110,8 @@ public class DozeFactory {
                 new DozePauser(mHandler, machine, mAlarmManager, mDozeParameters.getPolicy()),
                 new DozeFalsingManagerAdapter(mFalsingManager),
                 createDozeTriggers(dozeService, mAsyncSensorManager, mDozeHost,
-                        mAlarmManager, config, mDozeParameters, mDelayableExecutor, wakeLock,
-                        machine, mDockManager, mDozeLog),
+                        mAlarmManager, config, mDozeParameters, wakeLock,
+                        machine, mDockManager, mDozeLog, mProximityCheck),
                 createDozeUi(dozeService, mDozeHost, wakeLock, machine, mHandler,
                         mAlarmManager, mDozeParameters, mDozeLog),
                 new DozeScreenState(wrappedService, mHandler, mDozeHost, mDozeParameters,
@@ -140,12 +138,13 @@ public class DozeFactory {
 
     private DozeTriggers createDozeTriggers(Context context, AsyncSensorManager sensorManager,
             DozeHost host, AlarmManager alarmManager, AmbientDisplayConfiguration config,
-            DozeParameters params, DelayableExecutor delayableExecutor, WakeLock wakeLock,
-            DozeMachine machine, DockManager dockManager, DozeLog dozeLog) {
+            DozeParameters params, WakeLock wakeLock,
+            DozeMachine machine, DockManager dockManager, DozeLog dozeLog,
+            ProximitySensor.ProximityCheck proximityCheck) {
         boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, alarmManager, config, params,
-                sensorManager, delayableExecutor, wakeLock, allowPulseTriggers, dockManager,
-                mProximitySensor, dozeLog, mBroadcastDispatcher);
+                sensorManager, wakeLock, allowPulseTriggers, dockManager,
+                mProximitySensor, proximityCheck, dozeLog, mBroadcastDispatcher);
 
     }
 

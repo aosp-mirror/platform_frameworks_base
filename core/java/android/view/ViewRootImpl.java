@@ -21,7 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.LAST_TYPE;
+import static android.view.InsetsState.SIZE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -564,7 +564,7 @@ public final class ViewRootImpl implements ViewParent,
             new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
     boolean mPendingAlwaysConsumeSystemBars;
     private final InsetsState mTempInsets = new InsetsState();
-    private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[LAST_TYPE + 1];
+    private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[SIZE];
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1726,7 +1726,9 @@ public final class ViewRootImpl implements ViewParent,
                 destroySurface();
             }
         }
+        scheduleConsumeBatchedInputImmediately();
     }
+
 
     /** Register callbacks to be notified when the ViewRootImpl surface changes. */
     interface SurfaceChangedCallback {
@@ -1780,6 +1782,7 @@ public final class ViewRootImpl implements ViewParent,
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
                     .setParent(getRenderSurfaceControl())
+                    .setCallsite("ViewRootImpl.getBoundsLayer")
                     .build();
             setBoundsLayerCrop();
             mTransaction.show(mBoundsLayer).apply();
@@ -1821,13 +1824,19 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Called after window layout to update the bounds surface. If the surface insets have changed
      * or the surface has resized, update the bounds surface.
+     *
+     * @param shouldReparent Whether it should reparent the bounds layer to the main SurfaceControl.
      */
-    private void updateBoundsLayer() {
+    private void updateBoundsLayer(boolean shouldReparent) {
         if (mBoundsLayer != null) {
             setBoundsLayerCrop();
-            mTransaction.deferTransactionUntil(mBoundsLayer,
-                    getRenderSurfaceControl(), mSurface.getNextFrameNumber())
-                    .apply();
+            mTransaction.deferTransactionUntil(mBoundsLayer, getRenderSurfaceControl(),
+                    mSurface.getNextFrameNumber());
+
+            if (shouldReparent) {
+                mTransaction.reparent(mBoundsLayer, getRenderSurfaceControl());
+            }
+            mTransaction.apply();
         }
     }
 
@@ -2314,7 +2323,7 @@ public final class ViewRootImpl implements ViewParent,
                 || lp.type == TYPE_VOLUME_OVERLAY;
     }
 
-    private int dipToPx(int dip) {
+    int dipToPx(int dip) {
         final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         return (int) (displayMetrics.density * dip + 0.5f);
     }
@@ -2722,7 +2731,6 @@ public final class ViewRootImpl implements ViewParent,
                             mAttachInfo.mThreadedRenderer.isEnabled()) {
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
-                    notifySurfaceDestroyed();
                 } else if ((surfaceReplaced
                         || surfaceSizeChanged || windowRelayoutWasForced || colorModeChanged)
                         && mSurfaceHolder == null
@@ -2910,7 +2918,16 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (surfaceSizeChanged || surfaceReplaced || surfaceCreated || windowAttributesChanged) {
-            updateBoundsLayer();
+            // If the surface has been replaced, there's a chance the bounds layer is not parented
+            // to the new layer. When updating bounds layer, also reparent to the main VRI
+            // SurfaceControl to ensure it's correctly placed in the hierarchy.
+            //
+            // This needs to be done on the client side since WMS won't reparent the children to the
+            // new surface if it thinks the app is closing. WMS gets the signal that the app is
+            // stopping, but on the client side it doesn't get stopped since it's restarted quick
+            // enough. WMS doesn't want to keep around old children since they will leak when the
+            // client creates new children.
+            updateBoundsLayer(surfaceReplaced);
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
@@ -2951,6 +2968,10 @@ public final class ViewRootImpl implements ViewParent,
                 System.out.println("performTraversals -- after setFrame");
                 host.debug();
             }
+        }
+
+        if (surfaceDestroyed) {
+            notifySurfaceDestroyed();
         }
 
         if (triggerGlobalLayoutListener) {
@@ -4616,6 +4637,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void dispatchDetachedFromWindow() {
+        // Make sure we free-up insets resources if view never received onWindowFocusLost()
+        // because of a die-signal
+        mInsetsController.onWindowFocusLost();
         mFirstInputStage.onDetachedFromWindow();
         if (mView != null && mView.mAttachInfo != null) {
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(false);
@@ -8104,7 +8128,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void scheduleConsumeBatchedInput() {
-        if (!mConsumeBatchedInputScheduled) {
+        // If anything is currently scheduled to consume batched input then there's no point in
+        // scheduling it again.
+        if (!mConsumeBatchedInputScheduled && !mConsumeBatchedInputImmediatelyScheduled) {
             mConsumeBatchedInputScheduled = true;
             mChoreographer.postCallback(Choreographer.CALLBACK_INPUT,
                     mConsumedBatchedInputRunnable, null);
@@ -8127,22 +8153,15 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void doConsumeBatchedInput(long frameTimeNanos) {
-        if (mConsumeBatchedInputScheduled) {
-            mConsumeBatchedInputScheduled = false;
-            if (mInputEventReceiver != null) {
-                if (mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos)
-                        && frameTimeNanos != -1) {
-                    // If we consumed a batch here, we want to go ahead and schedule the
-                    // consumption of batched input events on the next frame. Otherwise, we would
-                    // wait until we have more input events pending and might get starved by other
-                    // things occurring in the process. If the frame time is -1, however, then
-                    // we're in a non-batching mode, so there's no need to schedule this.
-                    scheduleConsumeBatchedInput();
-                }
-            }
-            doProcessInputEvents();
+    boolean doConsumeBatchedInput(long frameTimeNanos) {
+        final boolean consumedBatches;
+        if (mInputEventReceiver != null) {
+            consumedBatches = mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos);
+        } else {
+            consumedBatches = false;
         }
+        doProcessInputEvents();
+        return consumedBatches;
     }
 
     final class TraversalRunnable implements Runnable {
@@ -8186,8 +8205,11 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onBatchedInputEventPending(int source) {
+            // mStopped: There will be no more choreographer callbacks if we are stopped,
+            // so we must consume all input immediately to prevent ANR
             final boolean unbuffered = mUnbufferedInputDispatch
-                    || (source & mUnbufferedInputSource) != SOURCE_CLASS_NONE;
+                    || (source & mUnbufferedInputSource) != SOURCE_CLASS_NONE
+                    || mStopped;
             if (unbuffered) {
                 if (mConsumeBatchedInputScheduled) {
                     unscheduleConsumeBatchedInput();
@@ -8215,7 +8237,14 @@ public final class ViewRootImpl implements ViewParent,
     final class ConsumeBatchedInputRunnable implements Runnable {
         @Override
         public void run() {
-            doConsumeBatchedInput(mChoreographer.getFrameTimeNanos());
+            mConsumeBatchedInputScheduled = false;
+            if (doConsumeBatchedInput(mChoreographer.getFrameTimeNanos())) {
+                // If we consumed a batch here, we want to go ahead and schedule the
+                // consumption of batched input events on the next frame. Otherwise, we would
+                // wait until we have more input events pending and might get starved by other
+                // things occurring in the process.
+                scheduleConsumeBatchedInput();
+            }
         }
     }
     final ConsumeBatchedInputRunnable mConsumedBatchedInputRunnable =
@@ -8225,6 +8254,7 @@ public final class ViewRootImpl implements ViewParent,
     final class ConsumeBatchedInputImmediatelyRunnable implements Runnable {
         @Override
         public void run() {
+            mConsumeBatchedInputImmediatelyScheduled = false;
             doConsumeBatchedInput(-1);
         }
     }
@@ -9363,6 +9393,11 @@ public final class ViewRootImpl implements ViewParent,
             return null;
         }
         return mInputEventReceiver.getToken();
+    }
+
+    @NonNull
+    public IBinder getWindowToken() {
+        return mAttachInfo.mWindowToken;
     }
 
     /**

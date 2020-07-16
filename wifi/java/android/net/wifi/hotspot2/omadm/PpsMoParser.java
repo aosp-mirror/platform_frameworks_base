@@ -937,7 +937,7 @@ public final class PpsMoParser {
      */
     private static Credential parseCredential(PPSNode node) throws ParsingException {
         if (node.isLeaf()) {
-            throw new ParsingException("Leaf node not expected for HomeSP");
+            throw new ParsingException("Leaf node not expected for Credential");
         }
 
         Credential credential = new Credential();
@@ -1009,8 +1009,8 @@ public final class PpsMoParser {
                     parseEAPMethod(child, userCred);
                     break;
                 default:
-                    throw new ParsingException("Unknown node under UsernamPassword: " +
-                            child.getName());
+                    throw new ParsingException("Unknown node under UsernamePassword: "
+                            + child.getName());
             }
         }
         return userCred;
@@ -1065,7 +1065,7 @@ public final class PpsMoParser {
     private static Credential.CertificateCredential parseCertificateCredential(PPSNode node)
             throws ParsingException {
         if (node.isLeaf()) {
-            throw new ParsingException("Leaf node not expected for DigitalCertificate");
+            throw new ParsingException("Leaf node not expected for CertificateCredential");
         }
 
         Credential.CertificateCredential certCred = new Credential.CertificateCredential();
@@ -1078,8 +1078,8 @@ public final class PpsMoParser {
                     certCred.setCertSha256Fingerprint(parseHexString(getPpsNodeValue(child)));
                     break;
                 default:
-                    throw new ParsingException("Unknown node under DigitalCertificate: " +
-                            child.getName());
+                    throw new ParsingException("Unknown node under CertificateCredential: "
+                            + child.getName());
             }
         }
         return certCred;
@@ -1096,7 +1096,7 @@ public final class PpsMoParser {
     private static Credential.SimCredential parseSimCredential(PPSNode node)
             throws ParsingException {
         if (node.isLeaf()) {
-            throw new ParsingException("Leaf node not expected for SIM");
+            throw new ParsingException("Leaf node not expected for SimCredential");
         }
 
         Credential.SimCredential simCred = new Credential.SimCredential();
@@ -1109,7 +1109,8 @@ public final class PpsMoParser {
                     simCred.setEapType(parseInteger(getPpsNodeValue(child)));
                     break;
                 default:
-                    throw new ParsingException("Unknown node under SIM: " + child.getName());
+                    throw new ParsingException("Unknown node under SimCredential: "
+                            + child.getName());
             }
         }
         return simCred;
@@ -1657,7 +1658,7 @@ public final class PpsMoParser {
     private static void parseVendorAndroidExtension(PPSNode node, PasspointConfiguration config)
             throws ParsingException {
         if (node.isLeaf()) {
-            throw new ParsingException("Leaf node not expected for Extension");
+            throw new ParsingException("Leaf node not expected for AndroidExtension");
         }
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
@@ -1707,7 +1708,8 @@ public final class PpsMoParser {
      */
     private static byte[] parseHexString(String str) throws ParsingException {
         if ((str.length() & 1) == 1) {
-            throw new ParsingException("Odd length hex string: " + str.length());
+            throw new ParsingException("Odd length hex string: " + str + ", length: "
+                    + str.length());
         }
 
         byte[] result = new byte[str.length() / 2];

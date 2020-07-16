@@ -32,8 +32,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.AlphaOptimizedImageView;
 
 import java.net.URISyntaxException;
 
@@ -53,8 +53,8 @@ public class CarNavigationButton extends LinearLayout {
     private static final String EXTRA_BUTTON_PACKAGES = "packages";
 
     private Context mContext;
-    private AlphaOptimizedImageButton mIcon;
-    private AlphaOptimizedImageButton mMoreIcon;
+    private AlphaOptimizedImageView mIcon;
+    private AlphaOptimizedImageView mMoreIcon;
     private ImageView mUnseenIcon;
     private String mIntent;
     private String mLongIntent;

@@ -95,6 +95,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             mSelectableTargetInfoCommunicator;
 
     private int mNumShortcutResults = 0;
+    private Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
 
     // Reserve spots for incoming direct share targets by adding placeholders
     private ChooserTargetInfo
@@ -181,6 +182,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     ri.icon = 0;
                 }
                 mCallerTargets.add(new DisplayResolveInfo(ii, ri, ii, makePresentationGetter(ri)));
+                if (mCallerTargets.size() == MAX_SUGGESTED_APP_TARGETS) break;
             }
         }
     }
@@ -238,11 +240,42 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     @Override
     protected void onBindView(View view, TargetInfo info, int position) {
-        super.onBindView(view, info, position);
-        if (info == null) return;
+        final ViewHolder holder = (ViewHolder) view.getTag();
+        if (info == null) {
+            holder.icon.setImageDrawable(
+                    mContext.getDrawable(R.drawable.resolver_icon_placeholder));
+            return;
+        }
+
+        if (!(info instanceof DisplayResolveInfo)) {
+            holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
+            holder.bindIcon(info);
+
+            if (info instanceof SelectableTargetInfo) {
+                // direct share targets should append the application name for a better readout
+                DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
+                CharSequence appName = rInfo != null ? rInfo.getDisplayLabel() : "";
+                CharSequence extendedInfo = info.getExtendedInfo();
+                String contentDescription = String.join(" ", info.getDisplayLabel(),
+                        extendedInfo != null ? extendedInfo : "", appName);
+                holder.updateContentDescription(contentDescription);
+            }
+        } else {
+            DisplayResolveInfo dri = (DisplayResolveInfo) info;
+            holder.bindLabel(dri.getDisplayLabel(), dri.getExtendedInfo(), alwaysShowSubLabel());
+            LoadIconTask task = mIconLoaders.get(dri);
+            if (task == null) {
+                task = new LoadIconTask(dri, holder);
+                mIconLoaders.put(dri, task);
+                task.execute();
+            } else {
+                // The holder was potentially changed as the underlying items were
+                // reshuffled, so reset the target holder
+                task.setViewHolder(holder);
+            }
+        }
 
         // If target is loading, show a special placeholder shape in the label, make unclickable
-        final ViewHolder holder = (ViewHolder) view.getTag();
         if (info instanceof ChooserActivity.PlaceHolderTargetInfo) {
             final int maxWidth = mContext.getResources().getDimensionPixelSize(
                     R.dimen.chooser_direct_share_label_placeholder_max_width);
@@ -274,33 +307,43 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     void updateAlphabeticalList() {
-        mSortedList.clear();
-        List<DisplayResolveInfo> tempList = new ArrayList<>();
-        tempList.addAll(mDisplayList);
-        tempList.addAll(mCallerTargets);
-        if (mEnableStackedApps) {
-            // Consolidate multiple targets from same app.
-            Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
-            for (DisplayResolveInfo info : tempList) {
-                String packageName = info.getResolvedComponentName().getPackageName();
-                DisplayResolveInfo multiDri = consolidated.get(packageName);
-                if (multiDri == null) {
-                    consolidated.put(packageName, info);
-                } else if (multiDri instanceof MultiDisplayResolveInfo) {
-                    ((MultiDisplayResolveInfo) multiDri).addTarget(info);
-                } else {
-                    // create consolidated target from the single DisplayResolveInfo
-                    MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, multiDri);
-                    multiDisplayResolveInfo.addTarget(info);
-                    consolidated.put(packageName, multiDisplayResolveInfo);
+        new AsyncTask<Void, Void, List<DisplayResolveInfo>>() {
+            @Override
+            protected List<DisplayResolveInfo> doInBackground(Void... voids) {
+                List<DisplayResolveInfo> allTargets = new ArrayList<>();
+                allTargets.addAll(mDisplayList);
+                allTargets.addAll(mCallerTargets);
+                if (!mEnableStackedApps) {
+                    return allTargets;
                 }
+                // Consolidate multiple targets from same app.
+                Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
+                for (DisplayResolveInfo info : allTargets) {
+                    String packageName = info.getResolvedComponentName().getPackageName();
+                    DisplayResolveInfo multiDri = consolidated.get(packageName);
+                    if (multiDri == null) {
+                        consolidated.put(packageName, info);
+                    } else if (multiDri instanceof MultiDisplayResolveInfo) {
+                        ((MultiDisplayResolveInfo) multiDri).addTarget(info);
+                    } else {
+                        // create consolidated target from the single DisplayResolveInfo
+                        MultiDisplayResolveInfo multiDisplayResolveInfo =
+                            new MultiDisplayResolveInfo(packageName, multiDri);
+                        multiDisplayResolveInfo.addTarget(info);
+                        consolidated.put(packageName, multiDisplayResolveInfo);
+                    }
+                }
+                List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
+                groupedTargets.addAll(consolidated.values());
+                Collections.sort(groupedTargets, new ChooserActivity.AzInfoComparator(mContext));
+                return groupedTargets;
             }
-            mSortedList.addAll(consolidated.values());
-        } else {
-            mSortedList.addAll(tempList);
-        }
-        Collections.sort(mSortedList, new ChooserActivity.AzInfoComparator(mContext));
+            @Override
+            protected void onPostExecute(List<DisplayResolveInfo> newList) {
+                mSortedList = newList;
+                notifyDataSetChanged();
+            }
+        }.execute();
     }
 
     @Override
@@ -320,7 +363,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
 
     public int getCallerTargetCount() {
-        return Math.min(mCallerTargets.size(), MAX_SUGGESTED_APP_TARGETS);
+        return mCallerTargets.size();
     }
 
     /**
@@ -346,8 +389,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     int getAlphaTargetCount() {
-        int standardCount = mSortedList.size();
-        return standardCount > mChooserListCommunicator.getMaxRankedTargets() ? standardCount : 0;
+        int groupedCount = mSortedList.size();
+        int ungroupedCount = mCallerTargets.size() + mDisplayList.size();
+        return ungroupedCount > mChooserListCommunicator.getMaxRankedTargets() ? groupedCount : 0;
     }
 
     /**
@@ -549,7 +593,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 mChooserTargetScores.put(componentName, new HashMap<>());
             }
             mChooserTargetScores.get(componentName).put(shortcutInfo.getShortLabel().toString(),
-                    shortcutInfo.getRank());
+                    target.getRank());
         }
         mChooserTargetScores.keySet().forEach(key -> rankTargetsWithinComponent(key));
     }
@@ -826,6 +870,12 @@ public class ChooserListAdapter extends ResolverListAdapter {
         return mServiceTargets.get(value).getChooserTarget();
     }
 
+    protected boolean alwaysShowSubLabel() {
+        // Always show a subLabel for visual consistency across list items. Show an empty
+        // subLabel if the subLabel is the same as the label
+        return true;
+    }
+
     /**
      * Rather than fully sorting the input list, this sorting task will put the top k elements
      * in the head of input list and fill the tail with other elements in undetermined order.
@@ -867,6 +917,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
         if (getAppPredictor() != null) {
             getAppPredictor().unregisterPredictionUpdates(mAppPredictorCallback);
             getAppPredictor().destroy();
+            setAppPredictor(null);
         }
     }
 

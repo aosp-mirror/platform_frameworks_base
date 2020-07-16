@@ -18,7 +18,6 @@ package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.UserHandle
@@ -26,27 +25,21 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
-import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.atLeastOnce
-import org.mockito.Mockito.never
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.times
+import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.Executor
 
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
@@ -56,12 +49,12 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     companion object {
         private const val ACTION_1 = "com.android.systemui.tests.ACTION_1"
         private const val ACTION_2 = "com.android.systemui.tests.ACTION_2"
-        private const val CATEGORY_1 = "com.android.systemui.tests.CATEGORY_1"
-        private const val CATEGORY_2 = "com.android.systemui.tests.CATEGORY_2"
         private const val USER_ID = 0
         private val USER_HANDLE = UserHandle.of(USER_ID)
 
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+        fun <T> any(): T = Mockito.any()
+        fun <T> eq(v: T) = Mockito.eq(v) ?: v
     }
 
     @Mock
@@ -71,10 +64,7 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     @Mock
     private lateinit var mockContext: Context
     @Mock
-    private lateinit var mPendingResult: BroadcastReceiver.PendingResult
-
-    @Captor
-    private lateinit var argumentCaptor: ArgumentCaptor<IntentFilter>
+    private lateinit var logger: BroadcastDispatcherLogger
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var userBroadcastDispatcher: UserBroadcastDispatcher
@@ -90,39 +80,36 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         handler = Handler(testableLooper.looper)
         fakeExecutor = FakeExecutor(FakeSystemClock())
 
-        userBroadcastDispatcher = UserBroadcastDispatcher(
-                mockContext, USER_ID, testableLooper.looper)
-        userBroadcastDispatcher.pendingResult = mPendingResult
-    }
-
-    @Test
-    fun testNotRegisteredOnStart() {
-        testableLooper.processAllMessages()
-        verify(mockContext, never()).registerReceiver(any(), any())
-        verify(mockContext, never()).registerReceiver(any(), any(), anyInt())
-        verify(mockContext, never()).registerReceiver(any(), any(), anyString(), any())
-        verify(mockContext, never()).registerReceiver(any(), any(), anyString(), any(), anyInt())
-        verify(mockContext, never()).registerReceiverAsUser(any(), any(), any(), anyString(), any())
+        userBroadcastDispatcher = object : UserBroadcastDispatcher(
+                mockContext, USER_ID, testableLooper.looper, mock(Executor::class.java), logger) {
+            override fun createActionReceiver(action: String): ActionReceiver {
+                return mock(ActionReceiver::class.java)
+            }
+        }
     }
 
     @Test
     fun testSingleReceiverRegistered() {
+        intentFilter = IntentFilter(ACTION_1)
+        val receiverData = ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE)
+
+        userBroadcastDispatcher.registerReceiver(receiverData)
+        testableLooper.processAllMessages()
+
+        val actionReceiver = userBroadcastDispatcher.getActionReceiver(ACTION_1)
+        assertNotNull(actionReceiver)
+        verify(actionReceiver)?.addReceiverData(receiverData)
+    }
+
+    @Test
+    fun testSingleReceiverRegistered_logging() {
         intentFilter = IntentFilter(ACTION_1)
 
         userBroadcastDispatcher.registerReceiver(
                 ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         testableLooper.processAllMessages()
 
-        assertTrue(userBroadcastDispatcher.isRegistered())
-        verify(mockContext).registerReceiverAsUser(
-                any(),
-                eq(USER_HANDLE),
-                capture(argumentCaptor),
-                any(),
-                any())
-        assertEquals(1, argumentCaptor.value.countActions())
-        assertTrue(argumentCaptor.value.hasAction(ACTION_1))
-        assertEquals(0, argumentCaptor.value.countCategories())
+        verify(logger).logReceiverRegistered(USER_HANDLE.identifier, broadcastReceiver)
     }
 
     @Test
@@ -132,124 +119,27 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         userBroadcastDispatcher.registerReceiver(
                 ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         testableLooper.processAllMessages()
-        reset(mockContext)
-
-        assertTrue(userBroadcastDispatcher.isRegistered())
 
         userBroadcastDispatcher.unregisterReceiver(broadcastReceiver)
         testableLooper.processAllMessages()
 
-        verify(mockContext, atLeastOnce()).unregisterReceiver(any())
-        verify(mockContext, never()).registerReceiverAsUser(any(), any(), any(), any(), any())
-        assertFalse(userBroadcastDispatcher.isRegistered())
+        val actionReceiver = userBroadcastDispatcher.getActionReceiver(ACTION_1)
+        assertNotNull(actionReceiver)
+        verify(actionReceiver)?.removeReceiver(broadcastReceiver)
     }
 
     @Test
-    fun testFilterHasAllActionsAndCategories_twoReceivers() {
+    fun testSingleReceiverUnregistered_logger() {
         intentFilter = IntentFilter(ACTION_1)
-        intentFilterOther = IntentFilter(ACTION_2).apply {
-            addCategory(CATEGORY_1)
-            addCategory(CATEGORY_2)
-        }
 
         userBroadcastDispatcher.registerReceiver(
                 ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
-
         testableLooper.processAllMessages()
-        assertTrue(userBroadcastDispatcher.isRegistered())
 
-        verify(mockContext, times(2)).registerReceiverAsUser(
-                any(),
-                eq(USER_HANDLE),
-                capture(argumentCaptor),
-                any(),
-                any())
-
-        val lastFilter = argumentCaptor.value
-
-        assertTrue(lastFilter.hasAction(ACTION_1))
-        assertTrue(lastFilter.hasAction(ACTION_2))
-        assertTrue(lastFilter.hasCategory(CATEGORY_1))
-        assertTrue(lastFilter.hasCategory(CATEGORY_1))
-    }
-
-    @Test
-    fun testDispatchToCorrectReceiver() {
-        intentFilter = IntentFilter(ACTION_1)
-        intentFilterOther = IntentFilter(ACTION_2)
-
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
-
-        val intent = Intent(ACTION_2)
-
-        userBroadcastDispatcher.onReceive(mockContext, intent)
+        userBroadcastDispatcher.unregisterReceiver(broadcastReceiver)
         testableLooper.processAllMessages()
-        fakeExecutor.runAllReady()
 
-        verify(broadcastReceiver, never()).onReceive(any(), any())
-        verify(broadcastReceiverOther).onReceive(mockContext, intent)
-    }
-
-    @Test
-    fun testDispatchToCorrectReceiver_differentFiltersSameReceiver() {
-        intentFilter = IntentFilter(ACTION_1)
-        intentFilterOther = IntentFilter(ACTION_2)
-
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilterOther, fakeExecutor, USER_HANDLE))
-
-        val intent = Intent(ACTION_2)
-
-        userBroadcastDispatcher.onReceive(mockContext, intent)
-        testableLooper.processAllMessages()
-        fakeExecutor.runAllReady()
-
-        verify(broadcastReceiver).onReceive(mockContext, intent)
-    }
-
-    @Test
-    fun testDispatchIntentWithoutCategories() {
-        intentFilter = IntentFilter(ACTION_1)
-        intentFilter.addCategory(CATEGORY_1)
-        intentFilterOther = IntentFilter(ACTION_1)
-        intentFilterOther.addCategory(CATEGORY_2)
-
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
-
-        val intent = Intent(ACTION_1)
-
-        userBroadcastDispatcher.onReceive(mockContext, intent)
-        testableLooper.processAllMessages()
-        fakeExecutor.runAllReady()
-
-        verify(broadcastReceiver).onReceive(mockContext, intent)
-        verify(broadcastReceiverOther).onReceive(mockContext, intent)
-    }
-
-    @Test
-    fun testPendingResult() {
-        intentFilter = IntentFilter(ACTION_1)
-        userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
-
-        val intent = Intent(ACTION_1)
-        userBroadcastDispatcher.onReceive(mockContext, intent)
-
-        testableLooper.processAllMessages()
-        fakeExecutor.runAllReady()
-
-        verify(broadcastReceiver).onReceive(mockContext, intent)
-        verify(broadcastReceiver).pendingResult = mPendingResult
+        verify(logger).logReceiverUnregistered(USER_HANDLE.identifier, broadcastReceiver)
     }
 
     @Test
@@ -268,5 +158,9 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         assertFalse(userBroadcastDispatcher.isReceiverReferenceHeld(broadcastReceiver))
+    }
+
+    private fun UserBroadcastDispatcher.getActionReceiver(action: String): ActionReceiver? {
+        return actionsToActionsReceivers.get(action)
     }
 }

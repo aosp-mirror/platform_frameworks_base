@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Na-disable ng <xliff:g id="OWNER_APP">%s</xliff:g> ang pag-print."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"I-on ang profile sa trabaho"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Naka-block ang iyong mga personal na app hangga\'t hindi mo ino-on ang profile sa trabaho mo"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Iba-block ang mga personal na app sa <xliff:g id="DATE">%1$s</xliff:g> nang <xliff:g id="TIME">%2$s</xliff:g>. Hindi pinapayagan ng iyong IT admin na manatiling naka-off ang profile mo sa trabaho nang mahigit <xliff:g id="NUMBER">%3$d</xliff:g> (na) araw."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"I-on"</string>
     <string name="me" msgid="6207584824693813140">"Ako"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Mga pagpipilian sa tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Mga opsyon sa Android TV"</string>
@@ -1419,7 +1417,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"I-sync"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Pagiging Accessible"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Accessibility"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Notification listener"</string>
@@ -1621,15 +1619,14 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%3$d</xliff:g> (na) segundo."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Alisin"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Ang sinimulan sa background na serbisyo sa foreground mula sa <xliff:g id="PACKAGENAME">%1$s</xliff:g> ay hindi magkakaroon ng pahintulot habang ginagamit sa mga R build sa hinaharap. Pakipuntahan ang go/r-bg-fgs-restriction at maghain ng bugreport."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Pagiging Accessible?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"I-on ang mga feature ng pagiging accessible?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mao-on ang mga feature ng pagiging accessible kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nMga kasalukuyang feature:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuwede mong baguhin ang mga napiling feature sa Mga Setting &gt; Pagiging Accessible."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"I-on ang mga feature ng accessibility?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mao-on ang mga feature ng accessibility kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nMga kasalukuyang feature:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuwede mong baguhin ang mga napiling feature sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"I-on ang <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mao-on ang feature ng pagiging accessible na <xliff:g id="SERVICE">%1$s</xliff:g> kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nPuwede mong palitan ng ibang feature ang shortcut na ito sa Mga Setting &gt; Pagiging Accessible."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mao-on ang feature ng accessibility na <xliff:g id="SERVICE">%1$s</xliff:g> kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nPuwede mong palitan ng ibang feature ang shortcut na ito sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"I-on"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Huwag i-on"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"NAKA-ON"</string>
@@ -1653,12 +1650,12 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Pagwawasto ng Kulay"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Mga volume key na pinipindot nang matagal. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Mga volume key na pinipindot nang matagal. Na-off ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pinindot nang matagal ang volume keys. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pinindot nang matagal ang volume keys. Na-off ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pindutin nang matagal ang parehong volume key sa loob ng tatlong segundo para magamit ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Pumili ng feature na gagana sa pamamagitan ng pag-tap mo sa button ng accessibility:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Pumili ng feature na gagana sa pamamagitan ng galaw ng pagiging accessible (pag-swipe pataas mula sa ibaba ng screen gamit ang dalawang daliri):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Pumili ng feature na gagana sa pamamagitan ng galaw ng pagiging accessible (pag-swipe pataas mula sa ibaba ng screen gamit ang tatlong daliri):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Pumili ng feature na gagana sa pamamagitan ng galaw ng accessibility (pag-swipe pataas mula sa ibaba ng screen gamit ang dalawang daliri):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Pumili ng feature na gagana sa pamamagitan ng galaw ng accessibility (pag-swipe pataas mula sa ibaba ng screen gamit ang tatlong daliri):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Para magpalipat-lipat sa mga feature, pindutin nang matagal ang button ng accessibility."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Para magpalipat-lipat sa mga feature, mag-swipe pataas gamit ang dalawang daliri at i-hold ito."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Para magpalipat-lipat sa mga feature, mag-swipe pataas gamit ang tatlong daliri at i-hold ito."</string>

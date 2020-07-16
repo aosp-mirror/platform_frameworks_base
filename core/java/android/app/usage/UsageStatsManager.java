@@ -154,6 +154,7 @@ public final class UsageStatsManager {
      * been misbehaving in some manner.
      * Apps in this bucket will have the most restrictions, including network restrictions and
      * additional restrictions on jobs.
+     * <p> Note: this bucket is not enabled in {@link Build.VERSION_CODES#R}.
      * @see #getAppStandbyBucket()
      */
     public static final int STANDBY_BUCKET_RESTRICTED = 45;

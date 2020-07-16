@@ -17,6 +17,7 @@
 package com.android.systemui.controls.management
 
 import android.content.ComponentName
+import android.graphics.drawable.Icon
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.controls.ControlInterface
 import com.android.systemui.controls.ControlStatus
@@ -126,6 +127,9 @@ data class ControlInfoWrapper(
         get() = controlInfo.controlSubtitle
     override val deviceType: Int
         get() = controlInfo.deviceType
+    override val customIcon: Icon?
+        // Will need to address to support for edit activity
+        get() = null
 }
 
 data class DividerWrapper(

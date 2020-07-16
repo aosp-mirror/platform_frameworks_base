@@ -16,6 +16,13 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_FOREGROUND_SERVICE;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_HEADS_UP;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_MEDIA_CONTROLS;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_PEOPLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
+
 import android.annotation.Nullable;
 import android.service.notification.StatusBarNotification;
 
@@ -23,6 +30,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
+import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 
 import java.util.List;
 /**
@@ -84,7 +92,7 @@ public interface NotificationPanelLogger {
                 if (n.getNotification() != null) {
                     proto.isGroupSummary = n.getNotification().isGroupSummary();
                 }
-                proto.section = 1 + ne.getBucket();  // We want 0 to mean not set / unknown
+                proto.section = toNotificationSection(ne.getBucket());
                 proto_array[i] = proto;
             }
             ++i;
@@ -92,4 +100,25 @@ public interface NotificationPanelLogger {
         notificationList.notifications = proto_array;
         return notificationList;
     }
+
+    /**
+     * Maps PriorityBucket enum to Notification.SECTION constant. The two lists should generally
+     * use matching names, but the values may differ, because PriorityBucket order changes from
+     * time to time, while logs need to have stable meanings.
+     * @param bucket PriorityBucket constant
+     * @return Notification.SECTION constant
+     */
+    static int toNotificationSection(@PriorityBucket int bucket) {
+        switch(bucket) {
+            case BUCKET_MEDIA_CONTROLS : return Notifications.Notification.SECTION_MEDIA_CONTROLS;
+            case BUCKET_HEADS_UP: return Notifications.Notification.SECTION_HEADS_UP;
+            case BUCKET_FOREGROUND_SERVICE:
+                return Notifications.Notification.SECTION_FOREGROUND_SERVICE;
+            case BUCKET_PEOPLE: return Notifications.Notification.SECTION_PEOPLE;
+            case BUCKET_ALERTING: return Notifications.Notification.SECTION_ALERTING;
+            case BUCKET_SILENT: return Notifications.Notification.SECTION_SILENT;
+        }
+        return Notifications.Notification.SECTION_UNKNOWN;
+    }
+
 }

@@ -71,7 +71,7 @@ interface IPermissionManager {
 
     void grantRuntimePermission(String packageName, String permName, int userId);
 
-    void revokeRuntimePermission(String packageName, String permName, int userId);
+    void revokeRuntimePermission(String packageName, String permName, int userId, String reason);
 
     void resetRuntimePermissions();
 

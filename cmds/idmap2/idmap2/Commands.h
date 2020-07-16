@@ -27,6 +27,5 @@ android::idmap2::Result<android::idmap2::Unit> CreateMultiple(const std::vector<
 android::idmap2::Result<android::idmap2::Unit> Dump(const std::vector<std::string>& args);
 android::idmap2::Result<android::idmap2::Unit> Lookup(const std::vector<std::string>& args);
 android::idmap2::Result<android::idmap2::Unit> Scan(const std::vector<std::string>& args);
-android::idmap2::Result<android::idmap2::Unit> Verify(const std::vector<std::string>& args);
 
 #endif  // IDMAP2_IDMAP2_COMMANDS_H_

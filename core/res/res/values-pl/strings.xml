@@ -206,10 +206,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukowanie wyłączone przez: <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Włącz profil do pracy"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Zablokowano aplikacje osobiste do czasu włączenia profilu do pracy"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikacje osobiste zostaną zablokowane <xliff:g id="DATE">%1$s</xliff:g> o <xliff:g id="TIME">%2$s</xliff:g>. Administrator IT nie pozwala na wyłączenie profilu służbowego na dłużej niż <xliff:g id="NUMBER">%3$d</xliff:g> dni."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Włącz"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcje tabletu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcje Androida TV"</string>
@@ -1170,10 +1168,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Otwórz w aplikacji"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otwórz w aplikacji %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otwórz"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otwieraj linki w"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otwieraj linki w aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Udziel uprawnień"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Edytuj w aplikacji %1$s"</string>
@@ -1665,7 +1663,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Po raz <xliff:g id="NUMBER_0">%1$d</xliff:g> nieprawidłowo narysowałeś wzór odblokowania. Po kolejnych <xliff:g id="NUMBER_1">%2$d</xliff:g> nieudanych próbach konieczne będzie odblokowanie telefonu przy użyciu danych logowania na konto Google.\n\n Spróbuj ponownie za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Usuń"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Uruchomiona w tle usługa działająca w pierwszym planie z pakietu <xliff:g id="PACKAGENAME">%1$s</xliff:g> nie będzie miała uprawnień obowiązujących podczas używania w przyszłych kompilacjach R. Zapoznaj się z ograniczeniem go/r-bg-fgs-restriction i zgłoś błąd."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu do ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Gdy skrót jest włączony, jednoczesne naciskanie przez trzy sekundy obu przycisków głośności uruchamia funkcję ułatwień dostępu."</string>
@@ -1689,7 +1686,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odmów"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Wybierz funkcję, aby zacząć z niej korzystać:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Wybierz funkcje, których chcesz używać z przyciskiem ułatwień dostępu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Wybierz funkcje, których chcesz używać w przypadku skrótu z klawiszami głośności"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Wybierz funkcje, do których chcesz używać skrótu z klawiszami głośności"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usługa <xliff:g id="SERVICE_NAME">%s</xliff:g> została wyłączona"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edytuj skróty"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
@@ -2125,18 +2122,18 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Służbowe"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Widok osobisty"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Widok służbowy"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nie można udostępnić aplikacjom do pracy"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Administrator IT nie pozwala na udostępnianie tej zawartości w profilu do pracy"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nie można otworzyć w aplikacjach do pracy"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Administrator IT nie pozwala na otwieranie tej zawartości w profilu do pracy"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nie można udostępnić aplikacjom służbowym"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Administrator IT nie pozwala na udostępnianie tej zawartości w profilu służbowym"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nie można otworzyć w aplikacjach służbowych"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Administrator IT nie pozwala na otwieranie tej zawartości w profilu służbowym"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nie można udostępnić aplikacjom osobistym"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Administrator IT nie pozwala na udostępnianie tej zawartości w profilu osobistym"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nie można otworzyć w aplikacjach osobistych"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Administrator IT nie pozwala na otwieranie tej zawartości w profilu osobistym"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Działanie profilu do pracy jest wstrzymane"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Działanie profilu służbowego jest wstrzymane"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Włącz"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Brak aplikacji do pracy, które obsługują tę zawartość"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Brak aplikacji do pracy, które mogą otworzyć tę zawartość"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Brak aplikacji służbowych, które obsługują tę zawartość"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Brak aplikacji służbowych, które mogą otworzyć tę zawartość"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Brak aplikacji osobistych, które obsługują tę zawartość"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Brak aplikacji osobistych, które mogą otworzyć tę zawartość"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kod PIN do karty SIM odblokowujący sieć"</string>

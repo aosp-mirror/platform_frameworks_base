@@ -47,6 +47,7 @@ public class WifiEnterpriseConfigTest {
     public static final String KEYSTORE_URI = "keystore://";
     public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
     public static final String KEYSTORES_URI = "keystores://";
+    private static final String TEST_DOMAIN_SUFFIX_MATCH = "domainSuffixMatch";
 
     private WifiEnterpriseConfig mEnterpriseConfig;
 
@@ -540,4 +541,37 @@ public class WifiEnterpriseConfigTest {
         mEnterpriseConfig.setEapMethod(Eap.UNAUTH_TLS);
         assertEquals(null, getSupplicantPhase2Method());
     }
+
+    @Test
+    public void testIsEnterpriseConfigSecure() {
+        WifiEnterpriseConfig baseConfig = new WifiEnterpriseConfig();
+        baseConfig.setEapMethod(Eap.PEAP);
+        baseConfig.setPhase2Method(Phase2.MSCHAPV2);
+        assertTrue(baseConfig.isInsecure());
+
+        WifiEnterpriseConfig noMatchConfig = new WifiEnterpriseConfig(baseConfig);
+        noMatchConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        // Missing match is insecure.
+        assertTrue(noMatchConfig.isInsecure());
+
+        WifiEnterpriseConfig noCaConfig = new WifiEnterpriseConfig(baseConfig);
+        noCaConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        // Missing CA certificate is insecure.
+        assertTrue(noCaConfig.isInsecure());
+
+        WifiEnterpriseConfig secureConfig = new WifiEnterpriseConfig();
+        secureConfig.setEapMethod(Eap.PEAP);
+        secureConfig.setPhase2Method(Phase2.MSCHAPV2);
+        secureConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        secureConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        assertFalse(secureConfig.isInsecure());
+
+        WifiEnterpriseConfig secureConfigWithCaAlias = new WifiEnterpriseConfig();
+        secureConfigWithCaAlias.setEapMethod(Eap.PEAP);
+        secureConfigWithCaAlias.setPhase2Method(Phase2.MSCHAPV2);
+        secureConfigWithCaAlias.setCaCertificateAliases(new String[]{"alias1", "alisa2"});
+        secureConfigWithCaAlias.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        assertFalse(secureConfigWithCaAlias.isInsecure());
+    }
+
 }

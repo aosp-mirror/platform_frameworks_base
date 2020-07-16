@@ -18,9 +18,11 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
-import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsController.DEBUG;
+import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
+
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -151,6 +153,9 @@ public class InsetsSourceConsumer {
                 if (oldLeash == null || newLeash == null || !oldLeash.isSameSurface(newLeash)) {
                     applyHiddenToControl();
                 }
+                if (!requestedVisible && !mIsAnimationPending) {
+                    removeSurface();
+                }
             }
         }
         if (lastControl != null) {
@@ -219,9 +224,10 @@ public class InsetsSourceConsumer {
         final boolean hasControl = mSourceControl != null;
 
         // We still need to let the legacy app know the visibility change even if we don't have the
-        // control.
+        // control. If we don't have the source, we don't change the requested visibility for making
+        // the callback behavior compatible.
         mController.updateCompatSysUiVisibility(
-                mType, hasControl ? mRequestedVisible : isVisible, hasControl);
+                mType, (hasControl || source == null) ? mRequestedVisible : isVisible, hasControl);
 
         // If we don't have control, we are not able to change the visibility.
         if (!hasControl) {
@@ -258,6 +264,15 @@ public class InsetsSourceConsumer {
     }
 
     /**
+     * Reports that this source's perceptibility has changed
+     *
+     * @param perceptible true if the source is perceptible, false otherwise.
+     * @see InsetsAnimationControlCallbacks#reportPerceptible
+     */
+    public void onPerceptible(boolean perceptible) {
+    }
+
+    /**
      * Notify listeners that window is now hidden.
      */
     void notifyHidden() {
@@ -271,16 +286,19 @@ public class InsetsSourceConsumer {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
     }
 
-    void updateSource(InsetsSource newSource) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void updateSource(InsetsSource newSource, @AnimationType int animationType) {
         InsetsSource source = mState.peekSource(mType);
-        if (source == null || mController.getAnimationType(mType) == ANIMATION_TYPE_NONE
+        if (source == null || animationType == ANIMATION_TYPE_NONE
                 || source.getFrame().equals(newSource.getFrame())) {
+            mPendingFrame = null;
+            mPendingVisibleFrame = null;
             mState.addSource(newSource);
             return;
         }
 
         // Frame is changing while animating. Keep note of the new frame but keep existing frame
-        // until animaition is finished.
+        // until animation is finished.
         newSource = new InsetsSource(newSource);
         mPendingFrame = new Rect(newSource.getFrame());
         mPendingVisibleFrame = newSource.getVisibleFrame() != null
@@ -292,7 +310,8 @@ public class InsetsSourceConsumer {
         if (DEBUG) Log.d(TAG, "updateSource: " + newSource);
     }
 
-    boolean notifyAnimationFinished() {
+    @VisibleForTesting(visibility = PACKAGE)
+    public boolean notifyAnimationFinished() {
         if (mPendingFrame != null) {
             InsetsSource source = mState.getSource(mType);
             source.setFrame(mPendingFrame);
@@ -332,5 +351,6 @@ public class InsetsSourceConsumer {
             t.hide(mSourceControl.getLeash());
         }
         t.apply();
+        onPerceptible(mRequestedVisible);
     }
 }

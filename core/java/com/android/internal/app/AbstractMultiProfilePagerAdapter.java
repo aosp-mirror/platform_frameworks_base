@@ -151,6 +151,13 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                     mOnProfileSelectedListener.onProfileSelected(position);
                 }
             }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (mOnProfileSelectedListener != null) {
+                    mOnProfileSelectedListener.onProfilePageStateChanged(state);
+                }
+            }
         });
         viewPager.setAdapter(this);
         viewPager.setCurrentItem(mCurrentPage);
@@ -606,6 +613,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
          * {@link #PROFILE_WORK} if the work profile was selected.
          */
         void onProfileSelected(int profileIndex);
+
+
+        /**
+         * Callback for when the scroll state changes. Useful for discovering when the user begins
+         * dragging, when the pager is automatically settling to the current page, or when it is
+         * fully stopped/idle.
+         * @param state {@link ViewPager#SCROLL_STATE_IDLE}, {@link ViewPager#SCROLL_STATE_DRAGGING}
+         *              or {@link ViewPager#SCROLL_STATE_SETTLING}
+         * @see ViewPager.OnPageChangeListener#onPageScrollStateChanged
+         */
+        void onProfilePageStateChanged(int state);
     }
 
     /**

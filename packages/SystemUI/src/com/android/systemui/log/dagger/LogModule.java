@@ -68,7 +68,7 @@ public class LogModule {
     public static LogBuffer provideNotificationSectionLogBuffer(
             LogcatEchoTracker bufferFilter,
             DumpManager dumpManager) {
-        LogBuffer buffer = new LogBuffer("NotifSectionLog", 500, 10, bufferFilter);
+        LogBuffer buffer = new LogBuffer("NotifSectionLog", 1000, 10, bufferFilter);
         buffer.attach(dumpManager);
         return buffer;
     }
@@ -93,6 +93,18 @@ public class LogModule {
             LogcatEchoTracker bufferFilter,
             DumpManager dumpManager) {
         LogBuffer buffer = new LogBuffer("QSLog", 500, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
+    }
+
+    /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
+    @Provides
+    @Singleton
+    @BroadcastDispatcherLog
+    public static LogBuffer provideBroadcastDispatcherLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("BroadcastDispatcherLog", 500, 10, bufferFilter);
         buffer.attach(dumpManager);
         return buffer;
     }

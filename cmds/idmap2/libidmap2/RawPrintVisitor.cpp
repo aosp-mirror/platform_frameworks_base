@@ -23,10 +23,12 @@
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/ApkAssets.h"
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 
 using android::ApkAssets;
+using android::idmap2::policy::PoliciesToDebugString;
 
 namespace {
 
@@ -39,9 +41,6 @@ size_t StringSizeWhenEncoded(const std::string& s) {
 
 namespace android::idmap2 {
 
-// verbatim copy fomr PrettyPrintVisitor.cpp, move to common utils
-#define RESID(pkg, type, entry) (((pkg) << 24) | ((type) << 16) | (entry))
-
 void RawPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
 }
 
@@ -50,6 +49,9 @@ void RawPrintVisitor::visit(const IdmapHeader& header) {
   print(header.GetVersion(), "version");
   print(header.GetTargetCrc(), "target crc");
   print(header.GetOverlayCrc(), "overlay crc");
+  print(header.GetFulfilledPolicies(), "fulfilled policies: %s",
+        PoliciesToDebugString(header.GetFulfilledPolicies()).c_str());
+  print(static_cast<uint8_t>(header.GetEnforceOverlayable()), "enforce overlayable");
   print(header.GetTargetPath().to_string(), kIdmapStringLength, "target path");
   print(header.GetOverlayPath().to_string(), kIdmapStringLength, "overlay path");
   print("...", StringSizeWhenEncoded(header.GetDebugInfo()), "debug info");

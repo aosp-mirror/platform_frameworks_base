@@ -178,6 +178,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -347,6 +348,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             super.setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
         }
 
+        @Override
+        protected String[] getStringArrayResource(int key) {
+            return new String[] {PKG_O};
+        }
+
         private void setNotificationAssistantAccessGrantedCallback(
                 @Nullable NotificationAssistantAccessGrantedCallback callback) {
             this.mNotificationAssistantAccessGrantedCallback = callback;
@@ -434,7 +440,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Setup managed services
         mListener = mListeners.new ManagedServiceInfo(
-                null, new ComponentName(PKG, "test_class"), mUid, true, null, 0);
+                null, new ComponentName(PKG, "test_class"),
+                UserHandle.getUserId(mUid), true, null, 0);
         ComponentName defaultComponent = ComponentName.unflattenFromString("config/device");
         ArraySet<ComponentName> components = new ArraySet<>();
         components.add(defaultComponent);
@@ -444,7 +451,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.getDefaultComponents()).thenReturn(components);
         when(mAssistants.queryPackageForServices(
                 anyString(), anyInt(), anyInt())).thenReturn(components);
-        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        when(mListeners.checkServiceTokenLocked(null)).thenReturn(mListener);
         ManagedServices.Config listenerConfig = new ManagedServices.Config();
         listenerConfig.xmlTag = NotificationListeners.TAG_ENABLED_NOTIFICATION_LISTENERS;
         when(mListeners.getConfig()).thenReturn(listenerConfig);
@@ -497,6 +504,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
+        mBinderService.createNotificationChannels(
+                PKG_P, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
+        mBinderService.createNotificationChannels(
+                PKG_O, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
         assertNotNull(mBinderService.getNotificationChannel(
                 PKG, mContext.getUserId(), PKG, TEST_CHANNEL_ID));
         clearInvocations(mRankingHandler);
@@ -583,7 +594,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setGroupSummary(isSummary);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id,
                 "tag" + System.currentTimeMillis(), mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -603,7 +614,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             nb.extend(extender);
         }
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -635,7 +646,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb = getMessageStyleNotifBuilder(addMetadata, groupKey, isSummary);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id,
                 tag, mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -1333,8 +1344,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
                 sbn.getNotification(), sbn.getUserId());
+        Thread.sleep(1);  // make sure the system clock advances before the next step
         // THEN it is canceled
         mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
+        Thread.sleep(1);  // here too
         // THEN it is posted again (before the cancel has a chance to finish)
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
                 sbn.getNotification(), sbn.getUserId());
@@ -1687,7 +1700,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         .setSmallIcon(android.R.drawable.sym_def_app_icon)
                         .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, null, mUid, 0,
-                n, new UserHandle(mUid), null, 0);
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, PKG, null,
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
@@ -2191,7 +2204,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
@@ -2219,7 +2233,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateChannelGroupNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mService.setPreferencesHelper(mPreferencesHelper);
         NotificationChannelGroup group1 = new NotificationChannelGroup("a", "b");
         NotificationChannelGroup group2 = new NotificationChannelGroup("n", "m");
@@ -2239,7 +2254,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testUpdateChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mService.setPreferencesHelper(mPreferencesHelper);
         mTestNotificationChannel.setLightColor(Color.CYAN);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
@@ -2257,7 +2273,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testDeleteChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
@@ -2273,7 +2290,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testDeleteChannelGroupNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         NotificationChannelGroup ncg = new NotificationChannelGroup("a", "b/c");
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannelGroup(eq(ncg.getId()), eq(PKG), anyInt()))
@@ -2290,7 +2308,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
@@ -2310,7 +2329,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testUpdateNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
 
         try {
             mBinderService.updateNotificationChannelFromPrivilegedListener(
@@ -2333,7 +2353,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         mListener.component = new ComponentName(PKG, PKG);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
@@ -2360,7 +2381,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
 
         mBinderService.getNotificationChannelsFromPrivilegedListener(
                 null, PKG, Process.myUserHandle());
@@ -2373,7 +2395,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testGetNotificationChannelFromPrivilegedListener_cdm_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
 
         try {
             mBinderService.getNotificationChannelsFromPrivilegedListener(
@@ -2391,7 +2414,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testGetNotificationChannelFromPrivilegedListener_assistant_success()
             throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(new ArrayList<>());
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(new ArrayList<>());
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
 
         mBinderService.getNotificationChannelsFromPrivilegedListener(
@@ -2405,7 +2429,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testGetNotificationChannelFromPrivilegedListener_assistant_noAccess()
             throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(new ArrayList<>());
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(new ArrayList<>());
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(false);
 
         try {
@@ -2425,7 +2450,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
@@ -2447,7 +2473,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
 
         mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
                 null, PKG, Process.myUserHandle());
@@ -2459,7 +2486,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testGetNotificationChannelGroupsFromPrivilegedListener_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
 
         try {
             mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
@@ -2476,7 +2504,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testGetNotificationChannelGroupsFromPrivilegedListener_badUser() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
-        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
@@ -3026,8 +3055,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mListeners).migrateToXml();
-        verify(mListeners).notifyNotificationChannelChanged(anyString(), any(), any(),
-                anyInt());
         verify(mConditionProviders).setPackageOrComponentEnabled(
                 anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mAssistants).migrateToXml();
@@ -3041,8 +3068,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
 
         verify(mListeners).migrateToXml();
-        verify(mListeners).notifyNotificationChannelChanged(anyString(), any(), any(),
-                anyInt());
         verify(mConditionProviders).setPackageOrComponentEnabled(
                 anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mAssistants).migrateToXml();
@@ -3178,7 +3203,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "testNoFakeColorizedPermission", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
@@ -3216,7 +3241,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "tag", mUid, 0,
-                n, new UserHandle(mUid), null, 0);
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord otherPackage =
                 new NotificationRecord(mContext, sbn, mTestNotificationChannel);
         mService.addEnqueuedNotification(otherPackage);
@@ -3224,7 +3249,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Same notifications are enqueued as posted, everything counts b/c id and tag don't match
         // anything that's currently enqueued or posted
-        int userId = new UserHandle(mUid).getIdentifier();
+        int userId = UserHandle.getUserId(mUid);
         assertEquals(40,
                 mService.getNotificationCountLocked(PKG, userId, 0, null));
         assertEquals(40,
@@ -3441,8 +3466,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         StatusBarNotification sbn = new StatusBarNotification(preOPkg, preOPkg, 9,
                 "testBumpFGImportance_noChannelChangePreOApp",
-                Binder.getCallingUid(), 0, nb.build(), new UserHandle(Binder.getCallingUid()), null,
-                0);
+                Binder.getCallingUid(), 0, nb.build(),
+                UserHandle.getUserHandleForUid(Binder.getCallingUid()), null, 0);
 
         mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), sbn.getOpPkg(),
                 sbn.getTag(), sbn.getId(), sbn.getNotification(), sbn.getUserId());
@@ -3459,7 +3484,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         sbn = new StatusBarNotification(preOPkg, preOPkg, 9,
                 "testBumpFGImportance_noChannelChangePreOApp", Binder.getCallingUid(),
-                0, nb.build(), new UserHandle(Binder.getCallingUid()), null, 0);
+                0, nb.build(), UserHandle.getUserHandleForUid(Binder.getCallingUid()), null, 0);
 
         mBinderService.enqueueNotificationWithTag(preOPkg, preOPkg,
                 "testBumpFGImportance_noChannelChangePreOApp",
@@ -3813,7 +3838,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         .addMessage(message1)
                         .addMessage(message2));
         NotificationRecord recordA = new NotificationRecord(mContext, new StatusBarNotification(
-                PKG, PKG, 0, "tag", mUid, 0, nbA.build(), new UserHandle(mUid), null, 0), c);
+                PKG, PKG, 0, "tag", mUid, 0, nbA.build(), UserHandle.getUserHandleForUid(mUid),
+                null, 0), c);
 
         // First post means we grant access to both
         reset(mUgm);
@@ -3831,7 +3857,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.MessagingStyle("").addMessage(message2));
         NotificationRecord recordB = new NotificationRecord(mContext, new StatusBarNotification(PKG,
-                PKG, 0, "tag", mUid, 0, nbB.build(), new UserHandle(mUid), null, 0), c);
+                PKG, 0, "tag", mUid, 0, nbB.build(), UserHandle.getUserHandleForUid(mUid), null, 0),
+                c);
 
         // Update means we drop access to first
         reset(mUgmInternal);
@@ -3870,7 +3897,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.MessagingStyle("")
                         .addMessage(message1));
         NotificationRecord recordA = new NotificationRecord(mContext, new StatusBarNotification(
-                PKG, PKG, 0, "tag", mUid, 0, nbA.build(), new UserHandle(mUid), null, 0), c);
+                PKG, PKG, 0, "tag", mUid, 0, nbA.build(), UserHandle.getUserHandleForUid(mUid),
+                null, 0), c);
 
         doThrow(new SecurityException("no access")).when(mUgm)
                 .grantUriPermissionFromOwner(
@@ -4029,7 +4057,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentTitle("foo");
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
@@ -4037,7 +4065,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .setContentTitle("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4049,14 +4077,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentTitle("foo");
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentTitle("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4069,7 +4097,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.InboxStyle()
                     .addLine("line1").addLine("line2"));
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
@@ -4077,7 +4105,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.InboxStyle()
                         .addLine("line1").addLine("line2_changed"));
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4087,7 +4115,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.InboxStyle()
                         .addLine("line1"));
         StatusBarNotification sbn3 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb3.build(), new UserHandle(mUid), null, 0);
+                nb3.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r3 =
                 new NotificationRecord(mContext, sbn3, mock(NotificationChannel.class));
 
@@ -4097,7 +4125,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.InboxStyle()
                         .addLine("line1").addLine("line2").addLine("line3"));
         StatusBarNotification sbn4 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb4.build(), new UserHandle(mUid), null, 0);
+                nb4.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r4 =
                 new NotificationRecord(mContext, sbn4, mock(NotificationChannel.class));
 
@@ -4106,7 +4134,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb5 = new Notification.Builder(mContext, "")
             .setContentText("not an inbox");
         StatusBarNotification sbn5 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb5.build(), new UserHandle(mUid), null, 0);
+                nb5.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r5 =
                 new NotificationRecord(mContext, sbn5, mock(NotificationChannel.class));
 
@@ -4118,14 +4146,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentText("foo");
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentText("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4137,14 +4165,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentText("foo");
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentText("foo");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4156,14 +4184,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentText(Html.fromHtml("<b>foo</b>"));
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentText(Html.fromHtml("<b>foo</b>"));
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4175,14 +4203,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentText(Html.fromHtml("<b>foo</b>"));
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentText(Html.fromHtml("<b>bar</b>"));
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4194,14 +4222,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setProgress(100, 90, false);
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setProgress(100, 100, false);
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4213,14 +4241,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setProgress(100, 90, false);
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setProgress(100, 91, false);
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4232,14 +4260,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setProgress(100, 100, false);
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setProgress(100, 100, false);
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4253,7 +4281,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                 .setContentText("foo");
         StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
+                nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
 
@@ -4262,7 +4290,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                 .setContentText("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4276,7 +4304,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                 .setContentText("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb2.build(), new UserHandle(mUid), null, 0);
+                nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
 
@@ -4694,7 +4722,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         n.flags |= FLAG_FOREGROUND_SERVICE;
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 9, null, mUid, 0,
-                n, new UserHandle(mUid), null, 0);
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addEnqueuedNotification(r);
@@ -4713,7 +4741,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         n.flags |= FLAG_FOREGROUND_SERVICE;
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 9, null, mUid, 0,
-                n, new UserHandle(mUid), null, 0);
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addNotification(r);
@@ -5026,7 +5054,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, "opPkg", 0, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r =  new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.reportSeen(r);
@@ -5050,7 +5078,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, r.getSbn().getId(),
                 r.getSbn().getTag(), mUid, 0,
                 new Notification.Builder(mContext, mTestNotificationChannel.getId()).build(),
-                new UserHandle(mUid), null, 0);
+                UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord update = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
         mService.addEnqueuedNotification(update);
         assertNull(update.getSbn().getNotification().getSmallIcon());
@@ -5084,7 +5112,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testgetNotificationChannels_crossUser() throws Exception {
+    public void testGetNotificationChannels_crossUser() throws Exception {
         // same user no problem
         mBinderService.getNotificationChannels("src", "target", mContext.getUserId());
 
@@ -5273,7 +5301,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setBubbleMetadata(getBubbleMetadata());
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         // Say we're foreground
@@ -5319,7 +5347,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         nb.setShortcutId(null);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 null, mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
 
         mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
@@ -5363,7 +5391,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "testFlagBubbleNotifs_noFlag_notBubble", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         // Post the notification
@@ -5455,25 +5483,49 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCancelNotificationsFromListener_ignoresBubbles() throws Exception {
-        final NotificationRecord nrNormal = generateNotificationRecord(mTestNotificationChannel);
-        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
-        nrBubble.getSbn().getNotification().flags |= FLAG_BUBBLE;
+    public void testCancelNotificationsFromListener_cancelsNonBubble() throws Exception {
+        // Add non-bubble notif
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(nr);
 
-        mService.addNotification(nrNormal);
-        mService.addNotification(nrBubble);
-
-        String[] keys = {nrNormal.getSbn().getKey(), nrBubble.getSbn().getKey()};
+        // Cancel via listener
+        String[] keys = {nr.getSbn().getKey()};
         mService.getBinderService().cancelNotificationsFromListener(null, keys);
         waitForIdle();
 
+        // Notif not active anymore
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Cancel event is logged
+        assertEquals(1, mNotificationRecordLogger.numCalls());
+        assertEquals(NotificationRecordLogger.NotificationCancelledEvent
+            .NOTIFICATION_CANCEL_LISTENER_CANCEL, mNotificationRecordLogger.event(0));
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_suppressesBubble() throws Exception {
+        // Add bubble notif
+        setUpPrefsForBubbles(PKG, mUid,
+            true /* global */,
+            BUBBLE_PREFERENCE_ALL /* app */,
+            true /* channel */);
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+            nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Cancel via listener
+        String[] keys = {nr.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+
+        // Bubble notif active and suppressed
         StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
         assertEquals(1, mService.getNotificationRecordCount());
-
-        assertEquals(1, mNotificationRecordLogger.numCalls());
-        assertEquals(NotificationRecordLogger.NotificationCancelledEvent
-                .NOTIFICATION_CANCEL_LISTENER_CANCEL, mNotificationRecordLogger.event(0));
+        assertTrue(notifs[0].getNotification().getBubbleMetadata().isNotificationSuppressed());
     }
 
     @Test
@@ -6154,7 +6206,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         nb.setShortcutId(VALID_CONVO_SHORTCUT_ID);
         nb.setBubbleMetadata(metadata);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
+                "tag", mUid, 0, nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         // Test: Send the bubble notification
@@ -6179,7 +6231,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Test: Remove the shortcut
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
         launcherAppsCallback.getValue().onShortcutsChanged(PKG, Collections.emptyList(),
-                new UserHandle(mUid));
+                UserHandle.getUserHandleForUid(mUid));
         waitForIdle();
 
         // Verify:
@@ -6214,7 +6266,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         nb.setShortcutId(shortcutId);
         nb.setBubbleMetadata(metadata);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
+                "tag", mUid, 0, nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         // Pretend the shortcut exists
@@ -6662,15 +6714,43 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRecordMessages_invalidMsg() throws RemoteException {
-        NotificationRecord nr =
-                generateMessageBubbleNotifRecord(mTestNotificationChannel,
-                        "testRecordMessages_invalidMsg");
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(null);
+        StatusBarNotification sbn = new StatusBarNotification(PKG_P, PKG_P, 1,
+                "testRecordMessages_invalidMsg", mUid, 0, nb.build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+        mBinderService.enqueueNotificationWithTag(PKG_P, PKG_P, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
-        assertTrue(mBinderService.isInInvalidMsgState(PKG, mUid));
+        assertTrue(mBinderService.isInInvalidMsgState(PKG_P, mUid));
+    }
+
+    @Test
+    public void testRecordMessages_invalidMsg_notMessageStyle() throws RemoteException {
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setShortcutId(null)
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setCategory(Notification.CATEGORY_MESSAGE);
+        StatusBarNotification sbn = new StatusBarNotification(PKG_O, PKG_O, 1,
+                "testRecordMessages_invalidMsg_notMessageStyle", mUid, 0, nb.build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
+        mBinderService.enqueueNotificationWithTag(PKG_O, PKG_O, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // PKG_O is allowed to be in conversation space b/c of override in
+        // TestableNotificationManagerService
+        assertTrue(mBinderService.isInInvalidMsgState(PKG_O, mUid));
     }
 
     @Test
@@ -6678,24 +6758,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
         nb.setShortcutId(null);
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "testRecordMessages_validMsg", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
+        StatusBarNotification sbn = new StatusBarNotification(PKG_P, PKG_P, 1,
+                "testRecordMessages_validMsg", mUid, 0, nb.build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+        mBinderService.enqueueNotificationWithTag(PKG_P, PKG_P, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
-        assertTrue(mBinderService.isInInvalidMsgState(PKG, mUid));
+        assertTrue(mBinderService.isInInvalidMsgState(PKG_P, mUid));
 
         nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                 "testRecordMessages_validMsg");
 
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+        mBinderService.enqueueNotificationWithTag(PKG_P, PKG_P, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
-        assertFalse(mBinderService.isInInvalidMsgState(PKG, mUid));
+        assertFalse(mBinderService.isInInvalidMsgState(PKG_P, mUid));
     }
 
     @Test
@@ -6715,7 +6796,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         nb.setShortcutId(null);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "testRecordMessages_invalidMsg_afterValidMsg_2", mUid, 0, nb.build(),
-                new UserHandle(mUid), null, 0);
+                UserHandle.getUserHandleForUid(mUid), null, 0);
          nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),

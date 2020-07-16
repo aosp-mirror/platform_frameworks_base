@@ -631,7 +631,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Whether or not device admin feature is supported. If it isn't return defaults for all
-     * public methods.
+     * public methods, unless the caller has the appropriate permission for a particular method.
      */
     final boolean mHasFeature;
 
@@ -2616,6 +2616,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSetupContentObserver = new SetupContentObserver(mHandler);
 
         mUserManagerInternal.addUserRestrictionsListener(new RestrictionsListener(mContext));
+
+        loadOwners();
     }
 
     /**
@@ -2676,12 +2678,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * Load information about device and profile owners of the device, populating mOwners and
+     * pushing owner info to other system services. This is called at a fairly early stage of
+     * system server initialiation (via DevicePolicyManagerService's ctor), so care should to
+     * be taken to not interact with system services that are initialiated after DPMS.
+     * onLockSettingsReady() is a safer place to do initialization work not critical during
+     * the first boot stage.
+     * Note this only loads the list of owners, and not their actual policy (DevicePolicyData).
+     * The policy is normally loaded lazily when it's first accessed. In several occasions
+     * the list of owners is necessary for providing callers with aggregated policies across
+     * multiple owners, hence the owner list is loaded as part of DPMS's construction here.
+     */
     void loadOwners() {
         synchronized (getLockObject()) {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
-            migrateUserRestrictionsIfNecessaryLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
             updateDeviceOwnerLocked();
@@ -2742,7 +2755,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slog.i(LOG_TAG, "Giving the PO additional power...");
         markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(poAdminComponent, poUserId);
         Slog.i(LOG_TAG, "Migrating DO policies to PO...");
-        moveDoPoliciesToProfileParentAdmin(doAdmin, poAdmin.getParentActiveAdmin());
+        moveDoPoliciesToProfileParentAdminLocked(doAdmin, poAdmin.getParentActiveAdmin());
+        migratePersonalAppSuspensionLocked(doUserId, poUserId, poAdmin);
         saveSettingsLocked(poUserId);
         Slog.i(LOG_TAG, "Clearing the DO...");
         final ComponentName doAdminReceiver = doAdmin.info.getComponent();
@@ -2760,6 +2774,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.COMP_TO_ORG_OWNED_PO_MIGRATED)
                 .setAdmin(poAdminComponent)
                 .write();
+    }
+
+    @GuardedBy("getLockObject()")
+    private void migratePersonalAppSuspensionLocked(
+            int doUserId, int poUserId, ActiveAdmin poAdmin) {
+        final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+        if (!pmi.isSuspendingAnyPackages(PLATFORM_PACKAGE_NAME, doUserId)) {
+            Slog.i(LOG_TAG, "DO is not suspending any apps.");
+            return;
+        }
+
+        if (getTargetSdk(poAdmin.info.getPackageName(), poUserId) >= Build.VERSION_CODES.R) {
+            Slog.i(LOG_TAG, "PO is targeting R+, keeping personal apps suspended.");
+            getUserData(doUserId).mAppsSuspended = true;
+            poAdmin.mSuspendPersonalApps = true;
+        } else {
+            Slog.i(LOG_TAG, "PO isn't targeting R+, unsuspending personal apps.");
+            pmi.unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, doUserId);
+        }
     }
 
     private void uninstallOrDisablePackage(String packageName, int userHandle) {
@@ -2803,7 +2836,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pi.uninstall(packageName, 0 /* flags */, new IntentSender((IIntentSender) mLocalSender));
     }
 
-    private void moveDoPoliciesToProfileParentAdmin(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
+    @GuardedBy("getLockObject()")
+    private void moveDoPoliciesToProfileParentAdminLocked(
+            ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
         // The following policies can be already controlled via parent instance, skip if so.
         if (parentAdmin.mPasswordPolicy.quality == PASSWORD_QUALITY_UNSPECIFIED) {
             parentAdmin.mPasswordPolicy = doAdmin.mPasswordPolicy;
@@ -4104,8 +4139,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void onLockSettingsReady() {
+        synchronized (getLockObject()) {
+            migrateUserRestrictionsIfNecessaryLocked();
+        }
         getUserData(UserHandle.USER_SYSTEM);
-        loadOwners();
         cleanUpOldUsers();
         maybeSetDefaultProfileOwnerUserRestrictions();
         handleStartUser(UserHandle.USER_SYSTEM);
@@ -5995,7 +6032,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void lockNow(int flags, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature && mContext.checkCallingPermission(android.Manifest.permission.LOCK_DEVICE)
+                != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -7952,7 +7990,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void updateScreenCaptureDisabled(int userHandle, boolean disabled) {
-        mPolicyCache.setScreenCaptureDisabled(userHandle, disabled);
+        mPolicyCache.setScreenCaptureAllowed(userHandle, !disabled);
         mHandler.post(() -> {
             try {
                 mInjector.getIWindowManager().refreshScreenCaptureDisabled(userHandle);
@@ -12674,7 +12712,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 for (ResolveInfo receiver : receivers) {
                     final String packageName = receiver.getComponentInfo().packageName;
                     if (checkCrossProfilePackagePermissions(packageName, userId,
-                            requiresPermission)) {
+                            requiresPermission)
+                            || checkModifyQuietModePermission(packageName, userId)) {
                         Slog.i(LOG_TAG,
                                 String.format("Sending %s broadcast to %s.", intent.getAction(),
                                         packageName));
@@ -12688,6 +12727,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG,
                         String.format("Cannot get list of broadcast receivers for %s because: %s.",
                                 intent.getAction(), ex));
+            }
+        }
+
+        /**
+         * Checks whether the package {@code packageName} has the {@code MODIFY_QUIET_MODE}
+         * permission granted for the user {@code userId}.
+         */
+        private boolean checkModifyQuietModePermission(String packageName, @UserIdInt int userId) {
+            try {
+                final int uid = Objects.requireNonNull(
+                        mInjector.getPackageManager().getApplicationInfoAsUser(
+                                Objects.requireNonNull(packageName), /* flags= */ 0, userId)).uid;
+                return PackageManager.PERMISSION_GRANTED
+                        == ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.MODIFY_QUIET_MODE, uid, /* owningUid= */
+                        -1, /* exported= */ true);
+            } catch (NameNotFoundException ex) {
+                Slog.w(LOG_TAG,
+                        String.format("Cannot find the package %s to check for permissions.",
+                                packageName));
+                return false;
             }
         }
 
@@ -16132,25 +16192,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Slog.i(LOG_TAG, String.format("%s personal apps for user %d",
                 suspended ? "Suspending" : "Unsuspending", userId));
+
+        if (suspended) {
+            suspendPersonalAppsInPackageManager(userId);
+        } else {
+            mInjector.getPackageManagerInternal().unsuspendForSuspendingPackage(
+                    PLATFORM_PACKAGE_NAME, userId);
+        }
+
+        synchronized (getLockObject()) {
+            getUserData(userId).mAppsSuspended = suspended;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    private void suspendPersonalAppsInPackageManager(int userId) {
         mInjector.binderWithCleanCallingIdentity(() -> {
             try {
                 final String[] appsToSuspend = mInjector.getPersonalAppsForSuspension(userId);
-                final String[] failedPackages = mIPackageManager.setPackagesSuspendedAsUser(
-                        appsToSuspend, suspended, null, null, null, PLATFORM_PACKAGE_NAME, userId);
-                if (!ArrayUtils.isEmpty(failedPackages)) {
-                    Slog.wtf(LOG_TAG, String.format("Failed to %s packages: %s",
-                            suspended ? "suspend" : "unsuspend", String.join(",", failedPackages)));
+                final String[] failedApps = mIPackageManager.setPackagesSuspendedAsUser(
+                        appsToSuspend, true, null, null, null, PLATFORM_PACKAGE_NAME, userId);
+                if (!ArrayUtils.isEmpty(failedApps)) {
+                    Slog.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
             }
         });
-
-        synchronized (getLockObject()) {
-            getUserData(userId).mAppsSuspended = suspended;
-            saveSettingsLocked(userId);
-        }
     }
 
     @GuardedBy("getLockObject()")

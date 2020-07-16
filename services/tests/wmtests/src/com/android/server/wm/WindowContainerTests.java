@@ -27,6 +27,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -66,13 +67,13 @@ import android.view.SurfaceSession;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+
 
 /**
  * Test class for {@link WindowContainer}.
@@ -825,20 +826,49 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testHandleCompleteDeferredRemoval() {
+        final DisplayContent displayContent = createNewDisplay();
+        // Do not reparent activity to default display when removing the display.
+        doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
+        final ActivityRecord r = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(displayContent).build().getTopMostActivity();
+        // Add a window and make the activity animating so the removal of activity is deferred.
+        createWindow(null, TYPE_BASE_APPLICATION, r, "win");
+        doReturn(true).when(r).isAnimating(anyInt(), anyInt());
+
+        displayContent.remove();
+        // Ensure that ActivityRecord#onRemovedFromDisplay is called.
+        r.destroyed("test");
+        // The removal is deferred, so the activity is still in the display.
+        assertEquals(r, displayContent.getTopMostActivity());
+
+        // Assume the animation is done so the deferred removal can continue.
+        doReturn(false).when(r).isAnimating(anyInt(), anyInt());
+
+        assertFalse(displayContent.handleCompleteDeferredRemoval());
+        assertFalse(displayContent.hasChild());
+        assertFalse(r.hasChild());
+    }
+
+    @Test
     public void testTaskCanApplyAnimation() {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity =
+        final ActivityRecord activity2 =
                 WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
-        verifyWindowContainerApplyAnimation(task, activity);
+        final ActivityRecord activity1 =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        verifyWindowContainerApplyAnimation(task, activity1, activity2);
     }
 
     @Test
     public void testStackCanApplyAnimation() {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
+        final ActivityRecord activity2 = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
                 createTaskInStack(stack, 0 /* userId */));
-        verifyWindowContainerApplyAnimation(stack, activity);
+        final ActivityRecord activity1 = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
+                createTaskInStack(stack, 0 /* userId */));
+        verifyWindowContainerApplyAnimation(stack, activity1, activity2);
     }
 
     @Test
@@ -871,7 +901,8 @@ public class WindowContainerTests extends WindowTestsBase {
         assertEquals(displayArea, displayArea.getDisplayArea());
     }
 
-    private void verifyWindowContainerApplyAnimation(WindowContainer wc, ActivityRecord act) {
+    private void verifyWindowContainerApplyAnimation(WindowContainer wc, ActivityRecord act,
+            ActivityRecord act2) {
         // Initial remote animation for app transition.
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 new IRemoteAnimationRunner.Stub() {
@@ -895,17 +926,23 @@ public class WindowContainerTests extends WindowTestsBase {
         wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
         spyOn(wc);
         doReturn(true).when(wc).okToAnimate();
-        final OnAnimationFinishedCallback onAnimationFinishedCallback =
-                mock(OnAnimationFinishedCallback.class);
 
         // Make sure animating state is as expected after applied animation.
-        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false,
-                onAnimationFinishedCallback));
-        assertEquals(wc.getTopMostActivity(), act);
+
+        // Animation target is promoted from act to wc. act2 is a descendant of wc, but not a source
+        // of the animation.
+        ArrayList<WindowContainer<WindowState>> sources = new ArrayList<>();
+        sources.add(act);
+        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false, sources));
+
+        assertEquals(act, wc.getTopMostActivity());
         assertTrue(wc.isAnimating());
+        assertTrue(wc.isAnimating(0, ANIMATION_TYPE_APP_TRANSITION));
+        assertTrue(wc.getAnimationSources().contains(act));
+        assertFalse(wc.getAnimationSources().contains(act2));
         assertTrue(act.isAnimating(PARENTS));
-        verify(onAnimationFinishedCallback, times(0)).onAnimationFinished(
-                eq(ANIMATION_TYPE_APP_TRANSITION), any());
+        assertTrue(act.isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
+        assertEquals(wc, act.getAnimatingContainer(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
 
         // Make sure animation finish callback will be received and reset animating state after
         // animation finish.
@@ -914,8 +951,6 @@ public class WindowContainerTests extends WindowTestsBase {
         verify(wc).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION), any());
         assertFalse(wc.isAnimating());
         assertFalse(act.isAnimating(PARENTS));
-        verify(onAnimationFinishedCallback, times(1)).onAnimationFinished(
-                eq(ANIMATION_TYPE_APP_TRANSITION), any());
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

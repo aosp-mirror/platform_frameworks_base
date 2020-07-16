@@ -38,6 +38,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:layout_gravity="top|center_horizontal"
         >
 
@@ -63,13 +65,17 @@
                 android:layout_height="@dimen/conversation_icon_size_badged"
                 android:layout_marginLeft="@dimen/conversation_badge_side_margin"
                 android:layout_marginTop="@dimen/conversation_badge_side_margin"
+                android:clipChildren="false"
+                android:clipToPadding="false"
             >
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_bg"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_gravity="center"
                     android:src="@drawable/conversation_badge_background"
                     android:forceHasOverlappingRendering="false"
+                    android:scaleType="center"
                 />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/icon"
@@ -81,11 +87,14 @@
                 />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_ring"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:src="@drawable/conversation_badge_ring"
                     android:visibility="gone"
                     android:forceHasOverlappingRendering="false"
+                    android:clipToPadding="false"
+                    android:scaleType="center"
                 />
             </FrameLayout>
         </FrameLayout>
@@ -119,6 +128,9 @@
                 android:layout_weight="1">
 
                 <!-- Header -->
+
+                <!-- Use layout_marginStart instead of paddingStart to work around strange
+                     measurement behavior on lower display densities. -->
                 <LinearLayout
                     android:id="@+id/conversation_header"
                     android:layout_width="wrap_content"
@@ -126,27 +138,26 @@
                     android:orientation="horizontal"
                     android:paddingTop="16dp"
                     android:layout_marginBottom="2dp"
-                    android:paddingStart="@dimen/conversation_content_start"
+                    android:layout_marginStart="@dimen/conversation_content_start"
                 >
                     <TextView
                         android:id="@+id/conversation_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
                         android:textSize="16sp"
                         android:singleLine="true"
                         android:layout_weight="1"
                         />
 
-
                     <TextView
                         android:id="@+id/app_name_divider"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:text="@string/notification_header_divider_symbol"
                         android:layout_gravity="center"
                         android:paddingTop="1sp"
@@ -161,9 +172,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:paddingTop="1sp"
                         android:singleLine="true"
+                        android:visibility="gone"
                     />
 
                     <TextView
@@ -171,8 +184,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:text="@string/notification_header_divider_symbol"
                         android:layout_gravity="center"
                         android:paddingTop="1sp"
@@ -182,11 +195,11 @@
 
                     <DateTimeView
                         android:id="@+id/time"
-                        android:textAppearance="@style/TextAppearance.Material.Notification.Time"
+                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
                         android:paddingTop="1sp"
                         android:showRelative="true"
                         android:singleLine="true"

@@ -22,13 +22,13 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1596683495752107015"></item>
-    <item msgid="3288373008277313483">"Scansione in corso..."</item>
-    <item msgid="6050951078202663628">"Connessione..."</item>
-    <item msgid="8356618438494652335">"Autenticazione..."</item>
-    <item msgid="2837871868181677206">"Acquisizione indirizzo IP..."</item>
+    <item msgid="3288373008277313483">"Scansione in corso…"</item>
+    <item msgid="6050951078202663628">"Connessione…"</item>
+    <item msgid="8356618438494652335">"Autenticazione…"</item>
+    <item msgid="2837871868181677206">"Acquisizione indirizzo IP…"</item>
     <item msgid="4613015005934755724">"Connessa"</item>
     <item msgid="3763530049995655072">"Sospesa"</item>
-    <item msgid="7852381437933824454">"Disconnessione..."</item>
+    <item msgid="7852381437933824454">"Disconnessione…"</item>
     <item msgid="5046795712175415059">"Disconnessa"</item>
     <item msgid="2473654476624070462">"Operazione non riuscita"</item>
     <item msgid="9146847076036105115">"Bloccato"</item>
@@ -36,13 +36,13 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="5969842512724979061"></item>
-    <item msgid="1818677602615822316">"Scansione in corso..."</item>
-    <item msgid="8339720953594087771">"Connessione a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
-    <item msgid="3028983857109369308">"Autenticazione con <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
-    <item msgid="4287401332778341890">"Acquisizione indirizzo IP da <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="1818677602615822316">"Scansione in corso…"</item>
+    <item msgid="8339720953594087771">"Connessione a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="3028983857109369308">"Autenticazione con <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="4287401332778341890">"Acquisizione indirizzo IP da <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="1043944043827424501">"Connessa a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Sospesa"</item>
-    <item msgid="1175040558087735707">"Disconnessione da <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="1175040558087735707">"Disconnessione da <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"Disconnessa"</item>
     <item msgid="522383512264986901">"Operazione non riuscita"</item>
     <item msgid="3602596701217484364">"Bloccato"</item>

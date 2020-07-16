@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"បើកកម្រងព័ត៌មានការងាររបស់អ្នក"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"កម្មវិធីផ្ទាល់ខ្លួន​របស់អ្នកត្រូវ​បានទប់ស្កាត់ រហូតទាល់តែ​អ្នកបើក​កម្រងព័ត៌មាន​ការងាររបស់អ្នក"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"កម្មវិធីផ្ទាល់ខ្លួន​នឹងត្រូវបាន​ទប់ស្កាត់​នៅថ្ងៃទី <xliff:g id="DATE">%1$s</xliff:g> នៅម៉ោង <xliff:g id="TIME">%2$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិនអនុញ្ញាតឱ្យ​បន្តបិទ​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លើសពី <xliff:g id="NUMBER">%3$d</xliff:g> ថ្ងៃ​ទេ។"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"បើក"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ជម្រើស Android TV"</string>
@@ -1125,17 +1123,15 @@
     <string name="checked" msgid="9179896827054513119">"បានធីក​"</string>
     <string name="not_checked" msgid="7972320087569023342">"មិន​បាន​ធីក​"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"បើក"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"បើកតំណជាមួយ"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"បើក​តំណជាមួយ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ដោយប្រើ"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"បើកតំណដោយប្រើ"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"បើក​តំណដោយប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ដោយប្រើ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"កែសម្រួល​ជាមួយ​ %1$s"</string>
@@ -1230,7 +1226,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"កម្រិត​សំឡេង"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"កម្រិត​សំឡេង​ប៊្លូធូស"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"កម្រិត​សំឡេង​រោទ៍"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅ"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅទូរសព្ទ"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"សំឡេង​រោទ៍​លំនាំដើម"</string>
@@ -1623,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%2$d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី។"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"លុប​ចេញ"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"សេវាកម្ម​ផ្ទៃខាងមុខ​ដែលចាប់ផ្ដើមដោយ​ផ្ទៃខាងក្រោយ​ពី <xliff:g id="PACKAGENAME">%1$s</xliff:g> នឹង​មិនមាន​ការអនុញ្ញាត​ខណៈពេល​កំពុង​ប្រើប្រាស់​ទេ នៅក្នុង​កំណែបង្កើត R នៅពេល​អនាគត​។ សូម​មើល go/r-bg-fgs-restriction និង​ផ្ញើ​របាយការណ៍​អំពី​បញ្ហា​។"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>

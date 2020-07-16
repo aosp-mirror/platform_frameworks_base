@@ -31,6 +31,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -186,6 +187,9 @@ public class BubbleFlyoutView extends FrameLayout {
             }
         });
 
+        // Use locale direction so the text is aligned correctly.
+        setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
+
         mBgPaint.setColor(mFloatingBackgroundColor);
 
         mLeftTriangleShape =
@@ -220,9 +224,10 @@ public class BubbleFlyoutView extends FrameLayout {
             float[] dotCenter,
             boolean hideDot) {
 
-        if (flyoutMessage.senderAvatar != null && flyoutMessage.isGroupChat) {
+        final Drawable senderAvatar = flyoutMessage.senderAvatar;
+        if (senderAvatar != null && flyoutMessage.isGroupChat) {
             mSenderAvatar.setVisibility(VISIBLE);
-            mSenderAvatar.setImageDrawable(flyoutMessage.senderAvatar);
+            mSenderAvatar.setImageDrawable(senderAvatar);
         } else {
             mSenderAvatar.setVisibility(GONE);
             mSenderAvatar.setTranslationX(0);

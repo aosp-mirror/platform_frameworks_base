@@ -30,7 +30,8 @@ import java.lang.annotation.Retention;
 @IntDef(value = {
         StartInputReason.UNSPECIFIED,
         StartInputReason.WINDOW_FOCUS_GAIN,
-        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY,
+        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR,
+        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR,
         StartInputReason.APP_CALLED_RESTART_INPUT_API,
         StartInputReason.CHECK_FOCUS,
         StartInputReason.BOUND_TO_IMMS,
@@ -49,44 +50,50 @@ public @interface StartInputReason {
      */
     int WINDOW_FOCUS_GAIN = 1;
     /**
+     * {@link android.view.Window} gained focus and the focused view is same as current served
+     * view and its input connection remains. {@link android.view.inputmethod.InputMethodManager}
+     * just reports this window focus change event to sync IME input target for system.
+     */
+    int WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR = 2;
+    /**
      * {@link android.view.Window} gained focus but there is no {@link android.view.View} that is
      * eligible to have IME focus. {@link android.view.inputmethod.InputMethodManager} just reports
-     * this window focus change event.
+     * this window focus change event for logging.
      */
-    int WINDOW_FOCUS_GAIN_REPORT_ONLY = 2;
+    int WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR = 3;
     /**
      * {@link android.view.inputmethod.InputMethodManager#restartInput(android.view.View)} is
      * either explicitly called by the application or indirectly called by some Framework class
      * (e.g. {@link android.widget.EditText}).
      */
-    int APP_CALLED_RESTART_INPUT_API = 3;
+    int APP_CALLED_RESTART_INPUT_API = 4;
     /**
      * {@link android.view.View} requested a new connection because of view focus change.
      */
-    int CHECK_FOCUS = 4;
+    int CHECK_FOCUS = 5;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
      * {@link com.android.internal.view.IInputMethodClient#onBindMethod}.
      */
-    int BOUND_TO_IMMS = 5;
+    int BOUND_TO_IMMS = 6;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
      * {@link com.android.internal.view.IInputMethodClient#onUnbindMethod}.
      */
-    int UNBOUND_FROM_IMMS = 6;
+    int UNBOUND_FROM_IMMS = 7;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
      * {@link com.android.internal.view.IInputMethodClient#setActive}.
      */
-    int ACTIVATED_BY_IMMS = 7;
+    int ACTIVATED_BY_IMMS = 8;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
      * {@link com.android.internal.view.IInputMethodClient#setActive}.
      */
-    int DEACTIVATED_BY_IMMS = 8;
+    int DEACTIVATED_BY_IMMS = 9;
     /**
      * {@link com.android.server.inputmethod.InputMethodManagerService} is responding to
      * {@link com.android.internal.view.IInputSessionCallback#sessionCreated}.
      */
-    int SESSION_CREATED_BY_IME = 9;
+    int SESSION_CREATED_BY_IME = 10;
 }

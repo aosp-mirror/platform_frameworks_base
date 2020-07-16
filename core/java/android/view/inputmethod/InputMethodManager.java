@@ -19,6 +19,9 @@ package android.view.inputmethod;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
+import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR;
+import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -538,6 +541,19 @@ public final class InputMethodManager {
         return servedView.hasWindowFocus() || isAutofillUIShowing(servedView);
     }
 
+    /**
+     * Reports whether the IME is currently perceptible or not, according to the leash applied by
+     * {@link android.view.WindowInsetsController}.
+     * @hide
+     */
+    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+        try {
+            mService.reportPerceptible(windowToken, perceptible);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
         /**
@@ -616,12 +632,23 @@ public final class InputMethodManager {
                 // For some reason we didn't do a startInput + windowFocusGain, so
                 // we'll just do a window focus gain and call it a day.
                 try {
-                    if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
+                    View servedView = controller.getServedView();
+                    boolean nextFocusSameEditor = servedView != null && servedView == focusedView
+                            && isSameEditorAndAcceptingText(focusedView);
+                    if (DEBUG) {
+                        Log.v(TAG, "Reporting focus gain, without startInput"
+                                + ", nextFocusIsServedView=" + nextFocusSameEditor);
+                    }
+                    final int startInputReason =
+                            nextFocusSameEditor ? WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR
+                                    : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR;
                     mService.startInputOrWindowGainedFocus(
-                            StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
+                            startInputReason, mClient,
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
                             windowFlags,
-                            null, null, 0 /* missingMethodFlags */,
+                            null,
+                            null,
+                            0 /* missingMethodFlags */,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -645,11 +672,6 @@ public final class InputMethodManager {
         @Override
         public void setCurrentRootView(ViewRootImpl rootView) {
             synchronized (mH) {
-                if (mCurRootView != null) {
-                    // Reset the last served view and restart window focus state of the root view.
-                    mCurRootView.getImeFocusController().setServedView(null);
-                    mRestartOnNextWindowFocus = true;
-                }
                 mCurRootView = rootView;
             }
         }
@@ -676,6 +698,37 @@ public final class InputMethodManager {
                 mRestartOnNextWindowFocus = false;
             }
             return result;
+        }
+
+        /**
+         * For {@link ImeFocusController} to check if the given focused view aligns with the same
+         * editor and the editor is active to accept the text input.
+         *
+         * TODO(b/160968797): Remove this method and move mCurrentTextBoxAttritube to
+         *  ImeFocusController.
+         * In the long-term, we should make mCurrentTextBoxAtrtribue as per-window base instance,
+         * so that we we can directly check if the current focused view aligned with the same editor
+         * in the window without using this checking.
+         *
+         * Note that this method is only use for fixing start new input may ignored issue
+         * (e.g. b/160391516), DO NOT leverage this method to do another check.
+         */
+        public boolean isSameEditorAndAcceptingText(View view) {
+            synchronized (mH) {
+                if (!hasServedByInputMethodLocked(view) || mCurrentTextBoxAttribute == null) {
+                    return false;
+                }
+
+                final EditorInfo ic = mCurrentTextBoxAttribute;
+                // This sameEditor checking is based on using object hash comparison to check if
+                // some fields of the current EditorInfo (e.g. autoFillId, OpPackageName) the
+                // hash code is same as the given focused view.
+                final boolean sameEditor = view.onCheckIsTextEditor() && view.getId() == ic.fieldId
+                        && view.getAutofillId() == ic.autofillId
+                        && view.getContext().getOpPackageName() == ic.packageName;
+                return sameEditor && mServedInputConnectionWrapper != null
+                        && mServedInputConnectionWrapper.isActive();
+            }
         }
     }
 
@@ -2072,28 +2125,36 @@ public final class InputMethodManager {
 
     /**
      * Call showSoftInput with currently focused view.
-     * @return {@code true} if IME can be shown.
+     *
+     * @param windowToken the window from which this request originates. If this doesn't match the
+     *                    currently served view, the request is ignored and returns {@code false}.
+     *
+     * @return {@code true} if IME can (eventually) be shown, {@code false} otherwise.
      * @hide
      */
-    public boolean requestImeShow(ResultReceiver resultReceiver) {
+    public boolean requestImeShow(IBinder windowToken) {
         synchronized (mH) {
             final View servedView = getServedViewLocked();
-            if (servedView == null) {
+            if (servedView == null || servedView.getWindowToken() != windowToken) {
                 return false;
             }
-            showSoftInput(servedView, 0 /* flags */, resultReceiver);
+            showSoftInput(servedView, 0 /* flags */, null /* resultReceiver */);
             return true;
         }
     }
 
     /**
      * Notify IME directly that it is no longer visible.
+     *
+     * @param windowToken the window from which this request originates. If this doesn't match the
+     *                    currently served view, the request is ignored.
      * @hide
      */
-    public void notifyImeHidden() {
+    public void notifyImeHidden(IBinder windowToken) {
         synchronized (mH) {
             try {
-                if (mCurMethod != null) {
+                if (mCurMethod != null && mCurRootView != null
+                        && mCurRootView.getWindowToken() == windowToken) {
                     mCurMethod.notifyImeHidden();
                 }
             } catch (RemoteException re) {
@@ -2103,15 +2164,15 @@ public final class InputMethodManager {
 
     /**
      * Notify IME directly to remove surface as it is no longer visible.
+     * @param windowToken The client window token that requests the IME to remove its surface.
      * @hide
      */
-    public void removeImeSurface() {
+    public void removeImeSurface(IBinder windowToken) {
         synchronized (mH) {
             try {
-                if (mCurMethod != null) {
-                    mCurMethod.removeImeSurface();
-                }
-            } catch (RemoteException re) {
+                mService.removeImeSurfaceFromWindow(windowToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }

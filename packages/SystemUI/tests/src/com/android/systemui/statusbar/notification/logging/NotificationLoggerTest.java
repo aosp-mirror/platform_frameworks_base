@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -42,6 +42,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -163,27 +164,60 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mUiBgExecutor.runAllReady();
         Mockito.reset(mBarService);
 
-        mLogger.stopNotificationLogging();
+        setStateAsleep();
+        mLogger.onDozingChanged(false);  // Wake to lockscreen
+        mLogger.onDozingChanged(true);  // And go back to sleep, turning off logging
         mUiBgExecutor.runAllReady();
         // The visibility objects are recycled by NotificationLogger, so we can't use specific
         // matchers here.
         verify(mBarService, times(1)).onNotificationVisibilityChanged(any(), any());
     }
 
+    private void setStateAsleep() {
+        mLogger.onPanelExpandedChanged(true);
+        mLogger.onDozingChanged(true);
+        mLogger.onStateChanged(StatusBarState.KEYGUARD);
+    }
+
+    private void setStateAwake() {
+        mLogger.onPanelExpandedChanged(false);
+        mLogger.onDozingChanged(false);
+        mLogger.onStateChanged(StatusBarState.SHADE);
+    }
+
     @Test
-    public void testLogPanelShownOnLoggingStart() {
+    public void testLogPanelShownOnWake() {
         when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.startNotificationLogging();
+        setStateAsleep();
+        mLogger.onDozingChanged(false);  // Wake to lockscreen
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
-        assertEquals(false, mNotificationPanelLoggerFake.get(0).isLockscreen);
+        assertTrue(mNotificationPanelLoggerFake.get(0).isLockscreen);
         assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
         Notifications.Notification n = mNotificationPanelLoggerFake.get(0).list.notifications[0];
         assertEquals(TEST_PACKAGE_NAME, n.packageName);
         assertEquals(TEST_UID, n.uid);
         assertEquals(1, n.instanceId);
-        assertEquals(false, n.isGroupSummary);
-        assertEquals(1 + BUCKET_ALERTING, n.section);
+        assertFalse(n.isGroupSummary);
+        assertEquals(Notifications.Notification.SECTION_ALERTING, n.section);
     }
+
+    @Test
+    public void testLogPanelShownOnShadePull() {
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
+        setStateAwake();
+        // Now expand panel
+        mLogger.onPanelExpandedChanged(true);
+        assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
+        assertFalse(mNotificationPanelLoggerFake.get(0).isLockscreen);
+        assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
+        Notifications.Notification n = mNotificationPanelLoggerFake.get(0).list.notifications[0];
+        assertEquals(TEST_PACKAGE_NAME, n.packageName);
+        assertEquals(TEST_UID, n.uid);
+        assertEquals(1, n.instanceId);
+        assertFalse(n.isGroupSummary);
+        assertEquals(Notifications.Notification.SECTION_ALERTING, n.section);
+    }
+
 
     @Test
     public void testLogPanelShownHandlesNullInstanceIds() {
@@ -198,7 +232,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
         entry.setRow(mRow);
 
         when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(entry));
-        mLogger.startNotificationLogging();
+        setStateAsleep();
+        mLogger.onDozingChanged(false);  // Wake to lockscreen
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
         assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
         Notifications.Notification n = mNotificationPanelLoggerFake.get(0).list.notifications[0];

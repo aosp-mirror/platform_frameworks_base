@@ -239,7 +239,10 @@ public class PackageWatchdog {
             mIsPackagesReady = true;
             mHealthCheckController.setCallbacks(packageName -> onHealthCheckPassed(packageName),
                     packages -> onSupportedPackages(packages),
-                    () -> syncRequestsAsync());
+                    () -> {
+                            syncRequestsAsync();
+                            mSyncRequired = true;
+                    });
             setPropertyChangedListenerLocked();
             updateConfigs();
             registerConnectivityModuleHealthListener();
@@ -255,7 +258,6 @@ public class PackageWatchdog {
      */
     public void registerHealthObserver(PackageHealthObserver observer) {
         synchronized (mLock) {
-            mSyncRequired = true;
             ObserverInternal internalObserver = mAllObservers.get(observer.getName());
             if (internalObserver != null) {
                 internalObserver.registeredObserver = observer;
@@ -642,7 +644,8 @@ public class PackageWatchdog {
         synchronized (mLock) {
             if (mIsPackagesReady) {
                 Set<String> packages = getPackagesPendingHealthChecksLocked();
-                if (!packages.equals(mRequestedHealthCheckPackages) || mSyncRequired) {
+                if (mSyncRequired || !packages.equals(mRequestedHealthCheckPackages)
+                        || packages.isEmpty()) {
                     syncRequired = true;
                     mRequestedHealthCheckPackages = packages;
                 }

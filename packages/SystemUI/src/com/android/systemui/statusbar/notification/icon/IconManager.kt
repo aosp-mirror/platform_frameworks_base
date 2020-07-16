@@ -96,13 +96,11 @@ class IconManager @Inject constructor(
         val shelfIcon = iconBuilder.createIconView(entry)
         shelfIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
 
-        shelfIcon.visibility = View.INVISIBLE
         // TODO: This doesn't belong here
         shelfIcon.setOnVisibilityChangedListener { newVisibility: Int ->
-            if (entry.row != null) {
-                entry.row.setShelfIconVisible(newVisibility == View.VISIBLE)
-            }
+            entry.setShelfIconVisible(newVisibility == View.VISIBLE)
         }
+        shelfIcon.visibility = View.INVISIBLE
 
         // Construct the aod icon view.
         val aodIcon = iconBuilder.createIconView(entry)
@@ -255,23 +253,11 @@ class IconManager @Inject constructor(
 
     @Throws(InflationException::class)
     private fun createPeopleAvatar(entry: NotificationEntry): Icon? {
-        // Attempt to extract form shortcut.
-        val conversationId = entry.ranking.channel.conversationId
-        val query = LauncherApps.ShortcutQuery()
-                .setPackage(entry.sbn.packageName)
-                .setQueryFlags(
-                        LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
-                                or LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
-                .setShortcutIds(listOf(conversationId))
-        val shortcuts = launcherApps.getShortcuts(query, entry.sbn.user)
         var ic: Icon? = null
-        if (shortcuts != null && shortcuts.isNotEmpty()) {
-            ic = shortcuts[0].icon
-        }
 
-        // Fall back to notification large icon if available
-        if (ic == null) {
-            ic = entry.sbn.notification.getLargeIcon()
+        val shortcut = entry.ranking.shortcutInfo
+        if (shortcut != null) {
+            ic = launcherApps.getShortcutIcon(shortcut)
         }
 
         // Fall back to extract from message
@@ -288,6 +274,11 @@ class IconManager @Inject constructor(
                     break
                 }
             }
+        }
+
+        // Fall back to notification large icon if available
+        if (ic == null) {
+            ic = entry.sbn.notification.getLargeIcon()
         }
 
         // Revert to small icon if still not available
