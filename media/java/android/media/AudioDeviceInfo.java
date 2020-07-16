@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.util.SparseIntArray;
 
 import java.lang.annotation.Retention;
@@ -137,13 +136,15 @@ public final class AudioDeviceInfo {
      */
     public static final int TYPE_BUILTIN_SPEAKER_SAFE = 24;
     /**
-     * @hide
      * A device type for rerouting audio within the Android framework between mixes and
-     * system applications. Typically created when using
-     * {@link android.media.audiopolicy.AudioPolicy} for mixes created with the
-     * {@link android.media.audiopolicy.AudioMix#ROUTE_FLAG_RENDER} flag.
+     * system applications.
+     * This type is for instance encountered when querying the output device of a track
+     * (with {@link AudioTrack#getRoutedDevice()} playing from a device in screen mirroring mode,
+     * where the audio is not heard on the device, but on the remote device.
      */
-    @SystemApi
+    // Typically created when using
+    // {@link android.media.audiopolicy.AudioPolicy} for mixes created with the
+    // {@link android.media.audiopolicy.AudioMix#ROUTE_FLAG_LOOP_BACK} flag.
     public static final int TYPE_REMOTE_SUBMIX = 25;
 
     /** @hide */
