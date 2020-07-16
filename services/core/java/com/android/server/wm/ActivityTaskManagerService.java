@@ -6820,7 +6820,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 // Clean-up disabled activities.
                 if (mRootWindowContainer.finishDisabledPackageActivities(
-                        packageName, disabledClasses, true, false, userId) && booted) {
+                        packageName, disabledClasses, true /* doit */, false /* evenPersistent */,
+                        userId, false /* onlyRemoveNoProcess */) && booted) {
                     mRootWindowContainer.resumeFocusedStacksTopActivities();
                     mStackSupervisor.scheduleIdle();
                 }
@@ -6839,7 +6840,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean didSomething =
                         getActivityStartController().clearPendingActivityLaunches(packageName);
                 didSomething |= mRootWindowContainer.finishDisabledPackageActivities(packageName,
-                        null, doit, evenPersistent, userId);
+                        null /* filterByClasses */, doit, evenPersistent, userId,
+                        // Only remove the activities without process because the activities with
+                        // attached process will be removed when handling process died with
+                        // WindowProcessController#isRemoved == true.
+                        true /* onlyRemoveNoProcess */);
                 return didSomething;
             }
         }

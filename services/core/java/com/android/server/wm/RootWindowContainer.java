@@ -3092,6 +3092,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean handleAppDied(WindowProcessController app) {
+        if (app.isRemoved()) {
+            // The package of the died process should be force-stopped, so make its activities as
+            // finishing to prevent the process from being started again if the next top (or being
+            // visible) activity also resides in the same process.
+            app.makeFinishingForProcessRemoved();
+        }
         return reduceOnAllTaskDisplayAreas((taskDisplayArea, result) -> {
             for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                 final Task stack = taskDisplayArea.getStackAt(sNdx);
@@ -3129,24 +3135,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         private boolean mDoit;
         private boolean mEvenPersistent;
         private int mUserId;
+        private boolean mOnlyRemoveNoProcess;
         private Task mLastTask;
         private ComponentName mHomeActivity;
 
         private void reset(String packageName, Set<String> filterByClasses,
-                boolean doit, boolean evenPersistent, int userId) {
+                boolean doit, boolean evenPersistent, int userId, boolean onlyRemoveNoProcess) {
             mDidSomething = false;
             mPackageName = packageName;
             mFilterByClasses = filterByClasses;
             mDoit = doit;
             mEvenPersistent = evenPersistent;
             mUserId = userId;
+            mOnlyRemoveNoProcess = onlyRemoveNoProcess;
             mLastTask = null;
             mHomeActivity = null;
         }
 
         boolean process(String packageName, Set<String> filterByClasses,
-                boolean doit, boolean evenPersistent, int userId) {
-            reset(packageName, filterByClasses, doit, evenPersistent, userId);
+                boolean doit, boolean evenPersistent, int userId, boolean onlyRemoveNoProcess) {
+            reset(packageName, filterByClasses, doit, evenPersistent, userId, onlyRemoveNoProcess);
 
             final PooledFunction f = PooledLambda.obtainFunction(
                     FinishDisabledPackageActivitiesHelper::processActivity, this,
@@ -3161,9 +3169,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     (r.packageName.equals(mPackageName) && (mFilterByClasses == null
                             || mFilterByClasses.contains(r.mActivityComponent.getClassName())))
                             || (mPackageName == null && r.mUserId == mUserId);
+            final boolean noProcess = !r.hasProcess();
             if ((mUserId == UserHandle.USER_ALL || r.mUserId == mUserId)
                     && (sameComponent || r.getTask() == mLastTask)
-                    && (r.app == null || mEvenPersistent || !r.app.isPersistent())) {
+                    && (noProcess || mEvenPersistent || !r.app.isPersistent())) {
                 if (!mDoit) {
                     if (r.finishing) {
                         // If this activity is just finishing, then it is not
@@ -3180,10 +3189,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         mHomeActivity = r.mActivityComponent;
                     }
                 }
-                mDidSomething = true;
-                Slog.i(TAG, "  Force finishing activity " + r);
+                if (mOnlyRemoveNoProcess) {
+                    if (noProcess) {
+                        mDidSomething = true;
+                        Slog.i(TAG, "  Force removing " + r);
+                        r.cleanUp(false /* cleanServices */, false /* setState */);
+                        r.removeFromHistory("force-stop");
+                    }
+                } else {
+                    mDidSomething = true;
+                    Slog.i(TAG, "  Force finishing " + r);
+                    r.finishIfPossible("force-stop", true /* oomAdj */);
+                }
                 mLastTask = r.getTask();
-                r.finishIfPossible("force-stop", true);
             }
 
             return false;
@@ -3192,9 +3210,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     /** @return true if some activity was finished (or would have finished if doit were true). */
     boolean finishDisabledPackageActivities(String packageName, Set<String> filterByClasses,
-            boolean doit, boolean evenPersistent, int userId) {
+            boolean doit, boolean evenPersistent, int userId, boolean onlyRemoveNoProcess) {
         return mFinishDisabledPackageActivitiesHelper.process(packageName, filterByClasses, doit,
-                evenPersistent, userId);
+                evenPersistent, userId, onlyRemoveNoProcess);
     }
 
     void updateActivityApplicationInfo(ApplicationInfo aInfo) {

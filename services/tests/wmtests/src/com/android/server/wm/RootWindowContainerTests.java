@@ -25,6 +25,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.Task.ActivityState.FINISHING;
 import static com.android.server.wm.Task.ActivityState.PAUSED;
 import static com.android.server.wm.Task.ActivityState.PAUSING;
@@ -168,6 +170,28 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         activity.setState(FINISHING, "test FINISHING");
         assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+    }
+
+    @Test
+    public void testForceStopPackage() {
+        final Task task = new ActivityTestsBase.StackBuilder(mWm.mRoot).build();
+        final ActivityRecord activity1 = task.getTopMostActivity();
+        final ActivityRecord activity2 =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService).setStack(task).build();
+        final WindowProcessController wpc = activity1.app;
+        spyOn(wpc);
+        activity1.app = null;
+        activity2.setProcess(wpc);
+        doReturn(true).when(wpc).isRemoved();
+
+        mWm.mAtmService.mInternal.onForceStopPackage(wpc.mInfo.packageName, true /* doit */,
+                false /* evenPersistent */, wpc.mUserId);
+        // The activity without process should be removed.
+        assertEquals(1, task.getChildCount());
+
+        mWm.mRoot.handleAppDied(wpc);
+        // The activity with process should be removed because WindowProcessController#isRemoved.
+        assertFalse(task.hasChild());
     }
 }
 
