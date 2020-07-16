@@ -84,6 +84,15 @@ public class NetworkTemplate implements Parcelable {
      * @hide
      */
     public static final int NETWORK_TYPE_ALL = -1;
+    /**
+     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
+     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
+     * with NR state as connected. This should not be overlapped with any of the
+     * {@code TelephonyManager.NETWORK_TYPE_*} constants.
+     *
+     * @hide
+     */
+    public static final int NETWORK_TYPE_5G_NSA = -2;
 
     private static boolean isKnownMatchRule(final int rule) {
         switch (rule) {
@@ -472,6 +481,9 @@ public class NetworkTemplate implements Parcelable {
                 return TelephonyManager.NETWORK_TYPE_LTE;
             case TelephonyManager.NETWORK_TYPE_NR:
                 return TelephonyManager.NETWORK_TYPE_NR;
+            // Virtual RAT type for 5G NSA mode, see {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+            case NetworkTemplate.NETWORK_TYPE_5G_NSA:
+                return NetworkTemplate.NETWORK_TYPE_5G_NSA;
             default:
                 return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }

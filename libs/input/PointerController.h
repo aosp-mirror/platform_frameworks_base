@@ -17,19 +17,20 @@
 #ifndef _UI_POINTER_CONTROLLER_H
 #define _UI_POINTER_CONTROLLER_H
 
-#include "SpriteController.h"
-
-#include <map>
-#include <vector>
-
-#include <ui/DisplayInfo.h>
+#include <PointerControllerInterface.h>
+#include <gui/DisplayEventReceiver.h>
 #include <input/DisplayViewport.h>
 #include <input/Input.h>
-#include <PointerControllerInterface.h>
+#include <ui/DisplayInfo.h>
 #include <utils/BitSet.h>
-#include <utils/RefBase.h>
 #include <utils/Looper.h>
-#include <gui/DisplayEventReceiver.h>
+#include <utils/RefBase.h>
+
+#include <map>
+#include <memory>
+#include <vector>
+
+#include "SpriteController.h"
 
 namespace android {
 
@@ -70,25 +71,22 @@ public:
     virtual int32_t getCustomPointerIconId() = 0;
 };
 
-
 /*
  * Tracks pointer movements and draws the pointer sprite to a surface.
  *
  * Handles pointer acceleration and animation.
  */
-class PointerController : public PointerControllerInterface, public MessageHandler,
-                          public LooperCallback {
-protected:
-    virtual ~PointerController();
-
+class PointerController : public PointerControllerInterface {
 public:
-    enum InactivityTimeout {
-        INACTIVITY_TIMEOUT_NORMAL = 0,
-        INACTIVITY_TIMEOUT_SHORT = 1,
+    static std::shared_ptr<PointerController> create(
+            const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+            const sp<SpriteController>& spriteController);
+    enum class InactivityTimeout {
+        NORMAL = 0,
+        SHORT = 1,
     };
 
-    PointerController(const sp<PointerControllerPolicyInterface>& policy,
-            const sp<Looper>& looper, const sp<SpriteController>& spriteController);
+    virtual ~PointerController();
 
     virtual bool getBounds(float* outMinX, float* outMinY,
             float* outMaxX, float* outMaxY) const;
@@ -113,8 +111,8 @@ public:
     void reloadPointerResources();
 
 private:
-    static const size_t MAX_RECYCLED_SPRITES = 12;
-    static const size_t MAX_SPOTS = 12;
+    static constexpr size_t MAX_RECYCLED_SPRITES = 12;
+    static constexpr size_t MAX_SPOTS = 12;
 
     enum {
         MSG_INACTIVITY_TIMEOUT,
@@ -130,8 +128,13 @@ private:
         float x, y;
 
         inline Spot(uint32_t id, const sp<Sprite>& sprite)
-                : id(id), sprite(sprite), alpha(1.0f), scale(1.0f),
-                  x(0.0f), y(0.0f), lastIcon(NULL) { }
+              : id(id),
+                sprite(sprite),
+                alpha(1.0f),
+                scale(1.0f),
+                x(0.0f),
+                y(0.0f),
+                lastIcon(nullptr) {}
 
         void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId);
 
@@ -139,12 +142,24 @@ private:
         const SpriteIcon* lastIcon;
     };
 
+    class MessageHandler : public virtual android::MessageHandler {
+    public:
+        void handleMessage(const Message& message) override;
+        std::weak_ptr<PointerController> pointerController;
+    };
+
+    class LooperCallback : public virtual android::LooperCallback {
+    public:
+        int handleEvent(int fd, int events, void* data) override;
+        std::weak_ptr<PointerController> pointerController;
+    };
+
     mutable Mutex mLock;
 
     sp<PointerControllerPolicyInterface> mPolicy;
     sp<Looper> mLooper;
     sp<SpriteController> mSpriteController;
-    sp<WeakMessageHandler> mHandler;
+    sp<MessageHandler> mHandler;
     sp<LooperCallback> mCallback;
 
     DisplayEventReceiver mDisplayEventReceiver;
@@ -181,14 +196,15 @@ private:
         int32_t buttonState;
 
         std::map<int32_t /* displayId */, std::vector<Spot*>> spotsByDisplay;
-        std::vector<sp<Sprite> > recycledSprites;
+        std::vector<sp<Sprite>> recycledSprites;
     } mLocked GUARDED_BY(mLock);
+
+    PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+                      const sp<SpriteController>& spriteController);
 
     bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
     void setPositionLocked(float x, float y);
 
-    void handleMessage(const Message& message);
-    int handleEvent(int fd, int events, void* data);
     void doAnimate(nsecs_t timestamp);
     bool doFadingAnimationLocked(nsecs_t timestamp);
     bool doBitmapAnimationLocked(nsecs_t timestamp);

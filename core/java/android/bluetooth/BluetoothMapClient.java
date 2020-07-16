@@ -52,6 +52,18 @@ public final class BluetoothMapClient implements BluetoothProfile {
     public static final String ACTION_MESSAGE_DELIVERED_SUCCESSFULLY =
             "android.bluetooth.mapmce.profile.action.MESSAGE_DELIVERED_SUCCESSFULLY";
 
+    /**
+     * Action to notify read status changed
+     */
+    public static final String ACTION_MESSAGE_READ_STATUS_CHANGED =
+            "android.bluetooth.mapmce.profile.action.MESSAGE_READ_STATUS_CHANGED";
+
+    /**
+     * Action to notify deleted status changed
+     */
+    public static final String ACTION_MESSAGE_DELETED_STATUS_CHANGED =
+            "android.bluetooth.mapmce.profile.action.MESSAGE_DELETED_STATUS_CHANGED";
+
     /* Extras used in ACTION_MESSAGE_RECEIVED intent.
      * NOTE: HANDLE is only valid for a single session with the device. */
     public static final String EXTRA_MESSAGE_HANDLE =
@@ -65,6 +77,25 @@ public final class BluetoothMapClient implements BluetoothProfile {
     public static final String EXTRA_SENDER_CONTACT_NAME =
             "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_NAME";
 
+    /**
+     * Used as a boolean extra in ACTION_MESSAGE_DELETED_STATUS_CHANGED
+     * Contains the MAP message deleted status
+     * Possible values are:
+     * true: deleted
+     * false: undeleted
+     */
+    public static final String EXTRA_MESSAGE_DELETED_STATUS =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_DELETED_STATUS";
+
+    /**
+     * Extra used in ACTION_MESSAGE_READ_STATUS_CHANGED or ACTION_MESSAGE_DELETED_STATUS_CHANGED
+     * Possible values are:
+     * 0: failure
+     * 1: success
+     */
+    public static final String EXTRA_RESULT_CODE =
+            "android.bluetooth.device.extra.RESULT_CODE";
+
     /** There was an error trying to obtain the state */
     public static final int STATE_ERROR = -1;
 
@@ -74,6 +105,12 @@ public final class BluetoothMapClient implements BluetoothProfile {
     public static final int RESULT_CANCELED = 2;
 
     private static final int UPLOADING_FEATURE_BITMASK = 0x08;
+
+    /** Parameters in setMessageStatus */
+    public static final int UNREAD = 0;
+    public static final int READ = 1;
+    public static final int UNDELETED = 2;
+    public static final int DELETED = 3;
 
     private BluetoothAdapter mAdapter;
     private final BluetoothProfileConnector<IBluetoothMapClient> mProfileConnector =
@@ -401,6 +438,38 @@ public final class BluetoothMapClient implements BluetoothProfile {
                 && ((service.getSupportedFeatures(device) & UPLOADING_FEATURE_BITMASK) > 0);
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Set message status of message on MSE
+     * <p>
+     * When read status changed, the result will be published via
+     * {@link #ACTION_MESSAGE_READ_STATUS_CHANGED}
+     * When deleted status changed, the result will be published via
+     * {@link #ACTION_MESSAGE_DELETED_STATUS_CHANGED}
+     *
+     * @param device Bluetooth device
+     * @param handle message handle
+     * @param status <code>UNREAD</code> for "unread", <code>READ</code> for
+     *            "read", <code>UNDELETED</code> for "undeleted", <code>DELETED</code> for
+     *            "deleted", otherwise return error
+     * @return <code>true</code> if request has been sent, <code>false</code> on error
+     *
+     */
+    @RequiresPermission(Manifest.permission.READ_SMS)
+    public boolean setMessageStatus(BluetoothDevice device, String handle, int status) {
+        if (DBG) Log.d(TAG, "setMessageStatus(" + device + ", " + handle + ", " + status + ")");
+        final IBluetoothMapClient service = getService();
+        if (service != null && isEnabled() && isValidDevice(device) && handle != null &&
+            (status == READ || status == UNREAD || status == UNDELETED  || status == DELETED)) {
+            try {
+                return service.setMessageStatus(device, handle, status);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
         return false;
     }
