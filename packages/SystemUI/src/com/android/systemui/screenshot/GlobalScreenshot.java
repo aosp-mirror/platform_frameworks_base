@@ -57,7 +57,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -648,14 +647,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     private void startAnimation(final Consumer<Uri> finisher, Rect screenRect, Insets screenInsets,
             boolean showFlash) {
-
-        // If power save is on, show a toast so there is some visual indication that a
-        // screenshot has been taken.
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        if (powerManager.isPowerSaveMode()) {
-            Toast.makeText(mContext, R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show();
-        }
-
         mScreenshotHandler.post(() -> {
             if (!mScreenshotLayout.isAttachedToWindow()) {
                 mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
