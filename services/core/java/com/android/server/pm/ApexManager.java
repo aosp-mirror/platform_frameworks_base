@@ -1031,12 +1031,17 @@ public abstract class ApexManager {
                 if (files != null) {
                     for (File file : files) {
                         if (file.isDirectory() && !file.getName().contains("@")) {
+                            boolean skip = false;
                             for (String skipDir : skipDirs) {
                                 if (file.getName().equals(skipDir)) {
-                                    continue;
+                                    skip = true;
+                                    break;
                                 }
                             }
-                            result.add(new ActiveApexInfo(file, Environment.getRootDirectory()));
+                            if (!skip) {
+                                result.add(
+                                    new ActiveApexInfo(file, Environment.getRootDirectory()));
+                            }
                         }
                     }
                 }
