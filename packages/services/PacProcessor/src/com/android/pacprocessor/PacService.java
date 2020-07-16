@@ -88,15 +88,5 @@ public class PacService extends Service {
             }
             mLibpac.setCurrentProxyScript(script);
         }
-
-        @Override
-        public void startPacSystem() throws RemoteException {
-            //TODO: remove
-        }
-
-        @Override
-        public void stopPacSystem() throws RemoteException {
-            //TODO: remove
-        }
     }
 }
