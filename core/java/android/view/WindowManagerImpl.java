@@ -276,7 +276,7 @@ public final class WindowManagerImpl implements WindowManager {
             if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
                 return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
                         isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
-                        SOFT_INPUT_ADJUST_NOTHING,
+                        SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
                         SYSTEM_UI_FLAG_VISIBLE, null /* typeSideMap */);
             } else {
                 return new WindowInsets.Builder()
