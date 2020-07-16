@@ -640,7 +640,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             }
 
             for (String apexPackageName : apexPackageNames) {
-                // We will not recieve notifications when an apex is updated,
+                // We will not receive notifications when an apex is updated,
                 // so check now in case any rollbacks ought to be expired. The
                 // onPackagedReplace function is safe to call if the package
                 // hasn't actually been updated.
@@ -827,7 +827,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     }
 
     /**
-     * Do code and userdata backups to enable rollback of the given session.
+     * Do code and user-data backups to enable rollback of the given session.
      * In case of multiPackage sessions, <code>session</code> should be one of
      * the child sessions, not the parent session.
      *
@@ -915,7 +915,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             }
         }
 
-        /**
+        /*
          * The order is important here! Always enable the embedded apk-in-apex (if any) before
          * enabling the embedding apex. Otherwise the rollback object might be in an inconsistent
          * state where an embedding apex is successfully enabled while one of its embedded
@@ -1323,7 +1323,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         assertInWorkerThread();
         int rollbackId = allocateRollbackId();
         final int userId;
-        if (parentSession.getUser() == UserHandle.ALL) {
+        if (parentSession.getUser().equals(UserHandle.ALL)) {
             userId = UserHandle.SYSTEM.getIdentifier();
         } else {
             userId = parentSession.getUser().getIdentifier();
