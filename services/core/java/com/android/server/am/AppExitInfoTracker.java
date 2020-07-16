@@ -522,7 +522,7 @@ public final class AppExitInfoTracker {
                         AppExitInfoContainer container = records.get(filterUid);
                         if (container != null) {
                             mTmpInfoList.clear();
-                            results.addAll(container.toListLocked(mTmpInfoList, filterPid));
+                            list.addAll(container.toListLocked(mTmpInfoList, filterPid));
                         }
                         return AppExitInfoTracker.FOREACH_ACTION_NONE;
                     });
