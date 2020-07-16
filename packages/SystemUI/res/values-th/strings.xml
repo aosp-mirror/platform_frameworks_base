@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"แก้ไขลำดับการตั้งค่า"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"หน้า <xliff:g id="ID_1">%1$d</xliff:g> จาก <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"หน้าจอล็อก"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ขยาย"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ย่อเล็กสุด"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ปิด"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"การตั้งค่า"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ลากลงเพื่อปิด"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"เมนู"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
-    <string name="pip_play" msgid="333995977693142810">"เล่น"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"หยุดชั่วคราว"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ข้ามไปรายการถัดไป"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ข้ามไปรายการก่อนหน้า"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ปรับขนาด"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"โทรศัพท์ปิดไปเพราะร้อนมาก"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"ขณะนี้โทรศัพท์ทำงานเป็นปกติ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"โทรศัพท์ร้อนเกินไปจึงปิดเครื่องเพื่อให้เย็นลง ขณะนี้โทรศัพท์ทำงานเป็นปกติ\n\nโทรศัพท์อาจร้อนเกินไปหากคุณ\n	• ใช้แอปที่ใช้ทรัพยากรมาก (เช่น เกม วิดีโอ หรือแอปการนำทาง)\n	• ดาวน์โหลดหรืออัปโหลดไฟล์ขนาดใหญ่\n	• ใช้โทรศัพท์ในอุณหภูมิที่สูง"</string>

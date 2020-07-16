@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लक स्क्रिन"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"विस्तृत गर्नुहोस्"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"सानो बनाउनुहोस्"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"बन्द गर्नुहोस्"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"सेटिङहरू"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"खारेज गर्न तल तान्नुहोस्"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"मेनु"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> Picture-in-picture मा छ"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले सुविधा प्रयोग नगरोस् भन्ने चाहनुहुन्छ भने ट्याप गरेर सेटिङहरू खोल्नुहोस् र यसलाई निष्क्रिय पार्नुहोस्।"</string>
-    <string name="pip_play" msgid="333995977693142810">"प्ले गर्नुहोस्"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"पज गर्नुहोस्"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"अर्कोमा जानुहोस्"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"अघिल्लोमा जानुहोस्"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"आकार बदल्नुहोस्"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"फोन अति नै तातिएकाले चिसिन बन्द भयो"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"तपाईंको फोन अब सामान्य ढंगले चल्दै छ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"तपाईंको फोन अति नै तातिएकाले चिसिन बन्द भयो। तपाईंको फोन अब सामान्य ढंगले चल्दै छ।\n\nतपाईंले निम्न कुराहरू गर्नुभयो भने तपाईंको फोन अत्यन्त तातो हुनसक्छ:\n	• धेरै संसाधन खपत गर्ने एपहरूको प्रयोग (जस्तै गेमिङ, भिडियो वा नेभिगेसन एपहरू)\n	• ठूला फाइलहरूको डाउनलोड वा अपलोड\n	• उच्च तापक्रममा फोनको प्रयोग"</string>

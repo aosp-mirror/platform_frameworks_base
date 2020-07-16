@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"I-edit ang pagkakasunud-sunod ng mga setting."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> ng <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lock screen"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Palawakin"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"I-minimize"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Isara"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Mga Setting"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"I-drag pababa upang i-dismiss"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"Nasa picture-in-picture ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Kung ayaw mong magamit ni <xliff:g id="NAME">%s</xliff:g> ang feature na ito, i-tap upang buksan ang mga setting at i-off ito."</string>
-    <string name="pip_play" msgid="333995977693142810">"I-play"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"I-pause"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Lumaktaw sa susunod"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Lumaktaw sa nakaraan"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"I-resize"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Na-off ang telepono dahil sa init"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Maayos na ngayong gumagana ang iyong telepono"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Napakainit ng telepono, kaya nag-off ito para lumamig. Maayos na itong gumagana.\n\nMaaaring lubos na uminit ang telepono kapag:\n	• Gumamit ka ng resource-intensive na app (gaya ng app para sa gaming, video, o navigation)\n	• Nag-download o nag-upload ka ng malaking file\n • Ginamit mo ito sa mainit na lugar"</string>

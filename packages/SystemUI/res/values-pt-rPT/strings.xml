@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editar a ordem das definições."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ecrã de bloqueio"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Expandir"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimizar"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Fechar"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Definições"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Arrastar para baixo para ignorar"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"A app <xliff:g id="NAME">%s</xliff:g> está no modo de ecrã no ecrã"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Se não pretende que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
-    <string name="pip_play" msgid="333995977693142810">"Reproduzir"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Pausar"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Mudar para o seguinte"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Mudar para o anterior"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Redimensionar"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telem. deslig. devido ao calor"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"O telemóvel está a funcionar normalmente"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O telemóvel estava muito quente, por isso desligou-se para arrefecer. Agora funciona normalmente.\n\nO telemóvel pode sobreaquecer se:\n	• Utilizar aplicações que utilizam mais recursos (jogos, vídeo ou aplicações de navegação)\n	• Transferir ou carregar ficheiros grandes\n	• Utilizar em altas temperaturas"</string>

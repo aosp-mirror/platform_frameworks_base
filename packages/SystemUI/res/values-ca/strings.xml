@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Edita l\'ordre de la configuració."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueig"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Desplega"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimitza"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Tanca"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Configuració"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Arrossega cap avall per ignorar-ho"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menú"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> està en pantalla en pantalla"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
-    <string name="pip_play" msgid="333995977693142810">"Reprodueix"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Posa en pausa"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Ves al següent"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Torna a l\'anterior"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Canvia la mida"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telèfon apagat per la calor"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ara el telèfon funciona de manera normal"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"El telèfon s\'havia sobreescalfat i s\'ha apagat per refredar-se. Ara funciona amb normalitat.\n\nEs pot sobreescalfar si:\n	• utilitzes aplicacions que consumeixen molts recursos (com ara, videojocs, vídeos o aplicacions de navegació);\n	• baixes o penges fitxers grans;\n	• l\'utilitzes amb temperatures altes."</string>

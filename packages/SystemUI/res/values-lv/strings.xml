@@ -921,19 +921,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Rediģēt iestatījumu secību."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Bloķēšanas ekrāns"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Izvērst"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimizēt"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Aizvērt"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Iestatījumi"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Velciet lejup, lai noraidītu"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Izvēlne"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ir attēlā attēlā"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Ja nevēlaties lietotnē <xliff:g id="NAME">%s</xliff:g> izmantot šo funkciju, pieskarieties, lai atvērtu iestatījumus un izslēgtu funkciju."</string>
-    <string name="pip_play" msgid="333995977693142810">"Atskaņot"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Apturēt"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Pāriet uz nākamo"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Pāriet uz iepriekšējo"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Mainīt lielumu"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tālrunis izslēgts karstuma dēļ"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Tagad jūsu tālrunis darbojas normāli"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Jūsu tālrunis bija pārkarsis un tika izslēgts. Tagad tas darbojas normāli.\n\nTālrunis var sakarst, ja:\n	• tiek izmantotas lietotnes, kas patērē daudz enerģijas (piem., spēles, video lietotnes vai navigācija);\n	• tiek lejupielādēti/augšupielādēti lieli faili;\n	• tālrunis tiek lietots augstā temperatūrā."</string>

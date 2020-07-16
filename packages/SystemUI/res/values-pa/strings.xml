@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ਸੈਟਿੰਗਾਂ ਦੇ ਕ੍ਰਮ ਦਾ ਸੰਪਾਦਨ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ਦਾ <xliff:g id="ID_1">%1$d</xliff:g> ਪੰਨਾ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">" ਲਾਕ  ਸਕ੍ਰੀਨ"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ਵਿਸਤਾਰ ਕਰੋ"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ਛੋਟਾ ਕਰੋ"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ਬੰਦ ਕਰੋ"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ਖਾਰਜ ਕਰਨ ਲਈ ਹੇਠਾਂ ਘਸੀਟੋ"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"ਮੀਨੂ"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ਤਸਵੀਰ-ਅੰਦਰ-ਤਸਵੀਰ ਵਿੱਚ ਹੈ"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"ਜੇਕਰ ਤੁਸੀਂ ਨਹੀਂ ਚਾਹੁੰਦੇ ਕਿ <xliff:g id="NAME">%s</xliff:g> ਐਪ ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਦੀ ਵਰਤੋਂ ਕਰੇ, ਤਾਂ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"</string>
-    <string name="pip_play" msgid="333995977693142810">"ਚਲਾਓ"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"ਵਿਰਾਮ ਦਿਓ"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ਅਗਲੇ \'ਤੇ ਜਾਓ"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ਆਕਾਰ ਬਦਲੋ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ਗਰਮ ਹੋਣ ਕਾਰਨ ਫ਼ੋਨ ਬੰਦ ਹੋ ਗਿਆ"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">\n"ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਸੀ, ਇਸ ਲਈ ਇਹ ਠੰਡਾ ਹੋਣ ਵਾਸਤੇ ਬੰਦ ਹੋ ਗਿਆ ਸੀ। ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ।\n\nਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਸਕਦਾ ਹੈ ਜੇ:\n	• ਤੁਸੀਂ ਸਰੋਤਾਂ ਦੀ ਵੱਧ ਵਰਤੋਂ ਵਾਲੀਆਂ ਐਪਾਂ (ਜਿਵੇਂ ਗੇਮਿੰਗ, ਵੀਡੀਓ, ਜਾਂ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਐਪਾਂ) ਵਰਤਦੇ ਹੋ 	• ਵੱਡੀਆਂ ਫ਼ਾਈਲਾਂ ਡਾਊਨਲੋਡ ਜਾਂ ਅੱਪਲੋਡ ਕਰਦੇ ਹੋ\n	• ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਉੱਚ ਤਾਪਮਾਨਾਂ ਵਿੱਚ ਵਰਤਦੇ ਹੋ"</string>

@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ແກ້ໄຂລຳດັບການຕັ້ງຄ່າ."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g> ຈາກທັງໝົດ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ໜ້າຈໍລັອກ"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ຂະຫຍາຍ"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ຫຍໍ້"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ປິດ"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ການຕັ້ງຄ່າ"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ລາກລົງເພື່ອປິດໄວ້"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"ເມນູ"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ແມ່ນເປັນການສະແດງຜົນຫຼາຍຢ່າງພ້ອມກັນ"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"ຫາກທ່ານບໍ່ຕ້ອງການ <xliff:g id="NAME">%s</xliff:g> ໃຫ້ໃຊ້ຄຸນສົມບັດນີ້, ໃຫ້ແຕະເພື່ອເປີດການຕັ້ງຄ່າ ແລ້ວປິດມັນໄວ້."</string>
-    <string name="pip_play" msgid="333995977693142810">"ຫຼິ້ນ"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"ຢຸດຊົ່ວຄາວ"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ຂ້າມໄປລາຍການໜ້າ"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ຂ້າມໄປລາຍການກ່ອນນີ້"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ປ່ຽນຂະໜາດ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ປິດໂທລະສັບເນື່ອງຈາກຮ້ອນເກີນໄປ"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"ໂທລະສັບຂອງທ່ານຕອນນີ້ເຮັດວຽກປົກກະຕິແລ້ວ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ໂທລະສັບຂອງທ່ານຮ້ອນເກີນໄປ, ດັ່ງນັ້ນມັນຈຶ່ງຖືກປິດໄວ້ເພື່ອໃຫ້ເຢັນກ່ອນ. ໂທລະສັບຂອງທ່ານຕອນນີ້ເຮັດວຽກປົກກະຕິແລ້ວ.\n\nໂທລະສັບຂອງທ່ານອາດຮ້ອນຫາກວ່າທ່ານ:\n	• ໃຊ້ແອັບທີ່ກິນຊັບພະຍາກອນຫຼາຍ (ເຊັ່ນ: ເກມ, ວິດີໂອ ຫຼື ແອັບການນຳທາງ)\n	• ດາວໂຫລດ ຫຼື ອັບໂຫລດຮູບພາບຂະໜາດໃຫຍ່\n	• ໃຊ້ໂທລະສັບຂອງທ່ານໃນບ່ອນທີ່ມີອຸນຫະພູມສູງ"</string>

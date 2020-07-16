@@ -49,16 +49,15 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
-import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.wm.shell.R;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Helper on top of PipTouchHandler that handles inputs OUTSIDE of the PIP window, which is used to

@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ترتیبات کی ترتیب میں ترمیم کریں۔"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"صفحہ <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"مقفل اسکرین"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"پھیلائیں"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"چھوٹی کریں"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"بند کریں"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ترتیبات"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"برخاست کرنے کیلئے نیچے گھسیٹیں"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"مینو"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> تصویر میں تصویر میں ہے"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کے لیے تھپتھپا کر اسے آف کرے۔"</string>
-    <string name="pip_play" msgid="333995977693142810">"چلائیں"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"موقوف کریں"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"نظرانداز کرکے اگلے پر جائیں"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"نظرانداز کرکے پچھلے پر جائیں"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"سائز تبدیل کریں"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"حرارت کی وجہ سے فون آف ہو گیا"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"آپ کا فون اب حسب معمول کام کر رہا ہے"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"آپ کا فون کافی گرم ہو گيا تھا، اس لئے سرد ہونے کیلئے یہ آف ہو گیا۔ اب آپ کا فون حسب معمول کام کر رہا ہے۔\n\nمندرجہ ذیل چیزیں کرنے پر آپ کا فون کافی گرم ہو سکتا ہے:\n	• ماخذ کا زیادہ استعمال کرنے والی ایپس (جیسے کہ گیمنگ، ویڈیو، یا نیویگیشن ایپس) کا استعمال کرنا\n	• بڑی فائلز ڈاؤن لوڈ یا اپ لوڈ کرنا\n	• اعلی درجہ حرارت میں فون کا استعمال کرنا"</string>

@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"설정 순서 수정"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>페이지 중 <xliff:g id="ID_1">%1$d</xliff:g>페이지"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"잠금 화면"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"펼치기"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"최소화"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"닫기"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"설정"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"아래로 드래그하여 닫기"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"메뉴"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g>에서 PIP 사용 중"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
-    <string name="pip_play" msgid="333995977693142810">"재생"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"일시중지"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"다음으로 건너뛰기"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"이전으로 건너뛰기"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"크기 조절"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"발열로 인해 휴대전화 전원이 종료됨"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"휴대전화가 정상적으로 실행 중입니다."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"휴대전화가 과열되어 온도를 낮추기 위해 전원이 종료되었습니다. 지금은 휴대전화가 정상적으로 실행 중입니다.\n\n휴대전화가 과열되는 이유는 다음과 같습니다.\n	• 리소스를 많이 사용하는 앱 사용(예: 게임, 동영상 또는 내비게이션 앱)\n	• 대용량 파일을 다운로드 또는 업로드\n	• 온도가 높은 곳에서 휴대폰 사용"</string>

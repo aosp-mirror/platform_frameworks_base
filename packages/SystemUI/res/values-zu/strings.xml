@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Hlela uhlelo lwezilungiselelo."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Ikhasi <xliff:g id="ID_1">%1$d</xliff:g> kwangu-<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Khiya isikrini"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Nweba"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Nciphisa"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Vala"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Izilungiselelo"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Hudulela phansi ukuze ucashise"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Imenyu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"U-<xliff:g id="NAME">%s</xliff:g> ungaphakathi kwesithombe esiphakathi kwesithombe"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Uma ungafuni i-<xliff:g id="NAME">%s</xliff:g> ukuthi isebenzise lesi sici, thepha ukuze uvule izilungiselelo uphinde uyivale."</string>
-    <string name="pip_play" msgid="333995977693142810">"Dlala"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Misa isikhashana"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Yeqela kokulandelayo"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Yeqela kokwangaphambilini"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Shintsha usayizi"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ifoni ivaliwe ngenxa yokushisa"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ifoni yakho manje isebenza kahle"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ifoni yakho ibishisa kakhulu, ngakho-ke yacisha ukuze iphole. Ifoni yakho manje isebenza ngokuvamile.\n\nIfoni yakho ingashisa kakhulu uma:\n	• Usebenzisa izinhlelo zokusebenza ezinkulu (njegegeyimu, ividiyo, noma izinhlelo zokusebenza zokuzula)\n	• Landa noma layisha amafayela amakhulu\n	• Sebenzisa ifoni yakho kumathempelesha aphezulu"</string>

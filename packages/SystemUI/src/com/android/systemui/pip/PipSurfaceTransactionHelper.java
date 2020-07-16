@@ -23,8 +23,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.SurfaceControl;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.R;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

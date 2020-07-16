@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"編輯設定次序。"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁 (共 <xliff:g id="ID_2">%2$d</xliff:g> 頁)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"螢幕鎖定"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"展開"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"最小化"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"關閉"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"設定"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"向下拖曳即可關閉"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"選單"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"「<xliff:g id="NAME">%s</xliff:g>」目前在畫中畫模式"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"如果您不想「<xliff:g id="NAME">%s</xliff:g>」使用此功能，請輕按以開啟設定，然後停用此功能。"</string>
-    <string name="pip_play" msgid="333995977693142810">"播放"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"暫停"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"跳到下一個"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"跳到上一個"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"調整大小"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手機因過熱而關上"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"您的手機現已正常運作"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"您的手機之前因過熱而關上降溫。手機現已正常運作。\n\n以下情況可能會導致手機過熱：\n	• 使用耗用大量資源的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上載大型檔案\n	• 在高溫環境下使用手機"</string>

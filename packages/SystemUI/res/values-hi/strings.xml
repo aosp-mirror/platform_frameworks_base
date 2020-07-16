@@ -918,19 +918,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिंग के क्रम को बदलें"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"विस्तार करें"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"छोटा करें"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"बंद करें"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"सेटिंग"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"खारिज करने के लिए नीचे खींचें और छोड़ें"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"मेन्यू"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> \"पिक्चर में पिक्चर\" के अंदर है"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने के लिए टैप करें और उसे बंद करें ."</string>
-    <string name="pip_play" msgid="333995977693142810">"चलाएं"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"रोकें"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"अगले पर जाएं"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"पिछले पर जाएं"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"आकार बदलें"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"गर्म होने की वजह से फ़ोन बंद हुआ"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"आपका फ़ोन अब सामान्य रूप से चल रहा है"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"फ़ोन बहुत गर्म हो गया था, इसलिए ठंडा होने के लिए बंद हो गया. फ़ोन अब अच्छे से चल रहा है.\n\nफ़ोन तब बहुत गर्म हो सकता है जब आप:\n	• ज़्यादा रिसॉर्स का इस्तेमाल करने वाले ऐप्लिकेशन चलाते हैं (जैसे गेमिंग, वीडियो या नेविगेशन ऐप्लिकेशन)\n	• बड़ी फ़ाइलें डाउनलोड या अपलोड करते हैं\n	• ज़्यादा तापमान में फ़ोन का इस्तेमाल करते हैं"</string>

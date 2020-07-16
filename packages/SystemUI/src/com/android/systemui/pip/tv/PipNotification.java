@@ -36,9 +36,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.util.NotificationChannels;
+import com.android.wm.shell.R;
 
 /**
  * A notification that informs users that PIP is running and also provides PIP controls.
