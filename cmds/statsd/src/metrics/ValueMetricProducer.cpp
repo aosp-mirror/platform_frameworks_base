@@ -733,6 +733,11 @@ bool getDoubleOrLong(const LogEvent& event, const Matcher& matcher, Value& ret) 
     return false;
 }
 
+bool ValueMetricProducer::multipleBucketsSkipped(const int64_t numBucketsForward) {
+    // Skip buckets if this is a pulled metric or a pushed metric that is diffed.
+    return numBucketsForward > 1 && (mIsPulled || mUseDiff);
+}
+
 void ValueMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition, const LogEvent& event,
@@ -910,8 +915,9 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         interval.sampleSize += 1;
     }
 
-    // Only trigger the tracker if all intervals are correct
-    if (useAnomalyDetection) {
+    // Only trigger the tracker if all intervals are correct and we have not skipped the bucket due
+    // to MULTIPLE_BUCKETS_SKIPPED.
+    if (useAnomalyDetection && !multipleBucketsSkipped(calcBucketsForwardCount(eventTimeNs))) {
         // TODO: propgate proper values down stream when anomaly support doubles
         long wholeBucketVal = intervals[0].value.long_value;
         auto prev = mCurrentFullBucket.find(eventKey);
@@ -961,9 +967,7 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     int64_t bucketEndTime = fullBucketEndTimeNs;
     int64_t numBucketsForward = calcBucketsForwardCount(eventTimeNs);
 
-    // Skip buckets if this is a pulled metric or a pushed metric that is diffed.
-    if (numBucketsForward > 1 && (mIsPulled || mUseDiff)) {
-
+    if (multipleBucketsSkipped(numBucketsForward)) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
         StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
         // Something went wrong. Maybe the device was sleeping for a long time. It is better
