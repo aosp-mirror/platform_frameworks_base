@@ -464,6 +464,7 @@
   <java-symbol type="integer" name="config_toastDefaultGravity" />
   <java-symbol type="integer" name="config_triplePressOnPowerBehavior" />
   <java-symbol type="integer" name="config_shortPressOnSleepBehavior" />
+  <java-symbol type="bool" name="config_silenceRingerOnSleepKey" />
   <java-symbol type="integer" name="config_longPressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_shortPressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
