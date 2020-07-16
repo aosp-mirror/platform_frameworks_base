@@ -46,13 +46,14 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
     private boolean mShouldSendErrorToClient;
+    private boolean mAlreadyCancelled;
 
     /**
      * Stops the HAL operation specific to the ClientMonitor subclass.
      */
     protected abstract void stopHalOperation();
 
-    AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality,
             int statsAction, int statsClient) {
@@ -99,6 +100,17 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
         if (finish) {
             mFinishCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public void cancel() {
+        if (mAlreadyCancelled) {
+            Slog.w(TAG, "Cancel was already requested");
+            return;
+        }
+
+        stopHalOperation();
+        mAlreadyCancelled = true;
     }
 
     @Override
@@ -153,7 +165,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
     }
 
 
-    final void vibrateSuccess() {
+    protected final void vibrateSuccess() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
             vibrator.vibrate(mSuccessVibrationEffect, VIBRATION_SONFICATION_ATTRIBUTES);

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -75,6 +76,8 @@ public class AuthServiceTest {
     IIrisService mIrisService;
     @Mock
     IFaceService mFaceService;
+    @Mock
+    AppOpsManager mAppOpsManager;
 
     @Before
     public void setUp() {
@@ -93,6 +96,7 @@ public class AuthServiceTest {
         when(mInjector.getFingerprintService()).thenReturn(mFingerprintService);
         when(mInjector.getFaceService()).thenReturn(mFaceService);
         when(mInjector.getIrisService()).thenReturn(mIrisService);
+        when(mInjector.getAppOps(any())).thenReturn(mAppOpsManager);
     }
 
     @Test
@@ -140,7 +144,9 @@ public class AuthServiceTest {
 
     // TODO(b/141025588): Check that an exception is thrown when the userId != callingUserId
     @Test
-    public void testAuthenticate_callsBiometricServiceAuthenticate() throws Exception {
+    public void testAuthenticate_appOpsOk_callsBiometricServiceAuthenticate() throws Exception {
+        when(mAppOpsManager.noteOp(eq(AppOpsManager.OP_USE_BIOMETRIC), anyInt(), any(), any(),
+                any())).thenReturn(AppOpsManager.MODE_ALLOWED);
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
 
@@ -158,6 +164,38 @@ public class AuthServiceTest {
                 promptInfo);
         waitForIdle();
         verify(mBiometricService).authenticate(
+                eq(token),
+                eq(sessionId),
+                eq(userId),
+                eq(mReceiver),
+                eq(TEST_OP_PACKAGE_NAME),
+                eq(promptInfo),
+                eq(Binder.getCallingUid()),
+                eq(Binder.getCallingPid()),
+                eq(UserHandle.getCallingUserId()));
+    }
+
+    @Test
+    public void testAuthenticate_appOpsDenied_doesNotCallBiometricService() throws Exception {
+        when(mAppOpsManager.noteOp(eq(AppOpsManager.OP_USE_BIOMETRIC), anyInt(), any(), any(),
+                any())).thenReturn(AppOpsManager.MODE_ERRORED);
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final Binder token = new Binder();
+        final PromptInfo promptInfo = new PromptInfo();
+        final long sessionId = 0;
+        final int userId = 0;
+
+        mAuthService.mImpl.authenticate(
+                token,
+                sessionId,
+                userId,
+                mReceiver,
+                TEST_OP_PACKAGE_NAME,
+                promptInfo);
+        waitForIdle();
+        verify(mBiometricService, never()).authenticate(
                 eq(token),
                 eq(sessionId),
                 eq(userId),

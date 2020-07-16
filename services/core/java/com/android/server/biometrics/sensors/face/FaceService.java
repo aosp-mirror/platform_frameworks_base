@@ -27,6 +27,7 @@ import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.Face;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
+import android.hardware.face.FaceSensorProperties;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.NativeHandle;
@@ -34,6 +35,7 @@ import android.util.Slog;
 import android.view.Surface;
 
 import com.android.internal.util.DumpUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -56,6 +58,7 @@ public class FaceService extends SystemService {
 
     private Face10 mFace10;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
+    private final LockPatternUtils mLockPatternUtils;
 
     /**
      * Receives the incoming binder calls from FaceManager.
@@ -102,6 +105,9 @@ public class FaceService extends SystemService {
                 final IFaceServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
+            // TODO(b/152413782): If the sensor supports face detect and the device is encrypted or
+            //  lockdown, something wrong happened. See similar path in FingerprintService.
+
             final boolean restricted = false; // Face APIs are private
             final int statsClient = Utils.isKeyguard(getContext(), opPackageName)
                     ? BiometricsProtoEnums.CLIENT_KEYGUARD
@@ -109,6 +115,25 @@ public class FaceService extends SystemService {
             mFace10.scheduleAuthenticate(token, operationId, userId, 0 /* cookie */,
                     new ClientMonitorCallbackConverter(receiver), opPackageName, restricted,
                     statsClient);
+        }
+
+        @Override // Binder call
+        public void detectFace(final IBinder token, final int userId,
+                final IFaceServiceReceiver receiver, final String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (!Utils.isKeyguard(getContext(), opPackageName)) {
+                Slog.w(TAG, "detectFace called from non-sysui package: " + opPackageName);
+                return;
+            }
+
+            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+                // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
+                // ever be invoked when the user is encrypted or lockdown.
+                Slog.e(TAG, "detectFace invoked when user is not encrypted or lockdown");
+                return;
+            }
+
+            // TODO(b/152413782): Implement this once it's supported in the HAL
         }
 
         @Override // Binder call
@@ -134,6 +159,18 @@ public class FaceService extends SystemService {
         public void cancelAuthentication(final IBinder token, final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             mFace10.cancelAuthentication(token);
+        }
+
+        @Override // Binder call
+        public void cancelFaceDetect(final IBinder token, final String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (!Utils.isKeyguard(getContext(), opPackageName)) {
+                Slog.w(TAG, "cancelFaceDetect called from non-sysui package: "
+                        + opPackageName);
+                return;
+            }
+
+            // TODO(b/152413782): Implement this once it's supported in the HAL
         }
 
         @Override // Binder call
@@ -202,6 +239,12 @@ public class FaceService extends SystemService {
             return !mFace10.getEnrolledFaces(userId).isEmpty();
         }
 
+        @Override // Binder call
+        public FaceSensorProperties getSensorProperties(String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            return mFace10.getFaceSensorProperties();
+        }
+
         @Override
         public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
@@ -246,6 +289,7 @@ public class FaceService extends SystemService {
     public FaceService(Context context) {
         super(context);
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     @Override

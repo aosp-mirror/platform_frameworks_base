@@ -65,7 +65,7 @@ public class PerformanceTracker {
         }
     }
 
-    void incrementAuthForUser(int userId, boolean accepted) {
+    public void incrementAuthForUser(int userId, boolean accepted) {
         createUserEntryIfNecessary(userId);
 
         if (accepted) {
