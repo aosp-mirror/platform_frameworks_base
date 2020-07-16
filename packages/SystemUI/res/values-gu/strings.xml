@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"સિસ્ટમ UI"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"સાફ કરો"</string>
-    <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"કોઈ સૂચનાઓ નથી"</string>
+    <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"કોઈ નોટિફિકેશન નથી"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"ચાલુ"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"નોટિફિકેશનો"</string>
     <string name="battery_low_title" msgid="6891106956328275225">"બૅટરી ટૂંક સમયમાં સમાપ્ત થશે"</string>
@@ -368,7 +368,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"સ્થાન બંધ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"મીડિયા ઉપકરણ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ફક્ત કટોકટીના કૉલ્સ"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ફક્ત ઇમર્જન્સી કૉલ"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"સેટિંગ"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"સમય"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"હું"</string>
@@ -517,7 +517,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"હવે પ્રારંભ કરો"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"કોઈ સૂચનાઓ નથી"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"કોઈ નોટિફિકેશન નથી"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"પ્રોફાઇલ મૉનિટર કરી શકાય છે"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"નેટવર્ક મૉનિટર કરી શકાય છે"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"નેટવર્ક મૉનિટર કરવામાં આવી શકે છે"</string>
@@ -930,11 +930,17 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"પહેલાંના પર જાઓ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"કદ બદલો"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે"</string>
+    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
+    <skip />
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
+    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
+    <skip />
     <string name="high_temp_title" msgid="2218333576838496100">"ફોન ગરમ થઈ રહ્યો છે"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ફોન ઠંડો થાય ત્યાં સુધી કેટલીક સુવિધાઓ મર્યાદિત હોય છે"</string>
+    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
+    <skip />
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
+    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
+    <skip />
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ચાર્જરને અનપ્લગ કરો"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"આ ડિવાઇસને ચાર્જ કરવામાં કોઈ સમસ્યા છે. પાવર અડૅપ્ટર અનપ્લગ કરો અને કાળજી લેજો કદાચ કેબલ થોડો ગરમ થયો હોઈ શકે છે."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"સારસંભાળના પગલાં જુઓ"</string>

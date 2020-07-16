@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"පෙර එකට පනින්න"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ප්‍රතිප්‍රමාණ කරන්න"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"දුරකථනය රත් වීම නිසා ක්‍රියාවිරහිත කරන ලදී"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ඔබගේ දුරකථනය දැන් සාමාන්‍ය ලෙස ධාවනය වේ"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ඔබගේ දුරකථනය දැන් සාමාන්‍ය ලෙස ධාවනය වේ.\nතව තතු සඳහා තට්ටු කරන්න"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ඔබේ දුරකථනය ඉතාම උණුසුම්ය, එම නිසා එය සිසිල් වීමට ක්‍රියාවිරහිත කරන ලදී. ධැන් ඔබේ දුරකථනය සාමාන්‍ය පරිදි ධාවනය වේ.\n\nඔබ පහත දේවල් සිදු කළහොත් ඔබේ දුරකථනය ඉතාම උණුසුම් විය හැකිය:\n	• සම්පත්-දැඩි සත්කාරක යෙදුම් භාවිතය (ක්‍රීඩා, වීඩියෝ, හෝ සංචලන යෙදුම් යනාදී)\n	• විශාල ගොනු බාගැනීම හෝ උඩුගත කිරීම\n	• ඔබේ දුරකථනය අධික උෂ්ණත්වයේදී භාවිත කිරීම"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"රැකවරණ පියවර බලන්න"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"දුරකථනය උණුසුම් වෙමින්"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය.\nතව තතු සඳහා තට්ටු කරන්න"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ඔබගේ දුරකථනය ස්වයංක්‍රියව සිසිල් වීමට උත්සාහ කරනු ඇත. ඔබට තවම ඔබේ දුරකථනය භාවිත කළ හැකිය, නමුත් එය සෙමින් ධාවනය විය හැකිය.\n\nඔබේ දුරකථනය සිසිල් වූ පසු, එය සාමාන්‍ය ලෙස ධාවනය වනු ඇත."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"රැකවරණ පියවර බලන්න"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"චාජරය පේනුවෙන් ඉවත් කරන්න"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"මෙම උපාංගය ආරෝපණ කිරීමේ ගැටලුවක් තිබේ බල ඇඩැප්ටරය ගලවා කේබලය උණුසුම් විය හැකි බැවින් පරෙස්සම් වන්න."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"රැකවරණ පියවර බලන්න"</string>

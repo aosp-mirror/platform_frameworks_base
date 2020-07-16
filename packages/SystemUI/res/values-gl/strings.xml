@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Ir ao anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Cambiar tamaño"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"O teléfono apagouse pola calor"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"O teu teléfono funciona agora con normalidade"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"O teléfono funciona con normalidade.\nToca para obter máis información"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O teléfono estaba moi quente, apagouse para que arrefríe e agora funciona con normalidade.\n\nÉ posible que estea moi quente se:\n	• Usas aplicacións que requiren moitos recursos (como aplicacións de navegación, vídeos e xogos)\n	• Descargas/cargas ficheiros grandes\n	• Usas o teléfono a alta temperatura"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver pasos de mantemento"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"O teléfono está quentando"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"O uso dalgunhas funcións é limitado mentres o teléfono arrefría"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"O uso dalgunhas funcións é limitado mentres o teléfono arrefría.\nToca para obter máis información"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"O teléfono tentará arrefriar automaticamente. Podes utilizalo, pero é probable que funcione máis lento.\n\nUnha vez que arrefríe, funcionará con normalidade."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver pasos de mantemento"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Desconecta o cargador"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Produciuse un problema ao cargar este dispositivo. Desconecta o adaptador de corrente e ten coidado porque o cable pode estar quente."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ver pasos de mantemento"</string>

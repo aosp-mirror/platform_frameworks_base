@@ -940,11 +940,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Praleisti ir eiti į ankstesnį"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Pakeisti dydį"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonas išjungt., nes įkaito"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Dabar telefonas veikia įprastai"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonas dabar veikia normaliai.\nPalietę gausite daugiau informacijos"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonas per daug įkaito, todėl buvo išj., kad atvėstų. Dabar telefonas veikia įprastai.\n\nTelefonas gali per daug įkaisti, jei:\n	• esate įjungę daug išteklių naudoj. progr. (pvz., žaidimų, vaizdo įr. arba navig. progr.);\n	• atsis. arba įkeliate didelius failus;\n	• telefoną naudojate aukštoje temper."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Žr. priežiūros veiksmus"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefonas kaista"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Kai kurios funkcijos gali neveikti, kol telefonas vėsta"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Kai kurios funkcijos gali neveikti, kol telefonas vėsta.\nPalietę gausite daugiau informacijos"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefonas automatiškai bandys atvėsti. Telefoną vis tiek galėsite naudoti, tačiau jis gali veikti lėčiau.\n\nKai telefonas atvės, jis veiks įprastai."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Žr. priežiūros veiksmus"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Atjunkite kroviklį"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Įkraunant šį įrenginį iškilo problema. Atjunkite maitinimo adapterį. Būkite atsargūs, nes laidas gali būti įkaitęs."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Žr. priežiūros veiksmus"</string>

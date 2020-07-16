@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"წინაზე გადასვლა"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ზომის შეცვლა"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ტელეფონი გამოირთო გაცხელების გამო"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"თქვენი ტელეფონი ახლა ჩვეულებრივად მუშაობს"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"თქვენი ტელეფონი უკვე ნორმალურად მუშაობს.\nშეეხეთ დამატებითი ინფორმაციის მისაღებად"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"თქვენი ტელეფონი გამოირთო გასაგრილებლად, რადგან ის მეტისმეტად გაცხელდა. ახლა ის ჩვეულებრივად მუშაობს.\n\nტელეფონის გაცხელების მიზეზებია:\n	• რესურსტევადი აპების გამოყენება (მაგ. სათამაშო, ვიდეო ან ნავიგაციის აპების)\n	• დიდი ფაილების ჩამოტვირთვა ან ატვირთვა\n	• ტელეფონის გამოყენება მაღალი ტემპერატურისას"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"მისაღები ზომების გაცნობა"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ტელეფონი ცხელდება"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ზოგიერთი ფუნქცია შეზღუდული იქნება, სანამ ტელეფონი გაგრილდება"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ზოგიერთი ფუნქცია შეზღუდული იქნება, სანამ ტელეფონი გაგრილდება.\nშეეხეთ დამატებითი ინფორმაციის მისაღებად"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"თქვენი ტელეფონი გაგრილებას ავტომატურად შეეცდება. შეგიძლიათ გააგრძელოთ მისით სარგებლობა, თუმცა ტელეფონმა შეიძლება უფრო ნელა იმუშაოს.\n\nგაგრილების შემდგომ ის ჩვეულებრივად იმუშავებს."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"მისაღები ზომების გაცნობა"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"გამოაერთეთ დამტენი"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ამ მოწყობილობის დატენა ვერ ხერხდება პრობლემის გამო. გამოაერთეთ ელკვების ადაპტერი და გამოიჩინეთ სიფრთხილე, რადგან კაბელი შეიძლებოდა გაცხელებულიყო."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"მისაღები ზომების გაცნობა"</string>

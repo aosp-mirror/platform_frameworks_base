@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Ruka ufikie iliyotangulia"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Badilisha ukubwa"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Simu ilizima kutokana na joto"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Simu yako sasa inafanya kazi ipasavyo"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Simu yako sasa inafanya kazi ipasavyo.\nGusa ili upate maelezo zaidi"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Simu yako ilikuwa moto sana, kwa hivyo ilijizima ili ipoe. Simu yako sasa inafanya kazi ipasavyo.\n\nSimu yako inaweza kuwa moto sana ikiwa:\n	• Unatumia programu zinazotumia vipengee vingi (kama vile michezo ya video, video au programu za uelekezaji)\n	• Unapakua au upakie faili kubwa\n	• Unatumia simu yako katika maeneo yenye halijoto ya juu"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Angalia hatua za utunzaji"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Joto la simu linaongezeka"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa.\nGusa ili upate maelezo zaidi"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Angalia hatua za utunzaji"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Chomoa chaja"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Kuna tatizo la kuchaji kifaa hiki. Chomoa adapta ya nishati na uwe mwangalifu, huenda kebo ni moto."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Angalia hatua za ulinzi"</string>

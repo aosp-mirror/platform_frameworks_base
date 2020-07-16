@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Վերադառնալ նախորդին"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Փոխել չափը"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել է տաքանալու պատճառով"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Հեռախոսն այժմ նորմալ աշխատում է"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Հեռախոսն այժմ նորմալ է աշխատում։\nՀպեք՝ ավելին իմանալու համար։"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավարկման հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Հեռախոսը տաքանում է"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են։\nՀպեք՝ ավելին իմանալու համար։"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ձեր հեռախոսն ավտոմատ կերպով կփորձի hովանալ: Կարող եք շարունակել օգտագործել հեռախոսը, սակայն հնարավոր է, որ այն ավելի դանդաղ աշխատի:\n\nՀովանալուց հետո հեռախոսը կաշխատի կանոնավոր կերպով:"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Անջատեք լիցքավորիչը հոսանքից"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Չհաջողվեց լիցքավորել սարքը: Անջատեք հոսանքի ադապտերը և ուշադիր եղեք՝ մալուխը կարող է տաքացած լինել:"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>

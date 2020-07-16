@@ -930,11 +930,17 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"अघिल्लोमा जानुहोस्"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"आकार बदल्नुहोस्"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"फोन अति नै तातिएकाले चिसिन बन्द भयो"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"तपाईंको फोन अब सामान्य ढंगले चल्दै छ"</string>
+    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
+    <skip />
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"तपाईंको फोन अति नै तातिएकाले चिसिन बन्द भयो। तपाईंको फोन अब सामान्य ढंगले चल्दै छ।\n\nतपाईंले निम्न कुराहरू गर्नुभयो भने तपाईंको फोन अत्यन्त तातो हुनसक्छ:\n	• धेरै संसाधन खपत गर्ने एपहरूको प्रयोग (जस्तै गेमिङ, भिडियो वा नेभिगेसन एपहरू)\n	• ठूला फाइलहरूको डाउनलोड वा अपलोड\n	• उच्च तापक्रममा फोनको प्रयोग"</string>
+    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
+    <skip />
     <string name="high_temp_title" msgid="2218333576838496100">"फोन तातो भइरहेको छ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"फोन चिसो हुँदै गर्दा केही विशेषताहरूलाई सीमित गरिन्छ"</string>
+    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
+    <skip />
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्ने छ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
+    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
+    <skip />
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"चार्जर अनप्लग गर्नुहोस्‌"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"यो यन्त्र चार्ज गर्दा कुनै समस्या भयो। पावर एडाप्टर अनप्लग गर्नुहोस्‌ र केबल तातो हुन सक्ने भएकाले ध्यान दिनुहोस्‌।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"हेरचाहसम्बन्धी चरणहरू हेर्नुहोस्‌"</string>

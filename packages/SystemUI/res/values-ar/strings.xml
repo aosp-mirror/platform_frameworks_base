@@ -950,11 +950,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"التخطي إلى السابق"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"تغيير الحجم"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف الهاتف بسبب الحرارة"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"يعمل هاتفك الآن بشكل طبيعي"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"يعمل هاتفك الآن بشكل طبيعي.\nانقر للحصول على مزيد من المعلومات."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ارتفعت درجة حرارة هاتفك بشدة، لذا تم إيقاف تشغيله لخفض درجة حرارته. يعمل هاتفك الآن بشكل طبيعي.\n\nقد ترتفع بشدة درجة حرارة هاتفك إذا:\n	• استخدمت تطبيقات كثيفة الاستخدام لموارد الجهاز (مثل الألعاب أو الفيديو أو تطبيقات التنقل)\n	• نزَّلت أو حمَّلت ملفات كبيرة الحجم\n	• استخدمت هاتفك وسط أجواء مرتفعة الحرارة"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"الاطّلاع على خطوات العناية"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"تزداد درجة حرارة الهاتف"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف.\nانقر للحصول على مزيد من المعلومات."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"سيحاول الهاتف تخفيض درجة حرارته تلقائيًا. سيظل بإمكانك استخدام هاتفك، ولكن قد يعمل بشكل أبطأ.\n\nبعد أن تنخفض درجة حرارة الهاتف، سيستعيد سرعته المعتادة."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"الاطّلاع على خطوات العناية"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"فصل الشاحن"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"هناك مشكلة في شحن هذا الجهاز. يُرجى فصل محوِّل الطاقة بحرص لأن الكابل قد يكون ساخنًا."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"الاطّلاع على خطوات العناية"</string>
