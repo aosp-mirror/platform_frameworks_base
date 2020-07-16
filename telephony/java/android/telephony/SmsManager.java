@@ -39,7 +39,9 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.ITelephony;
@@ -74,10 +76,15 @@ import java.util.concurrent.Executor;
 public final class SmsManager {
     private static final String TAG = "SmsManager";
 
-    /** Singleton object constructed during class initialization. */
-    private static final SmsManager sInstance = new SmsManager(
-            SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
     private static final Object sLockObject = new Object();
+
+    @GuardedBy("sLockObject")
+    private static final Map<Pair<Context, Integer>, SmsManager> sSubInstances =
+            new ArrayMap<>();
+
+    /** Singleton object constructed during class initialization. */
+    private static final SmsManager DEFAULT_INSTANCE = getSmsManagerForContextAndSubscriptionId(
+            null, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
 
     /** SMS record length from TS 51.011 10.5.3
      * @hide
@@ -89,12 +96,15 @@ public final class SmsManager {
      */
     public static final int CDMA_SMS_RECORD_LENGTH = 255;
 
-    private static final Map<Integer, SmsManager> sSubInstances =
-            new ArrayMap<Integer, SmsManager>();
-
     /** A concrete subscription id, or the pseudo DEFAULT_SUBSCRIPTION_ID */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSubId;
+
+    /**
+     * Context this SmsManager is for. Can be {@code null} in the case the manager was created via
+     * legacy APIs
+     */
+    private final @Nullable Context mContext;
 
     /*
      * Key for the various carrier-dependent configuration values.
@@ -325,6 +335,34 @@ public final class SmsManager {
     }
 
     /**
+     * Get {@link Context#getOpPackageName()} if this manager has a context, otherwise a dummy
+     * value.
+     *
+     * @return The package name to be used for app-ops checks
+     */
+    private @Nullable String getOpPackageName() {
+        if (mContext == null) {
+            return null;
+        } else {
+            return mContext.getOpPackageName();
+        }
+    }
+
+    /**
+     * Get {@link Context#getAttributionTag()} ()} if this manager has a context, otherwise get the
+     * default attribution tag.
+     *
+     * @return The attribution tag to be used for app-ops checks
+     */
+    private @Nullable String getAttributionTag() {
+        if (mContext == null) {
+            return null;
+        } else {
+            return mContext.getAttributionTag();
+        }
+    }
+
+    /**
      * Send a text based SMS.
      *
      * <p class="note"><strong>Note:</strong> Using this method requires that your app has the
@@ -424,7 +462,8 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                true /* persistMessage*/, null, null, 0L /* messageId */);
+                true /* persistMessage*/, getOpPackageName(), getAttributionTag(),
+                0L /* messageId */);
     }
 
 
@@ -443,7 +482,8 @@ public final class SmsManager {
             @Nullable PendingIntent sentIntent, @Nullable PendingIntent deliveryIntent,
             long messageId) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                true /* persistMessage*/, null, null, messageId);
+                true /* persistMessage*/, getOpPackageName(), getAttributionTag(),
+                messageId);
     }
 
     /**
@@ -653,8 +693,8 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                false /* persistMessage */, null, null,
-                0L /* messageId */);
+                false /* persistMessage */, getOpPackageName(),
+                getAttributionTag(), 0L /* messageId */);
     }
 
     private void sendTextMessageInternal(
@@ -937,8 +977,8 @@ public final class SmsManager {
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/, null, null,
-                0L /* messageId */);
+                deliveryIntents, true /* persistMessage*/, getOpPackageName(),
+                getAttributionTag(), 0L /* messageId */);
     }
 
     /**
@@ -955,8 +995,8 @@ public final class SmsManager {
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
             @Nullable List<PendingIntent> deliveryIntents, long messageId) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/, null, null,
-                messageId);
+                deliveryIntents, true /* persistMessage*/, getOpPackageName(),
+                getAttributionTag(), messageId);
     }
 
     /**
@@ -1086,8 +1126,8 @@ public final class SmsManager {
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, false /* persistMessage*/, null, null,
-                0L /* messageId */);
+                deliveryIntents, false /* persistMessage*/, getOpPackageName(),
+                getAttributionTag(), 0L /* messageId */);
     }
 
     /**
@@ -1447,9 +1487,57 @@ public final class SmsManager {
      * @return the {@link SmsManager} associated with the default subscription id.
      *
      * @see SubscriptionManager#getDefaultSmsSubscriptionId()
+     *
+     * @deprecated Use {@link Context#getSystemService Context.getSystemService(SmsManager.class)}
+     * instead
      */
+    @Deprecated
     public static SmsManager getDefault() {
-        return sInstance;
+        return DEFAULT_INSTANCE;
+    }
+
+    /**
+     * Get the instance of the SmsManager associated with a particular context and subscription ID.
+     *
+     * @param context The context the manager belongs to
+     * @param subId an SMS subscription ID, typically accessed using {@link SubscriptionManager}
+     *
+     * @return the instance of the SmsManager associated with subscription
+     *
+     * @hide
+     */
+    public static @NonNull SmsManager getSmsManagerForContextAndSubscriptionId(
+            @Nullable Context context, int subId) {
+        synchronized(sLockObject) {
+            Pair<Context, Integer> key = new Pair<>(context, subId);
+
+            SmsManager smsManager = sSubInstances.get(key);
+            if (smsManager == null) {
+                smsManager = new SmsManager(context, subId);
+                sSubInstances.put(key, smsManager);
+            }
+            return smsManager;
+        }
+    }
+
+    /**
+     * Get the instance of the SmsManager associated with a particular subscription ID.
+     *
+     * <p class="note"><strong>Note:</strong> Constructing an {@link SmsManager} in this manner will
+     * never cause an SMS disambiguation dialog to appear, unlike {@link #getDefault()}.
+     * </p>
+     *
+     * @param subId an SMS subscription ID, typically accessed using {@link SubscriptionManager}
+     * @return the instance of the SmsManager associated with subscription
+     *
+     * @see SubscriptionManager#getActiveSubscriptionInfoList()
+     * @see SubscriptionManager#getDefaultSmsSubscriptionId()
+     * @deprecated Use {@link Context#getSystemService Context.getSystemService(SmsManager.class)}
+     * .{@link #createForSubscriptionId createForSubscriptionId(subId)} instead
+     */
+    @Deprecated
+    public static SmsManager getSmsManagerForSubscriptionId(int subId) {
+        return getSmsManagerForContextAndSubscriptionId(null, subId);
     }
 
     /**
@@ -1465,18 +1553,12 @@ public final class SmsManager {
      * @see SubscriptionManager#getActiveSubscriptionInfoList()
      * @see SubscriptionManager#getDefaultSmsSubscriptionId()
      */
-    public static SmsManager getSmsManagerForSubscriptionId(int subId) {
-        synchronized(sLockObject) {
-            SmsManager smsManager = sSubInstances.get(subId);
-            if (smsManager == null) {
-                smsManager = new SmsManager(subId);
-                sSubInstances.put(subId, smsManager);
-            }
-            return smsManager;
-        }
+    public @NonNull SmsManager createForSubscriptionId(int subId) {
+        return getSmsManagerForContextAndSubscriptionId(mContext, subId);
     }
 
-    private SmsManager(int subId) {
+    private SmsManager(@Nullable Context context, int subId) {
+        mContext = context;
         mSubId = subId;
     }
 
