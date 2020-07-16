@@ -16,10 +16,10 @@
 
 package com.android.systemui.accessibility;
 
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import android.content.pm.ActivityInfo;
+import android.hardware.display.DisplayManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
@@ -39,8 +39,7 @@ import org.mockito.MockitoAnnotations;
 /** Tests the ModeSwitchesController. */
 public class ModeSwitchesControllerTest extends SysuiTestCase {
 
-    @Mock
-    private ModeSwitchesController.SwitchSupplier mSupplier;
+    private FakeSwitchSupplier mSupplier;
     @Mock
     private MagnificationModeSwitch mModeSwitch;
     private ModeSwitchesController mModeSwitchesController;
@@ -49,7 +48,7 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mSupplier.get(anyInt())).thenReturn(mModeSwitch);
+        mSupplier = new FakeSwitchSupplier(mContext.getSystemService(DisplayManager.class));
         mModeSwitchesController = new ModeSwitchesController(mSupplier);
     }
 
@@ -69,5 +68,26 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
         mModeSwitchesController.removeButton(Display.DEFAULT_DISPLAY);
 
         verify(mModeSwitch).removeButton();
+    }
+
+    @Test
+    public void testControllerOnConfigurationChanged_notifyShowingButton() {
+        mModeSwitchesController.showButton(Display.DEFAULT_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mModeSwitchesController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
+
+        verify(mModeSwitch).onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
+    }
+
+    private class FakeSwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {
+
+        FakeSwitchSupplier(DisplayManager displayManager) {
+            super(displayManager);
+        }
+
+        @Override
+        protected MagnificationModeSwitch createInstance(Display display) {
+            return mModeSwitch;
+        }
     }
 }
