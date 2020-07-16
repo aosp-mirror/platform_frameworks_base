@@ -171,7 +171,8 @@ cc_library_static {
     export_generated_headers: ["statslog_statsdtest.h"],
     shared_libs: [
         "libstatssocket",
-    ]
+        "libstatspull",
+    ],
 }
 
 cc_library_static {
@@ -185,7 +186,11 @@ cc_library_static {
     ],
     shared_libs: [
         "libstatssocket",
-    ]
+        "libstatspull",
+    ],
+    export_shared_lib_headers: [
+        "libstatspull",
+    ],
 }
 
 // =========
