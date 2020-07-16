@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -43,6 +48,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -68,13 +74,13 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
     @Mock private AppOpsController mAppOpsController;
     @Mock private NotifPipeline mNotifPipeline;
 
-    private NotificationEntry mEntry;
-    private Notification mNotification;
+    private NotificationEntryBuilder mEntryBuilder;
     private AppOpsCoordinator mAppOpsCoordinator;
     private NotifFilter mForegroundFilter;
     private NotifCollectionListener mNotifCollectionListener;
     private AppOpsController.Callback mAppOpsCallback;
     private NotifLifetimeExtender mForegroundNotifLifetimeExtender;
+    private NotifSection mFgsSection;
 
     private FakeSystemClock mClock = new FakeSystemClock();
     private FakeExecutor mExecutor = new FakeExecutor(mClock);
@@ -90,11 +96,8 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
                         mAppOpsController,
                         mExecutor);
 
-        mNotification = new Notification();
-        mEntry = new NotificationEntryBuilder()
-                .setUser(new UserHandle(NOTIF_USER_ID))
-                .setNotification(mNotification)
-                .build();
+        mEntryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
 
         mAppOpsCoordinator.attach(mNotifPipeline);
 
@@ -122,11 +125,14 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(AppOpsController.Callback.class);
         verify(mAppOpsController).addCallback(any(int[].class), appOpsCaptor.capture());
         mAppOpsCallback = appOpsCaptor.getValue();
+
+        mFgsSection = mAppOpsCoordinator.getSection();
     }
 
     @Test
     public void filterTest_disclosureUnnecessary() {
-        StatusBarNotification sbn = mEntry.getSbn();
+        NotificationEntry entry = mEntryBuilder.build();
+        StatusBarNotification sbn = entry.getSbn();
 
         // GIVEN the notification is a disclosure notification
         when(mForegroundServiceController.isDisclosureNotification(sbn)).thenReturn(true);
@@ -136,84 +142,91 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
                 .thenReturn(false);
 
         // THEN filter out the notification
-        assertTrue(mForegroundFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mForegroundFilter.shouldFilterOut(entry, 0));
     }
 
     @Test
     public void filterTest_systemAlertNotificationUnnecessary() {
-        StatusBarNotification sbn = mEntry.getSbn();
+        // GIVEN the alert notification isn't needed for this user
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Notification.EXTRA_FOREGROUND_APPS,
+                new String[]{TEST_PKG});
+        mEntryBuilder.modifyNotification(mContext)
+                .setExtras(extras);
+        NotificationEntry entry = mEntryBuilder.build();
+        StatusBarNotification sbn = entry.getSbn();
+        when(mForegroundServiceController.isSystemAlertWarningNeeded(sbn.getUserId(), TEST_PKG))
+                .thenReturn(false);
 
         // GIVEN the notification is a system alert notification + not a disclosure notification
         when(mForegroundServiceController.isSystemAlertNotification(sbn)).thenReturn(true);
         when(mForegroundServiceController.isDisclosureNotification(sbn)).thenReturn(false);
 
-        // GIVEN the alert notification isn't needed for this user
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Notification.EXTRA_FOREGROUND_APPS,
-                new String[]{TEST_PKG});
-        mNotification.extras = extras;
-        when(mForegroundServiceController.isSystemAlertWarningNeeded(sbn.getUserId(), TEST_PKG))
-                .thenReturn(false);
 
         // THEN filter out the notification
-        assertTrue(mForegroundFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mForegroundFilter.shouldFilterOut(entry, 0));
     }
 
     @Test
     public void filterTest_doNotFilter() {
-        StatusBarNotification sbn = mEntry.getSbn();
+        NotificationEntry entry = mEntryBuilder.build();
+        StatusBarNotification sbn = entry.getSbn();
 
         // GIVEN the notification isn't a system alert notification nor a disclosure notification
         when(mForegroundServiceController.isSystemAlertNotification(sbn)).thenReturn(false);
         when(mForegroundServiceController.isDisclosureNotification(sbn)).thenReturn(false);
 
         // THEN don't filter out the notification
-        assertFalse(mForegroundFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mForegroundFilter.shouldFilterOut(entry, 0));
     }
 
     @Test
     public void extendLifetimeText_notForeground() {
         // GIVEN the notification doesn't represent a foreground service
-        mNotification.flags = 0;
+        mEntryBuilder.modifyNotification(mContext)
+                .setFlag(FLAG_FOREGROUND_SERVICE, false);
 
         // THEN don't extend the lifetime
         assertFalse(mForegroundNotifLifetimeExtender
-                .shouldExtendLifetime(mEntry, NotificationListenerService.REASON_CLICK));
+                .shouldExtendLifetime(mEntryBuilder.build(),
+                        NotificationListenerService.REASON_CLICK));
     }
 
     @Test
     public void extendLifetimeText_foregroundNotifRecentlyPosted() {
         // GIVEN the notification represents a foreground service that was just posted
-        mNotification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        mEntry = new NotificationEntryBuilder()
-                .setUser(new UserHandle(NOTIF_USER_ID))
+        Notification notification = new Notification.Builder(mContext, "test_channel")
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        NotificationEntry entry = mEntryBuilder
                 .setSbn(new StatusBarNotification(TEST_PKG, TEST_PKG, NOTIF_USER_ID, "",
-                        NOTIF_USER_ID, NOTIF_USER_ID, mNotification,
+                        NOTIF_USER_ID, NOTIF_USER_ID, notification,
                         new UserHandle(NOTIF_USER_ID), "", System.currentTimeMillis()))
-                .setNotification(mNotification)
+                .setNotification(notification)
                 .build();
 
         // THEN extend the lifetime
         assertTrue(mForegroundNotifLifetimeExtender
-                .shouldExtendLifetime(mEntry, NotificationListenerService.REASON_CLICK));
+                .shouldExtendLifetime(entry, NotificationListenerService.REASON_CLICK));
     }
 
     @Test
     public void extendLifetimeText_foregroundNotifOld() {
         // GIVEN the notification represents a foreground service that was posted 10 seconds ago
-        mNotification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        mEntry = new NotificationEntryBuilder()
-                .setUser(new UserHandle(NOTIF_USER_ID))
+        Notification notification = new Notification.Builder(mContext, "test_channel")
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        NotificationEntry entry = mEntryBuilder
                 .setSbn(new StatusBarNotification(TEST_PKG, TEST_PKG, NOTIF_USER_ID, "",
-                        NOTIF_USER_ID, NOTIF_USER_ID, mNotification,
+                        NOTIF_USER_ID, NOTIF_USER_ID, notification,
                         new UserHandle(NOTIF_USER_ID), "",
                         System.currentTimeMillis() - 10000))
-                .setNotification(mNotification)
+                .setNotification(notification)
                 .build();
 
         // THEN don't extend the lifetime because the extended time exceeds MIN_FGS_TIME_MS
         assertFalse(mForegroundNotifLifetimeExtender
-                .shouldExtendLifetime(mEntry, NotificationListenerService.REASON_CLICK));
+                .shouldExtendLifetime(entry, NotificationListenerService.REASON_CLICK));
     }
 
     @Test
@@ -344,5 +357,42 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
 
         // THEN the entry's active app ops is updated to empty
         assertTrue(entry.mActiveAppOps.isEmpty());
+    }
+
+    @Test
+    public void testIncludeFGSInSection_importanceDefault() {
+        // GIVEN the notification represents a colorized foreground service with > min importance
+        mEntryBuilder
+                .setFlag(mContext, FLAG_FOREGROUND_SERVICE, true)
+                .setImportance(IMPORTANCE_DEFAULT)
+                .modifyNotification(mContext).setColorized(true);
+
+        // THEN the entry is in the fgs section
+        assertTrue(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    public void testDiscludeFGSInSection_importanceMin() {
+        // GIVEN the notification represents a colorized foreground service with min importance
+        mEntryBuilder
+                .setFlag(mContext, FLAG_FOREGROUND_SERVICE, true)
+                .setImportance(IMPORTANCE_MIN)
+                .modifyNotification(mContext).setColorized(true);
+
+        // THEN the entry is NOT in the fgs section
+        assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    public void testDiscludeNonFGSInSection() {
+        // GIVEN the notification represents a colorized notification with high importance that
+        // is NOT a foreground service
+        mEntryBuilder
+                .setImportance(IMPORTANCE_HIGH)
+                .setFlag(mContext, FLAG_FOREGROUND_SERVICE, false)
+                .modifyNotification(mContext).setColorized(false);
+
+        // THEN the entry is NOT in the fgs section
+        assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));
     }
 }
