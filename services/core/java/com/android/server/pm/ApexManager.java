@@ -563,76 +563,85 @@ public abstract class ApexManager {
 
         @Override
         @Nullable
-        public PackageInfo getPackageInfo(String packageName,
-                @PackageInfoFlags int flags) {
-            Preconditions.checkState(mAllPackagesCache != null,
-                    "APEX packages have not been scanned");
-            boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
-            boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
-            for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                if (!packageInfo.packageName.equals(packageName)) {
-                    continue;
+        public PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags) {
+            synchronized (mLock) {
+                Preconditions.checkState(mAllPackagesCache != null,
+                        "APEX packages have not been scanned");
+                boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
+                boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
+                for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
+                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                    if (!packageInfo.packageName.equals(packageName)) {
+                        continue;
+                    }
+                    if ((matchActive && isActive(packageInfo))
+                            || (matchFactory && isFactory(packageInfo))) {
+                        return packageInfo;
+                    }
                 }
-                if ((matchActive && isActive(packageInfo))
-                        || (matchFactory && isFactory(packageInfo))) {
-                    return packageInfo;
-                }
+                return null;
             }
-            return null;
         }
 
         @Override
         List<PackageInfo> getActivePackages() {
-            Preconditions.checkState(mAllPackagesCache != null,
-                    "APEX packages have not been scanned");
-            final List<PackageInfo> activePackages = new ArrayList<>();
-            for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                if (isActive(packageInfo)) {
-                    activePackages.add(packageInfo);
+            synchronized (mLock) {
+                Preconditions.checkState(mAllPackagesCache != null,
+                        "APEX packages have not been scanned");
+                final List<PackageInfo> activePackages = new ArrayList<>();
+                for (int i = 0; i < mAllPackagesCache.size(); i++) {
+                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                    if (isActive(packageInfo)) {
+                        activePackages.add(packageInfo);
+                    }
                 }
+                return activePackages;
             }
-            return activePackages;
         }
 
         @Override
         List<PackageInfo> getFactoryPackages() {
-            Preconditions.checkState(mAllPackagesCache != null,
-                    "APEX packages have not been scanned");
-            final List<PackageInfo> factoryPackages = new ArrayList<>();
-            for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                if (isFactory(packageInfo)) {
-                    factoryPackages.add(packageInfo);
+            synchronized (mLock) {
+                Preconditions.checkState(mAllPackagesCache != null,
+                        "APEX packages have not been scanned");
+                final List<PackageInfo> factoryPackages = new ArrayList<>();
+                for (int i = 0; i < mAllPackagesCache.size(); i++) {
+                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                    if (isFactory(packageInfo)) {
+                        factoryPackages.add(packageInfo);
+                    }
                 }
+                return factoryPackages;
             }
-            return factoryPackages;
         }
 
         @Override
         List<PackageInfo> getInactivePackages() {
-            Preconditions.checkState(mAllPackagesCache != null,
-                    "APEX packages have not been scanned");
-            final List<PackageInfo> inactivePackages = new ArrayList<>();
-            for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                if (!isActive(packageInfo)) {
-                    inactivePackages.add(packageInfo);
+            synchronized (mLock) {
+                Preconditions.checkState(mAllPackagesCache != null,
+                        "APEX packages have not been scanned");
+                final List<PackageInfo> inactivePackages = new ArrayList<>();
+                for (int i = 0; i < mAllPackagesCache.size(); i++) {
+                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                    if (!isActive(packageInfo)) {
+                        inactivePackages.add(packageInfo);
+                    }
                 }
+                return inactivePackages;
             }
-            return inactivePackages;
         }
 
         @Override
         boolean isApexPackage(String packageName) {
             if (!isApexSupported()) return false;
-            Preconditions.checkState(mAllPackagesCache != null,
-                    "APEX packages have not been scanned");
-            for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                if (packageInfo.packageName.equals(packageName)) {
-                    return true;
+            synchronized (mLock) {
+                Preconditions.checkState(mAllPackagesCache != null,
+                        "APEX packages have not been scanned");
+                for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
+                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                    if (packageInfo.packageName.equals(packageName)) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -640,14 +649,11 @@ public abstract class ApexManager {
 
         @Override
         @Nullable
-        public String getActiveApexPackageNameContainingPackage(
-                @NonNull AndroidPackage containedPackage) {
-            Preconditions.checkState(mPackageNameToApexModuleName != null,
-                    "APEX packages have not been scanned");
-
+        public String getActiveApexPackageNameContainingPackage(AndroidPackage containedPackage) {
             Objects.requireNonNull(containedPackage);
-
             synchronized (mLock) {
+                Preconditions.checkState(mPackageNameToApexModuleName != null,
+                        "APEX packages have not been scanned");
                 int numApksInApex = mApksInApex.size();
                 for (int apkInApexNum = 0; apkInApexNum < numApksInApex; apkInApexNum++) {
                     if (mApksInApex.valueAt(apkInApexNum).contains(
@@ -982,9 +988,11 @@ public abstract class ApexManager {
                 }
                 ipw.decreaseIndent();
                 ipw.println();
-                if (mAllPackagesCache == null) {
-                    ipw.println("APEX packages have not been scanned");
-                    return;
+                synchronized (mLock) {
+                    if (mAllPackagesCache == null) {
+                        ipw.println("APEX packages have not been scanned");
+                        return;
+                    }
                 }
                 ipw.println("Active APEX packages:");
                 dumpFromPackagesCache(getActivePackages(), packageName, ipw);
