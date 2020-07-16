@@ -24,6 +24,8 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_HEA
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_VERSION;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
+import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -38,7 +40,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
 import com.android.server.backup.UserBackupManagerService;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.PasswordUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -83,12 +85,14 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
     private final String mCurrentPassword;
     private final String mEncryptPassword;
     private final int mCurrentOpToken;
+    private final BackupEligibilityRules mBackupEligibilityRules;
 
     public PerformAdbBackupTask(UserBackupManagerService backupManagerService,
             ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
             boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
             String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
-            boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch) {
+            boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch,
+            BackupEligibilityRules backupEligibilityRules) {
         super(observer);
         mUserBackupManagerService = backupManagerService;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
@@ -119,6 +123,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         }
         mCompress = doCompress;
         mKeyValue = doKeyValue;
+        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     private void addPackagesToSet(TreeMap<String, PackageInfo> set, List<String> pkgNames) {
@@ -286,15 +291,14 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
-            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo,
-                    mUserBackupManagerService.getUserId())
-                    || AppBackupUtils.appIsStopped(pkg.applicationInfo)) {
+            if (!mBackupEligibilityRules.appIsEligibleForBackup(pkg.applicationInfo)
+                    || mBackupEligibilityRules.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (DEBUG) {
                     Slog.i(TAG, "Package " + pkg.packageName
                             + " is not eligible for backup, removing.");
                 }
-            } else if (AppBackupUtils.appIsKeyValueOnly(pkg)) {
+            } else if (mBackupEligibilityRules.appIsKeyValueOnly(pkg)) {
                 iter.remove();
                 if (DEBUG) {
                     Slog.i(TAG, "Package " + pkg.packageName

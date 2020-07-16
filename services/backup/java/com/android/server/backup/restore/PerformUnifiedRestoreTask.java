@@ -66,7 +66,7 @@ import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
 import libcore.io.IoUtils;
@@ -186,7 +186,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             int pmToken,
             boolean isFullSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules backupEligibilityRules) {
         this.backupManagerService = backupManagerService;
         mUserId = backupManagerService.getUserId();
         mTransportManager = backupManagerService.getTransportManager();
@@ -218,7 +219,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // We want everything and a pony
                 List<PackageInfo> apps =
                         PackageManagerBackupAgent.getStorableApplications(
-                                backupManagerService.getPackageManager(), mUserId);
+                                backupManagerService.getPackageManager(), mUserId,
+                                backupEligibilityRules);
                 filterSet = packagesToNames(apps);
                 if (DEBUG) {
                     Slog.i(TAG, "Full restore; asking about " + filterSet.length + " apps");
@@ -245,7 +247,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         continue;
                     }
 
-                    if (AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, mUserId)) {
+                    if (backupEligibilityRules.appIsEligibleForBackup(info.applicationInfo)) {
                         mAcceptSet.add(info);
                     }
                 } catch (NameNotFoundException e) {

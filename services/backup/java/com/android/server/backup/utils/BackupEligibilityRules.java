@@ -47,11 +47,33 @@ import java.util.Set;
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
  */
-public class AppBackupUtils {
+public class BackupEligibilityRules {
     private static final boolean DEBUG = false;
     // Whitelist of system packages that are eligible for backup in non-system users.
     private static final Set<String> systemPackagesWhitelistedForAllUsers =
             Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
+
+    private final PackageManager mPackageManager;
+    private final PackageManagerInternal mPackageManagerInternal;
+    private final int mUserId;
+    @OperationType  private final int mOperationType;
+
+    public static BackupEligibilityRules forBackup(PackageManager packageManager,
+            PackageManagerInternal packageManagerInternal,
+            int userId) {
+        return new BackupEligibilityRules(packageManager, packageManagerInternal, userId,
+                OperationType.BACKUP);
+    }
+
+    public BackupEligibilityRules(PackageManager packageManager,
+            PackageManagerInternal packageManagerInternal,
+            int userId,
+            @OperationType int operationType) {
+        mPackageManager = packageManager;
+        mPackageManagerInternal = packageManagerInternal;
+        mUserId = userId;
+        mOperationType = operationType;
+    }
 
     /**
      * Returns whether app is eligible for backup.
@@ -65,32 +87,18 @@ public class AppBackupUtils {
      *     <li>it is the special shared-storage backup package used for 'adb backup'
      * </ol>
      */
-    public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId) {
-        return appIsEligibleForBackup(
-                app, LocalServices.getService(PackageManagerInternal.class), userId,
-                OperationType.BACKUP);
-    }
-
-    public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId,
-            @OperationType int operationType) {
-        return appIsEligibleForBackup(
-                app, LocalServices.getService(PackageManagerInternal.class), userId, operationType);
-    }
-
     @VisibleForTesting
-    static boolean appIsEligibleForBackup(
-            ApplicationInfo app, PackageManagerInternal packageManager, int userId,
-            @OperationType int operationType) {
+    public boolean appIsEligibleForBackup(ApplicationInfo app) {
         // 1. their manifest states android:allowBackup="false"
         boolean appAllowsBackup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
-        if (!appAllowsBackup && !forceFullBackup(app.uid, operationType)) {
+        if (!appAllowsBackup && !forceFullBackup(app.uid, mOperationType)) {
             return false;
         }
 
         // 2. they run as a system-level uid
         if (UserHandle.isCore(app.uid)) {
             // and the backup is happening for non-system user on a non-whitelisted package.
-            if (userId != UserHandle.USER_SYSTEM
+            if (mUserId != UserHandle.USER_SYSTEM
                     && !systemPackagesWhitelistedForAllUsers.contains(app.packageName)) {
                 return false;
             }
@@ -111,7 +119,7 @@ public class AppBackupUtils {
             return false;
         }
 
-        return !appIsDisabled(app, packageManager, userId);
+        return !appIsDisabled(app);
     }
 
     /**
@@ -124,18 +132,16 @@ public class AppBackupUtils {
      *         {@link BackupTransport#isAppEligibleForBackup(PackageInfo, boolean)}
      * </ol>
      */
-    public static boolean appIsRunningAndEligibleForBackupWithTransport(
+    public boolean appIsRunningAndEligibleForBackupWithTransport(
             @Nullable TransportClient transportClient,
-            String packageName,
-            PackageManager pm,
-            int userId) {
+            String packageName) {
         try {
-            PackageInfo packageInfo = pm.getPackageInfoAsUser(packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES, userId);
+            PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-            if (!appIsEligibleForBackup(applicationInfo, userId)
+            if (!appIsEligibleForBackup(applicationInfo)
                     || appIsStopped(applicationInfo)
-                    || appIsDisabled(applicationInfo, userId)) {
+                    || appIsDisabled(applicationInfo)) {
                 return false;
             }
             if (transportClient != null) {
@@ -144,7 +150,7 @@ public class AppBackupUtils {
                             transportClient.connectOrThrow(
                                     "AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport");
                     return transport.isAppEligibleForBackup(
-                            packageInfo, AppBackupUtils.appGetsFullBackup(packageInfo));
+                            packageInfo, appGetsFullBackup(packageInfo));
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to ask about eligibility: " + e.getMessage());
                 }
@@ -157,14 +163,11 @@ public class AppBackupUtils {
     }
 
     /** Avoid backups of 'disabled' apps. */
-    static boolean appIsDisabled(ApplicationInfo app, int userId) {
-        return appIsDisabled(app, LocalServices.getService(PackageManagerInternal.class), userId);
-    }
-
     @VisibleForTesting
-    static boolean appIsDisabled(
-            ApplicationInfo app, PackageManagerInternal packageManager, int userId) {
-        int enabledSetting = packageManager.getApplicationEnabledState(app.packageName, userId);
+    boolean appIsDisabled(
+            ApplicationInfo app) {
+        int enabledSetting = mPackageManagerInternal.getApplicationEnabledState(app.packageName,
+                mUserId);
 
         switch (enabledSetting) {
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
@@ -190,7 +193,7 @@ public class AppBackupUtils {
      *     <li>The app has just been installed.
      * </ul>
      */
-    public static boolean appIsStopped(ApplicationInfo app) {
+    public boolean appIsStopped(ApplicationInfo app) {
         return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);
     }
 
@@ -198,13 +201,9 @@ public class AppBackupUtils {
      * Returns whether the app can get full backup. Does *not* check overall backup eligibility
      * policy!
      */
-    public static boolean appGetsFullBackup(PackageInfo pkg) {
-        return appGetsFullBackup(pkg, OperationType.BACKUP);
-    }
-
     @VisibleForTesting
-    public static boolean appGetsFullBackup(PackageInfo pkg, @OperationType int operationType) {
-        if (forceFullBackup(pkg.applicationInfo.uid, operationType)) {
+    public boolean appGetsFullBackup(PackageInfo pkg) {
+        if (forceFullBackup(pkg.applicationInfo.uid, mOperationType)) {
             // If this is a migration, all non-system packages get full backup.
             return true;
         }
@@ -218,12 +217,11 @@ public class AppBackupUtils {
         return true;
     }
 
-    public static boolean appIgnoresIncludeExcludeRules(ApplicationInfo app,
-            @OperationType int operationType) {
-        return forceFullBackup(app.uid, operationType);
+    public boolean appIgnoresIncludeExcludeRules(ApplicationInfo app) {
+        return forceFullBackup(app.uid, mOperationType);
     }
 
-    private static boolean forceFullBackup(int appUid, @OperationType int operationType) {
+    private boolean forceFullBackup(int appUid, @OperationType int operationType) {
         return operationType == OperationType.MIGRATION &&
                 !UserHandle.isCore(appUid);
     }
@@ -232,7 +230,7 @@ public class AppBackupUtils {
      * Returns whether the app is only capable of doing key/value. We say it's not if it allows full
      * backup, and it is otherwise.
      */
-    public static boolean appIsKeyValueOnly(PackageInfo pkg) {
+    public boolean appIsKeyValueOnly(PackageInfo pkg) {
         return !appGetsFullBackup(pkg);
     }
 
@@ -254,8 +252,7 @@ public class AppBackupUtils {
      *
      * Note that if {@param target} is null we return false.
      */
-    public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target,
-            PackageManagerInternal pmi) {
+    public boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null || target.packageName == null) {
             return false;
         }
@@ -296,7 +293,7 @@ public class AppBackupUtils {
             // TODO(b/73988180): address the case that app has declared restoreAnyVersion and is
             // restoring from higher version to lower after having rotated the key (i.e. higher
             // version has different sig than lower version that we want to restore to)
-            return pmi.isDataRestoreSafe(storedSigs[0], target.packageName);
+            return mPackageManagerInternal.isDataRestoreSafe(storedSigs[0], target.packageName);
         } else {
             // the app couldn't have rotated keys, since it was signed with multiple sigs - do
             // a check to see if we find a match for all stored sigs

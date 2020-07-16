@@ -33,7 +33,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -134,10 +134,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
         init(packageMgr, packages, userId);
     }
 
-    public PackageManagerBackupAgent(PackageManager packageMgr, int userId) {
+    public PackageManagerBackupAgent(PackageManager packageMgr, int userId,
+            BackupEligibilityRules backupEligibilityRules) {
         init(packageMgr, null, userId);
 
-        evaluateStorablePackages();
+        evaluateStorablePackages(backupEligibilityRules);
     }
 
     private void init(PackageManager packageMgr, List<PackageInfo> packages, int userId) {
@@ -153,18 +154,19 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     // We will need to refresh our understanding of what is eligible for
     // backup periodically; this entry point serves that purpose.
-    public void evaluateStorablePackages() {
-        mAllPackages = getStorableApplications(mPackageManager, mUserId);
+    public void evaluateStorablePackages(BackupEligibilityRules backupEligibilityRules) {
+        mAllPackages = getStorableApplications(mPackageManager, mUserId, backupEligibilityRules);
     }
 
     /** Gets all packages installed on user {@code userId} eligible for backup. */
-    public static List<PackageInfo> getStorableApplications(PackageManager pm, int userId) {
+    public static List<PackageInfo> getStorableApplications(PackageManager pm, int userId,
+            BackupEligibilityRules backupEligibilityRules) {
         List<PackageInfo> pkgs =
                 pm.getInstalledPackagesAsUser(PackageManager.GET_SIGNING_CERTIFICATES, userId);
         int N = pkgs.size();
         for (int a = N-1; a >= 0; a--) {
             PackageInfo pkg = pkgs.get(a);
-            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, userId)) {
+            if (!backupEligibilityRules.appIsEligibleForBackup(pkg.applicationInfo)) {
                 pkgs.remove(a);
             }
         }

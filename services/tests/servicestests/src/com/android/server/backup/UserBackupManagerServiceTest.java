@@ -18,6 +18,7 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.BackupParams;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +56,7 @@ public class UserBackupManagerServiceTest {
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
     @Mock TransportClient mTransportClient;
+    @Mock BackupEligibilityRules mBackupEligibilityRules;
 
 
     private TestBackupService mService;
@@ -82,54 +85,51 @@ public class UserBackupManagerServiceTest {
     }
 
     @Test
-    public void getRequestBackupParams_isMigrationAndAppGetsFullBackup() throws Exception {
+    public void getRequestBackupParams_appIsEligibleForFullBackup() throws Exception {
         when(mPackageManager.getPackageInfoAsUser(anyString(), anyInt(), anyInt())).thenReturn(
                 getPackageInfo(TEST_PACKAGE));
-        mService.mAppIsEligibleForBackup = true;
-        mService.mAppGetsFullBackup = true;
+        when(mBackupEligibilityRules.appIsEligibleForBackup(any())).thenReturn(true);
+        when(mBackupEligibilityRules.appGetsFullBackup(any())).thenReturn(true);
 
         BackupParams params = mService.getRequestBackupParams(TEST_PACKAGES, mBackupObserver,
-                mBackupManagerMonitor, /* flags */ 0, OperationType.MIGRATION,
+                mBackupManagerMonitor, /* flags */ 0, mBackupEligibilityRules,
                 mTransportClient, /* transportDirName */ "", OnTaskFinishedListener.NOP);
 
         assertThat(params.kvPackages).isEmpty();
         assertThat(params.fullPackages).contains(TEST_PACKAGE);
-        assertThat(params.operationType).isEqualTo(OperationType.MIGRATION);
-        assertThat(mService.mOperationType).isEqualTo(OperationType.MIGRATION);
+        assertThat(params.mBackupEligibilityRules).isEqualTo(mBackupEligibilityRules);
     }
 
     @Test
-    public void getRequestBackupParams_isMigrationAndAppGetsKeyValueBackup() throws Exception {
+    public void getRequestBackupParams_appIsEligibleForKeyValueBackup() throws Exception {
         when(mPackageManager.getPackageInfoAsUser(anyString(), anyInt(), anyInt())).thenReturn(
                 getPackageInfo(TEST_PACKAGE));
-        mService.mAppIsEligibleForBackup = true;
-        mService.mAppGetsFullBackup = false;
+        when(mBackupEligibilityRules.appIsEligibleForBackup(any())).thenReturn(true);
+        when(mBackupEligibilityRules.appGetsFullBackup(any())).thenReturn(false);
 
         BackupParams params = mService.getRequestBackupParams(TEST_PACKAGES, mBackupObserver,
-                mBackupManagerMonitor, /* flags */ 0, OperationType.MIGRATION,
+                mBackupManagerMonitor, /* flags */ 0, mBackupEligibilityRules,
                 mTransportClient, /* transportDirName */ "", OnTaskFinishedListener.NOP);
 
         assertThat(params.kvPackages).contains(TEST_PACKAGE);
         assertThat(params.fullPackages).isEmpty();
-        assertThat(params.operationType).isEqualTo(OperationType.MIGRATION);
-        assertThat(mService.mOperationType).isEqualTo(OperationType.MIGRATION);
+        assertThat(params.mBackupEligibilityRules).isEqualTo(mBackupEligibilityRules);
     }
 
     @Test
-    public void getRequestBackupParams_isMigrationAndAppNotEligibleForBackup() throws Exception {
+    public void getRequestBackupParams_appIsNotEligibleForBackup() throws Exception {
         when(mPackageManager.getPackageInfoAsUser(anyString(), anyInt(), anyInt())).thenReturn(
                 getPackageInfo(TEST_PACKAGE));
-        mService.mAppIsEligibleForBackup = false;
-        mService.mAppGetsFullBackup = false;
+        when(mBackupEligibilityRules.appIsEligibleForBackup(any())).thenReturn(false);
+        when(mBackupEligibilityRules.appGetsFullBackup(any())).thenReturn(false);
 
         BackupParams params = mService.getRequestBackupParams(TEST_PACKAGES, mBackupObserver,
-                mBackupManagerMonitor, /* flags */ 0, OperationType.MIGRATION,
+                mBackupManagerMonitor, /* flags */ 0, mBackupEligibilityRules,
                 mTransportClient, /* transportDirName */ "", OnTaskFinishedListener.NOP);
 
         assertThat(params.kvPackages).isEmpty();
         assertThat(params.fullPackages).isEmpty();
-        assertThat(params.operationType).isEqualTo(OperationType.MIGRATION);
-        assertThat(mService.mOperationType).isEqualTo(OperationType.MIGRATION);
+        assertThat(params.mBackupEligibilityRules).isEqualTo(mBackupEligibilityRules);
     }
 
     private static PackageInfo getPackageInfo(String packageName) {
@@ -141,9 +141,6 @@ public class UserBackupManagerServiceTest {
 
     private static class TestBackupService extends UserBackupManagerService {
         boolean isEnabledStatePersisted = false;
-        boolean mAppIsEligibleForBackup = false;
-        boolean mAppGetsFullBackup = false;
-        int mOperationType = 0;
 
         TestBackupService(Context context, PackageManager packageManager) {
             super(context, packageManager);
@@ -161,18 +158,5 @@ public class UserBackupManagerServiceTest {
 
         @Override
         void updateStateOnBackupEnabled(boolean wasEnabled, boolean enable) {}
-
-        @Override
-        boolean appIsEligibleForBackup(ApplicationInfo applicationInfo, int userId,
-                @OperationType int operationType) {
-            mOperationType = operationType;
-            return mAppIsEligibleForBackup;
-        }
-
-        @Override
-        boolean appGetsFullBackup(PackageInfo packageInfo, @OperationType int operationType) {
-            mOperationType = operationType;
-            return mAppGetsFullBackup;
-        }
     }
 }
