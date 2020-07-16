@@ -114,8 +114,8 @@ interface IFingerprintService {
     // Notifies about a finger leaving the sensor area.
     void onFingerUp();
 
-    // Returns whether the specified sensor is an under-display fingerprint sensor (UDFPS).
-    boolean isUdfps(int sensorId);
+    // Returns whether the sensor is an under-display fingerprint sensor (UDFPS).
+    boolean isUdfps();
 
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);

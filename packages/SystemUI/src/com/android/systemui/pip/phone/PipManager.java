@@ -53,10 +53,12 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.wm.DisplayChangeController;
 import com.android.systemui.wm.DisplayController;
+import com.android.systemui.wm.DisplayLayout;
 
 import java.io.PrintWriter;
 
@@ -234,6 +236,19 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
     }
 
+    public ConfigurationController.ConfigurationListener mOverlayChangedListener =
+            new ConfigurationController.ConfigurationListener() {
+        @Override
+        public void onOverlayChanged() {
+            mHandler.post(() -> {
+                mPipBoundsHandler.onOverlayChanged(mContext, mContext.getDisplay());
+                updateMovementBounds(null /* toBounds */,
+                        false /* fromRotation */, false /* fromImeAdjustment */,
+                        false /* fromShelfAdjustment */, null /* windowContainerTransaction */);
+            });
+        }
+    };
+
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             DisplayController displayController,
@@ -242,7 +257,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            ConfigurationController configController) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -274,6 +290,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         final DisplayInfo displayInfo = new DisplayInfo();
         context.getDisplay().getDisplayInfo(displayInfo);
         mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
+
+        configController.addCallback(mOverlayChangedListener);
 
         try {
             mPipTaskOrganizer.registerOrganizer(WINDOWING_MODE_PINNED);

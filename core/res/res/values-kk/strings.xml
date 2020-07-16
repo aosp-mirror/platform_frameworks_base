@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді не шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Батарея ұзағырақ жұмыс істеуі үшін, Battery Saver:\n\n• қараңғы тақырыпты қосады;\n•фондық жұмысты, кейбір визуалды әсерлерді және \"Ok Google\" сияқты басқа функцияларды өшіреді не шектейді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>

@@ -213,6 +213,10 @@ public class FingerprintService extends SystemService {
 
             final long token = Binder.clearCallingIdentity();
             try {
+                if (mFingerprint21 == null) {
+                    Slog.e(TAG, "No HAL");
+                    return false;
+                }
                 return mFingerprint21.isHardwareDetected();
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -313,7 +317,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
-        public boolean isUdfps(int sensorId) {
+        public boolean isUdfps() {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             return mFingerprint21.isUdfps();
         }

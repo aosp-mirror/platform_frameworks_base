@@ -25,6 +25,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.CarSystemUiTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest

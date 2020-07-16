@@ -175,14 +175,33 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Caching can be disabled completely by initializing {@code sEnabled} to false and rebuilding.
  *
+ * To test a binder cache, create one or more tests that exercise the binder method.  This
+ * should be done twice: once with production code and once with a special image that sets
+ * {@code DEBUG} and {@code VERIFY} true.  In the latter case, verify that no cache
+ * inconsistencies are reported.  If a cache inconsistency is reported, however, it might be a
+ * false positive.  This happens if the server side data can be read and written non-atomically
+ * with respect to cache invalidation.
+ *
  * @param <Query> The class used to index cache entries: must be hashable and comparable
  * @param <Result> The class holding cache entries; use a boxed primitive if possible
  *
  * {@hide}
  */
 public abstract class PropertyInvalidatedCache<Query, Result> {
-    private static final long NONCE_UNSET = 0;
-    private static final long NONCE_DISABLED = -1;
+    /**
+     * Reserved nonce values.  The code is written assuming that these
+     * values are contiguous.
+     */
+    private static final int NONCE_UNSET = 0;
+    private static final int NONCE_DISABLED = 1;
+    private static final int NONCE_CORKED = 2;
+    private static final int NONCE_RESERVED = NONCE_CORKED + 1;
+
+    /**
+     * The names of the nonces
+     */
+    private static final String[] sNonceName =
+            new String[]{ "unset", "disabled", "corked" };
 
     private static final String TAG = "PropertyInvalidatedCache";
     private static final boolean DEBUG = false;
@@ -195,9 +214,26 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     @GuardedBy("mLock")
     private long mMisses = 0;
 
+    @GuardedBy("mLock")
+    private long mMissDisabled[] = new long[]{ 0, 0, 0 };
+
+    @GuardedBy("mLock")
+    private long mMissOverflow = 0;
+
+    @GuardedBy("mLock")
+    private long mHighWaterMark = 0;
+
     // Most invalidation is done in a static context, so the counters need to be accessible.
     @GuardedBy("sCorkLock")
     private static final HashMap<String, Long> sInvalidates = new HashMap<>();
+
+    /**
+     * Record the number of invalidate or cork calls that were nops because
+     * the cache was already corked.  This is static because invalidation is
+     * done in a static context.
+     */
+    @GuardedBy("sCorkLock")
+    private static final HashMap<String, Long> sCorkedInvalidates = new HashMap<>();
 
     /**
      * If sEnabled is false then all cache operations are stubbed out.  Set
@@ -271,7 +307,15 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             true /* LRU access order */) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry eldest) {
-                    return size() > maxEntries;
+                    final int size = size();
+                    if (size > mHighWaterMark) {
+                        mHighWaterMark = size;
+                    }
+                    if (size > maxEntries) {
+                        mMissOverflow++;
+                        return true;
+                    }
+                    return false;
                 }
             };
         synchronized (sCorkLock) {
@@ -363,14 +407,21 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabledLocal()) ? getCurrentNonce() : NONCE_DISABLED;
         for (;;) {
-            if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET) {
+            if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET ||
+                currentNonce == NONCE_CORKED) {
+                if (!mDisabled) {
+                    // Do not bother collecting statistics if the cache is
+                    // locally disabled.
+                    synchronized (mLock) {
+                        mMissDisabled[(int) currentNonce]++;
+                    }
+                }
+
                 if (DEBUG) {
                     if (!mDisabled) {
                         Log.d(TAG, String.format(
                             "cache %s %s for %s",
-                            cacheName(),
-                            currentNonce == NONCE_DISABLED ? "disabled" : "unset",
-                            queryToString(query)));
+                            cacheName(), sNonceName[(int) currentNonce], queryToString(query)));
                     }
                 }
                 return recompute(query);
@@ -383,10 +434,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     if (cachedResult != null) mHits++;
                 } else {
                     if (DEBUG) {
-                        Log.d(TAG,
-                                String.format("clearing cache %s because nonce changed [%s] -> [%s]",
-                                        cacheName(),
-                                        mLastSeenNonce, currentNonce));
+                        Log.d(TAG, String.format(
+                            "clearing cache %s of %d entries because nonce changed [%s] -> [%s]",
+                            cacheName(), mCache.size(),
+                            mLastSeenNonce, currentNonce));
                     }
                     mCache.clear();
                     mLastSeenNonce = currentNonce;
@@ -517,6 +568,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                 if (DEBUG) {
                     Log.d(TAG, "ignoring invalidation due to cork: " + name);
                 }
+                final long count = sCorkedInvalidates.getOrDefault(name, (long) 0);
+                sCorkedInvalidates.put(name, count + 1);
                 return;
             }
             invalidateCacheLocked(name);
@@ -538,7 +591,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         long newValue;
         do {
             newValue = NoPreloadHolder.next();
-        } while (newValue == NONCE_UNSET || newValue == NONCE_DISABLED);
+        } while (newValue >= 0 && newValue < NONCE_RESERVED);
         final String newValueString = Long.toString(newValue);
         if (DEBUG) {
             Log.d(TAG,
@@ -567,13 +620,21 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * @param name Name of the cache-key property to cork
      */
     public static void corkInvalidations(@NonNull String name) {
+        if (!sEnabled) {
+            if (DEBUG) {
+                Log.w(TAG, String.format(
+                    "cache cork %s suppressed", name));
+            }
+            return;
+        }
+
         synchronized (sCorkLock) {
             int numberCorks = sCorks.getOrDefault(name, 0);
             if (DEBUG) {
                 Log.d(TAG, String.format("corking %s: numberCorks=%s", name, numberCorks));
             }
 
-            // If we're the first ones to cork this cache, set the cache to the unset state so
+            // If we're the first ones to cork this cache, set the cache to the corked state so
             // existing caches talk directly to their services while we've corked updates.
             // Make sure we don't clobber a disabled cache value.
 
@@ -584,8 +645,11 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             if (numberCorks == 0) {
                 final long nonce = SystemProperties.getLong(name, NONCE_UNSET);
                 if (nonce != NONCE_UNSET && nonce != NONCE_DISABLED) {
-                    SystemProperties.set(name, Long.toString(NONCE_UNSET));
+                    SystemProperties.set(name, Long.toString(NONCE_CORKED));
                 }
+            } else {
+                final long count = sCorkedInvalidates.getOrDefault(name, (long) 0);
+                sCorkedInvalidates.put(name, count + 1);
             }
             sCorks.put(name, numberCorks + 1);
             if (DEBUG) {
@@ -602,6 +666,14 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * @param name Name of the cache-key property to uncork
      */
     public static void uncorkInvalidations(@NonNull String name) {
+        if (!sEnabled) {
+            if (DEBUG) {
+                Log.w(TAG, String.format(
+                    "cache uncork %s suppressed", name));
+            }
+            return;
+        }
+
         synchronized (sCorkLock) {
             int numberCorks = sCorks.getOrDefault(name, 0);
             if (DEBUG) {
@@ -729,8 +801,9 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             boolean nonceChanged = (getCurrentNonce() != mLastSeenNonce);
             if (!nonceChanged && !debugCompareQueryResults(proposedResult, resultToCompare)) {
                 Log.e(TAG, String.format(
-                    "cache %s inconsistent for %s",
-                    cacheName(), queryToString(query)));
+                    "cache %s inconsistent for %s is %s should be %s",
+                    cacheName(), queryToString(query),
+                    proposedResult, resultToCompare));
             }
             // Always return the "true" result in verification mode.
             return resultToCompare;
@@ -784,18 +857,23 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
 
     private void dumpContents(PrintWriter pw, String[] args) {
         long invalidateCount;
-
+        long corkedInvalidates;
         synchronized (sCorkLock) {
             invalidateCount = sInvalidates.getOrDefault(mPropertyName, (long) 0);
+            corkedInvalidates = sCorkedInvalidates.getOrDefault(mPropertyName, (long) 0);
         }
 
         synchronized (mLock) {
             pw.println(String.format("  Cache Property Name: %s", cacheName()));
-            pw.println(String.format("    Hits: %d, Misses: %d, Invalidates: %d",
-                    mHits, mMisses, invalidateCount));
+            pw.println(String.format("    Hits: %d, Misses: %d, Invalidates: %d, Overflows: %d",
+                    mHits, mMisses, invalidateCount, mMissOverflow));
+            pw.println(String.format("    Miss-corked: %d, Miss-unset: %d, Miss-other: %d," +
+                    " CorkedInvalidates: %d",
+                    mMissDisabled[NONCE_CORKED], mMissDisabled[NONCE_UNSET],
+                    mMissDisabled[NONCE_DISABLED], corkedInvalidates));
             pw.println(String.format("    Last Observed Nonce: %d", mLastSeenNonce));
-            pw.println(String.format("    Current Size: %d, Max Size: %d",
-                    mCache.entrySet().size(), mMaxEntries));
+            pw.println(String.format("    Current Size: %d, Max Size: %d, HW Mark: %d",
+                    mCache.size(), mMaxEntries, mHighWaterMark));
             pw.println(String.format("    Enabled: %s", mDisabled ? "false" : "true"));
 
             Set<Map.Entry<Query, Result>> cacheEntries = mCache.entrySet();

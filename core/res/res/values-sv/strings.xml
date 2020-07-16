@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batterisparläget förlänger batteritiden genom att:\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Batterisparläget förlänger batteritiden genom att:\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batterisparläget förlänger batteritiden genom att\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Batterisparläget förlänger batteritiden genom att\n\n• aktivera Mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>

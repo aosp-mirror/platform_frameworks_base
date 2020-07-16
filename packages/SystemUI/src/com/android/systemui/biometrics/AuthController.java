@@ -246,11 +246,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         IActivityTaskManager getActivityTaskManager() {
             return ActivityTaskManager.getService();
         }
-
-        IFingerprintService getFingerprintService() {
-            return IFingerprintService.Stub.asInterface(
-                    ServiceManager.getService(Context.FINGERPRINT_SERVICE));
-        }
     }
 
     @Inject
@@ -276,23 +271,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mActivityTaskManager = mInjector.getActivityTaskManager();
 
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            IFingerprintService fingerprintService = mInjector.getFingerprintService();
-            if (fingerprintService == null) {
-                Log.e(TAG, "FEATURE_FINGERPRINT is available, but FingerprintService is null");
-            } else {
-                boolean isUdfps = false;
-                try {
-                    // TODO(b/160024833): Enumerate through all of the sensors and check whether
-                    //  at least one of them is UDFPS.
-                    isUdfps = fingerprintService.isUdfps(0 /* sensorId */);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Unable to check whether the sensor is a UDFPS", e);
-                }
-                if (isUdfps) {
-                    mUdfpsController = new UdfpsController(mContext, fingerprintService,
-                            mWindowManager);
-                }
+        final FingerprintManager fpm = mContext.getSystemService(FingerprintManager.class);
+        if (fpm != null && fpm.isHardwareDetected()) {
+            // TODO(b/160024833): Enumerate through all of the sensors and check whether
+            //  at least one of them is UDFPS.
+            if (fpm.isUdfps()) {
+                mUdfpsController = new UdfpsController(mContext, mWindowManager);
             }
         }
 

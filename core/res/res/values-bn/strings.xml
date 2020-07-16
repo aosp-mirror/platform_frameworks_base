@@ -1792,8 +1792,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n\n•গাঢ় থিম চালু করে\n•ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমিত করে\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n\n•গাঢ় থিম চালু করে\n•ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমিত করে"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4424488535318105801) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (6794188153647295212) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"চালু করুন"</string>
