@@ -5191,6 +5191,12 @@ message DataUsageBytesTransfer {
     // record is combined across opportunistic data subscriptions.
     // See {@link SubscriptionManager#setOpportunistic}.
     optional DataSubscriptionState opportunistic_data_sub = 10;
+
+    // Indicate whether NR is connected, server side could use this with RAT type to determine if
+    // the record is for 5G NSA (Non Stand Alone) mode, where the primary cell is still LTE and
+    // network allocates a secondary 5G cell so telephony reports RAT = LTE along with NR state as
+    // connected.
+    optional bool is_nr_connected = 11;
 }
 
 /**
