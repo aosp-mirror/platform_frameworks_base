@@ -34,7 +34,6 @@ import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IHwBinder;
 import android.os.Looper;
@@ -50,6 +49,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -392,7 +392,10 @@ public final class MediaCas implements AutoCloseable {
             @Override
             public void onReclaimResources() {
                 synchronized (mSessionMap) {
-                    mSessionMap.forEach((casSession, sessionResourceHandle) -> casSession.close());
+                    List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
+                    for (Session casSession: sessionList) {
+                        casSession.close();
+                    }
                 }
                 mEventHandler.sendMessage(mEventHandler.obtainMessage(
                         EventHandler.MSG_CAS_RESOURCE_LOST));
@@ -734,7 +737,7 @@ public final class MediaCas implements AutoCloseable {
             ResourceClientProfile profile =
                     new ResourceClientProfile(tvInputServiceSessionId, priorityHint);
             mTunerResourceManager.registerClientProfile(
-                    profile, new HandlerExecutor(mEventHandler), mResourceListener, clientId);
+                    profile, context.getMainExecutor(), mResourceListener, clientId);
             mClientId = clientId[0];
         }
     }
