@@ -1229,32 +1229,54 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @IntDef(prefix = "TYPE_", value = {
-                TYPE_ACCESSIBILITY_OVERLAY,
-                TYPE_APPLICATION,
-                TYPE_APPLICATION_ATTACHED_DIALOG,
-                TYPE_APPLICATION_MEDIA,
-                TYPE_APPLICATION_OVERLAY,
-                TYPE_APPLICATION_PANEL,
-                TYPE_APPLICATION_STARTING,
-                TYPE_APPLICATION_SUB_PANEL,
                 TYPE_BASE_APPLICATION,
+                TYPE_APPLICATION,
+                TYPE_APPLICATION_STARTING,
                 TYPE_DRAWN_APPLICATION,
+                TYPE_APPLICATION_PANEL,
+                TYPE_APPLICATION_MEDIA,
+                TYPE_APPLICATION_SUB_PANEL,
+                TYPE_APPLICATION_ATTACHED_DIALOG,
+                TYPE_APPLICATION_MEDIA_OVERLAY,
+                TYPE_APPLICATION_ABOVE_SUB_PANEL,
+                TYPE_STATUS_BAR,
+                TYPE_SEARCH_BAR,
+                TYPE_PHONE,
+                TYPE_SYSTEM_ALERT,
+                TYPE_KEYGUARD,
+                TYPE_TOAST,
+                TYPE_SYSTEM_OVERLAY,
+                TYPE_PRIORITY_PHONE,
+                TYPE_SYSTEM_DIALOG,
+                TYPE_KEYGUARD_DIALOG,
+                TYPE_SYSTEM_ERROR,
                 TYPE_INPUT_METHOD,
                 TYPE_INPUT_METHOD_DIALOG,
-                TYPE_KEYGUARD,
-                TYPE_KEYGUARD_DIALOG,
-                TYPE_PHONE,
-                TYPE_PRIORITY_PHONE,
-                TYPE_PRIVATE_PRESENTATION,
-                TYPE_SEARCH_BAR,
-                TYPE_STATUS_BAR,
-                TYPE_STATUS_BAR_PANEL,
-                TYPE_SYSTEM_ALERT,
-                TYPE_SYSTEM_DIALOG,
-                TYPE_SYSTEM_ERROR,
-                TYPE_SYSTEM_OVERLAY,
-                TYPE_TOAST,
                 TYPE_WALLPAPER,
+                TYPE_STATUS_BAR_PANEL,
+                TYPE_SECURE_SYSTEM_OVERLAY,
+                TYPE_DRAG,
+                TYPE_STATUS_BAR_SUB_PANEL,
+                TYPE_POINTER,
+                TYPE_NAVIGATION_BAR,
+                TYPE_VOLUME_OVERLAY,
+                TYPE_BOOT_PROGRESS,
+                TYPE_INPUT_CONSUMER,
+                TYPE_NAVIGATION_BAR_PANEL,
+                TYPE_DISPLAY_OVERLAY,
+                TYPE_MAGNIFICATION_OVERLAY,
+                TYPE_PRIVATE_PRESENTATION,
+                TYPE_VOICE_INTERACTION,
+                TYPE_ACCESSIBILITY_OVERLAY,
+                TYPE_VOICE_INTERACTION_STARTING,
+                TYPE_DOCK_DIVIDER,
+                TYPE_QS_DIALOG,
+                TYPE_SCREENSHOT,
+                TYPE_PRESENTATION,
+                TYPE_APPLICATION_OVERLAY,
+                TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                TYPE_NOTIFICATION_SHADE,
+                TYPE_STATUS_BAR_ADDITIONAL
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface WindowType {}
@@ -1715,6 +1737,46 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS = 0x80000000;
 
         /**
+         * @hide
+         */
+        @IntDef(flag = true, prefix = "FLAG_", value = {
+                FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
+                FLAG_DIM_BEHIND,
+                FLAG_BLUR_BEHIND,
+                FLAG_NOT_FOCUSABLE,
+                FLAG_NOT_TOUCHABLE,
+                FLAG_NOT_TOUCH_MODAL,
+                FLAG_TOUCHABLE_WHEN_WAKING,
+                FLAG_KEEP_SCREEN_ON,
+                FLAG_LAYOUT_IN_SCREEN,
+                FLAG_LAYOUT_NO_LIMITS,
+                FLAG_FULLSCREEN,
+                FLAG_FORCE_NOT_FULLSCREEN,
+                FLAG_DITHER,
+                FLAG_SECURE,
+                FLAG_SCALED,
+                FLAG_IGNORE_CHEEK_PRESSES,
+                FLAG_LAYOUT_INSET_DECOR,
+                FLAG_ALT_FOCUSABLE_IM,
+                FLAG_WATCH_OUTSIDE_TOUCH,
+                FLAG_SHOW_WHEN_LOCKED,
+                FLAG_SHOW_WALLPAPER,
+                FLAG_TURN_SCREEN_ON,
+                FLAG_DISMISS_KEYGUARD,
+                FLAG_SPLIT_TOUCH,
+                FLAG_HARDWARE_ACCELERATED,
+                FLAG_LAYOUT_IN_OVERSCAN,
+                FLAG_TRANSLUCENT_STATUS,
+                FLAG_TRANSLUCENT_NAVIGATION,
+                FLAG_LOCAL_FOCUS_MODE,
+                FLAG_SLIPPERY,
+                FLAG_LAYOUT_ATTACHED_IN_DECOR,
+                FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Flags {}
+
+        /**
          * Various behavioral options/flags.  Default is none.
          *
          * @see #FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
@@ -1809,6 +1871,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                     name = "DRAWS_SYSTEM_BAR_BACKGROUNDS")
         }, formatToHexString = true)
+        @Flags
         public int flags;
 
         /**
@@ -2027,6 +2090,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_TRUSTED_OVERLAY = 0x20000000;
+
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
@@ -2039,6 +2103,38 @@ public interface WindowManager extends ViewManager {
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
         })
         public @interface SystemFlags {}
+
+        /**
+         * @hide
+         */
+        @IntDef(flag = true, prefix="PRIVATE_FLAG_", value = {
+                PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
+                PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
+                PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
+                SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
+                PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                PRIVATE_FLAG_COMPATIBLE_WINDOW,
+                PRIVATE_FLAG_SYSTEM_ERROR,
+                PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
+                PRIVATE_FLAG_PRESERVE_GEOMETRY,
+                PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
+                PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
+                PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
+                PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
+                PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                PRIVATE_FLAG_IS_SCREEN_DECOR,
+                PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
+                PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
+                PRIVATE_FLAG_USE_BLAST,
+                PRIVATE_FLAG_APPEARANCE_CONTROLLED,
+                PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
+                PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
+                PRIVATE_FLAG_TRUSTED_OVERLAY,
+        })
+        public @interface PrivateFlags {}
 
         /**
          * Control flags that are private to the platform.
@@ -2127,6 +2223,10 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
                 @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_USE_BLAST,
+                        equals = PRIVATE_FLAG_USE_BLAST,
+                        name = "USE_BLAST"),
+                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         name = "APPEARANCE_CONTROLLED"),
@@ -2143,6 +2243,7 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_TRUSTED_OVERLAY,
                         name = "TRUSTED_OVERLAY")
         })
+        @PrivateFlags
         @TestApi
         public int privateFlags;
 
