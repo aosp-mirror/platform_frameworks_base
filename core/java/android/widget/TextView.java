@@ -395,6 +395,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int EMS = LINES;
     private static final int PIXELS = 2;
 
+    // Maximum text length for single line input.
+    private static final int MAX_LENGTH_FOR_SINGLE_LINE_EDIT_TEXT = 5000;
+
     private static final RectF TEMP_RECTF = new RectF();
 
     /** @hide */
@@ -1631,6 +1634,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
+        }
+
+        // For addressing b/145128646
+        // For the performance reason, we limit characters for single line text field.
+        if (bufferType == BufferType.EDITABLE && singleLine && maxlength == -1) {
+            maxlength = MAX_LENGTH_FOR_SINGLE_LINE_EDIT_TEXT;
         }
 
         if (maxlength >= 0) {
