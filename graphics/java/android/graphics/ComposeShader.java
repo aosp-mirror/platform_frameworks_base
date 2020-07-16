@@ -95,13 +95,9 @@ public class ComposeShader extends Shader {
 
     /** @hide */
     @Override
-    protected void verifyNativeInstance() {
-        if (mShaderA.getNativeInstance() != mNativeInstanceShaderA
-                || mShaderB.getNativeInstance() != mNativeInstanceShaderB) {
-            // Child shader native instance has been updated,
-            // so our cached native instance is no longer valid - discard it
-            discardNativeInstance();
-        }
+    protected boolean shouldDiscardNativeInstance() {
+        return mShaderA.getNativeInstance() != mNativeInstanceShaderA
+                || mShaderB.getNativeInstance() != mNativeInstanceShaderB;
     }
 
     private static native long nativeCreate(long nativeMatrix,

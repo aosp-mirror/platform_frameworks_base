@@ -150,7 +150,12 @@ public class Shader {
     /**
      *  @hide Only to be used by subclasses in the graphics package.
      */
-    protected final void discardNativeInstance() {
+    protected synchronized final void discardNativeInstance() {
+        discardNativeInstanceLocked();
+    }
+
+    // For calling inside a synchronized method.
+    private void discardNativeInstanceLocked() {
         if (mNativeInstance != 0) {
             mCleaner.run();
             mCleaner = null;
@@ -159,11 +164,12 @@ public class Shader {
     }
 
     /**
-     * Callback for subclasses to call {@link #discardNativeInstance()} if the most recently
-     * constructed native instance is no longer valid.
+     * Callback for subclasses to specify whether the most recently
+     * constructed native instance is still valid.
      *  @hide Only to be used by subclasses in the graphics package.
      */
-    protected void verifyNativeInstance() {
+    protected boolean shouldDiscardNativeInstance() {
+        return false;
     }
 
 
@@ -171,9 +177,10 @@ public class Shader {
      * @hide so it can be called by android.graphics.drawable but must not be called from outside
      * the module.
      */
-    public final long getNativeInstance() {
-        // verify mNativeInstance is valid
-        verifyNativeInstance();
+    public synchronized final long getNativeInstance() {
+        if (shouldDiscardNativeInstance()) {
+            discardNativeInstanceLocked();
+        }
 
         if (mNativeInstance == 0) {
             mNativeInstance = createNativeInstance(mLocalMatrix == null
