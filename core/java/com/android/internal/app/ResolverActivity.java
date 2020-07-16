@@ -1202,7 +1202,7 @@ public class ResolverActivity extends Activity implements
                     final PackageManager pm = getPackageManager();
 
                     // Set the preferred Activity
-                    pm.addPreferredActivity(filter, bestMatch, set, intent.getComponent());
+                    pm.addUniquePreferredActivity(filter, bestMatch, set, intent.getComponent());
 
                     if (ri.handleAllWebDataURI) {
                         // Set default Browser if needed
