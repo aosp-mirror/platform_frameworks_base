@@ -394,7 +394,8 @@ public class TarBackupReader {
         }
 
         RestorePolicy policy = RestorePolicy.IGNORE;
-
+        BackupEligibilityRules eligibilityRules = BackupEligibilityRules.forBackup(packageManager,
+                pmi, userId);
         // Okay, got the manifest info we need...
         try {
             PackageInfo pkgInfo = packageManager.getPackageInfoAsUser(
@@ -413,7 +414,7 @@ public class TarBackupReader {
                     // such packages are signed with the platform cert instead of
                     // the app developer's cert, so they're different on every
                     // device.
-                    if (AppBackupUtils.signaturesMatch(signatures, pkgInfo, pmi)) {
+                    if (eligibilityRules.signaturesMatch(signatures, pkgInfo)) {
                         if ((pkgInfo.applicationInfo.flags
                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                             Slog.i(TAG, "Package has restoreAnyVersion; taking data");

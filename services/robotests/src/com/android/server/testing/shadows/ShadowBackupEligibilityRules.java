@@ -22,7 +22,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -31,8 +31,8 @@ import org.robolectric.annotation.Resetter;
 import java.util.HashSet;
 import java.util.Set;
 
-@Implements(AppBackupUtils.class)
-public class ShadowAppBackupUtils {
+@Implements(BackupEligibilityRules.class)
+public class ShadowBackupEligibilityRules {
     private static final Set<String> sAppsRunningAndEligibleForBackupWithTransport =
             new HashSet<>();
     private static final Set<String> sAppsEligibleForBackup = new HashSet<>();
@@ -53,22 +53,19 @@ public class ShadowAppBackupUtils {
     }
 
     @Implementation
-    protected static boolean appIsRunningAndEligibleForBackupWithTransport(
+    protected boolean appIsRunningAndEligibleForBackupWithTransport(
             @Nullable TransportClient transportClient,
-            String packageName,
-            PackageManager pm,
-            int userId) {
+            String packageName) {
         return sAppsRunningAndEligibleForBackupWithTransport.contains(packageName);
     }
 
     @Implementation
-    protected static boolean appIsEligibleForBackup(ApplicationInfo app, int userId,
-            int operationType) {
+    protected boolean appIsEligibleForBackup(ApplicationInfo app) {
         return sAppsEligibleForBackup.contains(app.packageName);
     }
 
     @Implementation
-    protected static boolean appGetsFullBackup(PackageInfo packageInfo, int operationType) {
+    protected boolean appGetsFullBackup(PackageInfo packageInfo) {
         return sAppsGetFullBackup.contains(packageInfo.packageName);
     }
 
