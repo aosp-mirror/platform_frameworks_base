@@ -375,7 +375,8 @@ public class DropBoxManager {
     @RequiresPermission(allOf = { READ_LOGS, PACKAGE_USAGE_STATS })
     public @Nullable Entry getNextEntry(String tag, long msec) {
         try {
-            return mService.getNextEntry(tag, msec, mContext.getOpPackageName());
+            return mService.getNextEntryWithAttribution(tag, msec, mContext.getOpPackageName(),
+                    mContext.getAttributionTag());
         } catch (SecurityException e) {
             if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
                 throw e;
