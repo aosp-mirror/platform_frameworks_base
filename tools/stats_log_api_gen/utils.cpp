@@ -182,10 +182,10 @@ void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& 
     fprintf(out, "\n");
 }
 
-void write_native_method_signature(FILE* out, const string& methodName,
+void write_native_method_signature(FILE* out, const string& signaturePrefix,
                                    const vector<java_type_t>& signature,
                                    const AtomDecl& attributionDecl, const string& closer) {
-    fprintf(out, "%s(int32_t code", methodName.c_str());
+    fprintf(out, "%sint32_t code", signaturePrefix.c_str());
     int argIndex = 1;
     for (vector<java_type_t>::const_iterator arg = signature.begin(); arg != signature.end();
          arg++) {
