@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
@@ -39,7 +38,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.Dumpable;
-import com.android.systemui.wm.DisplayController;
+import com.android.wm.shell.common.DisplayController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

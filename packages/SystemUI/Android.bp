@@ -45,7 +45,7 @@ android_library {
         "WindowManager-Shell",
         "SystemUIPluginLib",
         "SystemUISharedLib",
-	"SystemUI-statsd",
+        "SystemUI-statsd",
         "SettingsLib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",

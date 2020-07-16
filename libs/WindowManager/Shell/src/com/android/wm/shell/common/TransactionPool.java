@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.wm.shell.common;
 
 import android.util.Pools;
 import android.view.SurfaceControl;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Provides a synchronized pool of {@link SurfaceControl.Transaction}s to minimize allocations.
  */
-@Singleton
 public class TransactionPool {
     private final Pools.SynchronizedPool<SurfaceControl.Transaction> mTransactionPool =
             new Pools.SynchronizedPool<>(4);
 
-    @Inject
-    TransactionPool() {
+    public TransactionPool() {
     }
 
     /** Gets a transaction from the pool. */

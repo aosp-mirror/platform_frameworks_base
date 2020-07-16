@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wm;
+package com.android.wm.shell.common;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -40,18 +40,12 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.view.IInputMethodManager;
-import com.android.systemui.TransactionPool;
-import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages IME control at the display-level. This occurs when IME comes up in multi-window mode.
  */
-@Singleton
 public class DisplayImeController implements DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "DisplayImeController";
 
@@ -66,18 +60,17 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private static final int DIRECTION_HIDE = 2;
     private static final int FLOATING_IME_BOTTOM_INSET = -80;
 
-    SystemWindows mSystemWindows;
-    final Handler mHandler;
+    protected final SystemWindows mSystemWindows;
+    protected final Handler mHandler;
     final TransactionPool mTransactionPool;
 
     final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
 
     final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
-    @Inject
     public DisplayImeController(SystemWindows syswin, DisplayController displayController,
-            @Main Handler mainHandler, TransactionPool transactionPool) {
-        mHandler = mainHandler;
+            Handler handler, TransactionPool transactionPool) {
+        mHandler = handler;
         mSystemWindows = syswin;
         mTransactionPool = transactionPool;
         displayController.addDisplayWindowListener(this);
@@ -305,8 +298,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // pretend the ime has some size just below the screen.
                 mImeFrame.set(newFrame);
                 final int floatingInset = (int) (
-                        mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId).density()
-                                * FLOATING_IME_BOTTOM_INSET);
+                        mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId)
+                        .density() * FLOATING_IME_BOTTOM_INSET);
                 mImeFrame.bottom -= floatingInset;
             } else if (newFrame.height() != 0) {
                 // Don't set a new frame if it's empty and hiding -- this maintains continuity
@@ -364,6 +357,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mAnimation.setInterpolator(INTERPOLATOR);
             mAnimation.addListener(new AnimatorListenerAdapter() {
                 private boolean mCancelled = false;
+
                 @Override
                 public void onAnimationStart(Animator animation) {
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
@@ -386,10 +380,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     t.apply();
                     mTransactionPool.release(t);
                 }
+
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     mCancelled = true;
                 }
+
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     if (DEBUG) Slog.d(TAG, "onAnimationEnd " + mCancelled);
@@ -449,18 +445,19 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         int IME_ANIMATION_NO_ALPHA = 1;
 
         /** @hide */
-        @IntDef(prefix = { "IME_ANIMATION_" }, value = {
+        @IntDef(prefix = {"IME_ANIMATION_"}, value = {
                 IME_ANIMATION_NO_ALPHA,
         })
-        @interface ImeAnimationFlags {}
+        @interface ImeAnimationFlags {
+        }
 
         /**
          * Called when the IME position is starting to animate.
          *
-         * @param hiddenTop The y position of the top of the IME surface when it is hidden.
-         * @param shownTop  The y position of the top of the IME surface when it is shown.
-         * @param showing   {@code true} when we are animating from hidden to shown, {@code false}
-         *                  when animating from shown to hidden.
+         * @param hiddenTop  The y position of the top of the IME surface when it is hidden.
+         * @param shownTop   The y position of the top of the IME surface when it is shown.
+         * @param showing    {@code true} when we are animating from hidden to shown, {@code false}
+         *                   when animating from shown to hidden.
          * @param isFloating {@code true} when the ime is a floating ime (doesn't inset).
          * @return flags that may alter how ime itself is animated (eg. no-alpha).
          */
@@ -476,8 +473,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          *
          * @param imeTop The current y position of the top of the IME surface.
          */
-        default void onImePositionChanged(int displayId, int imeTop,
-                SurfaceControl.Transaction t) {}
+        default void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
+        }
 
         /**
          * Called when the IME position is done animating.
@@ -485,7 +482,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          * @param cancel {@code true} if this was cancelled. This implies another start is coming.
          */
         default void onImeEndPositioning(int displayId, boolean cancel,
-                SurfaceControl.Transaction t) {}
+                SurfaceControl.Transaction t) {
+        }
     }
 
     public IInputMethodManager getImms() {

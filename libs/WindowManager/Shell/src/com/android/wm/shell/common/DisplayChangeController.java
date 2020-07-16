@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wm;
+package com.android.wm.shell.common;
 
 import android.os.Handler;
 import android.os.RemoteException;

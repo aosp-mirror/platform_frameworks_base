@@ -31,7 +31,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.statusbar.phone.NavigationModeController;
-import com.android.systemui.wm.DisplayController;
+import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
 import org.junit.Test;

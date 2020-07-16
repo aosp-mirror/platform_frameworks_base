@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wm;
+package com.android.wm.shell.common;
 
 import static android.content.res.Configuration.UI_MODE_TYPE_NORMAL;
 import static android.view.Surface.ROTATION_0;
@@ -35,12 +35,11 @@ import android.view.DisplayInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
-import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
 
 @SmallTest
-public class DisplayLayoutTest extends SysuiTestCase {
+public class DisplayLayoutTest {
 
     @Test
     public void testInsets() {
