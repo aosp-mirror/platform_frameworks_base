@@ -2915,7 +2915,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNAVAILABLE: {
                             // Don't fail or commit the session. Allow caller to commit again.
-                            sendPendingStreaming("DataLoader unavailable");
+                            final IntentSender statusReceiver;
+                            synchronized (mLock) {
+                                statusReceiver = mRemoteStatusReceiver;
+                            }
+                            sendPendingStreaming(mContext, statusReceiver, sessionId,
+                                    "DataLoader unavailable");
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
@@ -2929,7 +2934,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
                     // Just return from this method and allow caller to commit again.
-                    sendPendingStreaming(e.getMessage());
+                    final IntentSender statusReceiver;
+                    synchronized (mLock) {
+                        statusReceiver = mRemoteStatusReceiver;
+                    }
+                    sendPendingStreaming(mContext, statusReceiver, sessionId, e.getMessage());
                 }
             }
         };
@@ -3324,6 +3333,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.decreaseIndent();
     }
 
+    /**
+     * This method doesn't change internal states and is safe to call outside the lock.
+     */
     private static void sendOnUserActionRequired(Context context, IntentSender target,
             int sessionId, Intent intent) {
         final Intent fillIn = new Intent();
@@ -3336,6 +3348,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * This method doesn't change internal states and is safe to call outside the lock.
+     */
     private static void sendOnPackageInstalled(Context context, IntentSender target, int sessionId,
             boolean showNotification, int userId, String basePackageName, int returnCode,
             String msg, Bundle extras) {
@@ -3376,13 +3391,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void sendPendingStreaming(@Nullable String cause) {
-        final IntentSender statusReceiver;
-        synchronized (mLock) {
-            statusReceiver = mRemoteStatusReceiver;
-        }
-
-        if (statusReceiver == null) {
+    /**
+     * This method doesn't change internal states and is safe to call outside the lock.
+     */
+    private static void sendPendingStreaming(Context context, IntentSender target, int sessionId,
+            @Nullable String cause) {
+        if (target == null) {
             Slog.e(TAG, "Missing receiver for pending streaming status.");
             return;
         }
@@ -3397,7 +3411,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
         }
         try {
-            statusReceiver.sendIntent(mContext, 0, intent, null, null);
+            target.sendIntent(context, 0, intent, null, null);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
