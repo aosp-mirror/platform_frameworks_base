@@ -722,10 +722,9 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    protected void handleAuthenticated(BiometricAuthenticator.Identifier identifier,
-            ArrayList<Byte> token) {
+    protected void handleAuthenticated(boolean authenticated,
+            BiometricAuthenticator.Identifier identifier, ArrayList<Byte> token) {
         ClientMonitor client = mCurrentClient;
-        final boolean authenticated = identifier.getBiometricId() != 0;
 
         if (client != null && client.onAuthenticated(identifier, authenticated, token)) {
             removeClient(client);
