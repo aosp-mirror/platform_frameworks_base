@@ -40,3 +40,5 @@
 -keep public class * extends com.android.systemui.SystemUI {
     public <init>(android.content.Context);
 }
+
+-keep class com.android.wm.shell.*

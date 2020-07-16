@@ -25546,7 +25546,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void applyMimeGroupChanges(String packageName, String mimeGroup) {
         if (mComponentResolver.updateMimeGroup(packageName, mimeGroup)) {
-            clearPackagePreferredActivities(packageName, UserHandle.USER_ALL);
+            Binder.withCleanCallingIdentity(() ->
+                    clearPackagePreferredActivities(packageName, UserHandle.USER_ALL));
         }
 
         mPmInternal.writeSettings(false);

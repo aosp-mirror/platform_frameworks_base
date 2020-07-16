@@ -34,6 +34,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.window.WindowContainerTransaction;
@@ -60,7 +61,7 @@ public class PipBoundsHandler {
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final DisplayController mDisplayController;
-    private final DisplayLayout mDisplayLayout;
+    private DisplayLayout mDisplayLayout;
 
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
@@ -286,6 +287,10 @@ public class PipBoundsHandler {
 
     float getDefaultAspectRatio() {
         return mDefaultAspectRatio;
+    }
+
+    public void onOverlayChanged(Context context, Display display) {
+        mDisplayLayout = new DisplayLayout(context, display);
     }
 
     /**

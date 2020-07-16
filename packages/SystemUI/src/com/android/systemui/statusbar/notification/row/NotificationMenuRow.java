@@ -84,7 +84,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private final Map<View, MenuItem> mMenuItemsByView = new ArrayMap<>();
     private OnMenuEventListener mMenuListener;
     private boolean mDismissRtl;
-    private boolean mIsForeground;
 
     private ValueAnimator mFadeAnimator;
     private boolean mAnimating;
@@ -191,9 +190,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public void createMenu(ViewGroup parent, StatusBarNotification sbn) {
         mParent = (ExpandableNotificationRow) parent;
-        createMenuViews(true /* resetState */,
-                sbn != null && (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE)
-                        != 0);
+        createMenuViews(true /* resetState */);
     }
 
     @Override
@@ -237,8 +234,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             // Menu hasn't been created yet, no need to do anything.
             return;
         }
-        createMenuViews(!isMenuVisible() /* resetState */,
-                (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0);
+        createMenuViews(!isMenuVisible() /* resetState */);
     }
 
     @Override
@@ -253,9 +249,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mParent.removeListener();
     }
 
-    private void createMenuViews(boolean resetState, final boolean isForeground) {
-        mIsForeground = isForeground;
-
+    private void createMenuViews(boolean resetState) {
         final Resources res = mContext.getResources();
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
@@ -266,7 +260,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 SHOW_NOTIFICATION_SNOOZE, 0) == 1;
 
         // Construct the menu items based on the notification
-        if (!isForeground && showSnooze) {
+        if (showSnooze) {
             // Only show snooze for non-foreground notifications, and if the setting is on
             mSnoozeItem = createSnoozeItem(mContext);
         }
@@ -283,7 +277,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mInfoItem = createInfoItem(mContext);
         }
 
-        if (!isForeground && showSnooze) {
+        if (showSnooze) {
             mRightMenuItems.add(mSnoozeItem);
         }
         mRightMenuItems.add(mInfoItem);
@@ -789,7 +783,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     public void setDismissRtl(boolean dismissRtl) {
         mDismissRtl = dismissRtl;
         if (mMenuContainer != null) {
-            createMenuViews(true, mIsForeground);
+            createMenuViews(true);
         }
     }
 
