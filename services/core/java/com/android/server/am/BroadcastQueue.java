@@ -1677,7 +1677,7 @@ public final class BroadcastQueue {
         // that request - we don't want the token to be swept from under our feet...
         mHandler.removeCallbacksAndMessages(msgToken);
         // ...then add the token
-        proc.addAllowBackgroundActivityStartsToken(r);
+        proc.addAllowBackgroundActivityStartsToken(r, r.mBackgroundActivityStartsToken);
     }
 
     final void setBroadcastTimeoutLocked(long timeoutTime) {

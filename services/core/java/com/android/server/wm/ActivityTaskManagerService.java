@@ -675,6 +675,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowOrganizerController mWindowOrganizerController;
     TaskOrganizerController mTaskOrganizerController;
 
+    @Nullable
+    private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
+
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
     private final class FontScaleSettingObserver extends ContentObserver {
@@ -999,6 +1002,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             config.reqGlEsVersion = GL_ES_VERSION;
         }
         return config;
+    }
+
+    @Nullable
+    public BackgroundActivityStartCallback getBackgroundActivityStartCallback() {
+        return mBackgroundActivityStartCallback;
     }
 
     private void start() {
@@ -6140,6 +6148,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
             return false;
+        }
+
+        public void setBackgroundActivityStartCallback(
+                @Nullable BackgroundActivityStartCallback backgroundActivityStartCallback) {
+            mBackgroundActivityStartCallback = backgroundActivityStartCallback;
         }
 
         @Override
