@@ -260,6 +260,14 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHandleDestroyLifecycle() {
+        assertNotEquals(DESTROYED, mTile.getLifecycle().getCurrentState());
+        mTile.handleDestroy();
+
+        assertEquals(DESTROYED, mTile.getLifecycle().getCurrentState());
+    }
+
+    @Test
     public void testHandleDestroy_log() {
         mTile.handleDestroy();
         verify(mQsLogger).logTileDestroyed(eq(SPEC), anyString());
