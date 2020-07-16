@@ -1331,8 +1331,7 @@ public final class Telephony {
                 Object[] messages;
                 try {
                     messages = (Object[]) intent.getSerializableExtra("pdus");
-                }
-                catch (ClassCastException e) {
+                } catch (ClassCastException e) {
                     Rlog.e(TAG, "getMessagesFromIntent: " + e);
                     return null;
                 }
@@ -1344,9 +1343,12 @@ public final class Telephony {
 
                 String format = intent.getStringExtra("format");
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        SubscriptionManager.getDefaultSmsSubscriptionId());
-
-                Rlog.v(TAG, " getMessagesFromIntent sub_id : " + subId);
+                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                    Rlog.v(TAG, "getMessagesFromIntent with valid subId : " + subId);
+                } else {
+                    Rlog.v(TAG, "getMessagesFromIntent");
+                }
 
                 int pduCount = messages.length;
                 SmsMessage[] msgs = new SmsMessage[pduCount];

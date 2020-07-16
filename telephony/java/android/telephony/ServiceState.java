@@ -1392,29 +1392,14 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     public boolean isUsingCarrierAggregation() {
-        boolean isUsingCa = false;
-        NetworkRegistrationInfo nri = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        if (nri != null) {
-            DataSpecificRegistrationInfo dsri = nri.getDataSpecificInfo();
-            if (dsri != null) {
-                isUsingCa = dsri.isUsingCarrierAggregation();
-            }
-        }
-        return isUsingCa || getCellBandwidths().length > 1;
-    }
+        if (getCellBandwidths().length > 1) return true;
 
-    /** @hide */
-    public void setIsUsingCarrierAggregation(boolean ca) {
-        NetworkRegistrationInfo nri = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        if (nri != null) {
-            DataSpecificRegistrationInfo dsri = nri.getDataSpecificInfo();
-            if (dsri != null) {
-                dsri.setIsUsingCarrierAggregation(ca);
-                addNetworkRegistrationInfo(nri);
+        synchronized (mNetworkRegistrationInfos) {
+            for (NetworkRegistrationInfo nri : mNetworkRegistrationInfos) {
+                if (nri.isUsingCarrierAggregation()) return true;
             }
         }
+        return false;
     }
 
     /**
