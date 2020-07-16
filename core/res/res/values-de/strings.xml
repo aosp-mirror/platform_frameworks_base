@@ -932,7 +932,7 @@
     <string name="save_password_label" msgid="9161712335355510035">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tipp: Zum Vergrößern und Verkleinern doppeltippen"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"AutoFill"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"AutoFill konfig."</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Autom.Ausfüll.konf."</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"Mit <xliff:g id="SERVICENAME">%1$s</xliff:g> automatisch ausfüllen"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
@@ -1101,7 +1101,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Text auswählen"</string>
     <string name="undo" msgid="3175318090002654673">"Rückgängig machen"</string>
     <string name="redo" msgid="7231448494008532233">"Wiederholen"</string>
-    <string name="autofill" msgid="511224882647795296">"AutoFill"</string>
+    <string name="autofill" msgid="511224882647795296">"Automatisches Ausfüllen"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Textauswahl"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Zum Wörterbuch hinzufügen"</string>
     <string name="deleteText" msgid="4200807474529938112">"Löschen"</string>
@@ -1792,8 +1792,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (4424488535318105801) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (6794188153647295212) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1928,13 +1930,13 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Uhrzeit eingeben"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"In den Texteingabemodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"In den Uhrzeitmodus wechseln, um die Uhrzeit einzugeben."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"AutoFill-Optionen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für AutoFill speichern"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Optionen für automatisches Ausfüllen"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für \"Automatisches Ausfüllen\" speichern"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Inhalte können nicht automatisch ausgefüllt werden"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine AutoFill-Vorschläge"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Vorschläge für automatisches Ausfüllen"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> AutoFill-Vorschläge</item>
-      <item quantity="one">1 AutoFill-Vorschlag</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> Vorschläge für automatisches Ausfüllen</item>
+      <item quantity="one">1 Vorschlag für automatisches Ausfüllen</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"In "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" speichern?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> in "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" speichern?"</string>
