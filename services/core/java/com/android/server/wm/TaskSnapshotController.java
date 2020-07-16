@@ -615,8 +615,9 @@ class TaskSnapshotController {
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
                 false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
-                null /* displayCutout */, 0 /* legacySoftInputMode */, 0 /* legacySystemUiFlags */,
-                null /* typeSideMap */).getInsets(WindowInsets.Type.systemBars()).toRect();
+                null /* displayCutout */, 0 /* legacySoftInputMode */, 0 /* legacyWindowFlags */,
+                0 /* legacySystemUiFlags */, null /* typeSideMap */).getInsets(
+                        WindowInsets.Type.systemBars()).toRect();
     }
 
     void dump(PrintWriter pw, String prefix) {
