@@ -2438,7 +2438,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Determine if creating hard links between source and destination is
      * possible. That is, do they all live on the same underlying device.
      */
-    private boolean isLinkPossible(List<File> fromFiles, File toDir) {
+    private static boolean isLinkPossible(List<File> fromFiles, File toDir) {
         try {
             final StructStat toStat = Os.stat(toDir.getAbsolutePath());
             for (File fromFile : fromFiles) {
@@ -3004,16 +3004,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 detailMessage).sendToTarget();
     }
 
+    @GuardedBy("mLock")
+    private int[] getChildSessionIdsLocked() {
+        final int[] childSessionIds = mChildSessionIds.copyKeys();
+        return childSessionIds != null ? childSessionIds : EMPTY_CHILD_SESSION_ARRAY;
+    }
+
     @Override
     public int[] getChildSessionIds() {
-        final int[] childSessionIds;
         synchronized (mLock) {
-            childSessionIds = mChildSessionIds.copyKeys();
+            return getChildSessionIdsLocked();
         }
-        if (childSessionIds != null) {
-            return childSessionIds;
-        }
-        return EMPTY_CHILD_SESSION_ARRAY;
     }
 
     private boolean canBeAddedAsChild(int parentCandidate) {
@@ -3470,10 +3471,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (stageCid != null) {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_CID, stageCid);
             }
-            writeBooleanAttribute(out, ATTR_PREPARED, isPrepared());
-            writeBooleanAttribute(out, ATTR_COMMITTED, isCommitted());
-            writeBooleanAttribute(out, ATTR_DESTROYED, isDestroyed());
-            writeBooleanAttribute(out, ATTR_SEALED, isSealed());
+            writeBooleanAttribute(out, ATTR_PREPARED, mPrepared);
+            writeBooleanAttribute(out, ATTR_COMMITTED, mCommitted);
+            writeBooleanAttribute(out, ATTR_DESTROYED, mDestroyed);
+            writeBooleanAttribute(out, ATTR_SEALED, mSealed);
 
             writeBooleanAttribute(out, ATTR_MULTI_PACKAGE, params.isMultiPackage);
             writeBooleanAttribute(out, ATTR_STAGED_SESSION, params.isStaged);
@@ -3535,7 +3536,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                 params.appIconLastModified = appIconFile.lastModified();
             }
-            final int[] childSessionIds = getChildSessionIds();
+            final int[] childSessionIds = getChildSessionIdsLocked();
             for (int childSessionId : childSessionIds) {
                 out.startTag(null, TAG_CHILD_SESSION);
                 writeIntAttribute(out, ATTR_SESSION_ID, childSessionId);
@@ -3543,7 +3544,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             final InstallationFile[] files = getInstallationFilesLocked();
-            for (InstallationFile file : getInstallationFilesLocked()) {
+            for (InstallationFile file : files) {
                 out.startTag(null, TAG_SESSION_FILE);
                 writeIntAttribute(out, ATTR_LOCATION, file.getLocation());
                 writeStringAttribute(out, ATTR_NAME, file.getName());
