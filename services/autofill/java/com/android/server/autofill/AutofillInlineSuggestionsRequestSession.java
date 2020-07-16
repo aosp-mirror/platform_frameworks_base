@@ -364,6 +364,9 @@ final class AutofillInlineSuggestionsRequestSession {
         }
     }
 
+    /**
+     * Internal implementation of {@link IInlineSuggestionsRequestCallback}.
+     */
     private static final class InlineSuggestionsRequestCallbackImpl extends
             IInlineSuggestionsRequestCallback.Stub {
 
