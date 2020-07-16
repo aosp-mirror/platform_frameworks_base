@@ -1289,27 +1289,25 @@ public class SoundTriggerService extends SystemService {
             attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
             AudioAttributes attributes = attributesBuilder.build();
 
-            // Use same AudioFormat processing as in RecognitionEvent.fromParcel
             AudioFormat originalFormat = event.getCaptureFormat();
-            AudioFormat captureFormat = (new AudioFormat.Builder())
-                    .setChannelMask(originalFormat.getChannelMask())
-                    .setEncoding(originalFormat.getEncoding())
-                    .setSampleRate(originalFormat.getSampleRate())
-                    .build();
-
-            int bufferSize = AudioRecord.getMinBufferSize(
-                    captureFormat.getSampleRate() == AudioFormat.SAMPLE_RATE_UNSPECIFIED
-                            ? AudioFormat.SAMPLE_RATE_HZ_MAX
-                            : captureFormat.getSampleRate(),
-                    captureFormat.getChannelCount() == 2
-                            ? AudioFormat.CHANNEL_IN_STEREO
-                            : AudioFormat.CHANNEL_IN_MONO,
-                    captureFormat.getEncoding());
 
             sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
 
-            return new AudioRecord(attributes, captureFormat, bufferSize,
-                    event.getCaptureSession());
+            try {
+                return (new AudioRecord.Builder())
+                            .setAudioAttributes(attributes)
+                            .setAudioFormat((new AudioFormat.Builder())
+                                .setChannelMask(originalFormat.getChannelMask())
+                                .setEncoding(originalFormat.getEncoding())
+                                .setSampleRate(originalFormat.getSampleRate())
+                                .build())
+                            .setSessionId(event.getCaptureSession())
+                            .build();
+            } catch (IllegalArgumentException | UnsupportedOperationException e) {
+                Slog.w(TAG, mPuuid + ": createAudioRecordForEvent(" + event
+                        + "), failed to create AudioRecord");
+                return null;
+            }
         }
 
         @Override
@@ -1339,8 +1337,10 @@ public class SoundTriggerService extends SystemService {
 
                             // Currently we need to start and release the audio record to reset
                             // the DSP even if we don't want to process the event
-                            capturedData.startRecording();
-                            capturedData.release();
+                            if (capturedData != null) {
+                                capturedData.startRecording();
+                                capturedData.release();
+                            }
                         }
                     }));
         }
