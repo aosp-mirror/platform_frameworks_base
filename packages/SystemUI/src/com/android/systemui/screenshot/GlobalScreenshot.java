@@ -21,8 +21,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -30,13 +28,10 @@ import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -63,7 +58,6 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Slog;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -88,22 +82,14 @@ import android.widget.Toast;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  * Class for handling device screen shots
@@ -193,6 +179,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private final UiEventLogger mUiEventLogger;
 
     private final Context mContext;
+    private final ScreenshotSmartActions mScreenshotSmartActions;
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
     private final Display mDisplay;
@@ -248,9 +235,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     @Inject
     public GlobalScreenshot(
             Context context, @Main Resources resources,
+            ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController screenshotNotificationsController,
             UiEventLogger uiEventLogger) {
         mContext = context;
+        mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mUiEventLogger = uiEventLogger;
 
@@ -713,7 +702,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             });
         }
 
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data);
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
         mSaveInBgTask.execute();
     }
 
@@ -1123,121 +1112,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     new ColorDrawable(Color.BLACK), insetDrawable});
         } else {
             return insetDrawable;
-        }
-    }
-
-    /**
-     * Receiver to proxy the share or edit intent, used to clean up the notification and send
-     * appropriate signals to the system (ie. to dismiss the keyguard if necessary).
-     */
-    public static class ActionProxyReceiver extends BroadcastReceiver {
-        static final int CLOSE_WINDOWS_TIMEOUT_MILLIS = 3000;
-        private final StatusBar mStatusBar;
-
-        @Inject
-        public ActionProxyReceiver(Optional<Lazy<StatusBar>> statusBarLazy) {
-            Lazy<StatusBar> statusBar = statusBarLazy.orElse(null);
-            mStatusBar = statusBar != null ? statusBar.get() : null;
-        }
-
-        @Override
-        public void onReceive(Context context, final Intent intent) {
-            Runnable startActivityRunnable = () -> {
-                try {
-                    ActivityManagerWrapper.getInstance().closeSystemWindows(
-                            SYSTEM_DIALOG_REASON_SCREENSHOT).get(
-                            CLOSE_WINDOWS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-                } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                    Slog.e(TAG, "Unable to share screenshot", e);
-                    return;
-                }
-
-                PendingIntent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
-                if (intent.getBooleanExtra(EXTRA_CANCEL_NOTIFICATION, false)) {
-                    ScreenshotNotificationsController.cancelScreenshotNotification(context);
-                }
-                ActivityOptions opts = ActivityOptions.makeBasic();
-                opts.setDisallowEnterPictureInPictureWhileLaunching(
-                        intent.getBooleanExtra(EXTRA_DISALLOW_ENTER_PIP, false));
-                try {
-                    actionIntent.send(context, 0, null, null, null, null, opts.toBundle());
-                } catch (PendingIntent.CanceledException e) {
-                    Log.e(TAG, "Pending intent canceled", e);
-                }
-
-            };
-
-            if (mStatusBar != null) {
-                mStatusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,
-                        true /* dismissShade */, true /* afterKeyguardGone */,
-                        true /* deferred */);
-            } else {
-                startActivityRunnable.run();
-            }
-
-            if (intent.getBooleanExtra(EXTRA_SMART_ACTIONS_ENABLED, false)) {
-                String actionType = Intent.ACTION_EDIT.equals(intent.getAction())
-                        ? ACTION_TYPE_EDIT
-                        : ACTION_TYPE_SHARE;
-                ScreenshotSmartActions.notifyScreenshotAction(
-                        context, intent.getStringExtra(EXTRA_ID), actionType, false);
-            }
-        }
-    }
-
-    /**
-     * Removes the notification for a screenshot after a share target is chosen.
-     */
-    public static class TargetChosenReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Clear the notification only after the user has chosen a share action
-            ScreenshotNotificationsController.cancelScreenshotNotification(context);
-        }
-    }
-
-    /**
-     * Removes the last screenshot.
-     */
-    public static class DeleteScreenshotReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!intent.hasExtra(SCREENSHOT_URI_ID)) {
-                return;
-            }
-
-            // Clear the notification when the image is deleted
-            ScreenshotNotificationsController.cancelScreenshotNotification(context);
-
-            // And delete the image from the media store
-            final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
-            new DeleteImageInBackgroundTask(context).execute(uri);
-            if (intent.getBooleanExtra(EXTRA_SMART_ACTIONS_ENABLED, false)) {
-                ScreenshotSmartActions.notifyScreenshotAction(
-                        context, intent.getStringExtra(EXTRA_ID), ACTION_TYPE_DELETE, false);
-            }
-        }
-    }
-
-    /**
-     * Executes the smart action tapped by the user in the notification.
-     */
-    public static class SmartActionsReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            PendingIntent pendingIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
-            String actionType = intent.getStringExtra(EXTRA_ACTION_TYPE);
-            Slog.d(TAG, "Executing smart action [" + actionType + "]:" + pendingIntent.getIntent());
-            ActivityOptions opts = ActivityOptions.makeBasic();
-
-            try {
-                pendingIntent.send(context, 0, null, null, null, null, opts.toBundle());
-            } catch (PendingIntent.CanceledException e) {
-                Log.e(TAG, "Pending intent canceled", e);
-            }
-
-            ScreenshotSmartActions.notifyScreenshotAction(
-                    context, intent.getStringExtra(EXTRA_ID), actionType, true);
         }
     }
 }
