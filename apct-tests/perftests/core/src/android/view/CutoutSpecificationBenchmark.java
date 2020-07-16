@@ -22,13 +22,13 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.PathParser;
 
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -67,7 +67,7 @@ public class CutoutSpecificationBenchmark {
             + "Z\n"
             + "@dp";
     @Rule
-    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private Context mContext;
     private DisplayMetrics mDisplayMetrics;
@@ -168,7 +168,7 @@ public class CutoutSpecificationBenchmark {
 
     @Test
     public void parseByOldMethodForDoubleCutout() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             oldMethodParsingSpec(DOUBLE_CUTOUT_SPEC, mDisplayMetrics.widthPixels,
                     mDisplayMetrics.heightPixels, mDisplayMetrics.density);
@@ -177,7 +177,7 @@ public class CutoutSpecificationBenchmark {
 
     @Test
     public void parseByNewMethodForDoubleCutout() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new CutoutSpecification.Parser(mDisplayMetrics.density,
                     mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels)
@@ -209,7 +209,7 @@ public class CutoutSpecificationBenchmark {
                 + "@right\n"
                 + "@dp";
 
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new CutoutSpecification.Parser(mDisplayMetrics.density,
                     mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels).parse(spec);
@@ -231,7 +231,7 @@ public class CutoutSpecificationBenchmark {
                 + "Z\n"
                 + "@dp";
 
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new CutoutSpecification.Parser(mDisplayMetrics.density,
                     mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels).parse(spec);

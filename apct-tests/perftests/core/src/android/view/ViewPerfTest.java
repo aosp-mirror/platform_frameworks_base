@@ -19,11 +19,11 @@ package android.view;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
 import android.widget.FrameLayout;
 
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -37,7 +37,7 @@ import org.junit.Test;
 @LargeTest
 public class ViewPerfTest {
     @Rule
-    public final PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    public final BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Rule
     public final ActivityTestRule<PerfTestActivity> mActivityRule =
@@ -52,7 +52,7 @@ public class ViewPerfTest {
 
     @Test
     public void testSimpleViewInflate() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         FrameLayout root = new FrameLayout(mContext);
         while (state.keepRunning()) {
@@ -62,7 +62,7 @@ public class ViewPerfTest {
 
     @Test
     public void testTwelveKeyInflate() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         FrameLayout root = new FrameLayout(mContext);
         while (state.keepRunning()) {
@@ -72,7 +72,7 @@ public class ViewPerfTest {
 
     @Test
     public void testPerformHapticFeedback() throws Throwable {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         mActivityRule.runOnUiThread(() -> {
             state.pauseTiming();
             View view = new View(mContext);
