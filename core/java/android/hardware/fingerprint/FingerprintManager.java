@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,6 +66,7 @@ import javax.crypto.Mac;
  * it's much more realistic to have a system-provided authentication dialog since the method may
  * vary by vendor/device.
  */
+@SuppressWarnings("deprecation")
 @Deprecated
 @SystemService(Context.FINGERPRINT_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_FINGERPRINT)
@@ -80,11 +81,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_ERROR = 104;
     private static final int MSG_REMOVED = 105;
     private static final int MSG_CHALLENGE_GENERATED = 106;
+    private static final int MSG_FINGERPRINT_DETECTED = 107;
 
     private IFingerprintService mService;
     private Context mContext;
     private IBinder mToken = new Binder();
     private AuthenticationCallback mAuthenticationCallback;
+    private FingerprintDetectionCallback mFingerprintDetectionCallback;
     private EnrollmentCallback mEnrollmentCallback;
     private RemovalCallback mRemovalCallback;
     private GenerateChallengeCallback mGenerateChallengeCallback;
@@ -109,6 +112,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         @Override
         public void onCancel() {
             cancelAuthentication(mCrypto);
+        }
+    }
+
+    private class OnFingerprintDetectionCancelListener implements OnCancelListener {
+        @Override
+        public void onCancel() {
+            cancelFingerprintDetect();
         }
     }
 
@@ -222,7 +232,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         public boolean isStrongBiometric() {
             return mIsStrongBiometric;
         }
-    };
+    }
 
     /**
      * Callback structure provided to {@link FingerprintManager#authenticate(CryptoObject,
@@ -274,7 +284,19 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          */
         @Override
         public void onAuthenticationAcquired(int acquireInfo) {}
-    };
+    }
+
+    /**
+     * Callback structure provided for {@link #detectFingerprint(CancellationSignal,
+     * FingerprintDetectionCallback, int, Surface)}.
+     * @hide
+     */
+    public interface FingerprintDetectionCallback {
+        /**
+         * Invoked when a fingerprint has been detected.
+         */
+        void onFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric);
+    }
 
     /**
      * Callback structure provided to {@link FingerprintManager#enroll(byte[], CancellationSignal,
@@ -309,7 +331,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * @param remaining The number of remaining steps
          */
         public void onEnrollmentProgress(int remaining) { }
-    };
+    }
 
     /**
      * Callback structure provided to {@link #remove}. Users of {@link FingerprintManager} may
@@ -337,7 +359,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          *         fingerprints in the group, and 0 after the last fingerprint is removed.
          */
         public void onRemovalSucceeded(Fingerprint fp, int remaining) { }
-    };
+    }
 
     /**
      * @hide
@@ -349,7 +371,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * again.
          */
         public void onLockoutReset(int sensorId) { }
-    };
+    }
 
     /**
      * @hide
@@ -460,6 +482,35 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                         getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
                                 0 /* vendorCode */));
             }
+        }
+    }
+
+    /**
+     * Uses the fingerprint hardware to detect for the presence of a finger, without giving details
+     * about accept/reject/lockout.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void detectFingerprint(@NonNull CancellationSignal cancel,
+            @NonNull FingerprintDetectionCallback callback, int userId, @Nullable Surface surface) {
+        if (mService == null) {
+            return;
+        }
+
+        if (cancel.isCanceled()) {
+            Slog.w(TAG, "Detection already cancelled");
+            return;
+        } else {
+            cancel.setOnCancelListener(new OnFingerprintDetectionCancelListener());
+        }
+
+        mFingerprintDetectionCallback = callback;
+
+        try {
+            mService.detectFingerprint(mToken, userId, mServiceReceiver,
+                    mContext.getOpPackageName(), surface);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Remote exception when requesting finger detect", e);
         }
     }
 
@@ -882,12 +933,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 case MSG_CHALLENGE_GENERATED:
                     sendChallengeGenerated((long) msg.obj /* challenge */);
                     break;
+                case MSG_FINGERPRINT_DETECTED:
+                    sendFingerprintDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
+                            (boolean) msg.obj /* isStrongBiometric */);
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
 
             }
         }
-    };
+    }
 
     private void sendRemovedResult(Fingerprint fingerprint, int remaining) {
         if (mRemovalCallback == null) {
@@ -972,6 +1027,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         mGenerateChallengeCallback.onChallengeGenerated(challenge);
     }
 
+    private void sendFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric) {
+        if (mFingerprintDetectionCallback == null) {
+            Slog.e(TAG, "sendFingerprintDetected, callback null");
+            return;
+        }
+        mFingerprintDetectionCallback.onFingerprintDetected(sensorId, userId, isStrongBiometric);
+    }
+
     /**
      * @hide
      */
@@ -1003,6 +1066,18 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private void cancelAuthentication(android.hardware.biometrics.CryptoObject cryptoObject) {
         if (mService != null) try {
             mService.cancelAuthentication(mToken, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void cancelFingerprintDetect() {
+        if (mService == null) {
+            return;
+        }
+
+        try {
+            mService.cancelFingerprintDetect(mToken, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1109,6 +1184,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 boolean isStrongBiometric) {
             mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, isStrongBiometric ? 1 : 0,
                     fp).sendToTarget();
+        }
+
+        @Override
+        public void onFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_DETECTED, sensorId, userId, isStrongBiometric)
+                    .sendToTarget();
         }
 
         @Override // binder call

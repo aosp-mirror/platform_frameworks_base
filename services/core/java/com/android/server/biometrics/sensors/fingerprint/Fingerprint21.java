@@ -51,6 +51,7 @@ import com.android.server.biometrics.fingerprint.FingerprintUserStatsProto;
 import com.android.server.biometrics.fingerprint.PerformanceStatsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -101,12 +102,18 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
      * Static properties that never change for a given sensor.
      */
     private static final class SensorProperties {
+        // Unique sensorId
         final int sensorId;
+        // Is the sensor under-display
         final boolean isUdfps;
+        // Supports finger detection without exposing accept/reject and without incrementing the
+        // lockout counter
+        final boolean supportsFingerDetectOnly;
 
-        SensorProperties(int sensorId, boolean isUdfps) {
+        SensorProperties(int sensorId, boolean isUdfps, boolean supportsFingerDetectOnly) {
             this.sensorId = sensorId;
             this.isUdfps = isUdfps;
+            this.supportsFingerDetectOnly = supportsFingerDetectOnly;
         }
     }
 
@@ -203,17 +210,17 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 ArrayList<Byte> token) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintAuthenticationClient)) {
-                    Slog.e(TAG, "onAuthenticated for non-authentication client: "
+                if (!(client instanceof AuthenticationConsumer)) {
+                    Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final FingerprintAuthenticationClient authenticationClient =
-                        (FingerprintAuthenticationClient) client;
+                final AuthenticationConsumer authenticationConsumer =
+                        (AuthenticationConsumer) client;
                 final boolean authenticated = fingerId != 0;
                 final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
-                authenticationClient.onAuthenticated(fp, authenticated, token);
+                authenticationConsumer.onAuthenticated(fp, authenticated, token);
             });
         }
 
@@ -307,7 +314,9 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 isUdfps = false;
             }
         }
-        mSensorProperties = new SensorProperties(sensorId, isUdfps);
+        // Fingerprint2.1 supports finger-detect only since lockout is controlled in the framework.
+        mSensorProperties = new SensorProperties(sensorId, isUdfps,
+                true /* supportsFingerDetectOnly */);
     }
 
     @Override
@@ -472,6 +481,21 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     void cancelEnrollment(@NonNull IBinder token) {
         mHandler.post(() -> {
             mScheduler.cancelEnrollment(token);
+        });
+    }
+
+    void scheduleFingerDetect(@NonNull IBinder token, int userId,
+            @NonNull ClientMonitorCallbackConverter listener, @NonNull String opPackageName,
+            @Nullable Surface surface, int statsClient) {
+        mHandler.post(() -> {
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            final boolean isStrongBiometric = Utils.isStrongBiometric(mSensorProperties.sensorId);
+            final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
+                    mLazyDaemon, token, listener, userId, opPackageName,
+                    mSensorProperties.sensorId, mUdfpsOverlayController, isStrongBiometric,
+                    statsClient);
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 

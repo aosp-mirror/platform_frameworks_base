@@ -30,6 +30,7 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
 import android.hardware.face.IFaceServiceReceiver;
+import android.hardware.face.FaceSensorProperties;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +47,7 @@ import android.util.Slog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
+import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -82,6 +84,7 @@ class Face10 implements IHwBinder.DeathRecipient {
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
 
+    @NonNull private final FaceSensorProperties mFaceSensorProperties;
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
@@ -128,17 +131,17 @@ class Face10 implements IHwBinder.DeathRecipient {
         public void onAuthenticated(long deviceId, int faceId, int userId, ArrayList<Byte> token) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceAuthenticationClient)) {
-                    Slog.e(TAG, "onAuthenticated for non-authentication client: "
+                if (!(client instanceof AuthenticationConsumer)) {
+                    Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final FaceAuthenticationClient authenticationClient =
-                        (FaceAuthenticationClient) client;
+                final AuthenticationConsumer authenticationConsumer =
+                        (AuthenticationConsumer) client;
                 final boolean authenticated = faceId != 0;
                 final Face face = new Face("", faceId, deviceId);
-                authenticationClient.onAuthenticated(face, authenticated, token);
+                authenticationConsumer.onAuthenticated(face, authenticated, token);
             });
         }
 
@@ -266,6 +269,7 @@ class Face10 implements IHwBinder.DeathRecipient {
 
     Face10(@NonNull Context context, int sensorId,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+        mFaceSensorProperties = new FaceSensorProperties(false /* supportsFaceDetect */);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
@@ -553,6 +557,10 @@ class Face10 implements IHwBinder.DeathRecipient {
     boolean isHardwareDetected() {
         final IBiometricsFace daemon = getDaemon();
         return daemon != null;
+    }
+
+    FaceSensorProperties getFaceSensorProperties() {
+        return mFaceSensorProperties;
     }
 
     List<Face> getEnrolledFaces(int userId) {
