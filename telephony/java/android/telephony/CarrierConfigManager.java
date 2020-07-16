@@ -2382,6 +2382,16 @@ public class CarrierConfigManager {
             "call_forwarding_blocks_while_roaming_string_array";
 
     /**
+     * Call forwarding number prefixes defined by {@link
+     * #KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY} which will be allowed while the
+     * device is reporting that it is roaming and IMS is registered over LTE or Wi-Fi.
+     * By default this value is {@code true}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_IMS_CALL_FORWARDING_WHILE_ROAMING_BOOL =
+            "support_ims_call_forwarding_while_roaming_bool";
+
+    /**
      * The day of the month (1-31) on which the data cycle rolls over.
      * <p>
      * If the current month does not have this day, the cycle will roll over at
@@ -4223,6 +4233,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
+        sDefaults.putBoolean(KEY_SUPPORT_IMS_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
         sDefaults.putStringArray(KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL, false);
