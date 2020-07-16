@@ -54,9 +54,9 @@ class OpenImeWindowTest(
         checkResults {
             WmTraceSubject.assertThat(it)
                     .skipUntilFirstAssertion()
-                    .hidesImeWindow(IME_WINDOW_TITLE)
+                    .hidesNonAppWindow(IME_WINDOW_TITLE)
                     .then()
-                    .showsImeWindow(IME_WINDOW_TITLE)
+                    .showsNonAppWindow(IME_WINDOW_TITLE)
                     .forAllEntries()
         }
     }
