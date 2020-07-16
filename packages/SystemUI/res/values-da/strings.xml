@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Gå til forrige"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Rediger størrelse"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonen slukkede pga. varme"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Din telefon kører nu normalt"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Din telefon kører nu normalt.\nTryk for at få flere oplysninger"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Din telefon var blevet for varm, så den slukkede for at køle ned. Din telefon kører nu igen normalt. \n\nDin telefon kan blive for varm, hvis du:\n	• Bruger ressourcekrævende apps (f.eks. spil, video eller navigation)\n	• Downloader eller uploader store filer\n	• Bruger din telefon i varme omgivelser"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se håndteringsvejledning"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefonen er ved at blive varm"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Nogle funktioner er begrænsede, mens telefonen køler ned"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nogle funktioner er begrænsede, mens telefonen køler ned.\nTryk for at få flere oplysninger"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Frakobl opladeren"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Der er et problem med opladning af denne enhed. Frakobl strømadapteren, og vær forsigtig, da kablet kan være varmt."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Se vejledningen i pleje"</string>

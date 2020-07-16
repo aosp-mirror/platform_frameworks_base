@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Fara á fyrra"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Breyta stærð"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Slökkt var á símanum vegna hita"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Síminn virkar núna sem skyldi"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Síminn virkar nú eins og venjulega.\nÝttu til að fá frekari upplýsingar"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Síminn varð of heitur og því var slökkt á honum til að kæla hann. Síminn virkar núna sem skyldi.\n\nSíminn getur orðið of heitur ef þú:\n	• Notar plássfrek forrit (t.d. leikja-, myndbands- eða leiðsagnarforrit\n	• Sækir eða hleður upp stórum skrám\n	• Notar símann í miklum hita"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Sjá varúðarskref"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Síminn er að hitna"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Sumir eiginleikar eru takmarkaðir þegar síminn kælir sig"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Sumir eiginleikar eru takmarkaðir meðan síminn kælir sig.\nÝttu til að fá frekari upplýsingar"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Síminn reynir sjálfkrafa að kæla sig. Þú getur enn notað símann en hann gæti verið hægvirkari.\n\nEftir að síminn hefur kælt sig niður virkar hann eðlilega."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Sjá varúðarskref"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Taktu hleðslutækið úr sambandi"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Upp kom vandamál varðandi hleðslu tækisins. Taktu straumbreytinn úr sambandi og farðu varlega því snúran gæti verið heit."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Sjá varúðarskref"</string>

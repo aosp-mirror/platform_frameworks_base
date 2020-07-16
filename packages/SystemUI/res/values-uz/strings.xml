@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Avvalgisiga qaytish"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Oʻlchamini oʻzgartirish"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Qizigani uchun o‘chirildi"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefoningiz hozir normal holatda ishlayapti"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Endi telefoningiz normal holatda ishlayapti.\nBatafsil axborot uchun bosing"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon qizib ketganligi sababli sovitish uchun o‘chirib qo‘yilgan. Endi telefoningiz normal holatda ishlayapti.\n\nTelefon bu hollarda qizib ketishi mumkin:\n	• Resurstalab ilovalar ishlatilganda (masalan, o‘yin, video yoki navigatsiya ilovalari)\n	• Katta faylni yuklab olishda yoki yuklashda\n	• Telefondan yuqori haroratda foydalanganda"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Batafsil axborot"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon qizib ketdi"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Telefon sovish paytida ayrim funksiyalar ishlamasligi mumkin"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Telefon sovib qolganda ayrim funksiyalari ishlamasligi mumkin.\nBatafsil axborot uchun bosing"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Batafsil axborot"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Quvvatlash moslamasini uzing"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Bu qurilmani quvvatlashda muammo bor. Quvvat adapteri va kabelni tarmoqdan uzing, ular qizib ketgan boʻlishi mumkin."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Batafsil axborot"</string>

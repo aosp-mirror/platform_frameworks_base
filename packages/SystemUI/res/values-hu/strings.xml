@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Ugrás az előzőre"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Átméretezés"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"A meleg miatt kikapcsolt"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"A telefon most már megfelelően működik"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonja most már megfelelően működik.\nKoppintson, ha további információra van szüksége."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonja túlmelegedett, így kikapcsolt, hogy lehűlhessen. Most már megfelelően működik.\n\nA telefon akkor melegedhet túl, ha Ön:\n	• Energiaigényes alkalmazásokat használ (például játékokat, videókat vagy navigációs alkalmazásokat)\n	• Nagy fájlokat tölt le vagy fel\n	• Melegben használja a telefonját"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Olvassa el a kímélő használat lépéseit"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"A telefon melegszik"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Bizonyos funkciók korlátozottan működnek a telefon hűlése közben"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Bizonyos funkciók korlátozottan működnek a telefon lehűlése közben.\nKoppintson, ha további információra van szüksége."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"A telefon automatikusan megpróbál lehűlni. Továbbra is tudja használni a telefont, de elképzelhető, hogy működése lelassul.\n\nAmint a telefon lehűl, újra a szokásos módon működik majd."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Olvassa el a kímélő használat lépéseit"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Húzza ki a töltőt"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Probléma adódott az eszköz töltése során. Húzza ki a hálózati adaptert. Vigyázzon, a kábel forró lehet."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Olvassa el a megfelelő használat lépéseit"</string>

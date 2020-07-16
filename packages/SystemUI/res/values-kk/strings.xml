@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Алдыңғысына оралу"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Өлшемін өзгерту"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон қызып кеткендіктен өшірілді"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефоныңыз қазір қалыпты жұмыс істеп тұр"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефоныңыз қалыпты жұмыс істеп тұр.\nТолығырақ ақпарат алу үшін түртіңіз."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефоныңыз қатты қызып кеткендіктен өшірілді. Телефоныңыз қазір қалыпты жұмыс істеп тұр.\n\nТелефоныңыз мына жағдайларда ыстық болуы мүмкін:\n	• Ресурстар талап ететін қолданбаларды пайдалану (ойын, бейне немесе навигация қолданбалары)\n	• Үлкен көлемді файлдарды жүктеу немесе жүктеп салу\n	• Телефонды жоғары температурада пайдалану"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Пайдалану нұсқаулығын қараңыз"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Телефон қызуда"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі.\nТолығырақ ақпарат үшін түртіңіз."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефон автоматты түрде суи бастайды. Оны пайдалана бере аласыз, бірақ ол баяуырақ жұмыс істеуі мүмкін.\n\nТелефон суығаннан кейін, оның жұмысы қалпына келеді."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Пайдалану нұсқаулығын қараңыз"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Зарядтағышты ажыратыңыз"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Құрылғыны зарядтау кезінде ақау шықты. Қуат адаптерін ажыратыңыз. Кабель ыстық болуы мүмкін, абай болыңыз."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Пайдалану нұсқаулығын қараңыз"</string>

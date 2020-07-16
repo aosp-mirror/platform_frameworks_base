@@ -940,11 +940,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Přeskočit na předchozí"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Změnit velikost"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se vypnul z důvodu zahřátí"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Nyní telefon funguje jako obvykle."</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Nyní telefon funguje jako obvykle.\nKlepnutím zobrazíte další informace"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon byl příliš zahřátý, proto se vypnul, aby vychladl. Nyní telefon funguje jako obvykle.\n\nTelefon se může příliš zahřát v těchto případech:\n	• používání náročných aplikací (např. her, videí nebo navigace),\n	• stahování nebo nahrávání velkých souborů,\n	• používání telefonu při vysokých teplotách."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobrazit pokyny, co dělat"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon se zahřívá"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Některé funkce jsou při chladnutí omezeny"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Některé funkce jsou při chladnutí telefonu omezeny.\nKlepnutím zobrazíte další informace"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon se automaticky pokusí vychladnout. Lze jej nadále používat, ale může být pomalejší.\n\nAž telefon vychladne, bude fungovat normálně."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobrazit pokyny, co dělat"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Odpojte nabíječku"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Při nabíjení zařízení došlo k problému. Odpojte napájecí adaptér (dávejte pozor, kabel může být horký)."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Zobrazit pokyny, co dělat"</string>

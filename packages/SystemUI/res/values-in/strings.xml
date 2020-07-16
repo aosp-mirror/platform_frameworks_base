@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Lewati ke sebelumnya"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ubah ukuran"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ponsel dimatikan karena panas"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ponsel kini berfungsi normal"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ponsel kini berfungsi normal.\nKetuk untuk info selengkapnya"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ponsel menjadi terlalu panas, jadi dimatikan untuk mendinginkan. Ponsel kini berfungsi normal.\n\nPonsel dapat menjadi terlalu panas jika Anda:\n	• Menggunakan aplikasi yang menggunakan sumber daya secara intensif (seperti aplikasi game, video, atau navigasi)\n	• Mendownload atau mengupload file besar\n	• Menggunakan ponsel dalam suhu tinggi"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Ponsel menjadi hangat"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Beberapa fitur dibatasi saat ponsel mendingin"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Beberapa fitur dibatasi saat ponsel mendingin.\nKetuk untuk info selengkapnya"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ponsel akan otomatis mencoba mendingin. Anda tetap dapat menggunakan ponsel, tetapi mungkin berjalan lebih lambat.\n\nSetelah dingin, ponsel akan berjalan seperti biasa."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Cabut pengisi daya"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Ada masalah saat mengisi daya perangkat ini. Cabut adaptor daya dan berhati-hatilah karena kabelnya mungkin panas."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Lihat langkah-langkah perawatan"</string>

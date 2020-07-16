@@ -940,11 +940,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Preskočiť na predchádzajúce"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Zmeniť veľkosť"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefón sa vypol z dôvodu prehriatia"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Teraz telefón funguje ako obvykle"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Teraz telefón funguje ako obvykle.\nViac sa dozviete po klepnutí."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefón bol príliš horúci, preto sa vypol, aby vychladol. Teraz funguje ako obvykle.\n\nTelefón sa môže príliš zahriať v týchto prípadoch:\n	• používanie náročných aplikácií (napr. hier, videí alebo navigácie);\n	• sťahovanie alebo nahrávanie veľkých súborov;\n	• používanie telefónu pri vysokých teplotách."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobraziť opatrenia"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Teplota telefónu stúpa"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Niektoré funkcie budú obmedzené, dokým neklesne teplota telefónu"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Niektoré funkcie budú obmedzené, dokým neklesne teplota telefónu.\nViac sa dozviete po klepnutí."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Váš telefón sa automaticky pokúsi schladiť. Môžete ho naďalej používať, ale môže fungovať pomalšie.\n\nPo poklese teploty bude telefón fungovať ako normálne."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobraziť opatrenia"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Odpojte nabíjačku"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Vyskytol sa problém s nabíjaním tohto zariadenia. Odpojte nabíjačku a postupujte opatrne, pretože kábel môže byť horúci."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Zobraziť opatrenia"</string>

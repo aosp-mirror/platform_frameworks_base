@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Langkau ke sebelumnya"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ubah saiz"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon dimatikan kerana panas"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon anda kini berjalan seperti biasa"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon anda kini berjalan seperti biasa.\nKetik untuk mendapatkan maklumat lanjut"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon anda terlalu panas, jadi telefon itu telah dimatikan untuk menyejuk. Sekarang, telefon anda berjalan seperti biasa.\n\nTelefon anda mungkin menjadi terlalu panas jika anda:\n	• Menggunakan apl intensif sumber (seperti permainan, video atau apl navigasi)\n	• Memuat turun atau memuat naik fail besar\n	• Menggunakan telefon anda dalam suhu tinggi"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah penjagaan"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon semakin panas"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Sesetengah ciri adalah terhad semasa telefon menyejuk"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Sesetengah ciri adalah terhad semasa telefon menyejuk.\nKetik untuk mendapatkan maklumat lanjut"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon anda akan cuba menyejuk secara automatik. Anda masih dapat menggunakan telefon itu tetapi telefon tersebut mungkin berjalan lebih perlahan.\n\nSetelah telefon anda sejuk, telefon itu akan berjalan seperti biasa."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah penjagaan"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Cabut palam pengejas"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Terdapat isu semasa mengecas peranti ini. Cabut palam penyesuai kuasa. Berhati-hati kerana kabel mungkin hangat."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Lihat langkah penjagaan"</string>

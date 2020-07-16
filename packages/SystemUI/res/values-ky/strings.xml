@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Мурункусуна өткөрүп жиберүү"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Өлчөмүн өзгөртүү"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон ысыгандыктан өчүрүлдү"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефонуңуз кадимкидей иштеп жатат"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефонуңуз кадимкидей иштеп жатат.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонуңуз өтө ысып кеткендиктен, аны муздатуу үчүн өчүрүлдү. Эми телефонуңуз кадимкидей иштеп жатат.\n\nТелефонуңуз төмөнкү шарттарда ысып кетиши мүмкүн:\n	• Ашыкча ресурс короткон колдонмолорду (оюндар, видео же чабыттоо колдонмолору) пайдалансаңыз \n	• Ири көлөмдөгү файлдарды жүктөп алсаңыз же берсеңиз\n	• Телефонуңузду жогорку температураларда пайдалансаңыз"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Телефонуңуз ысып баратат"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Телефон сууганча айрым элементтердин иши чектелген"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Телефон сууганча айрым элементтердин иши чектелген.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Кубаттагычты сууруңуз"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Бул түзмөктү кубаттоодо маселе келип чыкты. Кабель ысып кетиши мүмкүн, андыктан кубаттагыч адаптерин сууруп коюңуз."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Тейлөө кадамдарын көрүңүз"</string>

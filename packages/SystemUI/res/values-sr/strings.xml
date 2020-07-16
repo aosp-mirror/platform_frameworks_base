@@ -935,11 +935,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Пређи на претходно"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Промените величину"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон се искључио због топлоте"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефон сада нормално ради"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефон сада нормално ради.\nДодирните за више информација"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон је био преврућ, па се искључио да се охлади. Сада ради нормално.\n\nТелефон може превише да се угреје ако:\n	• Користите апликације које захтевају пуно ресурса (нпр. видео игре, видео или апликације за навигацију)\n	• Преузимате/отпремате велике датотеке\n	• Користите телефон на високој температури"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Погледајте упозорења"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Телефон се загрејао"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Неке функције су ограничене док се телефон не охлади"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Неке функције су ограничене док се телефон не охлади.\nДодирните за више информација"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефон ће аутоматски покушати да се охлади. И даље ћете моћи да користите телефон, али ће спорије реаговати.\n\nКада се телефон охлади, нормално ће радити."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Погледајте упозорења"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Искључите пуњач из напајања"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Дошло је до проблема са пуњењем овог уређаја. Искључите адаптер из напајања и будите пажљиви јер кабл може да буде топао."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Погледајте упозорења"</string>

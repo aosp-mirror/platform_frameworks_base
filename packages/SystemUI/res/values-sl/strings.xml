@@ -940,11 +940,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Preskoči na prejšnjega"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Spremeni velikost"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tel. izklopljen zaradi vročine"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Zdaj telefon normalno deluje"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon zdaj deluje normalno.\nDotaknite se za več informacij"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon je bil prevroč, zato se je izklopil, da se ohladi. Zdaj normalno deluje.\n\nTelefon lahko postane prevroč ob:\n	• uporabi aplikacij, ki intenzivno porabljajo sredstva (npr. za igranje iger, videoposnetke ali navigacijo)\n	• prenosu ali nalaganju velikih datotek\n	• uporabi telefona pri visokih temp."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Oglejte si navodila za ukrepanje"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon se segreva"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Nekatere funkcije bodo med ohlajanjem omejene."</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nekatere funkcije bodo med ohlajanjem telefona omejene.\nDotaknite se za več informacij"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon se bo samodejno poskusil ohladiti. Še naprej ga lahko uporabljate, vendar bo morda deloval počasneje.\n\nKo se telefon ohladi, bo zopet deloval kot običajno."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Oglejte si navodila za ukrepanje"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Odklopite polnilnik"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Pri polnjenju te naprave je prišlo do težave. Previdno odklopite napajalnik, ker se je kabel morda segrel."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Oglejte si navodila za ukrepanje"</string>

@@ -930,11 +930,17 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"نظرانداز کرکے پچھلے پر جائیں"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"سائز تبدیل کریں"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"حرارت کی وجہ سے فون آف ہو گیا"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"آپ کا فون اب حسب معمول کام کر رہا ہے"</string>
+    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
+    <skip />
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"آپ کا فون کافی گرم ہو گيا تھا، اس لئے سرد ہونے کیلئے یہ آف ہو گیا۔ اب آپ کا فون حسب معمول کام کر رہا ہے۔\n\nمندرجہ ذیل چیزیں کرنے پر آپ کا فون کافی گرم ہو سکتا ہے:\n	• ماخذ کا زیادہ استعمال کرنے والی ایپس (جیسے کہ گیمنگ، ویڈیو، یا نیویگیشن ایپس) کا استعمال کرنا\n	• بڑی فائلز ڈاؤن لوڈ یا اپ لوڈ کرنا\n	• اعلی درجہ حرارت میں فون کا استعمال کرنا"</string>
+    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
+    <skip />
     <string name="high_temp_title" msgid="2218333576838496100">"فون گرم ہو رہا ہے"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"فون کے ٹھنڈے ہو جانے تک کچھ خصوصیات محدود ہیں"</string>
+    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
+    <skip />
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"آپ کا فون خودکار طور پر ٹھنڈا ہونے کی کوشش کرے گا۔ آپ ابھی بھی اپنا فون استعمال کر سکتے ہیں، مگر ہو سکتا ہے یہ سست چلے۔\n\nایک بار آپ کا فون ٹھنڈا ہوجائے تو یہ معمول کے مطابق چلے گا۔"</string>
+    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
+    <skip />
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"چارجر ان پلگ کریں"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"اس آلہ کو چارج کرنے میں ایک مسئلہ ہے۔ پاور ایڈاپٹر کو ان پلگ کریں اور دھیان دیں کیونکہ تار گرم ہو سکتا ہے۔"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"نگہداشت کے اقدامات ملاحظہ کریں"</string>
