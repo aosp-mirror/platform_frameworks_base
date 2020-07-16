@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.net.ConnectivityModuleConnector;
@@ -306,6 +307,8 @@ public class PackageWatchdog {
             MonitoredPackage pkg = newMonitoredPackage(packageNames.get(i), durationMs, false);
             if (pkg != null) {
                 packages.add(pkg);
+            } else {
+                Slog.w(TAG, "Failed to create MonitoredPackage for pkg=" + packageNames.get(i));
             }
         }
 
@@ -861,6 +864,25 @@ public class PackageWatchdog {
         });
     }
 
+    /**
+     * Gets PackageInfo for the given package. Matches any user and apex.
+     *
+     * @throws PackageManager.NameNotFoundException if no such package is installed.
+     */
+    private PackageInfo getPackageInfo(String packageName)
+            throws PackageManager.NameNotFoundException {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            // The MATCH_ANY_USER flag doesn't mix well with the MATCH_APEX
+            // flag, so make two separate attempts to get the package info.
+            // We don't need both flags at the same time because we assume
+            // apex files are always installed for all users.
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_ANY_USER);
+        } catch (PackageManager.NameNotFoundException e) {
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
+        }
+    }
+
     @Nullable
     private VersionedPackage getVersionedPackage(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
@@ -868,8 +890,7 @@ public class PackageWatchdog {
             return null;
         }
         try {
-            final long versionCode = pm.getPackageInfo(
-                    packageName, 0 /* flags */).getLongVersionCode();
+            final long versionCode = getPackageInfo(packageName).getLongVersionCode();
             return new VersionedPackage(packageName, versionCode);
         } catch (PackageManager.NameNotFoundException e) {
             return null;

@@ -88,6 +88,13 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    public void testBadUpdateRollback() throws Exception {
+        // Need to switch user in order to send broadcasts in device tests
+        assertTrue(getDevice().switchUser(mSecondaryUserId));
+        runPhaseForUsers("testBadUpdateRollback", mSecondaryUserId);
+    }
+
+    @Test
     public void testMultipleUsers() throws Exception {
         runPhaseForUsers("testMultipleUsersInstallV1", mOriginalUserId, mSecondaryUserId);
         runPhaseForUsers("testMultipleUsersUpgradeToV2", mOriginalUserId);
@@ -111,6 +118,8 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
 
     private void removeSecondaryUserIfNecessary() throws Exception {
         if (mSecondaryUserId != -1) {
+            // Can't remove the 2nd user without switching out of it
+            assertTrue(getDevice().switchUser(mOriginalUserId));
             getDevice().removeUser(mSecondaryUserId);
             mSecondaryUserId = -1;
         }
