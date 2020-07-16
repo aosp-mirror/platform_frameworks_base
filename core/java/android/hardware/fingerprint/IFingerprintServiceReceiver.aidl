@@ -26,6 +26,7 @@ oneway interface IFingerprintServiceReceiver {
     void onAcquired(long deviceId, int acquiredInfo, int vendorCode);
     void onAuthenticationSucceeded(long deviceId, in Fingerprint fp, int userId,
             boolean isStrongBiometric);
+    void onFingerprintDetected(long deviceId, int userId, boolean isStrongBiometric);
     void onAuthenticationFailed(long deviceId);
     void onError(long deviceId, int error, int vendorCode);
     void onRemoved(long deviceId, int fingerId, int groupId, int remaining);
