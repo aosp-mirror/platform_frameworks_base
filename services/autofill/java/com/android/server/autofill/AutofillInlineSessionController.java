@@ -31,9 +31,16 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-
 /**
- * Controls the interaction with the IME for the inline suggestion sessions.
+ * Controls the interaction with the IME for the {@link AutofillInlineSuggestionsRequestSession}s.
+ *
+ * <p>The class maintains the inline suggestion session with the autofill service. There is at most
+ * one active inline suggestion session at any given  corresponding to one focused view.
+ * New sessions are created only when {@link #onCreateInlineSuggestionsRequestLocked} is called.</p>
+ *
+ * <p>The class manages the interaction between the {@link com.android.server.autofill.Session} and
+ * the inline suggestion session whenever inline suggestions can be provided. All calls to the
+ * inline suggestion session must be made through this controller.</p>
  */
 final class AutofillInlineSessionController {
     @NonNull
@@ -65,7 +72,6 @@ final class AutofillInlineSessionController {
         mLock = lock;
         mUiCallback = callback;
     }
-
 
     /**
      * Requests the IME to create an {@link InlineSuggestionsRequest} for {@code autofillId}.
