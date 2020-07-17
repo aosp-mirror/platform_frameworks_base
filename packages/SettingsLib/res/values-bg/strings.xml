@@ -508,7 +508,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Да се пита винаги"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"До изключване"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Току-що"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Високоговорител на телефона"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Високоговорител"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"При свързването възникна проблем. Изключете устройството и го включете отново"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Аудиоустройство с кабел"</string>
     <string name="help_label" msgid="3528360748637781274">"Помощ и отзиви"</string>
