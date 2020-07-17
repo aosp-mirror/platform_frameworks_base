@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.WmTraceSubject
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -63,7 +62,6 @@ class OpenAppWarmTest(
     }
 
     @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkZOrder_appWindowReplacesLauncherAsTopWindow() {
         checkResults {

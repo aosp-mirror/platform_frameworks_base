@@ -18,7 +18,6 @@ package com.android.server.wm.flicker
 
 import android.view.Surface
 import androidx.test.filters.FlakyTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runners.Parameterized
 
@@ -29,7 +28,6 @@ abstract class RotationTestBase(
     protected val endRotation: Int
 ) : FlickerTestBase() {
     @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkVisibility_navBarWindowIsAlwaysVisible() {
         checkResults {
@@ -39,7 +37,6 @@ abstract class RotationTestBase(
     }
 
     @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkVisibility_statusBarWindowIsAlwaysVisible() {
         checkResults {
@@ -86,7 +83,6 @@ abstract class RotationTestBase(
     }
 
     @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkVisibility_navBarLayerIsAlwaysVisible() {
         checkResults {
@@ -96,7 +92,6 @@ abstract class RotationTestBase(
     }
 
     @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkVisibility_statusBarLayerIsAlwaysVisible() {
         checkResults {

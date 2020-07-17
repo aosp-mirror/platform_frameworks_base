@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -63,7 +62,6 @@ open class CloseImeWindowToHomeTest(
     }
 
     @FlakyTest(bugId = 153739621)
-    @Ignore
     @Test
     open fun checkVisibility_imeLayerBecomesInvisible() {
         checkResults {
@@ -77,7 +75,6 @@ open class CloseImeWindowToHomeTest(
     }
 
     @FlakyTest(bugId = 153739621)
-    @Ignore
     @Test
     fun checkVisibility_imeAppLayerBecomesInvisible() {
         checkResults {

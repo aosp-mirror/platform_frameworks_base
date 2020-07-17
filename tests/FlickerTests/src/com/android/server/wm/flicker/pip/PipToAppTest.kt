@@ -23,7 +23,6 @@ import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -37,7 +36,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)
-@Ignore("Waiting bug feedback")
 class PipToAppTest(
     beginRotationName: String,
     beginRotation: Int

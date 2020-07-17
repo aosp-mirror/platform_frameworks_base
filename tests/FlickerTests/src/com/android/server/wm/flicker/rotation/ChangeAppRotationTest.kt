@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.rotation
 
 import android.util.Log
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.CommonTransitions
 import com.android.server.wm.flicker.LayersTraceSubject
@@ -25,7 +26,6 @@ import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.WindowUtils
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -67,7 +67,7 @@ class ChangeAppRotationTest(
         }
     }
 
-    @Ignore("Flaky. Pending debug")
+    @FlakyTest
     @Test
     fun checkVisibility_screenshotLayerBecomesInvisible() {
         checkResults {

@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.CommonTransitions
 import com.android.server.wm.flicker.LayersTraceSubject
@@ -24,7 +25,6 @@ import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -50,7 +50,7 @@ open class CloseImeWindowToAppTest(
                 instrumentation, uiDevice, beginRotation)
                 .includeJankyRuns().build()
 
-    @Ignore("Flaky. Pending debug")
+    @FlakyTest
     @Test
     open fun checkVisibility_imeLayerBecomesInvisible() {
         checkResults {

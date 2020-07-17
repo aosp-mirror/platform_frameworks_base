@@ -28,7 +28,6 @@ import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.WindowUtils
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -42,7 +41,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 147659548)
-@Ignore("Waiting bug feedback")
 class SeamlessAppRotationTest(
     private val intent: Intent,
     beginRotationName: String,

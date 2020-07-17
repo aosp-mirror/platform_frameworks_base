@@ -28,6 +28,7 @@ android_test {
         "flickerlib",
         "truth-prebuilt",
         "app-helpers-core",
+        "launcher-helper-lib",
         "launcher-aosp-tapl"
     ],
 }

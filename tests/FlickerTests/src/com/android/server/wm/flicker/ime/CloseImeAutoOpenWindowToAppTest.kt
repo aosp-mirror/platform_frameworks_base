@@ -22,7 +22,6 @@ import com.android.server.wm.flicker.CommonTransitions
 import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -49,21 +48,18 @@ class CloseImeAutoOpenWindowToAppTest(
                 .includeJankyRuns().build()
 
     @FlakyTest(bugId = 141458352)
-    @Ignore("Waiting bug feedback")
     @Test
     override fun checkVisibility_imeLayerBecomesInvisible() {
         super.checkVisibility_imeLayerBecomesInvisible()
     }
 
     @FlakyTest(bugId = 141458352)
-    @Ignore("Waiting bug feedback")
     @Test
     override fun checkVisibility_imeAppLayerIsAlwaysVisible() {
         super.checkVisibility_imeAppLayerIsAlwaysVisible()
     }
 
     @FlakyTest(bugId = 141458352)
-    @Ignore("Waiting bug feedback")
     @Test
     override fun checkVisibility_imeAppWindowIsAlwaysVisible() {
         super.checkVisibility_imeAppWindowIsAlwaysVisible()

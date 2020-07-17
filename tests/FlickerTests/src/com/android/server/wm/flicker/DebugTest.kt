@@ -20,22 +20,24 @@ import android.platform.helpers.IAppHelper
 import android.util.Rational
 import android.view.Surface
 import androidx.test.InstrumentationRegistry
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.UiDevice
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 
 /**
  * Tests to help debug individual transitions, capture video recordings and create test cases.
+ *
+ * Not actual tests
  */
 @LargeTest
-@Ignore("Used for debugging transitions used in FlickerTests.")
+@FlakyTest
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class DebugTest {

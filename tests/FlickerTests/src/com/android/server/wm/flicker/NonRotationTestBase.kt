@@ -18,7 +18,6 @@ package com.android.server.wm.flicker
 
 import android.view.Surface
 import androidx.test.filters.FlakyTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runners.Parameterized
 
@@ -27,7 +26,6 @@ abstract class NonRotationTestBase(
     protected val beginRotation: Int
 ) : FlickerTestBase() {
     @FlakyTest(bugId = 141361128)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkCoveredRegion_noUncoveredRegions() {
         val displayBounds = WindowUtils.getDisplayBounds(beginRotation)
@@ -38,7 +36,6 @@ abstract class NonRotationTestBase(
     }
 
     @FlakyTest(bugId = 141361128)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkVisibility_navBarLayerIsAlwaysVisible() {
         checkResults {
@@ -48,7 +45,6 @@ abstract class NonRotationTestBase(
     }
 
     @FlakyTest(bugId = 141361128)
-    @Ignore("Waiting bug feedback")
     @Test
     fun checkVisibility_statusBarLayerIsAlwaysVisible() {
         checkResults {

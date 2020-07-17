@@ -38,7 +38,6 @@ import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.google.common.truth.Truth
 import org.junit.AfterClass
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -53,7 +52,6 @@ import org.junit.runners.MethodSorters
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 159096424)
-@Ignore("Waiting bug feedback")
 class ResizeSplitScreenTest : FlickerTestBase() {
     init {
         testApp = StandardAppHelper(instrumentation,
@@ -97,7 +95,7 @@ class ResizeSplitScreenTest : FlickerTestBase() {
     }
 
     @Test
-    @Ignore("Waiting feedback")
+    @FlakyTest
     fun checkPosition_appsStartingBounds() {
         val displayBounds = WindowUtils.getDisplayBounds()
         checkResults { result: TransitionResult ->
@@ -122,7 +120,7 @@ class ResizeSplitScreenTest : FlickerTestBase() {
     }
 
     @Test
-    @Ignore("Waiting feedback")
+    @FlakyTest
     fun checkPosition_appsEndingBounds() {
         val displayBounds = WindowUtils.getDisplayBounds()
         checkResults { result: TransitionResult ->
@@ -166,7 +164,6 @@ class ResizeSplitScreenTest : FlickerTestBase() {
 
     @Test
     @FlakyTest(bugId = 156223549)
-    @Ignore("Waiting bug feedback")
     fun checkVisibility_topAppWindowIsAlwaysVisible() {
         checkResults {
             WmTraceSubject.assertThat(it)
@@ -177,7 +174,6 @@ class ResizeSplitScreenTest : FlickerTestBase() {
 
     @Test
     @FlakyTest(bugId = 156223549)
-    @Ignore("Waiting bug feedback")
     fun checkVisibility_bottomAppWindowIsAlwaysVisible() {
         checkResults {
             WmTraceSubject.assertThat(it)
