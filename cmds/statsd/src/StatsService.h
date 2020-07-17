@@ -66,7 +66,6 @@ public:
     virtual Status systemRunning();
     virtual Status statsCompanionReady();
     virtual Status bootCompleted();
-    virtual Status informAnomalyAlarmFired();
     virtual Status informPollAlarmFired();
     virtual Status informAlarmForSubscriberTriggeringFired();
 
