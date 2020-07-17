@@ -28,6 +28,7 @@ import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/typedef.proto";
 
 package com.android.server.wm;
 
@@ -43,8 +44,8 @@ message WindowManagerServiceDumpProto {
     optional string focused_app = 4;
     optional IdentifierProto input_method_window = 5;
     optional bool display_frozen = 6;
-    optional int32 rotation = 7;
-    optional int32 last_orientation = 8;
+    optional int32 rotation = 7 [(.android.typedef) = "android.view.Surface.Rotation"];
+    optional int32 last_orientation = 8 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
     optional int32 focused_display_id = 9;
 }
 
@@ -177,7 +178,7 @@ message DisplayContentProto {
     repeated WindowTokenProto ime_windows = 8 [deprecated=true];
     optional int32 dpi = 9;
     optional .android.view.DisplayInfoProto display_info = 10;
-    optional int32 rotation = 11;
+    optional int32 rotation = 11 [(.android.typedef) = "android.view.Surface.Rotation"];
     optional ScreenRotationAnimationProto screen_rotation_animation = 12;
     optional DisplayFramesProto display_frames = 13;
     optional int32 surface_size = 14 [deprecated=true];
@@ -264,8 +265,8 @@ message TaskProto {
 
     optional int32 display_id = 15;
     optional int32 root_task_id = 16;
-    optional int32 activity_type = 17;
-    optional int32 resize_mode = 18;
+    optional int32 activity_type = 17 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType"];
+    optional int32 resize_mode = 18 [(.android.typedef) = "android.appwidget.AppWidgetProviderInfo.ResizeModeFlags"];
     optional int32 min_width = 19;
     optional int32 min_height = 20;
 
@@ -351,7 +352,7 @@ message WindowStateProto {
     optional .android.graphics.RectProto surface_position = 16;
     optional int32 requested_width = 18;
     optional int32 requested_height = 19;
-    optional int32 view_visibility = 20;
+    optional int32 view_visibility = 20 [(.android.typedef) = "android.view.View.Visibility"];
     optional int32 system_ui_visibility = 21;
     optional bool has_surface = 22;
     optional bool is_ready_for_display = 23;
@@ -424,7 +425,7 @@ message WindowContainerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional ConfigurationContainerProto configuration_container = 1;
-    optional int32 orientation = 2;
+    optional int32 orientation = 2 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
     optional bool visible = 3;
     optional SurfaceAnimatorProto surface_animator = 4;
     repeated WindowContainerChildProto children = 5;

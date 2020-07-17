@@ -69,6 +69,7 @@ import com.android.internal.R;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * <p>
@@ -248,6 +249,9 @@ public class ProgressBar extends View {
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
 
     private ObjectAnimator mLastProgressAnimator;
+
+    private NumberFormat mPercentFormat;
+    private Locale mCachedLocale;
 
     /**
      * Create a new progress bar with range 0...100 and initial progress of 0.
@@ -1591,8 +1595,15 @@ public class ProgressBar extends View {
      * @return state description based on progress
      */
     private CharSequence formatStateDescription(int progress) {
-        return NumberFormat.getPercentInstance(mContext.getResources().getConfiguration().locale)
-                .format(getPercent(progress));
+        // Cache the locale-appropriate NumberFormat.  Configuration locale is guaranteed
+        // non-null, so the first time this is called we will always get the appropriate
+        // NumberFormat, then never regenerate it unless the locale changes on the fly.
+        final Locale curLocale = mContext.getResources().getConfiguration().getLocales().get(0);
+        if (!curLocale.equals(mCachedLocale)) {
+            mCachedLocale = curLocale;
+            mPercentFormat = NumberFormat.getPercentInstance(curLocale);
+        }
+        return mPercentFormat.format(getPercent(progress));
     }
 
     /**

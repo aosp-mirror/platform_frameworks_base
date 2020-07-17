@@ -101,6 +101,15 @@ public final class ClientMonitorCallbackConverter {
 
     // The following only apply to IFingerprintServiceReceiver and IFaceServiceReceiver
 
+    public void onDetected(int sensorId, int userId, boolean isStrongBiometric)
+            throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onFaceDetected(sensorId, userId, isStrongBiometric);
+        } else if (mFingerprintServiceReceiver != null) {
+            mFingerprintServiceReceiver.onFingerprintDetected(sensorId, userId, isStrongBiometric);
+        }
+    }
+
     void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining)
             throws RemoteException {
         if (mFaceServiceReceiver != null) {

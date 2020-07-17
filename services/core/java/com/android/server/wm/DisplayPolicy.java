@@ -373,7 +373,10 @@ public class DisplayPolicy {
     private static final Rect sTmpDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private static final Rect sTmpRect = new Rect();
     private static final Rect sTmpNavFrame = new Rect();
+    private static final Rect sTmpStatusFrame = new Rect();
+    private static final Rect sTmpScreenDecorFrame = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
+    private static final Rect sTmpDisplayFrameBounds = new Rect();
 
     private WindowState mTopFullscreenOpaqueWindowState;
     private WindowState mTopFullscreenOpaqueOrDimmingWindowState;
@@ -997,6 +1000,22 @@ public class DisplayPolicy {
         return ADD_OKAY;
     }
 
+    private void getRotatedWindowBounds(DisplayFrames displayFrames, WindowState windowState,
+            Rect outBounds) {
+        outBounds.set(windowState.getBounds());
+
+        int windowRotation = windowState.getWindowConfiguration().getRotation();
+        if (windowRotation == displayFrames.mRotation) {
+            return;
+        }
+
+        // Get displayFrames bounds
+        sTmpDisplayFrameBounds.set(0, 0, displayFrames.mDisplayWidth, displayFrames.mDisplayHeight);
+        // Rotate the WindowState's bounds based on the displayFrames rotation
+        mDisplayContent.rotateBounds(sTmpDisplayFrameBounds, windowRotation,
+                displayFrames.mRotation, outBounds);
+    }
+
     /**
      * Called when a window is being added to the system.  Must not throw an exception.
      *
@@ -1020,7 +1039,6 @@ public class DisplayPolicy {
                 mStatusBarController.setWindow(win);
                 final TriConsumer<DisplayFrames, WindowState, Rect> frameProvider =
                         (displayFrames, windowState, rect) -> {
-                            rect.set(windowState.getFrameLw());
                             rect.bottom = rect.top + getStatusBarHeight(displayFrames);
                         };
                 mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, win, frameProvider);
@@ -1041,7 +1059,7 @@ public class DisplayPolicy {
                                     displayFrames.mDisplayHeight,
                                     displayFrames.mRotation) == NAV_BAR_BOTTOM
                                     && !mNavButtonForcedVisible) {
-                                sTmpRect.set(windowState.getFrameLw());
+                                sTmpRect.set(inOutFrame);
                                 sTmpRect.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
                                 inOutFrame.top = sTmpRect.bottom
                                         - getNavigationBarHeight(displayFrames.mRotation,
@@ -1669,11 +1687,13 @@ public class DisplayPolicy {
             if (isSimulatedLayout) {
                 w.setSimulatedWindowFrames(simulatedFrames);
             }
-            Rect bounds = w.getBounds();
+            getRotatedWindowBounds(displayFrames, w, sTmpScreenDecorFrame);
             final WindowFrames windowFrames = w.getLayoutingWindowFrames();
-            windowFrames.setFrames(bounds /* parentFrame */, bounds /* displayFrame */,
-                    bounds /* contentFrame */, bounds /* visibleFrame */, sTmpRect /* decorFrame */,
-                    bounds /* stableFrame */);
+            windowFrames.setFrames(sTmpScreenDecorFrame /* parentFrame */,
+                    sTmpScreenDecorFrame /* displayFrame */,
+                    sTmpScreenDecorFrame /* contentFrame */,
+                    sTmpScreenDecorFrame /* visibleFrame */, sTmpRect /* decorFrame */,
+                    sTmpScreenDecorFrame /* stableFrame */);
             try {
                 w.computeFrame(displayFrames);
             } finally {
@@ -1731,12 +1751,13 @@ public class DisplayPolicy {
             return false;
         }
         // apply any status bar insets
-        Rect bounds = mStatusBar.getBounds();
+        getRotatedWindowBounds(displayFrames, mStatusBar, sTmpStatusFrame);
         sTmpRect.setEmpty();
         final WindowFrames windowFrames = mStatusBar.getLayoutingWindowFrames();
-        windowFrames.setFrames(bounds /* parentFrame */, bounds /* displayFrame */,
-                bounds /* contentFrame */, bounds /* visibleFrame */, sTmpRect /* decorFrame */,
-                bounds /* stableFrame */);
+        windowFrames.setFrames(sTmpStatusFrame /* parentFrame */,
+                sTmpStatusFrame /* displayFrame */, sTmpStatusFrame /* contentFrame */,
+                sTmpStatusFrame /* visibleFrame */, sTmpRect /* decorFrame */,
+                sTmpStatusFrame /* stableFrame */);
         // Let the status bar determine its size.
         mStatusBar.computeFrame(displayFrames);
 
@@ -1807,7 +1828,7 @@ public class DisplayPolicy {
         final Rect dockFrame = displayFrames.mDock;
         final int navBarPosition = navigationBarPosition(displayWidth, displayHeight, rotation);
 
-        navigationFrame.set(mNavigationBar.getBounds());
+        getRotatedWindowBounds(displayFrames, mNavigationBar, navigationFrame);
 
         final Rect cutoutSafeUnrestricted = sTmpRect;
         cutoutSafeUnrestricted.set(displayFrames.mUnrestricted);
@@ -2047,7 +2068,8 @@ public class DisplayPolicy {
             final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
             final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
             final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
-            final Rect dfu = win.getBounds();
+            getRotatedWindowBounds(displayFrames, win, sTmpRect);
+            final Rect dfu = sTmpRect;
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
                 final InsetsSource source = mDisplayContent.getInsetsPolicy()
@@ -2062,7 +2084,7 @@ public class DisplayPolicy {
             final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;
             final int right = (sidesToFit & Side.RIGHT) != 0 ? insets.right : 0;
             final int bottom = (sidesToFit & Side.BOTTOM) != 0 ? insets.bottom : 0;
-            df.set(left, top, dfu.right - right, dfu.bottom - bottom);
+            df.set(dfu.left + left, dfu.top + top, dfu.right - right, dfu.bottom - bottom);
             if (attached == null) {
                 pf.set(df);
                 vf.set(adjust != SOFT_INPUT_ADJUST_NOTHING

@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -159,7 +160,14 @@ public final class DropBoxManagerService extends SystemService {
 
         @Override
         public DropBoxManager.Entry getNextEntry(String tag, long millis, String callingPackage) {
-            return DropBoxManagerService.this.getNextEntry(tag, millis, callingPackage);
+            return getNextEntryWithAttribution(tag, millis, callingPackage, null);
+        }
+
+        @Override
+        public DropBoxManager.Entry getNextEntryWithAttribution(String tag, long millis,
+                String callingPackage, String callingAttributionTag) {
+            return DropBoxManagerService.this.getNextEntry(tag, millis, callingPackage,
+                    callingAttributionTag);
         }
 
         @Override
@@ -470,7 +478,8 @@ public final class DropBoxManagerService extends SystemService {
         }
     }
 
-    private boolean checkPermission(int callingUid, String callingPackage) {
+    private boolean checkPermission(int callingUid, String callingPackage,
+            @Nullable String callingAttributionTag) {
         // If callers have this permission, then we don't need to check
         // USAGE_STATS, because they are part of the system and have agreed to
         // check USAGE_STATS before passing the data along.
@@ -484,8 +493,9 @@ public final class DropBoxManagerService extends SystemService {
                 android.Manifest.permission.READ_LOGS, TAG);
 
         // Callers also need the ability to read usage statistics
-        switch (getContext().getSystemService(AppOpsManager.class)
-                .noteOp(AppOpsManager.OP_GET_USAGE_STATS, callingUid, callingPackage)) {
+        switch (getContext().getSystemService(AppOpsManager.class).noteOp(
+                AppOpsManager.OP_GET_USAGE_STATS, callingUid, callingPackage, callingAttributionTag,
+                null)) {
             case AppOpsManager.MODE_ALLOWED:
                 return true;
             case AppOpsManager.MODE_DEFAULT:
@@ -498,8 +508,8 @@ public final class DropBoxManagerService extends SystemService {
     }
 
     public synchronized DropBoxManager.Entry getNextEntry(String tag, long millis,
-            String callingPackage) {
-        if (!checkPermission(Binder.getCallingUid(), callingPackage)) {
+            String callingPackage, @Nullable String callingAttributionTag) {
+        if (!checkPermission(Binder.getCallingUid(), callingPackage, callingAttributionTag)) {
             return null;
         }
 

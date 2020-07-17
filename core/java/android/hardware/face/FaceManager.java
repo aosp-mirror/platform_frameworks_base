@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,11 +70,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private static final int MSG_GET_FEATURE_COMPLETED = 106;
     private static final int MSG_SET_FEATURE_COMPLETED = 107;
     private static final int MSG_CHALLENGE_GENERATED = 108;
+    private static final int MSG_FACE_DETECTED = 109;
 
     private final IFaceService mService;
     private final Context mContext;
     private IBinder mToken = new Binder();
     private AuthenticationCallback mAuthenticationCallback;
+    private FaceDetectionCallback mFaceDetectionCallback;
     private EnrollmentCallback mEnrollmentCallback;
     private RemovalCallback mRemovalCallback;
     private SetFeatureCallback mSetFeatureCallback;
@@ -100,6 +102,12 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         public void onAuthenticationSucceeded(Face face, int userId, boolean isStrongBiometric) {
             mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, isStrongBiometric ? 1 : 0,
                     face).sendToTarget();
+        }
+
+        @Override // binder call
+        public void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric) {
+            mHandler.obtainMessage(MSG_FACE_DETECTED, sensorId, userId, isStrongBiometric)
+                    .sendToTarget();
         }
 
         @Override // binder call
@@ -247,6 +255,34 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             } finally {
                 Trace.endSection();
             }
+        }
+    }
+
+    /**
+     * Uses the face hardware to detect for the presence of a face, without giving details about
+     * accept/reject/lockout.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void detectFace(@NonNull CancellationSignal cancel,
+            @NonNull FaceDetectionCallback callback, int userId) {
+        if (mService == null) {
+            return;
+        }
+
+        if (cancel.isCanceled()) {
+            Slog.w(TAG, "Detection already cancelled");
+            return;
+        } else {
+            cancel.setOnCancelListener(new OnFaceDetectionCancelListener());
+        }
+
+        mFaceDetectionCallback = callback;
+
+        try {
+            mService.detectFace(mToken, userId, mServiceReceiver, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Remote exception when requesting finger detect", e);
         }
     }
 
@@ -581,6 +617,24 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
+     * Get statically configured sensor properties.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    @NonNull
+    public FaceSensorProperties getSensorProperties() {
+        try {
+            if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
+                return new FaceSensorProperties();
+            }
+            return mService.getSensorProperties(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return new FaceSensorProperties();
+    }
+
+    /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
@@ -636,6 +690,18 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    private void cancelFaceDetect() {
+        if (mService == null) {
+            return;
+        }
+
+        try {
+            mService.cancelFaceDetect(mToken, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -896,6 +962,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
+     * @hide
+     */
+    public interface FaceDetectionCallback {
+        void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric);
+    }
+
+    /**
      * Callback structure provided to {@link FaceManager#enroll(long,
      * EnrollmentCallback, CancellationSignal, int). Users of {@link #FaceAuthenticationManager()}
      * must provide an implementation of this to {@link FaceManager#enroll(long,
@@ -1026,6 +1099,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
     }
 
+    private class OnFaceDetectionCancelListener implements OnCancelListener {
+        @Override
+        public void onCancel() {
+            cancelFaceDetect();
+        }
+    }
+
     private class MyHandler extends Handler {
         private MyHandler(Context context) {
             super(context.getMainLooper());
@@ -1072,6 +1152,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 case MSG_CHALLENGE_GENERATED:
                     sendChallengeGenerated((long) msg.obj /* challenge */);
                     break;
+                case MSG_FACE_DETECTED:
+                    sendFaceDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
+                            (boolean) msg.obj /* isStrongBiometric */);
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
             }
@@ -1098,6 +1182,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             return;
         }
         mGenerateChallengeCallback.onGenerateChallengeResult(challenge);
+    }
+
+    private void sendFaceDetected(int sensorId, int userId, boolean isStrongBiometric) {
+        if (mFaceDetectionCallback == null) {
+            Slog.e(TAG, "sendFaceDetected, callback null");
+            return;
+        }
+        mFaceDetectionCallback.onFaceDetected(sensorId, userId, isStrongBiometric);
     }
 
     private void sendRemovedResult(Face face, int remaining) {

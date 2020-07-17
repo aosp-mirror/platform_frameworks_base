@@ -41,8 +41,8 @@ import com.android.systemui.statusbar.notification.row.StackScrollerDecorView
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.children
-import com.android.systemui.util.takeUntil
 import com.android.systemui.util.foldToSparseArray
+import com.android.systemui.util.takeUntil
 import javax.inject.Inject
 
 /**
@@ -166,6 +166,9 @@ class NotificationSectionsManager @Inject internal constructor(
         peopleHubSubscription?.unsubscribe()
         peopleHubSubscription = null
         peopleHeaderView = reinflateView(peopleHeaderView, layoutInflater, R.layout.people_strip)
+                .apply {
+                    setOnHeaderClickListener(View.OnClickListener { onGentleHeaderClick() })
+                }
         if (ENABLE_SNOOZED_CONVERSATION_HUB) {
             peopleHubSubscription = peopleHubViewAdapter.bindView(peopleHubViewBoundary)
         }

@@ -16,7 +16,9 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.annotation.Nullable;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -57,6 +59,28 @@ public class UdfpsHelper {
             extension.onFingerUp();
         } catch (RemoteException e) {
             Slog.e(TAG, "onFingerUp | RemoteException: ", e);
+        }
+    }
+
+    static void showUdfpsOverlay(@Nullable IUdfpsOverlayController udfpsOverlayController) {
+        if (udfpsOverlayController == null) {
+            return;
+        }
+        try {
+            udfpsOverlayController.showUdfpsOverlay();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
+        }
+    }
+
+    static void hideUdfpsOverlay(@Nullable IUdfpsOverlayController udfpsOverlayController) {
+        if (udfpsOverlayController == null) {
+            return;
+        }
+        try {
+            udfpsOverlayController.hideUdfpsOverlay();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
         }
     }
 }

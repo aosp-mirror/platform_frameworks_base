@@ -424,7 +424,7 @@ public class BiometricScheduler {
             return;
         }
         final boolean isAuthenticating =
-                mCurrentOperation.clientMonitor instanceof AuthenticationClient;
+                mCurrentOperation.clientMonitor instanceof AuthenticationConsumer;
         final boolean tokenMatches = mCurrentOperation.clientMonitor.getToken() == token;
         if (!isAuthenticating || !tokenMatches) {
             Slog.w(getTag(), "Not cancelling authentication, isEnrolling: " + isAuthenticating
