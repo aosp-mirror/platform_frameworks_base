@@ -240,15 +240,6 @@
     <!-- Description of airplane mode -->
     <string name="airplane_mode">Airplane mode</string>
 
-    <!-- An explanation text that the PIN needs to be entered to prepare for an operating system update. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_prepare_for_update_pin">PIN required to prepare for update</string>
-
-    <!-- An explanation text that the pattern needs to be entered to prepare for an operating system update. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_prepare_for_update_pattern">Pattern required to prepare for update</string>
-
-    <!-- An explanation text that the password needs to be entered to prepare for an operating system update. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_prepare_for_update_password">Password required to prepare for update</string>
-
     <!-- An explanation text that the pattern needs to be solved since the device has just been restarted. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_restart_pattern">Pattern required after device restarts</string>
 

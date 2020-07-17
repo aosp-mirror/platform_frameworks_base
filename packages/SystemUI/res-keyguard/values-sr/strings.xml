@@ -104,9 +104,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Мрежа није доступна."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Промени метод уноса"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Режим рада у авиону"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"PIN је обавезан ради припреме за ажурирање"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Шаблон је обавезан ради припреме за ажурирање"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Лозинка је обавезна ради припреме за ажурирање"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Треба да унесете шаблон када се уређај поново покрене"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Треба да унесете PIN када се уређај поново покрене"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Треба да унесете лозинку када се уређај поново покрене"</string>

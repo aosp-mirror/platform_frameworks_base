@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Sin servicio"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambiar método de entrada"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Modo de avión"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"Se requiere el PIN para actualizar el sistema"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Se requiere el patrón para actualizar el sistema"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Se requiere la contraseña para actualizar el sistema"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Se requiere el patrón después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Se requiere el PIN después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Se requiere la contraseña después de reiniciar el dispositivo"</string>
