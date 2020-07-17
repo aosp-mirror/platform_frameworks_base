@@ -22,7 +22,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 
 /**

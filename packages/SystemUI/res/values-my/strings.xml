@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ချဲ့ရန်"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ချုံ့ရန်"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ပိတ်ရန်"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ဆက်တင်များ"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ပယ်ရန်အတွက် အောက်သို့ ပွတ်ဆွဲပါ"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"မီနူး"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> သည် တစ်ခုပေါ် တစ်ခုထပ်၍ ဖွင့်ထားသည်"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> အား ဤဝန်ဆောင်မှုကို အသုံးမပြုစေလိုလျှင် ဆက်တင်ကိုဖွင့်ရန် တို့ပြီး ၎င်းဝန်ဆောင်မှုကို ပိတ်လိုက်ပါ။"</string>
-    <string name="pip_play" msgid="333995977693142810">"ဖွင့်ရန်"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"ခေတ္တရပ်ရန်"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"နောက်တစ်ခုသို့ ကျော်ရန်"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ယခင်တစ်ခုသို့ ပြန်သွားရန်"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"အရွယ်အစားပြောင်းရန်"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"အပူရှိန်ကြောင့်ဖုန်းပိတ်ထားသည်"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"သင့်ဖုန်းသည် ယခု ပုံမှန်အလုပ်လုပ်နေပါပြီ။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံးခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>

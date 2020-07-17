@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ಲಾಕ್ ಪರದೆ"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ವಿಸ್ತೃತಗೊಳಿಸು"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ಕುಗ್ಗಿಸಿ"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ಮುಚ್ಚಿ"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ವಜಾಗೊಳಿಸಲು ಕೆಳಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"ಮೆನು"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವಾಗಿದೆ"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="pip_play" msgid="333995977693142810">"ಪ್ಲೇ"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"ವಿರಾಮಗೊಳಿಸಿ"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ಮುಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ಹಿಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ಫೋನ್ ಬಿಸಿಯಾಗಿದ್ದರಿಂದ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"ನಿಮ್ಮ ಫೋನ್ ಈಗ ಎಂದಿನಂತೆ ರನ್ ಆಗುತ್ತಿದೆ.\nಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ನಿಮ್ಮ ಫೋನ್ ತುಂಬಾ ಬಿಸಿಯಾಗಿತ್ತು, ತಣ್ಣಗಾಗಲು ಅದು ತಾನಾಗಿ ಆಫ್ ಆಗಿದೆ. ಈಗ ನಿಮ್ಮ ಫೋನ್ ಎಂದಿನಂತೆ ಕೆಲಸ ಮಾಡುತ್ತಿದೆ.\n\nನಿಮ್ಮ ಫೋನ್ ಬಿಸಿಯಾಗಲು ಕಾರಣಗಳು:\n	• ಹೆಚ್ಚು ಸಂಪನ್ಮೂಲ ಉಪಯೋಗಿಸುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಬಳಕೆ (ಉದಾ, ಗೇಮಿಂಗ್, ವೀಡಿಯೊ/ನ್ಯಾವಿಗೇಶನ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು)\n	• ದೊಡ್ಡ ಫೈಲ್‌ಗಳ ಡೌನ್‌ಲೋಡ್ ಅಥವಾ ಅಪ್‌ಲೋಡ್\n	• ಅಧಿಕ ಉಷ್ಣಾಂಶದಲ್ಲಿ ಫೋನಿನ ಬಳಕೆ"</string>

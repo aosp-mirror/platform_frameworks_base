@@ -36,9 +36,9 @@ import android.media.session.PlaybackState;
 import android.os.UserHandle;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -194,13 +194,13 @@ public class PipMediaController {
     private void createMediaActions() {
         String pauseDescription = mContext.getString(R.string.pip_pause);
         mPauseAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.ic_pause_white), pauseDescription, pauseDescription,
+                R.drawable.pip_ic_pause_white), pauseDescription, pauseDescription,
                         PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PAUSE),
                                 FLAG_UPDATE_CURRENT));
 
         String playDescription = mContext.getString(R.string.pip_play);
         mPlayAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.ic_play_arrow_white), playDescription, playDescription,
+                R.drawable.pip_ic_play_arrow_white), playDescription, playDescription,
                         PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PLAY),
                                 FLAG_UPDATE_CURRENT));
 

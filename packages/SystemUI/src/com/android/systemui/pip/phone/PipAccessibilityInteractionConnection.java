@@ -27,9 +27,9 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
-import com.android.systemui.R;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.List;

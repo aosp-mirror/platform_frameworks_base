@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Ayarların sıralanmasını redaktə edin."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> səhifədən <xliff:g id="ID_1">%1$d</xliff:g> səhifə"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran kilidi"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Genişləndirin"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Kiçildin"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Bağlayın"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Ayarlar"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Rədd etmək üçün aşağı çəkin"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menyu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> şəkil içində şəkildədir"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> tətbiqinin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
-    <string name="pip_play" msgid="333995977693142810">"Oxudun"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Fasilə verin"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Növbətiyə keçin"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Əvvəlkinə keçin"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ölçüsünü dəyişin"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"İstiliyə görə telefon söndü"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonunuz indi normal işləyir.\nƏtraflı məlumat üçün toxunun"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon çox isti idi və soyumaq üçün söndü. Hazırda telefon normal işləyir.\n\n Telefon bu hallarda çox isti ola bilər:\n 	• Çox resurslu tətbiq istifadə etsəniz (oyun, video və ya naviqasiya tətbiqi kimi)\n	• Böyük həcmli fayl endirsəniz və ya yükləsəniz\n	• Telefonu yüksək temperaturda istifadə etsəniz"</string>

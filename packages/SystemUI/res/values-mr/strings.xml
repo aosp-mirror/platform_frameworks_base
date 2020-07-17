@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिंग्जचा क्रम संपादित करा."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"विस्तृत करा"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"लहान करा"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"बंद करा"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"सेटिंग्ज"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"डिसमिस करण्यासाठी खाली ड्रॅग करा"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"मेनू"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> चित्रामध्ये चित्र मध्ये आहे"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g>ने हे वैशिष्ट्य वापरू नये असे तुम्हाला वाटत असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
-    <string name="pip_play" msgid="333995977693142810">"प्ले करा"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"थांबवा"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"डावलून पुढे जा"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"डावलून मागे जा"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"आकार बदला"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"तापल्‍यामुळे फोन बंद झाला"</string>
     <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
     <skip />

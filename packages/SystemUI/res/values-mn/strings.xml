@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Тохиргооны дарааллыг өөрчилнө үү."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>-н <xliff:g id="ID_1">%1$d</xliff:g>-р хуудас"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Түгжигдсэн дэлгэц"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Дэлгэх"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Багасгах"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Хаах"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Тохиргоо"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Хаахын тулд доош чирэх"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Цэс"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> дэлгэцэн доторх дэлгэцэд байна"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Та <xliff:g id="NAME">%s</xliff:g>-д энэ онцлогийг ашиглуулахыг хүсэхгүй байвал тохиргоог нээгээд, үүнийг унтраана уу."</string>
-    <string name="pip_play" msgid="333995977693142810">"Тоглуулах"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Түр зогсоох"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Дараагийн медиад очих"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Өмнөх медиад очих"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Хэмжээг өөрчлөх"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Халснаас үүдэн утас унтарсан"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Таны утас одоо хэвийн ажиллаж байна.\nДэлгэрэнгүй мэдээлэл авах бол товшино уу"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Таны утас хэт халсан тул хөргөхөөр унтраасан болно. Таны утас одоо хэвийн ажиллаж байна.\n\nХэрэв та дараахыг хийвэл таны утас хэт халж болзошгүй:\n	• Их хэмжээний нөөц хэрэглээний апп (тоглоом, видео эсвэл шилжилтийн апп зэрэг)\n	• Багтаамж ихтэй файл татах, байршуулах\n	• Утсаа өндөр температурт ашиглах"</string>

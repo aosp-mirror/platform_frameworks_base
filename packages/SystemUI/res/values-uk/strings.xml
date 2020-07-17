@@ -926,19 +926,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Змінити порядок налаштувань."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Сторінка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокований екран"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Розгорнути"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Згорнути"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Закрити"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Налаштування"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Перетягніть униз, щоб закрити"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Меню"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"У додатку <xliff:g id="NAME">%s</xliff:g> є функція \"Картинка в картинці\""</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Щоб додаток <xliff:g id="NAME">%s</xliff:g> не використовував цю функцію, вимкніть її в налаштуваннях."</string>
-    <string name="pip_play" msgid="333995977693142810">"Відтворити"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Призупинити"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Перейти далі"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Перейти назад"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Змінити розмір"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон перегрівся й вимкнувся"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Зараз телефон працює як зазвичай.\nНатисніть, щоб дізнатися більше"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон перегрівся, тому вимкнувся, щоб охолонути. Зараз він працює, як зазвичай.\n\nТелефон перегрівається, якщо ви:\n	• використовуєте ресурсомісткі додатки (ігри, відео, навігація)\n	• завантажуєте великі файли на телефон або з нього\n	• використовуєте телефон за високої температури"</string>
