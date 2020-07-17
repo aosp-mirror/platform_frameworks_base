@@ -125,10 +125,10 @@ public final class ImeFocusController {
         final View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
         onViewFocusChanged(viewForWindowFocus, true);
 
-        // Starting new input when the next focused view is same as served view but the
-        // editor is not aligned with the same editor or editor is inactive.
-        final boolean nextFocusIsServedView = mServedView != null && mServedView == focusedView;
-        if (nextFocusIsServedView && !immDelegate.isSameEditorAndAcceptingText(focusedView)) {
+        // Starting new input when the next focused view is same as served view but the currently
+        // active connection (if any) is not associated with it.
+        final boolean nextFocusIsServedView = mServedView == viewForWindowFocus;
+        if (nextFocusIsServedView && !immDelegate.hasActiveConnection(viewForWindowFocus)) {
             forceFocus = true;
         }
 
@@ -254,7 +254,7 @@ public final class ImeFocusController {
         void setCurrentRootView(ViewRootImpl rootView);
         boolean isCurrentRootView(ViewRootImpl rootView);
         boolean isRestartOnNextWindowFocus(boolean reset);
-        boolean isSameEditorAndAcceptingText(View view);
+        boolean hasActiveConnection(View view);
     }
 
     public View getServedView() {
