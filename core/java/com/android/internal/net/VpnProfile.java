@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Ikev2VpnProfile;
 import android.net.PlatformVpnProfile;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -287,7 +288,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
                     profile.proxy = new ProxyInfo(host, port.isEmpty() ?
                             0 : Integer.parseInt(port), exclList);
                 } else if (!pacFileUrl.isEmpty()) {
-                    profile.proxy = new ProxyInfo(pacFileUrl);
+                    profile.proxy = new ProxyInfo(Uri.parse(pacFileUrl));
                 }
             } // else profile.proxy = null
 
