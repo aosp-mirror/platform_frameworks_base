@@ -32,8 +32,6 @@ interface BubbleViewProvider {
 
     @Nullable View getIconView();
 
-    void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index);
-
     String getKey();
 
     Bitmap getBadgedImage();

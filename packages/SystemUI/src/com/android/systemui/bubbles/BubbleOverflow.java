@@ -163,12 +163,6 @@ public class BubbleOverflow implements BubbleViewProvider {
     }
 
     @Override
-    public void logUIEvent(int bubbleCount, int action, float normalX, float normalY,
-            int index) {
-        // TODO(b/149133814) Log overflow UI events.
-    }
-
-    @Override
     public View getIconView() {
         return mOverflowBtn;
     }
