@@ -163,7 +163,7 @@ public class ProxyTracker {
         if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
             ProxyInfo proxyProperties;
             if (!TextUtils.isEmpty(pacFileUrl)) {
-                proxyProperties = new ProxyInfo(pacFileUrl);
+                proxyProperties = new ProxyInfo(Uri.parse(pacFileUrl));
             } else {
                 proxyProperties = new ProxyInfo(host, port, exclList);
             }
