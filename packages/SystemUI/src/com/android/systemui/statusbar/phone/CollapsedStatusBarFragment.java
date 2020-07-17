@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_CLOCK;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
@@ -63,6 +64,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mNotificationIconAreaInner;
     private View mCenteredIconArea;
     private int mDisabled1;
+    private int mDisabled2;
     private StatusBar mStatusBarComponent;
     private DarkIconManager mDarkIconManager;
     private View mOperatorNameFrame;
@@ -173,9 +175,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         state1 = adjustDisableFlags(state1);
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
+        final int old2 = mDisabled2;
+        final int diff2 = state2 ^ old2;
         mDisabled1 = state1;
-        if ((diff1 & DISABLE_SYSTEM_INFO) != 0) {
-            if ((state1 & DISABLE_SYSTEM_INFO) != 0) {
+        mDisabled2 = state2;
+        if ((diff1 & DISABLE_SYSTEM_INFO) != 0 || ((diff2 & DISABLE2_SYSTEM_ICONS) != 0)) {
+            if ((state1 & DISABLE_SYSTEM_INFO) != 0 || ((state2 & DISABLE2_SYSTEM_ICONS) != 0)) {
                 hideSystemIconArea(animate);
                 hideOperatorName(animate);
             } else {
