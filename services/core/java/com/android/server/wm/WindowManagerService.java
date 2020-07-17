@@ -35,6 +35,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
@@ -365,9 +366,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // Maximum number of milliseconds to wait for input devices to be enumerated before
     // proceding with safe mode detection.
     private static final int INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS = 1000;
-
-    // Default input dispatching timeout in nanoseconds.
-    static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
     // Poll interval in milliseconds for watching boot animation finished.
     // TODO(b/159045990) Migrate to SystemService.waitForState with dedicated thread.
@@ -8075,7 +8073,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 | LayoutParams.FLAG_SLIPPERY);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
-        h.dispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         h.canReceiveKeys = false;
         h.hasFocus = false;
         h.hasWallpaper = false;

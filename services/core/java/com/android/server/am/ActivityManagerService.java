@@ -41,6 +41,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -130,9 +131,9 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_LASTANR_TRAC
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_RECENTS_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
-import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
+
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -18352,19 +18353,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException("Requires permission " + FILTER_EVENTS);
         }
         ProcessRecord proc;
-        long timeout;
+        long timeoutMillis;
         synchronized (this) {
             synchronized (mPidsSelfLocked) {
                 proc = mPidsSelfLocked.get(pid);
             }
-            timeout = proc != null ? proc.getInputDispatchingTimeout() : KEY_DISPATCHING_TIMEOUT_MS;
+            timeoutMillis = proc != null ? proc.getInputDispatchingTimeoutMillis() :
+                    DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         }
 
         if (inputDispatchingTimedOut(proc, null, null, null, null, aboveSystem, reason)) {
-            return -1;
+            return 0;
         }
 
-        return timeout;
+        return timeoutMillis;
     }
 
     /**

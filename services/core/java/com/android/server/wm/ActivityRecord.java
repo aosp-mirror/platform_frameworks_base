@@ -168,7 +168,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutLocked;
+import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -587,8 +587,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mOccludesParent;
 
-    // The input dispatching timeout for this application token in nanoseconds.
-    long mInputDispatchingTimeoutNanos;
+    // The input dispatching timeout for this application token in milliseconds.
+    long mInputDispatchingTimeoutMillis;
 
     private boolean mShowWhenLocked;
     private boolean mInheritShownWhenLocked;
@@ -1245,7 +1245,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (oldParent == null && newParent != null) {
             // First time we are adding the activity to the system.
             mVoiceInteraction = newTask.voiceSession != null;
-            mInputDispatchingTimeoutNanos = getInputDispatchingTimeoutLocked(this) * 1000000L;
+            mInputDispatchingTimeoutMillis = getInputDispatchingTimeoutMillisLocked(this);
 
             // TODO(b/36505427): Maybe this call should be moved inside
             // updateOverrideConfiguration()
@@ -5580,8 +5580,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
-            return mAtmService.mAmInternal.inputDispatchingTimedOut(
-                    windowPid, false /* aboveSystem */, reason) < 0;
+            long timeoutMillis = mAtmService.mAmInternal.inputDispatchingTimedOut(
+                    windowPid, false /* aboveSystem */, reason);
+            return timeoutMillis <= 0;
         }
     }
 

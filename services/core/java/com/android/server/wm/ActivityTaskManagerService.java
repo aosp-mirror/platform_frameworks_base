@@ -50,6 +50,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -313,10 +314,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
-    // How long we wait until we timeout on key dispatching.
-    public static final int KEY_DISPATCHING_TIMEOUT_MS = 5 * 1000;
     // How long we wait until we timeout on key dispatching during instrumentation.
-    static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS = 60 * 1000;
+    static final long INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS = 60 * 1000;
     // How long we permit background activity starts after an activity in the process
     // started or finished.
     static final long ACTIVITY_BG_START_GRACE_PERIOD_MS = 10 * 1000;
@@ -5374,15 +5373,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
+    static long getInputDispatchingTimeoutMillisLocked(ActivityRecord r) {
         if (r == null || !r.hasProcess()) {
-            return KEY_DISPATCHING_TIMEOUT_MS;
+            return DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         }
-        return getInputDispatchingTimeoutLocked(r.app);
+        return getInputDispatchingTimeoutMillisLocked(r.app);
     }
 
-    private static long getInputDispatchingTimeoutLocked(WindowProcessController r) {
-        return r != null ? r.getInputDispatchingTimeout() : KEY_DISPATCHING_TIMEOUT_MS;
+    private static long getInputDispatchingTimeoutMillisLocked(WindowProcessController r) {
+        if (r == null) {
+            return DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+        }
+        return r.getInputDispatchingTimeoutMillis();
     }
 
     /**
