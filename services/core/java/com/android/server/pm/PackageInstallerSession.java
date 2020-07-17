@@ -459,12 +459,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final int returnCode = args.argi1;
                     args.recycle();
 
-                    final boolean showNotification;
-                    synchronized (mLock) {
-                        showNotification = isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked();
-                    }
                     sendOnPackageInstalled(mContext, statusReceiver, sessionId,
-                            showNotification, userId,
+                            isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId,
                             packageName, returnCode, message, extras);
 
                     break;
@@ -494,8 +490,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * @return {@code true} iff the installing is app an device owner or affiliated profile owner.
      */
-    @GuardedBy("mLock")
-    private boolean isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked() {
+    private boolean isInstallerDeviceOwnerOrAffiliatedProfileOwner() {
+        assertNotLocked("isInstallerDeviceOwnerOrAffiliatedProfileOwner");
+        // It is safe to access mInstallerUid and mInstallSource without lock
+        // because they are immutable after sealing.
+        assertSealed("isInstallerDeviceOwnerOrAffiliatedProfileOwner");
         if (userId != UserHandle.getUserId(mInstallerUid)) {
             return false;
         }
@@ -513,12 +512,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *
      * @return {@code true} iff we need to ask to confirm the permissions?
      */
-    @GuardedBy("mLock")
-    private boolean needToAskForPermissionsLocked() {
-        if (mPermissionsManuallyAccepted) {
-            return false;
+    private boolean needToAskForPermissions() {
+        final String packageName;
+        synchronized (mLock) {
+            if (mPermissionsManuallyAccepted) {
+                return false;
+            }
+            packageName = mPackageName;
         }
 
+        // It is safe to access mInstallerUid and mInstallSource without lock
+        // because they are immutable after sealing.
         final boolean isInstallPermissionGranted =
                 (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
@@ -528,7 +532,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdatePermissionGranted =
                 (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGE_UPDATES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
-        final int targetPackageUid = mPm.getPackageUid(mPackageName, 0, userId);
+        final int targetPackageUid = mPm.getPackageUid(packageName, 0, userId);
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && targetPackageUid != -1)
                 || (isSelfUpdatePermissionGranted && targetPackageUid == mInstallerUid);
@@ -540,7 +544,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Device owners and affiliated profile owners  are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
         return forcePermissionPrompt || !(isPermissionGranted || isInstallerRoot
-                || isInstallerSystem || isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked());
+                || isInstallerSystem || isInstallerDeviceOwnerOrAffiliatedProfileOwner());
     }
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
@@ -737,6 +741,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public boolean isStagedAndInTerminalState() {
         synchronized (mLock) {
             return params.isStaged && (mStagedSessionApplied || mStagedSessionFailed);
+        }
+    }
+
+    private void assertNotLocked(String cookie) {
+        if (Thread.holdsLock(mLock)) {
+            throw new IllegalStateException(cookie + " is holding mLock");
+        }
+    }
+
+    private void assertSealed(String cookie) {
+        if (!isSealed()) {
+            throw new IllegalStateException(cookie + " before sealing");
         }
     }
 
@@ -1693,11 +1709,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void handleInstall() {
-        final boolean needsLogging;
-        synchronized (mLock) {
-            needsLogging = isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked();
-        }
-        if (needsLogging) {
+        if (isInstallerDeviceOwnerOrAffiliatedProfileOwner()) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
                     .setAdmin(mInstallSource.installerPackageName)
@@ -1724,9 +1736,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
 
         try {
-            synchronized (mLock) {
-                installNonStagedLocked(childSessions);
-            }
+            installNonStaged(childSessions);
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
             Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
@@ -1735,11 +1745,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    @GuardedBy("mLock")
-    private void installNonStagedLocked(List<PackageInstallerSession> childSessions)
+    private void installNonStaged(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
         final PackageManagerService.ActiveInstallSession installingSession =
-                makeSessionActiveLocked();
+                makeSessionActive();
         if (installingSession == null) {
             return;
         }
@@ -1752,7 +1761,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
                     final PackageManagerService.ActiveInstallSession installingChildSession =
-                            session.makeSessionActiveLocked();
+                            session.makeSessionActive();
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
                     }
@@ -1762,8 +1771,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
             if (!success) {
-                sendOnPackageInstalled(mContext, mRemoteStatusReceiver, sessionId,
-                        isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId, null,
+                final IntentSender statusReceiver;
+                synchronized (mLock) {
+                    statusReceiver = mRemoteStatusReceiver;
+                }
+                sendOnPackageInstalled(mContext, statusReceiver, sessionId,
+                        isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId, null,
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
@@ -1778,40 +1791,57 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link PackageManagerService.ActiveInstallSession} representing this new staged state or null
      * in case permissions need to be requested before install can proceed.
      */
+    private PackageManagerService.ActiveInstallSession makeSessionActive()
+            throws PackageManagerException {
+        assertNotLocked("makeSessionActive");
+
+        synchronized (mLock) {
+            if (mRelinquished) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session relinquished");
+            }
+            if (mDestroyed) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session destroyed");
+            }
+            if (!mSealed) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session not sealed");
+            }
+        }
+
+        if (!params.isMultiPackage && needToAskForPermissions()) {
+            // User needs to confirm installation;
+            // give installer an intent they can use to involve
+            // user.
+            final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
+            intent.setPackage(mPm.getPackageInstallerPackageName());
+            intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+
+            final IntentSender statusReceiver;
+            synchronized (mLock) {
+                statusReceiver = mRemoteStatusReceiver;
+            }
+            sendOnUserActionRequired(mContext, statusReceiver, sessionId, intent);
+
+            // Commit was keeping session marked as active until now; release
+            // that extra refcount so session appears idle.
+            closeInternal(false);
+            return null;
+        }
+
+        synchronized (mLock) {
+            return makeSessionActiveLocked();
+        }
+    }
+
     @GuardedBy("mLock")
     private PackageManagerService.ActiveInstallSession makeSessionActiveLocked()
             throws PackageManagerException {
-        if (mRelinquished) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Session relinquished");
-        }
-        if (mDestroyed) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session destroyed");
-        }
-        if (!mSealed) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session not sealed");
-        }
-
         if (!params.isMultiPackage) {
             Objects.requireNonNull(mPackageName);
             Objects.requireNonNull(mSigningDetails);
             Objects.requireNonNull(mResolvedBaseFile);
-
-            if (needToAskForPermissionsLocked()) {
-                // User needs to confirm installation;
-                // give installer an intent they can use to involve
-                // user.
-                final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
-                intent.setPackage(mPm.getPackageInstallerPackageName());
-                intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-
-                sendOnUserActionRequired(mContext, mRemoteStatusReceiver, sessionId, intent);
-
-                // Commit was keeping session marked as active until now; release
-                // that extra refcount so session appears idle.
-                closeInternal(false);
-                return null;
-            }
 
             // Inherit any packages and native libraries from existing install that
             // haven't been overridden.
