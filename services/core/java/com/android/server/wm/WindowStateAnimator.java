@@ -1592,12 +1592,6 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             mSurfaceController.detachChildren();
         }
-        // If the children are detached, it means the app is exiting. We don't want to tear the
-        // content down too early, otherwise we could end up with a flicker. By preserving the
-        // current surface, we ensure the content remains on screen until the window is completely
-        // removed. It also ensures that the old surface is cleaned up when started again since it
-        // forces mSurfaceController to be set to null.
-        preserveSurfaceLocked();
     }
 
     void setOffsetPositionForStackResize(boolean offsetPositionForStackResize) {
