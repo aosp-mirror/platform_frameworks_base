@@ -199,6 +199,40 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testGetAnimationTargets_visibilityAlreadyUpdated_butForcedTransitionRequested() {
+        // [DisplayContent] -+- [TaskStack1] - [Task1] - [ActivityRecord1] (closing, invisible)
+        //                   +- [TaskStack2] - [Task2] - [ActivityRecord2] (opening, visible)
+        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity1 = WindowTestUtils.createTestActivityRecord(stack1);
+        activity1.setVisible(true);
+        activity1.mVisibleRequested = true;
+        activity1.mRequestForceTransition = true;
+
+        final ActivityStack stack2 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity2 = WindowTestUtils.createTestActivityRecord(stack2);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = false;
+        activity2.mRequestForceTransition = true;
+
+        final ArraySet<ActivityRecord> opening = new ArraySet<>();
+        opening.add(activity1);
+        final ArraySet<ActivityRecord> closing = new ArraySet<>();
+        closing.add(activity2);
+
+        // The visibility are already updated, but since forced transition is requested, it will
+        // be included.
+        WindowManagerService.sHierarchicalAnimations = false;
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{activity1}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, true /* visible */));
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{activity2}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, false /* visible */));
+    }
+
+    @Test
     public void testGetAnimationTargets_exitingBeforeTransition() {
         // Create another non-empty task so the animation target won't promote to task display area.
         WindowTestUtils.createTestActivityRecord(
