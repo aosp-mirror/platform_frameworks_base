@@ -102,6 +102,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerPolicyConstants.ACTION_HDMI_PLUGGED;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_RIGHT;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_TOP;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_UNKNOWN;
 import static android.view.WindowManagerPolicyConstants.EXTRA_HDMI_PLUGGED_STATE;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
@@ -314,6 +319,17 @@ public class DisplayPolicy {
     private int[] mNavigationBarHeightForRotationInCarMode = new int[4];
     private int[] mNavigationBarWidthForRotationInCarMode = new int[4];
 
+    // Alternative status bar for when flexible insets mapping is used to place the status bar on
+    // another side of the screen.
+    private WindowState mStatusBarAlt = null;
+    @WindowManagerPolicy.AltBarPosition
+    private int mStatusBarAltPosition = ALT_BAR_UNKNOWN;
+    // Alternative navigation bar for when flexible insets mapping is used to place the navigation
+    // bar elsewhere on the screen.
+    private WindowState mNavigationBarAlt = null;
+    @WindowManagerPolicy.AltBarPosition
+    private int mNavigationBarAltPosition = ALT_BAR_UNKNOWN;
+
     /** See {@link #getNavigationBarFrameHeight} */
     private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
 
@@ -434,7 +450,7 @@ public class DisplayPolicy {
                 case MSG_REQUEST_TRANSIENT_BARS:
                     synchronized (mLock) {
                         WindowState targetBar = (msg.arg1 == MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS)
-                                ? mStatusBar : mNavigationBar;
+                                ? getStatusBar() : getNavigationBar();
                         if (targetBar != null) {
                             requestTransientBars(targetBar);
                         }
@@ -497,6 +513,7 @@ public class DisplayPolicy {
                             if (mStatusBar != null) {
                                 requestTransientBars(mStatusBar);
                             }
+                            checkAltBarSwipeForTransientBars(ALT_BAR_TOP);
                         }
                     }
 
@@ -507,6 +524,7 @@ public class DisplayPolicy {
                                     && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                                 requestTransientBars(mNavigationBar);
                             }
+                            checkAltBarSwipeForTransientBars(ALT_BAR_BOTTOM);
                         }
                     }
 
@@ -523,6 +541,7 @@ public class DisplayPolicy {
                                             excludedRegion)) {
                                 requestTransientBars(mNavigationBar);
                             }
+                            checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT);
                         }
                         excludedRegion.recycle();
                     }
@@ -540,6 +559,7 @@ public class DisplayPolicy {
                                             excludedRegion)) {
                                 requestTransientBars(mNavigationBar);
                             }
+                            checkAltBarSwipeForTransientBars(ALT_BAR_LEFT);
                         }
                         excludedRegion.recycle();
                     }
@@ -639,6 +659,15 @@ public class DisplayPolicy {
             }
         });
         mHandler.post(mGestureNavigationSettingsObserver::register);
+    }
+
+    private void checkAltBarSwipeForTransientBars(@WindowManagerPolicy.AltBarPosition int pos) {
+        if (mStatusBarAlt != null && mStatusBarAltPosition == pos) {
+            requestTransientBars(mStatusBarAlt);
+        }
+        if (mNavigationBarAlt != null && mNavigationBarAltPosition == pos) {
+            requestTransientBars(mNavigationBarAlt);
+        }
     }
 
     void systemReady() {
@@ -902,6 +931,14 @@ public class DisplayPolicy {
                 }
                 break;
         }
+
+        // Check if alternate bars positions were updated.
+        if (mStatusBarAlt == win) {
+            mStatusBarAltPosition = getAltBarPosition(attrs);
+        }
+        if (mNavigationBarAlt == win) {
+            mNavigationBarAltPosition = getAltBarPosition(attrs);
+        }
     }
 
     /**
@@ -946,10 +983,9 @@ public class DisplayPolicy {
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
-                if (mStatusBar != null) {
-                    if (mStatusBar.isAlive()) {
-                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                    }
+                if ((mStatusBar != null && mStatusBar.isAlive())
+                        || (mStatusBarAlt != null && mStatusBarAlt.isAlive())) {
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NOTIFICATION_SHADE:
@@ -966,10 +1002,9 @@ public class DisplayPolicy {
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
-                if (mNavigationBar != null) {
-                    if (mNavigationBar.isAlive()) {
-                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                    }
+                if ((mNavigationBar != null && mNavigationBar.isAlive())
+                        || (mNavigationBarAlt != null && mNavigationBarAlt.isAlive())) {
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
@@ -996,6 +1031,23 @@ public class DisplayPolicy {
                     android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                     "DisplayPolicy");
             enforceSingleInsetsTypeCorrespondingToWindowType(attrs.providesInsetsTypes);
+
+            for (@InternalInsetsType int insetType : attrs.providesInsetsTypes) {
+                switch (insetType) {
+                    case ITYPE_STATUS_BAR:
+                        if ((mStatusBar != null && mStatusBar.isAlive())
+                                || (mStatusBarAlt != null && mStatusBarAlt.isAlive())) {
+                            return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                        }
+                        break;
+                    case ITYPE_NAVIGATION_BAR:
+                        if ((mNavigationBar != null && mNavigationBar.isAlive())
+                                || (mNavigationBarAlt != null && mNavigationBarAlt.isAlive())) {
+                            return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                        }
+                        break;
+                }
+            }
         }
         return ADD_OKAY;
     }
@@ -1101,11 +1153,39 @@ public class DisplayPolicy {
                 break;
             default:
                 if (attrs.providesInsetsTypes != null) {
-                    for (int insetsType : attrs.providesInsetsTypes) {
+                    for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
+                        switch (insetsType) {
+                            case ITYPE_STATUS_BAR:
+                                mStatusBarAlt = win;
+                                mStatusBarController.setWindow(mStatusBarAlt);
+                                mStatusBarAltPosition = getAltBarPosition(attrs);
+                                break;
+                            case ITYPE_NAVIGATION_BAR:
+                                mNavigationBarAlt = win;
+                                mNavigationBarController.setWindow(mNavigationBarAlt);
+                                mNavigationBarAltPosition = getAltBarPosition(attrs);
+                                break;
+                        }
                         mDisplayContent.setInsetProvider(insetsType, win, null);
                     }
                 }
                 break;
+        }
+    }
+
+    @WindowManagerPolicy.AltBarPosition
+    private int getAltBarPosition(WindowManager.LayoutParams params) {
+        switch (params.gravity) {
+            case Gravity.LEFT:
+                return ALT_BAR_LEFT;
+            case Gravity.RIGHT:
+                return ALT_BAR_RIGHT;
+            case Gravity.BOTTOM:
+                return ALT_BAR_BOTTOM;
+            case Gravity.TOP:
+                return ALT_BAR_TOP;
+            default:
+                return ALT_BAR_UNKNOWN;
         }
     }
 
@@ -1149,12 +1229,14 @@ public class DisplayPolicy {
      * @param win The window being removed.
      */
     void removeWindowLw(WindowState win) {
-        if (mStatusBar == win) {
+        if (mStatusBar == win || mStatusBarAlt == win) {
             mStatusBar = null;
+            mStatusBarAlt = null;
             mStatusBarController.setWindow(null);
             mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, null, null);
-        } else if (mNavigationBar == win) {
+        } else if (mNavigationBar == win || mNavigationBarAlt == win) {
             mNavigationBar = null;
+            mNavigationBarAlt = null;
             mNavigationBarController.setWindow(null);
             mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, null, null);
         } else if (mNotificationShade == win) {
@@ -1180,7 +1262,7 @@ public class DisplayPolicy {
     }
 
     WindowState getStatusBar() {
-        return mStatusBar;
+        return mStatusBar != null ? mStatusBar : mStatusBarAlt;
     }
 
     WindowState getNotificationShade() {
@@ -1188,7 +1270,7 @@ public class DisplayPolicy {
     }
 
     WindowState getNavigationBar() {
-        return mNavigationBar;
+        return mNavigationBar != null ? mNavigationBar : mNavigationBarAlt;
     }
 
     /**
@@ -1249,6 +1331,46 @@ public class DisplayPolicy {
                         || transit == TRANSIT_SHOW) {
                     return R.anim.dock_left_enter;
                 }
+            }
+        } else if (win == mStatusBarAlt || win == mNavigationBarAlt) {
+            if (win.getAttrs().windowAnimations != 0) {
+                return ANIMATION_STYLEABLE;
+            }
+
+            int pos = (win == mStatusBarAlt) ? mStatusBarAltPosition : mNavigationBarAltPosition;
+
+            boolean isExitOrHide = transit == TRANSIT_EXIT || transit == TRANSIT_HIDE;
+            boolean isEnterOrShow = transit == TRANSIT_ENTER || transit == TRANSIT_SHOW;
+
+            switch (pos) {
+                case ALT_BAR_LEFT:
+                    if (isExitOrHide) {
+                        return R.anim.dock_left_exit;
+                    } else if (isEnterOrShow) {
+                        return R.anim.dock_left_enter;
+                    }
+                    break;
+                case ALT_BAR_RIGHT:
+                    if (isExitOrHide) {
+                        return R.anim.dock_right_exit;
+                    } else if (isEnterOrShow) {
+                        return R.anim.dock_right_enter;
+                    }
+                    break;
+                case ALT_BAR_BOTTOM:
+                    if (isExitOrHide) {
+                        return R.anim.dock_bottom_exit;
+                    } else if (isEnterOrShow) {
+                        return R.anim.dock_bottom_enter;
+                    }
+                    break;
+                case ALT_BAR_TOP:
+                    if (isExitOrHide) {
+                        return R.anim.dock_top_exit;
+                    } else if (isEnterOrShow) {
+                        return R.anim.dock_top_enter;
+                    }
+                    break;
             }
         }
 
@@ -1608,7 +1730,7 @@ public class DisplayPolicy {
                 mInputConsumer = null;
                 Slog.v(TAG, INPUT_CONSUMER_NAVIGATION + " dismissed.");
             }
-        } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
+        } else if (mInputConsumer == null && getStatusBar() != null && canHideNavigationBar()) {
             mInputConsumer = mDisplayContent.getInputMonitor().createInputConsumer(
                     mHandler.getLooper(),
                     INPUT_CONSUMER_NAVIGATION,
@@ -2698,10 +2820,10 @@ public class DisplayPolicy {
             mDreamingLockscreen = mService.mPolicy.isKeyguardShowingAndNotOccluded();
         }
 
-        if (mStatusBar != null) {
+        if (getStatusBar() != null) {
             if (DEBUG_LAYOUT) Slog.i(TAG, "force=" + mForceStatusBar
                     + " top=" + mTopFullscreenOpaqueWindowState);
-            final boolean forceShowStatusBar = (mStatusBar.getAttrs().privateFlags
+            final boolean forceShowStatusBar = (getStatusBar().getAttrs().privateFlags
                     & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
             final boolean notificationShadeForcesShowingNavigation =
                     mNotificationShade != null
@@ -3187,6 +3309,16 @@ public class DisplayPolicy {
         return mNavigationBarPosition;
     }
 
+    @WindowManagerPolicy.AltBarPosition
+    int getAlternateStatusBarPosition() {
+        return mStatusBarAltPosition;
+    }
+
+    @WindowManagerPolicy.AltBarPosition
+    int getAlternateNavBarPosition() {
+        return mNavigationBarAltPosition;
+    }
+
     /**
      * A new window has been focused.
      */
@@ -3348,8 +3480,8 @@ public class DisplayPolicy {
         final boolean isFullscreen = (visibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)) != 0
                 || (PolicyControl.getWindowFlags(win, win.mAttrs) & FLAG_FULLSCREEN) != 0
-                || (mStatusBar != null && insetsPolicy.isHidden(ITYPE_STATUS_BAR))
-                || (mNavigationBar != null && insetsPolicy.isHidden(
+                || (getStatusBar() != null && insetsPolicy.isHidden(ITYPE_STATUS_BAR))
+                || (getNavigationBar() != null && insetsPolicy.isHidden(
                         ITYPE_NAVIGATION_BAR));
         final int behavior = win.mAttrs.insetsFlags.behavior;
         final boolean isImmersive = (visibility & (View.SYSTEM_UI_FLAG_IMMERSIVE
@@ -3604,7 +3736,7 @@ public class DisplayPolicy {
         final boolean hideNavBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
-        final boolean transientStatusBarAllowed = mStatusBar != null
+        final boolean transientStatusBarAllowed = getStatusBar() != null
                 && (notificationShadeHasFocus || (!mForceShowSystemBars
                 && (hideStatusBarWM || (hideStatusBarSysui && immersiveSticky))));
 
@@ -3762,7 +3894,7 @@ public class DisplayPolicy {
     // TODO(b/118118435): Remove this after migration
     private boolean isImmersiveMode(int vis) {
         final int flags = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        return mNavigationBar != null
+        return getNavigationBar() != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & flags) != 0
                 && canHideNavigationBar();
@@ -3770,7 +3902,7 @@ public class DisplayPolicy {
 
     private boolean isImmersiveMode(WindowState win) {
         final int behavior = win.mAttrs.insetsFlags.behavior;
-        return mNavigationBar != null
+        return getNavigationBar() != null
                 && canHideNavigationBar()
                 && (behavior == BEHAVIOR_SHOW_BARS_BY_SWIPE
                         || behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
@@ -3851,8 +3983,8 @@ public class DisplayPolicy {
     public void takeScreenshot(int screenshotType, int source) {
         if (mScreenshotHelper != null) {
             mScreenshotHelper.takeScreenshot(screenshotType,
-                    mStatusBar != null && mStatusBar.isVisibleLw(),
-                    mNavigationBar != null && mNavigationBar.isVisibleLw(),
+                    getStatusBar() != null && getStatusBar().isVisibleLw(),
+                    getNavigationBar() != null && getNavigationBar().isVisibleLw(),
                     source, mHandler, null /* completionConsumer */);
         }
     }
@@ -3890,6 +4022,11 @@ public class DisplayPolicy {
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar="); pw.print(mStatusBar);
         }
+        if (mStatusBarAlt != null) {
+            pw.print(prefix); pw.print("mStatusBarAlt="); pw.print(mStatusBarAlt);
+            pw.print(prefix); pw.print("mStatusBarAltPosition=");
+            pw.println(mStatusBarAltPosition);
+        }
         if (mNotificationShade != null) {
             pw.print(prefix); pw.print("mExpandedPanel="); pw.print(mNotificationShade);
         }
@@ -3900,6 +4037,11 @@ public class DisplayPolicy {
             pw.print(prefix); pw.print("mNavigationBarCanMove="); pw.println(mNavigationBarCanMove);
             pw.print(prefix); pw.print("mNavigationBarPosition=");
             pw.println(mNavigationBarPosition);
+        }
+        if (mNavigationBarAlt != null) {
+            pw.print(prefix); pw.print("mNavigationBarAlt="); pw.println(mNavigationBarAlt);
+            pw.print(prefix); pw.print("mNavigationBarAltPosition=");
+            pw.println(mNavigationBarAltPosition);
         }
         if (mFocusedWindow != null) {
             pw.print(prefix); pw.print("mFocusedWindow="); pw.println(mFocusedWindow);
