@@ -24,6 +24,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,6 +40,9 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     private int mSecondaryUserId = -1;
     private static final long SWITCH_USER_COMPLETED_NUMBER_OF_POLLS = 60;
     private static final long SWITCH_USER_COMPLETED_POLL_INTERVAL_IN_MILLIS = 1000;
+
+    @Rule
+    public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
 
     @After
     public void tearDown() throws Exception {
@@ -57,6 +61,37 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     @Test
     public void testBasicForSecondaryUser() throws Exception {
         runPhaseForUsers("testBasic", mSecondaryUserId);
+    }
+
+    /**
+     * Tests staged install/rollback works correctly on the 2nd user.
+     */
+    @Test
+    public void testStagedRollback() throws Exception {
+        runPhaseForUsers("testStagedRollback_Phase1", mSecondaryUserId);
+        getDevice().reboot();
+
+        // Need to unlock the user for device tests to run successfully
+        getDevice().startUser(mSecondaryUserId);
+        awaitUserUnlocked(mSecondaryUserId);
+        runPhaseForUsers("testStagedRollback_Phase2", mSecondaryUserId);
+        getDevice().reboot();
+
+        getDevice().startUser(mSecondaryUserId);
+        awaitUserUnlocked(mSecondaryUserId);
+        runPhaseForUsers("testStagedRollback_Phase3", mSecondaryUserId);
+        getDevice().reboot();
+
+        getDevice().startUser(mSecondaryUserId);
+        awaitUserUnlocked(mSecondaryUserId);
+        runPhaseForUsers("testStagedRollback_Phase4", mSecondaryUserId);
+    }
+
+    @Test
+    public void testBadUpdateRollback() throws Exception {
+        // Need to switch user in order to send broadcasts in device tests
+        assertTrue(getDevice().switchUser(mSecondaryUserId));
+        runPhaseForUsers("testBadUpdateRollback", mSecondaryUserId);
     }
 
     @Test
@@ -83,6 +118,8 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
 
     private void removeSecondaryUserIfNecessary() throws Exception {
         if (mSecondaryUserId != -1) {
+            // Can't remove the 2nd user without switching out of it
+            assertTrue(getDevice().switchUser(mOriginalUserId));
             getDevice().removeUser(mSecondaryUserId);
             mSecondaryUserId = -1;
         }
