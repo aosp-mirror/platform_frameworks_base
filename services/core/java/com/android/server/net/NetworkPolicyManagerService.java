@@ -3910,11 +3910,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForAppIdleParoleUL() {
         final boolean paroled = mAppStandby.isInParole();
         final boolean enableChain = !paroled;
-        enableFirewallChainUL(FIREWALL_CHAIN_STANDBY, enableChain);
 
         int ruleCount = mUidFirewallStandbyRules.size();
+        final SparseIntArray blockedUids = new SparseIntArray();
         for (int i = 0; i < ruleCount; i++) {
             final int uid = mUidFirewallStandbyRules.keyAt(i);
+            if (!isUidValidForBlacklistRulesUL(uid)) {
+                continue;
+            }
             int oldRules = mUidRules.get(uid);
             if (enableChain) {
                 // Chain wasn't enabled before and the other power-related
@@ -3926,13 +3929,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // Skip if it had no restrictions to begin with
                 if ((oldRules & MASK_ALL_NETWORKS) == 0) continue;
             }
-            final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldRules, paroled);
+            final boolean isUidIdle = !paroled && isUidIdle(uid);
+            if (isUidIdle && !mPowerSaveTempWhitelistAppIds.get(UserHandle.getAppId(uid))
+                    && !isUidForegroundOnRestrictPowerUL(uid)) {
+                mUidFirewallStandbyRules.put(uid, FIREWALL_RULE_DENY);
+                blockedUids.put(uid, FIREWALL_RULE_DENY);
+            } else {
+                mUidFirewallStandbyRules.put(uid, FIREWALL_RULE_DEFAULT);
+            }
+            final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldRules,
+                    isUidIdle);
             if (newUidRules == RULE_NONE) {
                 mUidRules.delete(uid);
             } else {
                 mUidRules.put(uid, newUidRules);
             }
         }
+        setUidFirewallRulesUL(FIREWALL_CHAIN_STANDBY, blockedUids,
+                enableChain ? CHAIN_TOGGLE_ENABLE : CHAIN_TOGGLE_DISABLE);
     }
 
     /**
@@ -4400,7 +4414,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForPowerRestrictionsUL(int uid) {
         final int oldUidRules = mUidRules.get(uid, RULE_NONE);
 
-        final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldUidRules, false);
+        final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldUidRules,
+                isUidIdle(uid));
 
         if (newUidRules == RULE_NONE) {
             mUidRules.delete(uid);
@@ -4414,33 +4429,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      * @param uid the uid of the app to update rules for
      * @param oldUidRules the current rules for the uid, in order to determine if there's a change
-     * @param paroled whether to ignore idle state of apps and only look at other restrictions
+     * @param isUidIdle whether uid is idle or not
      *
      * @return the new computed rules for the uid
      */
     @GuardedBy("mUidRulesFirstLock")
-    private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean paroled) {
+    private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean isUidIdle) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
                     "updateRulesForPowerRestrictionsUL: " + uid + "/" + oldUidRules + "/"
-                            + (paroled ? "P" : "-"));
+                            + (isUidIdle ? "I" : "-"));
         }
         try {
-            return updateRulesForPowerRestrictionsULInner(uid, oldUidRules, paroled);
+            return updateRulesForPowerRestrictionsULInner(uid, oldUidRules, isUidIdle);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
     @GuardedBy("mUidRulesFirstLock")
-    private int updateRulesForPowerRestrictionsULInner(int uid, int oldUidRules, boolean paroled) {
+    private int updateRulesForPowerRestrictionsULInner(int uid, int oldUidRules,
+            boolean isUidIdle) {
         if (!isUidValidForBlacklistRulesUL(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict power rules for uid " + uid);
             return RULE_NONE;
         }
 
-        final boolean isIdle = !paroled && isUidIdle(uid);
-        final boolean restrictMode = isIdle || mRestrictPower || mDeviceIdleMode;
+        final boolean restrictMode = isUidIdle || mRestrictPower || mDeviceIdleMode;
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
 
         final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid, mDeviceIdleMode);
@@ -4463,7 +4478,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         if (LOGV) {
             Log.v(TAG, "updateRulesForPowerRestrictionsUL(" + uid + ")"
-                    + ", isIdle: " + isIdle
+                    + ", isIdle: " + isUidIdle
                     + ", mRestrictPower: " + mRestrictPower
                     + ", mDeviceIdleMode: " + mDeviceIdleMode
                     + ", isForeground=" + isForeground
