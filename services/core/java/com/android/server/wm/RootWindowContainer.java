@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
+import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -2156,6 +2157,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
                 // up-to-dated pinned stack information on this newly created stack.
                 r.reparent(stack, MAX_VALUE, reason);
+
+                // In the case of this activity entering PIP due to it being moved to the back,
+                // the old activity would have a TRANSIT_TASK_TO_BACK transition that needs to be
+                // ran. But, since its visibility did not change (note how it was STOPPED/not
+                // visible, and with it now at the back stack, it remains not visible), the logic to
+                // add the transition is automatically skipped. We then add this activity manually
+                // to the list of apps being closed, and request its transition to be ran.
+                final ActivityRecord oldTopActivity = task.getTopMostActivity();
+                if (oldTopActivity != null && oldTopActivity.isState(STOPPED)
+                        && task.getDisplayContent().mAppTransition.getAppTransition()
+                                == TRANSIT_TASK_TO_BACK) {
+                    task.getDisplayContent().mClosingApps.add(oldTopActivity);
+                    oldTopActivity.mRequestForceTransition = true;
+                }
             }
             // The intermediate windowing mode to be set on the ActivityRecord later.
             // This needs to happen before the re-parenting, otherwise we will always set the

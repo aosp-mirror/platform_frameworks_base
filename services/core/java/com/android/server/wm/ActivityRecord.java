@@ -658,6 +658,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
     boolean mIsExiting;
+    // Force an app transition to be ran in the case the visibility of the app did not change.
+    // We use this for the case of moving a Root Task to the back with multiple activities, and the
+    // top activity enters PIP; the bottom activity's visibility stays the same, but we need to
+    // run the transition.
+    boolean mRequestForceTransition;
 
     boolean mEnteringAnimation;
 
@@ -4199,6 +4204,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mUseTransferredAnimation) {
             return false;
         }
+        // If it was set to true, reset the last request to force the transition.
+        mRequestForceTransition = false;
         return super.applyAnimation(lp, transit, enter, isVoiceInteraction, sources);
     }
 
@@ -4342,7 +4349,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // transition animation
         // * or this is an opening app and windows are being replaced (e.g. freeform window to
         //   normal window).
-        return isVisible() != visible || (!isVisible() && mIsExiting)
+        return isVisible() != visible || mRequestForceTransition || (!isVisible() && mIsExiting)
                 || (visible && forAllWindows(WindowState::waitingForReplacement, true));
     }
 
