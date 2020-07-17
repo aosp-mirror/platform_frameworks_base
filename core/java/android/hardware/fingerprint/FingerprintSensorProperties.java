@@ -45,18 +45,24 @@ public class FingerprintSensorProperties implements Parcelable {
 
     public final int sensorId;
     public final @SensorType int sensorType;
+    // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
+    // cannot be checked
+    public final boolean resetLockoutRequiresHardwareAuthToken;
 
     /**
      * Initializes SensorProperties with specified values
      */
-    public FingerprintSensorProperties(int sensorId, @SensorType int sensorType) {
+    public FingerprintSensorProperties(int sensorId, @SensorType int sensorType,
+            boolean resetLockoutRequiresHardwareAuthToken) {
         this.sensorId = sensorId;
         this.sensorType = sensorType;
+        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
     }
 
     protected FingerprintSensorProperties(Parcel in) {
         sensorId = in.readInt();
         sensorType = in.readInt();
+        resetLockoutRequiresHardwareAuthToken = in.readBoolean();
     }
 
     public static final Creator<FingerprintSensorProperties> CREATOR =
@@ -81,5 +87,6 @@ public class FingerprintSensorProperties implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(sensorId);
         dest.writeInt(sensorType);
+        dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
     }
 }

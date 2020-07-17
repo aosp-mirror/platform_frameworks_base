@@ -300,26 +300,6 @@ public class BiometricManager {
     }
 
     /**
-     * Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-     *
-     * @param userId this operation takes effect for.
-     * @param hardwareAuthToken an opaque token returned by password confirmation.
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void resetLockout(int userId, byte[] hardwareAuthToken) {
-        if (mService != null) {
-            try {
-                mService.resetLockout(userId, hardwareAuthToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "resetLockout(): Service not connected");
-        }
-    }
-
-    /**
      * Get a list of AuthenticatorIDs for biometric authenticators which have 1) enrolled templates,
      * and 2) meet the requirements for integrating with Keystore. The AuthenticatorIDs are known
      * in Keystore land as SIDs, and are used during key generation.
