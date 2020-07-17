@@ -3292,7 +3292,7 @@ public class DisplayPolicy {
             // keys, we let it keep controlling the visibility.
             final boolean lastFocusCanReceiveKeys =
                     (mLastFocusedWindow != null && mLastFocusedWindow.canReceiveKeys());
-            winCandidate = isKeyguardShowing() ? mNotificationShade
+            winCandidate = isKeyguardShowing() && !isKeyguardOccluded() ? mNotificationShade
                     : lastFocusCanReceiveKeys ? mLastFocusedWindow
                             : mTopFullscreenOpaqueWindowState;
             if (winCandidate == null) {
