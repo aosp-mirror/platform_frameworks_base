@@ -47,6 +47,7 @@ import android.view.Surface;
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -622,16 +623,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     @NonNull
-    public FaceSensorProperties getSensorProperties() {
+    public List<FaceSensorProperties> getSensorProperties() {
         try {
             if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
-                return new FaceSensorProperties();
+                return new ArrayList<>();
             }
             return mService.getSensorProperties(mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        return new FaceSensorProperties();
+        return new ArrayList<>();
     }
 
     /**

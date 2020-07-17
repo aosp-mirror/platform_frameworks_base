@@ -1338,7 +1338,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private CancellationSignal mFaceCancelSignal;
     private FingerprintManager mFpm;
     private FaceManager mFaceManager;
-    private FaceSensorProperties mFaceSensorProperties;
+    private List<FaceSensorProperties> mFaceSensorProperties;
     private boolean mFingerprintLockedOut;
     private TelephonyManager mTelephonyManager;
 
@@ -2100,7 +2100,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
             mFaceCancelSignal = new CancellationSignal();
 
-            if (isEncryptedOrLockdown(userId) && mFaceSensorProperties.supportsFaceDetection) {
+            // This would need to be updated for multi-sensor devices
+            final boolean supportsFaceDetection = !mFaceSensorProperties.isEmpty()
+                    && mFaceSensorProperties.get(0).supportsFaceDetection;
+            if (isEncryptedOrLockdown(userId) && supportsFaceDetection) {
                 mFaceManager.detectFace(mFaceCancelSignal, mFaceDetectionCallback, userId);
             } else {
                 mFaceManager.authenticate(null /* crypto */, mFaceCancelSignal,

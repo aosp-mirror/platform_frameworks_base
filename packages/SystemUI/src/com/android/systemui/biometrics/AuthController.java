@@ -38,6 +38,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.IFingerprintService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -265,6 +266,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void start() {
         mCommandQueue.addCallback(this);
@@ -273,10 +275,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
         final FingerprintManager fpm = mContext.getSystemService(FingerprintManager.class);
         if (fpm != null && fpm.isHardwareDetected()) {
-            // TODO(b/160024833): Enumerate through all of the sensors and check whether
-            //  at least one of them is UDFPS.
-            if (fpm.isUdfps()) {
-                mUdfpsController = new UdfpsController(mContext, mWindowManager);
+            final List<FingerprintSensorProperties> fingerprintSensorProperties =
+                    fpm.getSensorProperties();
+            for (FingerprintSensorProperties props : fingerprintSensorProperties) {
+                if (props.sensorType == FingerprintSensorProperties.TYPE_UDFPS) {
+                    mUdfpsController = new UdfpsController(mContext, mWindowManager);
+                    break;
+                }
             }
         }
 

@@ -28,6 +28,9 @@ import android.view.Surface;
  * @hide
  */
 interface IFaceService {
+    // Retrieve static sensor properties for all face sensors
+    List<FaceSensorProperties> getSensorProperties(String opPackageName);
+
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long operationId, int userid, IFaceServiceReceiver receiver,
             String opPackageName);
@@ -87,9 +90,6 @@ interface IFaceService {
 
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
-
-    // Retrieve static sensor properties
-    FaceSensorProperties getSensorProperties(String opPackageName);
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int userId);

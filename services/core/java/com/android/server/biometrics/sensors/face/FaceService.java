@@ -44,6 +44,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,6 +65,20 @@ public class FaceService extends SystemService {
      * Receives the incoming binder calls from FaceManager.
      */
     private final class FaceServiceWrapper extends IFaceService.Stub {
+        @Override // Binder call
+        public List<FaceSensorProperties> getSensorProperties(String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            final List<FaceSensorProperties> properties = new ArrayList<>();
+
+            if (mFace10 != null) {
+                properties.add(mFace10.getFaceSensorProperties());
+            }
+
+            Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
+                    + ", sensors: " + properties.size());
+            return properties;
+        }
+
         @Override // Binder call
         public void generateChallenge(IBinder token, IFaceServiceReceiver receiver,
                 String opPackageName) {
@@ -237,12 +252,6 @@ public class FaceService extends SystemService {
         public boolean hasEnrolledFaces(int userId, String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             return !mFace10.getEnrolledFaces(userId).isEmpty();
-        }
-
-        @Override // Binder call
-        public FaceSensorProperties getSensorProperties(String opPackageName) {
-            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            return mFace10.getFaceSensorProperties();
         }
 
         @Override

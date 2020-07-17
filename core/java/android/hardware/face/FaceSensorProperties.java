@@ -25,23 +25,19 @@ import android.os.Parcelable;
  */
 public class FaceSensorProperties implements Parcelable {
 
+    public final int sensorId;
     public final boolean supportsFaceDetection;
-
-    /**
-     * Creates a SensorProperties class with safe default values
-     */
-    public FaceSensorProperties() {
-        supportsFaceDetection = false;
-    }
 
     /**
      * Initializes SensorProperties with specified values
      */
-    public FaceSensorProperties(boolean supportsFaceDetection) {
+    public FaceSensorProperties(int sensorId, boolean supportsFaceDetection) {
+        this.sensorId = sensorId;
         this.supportsFaceDetection = supportsFaceDetection;
     }
 
     protected FaceSensorProperties(Parcel in) {
+        sensorId = in.readInt();
         supportsFaceDetection = in.readBoolean();
     }
 
@@ -65,6 +61,7 @@ public class FaceSensorProperties implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(sensorId);
         dest.writeBoolean(supportsFaceDetection);
     }
 }

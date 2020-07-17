@@ -23,10 +23,8 @@ import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -34,6 +32,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -42,7 +41,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
@@ -58,6 +56,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,6 +79,20 @@ public class FingerprintService extends SystemService {
      * Receives the incoming binder calls from FingerprintManager.
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
+        @Override // Binder call
+        public List<FingerprintSensorProperties> getSensorProperties(String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            final List<FingerprintSensorProperties> properties = new ArrayList<>();
+
+            if (mFingerprint21 != null) {
+                properties.add(mFingerprint21.getFingerprintSensorProperties());
+            }
+
+            Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
+                    + ", sensors: " + properties.size());
+            return properties;
+        }
+
         @Override // Binder call
         public void generateChallenge(IBinder token, IFingerprintServiceReceiver receiver,
                 String opPackageName) {
@@ -362,12 +375,6 @@ public class FingerprintService extends SystemService {
         public void onFingerUp() {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             mFingerprint21.onFingerUp();
-        }
-
-        @Override
-        public boolean isUdfps() {
-            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            return mFingerprint21.isUdfps();
         }
 
         @Override
