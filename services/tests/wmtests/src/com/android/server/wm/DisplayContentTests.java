@@ -887,6 +887,21 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testInputMethodInputTarget_isClearedWhenWindowStateIsRemoved() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+
+        WindowState app = createWindow(null, TYPE_BASE_APPLICATION, dc, "app");
+
+        dc.mInputMethodInputTarget = app;
+        assertEquals(app, dc.computeImeControlTarget());
+
+        app.removeImmediately();
+
+        assertNull(dc.mInputMethodInputTarget);
+        assertNull(dc.computeImeControlTarget());
+    }
+
+    @Test
     public void testComputeImeControlTarget() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
