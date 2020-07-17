@@ -30,6 +30,7 @@ aidl_interface {
         "android/os/StatsDimensionsValueParcel.aidl",
         "android/util/StatsEventParcel.aidl",
     ],
+    host_supported: true,
     backend: {
         java: {
             enabled: false, // framework-statsd and service-statsd use framework-statsd-aidl-sources

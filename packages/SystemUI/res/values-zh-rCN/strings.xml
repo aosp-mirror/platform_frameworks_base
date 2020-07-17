@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"跳到上一个"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"调整大小"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手机因严重发热而自动关机"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"现在，您的手机已恢复正常运行"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"现在，您的手机已恢复正常运行。\n点按即可了解详情"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"由于发热严重，因此您的手机执行了自动关机以降温。现在，您的手机已恢复正常运行。\n\n以下情况可能会导致您的手机严重发热：\n • 使用占用大量资源的应用（例如游戏、视频或导航应用）\n • 下载或上传大型文件\n • 在高温环境下使用手机"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"查看处理步骤"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"手机温度上升中"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"手机降温时，部分功能的使用会受限制"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"手机降温时，部分功能的使用会受限制。\n点按即可了解详情"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"您的手机将自动尝试降温。您依然可以使用您的手机，但是手机运行速度可能会更慢。\n\n手机降温后，就会恢复正常的运行速度。"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看处理步骤"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"拔下充电器"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"为此设备充电时出现问题。这可能是由数据线太热所导致，请拔下电源适配器并采取相应的处理措施。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"查看处理步骤"</string>

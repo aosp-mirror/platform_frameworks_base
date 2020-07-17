@@ -930,11 +930,17 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ਆਕਾਰ ਬਦਲੋ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ਗਰਮ ਹੋਣ ਕਾਰਨ ਫ਼ੋਨ ਬੰਦ ਹੋ ਗਿਆ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ"</string>
+    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
+    <skip />
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">\n"ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਸੀ, ਇਸ ਲਈ ਇਹ ਠੰਡਾ ਹੋਣ ਵਾਸਤੇ ਬੰਦ ਹੋ ਗਿਆ ਸੀ। ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ।\n\nਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਸਕਦਾ ਹੈ ਜੇ:\n	• ਤੁਸੀਂ ਸਰੋਤਾਂ ਦੀ ਵੱਧ ਵਰਤੋਂ ਵਾਲੀਆਂ ਐਪਾਂ (ਜਿਵੇਂ ਗੇਮਿੰਗ, ਵੀਡੀਓ, ਜਾਂ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਐਪਾਂ) ਵਰਤਦੇ ਹੋ 	• ਵੱਡੀਆਂ ਫ਼ਾਈਲਾਂ ਡਾਊਨਲੋਡ ਜਾਂ ਅੱਪਲੋਡ ਕਰਦੇ ਹੋ\n	• ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਉੱਚ ਤਾਪਮਾਨਾਂ ਵਿੱਚ ਵਰਤਦੇ ਹੋ"</string>
+    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
+    <skip />
     <string name="high_temp_title" msgid="2218333576838496100">"ਫ਼ੋਨ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ਫ਼ੋਨ ਦੇ ਠੰਡਾ ਹੋਣ ਦੇ ਦੌਰਾਨ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸੀਮਿਤ ਹੁੰਦੀਆਂ ਹਨ"</string>
+    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
+    <skip />
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਵੈਚਲਿਤ ਰੂਪ ਵਿੱਚ ਠੰਡਾ ਹੋਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੇਗਾ। ਤੁਸੀਂ ਹਾਲੇ ਵੀ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤ ਸਕਦੇ ਹੋ, ਪਰੰਤੂ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਇਹ ਵਧੇਰੇ ਹੌਲੀ ਚੱਲੇ।\n\nਇੱਕ ਵਾਰ ਠੰਡਾ ਹੋਣ ਤੋਂ ਬਾਅਦ ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਧਾਰਨ ਤੌਰ \'ਤੇ ਚੱਲੇਗਾ।"</string>
+    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
+    <skip />
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ਚਾਰਜਰ ਨੂੰ ਕੱਢੋ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਚਾਰਜ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆ ਗਈ ਹੈ। ਪਾਵਰ ਅਡਾਪਟਰ ਨੂੰ ਕੱਢੋ ਅਤੇ ਧਿਆਨ ਰੱਖੋ ਸ਼ਾਇਦ ਕੇਬਲ ਗਰਮ ਹੋਵੇ।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ਦੇਖਭਾਲ ਦੇ ਪੜਾਅ ਦੇਖੋ"</string>

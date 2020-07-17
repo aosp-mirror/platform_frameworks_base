@@ -2687,7 +2687,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void addPreferredActivity(IntentFilter filter,
                                      int match, ComponentName[] set, ComponentName activity) {
         try {
-            mPM.addPreferredActivity(filter, match, set, activity, getUserId());
+            mPM.addPreferredActivity(filter, match, set, activity, getUserId(), false);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2697,7 +2697,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void addPreferredActivityAsUser(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
         try {
-            mPM.addPreferredActivity(filter, match, set, activity, userId);
+            mPM.addPreferredActivity(filter, match, set, activity, userId, false);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2728,6 +2728,16 @@ public class ApplicationPackageManager extends PackageManager {
     public void clearPackagePreferredActivities(String packageName) {
         try {
             mPM.clearPackagePreferredActivities(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void addUniquePreferredActivity(@NonNull IntentFilter filter, int match,
+            @Nullable ComponentName[] set, @NonNull ComponentName activity) {
+        try {
+            mPM.addPreferredActivity(filter, match, set, activity, getUserId(), true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

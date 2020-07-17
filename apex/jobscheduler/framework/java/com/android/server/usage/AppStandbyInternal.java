@@ -7,7 +7,6 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.content.Context;
-import android.os.Looper;
 import android.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
@@ -21,13 +20,12 @@ public interface AppStandbyInternal {
      * TODO AppStandbyController should probably be a binder service, and then we shouldn't need
      * this method.
      */
-    static AppStandbyInternal newAppStandbyController(ClassLoader loader, Context context,
-            Looper looper) {
+    static AppStandbyInternal newAppStandbyController(ClassLoader loader, Context context) {
         try {
             final Class<?> clazz = Class.forName("com.android.server.usage.AppStandbyController",
                     true, loader);
-            final Constructor<?> ctor =  clazz.getConstructor(Context.class, Looper.class);
-            return (AppStandbyInternal) ctor.newInstance(context, looper);
+            final Constructor<?> ctor =  clazz.getConstructor(Context.class);
+            return (AppStandbyInternal) ctor.newInstance(context);
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
             throw new RuntimeException("Unable to instantiate AppStandbyController!", e);

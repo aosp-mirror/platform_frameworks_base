@@ -37,6 +37,10 @@ interface IDropBoxManagerService {
     boolean isTagEnabled(String tag);
 
     /** @see DropBoxManager#getNextEntry */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk=30,
+            publicAlternatives="Use {@link android.os.DropBoxManager#getNextEntry} instead")
     DropBoxManager.Entry getNextEntry(String tag, long millis, String packageName);
+
+    DropBoxManager.Entry getNextEntryWithAttribution(String tag, long millis, String packageName,
+            String attributionTag);
 }

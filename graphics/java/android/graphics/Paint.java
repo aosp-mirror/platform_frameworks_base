@@ -674,10 +674,15 @@ public class Paint {
      * Return the pointer to the native object while ensuring that any
      * mutable objects that are attached to the paint are also up-to-date.
      *
+     * Note: Although this method is |synchronized|, this is simply so it
+     * is not thread-hostile to multiple threads calling this method. It
+     * is still unsafe to attempt to change the Shader/ColorFilter while
+     * another thread attempts to access the native object.
+     *
      * @hide
      */
     @UnsupportedAppUsage
-    public long getNativeInstance() {
+    public synchronized long getNativeInstance() {
         long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance();
         if (newNativeShader != mNativeShader) {
             mNativeShader = newNativeShader;

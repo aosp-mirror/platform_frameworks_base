@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Əvvəlkinə keçin"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ölçüsünü dəyişin"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"İstiliyə görə telefon söndü"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon indi normal işləyir"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonunuz indi normal işləyir.\nƏtraflı məlumat üçün toxunun"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon çox isti idi və soyumaq üçün söndü. Hazırda telefon normal işləyir.\n\n Telefon bu hallarda çox isti ola bilər:\n 	• Çox resurslu tətbiq istifadə etsəniz (oyun, video və ya naviqasiya tətbiqi kimi)\n	• Böyük həcmli fayl endirsəniz və ya yükləsəniz\n	• Telefonu yüksək temperaturda istifadə etsəniz"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon qızmağa başlayır"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır.\nƏtraflı məlumat üçün toxunun"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefonunuz avtomatik olaraq soyumağa başlayacaq. Telefon istifadəsinə davam edə bilərsiniz, lakin sürəti yavaşlaya bilər.\n\nTelefonunuz soyuduqdan sonra normal işləyəcək."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Adapteri cərəyandan ayırın"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Bu cihazın batareya yığmasında problem var. Adapteri cərəyandan ayırın. Ehtiyatlı olun, kabel isti ola bilər."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ehtiyat tədbiri mərhələlərinə baxın"</string>

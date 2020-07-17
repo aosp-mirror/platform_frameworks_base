@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Chuyển về mục trước"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Đổi kích thước"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Điện thoại đã tắt do nhiệt"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Điện thoại của bạn hiện đang chạy bình thường"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Điện thoại của bạn đang chạy bình thường.\nHãy nhấn để biết thêm thông tin"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Do quá nóng nên điện thoại đã tắt để hạ nhiệt. Hiện điện thoại của bạn đang chạy bình thường.\n\nĐiện thoại có thể bị quá nóng nếu bạn:\n	• Dùng các ứng dụng tốn nhiều tài nguyên (như ứng dụng trò chơi, video hoặc điều hướng)\n	• Tải xuống hoặc tải lên tệp có dung lượng lớn\n	• Dùng điện thoại ở nhiệt độ cao"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Xem các bước chăm sóc"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Điện thoại đang nóng lên"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Một số tính năng bị hạn chế trong khi điện thoại nguội dần"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Một số tính năng bị hạn chế trong khi điện thoại nguội dần.\nHãy nhấn để biết thêm thông tin"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Điện thoại của bạn sẽ tự động nguội dần. Bạn vẫn có thể sử dụng điện thoại, nhưng điện thoại có thể chạy chậm hơn. \n\nSau khi đã nguội, điện thoại sẽ chạy bình thường."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Xem các bước chăm sóc"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Rút phích cắm bộ sạc"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Đã xảy ra sự cố khi sạc thiết bị này. Hãy rút phích cắm bộ chuyển đổi điện và cẩn thận vì dây cáp có thể nóng."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Xem các bước chăm sóc"</string>

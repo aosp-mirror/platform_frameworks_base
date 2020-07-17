@@ -215,8 +215,7 @@ public class UsageStatsService extends SystemService implements
         mHandler = new H(BackgroundThread.get().getLooper());
 
         mAppStandby = AppStandbyInternal.newAppStandbyController(
-                UsageStatsService.class.getClassLoader(), getContext(),
-                BackgroundThread.get().getLooper());
+                UsageStatsService.class.getClassLoader(), getContext());
 
         mAppTimeLimit = new AppTimeLimitController(
                 new AppTimeLimitController.TimeLimitCallbackListener() {

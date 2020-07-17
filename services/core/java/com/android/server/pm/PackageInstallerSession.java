@@ -459,8 +459,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final int returnCode = args.argi1;
                     args.recycle();
 
+                    final boolean showNotification;
+                    synchronized (mLock) {
+                        showNotification = isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked();
+                    }
                     sendOnPackageInstalled(mContext, statusReceiver, sessionId,
-                            isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId,
+                            showNotification, userId,
                             packageName, returnCode, message, extras);
 
                     break;
@@ -888,6 +892,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return markerName;
     }
 
+    @GuardedBy("mLock")
     private void createRemoveSplitMarkerLocked(String splitName) throws IOException {
         try {
             final File target = new File(stageDir, getRemoveMarkerName(splitName));
@@ -1058,6 +1063,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private ParcelFileDescriptor openReadInternalLocked(String name) throws IOException {
         try {
             if (!FileUtils.isValidExtFilename(name)) {
@@ -2023,7 +2029,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final File targetFile = new File(stageDir, targetName);
-        resolveAndStageFile(addedFile, targetFile);
+        resolveAndStageFileLocked(addedFile, targetFile);
         mResolvedBaseFile = targetFile;
 
         // Populate package name of the apex session
@@ -2139,7 +2145,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             final File targetFile = new File(stageDir, targetName);
-            resolveAndStageFile(addedFile, targetFile);
+            resolveAndStageFileLocked(addedFile, targetFile);
 
             // Base is coming from session
             if (apk.splitName == null) {
@@ -2156,7 +2162,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 final File targetDexMetadataFile = new File(stageDir,
                         DexMetadataHelper.buildDexMetadataPathForApk(targetName));
-                resolveAndStageFile(dexMetadataFile, targetDexMetadataFile);
+                resolveAndStageFileLocked(dexMetadataFile, targetDexMetadataFile);
             }
         }
 
@@ -2236,12 +2242,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Inherit base if not overridden
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
-                resolveInheritedFile(mResolvedBaseFile);
+                resolveInheritedFileLocked(mResolvedBaseFile);
                 // Inherit the dex metadata if present.
                 final File baseDexMetadataFile =
                         DexMetadataHelper.findDexMetadataForFile(mResolvedBaseFile);
                 if (baseDexMetadataFile != null) {
-                    resolveInheritedFile(baseDexMetadataFile);
+                    resolveInheritedFileLocked(baseDexMetadataFile);
                 }
                 baseApk = existingBase;
             }
@@ -2253,12 +2259,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final File splitFile = new File(existing.splitCodePaths[i]);
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     if (!stagedSplits.contains(splitName) && !splitRemoved) {
-                        resolveInheritedFile(splitFile);
+                        resolveInheritedFileLocked(splitFile);
                         // Inherit the dex metadata if present.
                         final File splitDexMetadataFile =
                                 DexMetadataHelper.findDexMetadataForFile(splitFile);
                         if (splitDexMetadataFile != null) {
-                            resolveInheritedFile(splitDexMetadataFile);
+                            resolveInheritedFileLocked(splitDexMetadataFile);
                         }
                     }
                 }
@@ -2359,7 +2365,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void resolveAndStageFile(File origFile, File targetFile)
+    @GuardedBy("mLock")
+    private void resolveAndStageFileLocked(File origFile, File targetFile)
             throws PackageManagerException {
         mResolvedStagedFiles.add(targetFile);
         maybeRenameFile(origFile, targetFile);
@@ -2392,7 +2399,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedStagedFiles.add(stagedSignature);
     }
 
-    private void resolveInheritedFile(File origFile) {
+    @GuardedBy("mLock")
+    private void resolveInheritedFileLocked(File origFile) {
         mResolvedInheritedFiles.add(origFile);
 
         // Inherit the fsverity signature file if present.

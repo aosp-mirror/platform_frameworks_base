@@ -122,9 +122,14 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         updateDisplayFrames();
     }
 
-    public void setRotation(int rotation) {
+    public void setRotation(int rotation, boolean includingWindows) {
         mRotation = rotation;
         updateDisplayFrames();
+        if (includingWindows) {
+            mNavBarWindow.getWindowConfiguration().setRotation(rotation);
+            mStatusBarWindow.getWindowConfiguration().setRotation(rotation);
+            mWindow.getWindowConfiguration().setRotation(rotation);
+        }
     }
 
     public void addDisplayCutout() {
@@ -483,8 +488,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_withDisplayCutout_landscape() {
         addDisplayCutout();
-        setRotation(ROTATION_90);
-
+        setRotation(ROTATION_90, true /* includingWindows */);
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
@@ -504,7 +508,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_withDisplayCutout_seascape() {
         addDisplayCutout();
-        setRotation(ROTATION_270);
+        setRotation(ROTATION_270, true /* includingWindows */);
 
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -525,7 +529,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_withDisplayCutout_fullscreen_landscape() {
         addDisplayCutout();
-        setRotation(ROTATION_90);
+        setRotation(ROTATION_90, true /* includingWindows */);
 
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -566,7 +570,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_withDisplayCutout_fullscreenInCutout_landscape() {
         addDisplayCutout();
-        setRotation(ROTATION_90);
+        setRotation(ROTATION_90, true /* includingWindows */);
 
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -784,7 +788,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void testSimulateLayoutDisplay() {
         assertSimulateLayoutSameDisplayFrames();
-        setRotation(ROTATION_90);
+        setRotation(ROTATION_90, false /* includingWindows */);
         assertSimulateLayoutSameDisplayFrames();
         addDisplayCutout();
         assertSimulateLayoutSameDisplayFrames();

@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Lumaktaw sa nakaraan"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"I-resize"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Na-off ang telepono dahil sa init"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Maayos na ngayong gumagana ang iyong telepono"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Maayos na ngayong gumagana ang iyong telepono.\nMag-tap para sa higit pang impormasyon"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Napakainit ng telepono, kaya nag-off ito para lumamig. Maayos na itong gumagana.\n\nMaaaring lubos na uminit ang telepono kapag:\n	• Gumamit ka ng resource-intensive na app (gaya ng app para sa gaming, video, o navigation)\n	• Nag-download o nag-upload ka ng malaking file\n • Ginamit mo ito sa mainit na lugar"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Umiinit ang telepono"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Limitado ang ilang feature habang nagku-cool down ang telepono"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Limitado ang ilang feature habang nagku-cool down ang telepono.\nMag-tap para sa higit pang impormasyon"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Hugutin ang charger"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"May isyu sa pag-charge ng device na ito. Hugutin ang power adapter at mag-ingat dahil maaaring mainit ang cable."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Tingnan ang mga hakbang sa pangangalaga"</string>

@@ -58,7 +58,7 @@ class PipToAppTest(
                     .then()
                     .showsAppWindowOnTop(testApp.getPackage())
                     .then()
-                    .hidesAppWindowOnTop(testApp.getPackage())
+                    .appWindowNotOnTop(testApp.getPackage())
                     .forAllEntries()
         }
     }

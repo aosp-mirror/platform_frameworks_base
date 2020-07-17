@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ຂ້າມໄປລາຍການກ່ອນນີ້"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ປ່ຽນຂະໜາດ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ປິດໂທລະສັບເນື່ອງຈາກຮ້ອນເກີນໄປ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ໂທລະສັບຂອງທ່ານຕອນນີ້ເຮັດວຽກປົກກະຕິແລ້ວ"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ໂທລະສັບຂອງທ່ານຕອນນີ້ເຮັດວຽກປົກກະຕິແລ້ວ.\nແຕະເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ໂທລະສັບຂອງທ່ານຮ້ອນເກີນໄປ, ດັ່ງນັ້ນມັນຈຶ່ງຖືກປິດໄວ້ເພື່ອໃຫ້ເຢັນກ່ອນ. ໂທລະສັບຂອງທ່ານຕອນນີ້ເຮັດວຽກປົກກະຕິແລ້ວ.\n\nໂທລະສັບຂອງທ່ານອາດຮ້ອນຫາກວ່າທ່ານ:\n	• ໃຊ້ແອັບທີ່ກິນຊັບພະຍາກອນຫຼາຍ (ເຊັ່ນ: ເກມ, ວິດີໂອ ຫຼື ແອັບການນຳທາງ)\n	• ດາວໂຫລດ ຫຼື ອັບໂຫລດຮູບພາບຂະໜາດໃຫຍ່\n	• ໃຊ້ໂທລະສັບຂອງທ່ານໃນບ່ອນທີ່ມີອຸນຫະພູມສູງ"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ເບິ່ງຂັ້ນຕອນການເບິ່ງແຍງ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ໂທລະສັບກຳລັງຮ້ອນຂຶ້ນ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ເນື່ອງໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ.\nແຕະເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ໂທລະສັບຂອງທ່ານຈະພະຍາຍາມລົດອຸນຫະພູມລົງ. ທ່ານຍັງຄົງສາມາດໃຊ້ໂທລະສັບຂອງທ່ານໄດ້ຢູ່, ແຕ່ມັນຈະເຮັດວຽກຊ້າລົງ.\n\nເມື່ອໂທລະສັບຂອງທ່ານບໍ່ຮ້ອນຫຼາຍແລ້ວ, ມັນຈະກັບມາເຮັດວຽກຕາມປົກກະຕິ."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ເບິ່ງຂັ້ນຕອນການເບິ່ງແຍງ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ຖອດສາຍສາກອອກ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ເກີດບັນຫາໃນການສາກໄຟອຸປະກອນນີ້. ກະລຸນາຖອດສາຍສາກອອກ ແລະ ລະວັງເນື່ອງຈາກສາຍອາດຈະຍັງອຸ່ນຢູ່."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ເບິ່ງຂັ້ນຕອນການເບິ່ງແຍງ"</string>

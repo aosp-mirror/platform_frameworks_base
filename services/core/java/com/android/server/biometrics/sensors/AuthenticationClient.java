@@ -35,7 +35,8 @@ import java.util.ArrayList;
 /**
  * A class to keep track of the authentication state for a given client.
  */
-public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
+public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
+        implements AuthenticationConsumer  {
 
     private static final String TAG = "Biometrics/AuthenticationClient";
 
@@ -49,7 +50,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
     protected final long mOperationId;
 
     private long mStartTimeMs;
-    private boolean mAlreadyCancelled;
 
     protected boolean mAuthAttempted;
 
@@ -104,6 +104,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
         return mOperationId != 0;
     }
 
+    @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
         super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
@@ -241,10 +242,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
 
     @Override
     public void cancel() {
-        if (mAlreadyCancelled) {
-            Slog.w(TAG, "stopAuthentication: already cancelled!");
-            return;
-        }
+        super.cancel();
 
         if (mTaskStackListener != null) {
             try {
@@ -253,10 +251,5 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T> {
                 Slog.e(TAG, "Could not unregister task stack listener", e);
             }
         }
-
-        if (DEBUG) Slog.w(TAG, "Requesting cancel for " + getOwnerString());
-
-        stopHalOperation();
-        mAlreadyCancelled = true;
     }
 }

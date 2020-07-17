@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Прескокни до претходната"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Промени големина"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефонот се исклучи поради загреаност"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Сега телефонот работи нормално"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Сега телефонот работи нормално.\nДопрете за повеќе информации"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонот беше премногу загреан, така што се исклучи за да се олади. Сега работи нормално.\n\nТелефонот може премногу да се загрее ако:\n	• користите апликации што работат со многу ресурси (како што се, на пример, апликациите за видеа, навигација или игри)\n	• преземате или поставувате големи датотеки\n	•го користите телефонот на високи температури"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Прикажи ги чекорите за грижа за уредот"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Телефонот се загрева"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Некои функции се ограничени додека телефонот се лади"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Некои функции се ограничени додека телефонот се лади.\nДопрете за повеќе информации"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефонот автоматски ќе се обиде да се олади. Вие сепак ќе може да го користите, но тој може да работи побавно.\n\nОткако ќе се олади, ќе работи нормално."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Прикажи ги чекорите за грижа за уредот"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Исклучете го полначот"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Има проблем со полнењето на уредов. Исклучете го адаптерот за напојување и внимавајте зошто кабелот може да е топол."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Прикажи ги чекорите за грижа за уредот"</string>

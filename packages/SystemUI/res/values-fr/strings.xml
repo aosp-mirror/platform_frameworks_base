@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Passer au contenu précédent"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Redimensionner"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tél. éteint car il surchauffait"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"À présent, votre téléphone fonctionne normalement"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"À présent, votre téléphone fonctionne normalement.\nAppuyer pour en savoir plus"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Votre téléphone s\'est éteint, car il surchauffait. Il s\'est refroidi et fonctionne normalement.\n\nIl peut surchauffer si vous :\n	• exécutez applis utilisant beaucoup de ressources (jeux, vidéo, navigation, etc.) ;\n	• téléchargez ou importez gros fichiers ;\n	• utilisez téléphone à des températures élevées."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Afficher les étapes d\'entretien"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Le téléphone chauffe"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Fonctionnalités limitées pendant le refroidissement du téléphone"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Fonctionnalités limitées pendant le refroidissement du téléphone.\nAppuyer pour en savoir plus"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Votre téléphone va essayer de se refroidir automatiquement. Vous pouvez toujours l\'utiliser, mais il risque d\'être plus lent.\n\nUne fois refroidi, il fonctionnera normalement."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Afficher les étapes d\'entretien"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Débrancher le chargeur"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Un problème est survenu lors de la recharge de cet appareil. Débranchez l\'adaptateur secteur en faisant attention, car le câble risque d\'être chaud."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Afficher les étapes d\'entretien"</string>

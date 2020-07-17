@@ -930,11 +930,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ಹಿಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ಫೋನ್ ಬಿಸಿಯಾಗಿದ್ದರಿಂದ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ಈಗ ನಿಮ್ಮ ಫೋನ್ ಎಂದಿನಂತೆ ಕೆಲಸ ಮಾಡುತ್ತಿದೆ"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ನಿಮ್ಮ ಫೋನ್ ಈಗ ಎಂದಿನಂತೆ ರನ್ ಆಗುತ್ತಿದೆ.\nಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ನಿಮ್ಮ ಫೋನ್ ತುಂಬಾ ಬಿಸಿಯಾಗಿತ್ತು, ತಣ್ಣಗಾಗಲು ಅದು ತಾನಾಗಿ ಆಫ್ ಆಗಿದೆ. ಈಗ ನಿಮ್ಮ ಫೋನ್ ಎಂದಿನಂತೆ ಕೆಲಸ ಮಾಡುತ್ತಿದೆ.\n\nನಿಮ್ಮ ಫೋನ್ ಬಿಸಿಯಾಗಲು ಕಾರಣಗಳು:\n	• ಹೆಚ್ಚು ಸಂಪನ್ಮೂಲ ಉಪಯೋಗಿಸುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಬಳಕೆ (ಉದಾ, ಗೇಮಿಂಗ್, ವೀಡಿಯೊ/ನ್ಯಾವಿಗೇಶನ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು)\n	• ದೊಡ್ಡ ಫೈಲ್‌ಗಳ ಡೌನ್‌ಲೋಡ್ ಅಥವಾ ಅಪ್‌ಲೋಡ್\n	• ಅಧಿಕ ಉಷ್ಣಾಂಶದಲ್ಲಿ ಫೋನಿನ ಬಳಕೆ"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ಫೋನ್ ಬಿಸಿಯಾಗುತ್ತಿದೆ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸಲಾಗುತ್ತದೆ\nಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ನಿಮ್ಮ ಫೋನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಣ್ಣಗಾಗಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಈಗಲೂ ಬಳಸಬಹುದಾಗಿರುತ್ತದೆ, ಆದರೆ ಇದು ನಿಧಾನವಾಗಿರಬಹುದು.\n\nಒಮ್ಮೆ ನಿಮ್ಮ ಫೋನ್ ತಣ್ಣಗಾದ ನಂತರ ಇದು ಸಾಮಾನ್ಯ ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ಚಾರ್ಜರ್ ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ಈ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡುತ್ತಿರುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ. ಪವರ್ ಅಡಾಪ್ಟರ್ ಅನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ ಮತ್ತು ಕೇಬಲ್ ಬೆಚ್ಚಗಿರಬೇಕೆಂದು ಜಾಗ್ರತೆ ವಹಿಸಿ."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ಕಾಳಜಿ ಹಂತಗಳನ್ನು ನೋಡಿ"</string>

@@ -39,7 +39,6 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
-    private boolean mAlreadyCancelled;
 
     /**
      * @return true if the user has already enrolled the maximum number of templates.
@@ -95,17 +94,6 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
 
         mEnrollmentStartTimeMs = System.currentTimeMillis();
         startHalOperation();
-    }
-
-    @Override
-    public void cancel() {
-        if (mAlreadyCancelled) {
-            Slog.w(TAG, "stopEnroll: already cancelled!");
-            return;
-        }
-
-        stopHalOperation();
-        mAlreadyCancelled = true;
     }
 
     /**
