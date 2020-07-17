@@ -583,7 +583,8 @@ message Atom {
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
         BlobInfo blob_info = 10081 [(module) = "framework"];
-        DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
+        DataUsageBytesTransfer data_usage_bytes_transfer =
+                10082 [(module) = "framework", (truncate_timestamp) = true];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
         DNDModeProto dnd_mode_rule = 10084 [(module) = "framework"];
