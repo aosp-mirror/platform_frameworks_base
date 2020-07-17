@@ -10900,17 +10900,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *    not among the handles.
      */
     boolean isFromPrimePointer(MotionEvent event, boolean fromHandleView) {
+        boolean res = true;
         if (mPrimePointerId == NO_POINTER_ID)  {
             mPrimePointerId = event.getPointerId(0);
             mIsPrimePointerFromHandleView = fromHandleView;
         } else if (mPrimePointerId != event.getPointerId(0)) {
-            return mIsPrimePointerFromHandleView && fromHandleView;
+            res = mIsPrimePointerFromHandleView && fromHandleView;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_UP
             || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             mPrimePointerId = -1;
         }
-        return true;
+        return res;
     }
 
     @Override
