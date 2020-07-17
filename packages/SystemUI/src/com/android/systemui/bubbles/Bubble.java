@@ -712,22 +712,6 @@ class Bubble implements BubbleViewProvider {
         return Objects.hash(mKey);
     }
 
-    @Override
-    public void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index) {
-        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
-                mPackageName,
-                mChannelId,
-                mNotificationId,
-                index,
-                bubbleCount,
-                action,
-                normalX,
-                normalY,
-                showInShade(),
-                false /* isOngoing (unused) */,
-                false /* isAppForeground (unused) */);
-    }
-
     @Nullable
     private static String getTitle(@NonNull final NotificationEntry e) {
         final CharSequence titleCharSeq = e.getSbn().getNotification().extras.getCharSequence(
