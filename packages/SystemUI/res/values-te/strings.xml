@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"విస్తరింపజేయి"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"కనిష్టీకరించు"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"మూసివేయి"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"సెట్టింగ్‌లు"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"తీసివేయడానికి కిందికి లాగండి"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"మెను"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> చిత్రంలో చిత్రం రూపంలో ఉంది"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
-    <string name="pip_play" msgid="333995977693142810">"ప్లే చేయి"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"పాజ్ చేయి"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"దాటవేసి తర్వాత దానికి వెళ్లు"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"దాటవేసి మునుపటి దానికి వెళ్లు"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"వేడెక్కినందుకు ఫోన్ ఆఫ్ చేయబడింది"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"మీ ఫోన్ చాలా వేడిగా ఉంది, కనుక చల్లబర్చడానికి ఆఫ్ చేయబడింది. మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది.\n\nమీరు ఇలా చేస్తే మీ ఫోన్ చాలా వేడెక్కవచ్చు:\n	• వనరు-ఆధారిత అనువర్తనాలు (గేమింగ్, వీడియో లేదా నావిగేషన్ వంటి అనువర్తనాలు) ఉపయోగించడం\n	• పెద్ద ఫైల్‌లను డౌన్‌లోడ్ లేదా అప్‌లోడ్ చేయడం\n	• అధిక ఉష్ణోగ్రతలలో మీ ఫోన్‌ని ఉపయోగించడం"</string>

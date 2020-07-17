@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ക്രമീകരണ ക്രമം എഡിറ്റുചെയ്യുക."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ലോക്ക് സ്‌ക്രീൻ"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"വികസിപ്പിക്കുക"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ചെറുതാക്കുക‍"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"അവസാനിപ്പിക്കുക"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ക്രമീകരണം"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"തള്ളിക്കളയാൻ താഴേക്ക് വലിച്ചിടുക"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"മെനു"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ചിത്രത്തിനുള്ളിൽ ചിത്രം രീതിയിലാണ്"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ഈ ഫീച്ചർ ഉപയോഗിക്കേണ്ടെങ്കിൽ, ടാപ്പ് ചെയ്‌ത് ക്രമീകരണം തുറന്ന് അത് ഓഫാക്കുക."</string>
-    <string name="pip_play" msgid="333995977693142810">"പ്ലേ ചെയ്യുക"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"താൽക്കാലികമായി നിർത്തുക"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"അടുത്തതിലേക്ക് പോകുക"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"മുമ്പത്തേതിലേക്ക് പോകുക"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ചൂട് കൂടിയതിനാൽ ഫോൺ ഓഫാക്കി"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"ഫോൺ ഇപ്പോൾ സാധാരണഗതിയിൽ പ്രവർത്തിക്കുന്നു"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ഫോൺ ചൂടായിരിക്കുന്നതിനാൽ തണുക്കാൻ ഓഫാക്കിയിരിക്കുന്നു. ഫോൺ ഇപ്പോൾ സാധാരണഗതിയിൽ പ്രവർത്തിക്കുന്നു.\n\nഫോണിന് ചൂട് കൂടാൻ കാരണം:\n	• ഗെയിമിംഗ്, വീഡിയോ അല്ലെങ്കിൽ നാവിഗേഷൻ തുടങ്ങിയ റിസോഴ്സ്-ഇന്റൻസീവായ ആപ്പുകൾ ഉപയോഗിക്കുന്നത്\n	• വലിയ ഫയലുകൾ അപ്‌ലോഡോ ഡൗൺലോഡോ ചെയ്യുന്നത്\n	• ഉയർന്ന താപനിലയിൽ ഫോൺ ഉപയോഗിക്കുന്നത്"</string>

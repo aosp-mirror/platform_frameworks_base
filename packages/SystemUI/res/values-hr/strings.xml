@@ -905,18 +905,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Uređivanje redoslijeda postavki."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključan zaslon"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Proširivanje"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimiziraj"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Zatvori"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Postavke"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Povucite prema dolje da biste odbacili"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Izbornik"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> jest na slici u slici"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Ako ne želite da aplikacija <xliff:g id="NAME">%s</xliff:g> upotrebljava tu značajku, dodirnite da biste otvorili postavke i isključili je."</string>
-    <string name="pip_play" msgid="333995977693142810">"Reproduciraj"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Pauziraj"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Preskoči na sljedeće"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Preskoči na prethodno"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog vrućine"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon sada radi normalno"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon se pregrijao, stoga se isključio kako bi se ohladio Telefon sada radi normalno.\n\nTelefon se može pregrijati ako:\n	• upotrebljavate zahtjevne aplikacije (kao što su igre, aplikacije za videozapise ili navigaciju)\n	• preuzimate ili prenosite velike datoteke\n	• upotrebljavate telefon na visokim temperaturama."</string>

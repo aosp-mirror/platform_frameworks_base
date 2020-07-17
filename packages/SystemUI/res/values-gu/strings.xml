@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"સેટિંગ્સનો ક્રમ સંપાદિત કરો."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> માંથી <xliff:g id="ID_1">%1$d</xliff:g> પૃષ્ઠ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"લૉક સ્ક્રીન"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"વિસ્તૃત કરો"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"નાનું કરો"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"બંધ કરો"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"સેટિંગ"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"છોડી દેવા માટે નીચે ખેંચો"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"મેનૂ"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
-    <string name="pip_play" msgid="333995977693142810">"ચલાવો"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"થોભાવો"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"આગલા પર જાઓ"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"પહેલાંના પર જાઓ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>

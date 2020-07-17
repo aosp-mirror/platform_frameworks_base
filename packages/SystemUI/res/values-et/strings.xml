@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Muuda seadete järjestust."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Leht <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lukustuskuva"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Laiendamine"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimeeri"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Sule"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Seaded"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Loobumiseks lohistage alla"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menüü"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> on režiimis Pilt pildis"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Kui te ei soovi, et rakendus <xliff:g id="NAME">%s</xliff:g> seda funktsiooni kasutaks, puudutage seadete avamiseks ja lülitage see välja."</string>
-    <string name="pip_play" msgid="333995977693142810">"Esita"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Peata"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Järgmise juurde"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Eelmise juurde"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tel. lül. kuumuse tõttu välja"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon töötab nüüd tavapäraselt"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon oli liiga kuum, seetõttu lülitus see jahtumiseks välja. Telefon töötab nüüd tavapäraselt.\n\nTelefon võib kuumaks minna:\n • ressursse koormavate rakenduste kasutamisel (nt mängu-, video- või navigatsioonirakendused)\n • suurte failide alla-/üleslaadimisel\n • telefoni kasutamisel kõrgel temperatuuril"</string>

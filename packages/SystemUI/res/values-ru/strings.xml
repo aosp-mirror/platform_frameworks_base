@@ -910,18 +910,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Изменить порядок быстрых настроек."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> из <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокированный экран"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Развернуть"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Свернуть"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Закрыть"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Настройки"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Чтобы закрыть, потяните вниз"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Меню"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> находится в режиме \"Картинка в картинке\""</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Чтобы отключить эту функцию для приложения \"<xliff:g id="NAME">%s</xliff:g>\", перейдите в настройки."</string>
-    <string name="pip_play" msgid="333995977693142810">"Воспроизвести"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Приостановить"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Перейти к следующему"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Перейти к предыдущему"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон выключился из-за перегрева"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Сейчас телефон работает нормально"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ваш телефон выключился из-за перегрева. Сейчас он работает нормально.\n\nВозможные причины перегрева телефона:\n	• использование ресурсоемких игр и приложений, связанных с видео или навигацией);\n	• скачивание или загрузка больших файлов;\n	• высокая температура окружающей среды."</string>

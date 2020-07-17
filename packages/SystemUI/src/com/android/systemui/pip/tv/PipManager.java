@@ -47,7 +47,6 @@ import android.util.Pair;
 import android.view.DisplayInfo;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
@@ -59,6 +58,7 @@ import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedSta
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
+import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.List;

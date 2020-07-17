@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Endre rekkefølgen på innstillingene."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskjerm"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Vis"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimer"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Lukk"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Innstillinger"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Dra ned for å avvise"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Meny"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> er i bilde-i-bilde"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
-    <string name="pip_play" msgid="333995977693142810">"Spill av"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Sett på pause"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Hopp til neste"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Hopp til forrige"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon ble slått av pga varme"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefonen din kjører nå som normalt"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonen din var for varm, så den ble slått av for å kjøles ned. Telefonen din kjører nå som normalt.\n\nTelefonen kan blir for varm hvis du:\n	• bruker ressurskrevende apper (for eksempel spill-, video- eller navigeringsapper)\n	• laster store filer opp eller ned\n	• bruker telefonen ved høy temperatur"</string>

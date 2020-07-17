@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ସେଟିଙ୍ଗର କ୍ରମ ସଂଶୋଧନ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ପୃଷ୍ଠା <xliff:g id="ID_1">%1$d</xliff:g> ମୋଟ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ବଢ଼ାନ୍ତୁ"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"ଛୋଟ କରନ୍ତୁ"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ସେଟିଙ୍ଗ"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ଖାରଜ କରିବାକୁ ତଳକୁ ଟାଣନ୍ତୁ"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"ମେନୁ"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> \"ଛବି-ଭିତରେ-ଛବି\"ରେ ଅଛି"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"ଏହି ବୈଶିଷ୍ଟ୍ୟ <xliff:g id="NAME">%s</xliff:g> ବ୍ୟବହାର ନକରିବାକୁ ଯଦି ଆପଣ ଚାହାଁନ୍ତି, ସେଟିଙ୍ଗ ଖୋଲିବାକୁ ଟାପ୍‍ କରନ୍ତୁ ଏବଂ ଏହା ଅଫ୍‍ କରିଦିଅନ୍ତୁ।"</string>
-    <string name="pip_play" msgid="333995977693142810">"ପ୍ଲେ କରନ୍ତୁ"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"ପଜ୍‍ କରନ୍ତୁ"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ପରବର୍ତ୍ତୀକୁ ଯାଆନ୍ତୁ"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ପୂର୍ବବର୍ତ୍ତୀକୁ ଛାଡ଼ନ୍ତୁ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ଗରମ ହେତୁ ଫୋନ୍‍ ଅଫ୍‍ କରିଦିଆଗଲା"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"ଆପଣଙ୍କ ଫୋନ୍‍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ଅବସ୍ଥାରେ ଚାଲୁଛି"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ଆପଣଙ୍କ ଫୋନ୍‍ ବହୁତ ଗରମ ଥିଲା, ତେଣୁ ଏହାକୁ ଥଣ୍ଡା କରାଯିବାକୁ ଅଫ୍‍ କରିଦିଆଗଲା। ଆପଣଙ୍କ ଫୋନ୍‍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ଅବସ୍ଥାରେ ଚାଲୁଛି।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଅଧିକ ଗରମ ହୋଇଯାଇପାରେ ଯଦି ଆପଣ:\n	• ରିସୋର୍ସ-ଇଣ୍ଟେନସିଭ୍‍ ଆପ୍‍ (ଯେପରିକି ଗେମିଙ୍ଗ, ଭିଡିଓ, କିମ୍ବା ନେଭିଗେସନ୍‍ ଆପ୍‍) ବ୍ୟବହାର କରନ୍ତି\n	• ବଡ ଫାଇଲ୍‍ ଡାଉନଲୋଡ୍ କିମ୍ବା ଅପଲୋଡ୍‍ କରନ୍ତି\n	• ଅଧିକ ତାପମାତ୍ରାରେ ଆପଣଙ୍କ ଫୋନ୍‍ ବ୍ୟବହାର କରନ୍ତି"</string>

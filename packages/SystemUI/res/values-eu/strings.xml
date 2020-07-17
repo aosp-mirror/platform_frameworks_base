@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editatu ezarpenen ordena."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantaila blokeatua"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Zabaldu"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimizatu"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Itxi"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Ezarpenak"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Baztertzeko, arrastatu behera"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menua"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"Pantaila txiki gainjarrian dago <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
-    <string name="pip_play" msgid="333995977693142810">"Erreproduzitu"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Pausatu"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Saltatu hurrengora"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Saltatu aurrekora"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Beroegi egoteagatik itzali da"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Orain, ohiko moduan dabil telefonoa"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonoa gehiegi berotu da, eta itzali egin da tenperatura jaisteko. Orain, ohiko moduan dabil.\n\nBerotzearen zergati posibleak:\n	• Baliabide asko behar dituzten aplikazioak erabiltzea (adib., jokoak, bideoak edo nabigazio-aplikazioak).\n	• Fitxategi handiak deskargatu edo kargatzea.\n	• Telefonoa giro beroetan erabiltzea."</string>

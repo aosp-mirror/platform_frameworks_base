@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Параметрлер тәртібін өзгерту."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ішінен <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Құлыпталған экран"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Жаю"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Кішірейту"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Жабу"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Реттеулер"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Жабу үшін төмен қарай сүйреңіз"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Mәзір"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> \"суреттегі сурет\" режимінде"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл мүмкіндікті пайдалануын қаламасаңыз, параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
-    <string name="pip_play" msgid="333995977693142810">"Ойнату"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Кідірту"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Келесіге өту"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Алдыңғысына оралу"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон қызып кеткендіктен өшірілді"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефоныңыз қазір қалыпты жұмыс істеп тұр"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефоныңыз қатты қызып кеткендіктен өшірілді. Телефоныңыз қазір қалыпты жұмыс істеп тұр.\n\nТелефоныңыз мына жағдайларда ыстық болуы мүмкін:\n	• Ресурстар талап ететін қолданбаларды пайдалану (ойын, бейне немесе навигация қолданбалары)\n	• Үлкен көлемді файлдарды жүктеу немесе жүктеп салу\n	• Телефонды жоғары температурада пайдалану"</string>

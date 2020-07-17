@@ -910,18 +910,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Edytuj kolejność ustawień."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Strona <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran blokady"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Rozwiń"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimalizuj"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Zamknij"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Ustawienia"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Przeciągnij w dół, by zamknąć"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"Aplikacja <xliff:g id="NAME">%s</xliff:g> działa w trybie obraz w obrazie"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i wyłącz ją."</string>
-    <string name="pip_play" msgid="333995977693142810">"Odtwórz"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Wstrzymaj"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Dalej"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Wstecz"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon wyłączony: przegrzanie"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon działa teraz normalnie"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon był zbyt gorący i wyłączył się, by obniżyć temperaturę. Urządzenie działa teraz normalnie.\n\nTelefon może się przegrzać, gdy:\n	• Używasz aplikacji zużywających dużo zasobów (np. gier, nawigacji czy odtwarzaczy filmów)\n	• Pobierasz lub przesyłasz duże pliki\n	• Używasz telefonu w wysokiej temperaturze"</string>

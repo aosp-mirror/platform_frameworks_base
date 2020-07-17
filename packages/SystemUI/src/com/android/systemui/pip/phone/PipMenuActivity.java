@@ -76,7 +76,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.Collections;

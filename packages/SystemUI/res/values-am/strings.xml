@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"የቅንብሮድ ቅደም-ተከተል አርትዕ።"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ገጽ <xliff:g id="ID_1">%1$d</xliff:g> ከ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ማያ ገጽ ቁልፍ"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"ዘርጋ"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"አሳንስ"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"ዝጋ"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ቅንብሮች"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ለማሰናበት ወደ ታች ይጎትቱ"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"ምናሌ"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> በስዕል-ላይ-ስዕል ውስጥ ነው"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ይህን ባህሪ እንዲጠቀም ካልፈለጉ ቅንብሮችን ለመክፈት መታ ያድርጉና ያጥፉት።"</string>
-    <string name="pip_play" msgid="333995977693142810">"አጫውት"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"ባለበት አቁም"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ወደ ቀጣይ ዝለል"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"ወደ ቀዳሚ ዝለል"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"የእርስዎ ስልክ በጣም ግሎ ነበር፣ ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪዲዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትላልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>

@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Badilisha orodha ya mipangilio."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Ukurasa wa <xliff:g id="ID_1">%1$d</xliff:g> kati ya <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Skrini iliyofungwa"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Panua"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Punguza"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Funga"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Mipangilio"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Buruta ili uondoe"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menyu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> iko katika hali ya picha ndani ya picha nyingine"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Ikiwa hutaki <xliff:g id="NAME">%s</xliff:g> itumie kipengele hiki, gusa ili ufungue mipangilio na uizime."</string>
-    <string name="pip_play" msgid="333995977693142810">"Cheza"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Sitisha"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Ruka ufikie inayofuata"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Ruka ufikie iliyotangulia"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Simu ilizima kutokana na joto"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Simu yako sasa inafanya kazi ipasavyo"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Simu yako ilikuwa moto sana, kwa hivyo ilijizima ili ipoe. Simu yako sasa inafanya kazi ipasavyo.\n\nSimu yako inaweza kuwa moto sana ikiwa:\n	• Unatumia programu zinazotumia vipengee vingi (kama vile michezo ya video, video au programu za uelekezaji)\n	• Unapakua au upakie faili kubwa\n	• Unatumia simu yako katika maeneo yenye halijoto ya juu"</string>
