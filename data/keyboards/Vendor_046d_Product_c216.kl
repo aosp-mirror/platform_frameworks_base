@@ -16,15 +16,15 @@
 # Logitech Dual Action Controller
 #
 
-key 0x120    BUTTON_A
-key 0x123    BUTTON_B
-key 0x121    BUTTON_X
-key 0x122    BUTTON_Y
+key 0x121    BUTTON_A
+key 0x122    BUTTON_B
+key 0x120    BUTTON_X
+key 0x123    BUTTON_Y
 key 0x124    BUTTON_L1
 key 0x125    BUTTON_R1
 key 0x126    BUTTON_L2
 key 0x127    BUTTON_R2
-key 0x128    BUTTON_SELECT
+key 0x128    BACK
 key 0x129    BUTTON_START
 key 0x12a    BUTTON_THUMBL
 key 0x12b    BUTTON_THUMBR
