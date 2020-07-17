@@ -107,9 +107,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Ni storitve."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Preklop načina vnosa"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Način za letalo"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"Za pripravo na posodobitev morate vnesti kodo PIN"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Za pripravo na posodobitev morate vnesti vzorec"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Za pripravo na posodobitev morate vnesti geslo"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Po vnovičnem zagonu naprave je treba vnesti vzorec"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Po vnovičnem zagonu naprave je treba vnesti kodo PIN"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Po vnovičnem zagonu naprave je treba vnesti geslo"</string>

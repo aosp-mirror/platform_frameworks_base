@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Sem serviço."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Alternar o método de introdução"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Modo de avião"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"É necessário introduzir o PIN para a preparação para a atualização."</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"É necessário introduzir o padrão para a preparação para a atualização."</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"É necessário introduzir a palavra-passe para a preparação para a atualização."</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"É necessário um padrão após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"É necessário um PIN após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"É necessária uma palavra-passe após reiniciar o dispositivo"</string>
