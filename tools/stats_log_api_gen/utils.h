@@ -59,7 +59,7 @@ void write_closing_namespace(FILE* out, const string& cppNamespaces);
 
 void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl);
 
-void write_native_method_signature(FILE* out, const string& signaturePrefix,
+void write_native_method_signature(FILE* out, const string& methodName,
                                    const vector<java_type_t>& signature,
                                    const AtomDecl& attributionDecl, const string& closer);
 
