@@ -396,14 +396,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             return false;
         }
 
-        /**
-         * Returns true if the window has a letterbox and any part of that letterbox overlaps with
-         * the given {@code rect}.
-         */
-        default boolean isLetterboxedOverlappingWith(Rect rect) {
-            return false;
-        }
-
         /** @return the current windowing mode of this window. */
         int getWindowingMode();
 
