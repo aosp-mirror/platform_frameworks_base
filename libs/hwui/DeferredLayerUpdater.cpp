@@ -149,6 +149,9 @@ void DeferredLayerUpdater::apply() {
                 sk_sp<SkImage> layerImage = mImageSlots[slot].createIfNeeded(
                         hardwareBuffer, dataspace, newContent,
                         mRenderState.getRenderThread().getGrContext());
+                // unref to match the ref added by ASurfaceTexture_dequeueBuffer. eglCreateImageKHR
+                // (invoked by createIfNeeded) will add a ref to the AHardwareBuffer.
+                AHardwareBuffer_release(hardwareBuffer);
                 if (layerImage.get()) {
                     SkMatrix textureTransform;
                     mat4(transformMatrix).copyTo(textureTransform);
