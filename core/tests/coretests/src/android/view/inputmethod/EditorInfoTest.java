@@ -264,6 +264,25 @@ public class EditorInfoTest {
                         InputConnection.GET_TEXT_WITH_STYLES)));
     }
 
+    @Test
+    public void surroundingTextRetrieval_writeToParcel_noException() {
+        StringBuilder sb = new StringBuilder("abcdefg");
+        Parcel parcel = Parcel.obtain();
+        EditorInfo editorInfo = new EditorInfo();
+        editorInfo.initialSelStart = 2;
+        editorInfo.initialSelEnd = 5;
+        editorInfo.inputType = EditorInfo.TYPE_CLASS_TEXT;
+
+        editorInfo.setInitialSurroundingText(sb);
+        sb.setLength(0);
+        editorInfo.writeToParcel(parcel, 0);
+
+        try {
+            editorInfo.getInitialTextBeforeCursor(60, 1);
+            fail("Test shouldn't have exception");
+        } catch (AssertionError e) { }
+    }
+
     private static void assertExpectedTextLength(EditorInfo editorInfo,
             @Nullable Integer expectBeforeCursorLength, @Nullable Integer expectSelectionLength,
             @Nullable Integer expectAfterCursorLength) {
