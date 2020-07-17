@@ -19,8 +19,8 @@ package android.view.inputmethod;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
-import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR;
-import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR;
+import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
+import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -89,6 +89,7 @@ import com.android.internal.view.InputBindResult;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -610,14 +611,13 @@ public final class InputMethodManager {
         @Override
         public void startInputAsyncOnWindowFocusGain(View focusedView,
                 @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
-            final boolean forceNewFocus1 = forceNewFocus;
             final int startInputFlags = getStartInputFlags(focusedView, 0);
 
             final ImeFocusController controller = getFocusController();
             if (controller == null) {
                 return;
             }
-            if (controller.checkFocus(forceNewFocus1, false)) {
+            if (controller.checkFocus(forceNewFocus, false)) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
                 // about the window gaining focus, to help make the transition
@@ -633,15 +633,15 @@ public final class InputMethodManager {
                 // we'll just do a window focus gain and call it a day.
                 try {
                     View servedView = controller.getServedView();
-                    boolean nextFocusSameEditor = servedView != null && servedView == focusedView
-                            && isSameEditorAndAcceptingText(focusedView);
+                    boolean nextFocusHasConnection = servedView != null && servedView == focusedView
+                            && hasActiveConnection(focusedView);
                     if (DEBUG) {
                         Log.v(TAG, "Reporting focus gain, without startInput"
-                                + ", nextFocusIsServedView=" + nextFocusSameEditor);
+                                + ", nextFocusIsServedView=" + nextFocusHasConnection);
                     }
                     final int startInputReason =
-                            nextFocusSameEditor ? WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR
-                                    : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR;
+                            nextFocusHasConnection ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
+                                    : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
                     mService.startInputOrWindowGainedFocus(
                             startInputReason, mClient,
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
@@ -701,33 +701,24 @@ public final class InputMethodManager {
         }
 
         /**
-         * For {@link ImeFocusController} to check if the given focused view aligns with the same
-         * editor and the editor is active to accept the text input.
+         * Checks whether the active input connection (if any) is for the given view.
          *
-         * TODO(b/160968797): Remove this method and move mCurrentTextBoxAttritube to
+         * TODO(b/160968797): Remove this method and move mServedInputConnectionWrapper to
          *  ImeFocusController.
-         * In the long-term, we should make mCurrentTextBoxAtrtribue as per-window base instance,
-         * so that we we can directly check if the current focused view aligned with the same editor
-         * in the window without using this checking.
          *
-         * Note that this method is only use for fixing start new input may ignored issue
+         * Note that this method is only intended for restarting input after focus gain
          * (e.g. b/160391516), DO NOT leverage this method to do another check.
          */
-        public boolean isSameEditorAndAcceptingText(View view) {
+        @Override
+        public boolean hasActiveConnection(View view) {
             synchronized (mH) {
-                if (!hasServedByInputMethodLocked(view) || mCurrentTextBoxAttribute == null) {
+                if (!hasServedByInputMethodLocked(view)) {
                     return false;
                 }
 
-                final EditorInfo ic = mCurrentTextBoxAttribute;
-                // This sameEditor checking is based on using object hash comparison to check if
-                // some fields of the current EditorInfo (e.g. autoFillId, OpPackageName) the
-                // hash code is same as the given focused view.
-                final boolean sameEditor = view.onCheckIsTextEditor() && view.getId() == ic.fieldId
-                        && view.getAutofillId() == ic.autofillId
-                        && view.getContext().getOpPackageName() == ic.packageName;
-                return sameEditor && mServedInputConnectionWrapper != null
-                        && mServedInputConnectionWrapper.isActive();
+                return mServedInputConnectionWrapper != null
+                        && mServedInputConnectionWrapper.isActive()
+                        && mServedInputConnectionWrapper.mServedView.get() == view;
             }
         }
     }
@@ -980,11 +971,13 @@ public final class InputMethodManager {
 
     private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
         private final InputMethodManager mParentInputMethodManager;
+        private final WeakReference<View> mServedView;
 
-        public ControlledInputConnectionWrapper(final Looper mainLooper, final InputConnection conn,
-                final InputMethodManager inputMethodManager) {
+        ControlledInputConnectionWrapper(Looper mainLooper, InputConnection conn,
+                InputMethodManager inputMethodManager, View servedView) {
             super(mainLooper, conn);
             mParentInputMethodManager = inputMethodManager;
+            mServedView = new WeakReference<>(servedView);
         }
 
         @Override
@@ -1007,6 +1000,7 @@ public final class InputMethodManager {
                     + "connection=" + getInputConnection()
                     + " finished=" + isFinished()
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
+                    + " mServedView=" + mServedView.get()
                     + "}";
         }
     }
@@ -1187,7 +1181,8 @@ public final class InputMethodManager {
         mMainLooper = looper;
         mH = new H(looper);
         mDisplayId = displayId;
-        mIInputContext = new ControlledInputConnectionWrapper(looper, mDummyInputConnection, this);
+        mIInputContext = new ControlledInputConnectionWrapper(looper, mDummyInputConnection, this,
+                null);
     }
 
     /**
@@ -1968,7 +1963,7 @@ public final class InputMethodManager {
                     icHandler = ic.getHandler();
                 }
                 servedContext = new ControlledInputConnectionWrapper(
-                        icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this);
+                        icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this, view);
             } else {
                 servedContext = null;
                 missingMethodFlags = 0;
