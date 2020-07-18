@@ -30,8 +30,8 @@ import java.lang.annotation.Retention;
 @IntDef(value = {
         StartInputReason.UNSPECIFIED,
         StartInputReason.WINDOW_FOCUS_GAIN,
-        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR,
-        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR,
+        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION,
+        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION,
         StartInputReason.APP_CALLED_RESTART_INPUT_API,
         StartInputReason.CHECK_FOCUS,
         StartInputReason.BOUND_TO_IMMS,
@@ -54,13 +54,13 @@ public @interface StartInputReason {
      * view and its input connection remains. {@link android.view.inputmethod.InputMethodManager}
      * just reports this window focus change event to sync IME input target for system.
      */
-    int WINDOW_FOCUS_GAIN_REPORT_WITH_SAME_EDITOR = 2;
+    int WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION = 2;
     /**
      * {@link android.view.Window} gained focus but there is no {@link android.view.View} that is
      * eligible to have IME focus. {@link android.view.inputmethod.InputMethodManager} just reports
      * this window focus change event for logging.
      */
-    int WINDOW_FOCUS_GAIN_REPORT_WITHOUT_EDITOR = 3;
+    int WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION = 3;
     /**
      * {@link android.view.inputmethod.InputMethodManager#restartInput(android.view.View)} is
      * either explicitly called by the application or indirectly called by some Framework class
