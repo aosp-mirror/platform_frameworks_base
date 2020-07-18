@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.BarControllerProto.STATE;
 import static com.android.server.wm.BarControllerProto.TRANSIENT_STATE;
 
+import android.annotation.NonNull;
 import android.app.StatusBarManager;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -169,13 +170,23 @@ public class BarController {
         return vis;
     }
 
+    private Rect getContentFrame(@NonNull WindowState win) {
+        final Rect rotatedContentFrame = win.mToken.getFixedRotationBarContentFrame(mWindowType);
+        return rotatedContentFrame != null ? rotatedContentFrame : mContentFrame;
+    }
+
+    boolean isLightAppearanceAllowed(WindowState win) {
+        if (win == null) {
+            return true;
+        }
+        return !win.isLetterboxedOverlappingWith(getContentFrame(win));
+    }
+
     boolean isTransparentAllowed(WindowState win) {
         if (win == null) {
             return true;
         }
-        final Rect rotatedContentFrame = win.mToken.getFixedRotationBarContentFrame(mWindowType);
-        final Rect contentFrame = rotatedContentFrame != null ? rotatedContentFrame : mContentFrame;
-        return !win.isLetterboxedOverlappingWith(contentFrame);
+        return win.letterboxNotIntersectsOrFullyContains(getContentFrame(win));
     }
 
     boolean setBarShowingLw(final boolean show) {
