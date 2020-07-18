@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.server.wm.flicker">
 
-    <uses-sdk android:minSdkVersion="27" android:targetSdkVersion="27"/>
+    <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29"/>
     <!-- Read and write traces from external storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

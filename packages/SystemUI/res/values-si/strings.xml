@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"සැකසීම්වල අනුපිළිවෙළ සංංස්කරණය කරන්න."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> න් <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"අගුලු තිරය"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"දිග හරින්න"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"කුඩා කරන්න"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"වසන්න"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"සැකසීම්"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ඉවත ලෑමට පහළට ඇදගෙන යන්න"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"මෙනුව"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> පින්තූරය-තුළ-පින්තූරය තුළ වේ"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"ඔබට <xliff:g id="NAME">%s</xliff:g> මෙම විශේෂාංගය භාවිත කිරීමට අවශ්‍ය නැති නම්, සැකසීම් විවෘත කිරීමට තට්ටු කර එය ක්‍රියාවිරහිත කරන්න."</string>
-    <string name="pip_play" msgid="333995977693142810">"ධාවනය කරන්න"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"විරාම කරන්න"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"ඊළඟ එකට පනින්න"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"පෙර එකට පනින්න"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ප්‍රතිප්‍රමාණ කරන්න"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"දුරකථනය රත් වීම නිසා ක්‍රියාවිරහිත කරන ලදී"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"ඔබගේ දුරකථනය දැන් සාමාන්‍ය ලෙස ධාවනය වේ.\nතව තතු සඳහා තට්ටු කරන්න"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ඔබේ දුරකථනය ඉතාම උණුසුම්ය, එම නිසා එය සිසිල් වීමට ක්‍රියාවිරහිත කරන ලදී. ධැන් ඔබේ දුරකථනය සාමාන්‍ය පරිදි ධාවනය වේ.\n\nඔබ පහත දේවල් සිදු කළහොත් ඔබේ දුරකථනය ඉතාම උණුසුම් විය හැකිය:\n	• සම්පත්-දැඩි සත්කාරක යෙදුම් භාවිතය (ක්‍රීඩා, වීඩියෝ, හෝ සංචලන යෙදුම් යනාදී)\n	• විශාල ගොනු බාගැනීම හෝ උඩුගත කිරීම\n	• ඔබේ දුරකථනය අධික උෂ්ණත්වයේදී භාවිත කිරීම"</string>

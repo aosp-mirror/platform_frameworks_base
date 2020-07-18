@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Жөндөөлөрдүн иретин өзгөртүү."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Кулпуланган экран"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Жайып көрсөтүү"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Кичирейтүү"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Жабуу"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Жөндөөлөр"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Четке кагуу үчүн төмөн сүйрөңүз"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Меню"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> – сүрөт ичиндеги сүрөт"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
-    <string name="pip_play" msgid="333995977693142810">"Ойнотуу"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Тындыруу"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Кийинкисине өткөрүп жиберүү"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Мурункусуна өткөрүп жиберүү"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Өлчөмүн өзгөртүү"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон ысыгандыктан өчүрүлдү"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефонуңуз кадимкидей иштеп жатат.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонуңуз өтө ысып кеткендиктен, аны муздатуу үчүн өчүрүлдү. Эми телефонуңуз кадимкидей иштеп жатат.\n\nТелефонуңуз төмөнкү шарттарда ысып кетиши мүмкүн:\n	• Ашыкча ресурс короткон колдонмолорду (оюндар, видео же чабыттоо колдонмолору) пайдалансаңыз \n	• Ири көлөмдөгү файлдарды жүктөп алсаңыз же берсеңиз\n	• Телефонуңузду жогорку температураларда пайдалансаңыз"</string>

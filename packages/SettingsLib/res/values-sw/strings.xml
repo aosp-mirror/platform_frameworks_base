@@ -553,5 +553,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Imezimwa"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Imewashwa"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Ni lazima uwashe tena kifaa chako ili mabadiliko haya yatekelezwe. Washa tena sasa au ughairi."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Vipokea sauti vyenye waya vinavyobanwa kichwani"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Vipokea sauti vya waya"</string>
 </resources>

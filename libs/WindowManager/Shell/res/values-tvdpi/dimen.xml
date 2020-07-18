@@ -1,7 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2016 The Android Open Source Project
+    Copyright (C) 2020 The Android Open Source Project
 
-   Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
@@ -13,13 +14,9 @@ Copyright (C) 2016 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+<resources>
+    <!-- The dimensions to user for picture-in-picture action buttons. -->
+    <dimen name="picture_in_picture_button_width">100dp</dimen>
+    <dimen name="picture_in_picture_button_start_margin">-50dp</dimen>
+</resources>
 
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M8 5v14l11-7z" />
-</vector>

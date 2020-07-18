@@ -916,19 +916,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Редактиране на подредбата на настройките."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> от <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заключен екран"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Разгъване"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Намаляване"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Затваряне"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Настройки"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Преместете надолу с плъзгане, за да отхвърлите"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Меню"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> е в режима „Картина в картината“"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>
-    <string name="pip_play" msgid="333995977693142810">"Пускане"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Поставяне на пауза"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Към следващия елемент"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Към предишния елемент"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Преоразмеряване"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Тел. се изкл. поради загряване"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефонът ви вече работи нормално.\nДокоснете за още информация"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонът ви бе твърде горещ, затова се изключи с цел охлаждане. Вече работи нормално.\n\nТелефонът ви може да стане твърде горещ, ако:\n	• използвате приложения, които ползват голям обем ресурси (като например игри, видеосъдържание или приложения за навигация);\n	• изтегляте или качвате големи файлове;\n	• използвате устройството си при високи температури."</string>

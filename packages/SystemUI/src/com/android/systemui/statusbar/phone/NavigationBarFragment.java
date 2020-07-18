@@ -963,13 +963,22 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
 
         // Change the cancel pin gesture to home and back if recents button is invisible
-        boolean recentsVisible = mNavigationBarView.isRecentsButtonVisible();
+        boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         ButtonDispatcher backButton = mNavigationBarView.getBackButton();
-        if (recentsVisible) {
-            backButton.setOnLongClickListener(this::onLongPressBackRecents);
+        ButtonDispatcher recentsButton = mNavigationBarView.getRecentsButton();
+        if (pinningActive) {
+            boolean recentsVisible = mNavigationBarView.isRecentsButtonVisible();
+            backButton.setOnLongClickListener(recentsVisible
+                    ? this::onLongPressBackRecents
+                    : this::onLongPressBackHome);
+            recentsButton.setOnLongClickListener(this::onLongPressBackRecents);
         } else {
-            backButton.setOnLongClickListener(this::onLongPressBackHome);
+            backButton.setOnLongClickListener(null);
+            recentsButton.setOnLongClickListener(null);
         }
+        // Note, this needs to be set after even if we're setting the listener to null
+        backButton.setLongClickable(pinningActive);
+        recentsButton.setLongClickable(pinningActive);
     }
 
     private void notifyNavigationBarScreenOn() {
@@ -982,11 +991,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         ButtonDispatcher recentsButton = mNavigationBarView.getRecentsButton();
         recentsButton.setOnClickListener(this::onRecentsClick);
         recentsButton.setOnTouchListener(this::onRecentsTouch);
-        recentsButton.setLongClickable(true);
-        recentsButton.setOnLongClickListener(this::onLongPressBackRecents);
-
-        ButtonDispatcher backButton = mNavigationBarView.getBackButton();
-        backButton.setLongClickable(true);
 
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
@@ -1093,6 +1097,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private boolean onLongPressBackRecents(View v) {
         return onLongPressNavigationButtons(v, R.id.back, R.id.recent_apps);
     }
+
 
     /**
      * This handles long-press of both back and recents/home. Back is the common button with

@@ -1461,8 +1461,12 @@ public class AppOpsManager {
     /**
      * AppOp granted to apps that we are started via {@code am instrument -e --no-isolated-storage}
      *
+     * <p>MediaProvider is the only component (outside of system server) that should care about this
+     * app op, hence {@code SystemApi.Client.MODULE_LIBRARIES}.
+     *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
