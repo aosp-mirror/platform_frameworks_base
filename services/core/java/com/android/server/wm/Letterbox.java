@@ -77,10 +77,10 @@ public class Letterbox {
         mOuter.set(outer);
         mInner.set(inner);
 
-        mTop.layout(outer.left, outer.top, inner.right, inner.top, surfaceOrigin);
-        mLeft.layout(outer.left, inner.top, inner.left, outer.bottom, surfaceOrigin);
-        mBottom.layout(inner.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
-        mRight.layout(inner.right, outer.top, outer.right, inner.bottom, surfaceOrigin);
+        mTop.layout(outer.left, outer.top, outer.right, inner.top, surfaceOrigin);
+        mLeft.layout(outer.left, outer.top, inner.left, outer.bottom, surfaceOrigin);
+        mBottom.layout(outer.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
+        mRight.layout(inner.right, outer.top, outer.right, outer.bottom, surfaceOrigin);
     }
 
 
@@ -98,6 +98,31 @@ public class Letterbox {
     /** @return The frame that used to place the content. */
     Rect getInnerFrame() {
         return mInner;
+    }
+
+    /**
+     * Returns {@code true} if the letterbox does not overlap with the bar, or the letterbox can
+     * fully cover the window frame.
+     *
+     * @param rect The area of the window frame.
+     */
+    boolean notIntersectsOrFullyContains(Rect rect) {
+        int emptyCount = 0;
+        int noOverlappingCount = 0;
+        for (LetterboxSurface surface : mSurfaces) {
+            final Rect surfaceRect = surface.mLayoutFrameGlobal;
+            if (surfaceRect.isEmpty()) {
+                // empty letterbox
+                emptyCount++;
+            } else if (!Rect.intersects(surfaceRect, rect)) {
+                // no overlapping
+                noOverlappingCount++;
+            } else if (surfaceRect.contains(rect)) {
+                // overlapping and covered
+                return true;
+            }
+        }
+        return (emptyCount + noOverlappingCount) == mSurfaces.length;
     }
 
     /**
