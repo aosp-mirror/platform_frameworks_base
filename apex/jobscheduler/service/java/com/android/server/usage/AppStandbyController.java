@@ -456,7 +456,7 @@ public class AppStandbyController implements AppStandbyInternal {
             mSystemServicesReady = true;
 
             // Offload to handler thread to avoid boot time impact.
-            mHandler.post(mInjector::updatePowerWhitelistCache);
+            mHandler.post(AppStandbyController.this::updatePowerWhitelistCache);
 
             boolean userFileExists;
             synchronized (mAppIdleLock) {
@@ -1684,6 +1684,14 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    private void updatePowerWhitelistCache() {
+        if (mInjector.getBootPhase() < PHASE_SYSTEM_SERVICES_READY) {
+            return;
+        }
+        mInjector.updatePowerWhitelistCache();
+        postCheckIdleStates(UserHandle.USER_ALL);
+    }
+
     private class PackageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1999,10 +2007,7 @@ public class AppStandbyController implements AppStandbyInternal {
             }
         }
 
-        private void updatePowerWhitelistCache() {
-            if (mBootPhase < PHASE_SYSTEM_SERVICES_READY) {
-                return;
-            }
+        void updatePowerWhitelistCache() {
             try {
                 // Don't call out to DeviceIdleController with the lock held.
                 final String[] whitelistedPkgs =
@@ -2204,7 +2209,7 @@ public class AppStandbyController implements AppStandbyInternal {
                     break;
                 case PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED:
                     if (mSystemServicesReady) {
-                        mHandler.post(mInjector::updatePowerWhitelistCache);
+                        mHandler.post(AppStandbyController.this::updatePowerWhitelistCache);
                     }
                     break;
             }
