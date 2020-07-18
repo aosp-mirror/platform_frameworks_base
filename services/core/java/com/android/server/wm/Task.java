@@ -2384,6 +2384,15 @@ class Task extends WindowContainer<WindowContainer> {
 
         saveLaunchingStateIfNeeded();
         final boolean taskOrgChanged = updateTaskOrganizerState(false /* forceUpdate */);
+        if (taskOrgChanged) {
+            updateSurfacePosition(getSyncTransaction());
+            if (!isOrganized()) {
+                // Surface-size update was skipped before (since internally it no-ops if
+                // isOrganized() is true); however, now that this is not organized, the surface
+                // size needs to be updated by WM.
+                updateSurfaceSize(getSyncTransaction());
+            }
+        }
         // If the task organizer has changed, then it will already be receiving taskAppeared with
         // the latest task-info thus the task-info won't have changed.
         if (!taskOrgChanged && isOrganized()) {
@@ -3367,7 +3376,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         final int boundsChange = super.setBounds(bounds);
         mRotation = rotation;
-        updateSurfacePosition();
+        updateSurfacePositionNonOrganized();
         return boundsChange;
     }
 
@@ -3740,6 +3749,12 @@ class Task extends WindowContainer<WindowContainer> {
         // case, reparent the task to the home animation layer while it is being animated to allow
         // the home activity to reorder the app windows relative to its own.
         return getAppAnimationLayer(ANIMATION_LAYER_HOME);
+    }
+
+    @Override
+    void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
+        if (isOrganized()) return;
+        super.resetSurfacePositionForAnimationLeash(t);
     }
 
     @Override
@@ -4960,7 +4975,9 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean updateTaskOrganizerState(boolean forceUpdate) {
         if (!isRootTask()) {
-            return false;
+            final boolean result = setTaskOrganizer(null);
+            mLastTaskOrganizerWindowingMode = -1;
+            return result;
         }
 
         final int windowingMode = getWindowingMode();
@@ -4979,7 +4996,7 @@ class Task extends WindowContainer<WindowContainer> {
         final ITaskOrganizer org =
                 mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
         final boolean result = setTaskOrganizer(org);
-        mLastTaskOrganizerWindowingMode = windowingMode;
+        mLastTaskOrganizerWindowingMode = org != null ? windowingMode : -1;
         return result;
     }
 
@@ -7622,7 +7639,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     private void updateSurfaceBounds() {
         updateSurfaceSize(getSyncTransaction());
-        updateSurfacePosition();
+        updateSurfacePositionNonOrganized();
         scheduleAnimation();
     }
 

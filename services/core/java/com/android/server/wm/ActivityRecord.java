@@ -3655,13 +3655,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    @Override
-    protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
-        if (!mSurfaceAnimator.hasLeash()) {
-            t.reparent(mSurfaceControl, newParent);
-        }
-    }
-
     void logStartActivity(int tag, Task task) {
         final Uri data = intent.getData();
         final String strData = data != null ? data.toSafeString() : null;
