@@ -2039,7 +2039,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"দ্রুত সেটিংস"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"পাওয়ার ডায়লগ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"লক স্ক্রিন"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"স্ক্রিনশট"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"স্ক্রিনশট নিন"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"অন-স্ক্রিন অ্যাক্সেসিবিলিটি শর্টকাট"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"অন-স্ক্রিন অ্যাক্সেসিবিলিটি শর্টকাট বেছে নেওয়ার বিকল্প"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"অ্যাক্সেসিবিলিটি শর্টকাট"</string>
