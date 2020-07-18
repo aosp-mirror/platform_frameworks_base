@@ -555,5 +555,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"מושבת"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"מופעל"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"צריך להפעיל מחדש את המכשיר כדי להחיל את השינוי. יש להפעיל מחדש עכשיו או לבטל."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"אוזניות עם חוט"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"אוזניות חוטיות"</string>
 </resources>
