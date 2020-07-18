@@ -75,6 +75,16 @@ public class GestureLauncherService extends SystemService {
      */
     @VisibleForTesting static final long POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS = 500;
 
+    /**
+     * Number of taps required to launch panic ui.
+     */
+    private static final int PANIC_POWER_TAP_COUNT_THRESHOLD = 5;
+
+    /**
+     * Number of taps required to launch camera shortcut.
+     */
+    private static final int CAMERA_POWER_TAP_COUNT_THRESHOLD = 2;
+
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
     private final CameraLiftTriggerEventListener mCameraLiftTriggerListener =
@@ -135,6 +145,7 @@ public class GestureLauncherService extends SystemService {
 
     private long mLastPowerDown;
     private int mPowerButtonConsecutiveTaps;
+    private int mPowerButtonSlowConsecutiveTaps;
 
     public GestureLauncherService(Context context) {
         this(context, new MetricsLogger());
@@ -350,9 +361,8 @@ public class GestureLauncherService extends SystemService {
      * Whether to enable panic button gesture.
      */
     public static boolean isPanicButtonGestureEnabled(Context context, int userId) {
-        return isCameraLaunchEnabled(context.getResources())
-                && (Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.PANIC_GESTURE_ENABLED, 0, userId) != 0);
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.PANIC_GESTURE_ENABLED, 0, userId) != 0;
     }
 
     /**
@@ -384,6 +394,13 @@ public class GestureLauncherService extends SystemService {
                 isCameraLiftTriggerEnabled(resources);
     }
 
+    /**
+     * Attempts to intercept power key down event by detecting certain gesture patterns
+     *
+     * @param interactive true if the event's policy contains {@code FLAG_INTERACTIVE}
+     * @param outLaunched true if some action is taken as part of the key intercept (eg, app launch)
+     * @return true if the key down event is intercepted
+     */
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
             MutableBoolean outLaunched) {
         if (event.isLongPress()) {
@@ -392,41 +409,60 @@ public class GestureLauncherService extends SystemService {
             // taps or consecutive taps, so we want to ignore the long press event.
             return false;
         }
-        boolean launched = false;
+        boolean launchCamera = false;
+        boolean launchPanic = false;
         boolean intercept = false;
         long powerTapInterval;
         synchronized (this) {
             powerTapInterval = event.getEventTime() - mLastPowerDown;
-            if (mCameraDoubleTapPowerEnabled
-                    && powerTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
-                launched = true;
-                intercept = interactive;
-                mPowerButtonConsecutiveTaps++;
-            } else if (powerTapInterval < POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
-                mPowerButtonConsecutiveTaps++;
-            } else {
-                mPowerButtonConsecutiveTaps = 1;
-            }
             mLastPowerDown = event.getEventTime();
+            if (powerTapInterval >= POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
+                // Tap too slow, reset consecutive tap counts.
+                mPowerButtonConsecutiveTaps = 1;
+                mPowerButtonSlowConsecutiveTaps = 1;
+            } else if (powerTapInterval >= CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
+                // Tap too slow for shortcuts
+                mPowerButtonConsecutiveTaps = 1;
+                mPowerButtonSlowConsecutiveTaps++;
+            } else {
+                // Fast consecutive tap
+                mPowerButtonConsecutiveTaps++;
+                mPowerButtonSlowConsecutiveTaps++;
+            }
+            if (mPanicButtonGestureEnabled
+                    && mPowerButtonConsecutiveTaps == PANIC_POWER_TAP_COUNT_THRESHOLD) {
+                launchPanic = true;
+                intercept = interactive;
+            } else if (mCameraDoubleTapPowerEnabled
+                    && powerTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS
+                    && mPowerButtonConsecutiveTaps == CAMERA_POWER_TAP_COUNT_THRESHOLD) {
+                launchCamera = true;
+                intercept = interactive;
+            }
         }
-        if (DBG && mPowerButtonConsecutiveTaps > 1) {
-            Slog.i(TAG, Long.valueOf(mPowerButtonConsecutiveTaps) +
-                    " consecutive power button taps detected");
+        if (mPowerButtonConsecutiveTaps > 1 || mPowerButtonSlowConsecutiveTaps > 1) {
+            Slog.i(TAG, Long.valueOf(mPowerButtonConsecutiveTaps)
+                    + " consecutive power button taps detected, "
+                    + Long.valueOf(mPowerButtonSlowConsecutiveTaps)
+                    + " consecutive slow power button taps detected");
         }
-        if (launched) {
+        if (launchCamera) {
             Slog.i(TAG, "Power button double tap gesture detected, launching camera. Interval="
                     + powerTapInterval + "ms");
-            launched = handleCameraGesture(false /* useWakelock */,
+            launchCamera = handleCameraGesture(false /* useWakelock */,
                     StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
-            if (launched) {
+            if (launchCamera) {
                 mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
                         (int) powerTapInterval);
             }
+        } else if (launchPanic) {
+            Slog.i(TAG, "Panic gesture detected, launching panic.");
         }
-        mMetricsLogger.histogram("power_consecutive_short_tap_count", mPowerButtonConsecutiveTaps);
+        mMetricsLogger.histogram("power_consecutive_short_tap_count",
+                mPowerButtonSlowConsecutiveTaps);
         mMetricsLogger.histogram("power_double_tap_interval", (int) powerTapInterval);
-        outLaunched.value = launched;
-        return intercept && launched;
+        outLaunched.value = launchCamera || launchPanic;
+        return intercept && (launchCamera || launchPanic);
     }
 
     /**
