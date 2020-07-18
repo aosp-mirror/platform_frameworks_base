@@ -76,11 +76,14 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
+import com.android.systemui.SystemUIFactory;
 import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Translucent activity that gets started on top of a task in PIP to allow the user to control it.
@@ -100,6 +103,7 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_POINTER_EVENT = 7;
     public static final int MESSAGE_MENU_EXPANDED = 8;
     public static final int MESSAGE_FADE_OUT_MENU = 9;
+    public static final int MESSAGE_UPDATE_MENU_LAYOUT = 10;
 
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
@@ -129,7 +133,11 @@ public class PipMenuActivity extends Activity {
     private View mSettingsButton;
     private View mDismissButton;
     private View mResizeHandle;
+    private View mTopEndContainer;
     private int mBetweenActionPaddingLand;
+
+    @Inject
+    PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
     private AnimatorSet mMenuContainerAnimator;
 
@@ -193,6 +201,11 @@ public class PipMenuActivity extends Activity {
                     fadeOutMenu();
                     break;
                 }
+                case MESSAGE_UPDATE_MENU_LAYOUT: {
+                    final Rect bounds = (Rect) msg.obj;
+                    mPipMenuIconsAlgorithm.onBoundsChanged(bounds);
+                    break;
+                }
             }
         }
     };
@@ -208,6 +221,9 @@ public class PipMenuActivity extends Activity {
         getWindow().addFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         super.onCreate(savedInstanceState);
+
+        SystemUIFactory.getInstance().getRootComponent().inject(this);
+
         setContentView(R.layout.pip_menu_activity);
 
         mAccessibilityManager = getSystemService(AccessibilityManager.class);
@@ -217,6 +233,7 @@ public class PipMenuActivity extends Activity {
         mViewRoot.setBackground(mBackgroundDrawable);
         mMenuContainer = findViewById(R.id.menu_container);
         mMenuContainer.setAlpha(0);
+        mTopEndContainer = findViewById(R.id.top_end_container);
         mSettingsButton = findViewById(R.id.settings);
         mSettingsButton.setAlpha(0);
         mSettingsButton.setOnClickListener((v) -> {
@@ -238,6 +255,8 @@ public class PipMenuActivity extends Activity {
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
 
+        mPipMenuIconsAlgorithm.bindViews((ViewGroup) mViewRoot, (ViewGroup) mTopEndContainer,
+                mResizeHandle, mSettingsButton, mDismissButton);
         updateFromIntent(getIntent());
         setTitle(R.string.pip_menu_title);
         setDisablePreviewScreenshots(true);

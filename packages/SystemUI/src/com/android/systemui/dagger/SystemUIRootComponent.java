@@ -29,6 +29,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.onehanded.dagger.OneHandedModule;
+import com.android.systemui.pip.phone.PipMenuActivity;
 import com.android.systemui.pip.phone.dagger.PipModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
@@ -121,4 +122,9 @@ public interface SystemUIRootComponent {
      * Member injection into the supplied argument.
      */
     void inject(KeyguardSliceProvider keyguardSliceProvider);
+
+    /**
+     * Member injection into the supplied argument.
+     */
+    void inject(PipMenuActivity pipMenuActivity);
 }
