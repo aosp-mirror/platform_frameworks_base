@@ -121,26 +121,10 @@ cc_library {
     ],
     target: {
         android: {
-            shared_libs: [
-                "libstatssocket",
-                "libstatspull",
-            ],
-            export_shared_lib_headers: [
-                 "libstatssocket",
-                 "libstatspull",
-            ],
+            shared_libs: ["libstatssocket"],
         },
         host: {
-            static_libs: [
-                "libstatssocket",
-                "libstatspull",
-                "statsd-aidl-ndk_platform",
-            ],
-            shared_libs: ["libbinder_ndk"],
-            export_static_lib_headers: [
-                "libstatssocket",
-                "libstatspull",
-            ],
+            static_libs: ["libstatssocket"],
         },
     },
 }
