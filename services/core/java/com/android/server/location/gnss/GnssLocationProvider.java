@@ -718,7 +718,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         GnssSatelliteBlacklistHelper gnssSatelliteBlacklistHelper =
                 new GnssSatelliteBlacklistHelper(mContext,
                         mLooper, this);
-        mHandler.post(gnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
         mGnssBatchingProvider = new GnssBatchingProvider();
         mGnssGeofenceProvider = new GnssGeofenceProvider();
 
@@ -746,6 +745,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         setAllowed(true);
 
         sendMessage(INITIALIZE_HANDLER, 0, null);
+        mHandler.post(gnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
     }
 
     /**
