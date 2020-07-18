@@ -1399,6 +1399,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
+     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     */
+    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
+        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
+    }
+
+    /**
      * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
      * the given {@code rect}.
      */

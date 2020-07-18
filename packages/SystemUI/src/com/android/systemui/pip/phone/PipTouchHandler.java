@@ -348,7 +348,7 @@ public class PipTouchHandler {
     }
 
     private boolean shouldShowResizeHandle() {
-            return !mPipBoundsHandler.hasSaveReentryBounds();
+        return false;
     }
 
     public void setTouchGesture(PipTouchGesture gesture) {

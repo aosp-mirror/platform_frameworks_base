@@ -178,6 +178,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 Rect startBounds = (Rect) args.arg2;
                 Rect toBounds = (Rect) args.arg3;
                 userResizePip(startBounds, toBounds);
+                if (updateBoundsCallback != null) {
+                    updateBoundsCallback.accept(toBounds);
+                }
                 break;
             }
         }

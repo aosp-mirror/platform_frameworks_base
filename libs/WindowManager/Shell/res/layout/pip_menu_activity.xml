@@ -62,25 +62,30 @@
         </FrameLayout>
     </FrameLayout>
 
-    <ImageButton
-        android:id="@+id/settings"
-        android:layout_width="@dimen/pip_action_size"
-        android:layout_height="@dimen/pip_action_size"
-        android:layout_gravity="top|start"
-        android:padding="@dimen/pip_action_padding"
-        android:contentDescription="@string/pip_phone_settings"
-        android:src="@drawable/pip_ic_settings"
-        android:background="?android:selectableItemBackgroundBorderless" />
-
-    <ImageButton
-        android:id="@+id/dismiss"
-        android:layout_width="@dimen/pip_action_size"
-        android:layout_height="@dimen/pip_action_size"
+    <LinearLayout
+        android:id="@+id/top_end_container"
         android:layout_gravity="top|end"
-        android:padding="@dimen/pip_action_padding"
-        android:contentDescription="@string/pip_phone_close"
-        android:src="@drawable/pip_ic_close_white"
-        android:background="?android:selectableItemBackgroundBorderless" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/settings"
+            android:layout_width="@dimen/pip_action_size"
+            android:layout_height="@dimen/pip_action_size"
+            android:padding="@dimen/pip_action_padding"
+            android:contentDescription="@string/pip_phone_settings"
+            android:src="@drawable/pip_ic_settings"
+            android:background="?android:selectableItemBackgroundBorderless" />
+
+        <ImageButton
+            android:id="@+id/dismiss"
+            android:layout_width="@dimen/pip_action_size"
+            android:layout_height="@dimen/pip_action_size"
+            android:padding="@dimen/pip_action_padding"
+            android:contentDescription="@string/pip_phone_close"
+            android:src="@drawable/pip_ic_close_white"
+            android:background="?android:selectableItemBackgroundBorderless" />
+    </LinearLayout>
 
     <!--TODO (b/156917828): Add content description for a11y purposes?-->
     <ImageButton
@@ -89,6 +94,7 @@
         android:layout_height="@dimen/pip_resize_handle_size"
         android:layout_gravity="top|start"
         android:layout_margin="@dimen/pip_resize_handle_margin"
+        android:padding="@dimen/pip_resize_handle_padding"
         android:src="@drawable/pip_resize_handle"
         android:background="?android:selectableItemBackgroundBorderless" />
 </FrameLayout>

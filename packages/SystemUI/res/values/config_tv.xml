@@ -16,10 +16,6 @@
 
 <resources>
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
-         when the PIP menu is shown with settings. -->
-    <string translatable="false" name="pip_settings_bounds">"662 756 1142 1026"</string>
-
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
          when the PIP menu is shown in center. -->
     <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
 

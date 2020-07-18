@@ -68,6 +68,14 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_WINDOWED_MAGNIFICATION = FEATURE_SYSTEM_FIRST + 4;
 
     /**
+     * Display area that can be magnified in
+     * {@link Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN}. This is different from
+     * {@link #FEATURE_WINDOWED_MAGNIFICATION} that the whole display will be magnified.
+     * @hide
+     */
+    public static final int FEATURE_FULLSCREEN_MAGNIFICATION = FEATURE_SYSTEM_FIRST + 5;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;

@@ -17,11 +17,18 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
+
+import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
+import static com.android.server.wm.DisplayAreaPolicyBuilder.HierarchyBuilder;
 
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -81,20 +88,26 @@ public abstract class DisplayAreaPolicy {
 
             // Define the features that will be supported under the root of the whole logical
             // display. The policy will build the DisplayArea hierarchy based on this.
-            DisplayAreaPolicyBuilder.HierarchyBuilder rootHierarchy =
-                    new DisplayAreaPolicyBuilder.HierarchyBuilder(root)
-                    .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
-                            "WindowedMagnification", FEATURE_WINDOWED_MAGNIFICATION)
+            HierarchyBuilder rootHierarchy = new HierarchyBuilder(root)
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "WindowedMagnification",
+                            FEATURE_WINDOWED_MAGNIFICATION)
                             .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
                             .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
                             // Make the DA dimmable so that the magnify window also mirrors the dim
                             // layer
                             .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
                             .build())
-                    .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
-                            "OneHanded", FEATURE_ONE_HANDED)
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
+                            FEATURE_ONE_HANDED)
                             .all()
                             .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                            .build())
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "FullscreenMagnification",
+                            FEATURE_FULLSCREEN_MAGNIFICATION)
+                            .all()
+                            .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, TYPE_INPUT_METHOD,
+                                    TYPE_INPUT_METHOD_DIALOG, TYPE_MAGNIFICATION_OVERLAY,
+                                    TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
                             .build())
                     .setImeContainer(imeContainer)
                     .setTaskDisplayAreas(tdaList);
