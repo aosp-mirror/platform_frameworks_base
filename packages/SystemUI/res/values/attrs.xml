@@ -133,11 +133,6 @@
         <attr name="buttonStrokeWidth" format="dimension" />
     </declare-styleable>
 
-    <!-- Used to style rotate suggestion button AVD animations -->
-    <attr name="rotateButtonStartAngle" format="float" />
-    <attr name="rotateButtonEndAngle" format="float" />
-    <attr name="rotateButtonScaleX" format="float" />
-
     <!-- Used to style charging animation AVD animation -->
     <attr name="chargingAnimColor" format="color" />
 
