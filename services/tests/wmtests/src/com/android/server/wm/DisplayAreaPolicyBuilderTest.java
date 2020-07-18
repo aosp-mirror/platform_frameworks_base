@@ -26,9 +26,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
@@ -175,6 +177,39 @@ public class DisplayAreaPolicyBuilderTest {
         }
 
         assertThat(hasOneHandedFeature).isTrue();
+    }
+
+    @Test
+    public void testBuilder_defaultPolicy_hasWindowedMagnificationFeature() {
+        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
+                resourcesWithProvider(""));
+        final DisplayAreaPolicyBuilder.Result defaultPolicy =
+                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
+                        mRoot, mImeContainer);
+        final List<Feature> features = defaultPolicy.getFeatures();
+        boolean hasWindowedMagnificationFeature = false;
+        for (Feature feature : features) {
+            hasWindowedMagnificationFeature |= feature.getId() == FEATURE_WINDOWED_MAGNIFICATION;
+        }
+
+        assertThat(hasWindowedMagnificationFeature).isTrue();
+    }
+
+    @Test
+    public void testBuilder_defaultPolicy_hasFullscreenMagnificationFeature() {
+        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
+                resourcesWithProvider(""));
+        final DisplayAreaPolicyBuilder.Result defaultPolicy =
+                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
+                        mRoot, mImeContainer);
+        final List<Feature> features = defaultPolicy.getFeatures();
+        boolean hasFullscreenMagnificationFeature = false;
+        for (Feature feature : features) {
+            hasFullscreenMagnificationFeature |=
+                    feature.getId() == FEATURE_FULLSCREEN_MAGNIFICATION;
+        }
+
+        assertThat(hasFullscreenMagnificationFeature).isTrue();
     }
 
     @Test
