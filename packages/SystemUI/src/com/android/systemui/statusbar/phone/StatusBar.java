@@ -2477,7 +2477,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Runnable mCheckBarModes = this::checkBarModes;
 
     public void setInteracting(int barWindow, boolean interacting) {
-        final boolean changing = ((mInteractingWindows & barWindow) != 0) != interacting;
         mInteractingWindows = interacting
                 ? (mInteractingWindows | barWindow)
                 : (mInteractingWindows & ~barWindow);
@@ -2485,11 +2484,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mAutoHideController.suspendAutoHide();
         } else {
             mAutoHideController.resumeSuspendedAutoHide();
-        }
-        // manually dismiss the volume panel when interacting with the nav bar
-        if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
-            mNavigationBarController.touchAutoDim(mDisplayId);
-            dismissVolumeDialog();
         }
         checkBarModes();
     }
