@@ -52,6 +52,7 @@ public class MediaMetrics {
         public static final String AUDIO_SERVICE = AUDIO + SEPARATOR + "service";
         public static final String AUDIO_VOLUME = AUDIO + SEPARATOR + "volume";
         public static final String AUDIO_VOLUME_EVENT = AUDIO_VOLUME + SEPARATOR + "event";
+        public static final String AUDIO_MODE = AUDIO + SEPARATOR + "mode";
     }
 
     /**
@@ -138,6 +139,10 @@ public class MediaMetrics {
 
         public static final Key<String> REQUEST =
                 createKey("request", String.class);
+
+        // For audio mode
+        public static final Key<String> REQUESTED_MODE =
+                createKey("requestedMode", String.class); // audio_mode
 
         // For Bluetooth
         public static final Key<String> SCO_AUDIO_MODE =
