@@ -1203,7 +1203,7 @@
     <string name="aerr_process_repeated" msgid="1153152413537954974">"האפליקציה <xliff:g id="PROCESS">%1$s</xliff:g> נעצרת שוב ושוב"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"פתח שוב את האפליקציה"</string>
     <string name="aerr_report" msgid="3095644466849299308">"משוב"</string>
-    <string name="aerr_close" msgid="3398336821267021852">"סגור"</string>
+    <string name="aerr_close" msgid="3398336821267021852">"סגירה"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"השתק עד הפעלה מחדש של המכשיר"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"המתן"</string>
     <string name="aerr_close_app" msgid="8318883106083050970">"סגור את האפליקציה"</string>
@@ -1925,7 +1925,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"אפשרויות נוספות"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"סגור את האפשרויות הנוספות"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"הגדל"</string>
-    <string name="close_button_text" msgid="10603510034455258">"סגור"</string>
+    <string name="close_button_text" msgid="10603510034455258">"סגירה"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="two">בחרת <xliff:g id="COUNT_1">%1$d</xliff:g></item>
@@ -2098,7 +2098,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> קבצים</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + קובץ  אחד (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"אין אנשים מומלצים שניתן לשתף איתם"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"אין אנשים שניתן לשתף איתם"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"רשימת האפליקציות"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏לאפליקציה זו לא ניתנה הרשאת הקלטה, אבל אפשר להקליט אודיו באמצעות התקן ה-USB הזה."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"בית"</string>

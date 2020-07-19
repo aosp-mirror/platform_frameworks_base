@@ -222,7 +222,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"اپ ڈیٹ کرنے کی تیاری ہو رہی ہے…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"اپ ڈیٹ پیکج پر کاروائی کی جارہی ہے…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"دوبارہ شروع ہو رہا ہے…"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"فیکٹری ڈیٹا کی دوبارہ ترتیب"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"فیکٹری ڈیٹا ری سیٹ"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"دوبارہ شروع ہو رہا ہے…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"بند ہو رہا ہے…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"آپ کا ٹیبلیٹ بند ہو جائے گا۔"</string>
@@ -686,9 +686,9 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"اسکرین مقفل کریں"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"اسکرین کب اور کس طرح مقفل ہوتی ہے اس کو کنٹرول کریں۔"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"سبھی ڈیٹا صاف کریں"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"فیکٹری ڈیٹا کی دوبارہ ترتیب انجام دے کر وارننگ کے بغیر ٹیبلٹ کا ڈیٹا مٹائیں۔"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"فیکٹری ڈیٹا ری سیٹ انجام دے کر وارننگ کے بغیر ٹیبلٹ کا ڈیٹا مٹائیں۔"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏فیکٹری ڈیٹا ری سیٹ کو انجام دے کر انتباہ کیے بغیر اپنے Android TV آلہ کا ڈیٹا مٹائیں۔"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"فیکٹری ڈیٹا کی دوبارہ ترتیب انجام دے کر وارننگ کے بغیر فون کا ڈیٹا مٹائیں۔"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"فیکٹری ڈیٹا ری سیٹ انجام دے کر وارننگ کے بغیر فون کا ڈیٹا مٹائیں۔"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"صارف کا ڈیٹا ہٹائیں"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"وارننگ کے بغیر اس ٹیبلٹ پر موجود اس صارف کا ڈیٹا ہٹائیں۔"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏انتباہ کے بغیر اس Android TV آلہ پر اس صارف کا ڈیٹا ہٹائیں۔"</string>
