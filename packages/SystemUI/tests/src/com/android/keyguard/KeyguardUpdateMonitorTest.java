@@ -132,6 +132,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private FaceManager mFaceManager;
     @Mock
+    private List<FaceSensorProperties> mFaceSensorProperties;
+    @Mock
     private BiometricManager mBiometricManager;
     @Mock
     private PackageManager mPackageManager;
@@ -175,7 +177,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
-        when(mFaceManager.getSensorProperties()).thenReturn(new FaceSensorProperties());
+        when(mFaceManager.getSensorProperties()).thenReturn(mFaceSensorProperties);
+
+        // IBiometricsFace@1.0 does not support detection, only authentication.
+        when(mFaceSensorProperties.isEmpty()).thenReturn(false);
+        when(mFaceSensorProperties.get(anyInt())).thenReturn(new FaceSensorProperties(0 /* id */,
+                false /* supportsFaceDetection */));
+
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);

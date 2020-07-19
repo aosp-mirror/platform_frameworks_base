@@ -31,6 +31,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
@@ -85,7 +86,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
 
     private final Context mContext;
     private final IActivityTaskManager mActivityTaskManager;
-    private final SensorProperties mSensorProperties;
+    private final FingerprintSensorProperties mSensorProperties;
     private final BiometricScheduler mScheduler;
     private final Handler mHandler;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
@@ -97,25 +98,6 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     @Nullable private IBiometricsFingerprint mDaemon;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
-
-    /**
-     * Static properties that never change for a given sensor.
-     */
-    private static final class SensorProperties {
-        // Unique sensorId
-        final int sensorId;
-        // Is the sensor under-display
-        final boolean isUdfps;
-        // Supports finger detection without exposing accept/reject and without incrementing the
-        // lockout counter
-        final boolean supportsFingerDetectOnly;
-
-        SensorProperties(int sensorId, boolean isUdfps, boolean supportsFingerDetectOnly) {
-            this.sensorId = sensorId;
-            this.isUdfps = isUdfps;
-            this.supportsFingerDetectOnly = supportsFingerDetectOnly;
-        }
-    }
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -314,9 +296,11 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 isUdfps = false;
             }
         }
-        // Fingerprint2.1 supports finger-detect only since lockout is controlled in the framework.
-        mSensorProperties = new SensorProperties(sensorId, isUdfps,
-                true /* supportsFingerDetectOnly */);
+
+        final @FingerprintSensorProperties.SensorType int sensorType =
+                isUdfps ? FingerprintSensorProperties.TYPE_UDFPS
+                        : FingerprintSensorProperties.TYPE_REAR;
+        mSensorProperties = new FingerprintSensorProperties(sensorId, sensorType);
     }
 
     @Override
@@ -558,6 +542,10 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         return daemon != null;
     }
 
+    @NonNull FingerprintSensorProperties getFingerprintSensorProperties() {
+        return mSensorProperties;
+    }
+
     void rename(int fingerId, int userId, String name) {
         mHandler.post(() -> {
             FingerprintUtils.getInstance().renameBiometricForUser(mContext, userId, fingerId, name);
@@ -590,10 +578,6 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         }
         final Udfps udfps = (Udfps) client;
         udfps.onFingerUp();
-    }
-
-    boolean isUdfps() {
-        return mSensorProperties.isUdfps;
     }
 
     void setUdfpsOverlayController(IUdfpsOverlayController controller) {

@@ -21,6 +21,7 @@ import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.view.Surface;
 import java.util.List;
 
@@ -29,6 +30,9 @@ import java.util.List;
  * @hide
  */
 interface IFingerprintService {
+    // Retrieve static sensor properties for all fingerprint sensors
+    List<FingerprintSensorProperties> getSensorProperties(String opPackageName);
+
     // Authenticate the given sessionId with a fingerprint. This is protected by
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
     // through FingerprintManager now.
@@ -121,9 +125,6 @@ interface IFingerprintService {
 
     // Notifies about a finger leaving the sensor area.
     void onFingerUp();
-
-    // Returns whether the sensor is an under-display fingerprint sensor (UDFPS).
-    boolean isUdfps();
 
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);

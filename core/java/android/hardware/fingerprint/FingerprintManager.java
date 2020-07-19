@@ -50,6 +50,7 @@ import android.util.Slog;
 import android.view.Surface;
 
 import java.security.Signature;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -740,24 +741,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public boolean isUdfps() {
-        if (mService == null) {
-            Slog.w(TAG, "isUdfps: no fingerprint service");
-            return false;
-        }
-
-        try {
-            return mService.isUdfps();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return false;
-    }
-
-    /**
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public void setUdfpsOverlayController(IUdfpsOverlayController controller) {
         if (mService == null) {
             Slog.w(TAG, "setUdfpsOverlayController: no fingerprint service");
@@ -859,6 +842,24 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
         }
         return false;
+    }
+
+    /**
+     * Get statically configured sensor properties.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    @NonNull
+    public List<FingerprintSensorProperties> getSensorProperties() {
+        try {
+            if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
+                return new ArrayList<>();
+            }
+            return mService.getSensorProperties(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return new ArrayList<>();
     }
 
     /**

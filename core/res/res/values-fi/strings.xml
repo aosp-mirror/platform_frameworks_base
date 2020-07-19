@@ -1159,8 +1159,8 @@
     <string name="noApplications" msgid="1186909265235544019">"Yksikään sovellus ei voi suorittaa tätä toimintoa."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> pysähtyi."</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> pysähtyi."</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> pysähtyy toistuvasti."</string>
-    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> pysähtyy toistuvasti."</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> pysähtyy toistuvasti"</string>
+    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> pysähtyy toistuvasti"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Avaa sovellus uudelleen"</string>
     <string name="aerr_report" msgid="3095644466849299308">"Lähetä palautetta"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Sulje"</string>

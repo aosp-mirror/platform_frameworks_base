@@ -2030,7 +2030,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fil</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Det finns inga rekommendationer för delning"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Inga rekommenderade personer att dela med"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Applista"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Appen har inte fått inspelningsbehörighet men kan spela in ljud via denna USB-enhet."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Startsida"</string>
