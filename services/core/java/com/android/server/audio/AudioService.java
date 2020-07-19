@@ -283,6 +283,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_HDMI_VOLUME_CHECK = 28;
     private static final int MSG_PLAYBACK_CONFIG_CHANGE = 29;
     private static final int MSG_BROADCAST_MICROPHONE_MUTE = 30;
+    private static final int MSG_CHECK_MODE_FOR_UID = 31;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -3683,12 +3684,14 @@ public class AudioService extends IAudioService.Stub
         private final IBinder mCb; // To be notified of client's death
         private final int mPid;
         private final int mUid;
+        private String mPackage;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
 
-        SetModeDeathHandler(IBinder cb, int pid, int uid) {
+        SetModeDeathHandler(IBinder cb, int pid, int uid, String caller) {
             mCb = cb;
             mPid = pid;
             mUid = uid;
+            mPackage = caller;
         }
 
         public void binderDied() {
@@ -3725,6 +3728,10 @@ public class AudioService extends IAudioService.Stub
 
         public int getUid() {
             return mUid;
+        }
+
+        public String getPackage() {
+            return mPackage;
         }
     }
 
@@ -3807,6 +3814,9 @@ public class AudioService extends IAudioService.Stub
                 hdlr = h;
                 // Remove from client list so that it is re-inserted at top of list
                 iter.remove();
+                if (hdlr.getMode() == AudioSystem.MODE_IN_COMMUNICATION) {
+                    mAudioHandler.removeEqualMessages(MSG_CHECK_MODE_FOR_UID, hdlr);
+                }
                 try {
                     hdlr.getBinder().unlinkToDeath(hdlr, 0);
                     if (cb != hdlr.getBinder()){
@@ -3837,7 +3847,7 @@ public class AudioService extends IAudioService.Stub
                 }
             } else {
                 if (hdlr == null) {
-                    hdlr = new SetModeDeathHandler(cb, pid, uid);
+                    hdlr = new SetModeDeathHandler(cb, pid, uid, caller);
                 }
                 // Register for client death notification
                 try {
@@ -3884,6 +3894,7 @@ public class AudioService extends IAudioService.Stub
             // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
             mModeLogger.log(
                     new PhoneStateEvent(caller, pid, mode, newModeOwnerPid, actualMode));
+
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int device = getDeviceForStream(streamType);
             int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
@@ -3894,6 +3905,16 @@ public class AudioService extends IAudioService.Stub
 
             // change of mode may require volume to be re-applied on some devices
             updateAbsVolumeMultiModeDevices(oldMode, actualMode);
+
+            if (actualMode == AudioSystem.MODE_IN_COMMUNICATION) {
+                sendMsg(mAudioHandler,
+                        MSG_CHECK_MODE_FOR_UID,
+                        SENDMSG_QUEUE,
+                        0,
+                        0,
+                        hdlr,
+                        CHECK_MODE_FOR_UID_PERIOD_MS);
+            }
         }
         return newModeOwnerPid;
     }
@@ -6402,6 +6423,35 @@ public class AudioService extends IAudioService.Stub
                 case MSG_BROADCAST_MICROPHONE_MUTE:
                     mSystemServer.sendMicrophoneMuteChangedIntent();
                     break;
+
+                case MSG_CHECK_MODE_FOR_UID:
+                    synchronized (mDeviceBroker.mSetModeLock) {
+                        if (msg.obj == null) {
+                            break;
+                        }
+                        // If the app corresponding to this mode death handler object is not
+                        // capturing or playing audio anymore after 3 seconds, remove it
+                        // from the stack. Otherwise, check again in 3 seconds.
+                        SetModeDeathHandler h = (SetModeDeathHandler) msg.obj;
+                        if (mSetModeDeathHandlers.indexOf(h) < 0) {
+                            break;
+                        }
+                        if (mRecordMonitor.isRecordingActiveForUid(h.getUid())
+                                || mPlaybackMonitor.isPlaybackActiveForUid(h.getUid())) {
+                            sendMsg(mAudioHandler,
+                                    MSG_CHECK_MODE_FOR_UID,
+                                    SENDMSG_QUEUE,
+                                    0,
+                                    0,
+                                    h,
+                                    CHECK_MODE_FOR_UID_PERIOD_MS);
+                            break;
+                        }
+                        // For now just log the fact that an app is hogging the audio mode.
+                        // TODO(b/160260850): remove abusive app from audio mode stack.
+                        mModeLogger.log(new PhoneStateEvent(h.getPackage(), h.getPid()));
+                    }
+                    break;
             }
         }
     }
@@ -7045,6 +7095,8 @@ public class AudioService extends IAudioService.Stub
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
+    // check playback or record activity every 3 seconds for UIDs owning mode IN_COMMUNICATION
+    private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 3000;
 
     private int safeMediaVolumeIndex(int device) {
         if (!mSafeMediaVolumeDevices.contains(device)) {
