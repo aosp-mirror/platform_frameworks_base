@@ -40,7 +40,7 @@ public class DismissCircleView extends FrameLayout {
 
         setBackground(res.getDrawable(R.drawable.dismiss_circle_background));
 
-        mIconView.setImageDrawable(res.getDrawable(R.drawable.ic_close_white));
+        mIconView.setImageDrawable(res.getDrawable(R.drawable.pip_ic_close_white));
         addView(mIconView);
 
         setViewSizes();

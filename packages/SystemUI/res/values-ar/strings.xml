@@ -920,18 +920,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"تعديل ترتيب الإعدادات."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"الصفحة <xliff:g id="ID_1">%1$d</xliff:g> من <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"شاشة القفل"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"توسيع"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"تصغير"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"إغلاق"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"الإعدادات"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"اسحب لأسفل للإلغاء"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"القائمة"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> يظهر في صورة داخل صورة"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم أوقِف تفعيل هذه الميزة."</string>
-    <string name="pip_play" msgid="333995977693142810">"تشغيل"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"إيقاف مؤقت"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"التخطي إلى التالي"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"التخطي إلى السابق"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف الهاتف بسبب الحرارة"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"يعمل هاتفك الآن بشكل طبيعي"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ارتفعت درجة حرارة هاتفك بشدة، لذا تم إيقاف تشغيله لخفض درجة حرارته. يعمل هاتفك الآن بشكل طبيعي.\n\nقد ترتفع بشدة درجة حرارة هاتفك إذا:\n	• استخدمت تطبيقات كثيفة الاستخدام لموارد الجهاز (مثل الألعاب أو الفيديو أو تطبيقات التنقل)\n	• نزَّلت أو حمَّلت ملفات كبيرة الحجم\n	• استخدمت هاتفك وسط أجواء مرتفعة الحرارة"</string>

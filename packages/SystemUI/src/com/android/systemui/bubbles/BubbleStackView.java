@@ -2891,23 +2891,13 @@ public class BubbleStackView extends FrameLayout
      * @param action the user interaction enum.
      */
     private void logBubbleEvent(@Nullable BubbleViewProvider provider, int action) {
-        if (provider == null || provider.getKey().equals(BubbleOverflow.KEY)) {
-            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
-                    mContext.getApplicationInfo().packageName,
-                    provider == null ? null : BubbleOverflow.KEY /* notification channel */,
-                    0 /* notification ID */,
-                    0 /* bubble position */,
-                    getBubbleCount(),
-                    action,
-                    getNormalizedXPosition(),
-                    getNormalizedYPosition(),
-                    false /* unread bubble */,
-                    false /* on-going bubble */,
-                    false /* isAppForeground (unused) */);
-            return;
-        }
-        provider.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
-                getNormalizedYPosition(), getBubbleIndex(provider));
+        mBubbleData.logBubbleEvent(provider,
+                action,
+                mContext.getApplicationInfo().packageName,
+                getBubbleCount(),
+                getBubbleIndex(provider),
+                getNormalizedXPosition(),
+                getNormalizedYPosition());
     }
 
     /**

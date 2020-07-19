@@ -2489,15 +2489,13 @@ class ActivityStack extends Task {
             return true;
         }
 
+        mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
+                getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
+                false /* deferResume */);
+
         ActivityRecord topActivity = getDisplayArea().topRunningActivity();
         ActivityStack topStack = topActivity.getRootTask();
         if (topStack != null && topStack != this && topActivity.isState(RESUMED)) {
-            // The new top activity is already resumed, so there's a good chance that nothing will
-            // get resumed below. So, update visibility now in case the transition is closed
-            // prematurely.
-            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                    getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
-                    false /* deferResume */);
             // Usually resuming a top activity triggers the next app transition, but nothing's got
             // resumed in this case, so we need to execute it explicitly.
             getDisplay().mDisplayContent.executeAppTransition();

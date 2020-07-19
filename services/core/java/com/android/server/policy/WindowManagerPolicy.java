@@ -140,6 +140,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     @IntDef({NAV_BAR_LEFT, NAV_BAR_RIGHT, NAV_BAR_BOTTOM})
     @interface NavigationBarPosition {}
 
+    @Retention(SOURCE)
+    @IntDef({ALT_BAR_UNKNOWN, ALT_BAR_LEFT, ALT_BAR_RIGHT, ALT_BAR_BOTTOM, ALT_BAR_TOP})
+    @interface AltBarPosition {}
+
     /**
      * Pass this event to the user / app.  To be returned from
      * {@link #interceptKeyBeforeQueueing}.
@@ -392,14 +396,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Returns true if the window is letterboxed for the display cutout.
          */
         default boolean isLetterboxedForDisplayCutoutLw() {
-            return false;
-        }
-
-        /**
-         * Returns true if the window has a letterbox and any part of that letterbox overlaps with
-         * the given {@code rect}.
-         */
-        default boolean isLetterboxedOverlappingWith(Rect rect) {
             return false;
         }
 

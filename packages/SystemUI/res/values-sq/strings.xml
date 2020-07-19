@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Modifiko rendin e cilësimeve."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Faqja <xliff:g id="ID_1">%1$d</xliff:g> nga <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekrani i kyçjes"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Zgjero"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimizo"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Mbyll"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Cilësimet"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Zvarrit poshtë për të larguar"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menyja"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> është në figurë brenda figurës"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Nëse nuk dëshiron që <xliff:g id="NAME">%s</xliff:g> ta përdorë këtë funksion, trokit për të hapur cilësimet dhe për ta çaktivizuar."</string>
-    <string name="pip_play" msgid="333995977693142810">"Luaj"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Ndërprit"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Kalo te tjetra"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Kalo tek e mëparshmja"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefoni u fik për shkak të nxehtësisë"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefoni tani punon normalisht"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefoni yt ishte tepër i nxehtë, prandaj u fik për t\'u ftohur. Telefoni tani punon normalisht.\n\nTelefoni mund të nxehet së tepërmi nëse ti:\n	• Përdor aplikacione intensive për burimet (siç janë aplikacionet e lojërave, videove apo aplikacionet e navigimit)\n	• Shkarkon ose ngarkon skedarë të mëdhenj\n	• E përdor telefonin në temperatura të larta"</string>

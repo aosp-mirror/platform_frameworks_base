@@ -2165,6 +2165,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
                 }
+                if (!Arrays.equals(win.mAttrs.providesInsetsTypes, attrs.providesInsetsTypes)) {
+                    throw new IllegalArgumentException(
+                            "Insets types can not be changed after the window is added.");
+                }
 
                 // Odd choice but less odd than embedding in copyFrom()
                 if ((attrs.privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY)

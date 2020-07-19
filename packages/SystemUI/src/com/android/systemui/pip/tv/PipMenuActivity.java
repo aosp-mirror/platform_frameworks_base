@@ -25,8 +25,8 @@ import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.systemui.R;
 import com.android.systemui.pip.tv.dagger.TvPipComponent;
+import com.android.wm.shell.R;
 
 import java.util.Collections;
 

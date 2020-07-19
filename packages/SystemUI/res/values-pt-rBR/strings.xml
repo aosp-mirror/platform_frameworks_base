@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editar ordem das configurações."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Tela de bloqueio"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Expandir"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimizar"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Fechar"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Configurações"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Arraste para baixo para dispensar"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> está em picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Se você não quer que o app <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
-    <string name="pip_play" msgid="333995977693142810">"Reproduzir"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Pausar"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Pular para a próxima"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Pular para a anterior"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"O smartphone foi desligado devido ao aquecimento"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"O smartphone está sendo executado normalmente agora"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O smartphone estava muito quente e foi desligado para resfriar. Agora, ele está sendo executado normalmente.\n\nO smartphone pode ficar quente demais se você:\n	• usar apps que consomem muitos recursos (como apps de jogos, vídeos ou navegação);\n	• fizer o download ou upload de arquivos grandes;\n	• usar o smartphone em temperaturas altas."</string>

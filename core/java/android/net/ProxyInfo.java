@@ -127,18 +127,6 @@ public class ProxyInfo implements Parcelable {
     }
 
     /**
-     * Create a ProxyProperties that points at a PAC URL.
-     * @hide
-     */
-    public ProxyInfo(String pacFileUrl) {
-        mHost = LOCAL_HOST;
-        mPort = LOCAL_PORT;
-        mExclusionList = LOCAL_EXCL_LIST;
-        mParsedExclusionList = parseExclusionList(mExclusionList);
-        mPacFileUrl = Uri.parse(pacFileUrl);
-    }
-
-    /**
      * Only used in PacManager after Local Proxy is bound.
      * @hide
      */

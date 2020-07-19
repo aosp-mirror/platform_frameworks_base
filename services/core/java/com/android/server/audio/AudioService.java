@@ -2956,11 +2956,10 @@ public class AudioService extends IAudioService.Stub
 
     // Don't show volume UI when:
     //  - Hdmi-CEC system audio mode is on and we are a TV panel
-    //  - CEC volume control enabled on a set-top box
     private int updateFlagsForTvPlatform(int flags) {
         synchronized (mHdmiClientLock) {
-            if ((mHdmiTvClient != null && mHdmiSystemAudioSupported && mHdmiCecVolumeControlEnabled)
-                    || (mHdmiPlaybackClient != null && mHdmiCecVolumeControlEnabled)) {
+            if (mHdmiTvClient != null && mHdmiSystemAudioSupported
+                    && mHdmiCecVolumeControlEnabled) {
                 flags &= ~AudioManager.FLAG_SHOW_UI;
             }
         }

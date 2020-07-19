@@ -17,8 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="com.android.server.wm.flicker.testapp">
 
-    <uses-sdk android:minSdkVersion="17"
-         android:targetSdkVersion="27"/>
+    <uses-sdk android:minSdkVersion="29"
+         android:targetSdkVersion="29"/>
     <application android:allowBackup="false"
          android:supportsRtl="true">
         <activity android:name=".SimpleActivity"

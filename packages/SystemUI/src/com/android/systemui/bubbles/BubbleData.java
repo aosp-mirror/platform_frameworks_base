@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -59,7 +60,7 @@ import javax.inject.Singleton;
 @Singleton
 public class BubbleData {
 
-    private BubbleLogger mLogger = new BubbleLoggerImpl();
+    private BubbleLoggerImpl mLogger = new BubbleLoggerImpl();
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
 
@@ -608,6 +609,30 @@ public class BubbleData {
         mSelectedBubble = bubble;
         mStateChange.selectedBubble = bubble;
         mStateChange.selectionChanged = true;
+    }
+
+    /**
+     * Logs the bubble UI event.
+     *
+     * @param provider The bubble view provider that is being interacted on. Null value indicates
+     *               that the user interaction is not specific to one bubble.
+     * @param action The user interaction enum
+     * @param packageName SystemUI package
+     * @param bubbleCount Number of bubbles in the stack
+     * @param bubbleIndex Index of bubble in the stack
+     * @param normalX Normalized x position of the stack
+     * @param normalY Normalized y position of the stack
+     */
+     void logBubbleEvent(@Nullable BubbleViewProvider provider, int action, String packageName,
+            int bubbleCount, int bubbleIndex, float normalX, float normalY) {
+        if (provider == null) {
+            mLogger.logStackUiChanged(packageName, action, bubbleCount, normalX, normalY);
+        } else if (provider.getKey().equals(BubbleOverflow.KEY)) {
+            mLogger.logShowOverflow(packageName, action, bubbleCount, normalX, normalY);
+        } else {
+            mLogger.logBubbleUiChanged((Bubble) provider, packageName, action, bubbleCount, normalX,
+                    normalY, bubbleIndex);
+        }
     }
 
     /**

@@ -26,8 +26,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -216,10 +216,10 @@ public class PipControlsViewController {
             } else {
                 mPlayPauseButtonView.setVisibility(View.VISIBLE);
                 if (state == PipManager.PLAYBACK_STATE_PLAYING) {
-                    mPlayPauseButtonView.setImageResource(R.drawable.ic_pause_white);
+                    mPlayPauseButtonView.setImageResource(R.drawable.pip_ic_pause_white);
                     mPlayPauseButtonView.setText(R.string.pip_pause);
                 } else {
-                    mPlayPauseButtonView.setImageResource(R.drawable.ic_play_arrow_white);
+                    mPlayPauseButtonView.setImageResource(R.drawable.pip_ic_play_arrow_white);
                     mPlayPauseButtonView.setText(R.string.pip_play);
                 }
             }

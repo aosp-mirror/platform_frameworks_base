@@ -218,6 +218,10 @@ public class AppStandbyControllerTests {
         }
 
         @Override
+        void updatePowerWhitelistCache() {
+        }
+
+        @Override
         boolean isRestrictedBucketEnabled() {
             return mIsRestrictedBucketEnabled;
         }

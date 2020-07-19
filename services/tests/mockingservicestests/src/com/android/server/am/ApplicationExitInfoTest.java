@@ -192,6 +192,7 @@ public class ApplicationExitInfoTest {
         final int app1Uid = 10123;
         final int app1Pid1 = 12345;
         final int app1Pid2 = 12346;
+        final int app1sPid1 = 13456;
         final int app1DefiningUid = 23456;
         final int app1ConnectiongGroup = 10;
         final int app1UidUser2 = 1010123;
@@ -202,8 +203,12 @@ public class ApplicationExitInfoTest {
         final long app1Rss2 = 45679;
         final long app1Pss3 = 34569;
         final long app1Rss3 = 45680;
+        final long app1sPss1 = 56789;
+        final long app1sRss1 = 67890;
         final String app1ProcessName = "com.android.test.stub1:process";
         final String app1PackageName = "com.android.test.stub1";
+        final String app1sProcessName = "com.android.test.stub_shared:process";
+        final String app1sPackageName = "com.android.test.stub_shared";
         final byte[] app1Cookie1 = {(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04,
                 (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08};
         final byte[] app1Cookie2 = {(byte) 0x08, (byte) 0x07, (byte) 0x06, (byte) 0x05,
@@ -262,6 +267,29 @@ public class ApplicationExitInfoTest {
                 app1Cookie1.length));
         assertEquals(info.getTraceInputStream(), null);
 
+        // Now create a process record from a different package but shared UID.
+        sleep(1);
+        final long now1s = System.currentTimeMillis();
+        app = makeProcessRecord(
+                app1sPid1,                   // pid
+                app1Uid,                     // uid
+                app1Uid,                     // packageUid
+                null,                        // definingUid
+                0,                           // connectionGroup
+                PROCESS_STATE_BOUND_TOP,     // procstate
+                app1sPss1,                   // pss
+                app1sRss1,                   // rss
+                app1sProcessName,            // processName
+                app1sPackageName);           // packageName
+        doReturn(new Pair<Long, Object>(now1s, Integer.valueOf(0)))
+                .when(mAppExitInfoTracker.mAppExitInfoSourceZygote)
+                .remove(anyInt(), anyInt());
+        doReturn(null)
+                .when(mAppExitInfoTracker.mAppExitInfoSourceLmkd)
+                .remove(anyInt(), anyInt());
+        noteAppKill(app, ApplicationExitInfo.REASON_USER_REQUESTED,
+                ApplicationExitInfo.SUBREASON_UNKNOWN, null);
+
         // Case 2: create another app1 process record with a different pid
         sleep(1);
         final long now2 = System.currentTimeMillis();
@@ -290,8 +318,8 @@ public class ApplicationExitInfoTest {
         list.clear();
 
         // Get all the records for app1Uid
-        mAppExitInfoTracker.getExitInfo(app1PackageName, app1Uid, 0, 0, list);
-        assertEquals(2, list.size());
+        mAppExitInfoTracker.getExitInfo(null, app1Uid, 0, 0, list);
+        assertEquals(3, list.size());
 
         info = list.get(0);
 
@@ -315,7 +343,26 @@ public class ApplicationExitInfoTest {
 
         assertTrue(ArrayUtils.equals(info.getProcessStateSummary(), app1Cookie2,
                 app1Cookie2.length));
+
         info = list.get(1);
+        verifyApplicationExitInfo(
+                info,                                      // info
+                now1s,                                     // timestamp
+                app1sPid1,                                 // pid
+                app1Uid,                                   // uid
+                app1Uid,                                   // packageUid
+                null,                                      // definingUid
+                app1sProcessName,                          // processName
+                0,                                         // connectionGroup
+                ApplicationExitInfo.REASON_USER_REQUESTED, // reason
+                null,                                      // subReason
+                null,                                      // status
+                app1sPss1,                                 // pss
+                app1sRss1,                                 // rss
+                IMPORTANCE_FOREGROUND,                     // importance
+                null);                                     // description
+
+        info = list.get(2);
         assertTrue(ArrayUtils.equals(info.getProcessStateSummary(), app1Cookie1,
                 app1Cookie1.length));
 
@@ -808,7 +855,7 @@ public class ApplicationExitInfoTest {
 
         list.clear();
         mAppExitInfoTracker.getExitInfo(null, app1Uid, 0, 0, list);
-        assertEquals(2, list.size());
+        assertEquals(3, list.size());
 
         info = list.get(0);
 
@@ -831,6 +878,24 @@ public class ApplicationExitInfoTest {
                 null);                                // description
 
         info = list.get(1);
+        verifyApplicationExitInfo(
+                info,                                      // info
+                now1s,                                     // timestamp
+                app1sPid1,                                 // pid
+                app1Uid,                                   // uid
+                app1Uid,                                   // packageUid
+                null,                                      // definingUid
+                app1sProcessName,                          // processName
+                0,                                         // connectionGroup
+                ApplicationExitInfo.REASON_USER_REQUESTED, // reason
+                null,                                      // subReason
+                null,                                      // status
+                app1sPss1,                                 // pss
+                app1sRss1,                                 // rss
+                IMPORTANCE_FOREGROUND,                     // importance
+                null);                                     // description
+
+        info = list.get(2);
         exitCode = 5;
         verifyApplicationExitInfo(
                 info,                                 // info

@@ -900,18 +900,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Sozlamalar tartibini o‘zgartirish."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>-sahifa, jami: <xliff:g id="ID_2">%2$d</xliff:g> ta sahifa"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran qulfi"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Yoyish"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Yig‘ish"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Yopish"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Sozlamalar"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Yopish uchun pastga torting"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Menyu"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> tasvir ustida tasvir rejimida"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ilovasi uchun bu funksiyani sozlamalar orqali faolsizlantirish mumkin."</string>
-    <string name="pip_play" msgid="333995977693142810">"Ijro"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Pauza"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Keyingisiga o‘tish"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Avvalgisiga qaytish"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Qizigani uchun o‘chirildi"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefoningiz hozir normal holatda ishlayapti"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon qizib ketganligi sababli sovitish uchun o‘chirib qo‘yilgan. Endi telefoningiz normal holatda ishlayapti.\n\nTelefon bu hollarda qizib ketishi mumkin:\n	• Resurstalab ilovalar ishlatilganda (masalan, o‘yin, video yoki navigatsiya ilovalari)\n	• Katta faylni yuklab olishda yoki yuklashda\n	• Telefondan yuqori haroratda foydalanganda"</string>

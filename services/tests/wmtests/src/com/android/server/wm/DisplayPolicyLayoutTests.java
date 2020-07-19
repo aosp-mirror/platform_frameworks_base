@@ -40,8 +40,13 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DEC
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_RIGHT;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_TOP;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -63,6 +68,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.Gravity;
 import android.view.InsetsState;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
@@ -167,6 +173,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void addingWindow_withInsetsTypes() {
+        mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
+
         WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
         win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_TOP_GESTURES};
         win.getFrameLw().set(0, 0, 500, 100);
@@ -213,6 +221,47 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
 
         expectThrows(IllegalArgumentException.class, () -> addWindow(win));
+    }
+
+    @Test
+    public void addingWindow_variousGravities_alternateBarPosUpdated() {
+        mDisplayPolicy.removeWindowLw(mNavBarWindow);  // Removes the existing one.
+
+        WindowState win1 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel1");
+        win1.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win1.mAttrs.gravity = Gravity.TOP;
+        win1.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win1);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_TOP);
+        mDisplayPolicy.removeWindowLw(win1);
+
+        WindowState win2 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel2");
+        win2.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win2.mAttrs.gravity = Gravity.BOTTOM;
+        win2.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win2);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_BOTTOM);
+        mDisplayPolicy.removeWindowLw(win2);
+
+        WindowState win3 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel3");
+        win3.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win3.mAttrs.gravity = Gravity.LEFT;
+        win3.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win3);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_LEFT);
+        mDisplayPolicy.removeWindowLw(win3);
+
+        WindowState win4 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel4");
+        win4.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win4.mAttrs.gravity = Gravity.RIGHT;
+        win4.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win4);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_RIGHT);
+        mDisplayPolicy.removeWindowLw(win4);
     }
 
     @Test

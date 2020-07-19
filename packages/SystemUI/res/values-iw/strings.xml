@@ -910,18 +910,6 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"עריכת סדר ההגדרות."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"דף <xliff:g id="ID_1">%1$d</xliff:g> מתוך <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"מסך נעילה"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"הרחב"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"מזער"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"סגור"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"הגדרות"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"גרור למטה כדי לסגור"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"תפריט"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
-    <string name="pip_play" msgid="333995977693142810">"הפעל"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"השהה"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"אפשר לדלג אל הבא"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"אפשר לדלג אל הקודם"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"הטלפון כבה עקב התחממות"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"הטלפון פועל כרגיל עכשיו"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• תשתמש באפליקציות עתירות משאבים (כגון משחקים, אפליקציות וידאו או אפליקציות ניווט)\n	• תוריד או תעלה קבצים גדולים\n	• תשתמש בטלפון בטמפרטורות גבוהות"</string>

@@ -28,7 +28,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 /**
  * A view containing PIP controls including fullscreen, close, and media controls.
