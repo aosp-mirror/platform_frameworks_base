@@ -55,6 +55,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 
 import com.android.server.AppStateTracker;
+import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
@@ -84,7 +85,7 @@ public class JobSchedulerServiceTest {
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
             super(context);
-            mAppStateTracker = mock(AppStateTracker.class);
+            mAppStateTracker = mock(AppStateTrackerImpl.class);
         }
 
         @Override
@@ -112,7 +113,7 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
-        doReturn(mock(AppStateTracker.class))
+        doReturn(mock(AppStateTrackerImpl.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
         // Called in BatteryController constructor.
         doReturn(mock(BatteryManagerInternal.class))

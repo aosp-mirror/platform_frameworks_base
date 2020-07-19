@@ -89,6 +89,7 @@ import com.android.dx.mockito.inline.extended.MockedVoidMethod;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppStateTracker;
+import com.android.server.AppStateTrackerImpl;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal;
@@ -131,7 +132,7 @@ public class AlarmManagerServiceTest {
     @Mock
     private ActivityManagerInternal mActivityManagerInternal;
     @Mock
-    private AppStateTracker mAppStateTracker;
+    private AppStateTrackerImpl mAppStateTracker;
     @Mock
     private AlarmManagerService.ClockReceiver mClockReceiver;
     @Mock
@@ -769,8 +770,8 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void testAlarmRestrictedInBatterSaver() throws Exception {
-        final ArgumentCaptor<AppStateTracker.Listener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(AppStateTracker.Listener.class);
+        final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
         verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
@@ -795,10 +796,10 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void alarmsRemovedOnAppStartModeDisabled() {
-        final ArgumentCaptor<AppStateTracker.Listener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(AppStateTracker.Listener.class);
+        final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
         verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
-        final AppStateTracker.Listener listener = listenerArgumentCaptor.getValue();
+        final AppStateTrackerImpl.Listener listener = listenerArgumentCaptor.getValue();
 
         final PendingIntent alarmPi1 = getNewMockPendingIntent();
         final PendingIntent alarmPi2 = getNewMockPendingIntent();

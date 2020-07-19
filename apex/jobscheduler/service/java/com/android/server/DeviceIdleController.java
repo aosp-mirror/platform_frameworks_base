@@ -286,7 +286,7 @@ public class DeviceIdleController extends SystemService
     private Intent mIdleIntent;
     private Intent mLightIdleIntent;
     private AnyMotionDetector mAnyMotionDetector;
-    private final AppStateTracker mAppStateTracker;
+    private final AppStateTrackerImpl mAppStateTracker;
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
     private boolean mQuickDozeActivated;
@@ -1859,8 +1859,8 @@ public class DeviceIdleController extends SystemService
             return new AnyMotionDetector(getPowerManager(), handler, sm, callback, angleThreshold);
         }
 
-        AppStateTracker getAppStateTracker(Context ctx, Looper looper) {
-            return new AppStateTracker(ctx, looper);
+        AppStateTrackerImpl getAppStateTracker(Context ctx, Looper looper) {
+            return new AppStateTrackerImpl(ctx, looper);
         }
 
         ConnectivityManager getConnectivityManager() {
