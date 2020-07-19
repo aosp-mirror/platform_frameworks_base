@@ -1176,7 +1176,7 @@
     <string name="noApplications" msgid="1186909265235544019">"Nijedna aplikacija ne može da obavlja ovu radnju."</string>
     <string name="aerr_application" msgid="4090916809370389109">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> je zaustavljena"</string>
     <string name="aerr_process" msgid="4268018696970966407">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljen"</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> se stalno zaustavlja(ju)"</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> se stalno zaustavlja"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> se stalno zaustavlja"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Ponovo otvori aplikaciju"</string>
     <string name="aerr_report" msgid="3095644466849299308">"Pošaljite povratne informacije"</string>

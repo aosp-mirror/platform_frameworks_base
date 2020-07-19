@@ -76,7 +76,7 @@
     <string name="learn_more" msgid="4690632085667273811">"আরও জানুন"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ফুল স্ক্রিন করুন"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট নিন"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
