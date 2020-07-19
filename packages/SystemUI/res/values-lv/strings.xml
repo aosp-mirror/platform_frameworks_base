@@ -294,7 +294,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Vairāk laika."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Mazāk laika."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="7606563260714825190">"Apgaismojums ir izslēgts."</string>
-    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="7458591827288347635">"Zibspuldze nav pieejama."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="7458591827288347635">"Lukturītis nav pieejams."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Apgaismojums ir ieslēgts."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Apgaismojums ir izslēgts."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Apgaismojums ir ieslēgts."</string>
@@ -407,7 +407,7 @@
       <item quantity="other">%d ierīces</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Paziņojumi"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Zibspuldze"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lukturītis"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera tiek lietota"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobilie dati"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Datu lietojums"</string>
