@@ -1792,10 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (4424488535318105801) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (6794188153647295212) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>

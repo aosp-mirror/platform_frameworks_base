@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"በእርስዎ አስተዳዳሪ ተዘምኗል"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"እሺ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"የባትሪ ዕድሜን ለማራዘም፣ የባትሪ ቆጣቢ፦\n\n•ጨለማ ገጽታን ያበራል\n•የበስተጀርባ እንቅስቃሴን፣ አንዳንድ የሚታዩ ማሳመሪያዎችን፣ እና ሌሎች እንደ «Hey Google» ያሉ ባህሪያትን ያጠፋል ወይም ይገድባል\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"የባትሪ ዕድሜን ለማራዘም፣ የባትሪ ቆጣቢ፦\n\n•ጨለማ ገጽታን ያበራል\n•የበስተጀርባ እንቅስቃሴን፣ አንዳንድ የሚታዩ ማሳመሪያዎችን፣ እና ሌሎች እንደ «Hey Google» ያሉ ባህሪያትን ያጠፋል ወይም ይገድባል"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"የባትሪ ዕድሜን ለማራዘም፣ የባትሪ ቆጣቢ፦\n\n•ጨለማ ገጽታን ያበራል\n•የበስተጀርባ እንቅስቃሴን፣ አንዳንድ የሚታዩ ማሳመሪያዎችን፣ እና ሌሎች እንደ «Hey Google» ያሉ ባህሪያትን ያጠፋል ወይም ይገድባል\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"የባትሪ ዕድሜን ለማራዘም የባትሪ ኃይል ቆጣቢ፦\n\n• ጨለማ ገጽታን ያበራል\n• የበስተጀርባ እንቅስቃሴን፣ አንዳንድ ምስላዊ ተጽዕኖዎችን እና ሌሎች እንደ «Hey Google» ያሉ ባህሪያትን ያጠፋል ወይም ይገድባል"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ውሂብ ቆጣቢ ይጥፋ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"አብራ"</string>
