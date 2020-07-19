@@ -76,7 +76,7 @@
     <string name="learn_more" msgid="4690632085667273811">"আরও জানুন"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ফুল স্ক্রিন করুন"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট নিন"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
@@ -917,17 +917,13 @@
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্রিন"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"আপনার ফোন গরম হওয়ার জন্য বন্ধ হয়ে গেছে"</string>
-    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
-    <skip />
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"আপনার ফোন এখন ভালভাবে কাজ করছে।\nআরও তথ্যের জন্য ট্যাপ করুন"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"আপনার ফোন খুব বেশি গরম হয়েছিল বলে ঠাণ্ডা হওয়ার জন্য বন্ধ হয়ে গেছে। আপনার ফোন ঠিক-ঠাক ভাবে চলছে না।\n\nআপনার ফোন খুব বেশি গরম হয়ে যাবে যদি আপনি:\n	•এমন অ্যাপ ব্যবহার করলে যেটি আপনার ডিভাইসের রিসোর্স বেশি ব্যবহার করে (যেমন গেমিং, ভিডিও বা নেভিগেশন অ্যাপ)\n	• বড় ফাইল ডাউনলোড বা আপলোড করলে\n	• বেশি তাপমাত্রায় আপনার ফোন ব্যবহার করলে"</string>
-    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
-    <skip />
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ফোনটি গরম হচ্ছে"</string>
-    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
-    <skip />
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ফোন ঠাণ্ডা না হওয়া পর্যন্ত কিছু ফিচার কাজ করে না।\nআরও তথ্যের জন্য ট্যাপ করুন"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপনার ফোনটি নিজে থেকেই ঠাণ্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠাণ্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
-    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
-    <skip />
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"চার্জার আনপ্লাগ করুন"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"এই ডিভাইস চার্জ করার সময় সমস্যা হয়েছে। চার্জিং কেবলটি হয়ত গরম হয়ে গেছে, পাওয়ার অ্যাডাপ্টারটি আনপ্লাগ করুন।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"কী করতে হবে ধাপে ধাপে দেখুন"</string>

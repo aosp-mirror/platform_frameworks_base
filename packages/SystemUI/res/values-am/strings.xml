@@ -917,17 +917,13 @@
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ገጽ <xliff:g id="ID_1">%1$d</xliff:g> ከ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ማያ ገጽ ቁልፍ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
-    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
-    <skip />
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"የእርስዎ ስልክ በመደበኛ ሁኔታ እየሠራ ነው።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"የእርስዎ ስልክ በጣም ግሎ ነበር፣ ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪዲዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትላልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
-    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
-    <skip />
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ስልኩ እየሞቀ ነው"</string>
-    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
-    <skip />
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"አንዳንድ ባሕሪያት ስልኩ እየቀዘቀዘ እያለ ውስን ይሆናሉ።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"የእርስዎ ስልክ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም ስልክዎን መጠቀም ይችላሉ፣ ነገር ግን ሊንቀራፈፍ ይችላል።\n\nአንዴ ስልክዎ ከቀዘቀዘ በኋላ በመደበኝነት ያሄዳል።"</string>
-    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
-    <skip />
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ኃይል መሙያን ይንቀሉ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"የዚህን መሣሪያ ባትሪ መሙላት ላይ ችግር አለ። የኃይል አስማሚውን ይንቀሉትና ሊግል ስለሚችል ገመዱን ይጠብቁት።"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>

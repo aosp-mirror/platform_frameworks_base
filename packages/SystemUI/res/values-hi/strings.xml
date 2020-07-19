@@ -370,7 +370,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"जगह की जानकारी बंद है"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मीडिया डिवाइस"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"केवल आपातकालीन कॉल"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"सिर्फ़ आपातकालीन कॉल"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"सेटिंग"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"समय"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"मुझे"</string>
@@ -519,7 +519,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं मिली"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"नेटवर्क को मॉनिटर किया जा सकता है"</string>

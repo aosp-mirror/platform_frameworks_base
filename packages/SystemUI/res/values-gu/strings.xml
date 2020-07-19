@@ -917,17 +917,13 @@
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> માંથી <xliff:g id="ID_1">%1$d</xliff:g> પૃષ્ઠ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"લૉક સ્ક્રીન"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
-    <!-- no translation found for thermal_shutdown_message (6142269839066172984) -->
-    <skip />
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
-    <!-- no translation found for thermal_shutdown_dialog_help_text (6413474593462902901) -->
-    <skip />
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ફોન ગરમ થઈ રહ્યો છે"</string>
-    <!-- no translation found for high_temp_notif_message (1277346543068257549) -->
-    <skip />
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ફોન ઠંડો થાય ત્યાં સુધી અમુક સુવિધાઓ મર્યાદિત હોય છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
-    <!-- no translation found for high_temp_dialog_help_text (7380171287943345858) -->
-    <skip />
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ચાર્જરને અનપ્લગ કરો"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"આ ડિવાઇસને ચાર્જ કરવામાં કોઈ સમસ્યા છે. પાવર અડૅપ્ટર અનપ્લગ કરો અને કાળજી લેજો કદાચ કેબલ થોડો ગરમ થયો હોઈ શકે છે."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"સારસંભાળના પગલાં જુઓ"</string>
