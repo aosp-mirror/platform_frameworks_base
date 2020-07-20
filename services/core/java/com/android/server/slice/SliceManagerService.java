@@ -28,6 +28,8 @@ import static android.os.Process.SYSTEM_UID;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceSpec;
 import android.app.usage.UsageStatsManagerInternal;
@@ -77,6 +79,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class SliceManagerService extends ISliceManager.Stub {
@@ -121,6 +124,7 @@ public class SliceManagerService extends ISliceManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
+        mRoleObserver = new RoleObserver();
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
     }
 
@@ -478,10 +482,26 @@ public class SliceManagerService extends ISliceManager.Stub {
         return cn.getPackageName();
     }
 
+    /**
+     * A cached value of the default home app
+     */
+    private String mCachedDefaultHome = null;
+
     // Based on getDefaultHome in ShortcutService.
     // TODO: Unify if possible
     @VisibleForTesting
     protected String getDefaultHome(int userId) {
+
+        // Set VERIFY to true to run the cache in "shadow" mode for cache
+        // testing.  Do not commit set to true;
+        final boolean VERIFY = false;
+
+        if (mCachedDefaultHome != null) {
+            if (!VERIFY) {
+                return mCachedDefaultHome;
+            }
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
@@ -490,10 +510,12 @@ public class SliceManagerService extends ISliceManager.Stub {
             final ComponentName defaultLauncher = mPackageManagerInternal
                     .getHomeActivitiesAsUser(allHomeCandidates, userId);
 
-            ComponentName detected = null;
-            if (defaultLauncher != null) {
-                detected = defaultLauncher;
-            }
+            ComponentName detected = defaultLauncher;
+
+            // Cache the default launcher.  It is not a problem if the
+            // launcher is null - eventually, the default launcher will be
+            // set to something non-null.
+            mCachedDefaultHome = ((detected != null) ? detected.getPackageName() : null);
 
             if (detected == null) {
                 // If we reach here, that means it's the first check since the user was created,
@@ -517,9 +539,51 @@ public class SliceManagerService extends ISliceManager.Stub {
                     lastPriority = ri.priority;
                 }
             }
-            return detected != null ? detected.getPackageName() : null;
+            final String ret = ((detected != null) ? detected.getPackageName() : null);
+            if (VERIFY) {
+                if (mCachedDefaultHome != null && !mCachedDefaultHome.equals(ret)) {
+                    Slog.e(TAG, "getDefaultHome() cache failure, is " +
+                           mCachedDefaultHome + " should be " + ret);
+                }
+            }
+            return ret;
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void invalidateCachedDefaultHome() {
+        mCachedDefaultHome = null;
+    }
+
+    /**
+     * Listen for changes in the roles, and invalidate the cached default
+     * home as necessary.
+     */
+    private RoleObserver mRoleObserver;
+
+    class RoleObserver implements OnRoleHoldersChangedListener {
+        private RoleManager mRm;
+        private final Executor mExecutor;
+
+        RoleObserver() {
+            mExecutor = mContext.getMainExecutor();
+            register();
+        }
+
+        public void register() {
+            mRm = mContext.getSystemService(RoleManager.class);
+            if (mRm != null) {
+                mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
+                invalidateCachedDefaultHome();
+            }
+        }
+
+        @Override
+        public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+            if (RoleManager.ROLE_HOME.equals(roleName)) {
+                invalidateCachedDefaultHome();
+            }
         }
     }
 
