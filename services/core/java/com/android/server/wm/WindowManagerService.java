@@ -1478,9 +1478,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         rootType, attrs.token, attrs.packageName)) {
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
-                token = new WindowToken(this, binder, type, false, displayContent,
-                        session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                if (hasParent) {
+                    // Use existing parent window token for child windows.
+                    token = parentWindow.mToken;
+                } else {
+                    final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
+                    token = new WindowToken(this, binder, type, false, displayContent,
+                            session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                }
             } else if (rootType >= FIRST_APPLICATION_WINDOW
                     && rootType <= LAST_APPLICATION_WINDOW) {
                 activity = token.asActivityRecord();

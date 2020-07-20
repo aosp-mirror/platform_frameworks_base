@@ -84,6 +84,10 @@ public class WindowTokenTests extends WindowTestsBase {
         assertFalse(token.hasWindow(window12));
         assertTrue(token.hasWindow(window2));
         assertTrue(token.hasWindow(window3));
+
+        // The child windows should have the same window token as their parents.
+        assertEquals(window1.mToken, window11.mToken);
+        assertEquals(window1.mToken, window12.mToken);
     }
 
     @Test
