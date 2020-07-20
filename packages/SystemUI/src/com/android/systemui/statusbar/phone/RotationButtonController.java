@@ -21,6 +21,8 @@ import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
 import android.annotation.StyleRes;
 import android.app.StatusBarManager;
 import android.content.ContentResolver;
@@ -30,6 +32,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.IRotationWatcher.Stub;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -40,6 +43,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -61,10 +65,12 @@ public class RotationButtonController {
 
     private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
 
+    private final Context mContext;
+    private final RotationButton mRotationButton;
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     private final ViewRippler mViewRippler = new ViewRippler();
 
-    private @StyleRes int mStyleRes;
     private int mLastRotationSuggestion;
     private boolean mPendingRotationSuggestion;
     private boolean mHoveringRotationSuggestion;
@@ -75,6 +81,9 @@ public class RotationButtonController {
     private boolean mListenersRegistered = false;
     private boolean mIsNavigationBarShowing;
     private boolean mSkipOverrideUserLockPrefsOnce;
+    private int mLightIconColor;
+    private int mDarkIconColor;
+    private int mIconResId = R.drawable.ic_sysbar_rotate_button_ccw_start_90;
 
     private final Runnable mRemoveRotationProposal =
             () -> setRotateSuggestionButtonState(false /* visible */);
@@ -82,9 +91,6 @@ public class RotationButtonController {
             () -> mPendingRotationSuggestion = false;
     private Animator mRotateHideAnimator;
 
-    private final Context mContext;
-    private final RotationButton mRotationButton;
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     private final Stub mRotationWatcher = new Stub() {
         @Override
@@ -117,12 +123,14 @@ public class RotationButtonController {
         return (disable2Flags & StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS) != 0;
     }
 
-    RotationButtonController(Context context, @StyleRes int style, RotationButton rotationButton) {
+    RotationButtonController(Context context, @ColorInt int lightIconColor,
+            @ColorInt int darkIconColor, RotationButton rotationButton) {
         mContext = context;
+        mLightIconColor = lightIconColor;
+        mDarkIconColor = darkIconColor;
         mRotationButton = rotationButton;
         mRotationButton.setRotationButtonController(this);
 
-        mStyleRes = style;
         mIsNavigationBarShowing = true;
         mRotationLockController = Dependency.get(RotationLockController.class);
         mAccessibilityManagerWrapper = Dependency.get(AccessibilityManagerWrapper.class);
@@ -275,17 +283,20 @@ public class RotationButtonController {
             return;
         }
 
+        // TODO: Remove styles?
         // Prepare to show the navbar icon by updating the icon style to change anim params
         mLastRotationSuggestion = rotation; // Remember rotation for click
         final boolean rotationCCW = isRotationAnimationCCW(windowRotation, rotation);
-        int style;
         if (windowRotation == Surface.ROTATION_0 || windowRotation == Surface.ROTATION_180) {
-            style = rotationCCW ? R.style.RotateButtonCCWStart90 : R.style.RotateButtonCWStart90;
+            mIconResId = rotationCCW
+                    ? R.drawable.ic_sysbar_rotate_button_ccw_start_90
+                    : R.drawable.ic_sysbar_rotate_button_cw_start_90;
         } else { // 90 or 270
-            style = rotationCCW ? R.style.RotateButtonCCWStart0 : R.style.RotateButtonCWStart0;
+            mIconResId = rotationCCW
+                    ? R.drawable.ic_sysbar_rotate_button_ccw_start_0
+                    : R.drawable.ic_sysbar_rotate_button_ccw_start_0;
         }
-        mStyleRes = style;
-        mRotationButton.updateIcon();
+        mRotationButton.updateIcon(mLightIconColor, mDarkIconColor);
 
         if (mIsNavigationBarShowing) {
             // The navbar is visible so show the icon right away
@@ -316,12 +327,24 @@ public class RotationButtonController {
         }
     }
 
-    @StyleRes int getStyleRes() {
-        return mStyleRes;
+    Context getContext() {
+        return mContext;
     }
 
     RotationButton getRotationButton() {
         return mRotationButton;
+    }
+
+    @DrawableRes int getIconResId() {
+        return mIconResId;
+    }
+
+    @ColorInt int getLightIconColor() {
+        return mLightIconColor;
+    }
+
+    @ColorInt int getDarkIconColor() {
+        return mDarkIconColor;
     }
 
     private void onRotateSuggestionClick(View v) {

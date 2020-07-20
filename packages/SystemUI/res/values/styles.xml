@@ -604,31 +604,6 @@
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>
 
-    <!-- Used to style rotate suggestion button AVD animations -->
-    <style name="RotateButtonCCWStart0">
-        <item name="rotateButtonStartAngle">0</item>
-        <item name="rotateButtonEndAngle">-90</item>
-        <item name="rotateButtonScaleX">1</item>
-    </style>
-
-    <style name="RotateButtonCCWStart90">
-        <item name="rotateButtonStartAngle">90</item>
-        <item name="rotateButtonEndAngle">0</item>
-        <item name="rotateButtonScaleX">1</item>
-    </style>
-
-    <style name="RotateButtonCWStart0">
-        <item name="rotateButtonStartAngle">0</item>
-        <item name="rotateButtonEndAngle">90</item>
-        <item name="rotateButtonScaleX">-1</item>
-    </style>
-
-    <style name="RotateButtonCWStart90">
-        <item name="rotateButtonStartAngle">90</item>
-        <item name="rotateButtonEndAngle">180</item>
-        <item name="rotateButtonScaleX">-1</item>
-    </style>
-
     <style name="MediaPlayer.Button" parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">@android:color/white</item>
