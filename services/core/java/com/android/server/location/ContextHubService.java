@@ -43,6 +43,7 @@ import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -386,7 +387,7 @@ public class ContextHubService extends IContextHubService.Stub {
                 createLoadTransactionCallback(contextHubHandle, nanoAppBinary);
 
         ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
-                contextHubHandle, nanoAppBinary, onCompleteCallback);
+                contextHubHandle, nanoAppBinary, onCompleteCallback, getCallingPackageName());
 
         mTransactionManager.addTransaction(transaction);
         return 0;
@@ -411,7 +412,7 @@ public class ContextHubService extends IContextHubService.Stub {
         IContextHubTransactionCallback onCompleteCallback =
                 createUnloadTransactionCallback(contextHubId);
         ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
-                contextHubId, nanoAppId, onCompleteCallback);
+                contextHubId, nanoAppId, onCompleteCallback, getCallingPackageName());
 
         mTransactionManager.addTransaction(transaction);
         return 0;
@@ -464,7 +465,7 @@ public class ContextHubService extends IContextHubService.Stub {
         IContextHubTransactionCallback onCompleteCallback =
                 createQueryTransactionCallback(contextHubId);
         ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
-                contextHubId, onCompleteCallback);
+                contextHubId, onCompleteCallback, getCallingPackageName());
 
         mTransactionManager.addTransaction(transaction);
         return Result.OK;
@@ -696,7 +697,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
-                contextHubId, nanoAppBinary, transactionCallback);
+                contextHubId, nanoAppBinary, transactionCallback, getCallingPackageName());
         mTransactionManager.addTransaction(transaction);
     }
 
@@ -720,7 +721,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
-                contextHubId, nanoAppId, transactionCallback);
+                contextHubId, nanoAppId, transactionCallback, getCallingPackageName());
         mTransactionManager.addTransaction(transaction);
     }
 
@@ -744,7 +745,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         ContextHubServiceTransaction transaction = mTransactionManager.createEnableTransaction(
-                contextHubId, nanoAppId, transactionCallback);
+                contextHubId, nanoAppId, transactionCallback, getCallingPackageName());
         mTransactionManager.addTransaction(transaction);
     }
 
@@ -768,7 +769,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         ContextHubServiceTransaction transaction = mTransactionManager.createDisableTransaction(
-                contextHubId, nanoAppId, transactionCallback);
+                contextHubId, nanoAppId, transactionCallback, getCallingPackageName());
         mTransactionManager.addTransaction(transaction);
     }
 
@@ -790,7 +791,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
-                contextHubId, transactionCallback);
+                contextHubId, transactionCallback, getCallingPackageName());
         mTransactionManager.addTransaction(transaction);
     }
 
@@ -821,6 +822,10 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== CLIENTS ====================");
         pw.println(mClientManager);
+
+        pw.println("");
+        pw.println("=================== TRANSACTIONS ====================");
+        pw.println(mTransactionManager);
 
         // dump eventLog
     }
@@ -923,5 +928,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
         mContextHubWrapper.onSettingChanged(Setting.LOCATION,
                 enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+    }
+
+    private String getCallingPackageName() {
+        return mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
     }
 }
