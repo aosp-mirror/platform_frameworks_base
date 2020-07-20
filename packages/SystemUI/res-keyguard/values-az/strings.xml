@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Xidmət yoxdur."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Daxiletmə metoduna keçin"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Təyyarə rejimi"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"Güncəlləməyə hazırlıq üçün PIN kod tələb olunur"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Güncəlləməyə hazırlıq üçün model tələb olunur"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Güncəlləməyə hazırlıq üçün parol tələb olunur"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Cihaz yenidən başladıqdan sonra model tələb olunur"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Cihaz yeniden başladıqdan sonra PIN tələb olunur"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Cihaz yeniden başladıqdan sonra parol tələb olunur"</string>

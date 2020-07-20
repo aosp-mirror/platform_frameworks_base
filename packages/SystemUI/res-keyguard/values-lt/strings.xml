@@ -107,9 +107,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Nėra paslaugos."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Perjungti įvesties metodą"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Lėktuvo režimas"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"Kad būtų pasiruošta atnaujinti, reikia įvesti PIN kodą"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Kad būtų pasiruošta atnaujinti, reikia įvesti atrakinimo piešinį"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Kad būtų pasiruošta atnaujinti, reikia įvesti slaptažodį"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Iš naujo paleidus įrenginį būtinas atrakinimo piešinys"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Iš naujo paleidus įrenginį būtinas PIN kodas"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Iš naujo paleidus įrenginį būtinas slaptažodis"</string>
