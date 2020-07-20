@@ -34,6 +34,8 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
+import java.lang.ref.WeakReference;
+
 class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeActionHelper {
 
     @VisibleForTesting
@@ -47,7 +49,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     private static final long SWIPE_MENU_TIMING = 200;
 
-    private NotificationMenuRowPlugin mCurrMenuRow;
+    // Hold a weak ref to the menu row so that it isn't accidentally retained in memory. The
+    // lifetime of the row should be the same as the ActivatableView, which is owned by the
+    // NotificationStackScrollLayout. If the notification isn't in the notification shade, then it
+    // isn't possible to swipe it and, so, this class doesn't need to "help."
+    private WeakReference<NotificationMenuRowPlugin> mCurrMenuRowRef;
     private boolean mIsExpanded;
     private boolean mPulsing;
 
@@ -82,11 +88,17 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         return mMenuExposedView;
     }
 
-    public void setCurrentMenuRow(NotificationMenuRowPlugin menuRow) {
-        mCurrMenuRow = menuRow;
+    @VisibleForTesting
+    void setCurrentMenuRow(NotificationMenuRowPlugin menuRow) {
+        mCurrMenuRowRef = menuRow != null ? new WeakReference(menuRow) : null;
     }
 
-    public NotificationMenuRowPlugin getCurrentMenuRow() {  return mCurrMenuRow; }
+    public NotificationMenuRowPlugin getCurrentMenuRow() {
+        if (mCurrMenuRowRef == null) {
+            return null;
+        }
+        return mCurrMenuRowRef.get();
+    }
 
     @VisibleForTesting
     protected Handler getHandler() { return mHandler; }
@@ -102,8 +114,9 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @Override
     protected void onChildSnappedBack(View animView, float targetLeft) {
-        if (mCurrMenuRow != null && targetLeft == 0) {
-            mCurrMenuRow.resetMenu();
+        final NotificationMenuRowPlugin menuRow = getCurrentMenuRow();
+        if (menuRow != null && targetLeft == 0) {
+            menuRow.resetMenu();
             clearCurrentMenuRow();
         }
     }
@@ -129,10 +142,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     @VisibleForTesting
     protected void initializeRow(SwipeableView row) {
         if (row.hasFinishedInitialization()) {
-            mCurrMenuRow = row.createMenu();
-            if (mCurrMenuRow != null) {
-                mCurrMenuRow.setMenuClickListener(mMenuListener);
-                mCurrMenuRow.onTouchStart();
+            final NotificationMenuRowPlugin menuRow = row.createMenu();
+            setCurrentMenuRow(menuRow);
+            if (menuRow != null) {
+                menuRow.setMenuClickListener(mMenuListener);
+                menuRow.onTouchStart();
             }
         }
     }
