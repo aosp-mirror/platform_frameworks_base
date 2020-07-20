@@ -362,7 +362,7 @@ public class RecentsAnimationController implements DeathRecipient {
         // TODO(b/153090560): Support Recents on multiple task display areas
         final ArrayList<Task> visibleTasks = mDisplayContent.getDefaultTaskDisplayArea()
                 .getVisibleTasks();
-        final ActivityStack targetStack = mDisplayContent.getDefaultTaskDisplayArea()
+        final Task targetStack = mDisplayContent.getDefaultTaskDisplayArea()
                 .getStack(WINDOWING_MODE_UNDEFINED, targetActivityType);
         if (targetStack != null) {
             final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
@@ -406,7 +406,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        final ActivityStack rootHomeTask =
+        final Task rootHomeTask =
                 mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
         mMinimizedHomeBounds = rootHomeTask != null ? rootHomeTask.getBounds() : null;
 

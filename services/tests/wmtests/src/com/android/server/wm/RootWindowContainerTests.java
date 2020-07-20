@@ -25,11 +25,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
-import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.Task.ActivityState.FINISHING;
+import static com.android.server.wm.Task.ActivityState.PAUSED;
+import static com.android.server.wm.Task.ActivityState.PAUSING;
+import static com.android.server.wm.Task.ActivityState.STOPPED;
+import static com.android.server.wm.Task.ActivityState.STOPPING;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -149,7 +149,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
         TaskDisplayArea taskDisplayArea = displayContent.getDefaultTaskDisplayArea();
-        ActivityStack stack = taskDisplayArea.getStackAt(0);
+        Task stack = taskDisplayArea.getStackAt(0);
         ActivityRecord activity = createActivityRecord(displayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         stack.mPausingActivity = activity;

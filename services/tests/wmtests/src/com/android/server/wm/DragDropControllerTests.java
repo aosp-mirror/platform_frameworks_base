@@ -40,7 +40,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
@@ -98,7 +97,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     private WindowState createDropTargetWindow(String name, int ownerId) {
         final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(
                 mDisplayContent);
-        final ActivityStack stack = createTaskStackOnDisplay(
+        final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final Task task = createTaskInStack(stack, ownerId);
         task.addChild(activity, 0);

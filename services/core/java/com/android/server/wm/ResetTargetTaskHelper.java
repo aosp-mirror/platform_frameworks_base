@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityStack.TAG_ADD_REMOVE;
-import static com.android.server.wm.ActivityStack.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.wm.Task.TAG_ADD_REMOVE;
+import static com.android.server.wm.Task.TAG_TASKS;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 class ResetTargetTaskHelper {
     private Task mTask;
     private Task mTargetTask;
-    private ActivityStack mTargetStack;
+    private Task mTargetStack;
     private ActivityRecord mRoot;
     private boolean mForceReset;
     private boolean mCanMoveOptions;
@@ -61,7 +61,7 @@ class ResetTargetTaskHelper {
         mForceReset = forceReset;
         mTargetTask = targetTask;
         mTargetTaskFound = false;
-        mTargetStack = targetTask.getStack();
+        mTargetStack = targetTask.getRootTask();
         mActivityReparentPosition = -1;
 
         final PooledConsumer c = PooledLambda.obtainConsumer(

@@ -46,9 +46,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.TAG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
@@ -74,11 +71,14 @@ import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.Task.ActivityState.PAUSED;
+import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.wm.Task.TAG_CLEANUP;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -380,12 +380,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final ActivityRecord r;
         final ActivityRecord sourceRecord;
         final int startFlags;
-        final ActivityStack stack;
+        final Task stack;
         final WindowProcessController callerApp;
         final NeededUriGrants intentGrants;
 
         PendingActivityLaunch(ActivityRecord r, ActivityRecord sourceRecord,
-                int startFlags, ActivityStack stack, WindowProcessController callerApp,
+                int startFlags, Task stack, WindowProcessController callerApp,
                 NeededUriGrants intentGrants) {
             this.r = r;
             this.sourceRecord = sourceRecord;
@@ -493,7 +493,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void moveRecentsStackToFront(String reason) {
-        final ActivityStack recentsStack = mRootWindowContainer.getDefaultTaskDisplayArea()
+        final Task recentsStack = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
         if (recentsStack != null) {
             recentsStack.moveToFront(reason);
@@ -729,7 +729,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         final Task task = r.getTask();
-        final ActivityStack stack = task.getStack();
+        final Task rootTask = task.getRootTask();
 
         beginDeferResume();
 
@@ -905,7 +905,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (andResume && readyToResume()) {
             // As part of the process of launching, ActivityThread also performs
             // a resume.
-            stack.minimalResumeActivityLocked(r);
+            rootTask.minimalResumeActivityLocked(r);
         } else {
             // This activity is not starting in the resumed state... which should look like we asked
             // it to pause+stop (but remain visible), and it has done so and reported back the
@@ -923,7 +923,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // launching the initial activity (that is, home), so that it can have
         // a chance to initialize itself while in the background, making the
         // switch back to it faster and look better.
-        if (mRootWindowContainer.isTopDisplayFocusedStack(stack)) {
+        if (mRootWindowContainer.isTopDisplayFocusedStack(rootTask)) {
             mService.getActivityStartController().startSetupActivity();
         }
 
@@ -990,7 +990,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             int requestCode, int callingPid, int callingUid, String callingPackage,
             @Nullable String callingFeatureId, boolean ignoreTargetSecurity,
             boolean launchingInTask, WindowProcessController callerApp, ActivityRecord resultRecord,
-            ActivityStack resultStack) {
+            Task resultStack) {
         final boolean isCallerRecents = mService.getRecentTasks() != null
                 && mService.getRecentTasks().isCallerRecents(callingUid);
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
@@ -1332,7 +1332,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     /** This doesn't just find a task, it also moves the task to front. */
     void findTaskToMoveToFront(Task task, int flags, ActivityOptions options, String reason,
             boolean forceNonResizeable) {
-        ActivityStack currentStack = task.getStack();
+        Task currentStack = task.getRootTask();
         if (currentStack == null) {
             Slog.e(TAG, "findTaskToMoveToFront: can't move task="
                     + task + " to front. Stack is null");
@@ -1349,7 +1349,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final Rect bounds = options.getLaunchBounds();
             task.setBounds(bounds);
 
-            ActivityStack stack =
+            Task stack =
                     mRootWindowContainer.getLaunchStack(null, options, task, ON_TOP);
 
             if (stack != currentStack) {
@@ -1388,7 +1388,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     private void moveHomeStackToFrontIfNeeded(int flags, TaskDisplayArea taskDisplayArea,
             String reason) {
-        final ActivityStack focusedStack = taskDisplayArea.getFocusedStack();
+        final Task focusedStack = taskDisplayArea.getFocusedStack();
 
         if ((taskDisplayArea.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 && (flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0)
@@ -1423,7 +1423,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mWindowManager.setDockedStackResizing(resizing);
     }
 
-    private void removePinnedStackInSurfaceTransaction(ActivityStack stack) {
+    private void removePinnedStackInSurfaceTransaction(Task stack) {
         /**
          * Workaround: Force-stop all the activities in the pinned stack before we reparent them
          * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
@@ -1459,7 +1459,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    private void removeStackInSurfaceTransaction(ActivityStack stack) {
+    private void removeStackInSurfaceTransaction(Task stack) {
         if (stack.getWindowingMode() == WINDOWING_MODE_PINNED) {
             removePinnedStackInSurfaceTransaction(stack);
         } else {
@@ -1479,7 +1479,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * pinned stack, then its tasks are not explicitly removed when the stack is destroyed, but
      * instead moved back onto the fullscreen stack.
      */
-    void removeStack(ActivityStack stack) {
+    void removeStack(Task stack) {
         mWindowManager.inSurfaceTransaction(() -> removeStackInSurfaceTransaction(stack));
     }
 
@@ -1597,7 +1597,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * @return true if the task has been restored successfully.
      */
     boolean restoreRecentTaskLocked(Task task, ActivityOptions aOptions, boolean onTop) {
-        final ActivityStack stack =
+        final Task stack =
                 mRootWindowContainer.getLaunchStack(null, aOptions, task, onTop);
         final WindowContainer parent = task.getParent();
 
@@ -1639,8 +1639,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * the various checks on tasks that are going to be reparented from one stack to another.
      */
     // TODO: Look into changing users to this method to DisplayContent.resolveWindowingMode()
-    ActivityStack getReparentTargetStack(Task task, ActivityStack stack, boolean toTop) {
-        final ActivityStack prevStack = task.getStack();
+    Task getReparentTargetStack(Task task, Task stack, boolean toTop) {
+        final Task prevStack = task.getRootTask();
         final int rootTaskId = stack.mTaskId;
         final boolean inMultiWindowMode = stack.inMultiWindowMode();
 
@@ -1769,7 +1769,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // A resumed activity cannot be stopping. remove from list
         mStoppingActivities.remove(r);
 
-        final ActivityStack stack = r.getRootTask();
+        final Task stack = r.getRootTask();
         if (stack.getDisplayArea().allResumedActivitiesComplete()) {
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical
@@ -1783,15 +1783,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
     private void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
         final Task task = r.getTask();
-        final ActivityStack stack = task.getStack();
+        final Task rootTask = task.getRootTask();
 
         mRecentTasks.add(task);
         mService.getTaskChangeNotificationController().notifyTaskStackChanged();
-        stack.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        rootTask.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
 
         // When launching tasks behind, update the last active time of the top task after the new
         // task has been shown briefly
-        final ActivityRecord top = stack.getTopNonFinishingActivity();
+        final ActivityRecord top = rootTask.getTopNonFinishingActivity();
         if (top != null) {
             top.getTask().touchActiveTime();
         }
@@ -2028,7 +2028,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      */
     void updateTopResumedActivityIfNeeded() {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
-        final ActivityStack topStack = mRootWindowContainer.getTopDisplayFocusedStack();
+        final Task topStack = mRootWindowContainer.getTopDisplayFocusedStack();
         if (topStack == null || topStack.mResumedActivity == prevTopActivity) {
             return;
         }
@@ -2124,13 +2124,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
-            TaskDisplayArea preferredTaskDisplayArea, ActivityStack actualStack) {
+            TaskDisplayArea preferredTaskDisplayArea, Task actualStack) {
         handleNonResizableTaskIfNeeded(task, preferredWindowingMode, preferredTaskDisplayArea,
                 actualStack, false /* forceNonResizable */);
     }
 
     void handleNonResizableTaskIfNeeded(Task task, int preferredWindowingMode,
-            TaskDisplayArea preferredTaskDisplayArea, ActivityStack actualStack,
+            TaskDisplayArea preferredTaskDisplayArea, Task actualStack,
             boolean forceNonResizable) {
         final boolean isSecondaryDisplayPreferred = preferredTaskDisplayArea != null
                 && preferredTaskDisplayArea.getDisplayId() != DEFAULT_DISPLAY;
@@ -2186,7 +2186,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed((ActivityStack) task);
+                taskDisplayArea.onSplitScreenModeDismissed(task);
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }
@@ -2242,14 +2242,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void scheduleUpdatePictureInPictureModeIfNeeded(Task task, ActivityStack prevStack) {
-        final ActivityStack stack = task.getStack();
-        if ((prevStack == null || (prevStack != stack
-                && !prevStack.inPinnedWindowingMode() && !stack.inPinnedWindowingMode()))) {
+    void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Task prevStack) {
+        final Task rootTask = task.getRootTask();
+        if ((prevStack == null || (prevStack != rootTask
+                && !prevStack.inPinnedWindowingMode() && !rootTask.inPinnedWindowingMode()))) {
             return;
         }
 
-        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.getRequestedOverrideBounds());
+        scheduleUpdatePictureInPictureModeIfNeeded(task, rootTask.getRequestedOverrideBounds());
     }
 
     private void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetStackBounds) {
@@ -2281,7 +2281,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ActivityRecord::updatePictureInPictureMode,
                 PooledLambda.__(ActivityRecord.class), targetStackBounds, forceUpdate);
-        task.getStack().setBounds(targetStackBounds);
+        task.getRootTask().setBounds(targetStackBounds);
         task.forAllActivities(c);
         c.recycle();
     }
@@ -2349,7 +2349,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     int uid = 0;
                     synchronized (mService.mGlobalLock) {
                         if (r.attachedToProcess()
-                                && r.isState(ActivityStack.ActivityState.RESTARTING_PROCESS)) {
+                                && r.isState(Task.ActivityState.RESTARTING_PROCESS)) {
                             processName = r.app.mName;
                             uid = r.app.mUid;
                         }
@@ -2516,7 +2516,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(
                         task.getTopNonFinishingActivity(), ActivityManager.START_TASK_TO_FRONT,
-                        task.getStack());
+                        task.getRootTask());
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingPackage = task.mCallingPackage;

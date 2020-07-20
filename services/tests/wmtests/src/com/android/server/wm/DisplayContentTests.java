@@ -144,7 +144,7 @@ public class DisplayContentTests extends WindowTestsBase {
         waitUntilHandlersIdle();
 
         exitingApp.mIsExiting = true;
-        exitingApp.getTask().getStack().mExitingActivities.add(exitingApp);
+        exitingApp.getTask().getRootTask().mExitingActivities.add(exitingApp);
 
         assertForAllWindowsOrder(Arrays.asList(
                 mWallpaperWindow,
@@ -321,7 +321,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
 
         // Add stack with activity.
-        final ActivityStack stack = createTaskStackOnDisplay(dc);
+        final Task stack = createTaskStackOnDisplay(dc);
         assertEquals(dc.getDisplayId(), stack.getDisplayContent().getDisplayId());
         assertEquals(dc, stack.getDisplayContent());
 
@@ -395,7 +395,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc1 = createNewDisplay();
 
         // Add stack with activity.
-        final ActivityStack stack0 = createTaskStackOnDisplay(dc0);
+        final Task stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
         final ActivityRecord activity =
                 WindowTestUtils.createTestActivityRecord(dc0);
@@ -403,7 +403,7 @@ public class DisplayContentTests extends WindowTestsBase {
         dc0.configureDisplayPolicy();
         assertNotNull(dc0.mTapDetector);
 
-        final ActivityStack stack1 = createTaskStackOnDisplay(dc1);
+        final Task stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(dc0);
@@ -849,13 +849,13 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
-        final ActivityStack stack =
+        final Task stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc)
                         .build();
         doReturn(true).when(stack).isVisible();
 
-        final ActivityStack freeformStack =
+        final Task freeformStack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc)
                         .setWindowingMode(WINDOWING_MODE_FREEFORM)
@@ -881,7 +881,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
         final int newOrientation = getRotatedOrientation(dc);
 
-        final ActivityStack stack =
+        final Task stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc).build();
         final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
@@ -901,7 +901,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         final int newOrientation = getRotatedOrientation(dc);
 
-        final ActivityStack stack =
+        final Task stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc).build();
         final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
@@ -1337,7 +1337,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Leave PiP to fullscreen. The orientation can be updated from
         // ActivityRecord#reportDescendantOrientationChangeIfNeeded.
         pinnedTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        homeActivity.setState(ActivityStack.ActivityState.STOPPED, "test");
+        homeActivity.setState(Task.ActivityState.STOPPED, "test");
 
         assertFalse(displayContent.hasTopFixedRotationLaunchingApp());
         verify(mWm, atLeastOnce()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
@@ -1445,7 +1445,7 @@ public class DisplayContentTests extends WindowTestsBase {
         TaskDisplayArea defaultTaskDisplayArea = mWm.mRoot.getDefaultTaskDisplayArea();
 
         // Remove the current home stack if it exists so a new one can be created below.
-        ActivityStack homeTask = defaultTaskDisplayArea.getRootHomeTask();
+        Task homeTask = defaultTaskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
             defaultTaskDisplayArea.removeChild(homeTask);
         }
@@ -1461,7 +1461,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Remove the current home stack if it exists so a new one can be created below.
         TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-        ActivityStack homeTask = taskDisplayArea.getRootHomeTask();
+        Task homeTask = taskDisplayArea.getRootHomeTask();
         if (homeTask != null) {
             taskDisplayArea.removeChild(homeTask);
         }
@@ -1493,7 +1493,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_behindWindow() {
         DisplayContent display = createNewDisplay();
-        ActivityStack stack = createTaskStackOnDisplay(display);
+        Task stack = createTaskStackOnDisplay(display);
         Task task = createTaskInStack(stack, 0 /* userId */);
         WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
@@ -1506,7 +1506,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_taskId() {
         DisplayContent display = createNewDisplay();
-        ActivityStack stack = createTaskStackOnDisplay(display);
+        Task stack = createTaskStackOnDisplay(display);
         Task task = createTaskInStack(stack, 0 /* userId */);
         WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
@@ -1533,7 +1533,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testSetWindowingModeAtomicallyUpdatesWindoingModeAndDisplayWindowingMode() {
         final DisplayContent dc = createNewDisplay();
-        final ActivityStack stack =
+        final Task stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                 .setDisplay(dc)
                 .build();

@@ -319,7 +319,7 @@ public class SystemServicesTestRule implements TestRule {
         spyOn(display);
         final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
         spyOn(taskDisplayArea);
-        final ActivityStack homeStack = taskDisplayArea.getStack(
+        final Task homeStack = taskDisplayArea.getStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         spyOn(homeStack);
     }

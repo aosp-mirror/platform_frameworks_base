@@ -47,7 +47,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -150,7 +149,7 @@ public class AppTransitionTests extends WindowTestsBase {
         final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
         final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
-        final ActivityStack stack1 = createTaskStackOnDisplay(dc1);
+        final Task stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(dc1);

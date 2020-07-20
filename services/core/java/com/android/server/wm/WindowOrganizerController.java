@@ -317,7 +317,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             Slog.w(TAG, "Container is no longer attached: " + task);
             return 0;
         }
-        final ActivityStack as = (ActivityStack) task;
+        final Task as = task;
 
         if (hop.isReparent()) {
             final boolean isNonOrganizedRootableTask =
@@ -337,12 +337,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 + " multi-window mode... newParent=" + newParent + " task=" + task);
                         return 0;
                     } else {
-                        task.reparent((ActivityStack) newParent,
+                        task.reparent((Task) newParent,
                                 hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
                                 false /*moveParents*/, "sanitizeAndApplyHierarchyOp");
                     }
                 } else {
-                    final ActivityStack rootTask = (ActivityStack) (
+                    final Task rootTask = (Task) (
                             (newParent != null && !(newParent instanceof TaskDisplayArea))
                                     ? newParent : task.getRootTask());
                     if (hop.getToTop()) {
@@ -395,10 +395,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private void resizePinnedStackIfNeeded(ConfigurationContainer container, int configMask,
             int windowMask, Configuration config) {
-        if ((container instanceof ActivityStack)
+        if ((container instanceof Task)
                 && ((configMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0)
                 && ((windowMask & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)) {
-            final ActivityStack stack = (ActivityStack) container;
+            final Task stack = (Task) container;
             if (stack.inPinnedWindowingMode()) {
                 stack.resize(config.windowConfiguration.getBounds(),
                         PRESERVE_WINDOWS, true /* deferResume */);

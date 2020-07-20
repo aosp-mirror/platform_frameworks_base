@@ -56,7 +56,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityStackSupervisorTests extends ActivityTestsBase {
-    private ActivityStack mFullscreenStack;
+    private Task mFullscreenStack;
 
     @Before
     public void setUp() throws Exception {
@@ -113,7 +113,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void testHandleNonResizableTaskOnSecondaryDisplay() {
         // Create an unresizable task on secondary display.
         final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
+        final Task stack = new StackBuilder(mRootWindowContainer)
                 .setDisplay(newDisplay).build();
         final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
         final Task task = unresizableActivity.getTask();

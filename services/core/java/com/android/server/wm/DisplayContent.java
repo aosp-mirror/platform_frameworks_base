@@ -78,7 +78,6 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_A
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
@@ -103,6 +102,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_CONTENT;
@@ -2193,13 +2193,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * activity type. Null is no compatible stack on the display.
      */
     @Nullable
-    ActivityStack getStack(int windowingMode, int activityType) {
+    Task getStack(int windowingMode, int activityType) {
         return getItemFromTaskDisplayAreas(taskDisplayArea ->
                 taskDisplayArea.getStack(windowingMode, activityType));
     }
 
     @Nullable
-    ActivityStack getStack(int rootTaskId) {
+    Task getStack(int rootTaskId) {
         return getItemFromTaskDisplayAreas(taskDisplayArea ->
                         taskDisplayArea.getStack(rootTaskId));
     }
@@ -2211,7 +2211,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @VisibleForTesting
     @Nullable
-    ActivityStack getTopStack() {
+    Task getTopStack() {
         return getItemFromTaskDisplayAreas(TaskDisplayArea::getTopStack);
     }
 
@@ -2831,7 +2831,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
-        final ActivityStack focusedStack = getFocusedStack();
+        final Task focusedStack = getFocusedStack();
         if (focusedStack != null) {
             proto.write(FOCUSED_ROOT_TASK_ID, focusedStack.getRootTaskId());
             final ActivityRecord focusedActivity = focusedStack.getDisplayArea()
@@ -2956,26 +2956,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         pw.println();
 
         // Dump stack references
-        final ActivityStack homeStack = getDefaultTaskDisplayArea().getRootHomeTask();
+        final Task homeStack = getDefaultTaskDisplayArea().getRootHomeTask();
         if (homeStack != null) {
             pw.println(prefix + "homeStack=" + homeStack.getName());
         }
-        final ActivityStack pinnedStack = getDefaultTaskDisplayArea().getRootPinnedTask();
+        final Task pinnedStack = getDefaultTaskDisplayArea().getRootPinnedTask();
         if (pinnedStack != null) {
             pw.println(prefix + "pinnedStack=" + pinnedStack.getName());
         }
-        final ActivityStack splitScreenPrimaryStack = getDefaultTaskDisplayArea()
+        final Task splitScreenPrimaryStack = getDefaultTaskDisplayArea()
                 .getRootSplitScreenPrimaryTask();
         if (splitScreenPrimaryStack != null) {
             pw.println(prefix + "splitScreenPrimaryStack=" + splitScreenPrimaryStack.getName());
         }
         // TODO: Support recents on non-default task containers
-        final ActivityStack recentsStack = getDefaultTaskDisplayArea().getStack(
+        final Task recentsStack = getDefaultTaskDisplayArea().getStack(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
         if (recentsStack != null) {
             pw.println(prefix + "recentsStack=" + recentsStack.getName());
         }
-        final ActivityStack dreamStack =
+        final Task dreamStack =
                 getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_DREAM);
         if (dreamStack != null) {
             pw.println(prefix + "dreamStack=" + dreamStack.getName());
@@ -4139,7 +4139,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         private boolean processTask(Task task) {
-            if (!task.getStack().getWindowConfiguration().canResizeTask()) {
+            if (!task.getRootTask().getWindowConfiguration().canResizeTask()) {
                 return true;
             }
 
@@ -4953,7 +4953,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Nullable
-    ActivityStack getFocusedStack() {
+    Task getFocusedStack() {
         return getItemFromTaskDisplayAreas(TaskDisplayArea::getFocusedStack);
     }
 
@@ -5150,12 +5150,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void remove() {
         mRemoving = true;
-        ActivityStack lastReparentedStack;
+        Task lastReparentedStack;
 
         mRootWindowContainer.mStackSupervisor.beginDeferResume();
         try {
             lastReparentedStack = reduceOnAllTaskDisplayAreas((taskDisplayArea, stack) -> {
-                final ActivityStack lastReparentedStackFromArea = taskDisplayArea.remove();
+                final Task lastReparentedStackFromArea = taskDisplayArea.remove();
                 if (lastReparentedStackFromArea != null) {
                     return lastReparentedStackFromArea;
                 }
@@ -5191,7 +5191,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (taskDisplayArea.getStackCount() != 1) {
                 return true;
             }
-            final ActivityStack stack = taskDisplayArea.getStackAt(0);
+            final Task stack = taskDisplayArea.getStackAt(0);
             return !stack.isActivityTypeHome() || stack.hasChild();
         });
         if (!hasNonEmptyHomeStack) {
@@ -5294,7 +5294,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     + this);
         }
         if (stackCount > 0) {
-            final ActivityStack stack = getDefaultTaskDisplayArea().getStackAt(0);
+            final Task stack = getDefaultTaskDisplayArea().getStackAt(0);
             if (stack.getChildCount() > 1) {
                 throw new IllegalArgumentException("Display stack already has multiple tasks."
                         + " display=" + this + " stack=" + stack);
@@ -5311,7 +5311,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @VisibleForTesting
     void removeAllTasks() {
-        forAllTasks((t) -> { t.getStack().removeChild(t, "removeAllTasks"); });
+        forAllTasks((t) -> { t.getRootTask().removeChild(t, "removeAllTasks"); });
     }
 
     /**

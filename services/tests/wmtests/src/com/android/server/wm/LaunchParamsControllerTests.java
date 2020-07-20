@@ -309,12 +309,12 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mController.registerModifier(positioner);
 
-        final int beforeWindowMode = task.getStack().getWindowingMode();
+        final int beforeWindowMode = task.getRootTask().getWindowingMode();
         assertNotEquals(windowingMode, beforeWindowMode);
 
         mController.layoutTask(task, null /* windowLayout */);
 
-        final int afterWindowMode = task.getStack().getWindowingMode();
+        final int afterWindowMode = task.getRootTask().getWindowingMode();
         assertEquals(windowingMode, afterWindowMode);
     }
 

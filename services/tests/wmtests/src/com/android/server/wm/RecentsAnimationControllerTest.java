@@ -92,7 +92,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Mock RecentsAnimationController.RecentsAnimationCallbacks mAnimationCallbacks;
     @Mock TaskSnapshot mMockTaskSnapshot;
     private RecentsAnimationController mController;
-    private ActivityStack mRootHomeTask;
+    private Task mRootHomeTask;
 
     @Before
     public void setUp() throws Exception {

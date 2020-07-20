@@ -145,10 +145,10 @@ class LaunchParamsController {
             }
 
             if (mTmpParams.hasWindowingMode()
-                    && mTmpParams.mWindowingMode != task.getStack().getWindowingMode()) {
+                    && mTmpParams.mWindowingMode != task.getRootTask().getWindowingMode()) {
                 final int activityType = activity != null
                         ? activity.getActivityType() : task.getActivityType();
-                task.getStack().setWindowingMode(task.getDisplayArea().validateWindowingMode(
+                task.getRootTask().setWindowingMode(task.getDisplayArea().validateWindowingMode(
                         mTmpParams.mWindowingMode, activity, task, activityType));
             }
 
@@ -156,7 +156,7 @@ class LaunchParamsController {
                 return false;
             }
 
-            if (task.getStack().inFreeformWindowingMode()) {
+            if (task.getRootTask().inFreeformWindowingMode()) {
                 // Only set bounds if it's in freeform mode.
                 task.setBounds(mTmpParams.mBounds);
                 return true;

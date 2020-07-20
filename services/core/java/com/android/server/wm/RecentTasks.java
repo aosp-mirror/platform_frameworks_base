@@ -215,7 +215,7 @@ class RecentTasks {
                     final RootWindowContainer rac = mService.mRootWindowContainer;
                     final DisplayContent dc = rac.getDisplayContent(displayId).mDisplayContent;
                     if (dc.pointWithinAppWindow(x, y)) {
-                        final ActivityStack stack = mService.getTopDisplayFocusedStack();
+                        final Task stack = mService.getTopDisplayFocusedStack();
                         final Task topTask = stack != null ? stack.getTopMostTask() : null;
                         resetFreezeTaskListReordering(topTask);
                     }
@@ -323,7 +323,7 @@ class RecentTasks {
     @VisibleForTesting
     void resetFreezeTaskListReorderingOnTimeout() {
         synchronized (mService.mGlobalLock) {
-            final ActivityStack focusedStack = mService.getTopDisplayFocusedStack();
+            final Task focusedStack = mService.getTopDisplayFocusedStack();
             final Task topTask = focusedStack != null ? focusedStack.getTopMostTask() : null;
             resetFreezeTaskListReordering(topTask);
         }
@@ -520,9 +520,9 @@ class RecentTasks {
      * Kicks off the task persister to write any pending tasks to disk.
      */
     void notifyTaskPersisterLocked(Task task, boolean flush) {
-        final ActivityStack stack = task != null ? task.getStack() : null;
-        if (stack != null && stack.isHomeOrRecentsStack()) {
-            // Never persist the home or recents stack.
+        final Task rootTask = task != null ? task.getRootTask() : null;
+        if (rootTask != null && rootTask.isHomeOrRecentsStack()) {
+            // Never persist the home or recents task.
             return;
         }
         syncPersistentTaskIdsLocked();
@@ -554,8 +554,8 @@ class RecentTasks {
     }
 
     private static boolean shouldPersistTaskLocked(Task task) {
-        final ActivityStack stack = task.getStack();
-        return task.isPersistable && (stack == null || !stack.isHomeOrRecentsStack());
+        final Task rootTask = task.getRootTask();
+        return task.isPersistable && (rootTask == null || !rootTask.isHomeOrRecentsStack());
     }
 
     void onSystemReadyLocked() {
@@ -975,9 +975,9 @@ class RecentTasks {
             final Task task = mTasks.get(i);
             if (TaskPersister.DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task
                     + " persistable=" + task.isPersistable);
-            final ActivityStack stack = task.getStack();
+            final Task rootTask = task.getRootTask();
             if ((task.isPersistable || task.inRecents)
-                    && (stack == null || !stack.isHomeOrRecentsStack())) {
+                    && (rootTask == null || !rootTask.isHomeOrRecentsStack())) {
                 if (TaskPersister.DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                 persistentTaskIds.add(task.mTaskId);
             } else {
@@ -1325,10 +1325,10 @@ class RecentTasks {
                 return false;
             case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
                 if (DEBUG_RECENTS_TRIM_TASKS) {
-                    Slog.d(TAG, "\ttop=" + task.getStack().getTopMostTask());
+                    Slog.d(TAG, "\ttop=" + task.getRootTask().getTopMostTask());
                 }
-                final ActivityStack stack = task.getStack();
-                if (stack != null && stack.getTopMostTask() == task) {
+                final Task rootTask = task.getRootTask();
+                if (rootTask != null && rootTask.getTopMostTask() == task) {
                     // Only the non-top task of the primary split screen mode is visible
                     return false;
                 }
@@ -1344,9 +1344,9 @@ class RecentTasks {
         // Tasks managed by/associated with an ActivityView should be excluded from recents.
         // singleTaskInstance is set on the VirtualDisplay managed by ActivityView
         // TODO(b/126185105): Find a different signal to use besides isSingleTaskInstance
-        final ActivityStack stack = task.getStack();
-        if (stack != null) {
-            DisplayContent display = stack.getDisplay();
+        final Task rootTask = task.getRootTask();
+        if (rootTask != null) {
+            DisplayContent display = rootTask.getDisplay();
             if (display != null && display.isSingleTaskInstance()) {
                 return false;
             }
@@ -1400,21 +1400,21 @@ class RecentTasks {
 
     /** @return whether the given task can be trimmed even if it is outside the visible range. */
     protected boolean isTrimmable(Task task) {
-        final ActivityStack stack = task.getStack();
+        final Task rootTask = task.getRootTask();
 
         // No stack for task, just trim it
-        if (stack == null) {
+        if (rootTask == null) {
             return true;
         }
 
         // Ignore tasks from different displays
         // TODO (b/115289124): No Recents on non-default displays.
-        if (!stack.isOnHomeDisplay()) {
+        if (!rootTask.isOnHomeDisplay()) {
             return false;
         }
 
-        final ActivityStack rootHomeTask = stack.getDisplayArea().getRootHomeTask();
-        // Home stack does not exist. Don't trim the task.
+        final Task rootHomeTask = rootTask.getDisplayArea().getRootHomeTask();
+        // Home task does not exist. Don't trim the task.
         if (rootHomeTask == null) {
             return false;
         }
