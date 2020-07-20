@@ -24,18 +24,24 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.content.Context;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
+import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
@@ -52,6 +58,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -127,6 +134,8 @@ public class NotificationEntryManager implements
 
     private final NotificationEntryManagerLogger mLogger;
 
+    private final IStatusBarService mStatusBarService;
+
     // Lazily retrieved dependencies
     private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
     private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
@@ -138,6 +147,8 @@ public class NotificationEntryManager implements
     private final NotificationRankingManager mRankingManager;
     private final FeatureFlags mFeatureFlags;
     private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
+    private final HeadsUpManager mHeadsUpManager;
+    private final StatusBarStateController mStatusBarStateController;
 
     private NotificationPresenter mPresenter;
     private RankingMap mLatestRankingMap;
@@ -201,7 +212,10 @@ public class NotificationEntryManager implements
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController) {
+            ForegroundServiceDismissalFeatureController fgsFeatureController,
+            HeadsUpManager headsUpManager,
+            StatusBarStateController statusBarStateController
+    ) {
         mLogger = logger;
         mGroupManager = groupManager;
         mRankingManager = rankingManager;
@@ -211,6 +225,11 @@ public class NotificationEntryManager implements
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
         mFgsFeatureController = fgsFeatureController;
+        mHeadsUpManager = headsUpManager;
+        mStatusBarStateController = statusBarStateController;
+
+        mStatusBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.checkService(Context.STATUS_BAR_SERVICE));
     }
 
     /** Once called, the NEM will start processing notification events from system server. */
@@ -496,6 +515,9 @@ public class NotificationEntryManager implements
                 removedByUser |= entryDismissed;
 
                 mLogger.logNotifRemoved(entry.getKey(), removedByUser);
+                if (removedByUser && visibility != null) {
+                    sendNotificationRemovalToServer(entry.getKey(), entry.getSbn(), visibility);
+                }
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryRemoved(entry, visibility, removedByUser, reason);
                 }
@@ -508,6 +530,36 @@ public class NotificationEntryManager implements
                 }
                 mLeakDetector.trackGarbage(entry);
             }
+        }
+    }
+
+    private void sendNotificationRemovalToServer(
+            String key,
+            StatusBarNotification notification,
+            NotificationVisibility nv) {
+        final String pkg = notification.getPackageName();
+        final String tag = notification.getTag();
+        final int id = notification.getId();
+        final int userId = notification.getUser().getIdentifier();
+        try {
+            int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
+            if (mHeadsUpManager.isAlerting(key)) {
+                dismissalSurface = NotificationStats.DISMISSAL_PEEK;
+            } else if (mStatusBarStateController.isDozing()) {
+                dismissalSurface = NotificationStats.DISMISSAL_AOD;
+            }
+            int dismissalSentiment = NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
+            mStatusBarService.onNotificationClear(
+                    pkg,
+                    tag,
+                    id,
+                    userId,
+                    notification.getKey(),
+                    dismissalSurface,
+                    dismissalSentiment,
+                    nv);
+        } catch (RemoteException ex) {
+            // system process is dead if we're here.
         }
     }
 
