@@ -311,7 +311,6 @@ public class SettingsBackupTest {
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
                     Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS,
-                    Settings.Global.JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS,
                     Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
                     Settings.Global.KERNEL_CPU_THREAD_READER,
                     Settings.Global.LANG_ID_UPDATE_CONTENT_URL,

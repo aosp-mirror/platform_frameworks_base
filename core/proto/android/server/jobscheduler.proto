@@ -324,7 +324,7 @@ message ConstantsProto {
         // ready now.
         reserved 1; // skip_not_ready_jobs
         // Whether or not TimeController will use a non-wakeup alarm for delay constraints.
-        optional bool use_non_wakeup_alarm_for_delay = 2;
+        reserved 2; // use_non_wakeup_alarm_for_delay
     }
     optional TimeController time_controller = 25;
 
