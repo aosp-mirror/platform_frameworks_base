@@ -117,7 +117,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             case PROMPT_REASON_USER_REQUEST:
                 return R.string.kg_prompt_reason_user_request;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
-                return R.string.kg_prompt_reason_prepare_for_update_pin;
+                return R.string.kg_prompt_reason_timeout_pin;
             case PROMPT_REASON_NONE:
                 return 0;
             default:

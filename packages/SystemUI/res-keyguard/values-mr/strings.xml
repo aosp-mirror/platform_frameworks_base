@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"सेवा नाही."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"इनपुट पद्धत स्विच करा"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"विमान मोड"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"अपडेटसाठी तयार करण्याकरिता पिन आवश्यक आहे"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"अपडेटसाठी तयार करण्याकरिता पॅटर्न आवश्यक आहे"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"अपडेटसाठी तयार करण्याकरिता पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"डिव्हाइस रीस्टार्ट झाल्यावर पॅटर्न आवश्यक आहे"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"डिव्हाइस रीस्टार्ट झाल्यावर पिन आवश्यक आहे"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"डिव्हाइस रीस्टार्ट झाल्यावर पासवर्ड आवश्यक आहे"</string>
