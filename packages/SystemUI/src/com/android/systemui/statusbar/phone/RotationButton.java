@@ -27,7 +27,7 @@ interface RotationButton {
     boolean show();
     boolean hide();
     boolean isVisible();
-    void updateIcon();
+    void updateIcon(int lightIconColor, int darkIconColor);
     void setOnClickListener(View.OnClickListener onClickListener);
     void setOnHoverListener(View.OnHoverListener onHoverListener);
     KeyButtonDrawable getImageDrawable();

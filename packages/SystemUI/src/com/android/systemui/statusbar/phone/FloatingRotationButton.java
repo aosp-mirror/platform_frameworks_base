@@ -16,19 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
@@ -65,6 +62,8 @@ public class FloatingRotationButton implements RotationButton {
     @Override
     public void setRotationButtonController(RotationButtonController rotationButtonController) {
         mRotationButtonController = rotationButtonController;
+        updateIcon(mRotationButtonController.getLightIconColor(),
+                mRotationButtonController.getDarkIconColor());
     }
 
     @Override
@@ -101,7 +100,6 @@ public class FloatingRotationButton implements RotationButton {
             default:
                 break;
         }
-        updateIcon();
         mWindowManager.addView(mKeyButtonView, lp);
         if (mKeyButtonDrawable != null && mKeyButtonDrawable.canAnimate()) {
             mKeyButtonDrawable.resetAnimation();
@@ -126,17 +124,13 @@ public class FloatingRotationButton implements RotationButton {
     }
 
     @Override
-    public void updateIcon() {
-        if (!mIsShowing) {
-            return;
-        }
-        mKeyButtonDrawable = getImageDrawable();
+    public void updateIcon(int lightIconColor, int darkIconColor) {
+        Color ovalBackgroundColor = Color.valueOf(Color.red(darkIconColor),
+                Color.green(darkIconColor), Color.blue(darkIconColor), BACKGROUND_ALPHA);
+        mKeyButtonDrawable = KeyButtonDrawable.create(mRotationButtonController.getContext(),
+                lightIconColor, darkIconColor, mRotationButtonController.getIconResId(),
+                false /* shadow */, ovalBackgroundColor);
         mKeyButtonView.setImageDrawable(mKeyButtonDrawable);
-        mKeyButtonDrawable.setCallback(mKeyButtonView);
-        if (mKeyButtonDrawable != null && mKeyButtonDrawable.canAnimate()) {
-            mKeyButtonDrawable.resetAnimation();
-            mKeyButtonDrawable.startAnimation();
-        }
     }
 
     @Override
@@ -151,20 +145,7 @@ public class FloatingRotationButton implements RotationButton {
 
     @Override
     public KeyButtonDrawable getImageDrawable() {
-        Context context = new ContextThemeWrapper(mContext.getApplicationContext(),
-                mRotationButtonController.getStyleRes());
-        final int dualToneDarkTheme = Utils.getThemeAttr(context, R.attr.darkIconTheme);
-        final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
-        Context lightContext = new ContextThemeWrapper(context, dualToneLightTheme);
-        Context darkContext = new ContextThemeWrapper(context, dualToneDarkTheme);
-        @ColorInt int darkColor = Utils.getColorAttrDefaultColor(darkContext,
-                R.attr.singleToneColor);
-        Color ovalBackgroundColor = Color.valueOf(Color.red(darkColor), Color.green(darkColor),
-                Color.blue(darkColor), BACKGROUND_ALPHA);
-
-        return KeyButtonDrawable.create(lightContext,
-                Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor), darkColor,
-                R.drawable.ic_sysbar_rotate_button, false /* shadow */, ovalBackgroundColor);
+        return mKeyButtonDrawable;
     }
 
     @Override
