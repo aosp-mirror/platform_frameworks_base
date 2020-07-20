@@ -4900,7 +4900,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppErrors.resetProcessCrashTimeLocked(packageName == null, appId, userId);
         }
 
-        boolean didSomething = mProcessList.killPackageProcessesLocked(packageName, appId, userId,
+        // Notify first that the package is stopped, so its process won't be restarted unexpectedly
+        // if there is an activity of the package without attached process becomes visible when
+        // killing its other processes with visible activities.
+        boolean didSomething =
+                mAtmInternal.onForceStopPackage(packageName, doit, evenPersistent, userId);
+
+        didSomething |= mProcessList.killPackageProcessesLocked(packageName, appId, userId,
                 ProcessList.INVALID_ADJ, callerWillRestart, false /* allowRestart */, doit,
                 evenPersistent, true /* setRemoved */,
                 packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
@@ -4908,9 +4914,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ApplicationExitInfo.SUBREASON_UNKNOWN,
                 (packageName == null ? ("stop user " + userId) : ("stop " + packageName))
                 + " due to " + reason);
-
-        didSomething |=
-                mAtmInternal.onForceStopPackage(packageName, doit, evenPersistent, userId);
 
         if (mServices.bringDownDisabledPackageServicesLocked(
                 packageName, null /* filterByClasses */, userId, evenPersistent, doit)) {

@@ -1021,7 +1021,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Note the activities have non-null ActivityRecord.app, so it won't remove directly.
         mRootWindowContainer.mFinishDisabledPackageActivitiesHelper.process(
                 firstActivity.packageName, null /* filterByClasses */, true /* doit */,
-                true /* evenPersistent */, UserHandle.USER_ALL);
+                true /* evenPersistent */, UserHandle.USER_ALL, false /* onlyRemoveNoProcess */);
 
         // If the activity is disabled with {@link android.content.pm.PackageManager#DONT_KILL_APP}
         // the activity should still follow the normal flow to finish and destroy.
@@ -1050,7 +1050,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         mRootWindowContainer.mFinishDisabledPackageActivitiesHelper.process(
                 activity.packageName, null  /* filterByClasses */, true /* doit */,
-                true /* evenPersistent */, UserHandle.USER_ALL);
+                true /* evenPersistent */, UserHandle.USER_ALL, false /* onlyRemoveNoProcess */);
 
         // Although the overlay activity is in another package, the non-overlay activities are
         // removed from the task. Since the overlay activity should be removed as well, the task
