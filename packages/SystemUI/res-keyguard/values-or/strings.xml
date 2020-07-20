@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"କୌଣସି ସେବା ନାହିଁ।"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ଇନପୁଟ୍‌ ପଦ୍ଧତି ବଦଳାନ୍ତୁ"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"ଅପଡେଟ୍ ପାଇଁ ପ୍ରସ୍ତୁତ ହେବାକୁ PIN ଆବଶ୍ୟକ"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"ଅପଡେଟ୍ ପାଇଁ ପ୍ରସ୍ତୁତ ହେବାକୁ ପାଟର୍ନ ଆବଶ୍ୟକ"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"ଅପଡେଟ୍ ପାଇଁ ପ୍ରସ୍ତୁତ ହେବାକୁ ପାସୱାର୍ଡ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାଟର୍ନ ଆବଶ୍ୟକ ଅଟେ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବାପରେ ପାସ୍‌ୱର୍ଡ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାସୱର୍ଡ ଆବଶ୍ୟକ ଅଟେ"</string>
