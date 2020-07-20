@@ -2170,6 +2170,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isInputMethodTarget()) {
             dc.computeImeTarget(true /* updateImeTarget */);
         }
+        if (dc.mInputMethodInputTarget == this) {
+            dc.setInputMethodInputTarget(null);
+        }
         if (dc.mInputMethodControlTarget == this) {
             dc.updateImeControlTarget();
         }
@@ -3797,7 +3800,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord.getBounds().equals(mTmpRect);
     }
 
-    @Override
+    /**
+     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     */
+    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
+        return mActivityRecord == null
+                || mActivityRecord.letterboxNotIntersectsOrFullyContains(rect);
+    }
+
     public boolean isLetterboxedOverlappingWith(Rect rect) {
         return mActivityRecord != null && mActivityRecord.isLetterboxOverlappingWith(rect);
     }

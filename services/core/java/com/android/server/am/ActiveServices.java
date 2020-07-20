@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.ROOT_UID;
@@ -1361,13 +1360,12 @@ public final class ActiveServices {
                         +  String.format("0x%08X", manifestType)
                         + " in service element of manifest file");
                 }
-                if ((foregroundServiceType & FOREGROUND_SERVICE_TYPE_LOCATION) != 0
-                        && !r.mAllowWhileInUsePermissionInFgs) {
-                    // If the foreground service is not started from TOP process, do not allow it to
-                    // have location capability, this prevents BG started FGS to have while-in-use
-                    // location permission.
+                // If the foreground service is not started from TOP process, do not allow it to
+                // have while-in-use location/camera/microphone access.
+                if (!r.mAllowWhileInUsePermissionInFgs) {
                     Slog.w(TAG,
-                            "BG started FGS can not have location capability: service "
+                            "Foreground service started from background can not have "
+                                    + "location/camera/microphone access: service "
                                     + r.shortInstanceName);
                 }
             }

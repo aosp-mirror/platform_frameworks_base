@@ -3292,7 +3292,7 @@ public class DisplayPolicy {
             // keys, we let it keep controlling the visibility.
             final boolean lastFocusCanReceiveKeys =
                     (mLastFocusedWindow != null && mLastFocusedWindow.canReceiveKeys());
-            winCandidate = isKeyguardShowing() ? mNotificationShade
+            winCandidate = isKeyguardShowing() && !isKeyguardOccluded() ? mNotificationShade
                     : lastFocusCanReceiveKeys ? mLastFocusedWindow
                             : mTopFullscreenOpaqueWindowState;
             if (winCandidate == null) {
@@ -3437,17 +3437,22 @@ public class DisplayPolicy {
             WindowState opaqueOrDimming) {
         final boolean onKeyguard = isKeyguardShowing() && !isKeyguardOccluded();
         final WindowState statusColorWin = onKeyguard ? mNotificationShade : opaqueOrDimming;
-        if (statusColorWin != null && (statusColorWin == opaque || onKeyguard)) {
-            // If the top fullscreen-or-dimming window is also the top fullscreen, respect
-            // its light flag.
-            appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
-            final int legacyAppearance = InsetsFlags.getAppearance(
-                    PolicyControl.getSystemUiVisibility(statusColorWin, null));
-            appearance |= (statusColorWin.mAttrs.insetsFlags.appearance | legacyAppearance)
-                    & APPEARANCE_LIGHT_STATUS_BARS;
-        } else if (statusColorWin != null && statusColorWin.isDimming()) {
-            // Otherwise if it's dimming, clear the light flag.
-            appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
+        if (statusColorWin != null) {
+            if (statusColorWin == opaque || onKeyguard) {
+                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
+                // its light flag.
+                appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
+                final int legacyAppearance = InsetsFlags.getAppearance(
+                        PolicyControl.getSystemUiVisibility(statusColorWin, null));
+                appearance |= (statusColorWin.mAttrs.insetsFlags.appearance | legacyAppearance)
+                        & APPEARANCE_LIGHT_STATUS_BARS;
+            } else if (statusColorWin.isDimming()) {
+                // Otherwise if it's dimming, clear the light flag.
+                appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
+            }
+            if (!mStatusBarController.isLightAppearanceAllowed(statusColorWin)) {
+                appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
+            }
         }
         return appearance;
     }
@@ -3512,8 +3517,7 @@ public class DisplayPolicy {
         return vis;
     }
 
-    @VisibleForTesting
-    static int updateLightNavigationBarAppearanceLw(int appearance, WindowState opaque,
+    private int updateLightNavigationBarAppearanceLw(int appearance, WindowState opaque,
             WindowState opaqueOrDimming, WindowState imeWindow, WindowState navColorWin) {
 
         if (navColorWin != null) {
@@ -3524,6 +3528,9 @@ public class DisplayPolicy {
                         & APPEARANCE_LIGHT_NAVIGATION_BARS;
             } else if (navColorWin == opaqueOrDimming && navColorWin.isDimming()) {
                 // Clear the light flag for dimming window.
+                appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
+            }
+            if (!mNavigationBarController.isLightAppearanceAllowed(navColorWin)) {
                 appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
             }
         }

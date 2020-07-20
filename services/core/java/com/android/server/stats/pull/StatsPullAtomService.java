@@ -1145,6 +1145,15 @@ public class StatsPullAtomService extends SystemService {
 
     private void addDataUsageBytesTransferAtoms(@NonNull NetworkStatsExt statsExt,
             @NonNull List<StatsEvent> pulledData) {
+
+        // Workaround for 5G NSA mode, see {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+        // 5G NSA mode means the primary cell is LTE with a secondary connection to an
+        // NR cell. To mitigate risk, NetworkStats is currently storing this state as
+        // a fake RAT type rather than storing the boolean separately.
+        final boolean is5GNsa = statsExt.ratType == NetworkTemplate.NETWORK_TYPE_5G_NSA;
+        // Report NR connected in 5G non-standalone mode, or if the RAT type is NR to begin with.
+        final boolean isNR = is5GNsa || statsExt.ratType == TelephonyManager.NETWORK_TYPE_NR;
+
         final NetworkStats.Entry entry = new NetworkStats.Entry(); // for recycling
         for (int i = 0; i < statsExt.stats.size(); i++) {
             statsExt.stats.getValues(i, entry);
@@ -1156,7 +1165,7 @@ public class StatsPullAtomService extends SystemService {
                     .writeLong(entry.rxPackets)
                     .writeLong(entry.txBytes)
                     .writeLong(entry.txPackets)
-                    .writeInt(statsExt.ratType)
+                    .writeInt(is5GNsa ? TelephonyManager.NETWORK_TYPE_LTE : statsExt.ratType)
                     // Fill information about subscription, these cannot be null since invalid data
                     // would be filtered when adding into subInfo list.
                     .writeString(statsExt.subInfo.mcc)
@@ -1165,6 +1174,7 @@ public class StatsPullAtomService extends SystemService {
                     .writeInt(statsExt.subInfo.isOpportunistic
                             ? DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC
                             : DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC)
+                    .writeBoolean(isNR)
                     .build();
             pulledData.add(e);
         }

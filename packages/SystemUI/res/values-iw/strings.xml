@@ -920,7 +920,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"מסך נעילה"</string>
     <string name="pip_phone_expand" msgid="1424988917240616212">"הרחב"</string>
     <string name="pip_phone_minimize" msgid="9057117033655996059">"מזער"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"סגור"</string>
+    <string name="pip_phone_close" msgid="8801864042095341824">"סגירה"</string>
     <string name="pip_phone_settings" msgid="5687538631925004341">"הגדרות"</string>
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"גרור למטה כדי לסגור"</string>
     <string name="pip_menu_title" msgid="6365909306215631910">"תפריט"</string>
