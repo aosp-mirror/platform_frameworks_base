@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"సేవ లేదు."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ఇన్‌పుట్ పద్ధతిని మార్చు"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"విమానం మోడ్"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"అప్‌డేట్‌కు సిద్ధం చేయడానికి పిన్ అవసరం"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"అప్‌డేట్‌కు సిద్ధం చేయడానికి ఆకృతి అవసరం"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"అప్‌డేట్‌కు సిద్ధం చేయడానికి పాస్‌వర్డ్ అవసరం"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత నమూనాను గీయాలి"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"డివైజ్‌ను పునఃప్రారంభించిన తర్వాత పిన్ నమోదు చేయాలి"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత పాస్‌వర్డ్‌ను నమోదు చేయాలి"</string>
