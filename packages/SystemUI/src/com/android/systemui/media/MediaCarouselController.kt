@@ -306,7 +306,7 @@ class MediaCarouselController @Inject constructor(
 
     private fun updatePageIndicator() {
         val numPages = mediaContent.getChildCount()
-        pageIndicator.setNumPages(numPages, Color.WHITE)
+        pageIndicator.setNumPages(numPages)
         if (numPages == 1) {
             pageIndicator.setLocation(0f)
         }

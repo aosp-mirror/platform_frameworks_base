@@ -10,10 +10,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
 
+/**
+ * Page indicator for using with pageable layouts
+ *
+ * Supports {@code android.R.attr.tint}. If missing, it will use the current accent color.
+ */
 public class PageIndicator extends ViewGroup {
 
     private static final String TAG = "PageIndicator";
@@ -31,12 +39,22 @@ public class PageIndicator extends ViewGroup {
     private final int mPageIndicatorWidth;
     private final int mPageIndicatorHeight;
     private final int mPageDotWidth;
+    private @NonNull ColorStateList mTint;
 
     private int mPosition = -1;
     private boolean mAnimating;
 
     public PageIndicator(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        TypedArray array = context.obtainStyledAttributes(attrs, new int[]{android.R.attr.tint});
+        if (array.hasValue(0)) {
+            mTint = array.getColorStateList(0);
+        } else {
+            mTint = Utils.getColorAccent(context);
+        }
+        array.recycle();
+
         mPageIndicatorWidth =
                 (int) mContext.getResources().getDimension(R.dimen.qs_page_indicator_width);
         mPageIndicatorHeight =
@@ -45,15 +63,6 @@ public class PageIndicator extends ViewGroup {
     }
 
     public void setNumPages(int numPages) {
-        TypedArray array = getContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorControlActivated});
-        int color = array.getColor(0, 0);
-        array.recycle();
-        setNumPages(numPages, color);
-    }
-
-    /** Overload of setNumPages that allows the indicator color to be specified.*/
-    public void setNumPages(int numPages, int color) {
         setVisibility(numPages > 1 ? View.VISIBLE : View.GONE);
         if (numPages == getChildCount()) {
             return;
@@ -67,11 +76,39 @@ public class PageIndicator extends ViewGroup {
         while (numPages > getChildCount()) {
             ImageView v = new ImageView(mContext);
             v.setImageResource(R.drawable.minor_a_b);
-            v.setImageTintList(ColorStateList.valueOf(color));
+            v.setImageTintList(mTint);
             addView(v, new LayoutParams(mPageIndicatorWidth, mPageIndicatorHeight));
         }
         // Refresh state.
         setIndex(mPosition >> 1);
+    }
+
+    /**
+     * @return the current tint list for this view.
+     */
+    @NonNull
+    public ColorStateList getTintList() {
+        return mTint;
+    }
+
+    /**
+     * Set the color for this view.
+     * <br>
+     * Calling this will change the color of the current view and any new dots that are added to it.
+     * @param color the new color
+     */
+    public void setTintList(@NonNull ColorStateList color) {
+        if (color.equals(mTint)) {
+            return;
+        }
+        mTint = color;
+        final int N = getChildCount();
+        for (int i = 0; i < N; i++) {
+            View v = getChildAt(i);
+            if (v instanceof ImageView) {
+                ((ImageView) v).setImageTintList(mTint);
+            }
+        }
     }
 
     public void setLocation(float location) {
