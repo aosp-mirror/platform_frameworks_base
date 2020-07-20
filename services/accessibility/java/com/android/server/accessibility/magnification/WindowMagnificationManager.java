@@ -384,7 +384,7 @@ public class WindowMagnificationManager implements
             synchronized (mLock) {
                 WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
                 if (magnifier == null) {
-                    return;
+                    magnifier = createWindowMagnifier(displayId);
                 }
                 if (DBG) {
                     Slog.i(TAG,
@@ -398,6 +398,15 @@ public class WindowMagnificationManager implements
         public void onChangeMagnificationMode(int displayId, int magnificationMode)
                 throws RemoteException {
             //TODO: Uses this method to change the magnification mode on non-default display.
+        }
+
+        @Override
+        public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
+            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                magnifier = createWindowMagnifier(displayId);
+            }
+            magnifier.onSourceBoundsChanged(sourceBounds);
         }
 
         @Override
@@ -427,6 +436,8 @@ public class WindowMagnificationManager implements
         private final WindowMagnificationManager mWindowMagnificationManager;
         //Records the bounds of window magnifier.
         private final Rect mBounds = new Rect();
+        //The magnified bounds on the screen.
+        private final Rect mSourceBounds = new Rect();
         WindowMagnifier(int displayId, WindowMagnificationManager windowMagnificationManager) {
             mDisplayId = displayId;
             mWindowMagnificationManager = windowMagnificationManager;
@@ -501,6 +512,10 @@ public class WindowMagnificationManager implements
         @GuardedBy("mLock")
         void reset() {
             mEnabled = false;
+        }
+
+        public void onSourceBoundsChanged(Rect sourceBounds) {
+            mSourceBounds.set(sourceBounds);
         }
     }
 

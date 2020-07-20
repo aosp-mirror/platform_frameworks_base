@@ -67,7 +67,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Surface.Rotation
     private int mRotation;
     private final Rect mMagnificationFrame = new Rect();
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTransaction;
 
     private final WindowManager mWm;
 
@@ -75,6 +75,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private final Rect mTmpRect = new Rect();
     private final Rect mMirrorViewBounds = new Rect();
+    private final Rect mSourceBounds = new Rect();
 
     // The root of the mirrored content
     private SurfaceControl mMirrorSurface;
@@ -101,22 +102,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final Rect mMagnificationFrameBoundary = new Rect();
 
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
-    private final Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback =
-            l -> {
-                if (mMirrorView != null) {
-                    final Rect sourceBounds = getSourceBounds(mMagnificationFrame, mScale);
-                    mTransaction.setGeometry(mMirrorSurface, sourceBounds, mTmpRect,
-                            Surface.ROTATION_0).apply();
-                }
-            };
+    private Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
 
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
 
-    WindowMagnificationController(Context context,
-            @NonNull Handler handler,
+    WindowMagnificationController(Context context, @NonNull Handler handler,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
-            MirrorWindowControl mirrorWindowControl,
+            MirrorWindowControl mirrorWindowControl,  SurfaceControl.Transaction transaction,
             @NonNull WindowMagnifierCallback callback) {
         mContext = context;
         mHandler = handler;
@@ -137,6 +130,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (mMirrorWindowControl != null) {
             mMirrorWindowControl.setWindowDelegate(this);
         }
+        mTransaction = transaction;
         setInitialStartBounds();
 
         // Initialize listeners.
@@ -153,6 +147,20 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorSurfaceViewLayoutChangeListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
                         -> applyTapExcludeRegion();
+
+        mMirrorViewGeometryVsyncCallback =
+                l -> {
+                    if (mMirrorView != null && mMirrorSurface != null) {
+                        calculateSourceBounds(mMagnificationFrame, mScale);
+                        // The final destination for the magnification surface should be at 0,0
+                        // since the ViewRootImpl's position will change
+                        mTmpRect.set(0, 0, mMagnificationFrame.width(),
+                                mMagnificationFrame.height());
+                        mTransaction.setGeometry(mMirrorSurface, mSourceBounds, mTmpRect,
+                                Surface.ROTATION_0).apply();
+                        mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, mSourceBounds);
+                    }
+                };
     }
 
     private void updateDimensions() {
@@ -350,13 +358,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * Modifies the placement of the mirrored content when the position of mMirrorView is updated.
      */
     private void modifyWindowMagnification(SurfaceControl.Transaction t) {
-        // The final destination for the magnification surface should be at 0,0 since the
-        // ViewRootImpl's position will change
-        mTmpRect.set(0, 0, mMagnificationFrame.width(), mMagnificationFrame.height());
-
+        mSfVsyncFrameProvider.postFrameCallback(mMirrorViewGeometryVsyncCallback);
         updateMirrorViewLayout();
 
-        mSfVsyncFrameProvider.postFrameCallback(mMirrorViewGeometryVsyncCallback);
     }
 
     /**
@@ -420,14 +424,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * Calculates the desired source bounds. This will be the area under from the center of  the
      * displayFrame, factoring in scale.
      */
-    private Rect getSourceBounds(Rect displayFrame, float scale) {
+    private void calculateSourceBounds(Rect displayFrame, float scale) {
         int halfWidth = displayFrame.width() / 2;
         int halfHeight = displayFrame.height() / 2;
         int left = displayFrame.left + (halfWidth - (int) (halfWidth / scale));
         int right = displayFrame.right - (halfWidth - (int) (halfWidth / scale));
         int top = displayFrame.top + (halfHeight - (int) (halfHeight / scale));
         int bottom = displayFrame.bottom - (halfHeight - (int) (halfHeight / scale));
-        return new Rect(left, top, right, bottom);
+        mSourceBounds.set(left, top, right, bottom);
     }
 
     private void setMagnificationFrameBoundary() {

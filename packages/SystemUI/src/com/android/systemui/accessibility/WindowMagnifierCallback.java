@@ -29,4 +29,12 @@ interface WindowMagnifierCallback {
      * @param bounds The bounds of window magnifier on the screen.
      */
     void onWindowMagnifierBoundsChanged(int displayId, Rect bounds);
+
+    /**
+     * Called when the magnified bounds is changed.
+     *
+     * @param displayId The logical display id.
+     * @param sourceBounds The magnified bounds in screen coordinates.
+     */
+    void onSourceBoundsChanged(int displayId, Rect sourceBounds);
 }
