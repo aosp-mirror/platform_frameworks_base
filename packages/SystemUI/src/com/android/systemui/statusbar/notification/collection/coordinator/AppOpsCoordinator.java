@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+
 import android.app.Notification;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -24,9 +26,11 @@ import android.util.ArraySet;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
@@ -43,6 +47,8 @@ import javax.inject.Singleton;
  *  Tags notifications with appOps
  *  Lifetime extends notifications associated with an ongoing ForegroundService.
  *  Filters out notifications that represent foreground services that are no longer running
+ *  Puts foreground service notifications into the FGS section. See {@link NotifCoordinators} for
+ *      section ordering priority.
  *
  * Previously this logic lived in
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceController
@@ -84,6 +90,10 @@ public class AppOpsCoordinator implements Coordinator {
 
         // when appOps change, update any relevant notifications to update appOps for
         mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
+    }
+
+    public NotifSection getSection() {
+        return mNotifSection;
     }
 
     /**
@@ -201,6 +211,23 @@ public class AppOpsCoordinator implements Coordinator {
             if (activeOps != null) {
                 entry.mActiveAppOps.addAll(activeOps);
             }
+        }
+    };
+
+    /**
+     * Puts foreground service notifications into its own section.
+     */
+    private final NotifSection mNotifSection = new NotifSection("ForegroundService") {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            NotificationEntry notificationEntry = entry.getRepresentativeEntry();
+            if (notificationEntry != null) {
+                Notification notification = notificationEntry.getSbn().getNotification();
+                return notification.isForegroundService()
+                        && notification.isColorized()
+                        && entry.getRepresentativeEntry().getImportance() > IMPORTANCE_MIN;
+            }
+            return false;
         }
     };
 

@@ -17,15 +17,19 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
  * Filters out NotificationEntries based on its Ranking and dozing state.
+ * Assigns alerting / silent section based on the importance of the notification entry.
  * We check the NotificationEntry's Ranking for:
  *  - whether the notification's app is suspended or hiding its notifications
  *  - whether DND settings are hiding notifications from ambient display or the notification list
@@ -35,10 +39,14 @@ public class RankingCoordinator implements Coordinator {
     private static final String TAG = "RankingNotificationCoordinator";
 
     private final StatusBarStateController mStatusBarStateController;
+    private final HighPriorityProvider mHighPriorityProvider;
 
     @Inject
-    public RankingCoordinator(StatusBarStateController statusBarStateController) {
+    public RankingCoordinator(
+            StatusBarStateController statusBarStateController,
+            HighPriorityProvider highPriorityProvider) {
         mStatusBarStateController = statusBarStateController;
+        mHighPriorityProvider = highPriorityProvider;
     }
 
     @Override
@@ -48,6 +56,28 @@ public class RankingCoordinator implements Coordinator {
         pipeline.addPreGroupFilter(mSuspendedFilter);
         pipeline.addPreGroupFilter(mDozingFilter);
     }
+
+    public NotifSection getAlertingSection() {
+        return mAlertingNotifSection;
+    }
+
+    public NotifSection getSilentSection() {
+        return mSilentNotifSection;
+    }
+
+    private final NotifSection mAlertingNotifSection = new NotifSection("Alerting") {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            return mHighPriorityProvider.isHighPriority(entry);
+        }
+    };
+
+    private final NotifSection mSilentNotifSection = new NotifSection("Silent") {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            return !mHighPriorityProvider.isHighPriority(entry);
+        }
+    };
 
     /**
      * Checks whether to filter out the given notification based the notification's Ranking object.

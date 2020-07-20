@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 
 /**
@@ -29,8 +28,4 @@ public interface Coordinator {
      * Coordinators should register their listeners and {@link Pluggable}s to the pipeline.
      */
     void attach(NotifPipeline pipeline);
-
-    default NotifSection getSection() {
-        return null;
-    }
 }
