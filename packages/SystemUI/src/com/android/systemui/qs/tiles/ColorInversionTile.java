@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
@@ -34,6 +35,10 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
+
+    private static final String EXTRA_FRAGMENT_ARGS_KEY = ":settings:fragment_args_key";
+    private static final String EXTRA_SHOW_FRAGMENT_ARGS_KEY = ":settings:show_fragment_args";
+    private static final String COLOR_INVERSION_PREFERENCE_KEY = "toggle_inversion_preference";
 
     private final Icon mIcon = ResourceIcon.get(drawable.ic_invert_colors);
     private final SecureSetting mSetting;
@@ -78,7 +83,11 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_FRAGMENT_ARGS_KEY, COLOR_INVERSION_PREFERENCE_KEY);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGS_KEY, bundle);
+        return intent;
     }
 
     @Override
