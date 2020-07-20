@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Nincs szolgáltatás."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Beviteli módszer váltása"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Repülős üzemmód"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"A frissítésre való felkészüléshez meg kell adni a PIN-kódot"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"A frissítésre való felkészüléshez meg kell adni a mintát"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"A frissítésre való felkészüléshez meg kell adni a jelszót"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Az eszköz újraindítását követően meg kell adni a mintát"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Az eszköz újraindítását követően meg kell adni a PIN-kódot"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Az eszköz újraindítását követően meg kell adni a jelszót"</string>
