@@ -2952,8 +2952,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 null /* resultData */, null /* resultGrants */);
         makeFinishingLocked();
         if (ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE) {
-            Slog.i(TAG_ADD_REMOVE, "Removing activity " + this + " from stack callers="
-                    + Debug.getCallers(5));
+            Slog.i(TAG_ADD_REMOVE, "Removing activity " + this + " from stack, reason="
+                    + reason + ", callers=" + Debug.getCallers(5));
         }
 
         takeFromHistory();

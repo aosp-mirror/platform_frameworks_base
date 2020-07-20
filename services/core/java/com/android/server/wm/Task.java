@@ -771,12 +771,6 @@ class Task extends WindowContainer<WindowContainer> {
             mHasVisibleActivities = false;
             mApp = app;
             mIsProcessRemoved = app.isRemoved();
-            if (mIsProcessRemoved) {
-                // The package of the died process should be force-stopped, so make its activities
-                // as finishing to prevent the process from being started again if the next top
-                // (or being visible) activity also resides in the same process.
-                app.makeFinishingForProcessRemoved();
-            }
 
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     RemoveHistoryRecordsForApp::addActivityToRemove, this,

@@ -307,7 +307,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 wpc = mWpc;
             } else {
                 wpc = new WindowProcessController(mService,
-                        mService.mContext.getApplicationInfo(), mProcessName, mUid,
+                        aInfo.applicationInfo, mProcessName, mUid,
                         UserHandle.getUserId(12345), mock(Object.class),
                         mock(WindowProcessListener.class));
                 wpc.setThread(mock(IApplicationThread.class));
