@@ -20,14 +20,13 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.icu.text.DateFormatSymbols;
 import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 
 import com.android.internal.R;
-
-import libcore.icu.LocaleData;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -200,17 +199,23 @@ public class DateUtils
      */
     @Deprecated
     public static String getDayOfWeekString(int dayOfWeek, int abbrev) {
-        LocaleData d = LocaleData.get(Locale.getDefault());
-        String[] names;
+        DateFormatSymbols dfs = DateFormatSymbols.getInstance();
+        final int width;
         switch (abbrev) {
-            case LENGTH_LONG:       names = d.longWeekdayNames;  break;
-            case LENGTH_MEDIUM:     names = d.shortWeekdayNames; break;
-            case LENGTH_SHORT:      names = d.shortWeekdayNames; break; // TODO
-            case LENGTH_SHORTER:    names = d.shortWeekdayNames; break; // TODO
-            case LENGTH_SHORTEST:   names = d.tinyWeekdayNames;  break;
-            default:                names = d.shortWeekdayNames; break;
+            case LENGTH_LONG:
+                width = DateFormatSymbols.WIDE;
+                break;
+            case LENGTH_SHORTEST:
+                width = DateFormatSymbols.NARROW;
+                break;
+            case LENGTH_MEDIUM:
+            case LENGTH_SHORT:   // TODO
+            case LENGTH_SHORTER: // TODO
+            default:
+                width = DateFormatSymbols.ABBREVIATED;
+                break;
         }
-        return names[dayOfWeek];
+        return dfs.getWeekdays(DateFormatSymbols.FORMAT, width)[dayOfWeek];
     }
 
     /**
@@ -239,17 +244,23 @@ public class DateUtils
      */
     @Deprecated
     public static String getMonthString(int month, int abbrev) {
-        LocaleData d = LocaleData.get(Locale.getDefault());
-        String[] names;
+        DateFormatSymbols dfs = DateFormat.getIcuDateFormatSymbols(Locale.getDefault());
+        final int width;
         switch (abbrev) {
-            case LENGTH_LONG:       names = d.longMonthNames;  break;
-            case LENGTH_MEDIUM:     names = d.shortMonthNames; break;
-            case LENGTH_SHORT:      names = d.shortMonthNames; break;
-            case LENGTH_SHORTER:    names = d.shortMonthNames; break;
-            case LENGTH_SHORTEST:   names = d.tinyMonthNames;  break;
-            default:                names = d.shortMonthNames; break;
+            case LENGTH_LONG:
+                width = DateFormatSymbols.WIDE;
+                break;
+            case LENGTH_SHORTEST:
+                width = DateFormatSymbols.NARROW;
+                break;
+            case LENGTH_MEDIUM:
+            case LENGTH_SHORT:
+            case LENGTH_SHORTER:
+            default:
+                width = DateFormatSymbols.ABBREVIATED;
+                break;
         }
-        return names[month];
+        return dfs.getMonths(DateFormatSymbols.FORMAT, width)[month];
     }
 
     /**
