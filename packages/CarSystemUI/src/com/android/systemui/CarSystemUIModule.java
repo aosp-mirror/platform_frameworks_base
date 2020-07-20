@@ -132,9 +132,9 @@ public abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
-    static SystemWindows provideSystemWindows(Context context, DisplayController displayController,
+    static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
-        return new SystemWindows(context, displayController, wmService);
+        return new SystemWindows(displayController, wmService);
     }
 
     @Singleton
