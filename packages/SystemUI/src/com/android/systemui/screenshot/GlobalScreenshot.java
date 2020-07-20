@@ -1033,6 +1033,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotPreview.setLayerType(View.LAYER_TYPE_NONE, null);
         mScreenshotPreview.setContentDescription(
                 mContext.getResources().getString(R.string.screenshot_preview_description));
+        mScreenshotPreview.setOnClickListener(null);
         mScreenshotLayout.setAlpha(1);
         mDismissButton.setTranslationY(0);
         mActionsContainer.setTranslationY(0);
