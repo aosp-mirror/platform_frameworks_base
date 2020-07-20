@@ -399,8 +399,11 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE_PULSING:
             case DOZE_PULSING_BRIGHT:
-            case DOZE_AOD_DOCKED:
                 mWantProx = true;
+                mWantTouchScreenSensors = false;
+                break;
+            case DOZE_AOD_DOCKED:
+                mWantProx = false;
                 mWantTouchScreenSensors = false;
                 break;
             case DOZE_PULSE_DONE:
