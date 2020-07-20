@@ -56,6 +56,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
+import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
@@ -67,7 +68,6 @@ import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.animation.PhysicsAnimator;
 import com.android.systemui.util.magnetictarget.MagnetizedObject;
-import com.android.wm.shell.R;
 
 import java.io.PrintWriter;
 
