@@ -29,8 +29,8 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
-import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.IFaceServiceReceiver;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -269,7 +269,7 @@ class Face10 implements IHwBinder.DeathRecipient {
 
     Face10(@NonNull Context context, int sensorId,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        mFaceSensorProperties = new FaceSensorProperties(false /* supportsFaceDetect */);
+        mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
@@ -559,7 +559,7 @@ class Face10 implements IHwBinder.DeathRecipient {
         return daemon != null;
     }
 
-    FaceSensorProperties getFaceSensorProperties() {
+    @NonNull FaceSensorProperties getFaceSensorProperties() {
         return mFaceSensorProperties;
     }
 
