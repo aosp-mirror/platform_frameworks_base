@@ -5400,12 +5400,9 @@ class Task extends WindowContainer<WindowContainer> {
         mCurrentUser = userId;
 
         super.switchUser(userId);
-        forAllLeafTasks((t) -> {
-            if (t.showToCurrentUser() && t != this) {
-                mChildren.remove(t);
-                mChildren.add(t);
-            }
-        }, true /* traverseTopToBottom */);
+        if (isLeafTask() && showToCurrentUser()) {
+            getParent().positionChildAt(POSITION_TOP, this, false /*includeParents*/);
+        }
     }
 
     void minimalResumeActivityLocked(ActivityRecord r) {
