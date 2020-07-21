@@ -17,6 +17,8 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.support.test.launcherhelper.ILauncherStrategy
+import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
@@ -24,8 +26,11 @@ import org.junit.Assert
 
 open class ImeAppHelper(
     instr: Instrumentation,
-    launcherName: String = "ImeApp"
-) : FlickerAppHelper(instr, launcherName) {
+    launcherName: String = "ImeApp",
+    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
+            .getInstance(instr)
+            .launcherStrategy
+) : FlickerAppHelper(instr, launcherName, launcherStrategy) {
     open fun openIME(device: UiDevice) {
         val editText = device.wait(
                 Until.findObject(By.res(getPackage(), "plain_text_input")),

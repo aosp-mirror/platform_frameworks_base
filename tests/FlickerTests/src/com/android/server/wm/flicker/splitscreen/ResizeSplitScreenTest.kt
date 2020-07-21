@@ -28,7 +28,6 @@ import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.flicker.helpers.clearRecents
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -75,7 +74,7 @@ class ResizeSplitScreenTest : FlickerTestBase() {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
                     this.setRotation(rotation)
-                    clearRecents(instrumentation)
+                    this.launcherStrategy.clearRecentAppsFromOverview()
                     testAppBottom.open()
                     device.pressHome()
                     testAppTop.open()
