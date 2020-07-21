@@ -225,7 +225,8 @@ public class DateUtils
      */
     @Deprecated
     public static String getAMPMString(int ampm) {
-        return LocaleData.get(Locale.getDefault()).amPm[ampm - Calendar.AM];
+        String[] amPm = DateFormat.getIcuDateFormatSymbols(Locale.getDefault()).getAmPmStrings();
+        return amPm[ampm - Calendar.AM];
     }
 
     /**

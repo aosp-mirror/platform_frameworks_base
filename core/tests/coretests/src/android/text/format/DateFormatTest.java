@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.icu.text.DateFormatSymbols;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -57,6 +58,15 @@ public class DateFormatTest {
     public void testIs24HourLocale() {
         assertFalse(DateFormat.is24HourLocale(Locale.US));
         assertTrue(DateFormat.is24HourLocale(Locale.GERMANY));
+    }
+
+    @Test
+    public void testgetIcuDateFormatSymbols() {
+        DateFormatSymbols dfs = DateFormat.getIcuDateFormatSymbols(Locale.US);
+        assertEquals("AM", dfs.getAmPmStrings()[0]);
+        assertEquals("PM", dfs.getAmPmStrings()[1]);
+        assertEquals("a", dfs.getAmpmNarrowStrings()[0]);
+        assertEquals("p", dfs.getAmpmNarrowStrings()[1]);
     }
 
     @Test
