@@ -502,6 +502,7 @@ message Atom {
         MediametricsMediaParserReported mediametrics_mediaparser_reported = 316;
         TlsHandshakeReported tls_handshake_reported = 317 [(module) = "conscrypt"];
         TextClassifierApiUsageReported text_classifier_api_usage_reported = 318  [(module) = "textclassifier"];
+        KilledAppStatsReported killed_app_stats_reported = 319 [(module) = "carwatchdogd"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -12012,4 +12013,144 @@ message TextClassifierApiUsageReported {
     }
     optional ResultType result_type = 2;
     optional int64 latency_millis = 3;
+}
+
+/**
+ * Logs the current state of an application before it is killed.
+ *
+ * Pushed from:
+ *  packages/services/Car/watchdog/server/src/ApplicationTerminator.cpp
+ */
+message KilledAppStatsReported {
+    // Linux process uid for the package.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Name of the package that was killed.
+    optional string package_name = 2;
+
+    // State of the application when it was killed.
+    enum AppState {
+        UNKNOWN_APP_STATE = 0;
+        BACKGROUND = 1;
+        FOREGROUND = 2;
+    }
+    optional AppState app_state = 3;
+
+    // System state indicating whether the system was in normal mode or garage mode.
+    enum SystemState {
+        UNKNOWN_SYSTEM_STATE = 0;
+        USER_INTERACTION_MODE = 1;
+        NO_USER_INTERACTION_MODE = 2;
+    }
+    optional SystemState system_state = 4;
+
+    // Reason for killing the application.
+    // Keep in sync between:
+    //   packages/services/Car/watchdog/server/src/ApplicationTerminator.h
+    //   frameworks/base/cmds/statsd/src/atoms.proto
+    enum KillReason {
+        UNKNOWN_KILL_REASON = 0;
+        KILLED_ON_ANR = 1;
+        KILLED_ON_IO_OVERUSE = 2;
+        KILLED_ON_MEMORY_OVERUSE = 3;
+    }
+    optional KillReason kill_reason = 5;
+
+    // Stats of the processes owned by the application when the application was killed.
+    // The process stack traces are not collected when the application was killed due to IO_OVERUSE.
+    optional ProcessStats process_stat = 6 [(log_mode) = MODE_BYTES];
+
+    // The application's I/O overuse stats logged only when the kill reason is KILLED_ON_IO_OVERUSE.
+    optional IoOveruseStats io_overuse_stats = 7 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs I/O overuse stats for a package.
+ *
+ * Keep in sync between:
+ *  packages/services/Car/watchdog/server/src/proto/statsd.proto
+ *  frameworks/base/cmds/statsd/src/atoms.proto
+ *
+ * Logged from:
+ *  packages/services/Car/watchdog/server/src/ApplicationTerminator.cpp
+ */
+message IoOveruseStats {
+    enum Period {
+        DAILY = 0;
+        WEEKLY = 1;
+    }
+
+    // Threshold and usage stats period.
+    optional Period period = 1;
+
+    // Threshold in-terms of write bytes defined for the package.
+    optional PerStateBytes threshold = 2;
+
+    // Number of write bytes in each state for the specified period.
+    optional PerStateBytes written_bytes = 3;
+};
+
+/**
+ * Logs bytes attributed to each application and system states.
+ *
+ * Keep in sync between:
+ *  packages/services/Car/watchdog/server/src/proto/statsd.proto
+ *  frameworks/base/cmds/statsd/src/atoms.proto
+ *
+ * Logged from:
+ *  packages/services/Car/watchdog/server/src/ApplicationTerminator.cpp
+ */
+message PerStateBytes {
+    // Number of bytes attributed to the application foreground.
+    optional int64 foreground_bytes = 1;
+
+    // Number of bytes attributed to the application background.
+    optional int64 background_bytes = 2;
+
+    // Number of bytes attributed to the garage mode.
+    optional int64 garage_mode_bytes = 3;
+}
+
+/**
+ * Logs each ProcessStat in ProcessStats.
+ * Keep in sync between:
+ *  packages/services/Car/watchdog/server/src/proto/statsd.proto
+ *  frameworks/base/cmds/statsd/src/atoms.proto
+ * Logged from:
+ *  packages/services/Car/watchdog/server/src/ApplicationTerminator.cpp
+ */
+message ProcessStats {
+    // Records the stats of the processes owned by an application.
+    repeated ProcessStat process_stat = 1;
+}
+
+/**
+ * Logs a process's stats.
+ * Keep in sync between:
+ *  packages/services/Car/watchdog/server/src/proto/statsd.proto
+ *  frameworks/base/cmds/statsd/src/atoms.proto
+ * Logged from:
+ *  packages/services/Car/watchdog/server/src/ApplicationTerminator.cpp
+ */
+message ProcessStat {
+    // Command name of the process.
+    optional string process_name = 1;
+
+    // Process uptime.
+    optional uint64 uptime_milliseconds = 2;
+
+    // Number of major page faults caused by the process and its children.
+    optional uint64 major_page_faults = 3;
+
+    // Peak virtual memory size in kb.
+    optional uint64 vm_peak_kb = 4;
+
+    // Virtual memory size in kb.
+    optional uint64 vm_size_kb = 5;
+
+    // Peak resident set size (high water mark) in kb.
+    optional uint64 vm_hwm_kb = 6;
+
+    // Resident set size in kb.
+    optional uint64 vm_rss_kb = 7;
 }
