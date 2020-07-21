@@ -803,7 +803,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notificações"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Atalhos de teclado"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Alterar esquema de teclado"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplicações"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistência"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Navegador"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contactos"</string>
@@ -968,7 +968,7 @@
     <string name="qs_dnd_until" msgid="7844269319043747955">"Até à(s) <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Manter"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Substituir"</string>
-    <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplicações em execução em segundo plano"</string>
+    <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Pretende desativar os dados móveis?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
