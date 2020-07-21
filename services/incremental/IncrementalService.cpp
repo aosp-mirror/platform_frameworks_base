@@ -1422,6 +1422,11 @@ static long elapsedMcs(Duration start, Duration end) {
 }
 
 // Extract lib files from zip, create new files in incfs and write data to them
+// Lib files should be placed next to the APK file in the following matter:
+// Example:
+// /path/to/base.apk
+// /path/to/lib/arm/first.so
+// /path/to/lib/arm/second.so
 bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                                  std::string_view libDirRelativePath,
                                                  std::string_view abi, bool extractNativeLibs) {
@@ -1433,9 +1438,13 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         return false;
     }
 
+    const auto targetLibPathRelativeToStorage =
+            path::join(path::dirname(normalizePathToStorage(*ifs, storage, apkFullPath)),
+                       libDirRelativePath);
+
     // First prepare target directories if they don't exist yet
-    if (auto res = makeDirs(*ifs, storage, libDirRelativePath, 0755)) {
-        LOG(ERROR) << "Failed to prepare target lib directory " << libDirRelativePath
+    if (auto res = makeDirs(*ifs, storage, targetLibPathRelativeToStorage, 0755)) {
+        LOG(ERROR) << "Failed to prepare target lib directory " << targetLibPathRelativeToStorage
                    << " errno: " << res;
         return false;
     }
@@ -1486,7 +1495,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         auto startFileTs = Clock::now();
 
         const auto libName = path::basename(fileName);
-        auto targetLibPath = path::join(libDirRelativePath, libName);
+        auto targetLibPath = path::join(targetLibPathRelativeToStorage, libName);
         const auto targetLibPathAbsolute = normalizePathToStorage(*ifs, storage, targetLibPath);
         // If the extract file already exists, skip
         if (access(targetLibPathAbsolute.c_str(), F_OK) == 0) {

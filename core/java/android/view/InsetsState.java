@@ -22,13 +22,14 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
-import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.isVisibleInsetsType;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
@@ -38,7 +39,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
@@ -171,7 +171,7 @@ public class InsetsState implements Parcelable {
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
             boolean isScreenRound, boolean alwaysConsumeSystemBars, DisplayCutout cutout,
-            int legacySoftInputMode, int legacySystemUiFlags,
+            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
@@ -218,10 +218,17 @@ public class InsetsState implements Parcelable {
             }
         }
         final int softInputAdjustMode = legacySoftInputMode & SOFT_INPUT_MASK_ADJUST;
+
+        @InsetsType int compatInsetsTypes = systemBars() | displayCutout();
+        if (softInputAdjustMode == SOFT_INPUT_ADJUST_RESIZE) {
+            compatInsetsTypes |= ime();
+        }
+        if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
+            compatInsetsTypes &= ~statusBars();
+        }
+
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, cutout, softInputAdjustMode == SOFT_INPUT_ADJUST_RESIZE
-                        ? systemBars() | displayCutout() | ime()
-                        : systemBars() | displayCutout(),
+                alwaysConsumeSystemBars, cutout, compatInsetsTypes,
                 sNewInsetsMode == NEW_INSETS_MODE_FULL
                         && (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }

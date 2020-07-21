@@ -26,7 +26,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.IdRes;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 
@@ -49,10 +48,7 @@ public class CarStatusBarHeader extends LinearLayout {
         float intensity = colorForeground == Color.WHITE ? 0f : 1f;
         Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
-
-        ((BatteryMeterView) findViewById(R.id.battery)).setForceShowPercent(true);
     }
 
     private void applyDarkness(@IdRes int id, Rect tintArea, float intensity, int color) {

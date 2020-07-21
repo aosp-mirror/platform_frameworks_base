@@ -86,7 +86,7 @@ public class ImeInsetsSourceConsumerTest {
                     false,
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
-                    SOFT_INPUT_ADJUST_RESIZE, 0);
+                    SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mImeConsumer = (ImeInsetsSourceConsumer) mController.getSourceConsumer(ITYPE_IME);
         });
     }

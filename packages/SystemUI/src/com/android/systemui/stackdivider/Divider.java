@@ -197,7 +197,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                     return;
                 }
                 mView.setHidden(mKeyguardStateController.isShowing());
-                mImePositionProcessor.updateAdjustForIme();
+                if (!mKeyguardStateController.isShowing()) {
+                    mImePositionProcessor.updateAdjustForIme();
+                }
             }
 
             @Override
@@ -316,7 +318,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     private void update(Configuration configuration) {
-        final boolean isDividerHidden = mView != null && mView.isHidden();
+        final boolean isDividerHidden = mView != null && mKeyguardStateController.isShowing();
 
         removeDivider();
         addDivider(configuration);
@@ -529,6 +531,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         updateVisibility(false /* visible */);
         mMinimized = false;
         removeDivider();
+        mImePositionProcessor.reset();
     }
 
     void ensureMinimizedSplit() {

@@ -79,6 +79,7 @@ public class DisplayLayout {
     private final Rect mStableInsets = new Rect();
     private boolean mHasNavigationBar = false;
     private boolean mHasStatusBar = false;
+    private int mNavBarFrameHeight = 0;
 
     /**
      * Create empty layout.
@@ -146,6 +147,7 @@ public class DisplayLayout {
         if (mHasStatusBar) {
             convertNonDecorInsetsToStableInsets(res, mStableInsets, mWidth, mHeight, mHasStatusBar);
         }
+        mNavBarFrameHeight = getNavigationBarFrameHeight(res, mWidth > mHeight);
     }
 
     /**
@@ -212,6 +214,11 @@ public class DisplayLayout {
     /** Get whether this layout is landscape. */
     public boolean isLandscape() {
         return mWidth > mHeight;
+    }
+
+    /** Get the navbar frame height (used by ime). */
+    public int navBarFrameHeight() {
+        return mNavBarFrameHeight;
     }
 
     /** Gets the orientation of this layout */
@@ -483,6 +490,7 @@ public class DisplayLayout {
             } else {
                 return res.getDimensionPixelSize(R.dimen.navigation_bar_width_car_mode);
             }
+
         } else {
             if (navBarSide == NAV_BAR_BOTTOM) {
                 return res.getDimensionPixelSize(landscape
@@ -492,5 +500,12 @@ public class DisplayLayout {
                 return res.getDimensionPixelSize(R.dimen.navigation_bar_width);
             }
         }
+    }
+
+    /** @see com.android.server.wm.DisplayPolicy#getNavigationBarFrameHeight */
+    public static int getNavigationBarFrameHeight(Resources res, boolean landscape) {
+        return res.getDimensionPixelSize(landscape
+                ? R.dimen.navigation_bar_frame_height_landscape
+                : R.dimen.navigation_bar_frame_height);
     }
 }
