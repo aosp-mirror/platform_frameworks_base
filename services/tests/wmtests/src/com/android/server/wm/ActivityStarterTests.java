@@ -321,7 +321,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         if (mockGetLaunchStack) {
             // Instrument the stack and task used.
-            final ActivityStack stack = mRootWindowContainer.getDefaultTaskDisplayArea()
+            final Task stack = mRootWindowContainer.getDefaultTaskDisplayArea()
                     .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                             true /* onTop */);
 
@@ -492,7 +492,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     private void assertNoTasks(DisplayContent display) {
         display.forAllTaskDisplayAreas(taskDisplayArea -> {
             for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                final Task stack = taskDisplayArea.getStackAt(sNdx);
                 assertFalse(stack.hasChild());
             }
         });
@@ -741,7 +741,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 new TestDisplayContent.Builder(mService, 1000, 1500)
                         .setPosition(POSITION_BOTTOM).build();
         final TaskDisplayArea secondaryTaskContainer = secondaryDisplay.getDefaultTaskDisplayArea();
-        final ActivityStack stack = secondaryTaskContainer.createStack(
+        final Task stack = secondaryTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Create an activity record on the top of secondary display.
@@ -787,7 +787,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));
 
         // Create another activity on top of the secondary display.
-        final ActivityStack topStack = secondaryTaskContainer.createStack(WINDOWING_MODE_FULLSCREEN,
+        final Task topStack = secondaryTaskContainer.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task topTask = new TaskBuilder(mSupervisor).setStack(topStack).build();
         new ActivityBuilder(mService).setTask(topTask).build();
@@ -826,7 +826,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         Task task = topActivity.getTask();
         starter.postStartActivityProcessing(
-                task.getTopNonFinishingActivity(), START_DELIVERED_TO_TOP, task.getStack());
+                task.getTopNonFinishingActivity(), START_DELIVERED_TO_TOP, task.getRootTask());
 
         verify(taskChangeNotifier).notifyActivityRestartAttempt(
                 any(), anyBoolean(), anyBoolean(), anyBoolean());
@@ -835,14 +835,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         Task task2 = reusableActivity.getTask();
         starter.postStartActivityProcessing(
-                task2.getTopNonFinishingActivity(), START_TASK_TO_FRONT, task.getStack());
+                task2.getTopNonFinishingActivity(), START_TASK_TO_FRONT, task.getRootTask());
         verify(taskChangeNotifier, times(2)).notifyActivityRestartAttempt(
                 any(), anyBoolean(), anyBoolean(), anyBoolean());
         verify(taskChangeNotifier).notifyActivityRestartAttempt(
                 any(), anyBoolean(), anyBoolean(), eq(false));
     }
 
-    private ActivityRecord createSingleTaskActivityOn(ActivityStack stack) {
+    private ActivityRecord createSingleTaskActivityOn(Task stack) {
         final ComponentName componentName = ComponentName.createRelative(
                 DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
@@ -1046,7 +1046,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         targetRecord.setVisibility(false);
         final ActivityRecord sourceRecord = new ActivityBuilder(mService).build();
 
-        final ActivityStack stack = spy(
+        final Task stack = spy(
                 mRootWindowContainer.getDefaultTaskDisplayArea()
                         .createStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
                                 /* onTop */true));

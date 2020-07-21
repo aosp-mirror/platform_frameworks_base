@@ -56,7 +56,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -76,6 +75,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
+import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -180,8 +180,8 @@ class ActivityStarter {
 
     private ActivityInfo mNewTaskInfo;
     private Intent mNewTaskIntent;
-    private ActivityStack mSourceStack;
-    private ActivityStack mTargetStack;
+    private Task mSourceStack;
+    private Task mTargetStack;
     // The task that the last activity was started into. We currently reset the actual start
     // activity's task and as a result may not have a reference to the task in all cases
     private Task mTargetTask;
@@ -651,7 +651,7 @@ class ActivityStarter {
             synchronized (mService.mGlobalLock) {
                 final boolean globalConfigWillChange = mRequest.globalConfig != null
                         && mService.getGlobalConfiguration().diff(mRequest.globalConfig) != 0;
-                final ActivityStack stack = mRootWindowContainer.getTopDisplayFocusedStack();
+                final Task stack = mRootWindowContainer.getTopDisplayFocusedStack();
                 if (stack != null) {
                     stack.mConfigWillChange = globalConfigWillChange;
                 }
@@ -984,7 +984,7 @@ class ActivityStarter {
             }
         }
 
-        final ActivityStack resultStack = resultRecord == null
+        final Task resultStack = resultRecord == null
                 ? null : resultRecord.getRootTask();
 
         if (err != START_SUCCESS) {
@@ -1122,7 +1122,7 @@ class ActivityStarter {
                         null /*profilerInfo*/);
 
                 if (DEBUG_PERMISSIONS_REVIEW) {
-                    final ActivityStack focusedStack =
+                    final Task focusedStack =
                             mRootWindowContainer.getTopDisplayFocusedStack();
                     Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
                             true, false) + "} from uid " + callingUid + " on display "
@@ -1163,7 +1163,7 @@ class ActivityStarter {
             r.appTimeTracker = sourceRecord.appTimeTracker;
         }
 
-        final ActivityStack stack = mRootWindowContainer.getTopDisplayFocusedStack();
+        final Task stack = mRootWindowContainer.getTopDisplayFocusedStack();
 
         // If we are starting an activity that is not from the same uid as the currently resumed
         // one, check whether app switches are allowed.
@@ -1445,7 +1445,7 @@ class ActivityStarter {
     }
 
     void postStartActivityProcessing(ActivityRecord r, int result,
-            ActivityStack startedActivityStack) {
+            Task startedActivityStack) {
         if (!ActivityManager.isStartResultSuccessful(result)) {
             if (mFrozeTaskList) {
                 // If we specifically froze the task list as part of starting an activity, then
@@ -1479,7 +1479,7 @@ class ActivityStarter {
             // The activity was already running so it wasn't started, but either brought to the
             // front or the new intent was delivered to it since it was already in front. Notify
             // anyone interested in this piece of information.
-            final ActivityStack homeStack = targetTask.getDisplayArea().getRootHomeTask();
+            final Task homeStack = targetTask.getDisplayArea().getRootHomeTask();
             final boolean homeTaskVisible = homeStack != null && homeStack.shouldBeVisible(null);
             mService.getTaskChangeNotificationController().notifyActivityRestartAttempt(
                     targetTask.getTaskInfo(), homeTaskVisible, clearedTask,
@@ -1514,7 +1514,7 @@ class ActivityStarter {
                 int startFlags, boolean doResume, ActivityOptions options, Task inTask,
                 boolean restrictedBgActivity, NeededUriGrants intentGrants) {
         int result = START_CANCELED;
-        final ActivityStack startedActivityStack;
+        final Task startedActivityStack;
         try {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
@@ -1537,9 +1537,9 @@ class ActivityStarter {
      *
      * @return the stack where the successful started activity resides.
      */
-    private @Nullable ActivityStack handleStartResult(@NonNull ActivityRecord started, int result) {
-        final ActivityStack currentStack = started.getRootTask();
-        ActivityStack startedActivityStack = currentStack != null ? currentStack : mTargetStack;
+    private @Nullable Task handleStartResult(@NonNull ActivityRecord started, int result) {
+        final Task currentStack = started.getRootTask();
+        Task startedActivityStack = currentStack != null ? currentStack : mTargetStack;
 
         if (ActivityManager.isStartResultSuccessful(result)) {
             if (startedActivityStack != null) {
@@ -1559,7 +1559,7 @@ class ActivityStarter {
         // If we are not able to proceed, disassociate the activity from the task. Leaving an
         // activity in an incomplete state can lead to issues, such as performing operations
         // without a window container.
-        final ActivityStack stack = mStartActivity.getRootTask();
+        final Task stack = mStartActivity.getRootTask();
         if (stack != null) {
             mStartActivity.finishIfPossible("startActivity", true /* oomAdj */);
         }
@@ -1634,7 +1634,7 @@ class ActivityStarter {
 
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
-        final ActivityStack topStack = mRootWindowContainer.getTopDisplayFocusedStack();
+        final Task topStack = mRootWindowContainer.getTopDisplayFocusedStack();
         if (topStack != null) {
             startResult = deliverToCurrentTopIfNeeded(topStack, intentGrants);
             if (startResult != START_SUCCESS) {
@@ -1659,7 +1659,7 @@ class ActivityStarter {
         }
 
         if (!mAvoidMoveToFront && mDoResume) {
-            mTargetStack.getStack().moveToFront("reuseOrNewTask", targetTask);
+            mTargetStack.getRootTask().moveToFront("reuseOrNewTask", targetTask);
             if (mOptions != null) {
                 if (mOptions.getTaskAlwaysOnTop()) {
                     mTargetStack.setAlwaysOnTop(true);
@@ -1752,7 +1752,7 @@ class ActivityStarter {
         } else if (mInTask != null) {
             return mInTask;
         } else {
-            final ActivityStack stack = getLaunchStack(mStartActivity, mLaunchFlags,
+            final Task stack = getLaunchStack(mStartActivity, mLaunchFlags,
                     null /* task */, mOptions);
             final ActivityRecord top = stack.getTopNonFinishingActivity();
             if (top != null) {
@@ -1767,7 +1767,7 @@ class ActivityStarter {
 
     private void computeLaunchParams(ActivityRecord r, ActivityRecord sourceRecord,
             Task targetTask) {
-        final ActivityStack sourceStack = mSourceStack != null ? mSourceStack
+        final Task sourceStack = mSourceStack != null ? mSourceStack
                 : mRootWindowContainer.getTopDisplayFocusedStack();
         if (sourceStack != null && sourceStack.inSplitScreenWindowingMode()
                 && (mOptions == null
@@ -1851,7 +1851,7 @@ class ActivityStarter {
         // Should not recycle task which is from a different user, just adding the starting
         // activity to the task.
         if (targetTask.mUserId != mStartActivity.mUserId) {
-            mTargetStack = targetTask.getStack();
+            mTargetStack = targetTask.getRootTask();
             mAddingToTask = true;
             return START_SUCCESS;
         }
@@ -1949,7 +1949,7 @@ class ActivityStarter {
      * Check if the activity being launched is the same as the one currently at the top and it
      * should only be launched once.
      */
-    private int deliverToCurrentTopIfNeeded(ActivityStack topStack, NeededUriGrants intentGrants) {
+    private int deliverToCurrentTopIfNeeded(Task topStack, NeededUriGrants intentGrants) {
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.mActivityComponent.equals(mStartActivity.mActivityComponent)
@@ -2042,7 +2042,7 @@ class ActivityStarter {
                 // running, and the caller has asked to clear the current task to have this
                 // activity at the top.
                 mAddingToTask = true;
-                if (targetTask.getStack() == null) {
+                if (targetTask.getRootTask() == null) {
                     // Target stack got cleared when we all activities were removed above.
                     // Go ahead and reset it.
                     mTargetStack =
@@ -2262,7 +2262,7 @@ class ActivityStarter {
         if ((startFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
             ActivityRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
-                ActivityStack topFocusedStack = mRootWindowContainer.getTopDisplayFocusedStack();
+                Task topFocusedStack = mRootWindowContainer.getTopDisplayFocusedStack();
                 if (topFocusedStack != null) {
                     checkedCaller = topFocusedStack.topRunningNonDelayedActivityLocked(mNotTop);
                 }
@@ -2299,7 +2299,7 @@ class ActivityStarter {
     private void computeLaunchingTaskFlags() {
         // If the caller is not coming from another activity, but has given us an explicit task into
         // which they would like us to launch the new activity, then let's see about doing that.
-        if (mSourceRecord == null && mInTask != null && mInTask.getStack() != null) {
+        if (mSourceRecord == null && mInTask != null && mInTask.getRootTask() != null) {
             final Intent baseIntent = mInTask.getBaseIntent();
             final ActivityRecord root = mInTask.getRootActivity();
             if (baseIntent == null) {
@@ -2482,7 +2482,7 @@ class ActivityStarter {
         // to the front if the caller is not itself in the front.
         final boolean differentTopTask;
         if (mTargetStack.getDisplayArea() == mPreferredTaskDisplayArea) {
-            final ActivityStack focusStack = mTargetStack.getDisplay().getFocusedStack();
+            final Task focusStack = mTargetStack.getDisplay().getFocusedStack();
             final ActivityRecord curTop = (focusStack == null)
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
             final Task topTask = curTop != null ? curTop.getTask() : null;
@@ -2503,7 +2503,7 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
 
-                final ActivityStack launchStack =
+                final Task launchStack =
                         getLaunchStack(mStartActivity, mLaunchFlags, intentTask, mOptions);
                 if (launchStack == null || launchStack == mTargetStack) {
                     // Do not set mMovedToFront to true below for split-screen-top stack, or
@@ -2616,11 +2616,11 @@ class ActivityStarter {
         return launchFlags;
     }
 
-    private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, Task task,
+    private Task getLaunchStack(ActivityRecord r, int launchFlags, Task task,
             ActivityOptions aOptions) {
         // We are reusing a task, keep the stack!
         if (mReuseTask != null) {
-            return mReuseTask.getStack();
+            return mReuseTask.getRootTask();
         }
 
         final boolean onTop =

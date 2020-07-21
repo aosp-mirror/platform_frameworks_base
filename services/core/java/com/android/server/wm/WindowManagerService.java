@@ -1478,9 +1478,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         rootType, attrs.token, attrs.packageName)) {
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
-                token = new WindowToken(this, binder, type, false, displayContent,
-                        session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                if (hasParent) {
+                    // Use existing parent window token for child windows.
+                    token = parentWindow.mToken;
+                } else {
+                    final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
+                    token = new WindowToken(this, binder, type, false, displayContent,
+                            session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                }
             } else if (rootType >= FIRST_APPLICATION_WINDOW
                     && rootType <= LAST_APPLICATION_WINDOW) {
                 activity = token.asActivityRecord();
@@ -1945,7 +1950,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // re-factor.
                 activity.firstWindowDrawn = false;
                 activity.clearAllDrawn();
-                final ActivityStack stack = activity.getStack();
+                final Task stack = activity.getStack();
                 if (stack != null) {
                     stack.mExitingActivities.remove(activity);
                 }
@@ -2863,7 +2868,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void getStackBounds(int windowingMode, int activityType, Rect bounds) {
-        final ActivityStack stack = mRoot.getStack(windowingMode, activityType);
+        final Task stack = mRoot.getStack(windowingMode, activityType);
         if (stack != null) {
             stack.getBounds(bounds);
             return;
@@ -4587,7 +4592,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRoot.getTopFocusedDisplayContent().mCurrentFocus;
     }
 
-    ActivityStack getImeFocusStackLocked() {
+    Task getImeFocusStackLocked() {
         // Don't use mCurrentFocus.getStack() because it returns home stack for system windows.
         // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
         // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
@@ -4596,7 +4601,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent topFocusedDisplay = mRoot.getTopFocusedDisplayContent();
         final ActivityRecord focusedApp = topFocusedDisplay.mFocusedApp;
         return (focusedApp != null && focusedApp.getTask() != null)
-                ? focusedApp.getTask().getStack() : null;
+                ? focusedApp.getTask().getRootTask() : null;
     }
 
     public boolean detectSafeMode() {

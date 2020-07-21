@@ -32,7 +32,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.Task.ActivityState.RESUMED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -67,7 +67,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class TaskDisplayAreaTests extends WindowTestsBase {
 
-    private ActivityStack mPinnedStack;
+    private Task mPinnedStack;
 
     @Before
     public void setUp() throws Exception {
@@ -89,7 +89,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testActivityWithZBoost_taskDisplayAreaDoesNotMoveUp() {
-        final ActivityStack stack = createTaskStackOnDisplay(
+        final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(mDisplayContent);
@@ -109,8 +109,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @Test
     public void testStackPositionChildAt() {
         // Test that always-on-top stack can't be moved to position other than top.
-        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityStack stack2 = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
 
         final WindowContainer taskStackContainer = stack1.getParent();
 
@@ -134,7 +134,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @Test
     public void testStackPositionBelowPinnedStack() {
         // Test that no stack can be above pinned stack.
-        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
 
         final WindowContainer taskStackContainer = stack1.getParent();
 
@@ -158,7 +158,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         doReturn(true).when(mDisplayContent).isTrusted();
 
         // The display contains pinned stack that was added in {@link #setUp}.
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Add another display at top.
@@ -216,10 +216,10 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final TaskDisplayArea defaultTaskDisplayArea =
                 rootWindowContainer.getDefaultTaskDisplayArea();
 
-        final ActivityStack rootHomeTask = defaultTaskDisplayArea.getRootHomeTask();
+        final Task rootHomeTask = defaultTaskDisplayArea.getRootHomeTask();
         rootHomeTask.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
 
-        final ActivityStack primarySplitTask =
+        final Task primarySplitTask =
                 new ActivityTestsBase.StackBuilder(rootWindowContainer)
                 .setTaskDisplayArea(defaultTaskDisplayArea)
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
@@ -247,7 +247,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     private void assertGetOrCreateStack(int windowingMode, int activityType, Task candidateTask,
             boolean reuseCandidate) {
         final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
-        final ActivityStack stack = taskDisplayArea.getOrCreateStack(windowingMode, activityType,
+        final Task stack = taskDisplayArea.getOrCreateStack(windowingMode, activityType,
                 false /* onTop */, null /* intent */, candidateTask /* candidateTask */);
         assertEquals(reuseCandidate, stack == candidateTask);
     }

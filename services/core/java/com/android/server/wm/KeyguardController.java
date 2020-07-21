@@ -475,7 +475,7 @@ class KeyguardController {
             mOccluded = false;
             mDismissingKeyguardActivity = null;
 
-            final ActivityStack stack = getStackForControllingOccluding(display);
+            final Task stack = getStackForControllingOccluding(display);
             if (stack != null) {
                 final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
                 mOccluded = stack.topActivityOccludesKeyguard() || (topDismissing != null
@@ -516,10 +516,10 @@ class KeyguardController {
          * occlusion state.
          */
         @Nullable
-        private ActivityStack getStackForControllingOccluding(DisplayContent display) {
+        private Task getStackForControllingOccluding(DisplayContent display) {
             return display.getItemFromTaskDisplayAreas(taskDisplayArea -> {
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                    final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                    final Task stack = taskDisplayArea.getStackAt(sNdx);
                     if (stack != null && stack.isFocusableAndVisible()
                             && !stack.inPinnedWindowingMode()) {
                         return stack;

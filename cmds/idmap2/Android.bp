@@ -181,7 +181,6 @@ cc_binary {
         "idmap2/Dump.cpp",
         "idmap2/Lookup.cpp",
         "idmap2/Main.cpp",
-        "idmap2/Scan.cpp",
     ],
     target: {
         android: {

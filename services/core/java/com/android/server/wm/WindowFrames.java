@@ -57,7 +57,7 @@ public class WindowFrames {
     public final Rect mParentFrame = new Rect();
 
     /**
-     * The entire screen area of the {@link ActivityStack} this window is in. Usually equal to the
+     * The entire screen area of the {@link Task} this window is in. Usually equal to the
      * screen area of the device.
      *
      * TODO(b/111611553): The name is unclear and most likely should be swapped with

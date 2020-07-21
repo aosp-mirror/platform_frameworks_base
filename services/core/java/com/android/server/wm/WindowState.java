@@ -1566,10 +1566,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
 
-    @Nullable ActivityStack getRootTask() {
+    @Nullable Task getRootTask() {
         final Task task = getTask();
         if (task != null) {
-            return (ActivityStack) task.getRootTask();
+            return task.getRootTask();
         }
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
         // associate them with some stack to enable dimming.
@@ -1611,7 +1611,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
-            final ActivityStack stack = task.getStack();
+            final Task stack = task.getRootTask();
             if (stack != null) {
                 stack.getDimBounds(mTmpRect);
             } else {
@@ -1622,7 +1622,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // the secondary split, it means this is "minimized" and thus must prevent
                 // overlapping with home.
                 // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
-                final ActivityStack rootSecondary =
+                final Task rootSecondary =
                         task.getDisplayArea().getRootSplitScreenSecondaryTask();
                 if (rootSecondary.isActivityTypeHome() || rootSecondary.isActivityTypeRecents()) {
                     final WindowContainer topTask = rootSecondary.getTopChild();
@@ -2107,7 +2107,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isObscuringDisplay() {
         Task task = getTask();
-        if (task != null && task.getStack() != null && !task.getStack().fillsParent()) {
+        if (task != null && task.getRootTask() != null && !task.getRootTask().fillsParent()) {
             return false;
         }
         return isOpaqueDrawn() && fillsDisplay();
@@ -2418,7 +2418,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final ActivityStack stack = getRootTask();
+        final Task stack = getRootTask();
         if (stack != null && !stack.isFocusable()) {
             // Ignore when the stack shouldn't receive input event.
             // (i.e. the minimized stack in split screen mode.)
@@ -2919,7 +2919,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        return mActivityRecord.getTask().getStack().shouldIgnoreInput()
+        return mActivityRecord.getTask().getRootTask().shouldIgnoreInput()
                 || !mActivityRecord.mVisibleRequested
                 || isRecentsAnimationConsumingAppInput();
     }
@@ -3489,7 +3489,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final ActivityStack stack = task.getStack();
+        final Task stack = task.getRootTask();
         if (stack == null || inFreeformWindowingMode()) {
             handle.setTouchableRegionCrop(null);
             return;
@@ -3504,7 +3504,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final ActivityStack stack = task.getStack();
+        final Task stack = task.getRootTask();
         if (stack == null || stack.mCreatedByOrganizer) {
             return;
         }
@@ -3748,7 +3748,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private int getRootTaskId() {
-        final ActivityStack stack = getRootTask();
+        final Task stack = getRootTask();
         if (stack == null) {
             return INVALID_TASK_ID;
         }
@@ -5451,7 +5451,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
-        ActivityStack stack = getRootTask();
+        Task stack = getRootTask();
 
         // If we have stack outsets, that means the top-left
         // will be outset, and we need to inset ourselves

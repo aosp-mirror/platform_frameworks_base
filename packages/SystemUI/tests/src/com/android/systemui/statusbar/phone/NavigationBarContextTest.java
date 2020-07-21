@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -190,13 +191,13 @@ public class NavigationBarContextTest extends SysuiTestCase {
         kbd2.setDarkIntensity(0f);
 
         // Update icon returns the drawable intensity to half
-        doReturn(kbd1).when(button).getNewDrawable();
-        button.updateIcon();
+        doReturn(kbd1).when(button).getNewDrawable(anyInt(), anyInt());
+        button.updateIcon(0, 0);
         assertEquals(TEST_DARK_INTENSITY, kbd1.getDarkIntensity(), DARK_INTENSITY_ERR);
 
         // Return old dark intensity on new drawable after update icon
-        doReturn(kbd2).when(button).getNewDrawable();
-        button.updateIcon();
+        doReturn(kbd2).when(button).getNewDrawable(anyInt(), anyInt());
+        button.updateIcon(0, 0);
         assertEquals(TEST_DARK_INTENSITY, kbd2.getDarkIntensity(), DARK_INTENSITY_ERR);
     }
 

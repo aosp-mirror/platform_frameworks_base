@@ -82,7 +82,7 @@ import java.util.ArrayList;
 @RunWith(WindowTestRunner.class)
 public class AppWindowTokenTests extends WindowTestsBase {
 
-    ActivityStack mStack;
+    Task mStack;
     Task mTask;
     ActivityRecord mActivity;
 
@@ -484,7 +484,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     private ActivityRecord createIsolatedTestActivityRecord() {
-        final ActivityStack taskStack = createTaskStackOnDisplay(mDisplayContent);
+        final Task taskStack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(taskStack, 0 /* userId */);
         return createTestActivityRecordForGivenTask(task);
     }

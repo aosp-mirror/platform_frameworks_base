@@ -538,7 +538,7 @@ public final class UserHandle implements Parcelable {
                 UserHandle other = (UserHandle)obj;
                 return mHandle == other.mHandle;
             }
-        } catch (ClassCastException e) {
+        } catch (ClassCastException ignore) {
         }
         return false;
     }

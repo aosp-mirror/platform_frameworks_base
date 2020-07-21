@@ -94,9 +94,9 @@ public class DisplayAreaPolicyTests {
 
     @Test
     public void testTaskDisplayArea_taskPositionChanged_updatesTaskDisplayAreaPosition() {
-        final ActivityStack stack1 = mTaskDisplayArea1.createStack(
+        final Task stack1 = mTaskDisplayArea1.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityStack stack2 = mTaskDisplayArea2.createStack(
+        final Task stack2 = mTaskDisplayArea2.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Initial order
@@ -155,11 +155,11 @@ public class DisplayAreaPolicyTests {
                 .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(group2)
                         .setTaskDisplayAreas(Lists.newArrayList(taskDisplayArea5)))
                 .build(wms);
-        final ActivityStack stack1 = taskDisplayArea1.createStack(
+        final Task stack1 = taskDisplayArea1.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityStack stack3 = taskDisplayArea3.createStack(
+        final Task stack3 = taskDisplayArea3.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityStack stack4 = taskDisplayArea4.createStack(
+        final Task stack4 = taskDisplayArea4.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Initial order

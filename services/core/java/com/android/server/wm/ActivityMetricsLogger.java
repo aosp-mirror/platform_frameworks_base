@@ -396,8 +396,7 @@ class ActivityMetricsLogger {
         mLastLogTimeSecs = now;
 
         mWindowState = WINDOW_STATE_INVALID;
-        ActivityStack stack =
-                mSupervisor.mRootWindowContainer.getTopDisplayFocusedStack();
+        Task stack = mSupervisor.mRootWindowContainer.getTopDisplayFocusedStack();
         if (stack == null) {
             return;
         }

@@ -105,7 +105,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static final int INVALID_STACK_ID = 999;
 
     private TaskDisplayArea mTaskContainer;
-    private ActivityStack mStack;
+    private Task mStack;
     private TestTaskPersister mTaskPersister;
     private TestRecentTasks mRecentTasks;
     private TestRunningTasks mRunningTasks;
@@ -829,7 +829,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(mTasks.get(2));
         mRecentTasks.add(mTasks.get(1));
 
-        ActivityStack stack = mTasks.get(2).getStack();
+        Task stack = mTasks.get(2).getRootTask();
         stack.moveToFront("", mTasks.get(2));
         doReturn(stack).when(mService.mRootWindowContainer).getTopDisplayFocusedStack();
 
@@ -850,8 +850,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBackStackTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
-        final ActivityStack aboveHomeStack = mTaskContainer.createStack(
+        final Task homeStack = mTaskContainer.getRootHomeTask();
+        final Task aboveHomeStack = mTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that nothing is trimmed because all
@@ -868,10 +868,10 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBehindHomeStackTasks_expectTaskTrimmed() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final ActivityStack behindHomeStack = mTaskContainer.createStack(
+        final Task behindHomeStack = mTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
-        final ActivityStack aboveHomeStack = mTaskContainer.createStack(
+        final Task homeStack = mTaskContainer.getRootHomeTask();
+        final Task aboveHomeStack = mTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that only the task in the stack behind
@@ -890,9 +890,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testOtherDisplayTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
+        final Task homeStack = mTaskContainer.getRootHomeTask();
         final DisplayContent otherDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final ActivityStack otherDisplayStack = otherDisplay.getDefaultTaskDisplayArea()
+        final Task otherDisplayStack = otherDisplay.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not

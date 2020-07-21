@@ -88,7 +88,6 @@ public class HeadsUpCoordinator implements Coordinator {
         pipeline.addNotificationLifetimeExtender(mLifetimeExtender);
     }
 
-    @Override
     public NotifSection getSection() {
         return mNotifSection;
     }
@@ -192,7 +191,7 @@ public class HeadsUpCoordinator implements Coordinator {
         }
     };
 
-    private final NotifSection mNotifSection = new NotifSection(TAG) {
+    private final NotifSection mNotifSection = new NotifSection("HeadsUp") {
         @Override
         public boolean isInSection(ListEntry entry) {
             return isCurrentlyShowingHun(entry);

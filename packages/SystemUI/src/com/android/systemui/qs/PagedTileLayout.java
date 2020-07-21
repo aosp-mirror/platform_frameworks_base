@@ -508,7 +508,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                         mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
                                 : position == 0);
                     }
-
                 }
 
                 @Override
