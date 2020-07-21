@@ -247,13 +247,22 @@ public class FingerprintService extends BiometricServiceBase {
         public void authenticate(final IBinder token, final long opId, final int userId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
-            if (Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)
-                    && Utils.isKeyguard(getContext(), opPackageName)) {
-                // If this happens, something in KeyguardUpdateMonitor is wrong.
-                // SafetyNet for b/79776455
-                EventLog.writeEvent(0x534e4554, "79776455");
-                Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
-                return;
+            // Keyguard check must be done on the caller's binder identity, since it also checks
+            // permission.
+            final boolean isKeyguard = Utils.isKeyguard(getContext(), opPackageName);
+
+            // Clear calling identity when checking LockPatternUtils for StrongAuth flags.
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (isKeyguard && Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+                    // If this happens, something in KeyguardUpdateMonitor is wrong.
+                    // SafetyNet for b/79776455
+                    EventLog.writeEvent(0x534e4554, "79776455");
+                    Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
+                    return;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
 
             updateActiveGroup(userId, opPackageName);
