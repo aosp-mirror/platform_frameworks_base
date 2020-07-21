@@ -73,6 +73,7 @@ test_access_hidden_api_whitelist = [
     "//external/robolectric-shadows:__subpackages__",
     "//frameworks/base/packages/SettingsLib/tests/integ",
     "//external/sl4a:__subpackages__",
+    "//packages/apps/Settings/tests/robotests", // TODO(b/161767237): remove
 ]
 
 // wifi-service needs pre-jarjared version of framework-wifi so it can reference copied utility
