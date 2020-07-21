@@ -317,7 +317,7 @@ key 366   DVR
 # key 367 "KEY_MHP"
 # key 368 "KEY_LANGUAGE"
 # key 369 "KEY_TITLE"
-# key 370 "KEY_SUBTITLE"
+key 370   CAPTIONS
 # key 371 "KEY_ANGLE"
 # key 372 "KEY_ZOOM"
 # key 373 "KEY_MODE"
