@@ -26,7 +26,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -34,6 +33,7 @@ import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
 import android.animation.ValueAnimator;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.platform.test.annotations.Presubmit;
@@ -202,7 +202,7 @@ public class SurfaceAnimationRunnerTest {
                 mMockTransaction, this::finishedCallback);
         waitUntilNextFrame();
 
-        verify(mMockPowerManager).powerHint(anyInt(), eq(0));
+        verify(mMockPowerManager).setPowerBoost(eq(Boost.INTERACTION), eq(0));
     }
 
     private void waitUntilNextFrame() throws Exception {
