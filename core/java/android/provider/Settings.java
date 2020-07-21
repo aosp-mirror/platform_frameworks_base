@@ -11862,21 +11862,6 @@ public final class Settings {
                 "job_scheduler_quota_controller_constants";
 
         /**
-         * Job scheduler TimeController specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "skip_not_ready_jobs=true5,other_key=2"
-         *
-         * <p>
-         * Type: string
-         *
-         * @hide
-         * @see com.android.server.job.JobSchedulerService.Constants
-         */
-        public static final String JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS =
-                "job_scheduler_time_controller_constants";
-
-        /**
          * ShortcutManager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *

@@ -16,22 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
-
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
-import android.content.Context;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 /** Containing logic for the rotation button in nav bar. */
-public class RotationContextButton extends ContextualButton implements
-        NavigationModeController.ModeChangedListener, RotationButton {
+public class RotationContextButton extends ContextualButton implements RotationButton {
     public static final boolean DEBUG_ROTATION = false;
 
-    private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private RotationButtonController mRotationButtonController;
 
     public RotationContextButton(@IdRes int buttonResId, @DrawableRes int iconResId) {
@@ -56,16 +50,10 @@ public class RotationContextButton extends ContextualButton implements
     }
 
     @Override
-    protected KeyButtonDrawable getNewDrawable() {
-        Context context = new ContextThemeWrapper(getContext().getApplicationContext(),
-                mRotationButtonController.getStyleRes());
-        return KeyButtonDrawable.create(context, mIconResId, false /* shadow */,
-                null /* ovalBackgroundColor */);
-    }
-
-    @Override
-    public void onNavigationModeChanged(int mode) {
-        mNavBarMode = mode;
+    protected KeyButtonDrawable getNewDrawable(int lightIconColor, int darkIconColor) {
+        return KeyButtonDrawable.create(mRotationButtonController.getContext(),
+                lightIconColor, darkIconColor, mRotationButtonController.getIconResId(),
+                false /* shadow */, null /* ovalBackgroundColor */);
     }
 
     @Override

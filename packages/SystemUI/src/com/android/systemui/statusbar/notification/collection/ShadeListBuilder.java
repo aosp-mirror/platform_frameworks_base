@@ -842,7 +842,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private static final NotifSection sDefaultSection =
-            new NotifSection("DefaultSection") {
+            new NotifSection("UnknownSection") {
                 @Override
                 public boolean isInSection(ListEntry entry) {
                     return true;

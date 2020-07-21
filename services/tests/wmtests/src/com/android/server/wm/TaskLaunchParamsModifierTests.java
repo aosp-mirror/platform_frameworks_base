@@ -30,7 +30,6 @@ import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
@@ -1350,13 +1349,13 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
-        final ActivityStack stack = display.getDefaultTaskDisplayArea()
+        final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
         return new ActivityBuilder(mService).setStack(stack).setCreateTask(true).build();
     }
 
     private void addFreeformTaskTo(TestDisplayContent display, Rect bounds) {
-        final ActivityStack stack = display.getDefaultTaskDisplayArea()
+        final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
         stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();

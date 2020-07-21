@@ -36,6 +36,8 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +52,7 @@ import org.mockito.MockitoAnnotations;
 public class RankingCoordinatorTest extends SysuiTestCase {
 
     @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private NotifPipeline mNotifPipeline;
 
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
@@ -58,16 +61,23 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     private NotifFilter mCapturedSuspendedFilter;
     private NotifFilter mCapturedDozingFilter;
 
+    private NotifSection mAlertingSection;
+    private NotifSection mSilentSection;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        RankingCoordinator rankingCoordinator = new RankingCoordinator(mStatusBarStateController);
+        RankingCoordinator rankingCoordinator =
+                new RankingCoordinator(mStatusBarStateController, mHighPriorityProvider);
         mEntry = new NotificationEntryBuilder().build();
 
         rankingCoordinator.attach(mNotifPipeline);
         verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
         mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
         mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
+
+        mAlertingSection = rankingCoordinator.getAlertingSection();
+        mSilentSection = rankingCoordinator.getSilentSection();
     }
 
     @Test
@@ -128,6 +138,26 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
         // THEN filter out the notification
         assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
+    }
+
+    @Test
+    public void testIncludeInSectionAlerting() {
+        // GIVEN the entry is high priority
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(true);
+
+        // THEN entry is in the alerting section
+        assertTrue(mAlertingSection.isInSection(mEntry));
+        assertFalse(mSilentSection.isInSection(mEntry));
+    }
+
+    @Test
+    public void testIncludeInSectionSilent() {
+        // GIVEN the entry isn't high priority
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+
+        // THEN entry is in the silent section
+        assertFalse(mAlertingSection.isInSection(mEntry));
+        assertTrue(mSilentSection.isInSection(mEntry));
     }
 
     private RankingBuilder getRankingForUnfilteredNotif() {

@@ -586,7 +586,7 @@ message Atom {
         DataUsageBytesTransfer data_usage_bytes_transfer =
                 10082 [(module) = "framework", (truncate_timestamp) = true];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
-                10083 [(module) = "framework"];
+                10083 [(module) = "framework", (truncate_timestamp) = true];
         DNDModeProto dnd_mode_rule = 10084 [(module) = "framework"];
         GeneralExternalStorageAccessStats general_external_storage_access_stats =
             10085 [(module) = "mediaprovider"];

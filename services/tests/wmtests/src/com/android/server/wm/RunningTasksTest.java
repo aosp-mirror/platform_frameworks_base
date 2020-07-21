@@ -62,7 +62,7 @@ public class RunningTasksTest extends ActivityTestsBase {
 
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
-            final ActivityStack stack = new StackBuilder(mRootWindowContainer)
+            final Task stack = new StackBuilder(mRootWindowContainer)
                     .setCreateActivity(false)
                     .setDisplay(display)
                     .setOnTop(false)
@@ -104,7 +104,7 @@ public class RunningTasksTest extends ActivityTestsBase {
         final DisplayContent display = new TestDisplayContent.Builder(mService, 1000, 2500).build();
         final int numTasks = 10;
         for (int i = 0; i < numTasks; i++) {
-            final ActivityStack stack = new StackBuilder(mRootWindowContainer)
+            final Task stack = new StackBuilder(mRootWindowContainer)
                     .setCreateActivity(false)
                     .setDisplay(display)
                     .setOnTop(true)
@@ -130,7 +130,7 @@ public class RunningTasksTest extends ActivityTestsBase {
     /**
      * Create a task with a single activity in it, with the given last active time.
      */
-    private Task createTask(ActivityStack stack, String className, int taskId,
+    private Task createTask(Task stack, String className, int taskId,
             int lastActiveTime, Bundle extras) {
         final Task task = new TaskBuilder(mService.mStackSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))

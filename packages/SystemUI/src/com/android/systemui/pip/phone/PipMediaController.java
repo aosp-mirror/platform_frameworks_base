@@ -36,9 +36,9 @@ import android.media.session.PlaybackState;
 import android.os.UserHandle;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.Collections;

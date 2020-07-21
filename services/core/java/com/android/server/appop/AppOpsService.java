@@ -6020,7 +6020,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void resampleAppOpForPackageLocked(@NonNull String packageName, boolean pickOp) {
         mMessagesCollectedCount = 0.0f;
         mSampledAppOpCode = pickOp ? ThreadLocalRandom.current().nextInt(_NUM_OP) : OP_NONE;
-        mAcceptableLeftDistance = _NUM_OP;
+        mAcceptableLeftDistance = _NUM_OP - 1;
         mSampledPackage = packageName;
     }
 

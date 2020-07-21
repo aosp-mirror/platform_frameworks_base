@@ -37,7 +37,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.FloatProperty;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import com.android.settingslib.Utils;
@@ -436,34 +435,6 @@ public class KeyButtonDrawable extends Drawable {
         public boolean canApplyTheme() {
             return true;
         }
-    }
-
-    /**
-     * Creates a KeyButtonDrawable with a shadow given its icon. The tint applied to the drawable
-     * is determined by the dark and light theme given by the context.
-     * @param ctx Context to get the drawable and determine the dark and light theme
-     * @param icon the icon resource id
-     * @param hasShadow if a shadow will appear with the drawable
-     * @param ovalBackgroundColor the color of the oval bg that will be drawn
-     * @return KeyButtonDrawable
-     */
-    public static KeyButtonDrawable create(@NonNull Context ctx, @DrawableRes int icon,
-            boolean hasShadow, Color ovalBackgroundColor) {
-        final int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
-        final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
-        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
-        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
-        return KeyButtonDrawable.create(lightContext, darkContext, icon, hasShadow,
-                ovalBackgroundColor);
-    }
-
-    /**
-     * Creates a KeyButtonDrawable with a shadow given its icon. For more information, see
-     * {@link #create(Context, int, boolean, boolean)}.
-     */
-    public static KeyButtonDrawable create(@NonNull Context ctx, @DrawableRes int icon,
-            boolean hasShadow) {
-        return create(ctx, icon, hasShadow, null /* ovalBackgroundColor */);
     }
 
     /**

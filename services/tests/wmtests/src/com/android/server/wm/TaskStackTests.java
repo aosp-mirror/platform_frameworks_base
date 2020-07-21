@@ -59,7 +59,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackPositionChildAt() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
 
@@ -74,8 +74,8 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(stack.mChildren.get(1), task1);
 
         // Non-leaf task should be moved to top regardless of the user id.
-        createTaskInStack((ActivityStack) task2, 0 /* userId */);
-        createTaskInStack((ActivityStack) task2, 1 /* userId */);
+        createTaskInStack(task2, 0 /* userId */);
+        createTaskInStack(task2, 1 /* userId */);
         stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task1);
         assertEquals(stack.mChildren.get(1), task2);
@@ -83,7 +83,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testClosingAppDifferentStackOrientation() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(mDisplayContent);
@@ -103,7 +103,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testMoveTaskToBackDifferentStackOrientation() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(mDisplayContent);
@@ -120,9 +120,9 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackRemoveImmediately() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        assertEquals(stack, task.getStack());
+        assertEquals(stack, task.getRootTask());
 
         // Remove stack and check if its child is also removed.
         stack.removeImmediately();
@@ -132,7 +132,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         assertNotNull(stack);
@@ -148,7 +148,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer_deferRemoval() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Stack removal is deferred if one of its child is animating.
@@ -172,12 +172,12 @@ public class TaskStackTests extends WindowTestsBase {
     @Test
     public void testReparent() {
         // Create first stack on primary display.
-        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
 
         // Create second display and put second stack on it.
         final DisplayContent dc = createNewDisplay();
-        final ActivityStack stack2 = createTaskStackOnDisplay(dc);
+        final Task stack2 = createTaskStackOnDisplay(dc);
 
         // Reparent
         clearInvocations(task1); // reset the number of onDisplayChanged for task.
@@ -191,7 +191,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackOutset() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final int stackOutset = 10;
         spyOn(stack);
         doReturn(stackOutset).when(stack).getTaskOutset();
@@ -219,7 +219,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testActivityAndTaskGetsProperType() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         ActivityRecord activity1 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
 

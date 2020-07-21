@@ -35,7 +35,7 @@ class DragResizeMode {
      */
     static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
 
-    static boolean isModeAllowedForStack(ActivityStack stack, int mode) {
+    static boolean isModeAllowedForStack(Task stack, int mode) {
         switch (mode) {
             case DRAG_RESIZE_MODE_FREEFORM:
                 return stack.getWindowingMode() == WINDOWING_MODE_FREEFORM;

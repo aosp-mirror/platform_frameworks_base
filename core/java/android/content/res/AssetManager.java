@@ -1573,7 +1573,6 @@ public final class AssetManager implements AutoCloseable {
     private static native long nativeAssetGetLength(long assetPtr);
     private static native long nativeAssetGetRemainingLength(long assetPtr);
 
-    private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
     private static native @Nullable Map nativeGetOverlayableMap(long ptr,
             @NonNull String packageName);
     private static native @Nullable String nativeGetOverlayablesToString(long ptr,

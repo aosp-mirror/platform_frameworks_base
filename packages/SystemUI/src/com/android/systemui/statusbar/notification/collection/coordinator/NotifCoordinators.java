@@ -60,6 +60,7 @@ public class NotifCoordinators implements Dumpable {
             PreparationCoordinator preparationCoordinator,
             MediaCoordinator mediaCoordinator) {
         dumpManager.registerDumpable(TAG, this);
+
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
         mCoordinators.add(hideNotifsForOtherUsersCoordinator);
         mCoordinators.add(keyguardCoordinator);
@@ -67,20 +68,22 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(appOpsCoordinator);
         mCoordinators.add(deviceProvisionedCoordinator);
         mCoordinators.add(bubbleCoordinator);
+        mCoordinators.add(mediaCoordinator);
+        mCoordinators.add(conversationCoordinator);
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mCoordinators.add(conversationCoordinator);
             mCoordinators.add(headsUpCoordinator);
             mCoordinators.add(preparationCoordinator);
         }
-        // TODO: add new Coordinators here! (b/112656837)
-        mCoordinators.add(mediaCoordinator);
 
-        // TODO: add the sections in a particular ORDER (HeadsUp < People < Alerting)
-        for (Coordinator c : mCoordinators) {
-            if (c.getSection() != null) {
-                mOrderedSections.add(c.getSection());
-            }
+        // Manually add Ordered Sections
+        // HeadsUp > FGS > People > Alerting > Silent > Unknown/Default
+        if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mOrderedSections.add(headsUpCoordinator.getSection()); // HeadsUp
         }
+        mOrderedSections.add(appOpsCoordinator.getSection()); // ForegroundService
+        mOrderedSections.add(conversationCoordinator.getSection()); // People
+        mOrderedSections.add(rankingCoordinator.getAlertingSection()); // Alerting
+        mOrderedSections.add(rankingCoordinator.getSilentSection()); // Silent
     }
 
     /**

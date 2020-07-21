@@ -111,9 +111,9 @@ public class ContextualButtonGroup extends ButtonDispatcher {
      * Update all the icons that are attached to this group. This will get all the buttons to update
      * their icons for their buttons.
      */
-    public void updateIcons() {
+    public void updateIcons(int lightIconColor, int darkIconColor) {
         for (ButtonData data : mButtonData) {
-            data.button.updateIcon();
+            data.button.updateIcon(lightIconColor, darkIconColor);
         }
     }
 

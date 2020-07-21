@@ -135,19 +135,27 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            if (Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)
-                    && Utils.isKeyguard(getContext(), opPackageName)) {
-                // If this happens, something in KeyguardUpdateMonitor is wrong.
-                // SafetyNet for b/79776455
-                EventLog.writeEvent(0x534e4554, "79776455");
-                Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
-                return;
+            // Keyguard check must be done on the caller's binder identity, since it also checks
+            // permission.
+            final boolean isKeyguard = Utils.isKeyguard(getContext(), opPackageName);
+
+            // Clear calling identity when checking LockPatternUtils for StrongAuth flags.
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (isKeyguard && Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+                    // If this happens, something in KeyguardUpdateMonitor is wrong.
+                    // SafetyNet for b/79776455
+                    EventLog.writeEvent(0x534e4554, "79776455");
+                    Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
+                    return;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
 
             final boolean restricted = getContext().checkCallingPermission(MANAGE_FINGERPRINT)
                     != PackageManager.PERMISSION_GRANTED;
-            final int statsClient = Utils.isKeyguard(getContext(), opPackageName)
-                    ? BiometricsProtoEnums.CLIENT_KEYGUARD
+            final int statsClient = isKeyguard ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
             mFingerprint21.scheduleAuthenticate(token, operationId, userId, 0 /* cookie */,
                     new ClientMonitorCallbackConverter(receiver), opPackageName, surface,

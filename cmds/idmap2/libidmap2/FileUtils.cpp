@@ -16,19 +16,7 @@
 
 #include "idmap2/FileUtils.h"
 
-#include <dirent.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <cerrno>
-#include <climits>
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
-#include <memory>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "android-base/file.h"
 #include "android-base/macros.h"
@@ -36,54 +24,6 @@
 #include "private/android_filesystem_config.h"
 
 namespace android::idmap2::utils {
-
-std::unique_ptr<std::vector<std::string>> FindFiles(const std::string& root, bool recurse,
-                                                    const FindFilesPredicate& predicate) {
-  DIR* dir = opendir(root.c_str());
-  if (dir == nullptr) {
-    return nullptr;
-  }
-  std::unique_ptr<std::vector<std::string>> vector(new std::vector<std::string>());
-  struct dirent* dirent;
-  while ((dirent = readdir(dir)) != nullptr) {
-    const std::string path = root + "/" + dirent->d_name;
-    if (predicate(dirent->d_type, path)) {
-      vector->push_back(path);
-    }
-    if (recurse && dirent->d_type == DT_DIR && strcmp(dirent->d_name, ".") != 0 &&
-        strcmp(dirent->d_name, "..") != 0) {
-      auto sub_vector = FindFiles(path, recurse, predicate);
-      if (!sub_vector) {
-        closedir(dir);
-        return nullptr;
-      }
-      vector->insert(vector->end(), sub_vector->begin(), sub_vector->end());
-    }
-  }
-  closedir(dir);
-
-  return vector;
-}
-
-std::unique_ptr<std::string> ReadFile(const std::string& path) {
-  std::unique_ptr<std::string> str(new std::string());
-  std::ifstream fin(path);
-  str->append({std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()});
-  fin.close();
-  return str;
-}
-
-std::unique_ptr<std::string> ReadFile(int fd) {
-  static constexpr const size_t kBufSize = 1024;
-
-  std::unique_ptr<std::string> str(new std::string());
-  char buf[kBufSize];
-  ssize_t r;
-  while ((r = read(fd, buf, sizeof(buf))) > 0) {
-    str->append(buf, r);
-  }
-  return r == 0 ? std::move(str) : nullptr;
-}
 
 #ifdef __ANDROID__
 bool UidHasWriteAccessToPath(uid_t uid, const std::string& path) {

@@ -173,7 +173,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFitWithinBounds() {
         final Rect parentBounds = new Rect(10, 10, 200, 200);
         TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
-        ActivityStack stack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
+        Task stack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         final Configuration parentConfig = stack.getConfiguration();
@@ -211,7 +211,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testBoundsOnModeChangeFreeformToFullscreen() {
         DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
-        ActivityStack stack = new StackBuilder(mRootWindowContainer).setDisplay(display)
+        Task stack = new StackBuilder(mRootWindowContainer).setDisplay(display)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         Task task = stack.getBottomMostTask();
         task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
@@ -252,7 +252,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
         dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
 
-        ActivityStack stack = new StackBuilder(mRootWindowContainer)
+        Task stack = new StackBuilder(mRootWindowContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         Task task = stack.getBottomMostTask();
         ActivityRecord root = task.getTopNonFinishingActivity();
@@ -313,7 +313,7 @@ public class TaskRecordTests extends ActivityTestsBase {
                 Configuration.ORIENTATION_LANDSCAPE;
         display.onRequestedOverrideConfigurationChanged(
                 display.getRequestedOverrideConfiguration());
-        ActivityStack stack = new StackBuilder(mRootWindowContainer)
+        Task stack = new StackBuilder(mRootWindowContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         Task task = stack.getBottomMostTask();
         ActivityRecord root = task.getTopNonFinishingActivity();
@@ -324,7 +324,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         parentWindowContainer.setBounds(fullScreenBounds);
         doReturn(parentWindowContainer).when(task).getParent();
         doReturn(display.getDefaultTaskDisplayArea()).when(task).getDisplayArea();
-        doReturn(stack).when(task).getStack();
+        doReturn(stack).when(task).getRootTask();
         doReturn(true).when(parentWindowContainer).handlesOrientationChangeFromDescendant();
 
         // Setting app to fixed portrait fits within parent, but Task shouldn't adjust the
@@ -409,15 +409,15 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertTrue(task.getResolvedOverrideBounds().isEmpty());
         int origScreenH = task.getConfiguration().screenHeightDp;
         Configuration stackConfig = new Configuration();
-        stackConfig.setTo(task.getStack().getRequestedOverrideConfiguration());
+        stackConfig.setTo(task.getRootTask().getRequestedOverrideConfiguration());
         stackConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
         // Set bounds on stack (not task) and verify that the task resource configuration changes
         // despite it's override bounds being empty.
-        Rect bounds = new Rect(task.getStack().getBounds());
+        Rect bounds = new Rect(task.getRootTask().getBounds());
         bounds.bottom = (int) (bounds.bottom * 0.6f);
         stackConfig.windowConfiguration.setBounds(bounds);
-        task.getStack().onRequestedOverrideConfigurationChanged(stackConfig);
+        task.getRootTask().onRequestedOverrideConfigurationChanged(stackConfig);
         assertNotEquals(origScreenH, task.getConfiguration().screenHeightDp);
     }
 
@@ -439,7 +439,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testInsetDisregardedWhenFreeformOverlapsNavBar() {
         TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
-        ActivityStack stack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+        Task stack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         DisplayInfo displayInfo = new DisplayInfo();
         mService.mContext.getDisplay().getDisplayInfo(displayInfo);
@@ -514,7 +514,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         info.packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
         info.targetActivity = targetClassName;
 
-        final Task task = new ActivityStack(mService, 1 /* taskId */, info, intent,
+        final Task task = new Task(mService, 1 /* taskId */, info, intent,
                 null /* voiceSession */, null /* voiceInteractor */, null /* taskDescriptor */,
                 null /*stack*/);
         assertEquals("The alias activity component should be saved in task intent.", aliasClassName,
@@ -880,7 +880,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Task task = getTestTask();
         task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
-        task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
         task.setHasBeenVisible(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
@@ -896,7 +896,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Task task = getTestTask();
         task.setHasBeenVisible(false);
         task.getDisplayContent().setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final DisplayContent oldDisplay = task.getDisplayContent();
 
         LaunchParamsController.LaunchParams params = new LaunchParamsController.LaunchParams();
@@ -920,7 +920,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         final Task task = getTestTask();
         task.setHasBeenVisible(false);
-        task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
         task.setHasBeenVisible(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
@@ -936,7 +936,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Task task = getTestTask();
         task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
-        task.getStack().setWindowingMode(WINDOWING_MODE_PINNED);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_PINNED);
 
         task.setHasBeenVisible(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
@@ -976,7 +976,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     private Task getTestTask() {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new StackBuilder(mRootWindowContainer).build();
         return stack.getBottomMostTask();
     }
 
@@ -984,7 +984,7 @@ public class TaskRecordTests extends ActivityTestsBase {
             Rect expectedConfigBounds) {
 
         TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
-        ActivityStack stack = taskDisplayArea.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
+        Task stack = taskDisplayArea.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
 
@@ -1024,7 +1024,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     private Task createTask(int taskId) {
-        return new ActivityStack(mService, taskId, new Intent(), null, null, null,
+        return new Task(mService, taskId, new Intent(), null, null, null,
                 ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
                 0, false, null, 0, 0, 0, 0, null, null, 0, false, false, false, 0,
                 0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/,

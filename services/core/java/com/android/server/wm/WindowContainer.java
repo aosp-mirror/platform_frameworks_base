@@ -112,16 +112,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
 
-    /** Animation layer that happens above all animating {@link ActivityStack}s. */
+    /** Animation layer that happens above all animating {@link Task}s. */
     static final int ANIMATION_LAYER_STANDARD = 0;
 
-    /** Animation layer that happens above all {@link ActivityStack}s. */
+    /** Animation layer that happens above all {@link Task}s. */
     static final int ANIMATION_LAYER_BOOSTED = 1;
 
     /**
      * Animation layer that is reserved for {@link WindowConfiguration#ACTIVITY_TYPE_HOME}
      * activities and all activities that are being controlled by the recents animation. This
-     * layer is generally below all {@link ActivityStack}s.
+     * layer is generally below all {@link Task}s.
      */
     static final int ANIMATION_LAYER_HOME = 2;
 
@@ -190,7 +190,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * Sources which triggered a surface animation on this container. An animation target can be
      * promoted to higher level, for example, from a set of {@link ActivityRecord}s to
-     * {@link ActivityStack}. In this case, {@link ActivityRecord}s are set on this variable while
+     * {@link Task}. In this case, {@link ActivityRecord}s are set on this variable while
      * the animation is running, and reset after finishing it.
      */
     private final ArraySet<WindowContainer> mSurfaceAnimationSources = new ArraySet<>();
