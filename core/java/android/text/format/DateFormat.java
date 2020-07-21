@@ -19,6 +19,7 @@ package android.text.format;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.icu.text.DateFormatSymbols;
 import android.icu.text.DateTimePatternGenerator;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
@@ -475,6 +476,8 @@ public class DateFormat {
         int count;
 
         LocaleData localeData = LocaleData.get(Locale.getDefault());
+        DateFormatSymbols dfs = getIcuDateFormatSymbols(Locale.getDefault());
+        String[] amPm = dfs.getAmPmStrings();
 
         int len = inFormat.length();
 
@@ -496,7 +499,7 @@ public class DateFormat {
             switch (c) {
                 case 'A':
                 case 'a':
-                    replacement = localeData.amPm[inDate.get(Calendar.AM_PM) - Calendar.AM];
+                    replacement = amPm[inDate.get(Calendar.AM_PM) - Calendar.AM];
                     break;
                 case 'd':
                     replacement = zeroPad(inDate.get(Calendar.DATE), count);
@@ -677,5 +680,17 @@ public class DateFormat {
 
     private static String zeroPad(int inValue, int inMinDigits) {
         return String.format(Locale.getDefault(), "%0" + inMinDigits + "d", inValue);
+    }
+
+    /**
+     * We use Gregorian calendar for date formats in android.text.format and various UI widget
+     * historically. It's a utility method to get an {@link DateFormatSymbols} instance. Note that
+     * {@link DateFormatSymbols} has cache, and external cache is not needed unless same instance is
+     * requested repeatedly in the performance critical code.
+     *
+     * @hide
+     */
+    public static DateFormatSymbols getIcuDateFormatSymbols(Locale locale) {
+        return new DateFormatSymbols(android.icu.util.GregorianCalendar.class, locale);
     }
 }
