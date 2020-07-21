@@ -21,6 +21,7 @@
 package android.text.format;
 
 import android.content.res.Resources;
+import android.icu.text.DateFormatSymbols;
 
 import com.android.i18n.timezone.ZoneInfoData;
 
@@ -55,11 +56,13 @@ class TimeFormatter {
      * The Locale for which the cached LocaleData and formats have been loaded.
      */
     private static Locale sLocale;
+    private static DateFormatSymbols sDateFormatSymbols;
     private static LocaleData sLocaleData;
     private static String sTimeOnlyFormat;
     private static String sDateOnlyFormat;
     private static String sDateTimeFormat;
 
+    private final DateFormatSymbols dateFormatSymbols;
     private final LocaleData localeData;
     private final String dateTimeFormat;
     private final String timeOnlyFormat;
@@ -74,6 +77,7 @@ class TimeFormatter {
 
             if (sLocale == null || !(locale.equals(sLocale))) {
                 sLocale = locale;
+                sDateFormatSymbols = DateFormat.getIcuDateFormatSymbols(locale);
                 sLocaleData = LocaleData.get(locale);
 
                 Resources r = Resources.getSystem();
@@ -82,6 +86,7 @@ class TimeFormatter {
                 sDateTimeFormat = r.getString(com.android.internal.R.string.date_and_time);
             }
 
+            this.dateFormatSymbols = sDateFormatSymbols;
             this.dateTimeFormat = sDateTimeFormat;
             this.timeOnlyFormat = sTimeOnlyFormat;
             this.dateOnlyFormat = sDateOnlyFormat;
@@ -310,12 +315,14 @@ class TimeFormatter {
                     outputBuilder.append('\n');
                     return false;
                 case 'p':
-                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2)) ? localeData.amPm[1]
-                            : localeData.amPm[0], modifier);
+                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2))
+                            ? dateFormatSymbols.getAmPmStrings()[1]
+                            : dateFormatSymbols.getAmPmStrings()[0], modifier);
                     return false;
                 case 'P':
-                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2)) ? localeData.amPm[1]
-                            : localeData.amPm[0], FORCE_LOWER_CASE);
+                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2))
+                            ? dateFormatSymbols.getAmPmStrings()[1]
+                            : dateFormatSymbols.getAmPmStrings()[0], FORCE_LOWER_CASE);
                     return false;
                 case 'R':
                     formatInternal("%H:%M", wallTime, zoneInfoData);
