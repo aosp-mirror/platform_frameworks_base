@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.protolog;
+package com.android.internal.protolog;
 
-import static com.android.server.protolog.ProtoLogFileProto.LOG;
-import static com.android.server.protolog.ProtoLogFileProto.MAGIC_NUMBER;
-import static com.android.server.protolog.ProtoLogFileProto.MAGIC_NUMBER_H;
-import static com.android.server.protolog.ProtoLogFileProto.MAGIC_NUMBER_L;
-import static com.android.server.protolog.ProtoLogFileProto.REAL_TIME_TO_ELAPSED_TIME_OFFSET_MILLIS;
-import static com.android.server.protolog.ProtoLogFileProto.VERSION;
-import static com.android.server.protolog.ProtoLogMessage.BOOLEAN_PARAMS;
-import static com.android.server.protolog.ProtoLogMessage.DOUBLE_PARAMS;
-import static com.android.server.protolog.ProtoLogMessage.ELAPSED_REALTIME_NANOS;
-import static com.android.server.protolog.ProtoLogMessage.MESSAGE_HASH;
-import static com.android.server.protolog.ProtoLogMessage.SINT64_PARAMS;
-import static com.android.server.protolog.ProtoLogMessage.STR_PARAMS;
+import static com.android.internal.protolog.ProtoLogFileProto.LOG;
+import static com.android.internal.protolog.ProtoLogFileProto.MAGIC_NUMBER;
+import static com.android.internal.protolog.ProtoLogFileProto.MAGIC_NUMBER_H;
+import static com.android.internal.protolog.ProtoLogFileProto.MAGIC_NUMBER_L;
+import static com.android.internal.protolog.ProtoLogFileProto.REAL_TIME_TO_ELAPSED_TIME_OFFSET_MILLIS;
+import static com.android.internal.protolog.ProtoLogFileProto.VERSION;
+import static com.android.internal.protolog.ProtoLogMessage.BOOLEAN_PARAMS;
+import static com.android.internal.protolog.ProtoLogMessage.DOUBLE_PARAMS;
+import static com.android.internal.protolog.ProtoLogMessage.ELAPSED_REALTIME_NANOS;
+import static com.android.internal.protolog.ProtoLogMessage.MESSAGE_HASH;
+import static com.android.internal.protolog.ProtoLogMessage.SINT64_PARAMS;
+import static com.android.internal.protolog.ProtoLogMessage.STR_PARAMS;
 
 import android.annotation.Nullable;
 import android.os.ShellCommand;
@@ -36,10 +36,9 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.protolog.common.IProtoLogGroup;
-import com.android.server.protolog.common.LogDataType;
+import com.android.internal.protolog.common.IProtoLogGroup;
+import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.util.TraceBuffer;
-import com.android.server.wm.ProtoLogGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +61,7 @@ public class ProtoLogImpl {
      * Must be invoked after every action that could change the result of {@link #isEnabled}, eg.
      * starting / stopping proto log, or enabling / disabling log groups.
      */
-    static Runnable sCacheUpdater = () -> { };
+    public static Runnable sCacheUpdater = () -> { };
 
     private static void addLogGroupEnum(IProtoLogGroup[] config) {
         for (IProtoLogGroup group : config) {
@@ -289,9 +288,7 @@ public class ProtoLogImpl {
         }
     }
 
-
-    @VisibleForTesting
-    ProtoLogImpl(File file, int bufferCapacity, ProtoLogViewerConfigReader viewerConfig) {
+    public ProtoLogImpl(File file, int bufferCapacity, ProtoLogViewerConfigReader viewerConfig) {
         mLogFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         mViewerConfig = viewerConfig;
