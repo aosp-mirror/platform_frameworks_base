@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 /**
@@ -102,28 +101,6 @@ import java.util.function.Consumer;
     public static final int ACTION_REGISTERED = 0;
     public static final int ACTION_UNREGISTERED = 1;
     public static final int ACTION_CANCELLED = 2;
-
-    /**
-     * Helper class to make a ConcurrentLinkedDeque fixed-size, evicting old entries when full.
-     */
-    private class ConcurrentLinkedEvictingDeque<E> extends ConcurrentLinkedDeque<E> {
-        private int mSize;
-
-        ConcurrentLinkedEvictingDeque(int size) {
-            mSize = size;
-        }
-
-        @Override
-        public boolean add(E elem) {
-            synchronized (this) {
-                if (size() == mSize) {
-                    poll();
-                }
-
-                return super.add(elem);
-            }
-        }
-    }
 
     /**
      * A container class to store a record of ContextHubClient registration.
