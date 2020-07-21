@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"സേവനമില്ല"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ഇൻപുട്ട് രീതി മാറുക"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"ഫ്ലൈറ്റ് മോഡ്"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"അപ്‌ഡേറ്റിനായി തയ്യാറെടുക്കാൻ പിൻ ആവശ്യമാണ്"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"അപ്‌ഡേറ്റിനായി തയ്യാറെടുക്കാൻ പാറ്റേൺ ആവശ്യമാണ്"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"അപ്‌ഡേറ്റിനായി തയ്യാറെടുക്കാൻ പാസ്‌വേഡ് ആവശ്യമാണ്"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പാറ്റേൺ വരയ്‌ക്കേണ്ടതുണ്ട്"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പിൻ നൽകേണ്ടതുണ്ട്"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പാസ്‌വേഡ് നൽകേണ്ടതുണ്ട്"</string>
