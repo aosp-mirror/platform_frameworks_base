@@ -27,7 +27,6 @@ import android.icu.util.MeasureUnit;
 
 import com.android.internal.R;
 
-import libcore.icu.DateIntervalFormat;
 import libcore.icu.LocaleData;
 
 import java.io.IOException;
