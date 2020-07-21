@@ -618,7 +618,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, true, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callerIsWhitelisted_notAborted", false,
+                "disallowed_callerIsAllowed_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, false, true, false, false);
@@ -639,7 +639,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
             int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
             int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
             boolean hasForegroundActivities, boolean callerIsRecents,
-            boolean callerIsTempWhitelisted,
+            boolean callerIsTempAllowed,
             boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
             boolean isCallingUidDeviceOwner) {
         // window visibility
@@ -664,8 +664,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         RecentTasks recentTasks = mock(RecentTasks.class);
         mService.mStackSupervisor.setRecentTasks(recentTasks);
         doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
-        // caller is temp whitelisted
-        callerApp.setAllowBackgroundActivityStarts(callerIsTempWhitelisted);
+        // caller is temp allowed
+        callerApp.setAllowBackgroundActivityStarts(callerIsTempAllowed);
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);

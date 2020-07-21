@@ -160,7 +160,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
-    // Set to true if this process is currently temporarily whitelisted to start activities even if
+    // Set to true if this process is currently temporarily allowed to start activities even if
     // it's not in the foreground
     private volatile boolean mAllowBackgroundActivityStarts;
     // Set of UIDs of clients currently bound to this process
@@ -454,7 +454,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     boolean areBackgroundActivityStartsAllowed() {
-        // allow if the whitelisting flag was explicitly set
+        // allow if the flag was explicitly set
         if (mAllowBackgroundActivityStarts) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[WindowProcessController(" + mPid

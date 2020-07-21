@@ -131,13 +131,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     int pendingConnectionImportance;   // To be filled in to ProcessRecord once it connects
 
     // any current binding to this service has BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS flag?
-    private boolean mHasBindingWhitelistingBgActivityStarts;
-    // is this service currently whitelisted to start activities from background by providing
+    private boolean mIsAllowedBgActivityStartsByBinding;
+    // is this service currently allowed to start activities from background by providing
     // allowBackgroundActivityStarts=true to startServiceLocked()?
-    private boolean mHasStartedWhitelistingBgActivityStarts;
-    // used to clean up the state of hasStartedWhitelistingBgActivityStarts after a timeout
-    private Runnable mStartedWhitelistingBgActivityStartsCleanUp;
-    private ProcessRecord mAppForStartedWhitelistingBgActivityStarts;
+    private boolean mIsAllowedBgActivityStartsByStart;
+    // used to clean up the state of mIsAllowedBgActivityStartsByStart after a timeout
+    private Runnable mCleanUpAllowBgActivityStartsByStartCallback;
+    private ProcessRecord mAppForAllowingBgActivityStartsByStart;
 
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
@@ -396,13 +396,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (whitelistManager) {
             pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
         }
-        if (mHasBindingWhitelistingBgActivityStarts) {
-            pw.print(prefix); pw.print("hasBindingWhitelistingBgActivityStarts=");
-            pw.println(mHasBindingWhitelistingBgActivityStarts);
+        if (mIsAllowedBgActivityStartsByBinding) {
+            pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByBinding=");
+            pw.println(mIsAllowedBgActivityStartsByBinding);
         }
-        if (mHasStartedWhitelistingBgActivityStarts) {
-            pw.print(prefix); pw.print("hasStartedWhitelistingBgActivityStarts=");
-            pw.println(mHasStartedWhitelistingBgActivityStarts);
+        if (mIsAllowedBgActivityStartsByStart) {
+            pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByStart=");
+            pw.println(mIsAllowedBgActivityStartsByStart);
         }
         pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
                 pw.println(mAllowWhileInUsePermissionInFgs);
@@ -560,31 +560,31 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     public void setProcess(ProcessRecord _proc) {
         if (_proc != null) {
-            // We're starting a new process for this service, but a previous one is whitelisted.
-            // Remove that whitelisting now (unless the new process is the same as the previous one,
-            // which is a common case).
-            if (mAppForStartedWhitelistingBgActivityStarts != null) {
-                if (mAppForStartedWhitelistingBgActivityStarts != _proc) {
-                    mAppForStartedWhitelistingBgActivityStarts
+            // We're starting a new process for this service, but a previous one is allowed to start
+            // background activities. Remove that ability now (unless the new process is the same as
+            // the previous one, which is a common case).
+            if (mAppForAllowingBgActivityStartsByStart != null) {
+                if (mAppForAllowingBgActivityStartsByStart != _proc) {
+                    mAppForAllowingBgActivityStartsByStart
                             .removeAllowBackgroundActivityStartsToken(this);
-                    ams.mHandler.removeCallbacks(mStartedWhitelistingBgActivityStartsCleanUp);
+                    ams.mHandler.removeCallbacks(mCleanUpAllowBgActivityStartsByStartCallback);
                 }
             }
             // Make sure the cleanup callback knows about the new process.
-            mAppForStartedWhitelistingBgActivityStarts = mHasStartedWhitelistingBgActivityStarts
+            mAppForAllowingBgActivityStartsByStart = mIsAllowedBgActivityStartsByStart
                     ? _proc : null;
-            if (mHasStartedWhitelistingBgActivityStarts
-                    || mHasBindingWhitelistingBgActivityStarts) {
+            if (mIsAllowedBgActivityStartsByStart
+                    || mIsAllowedBgActivityStartsByBinding) {
                 _proc.addAllowBackgroundActivityStartsToken(this);
             } else {
                 _proc.removeAllowBackgroundActivityStartsToken(this);
             }
         }
         if (app != null && app != _proc) {
-            // If the old app is whitelisted because of a service start, leave it whitelisted until
-            // the cleanup callback runs. Otherwise we can remove it from the whitelist immediately
-            // (it can't be bound now).
-            if (!mHasStartedWhitelistingBgActivityStarts) {
+            // If the old app is allowed to start bg activities because of a service start, leave it
+            // that way until the cleanup callback runs. Otherwise we can remove its bg activity
+            // start ability immediately (it can't be bound now).
+            if (!mIsAllowedBgActivityStartsByStart) {
                 app.removeAllowBackgroundActivityStartsToken(this);
             }
             app.updateBoundClientUids();
@@ -648,89 +648,88 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         return startRequested && (stopIfKilled || isStartCanceled) && pendingStarts.isEmpty();
     }
 
-    void updateHasBindingWhitelistingBgActivityStarts() {
-        boolean hasWhitelistingBinding = false;
+    void updateIsAllowedBgActivityStartsByBinding() {
+        boolean isAllowedByBinding = false;
         for (int conni = connections.size() - 1; conni >= 0; conni--) {
             ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
             for (int i = 0; i < cr.size(); i++) {
                 if ((cr.get(i).flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
-                    hasWhitelistingBinding = true;
+                    isAllowedByBinding = true;
                     break;
                 }
             }
-            if (hasWhitelistingBinding) {
+            if (isAllowedByBinding) {
                 break;
             }
         }
-        setHasBindingWhitelistingBgActivityStarts(hasWhitelistingBinding);
+        setAllowedBgActivityStartsByBinding(isAllowedByBinding);
     }
 
-    void setHasBindingWhitelistingBgActivityStarts(boolean newValue) {
-        if (mHasBindingWhitelistingBgActivityStarts != newValue) {
-            mHasBindingWhitelistingBgActivityStarts = newValue;
-            updateParentProcessBgActivityStartsWhitelistingToken();
+    void setAllowedBgActivityStartsByBinding(boolean newValue) {
+        if (mIsAllowedBgActivityStartsByBinding != newValue) {
+            mIsAllowedBgActivityStartsByBinding = newValue;
+            updateParentProcessBgActivityStartsToken();
         }
     }
 
     /**
-     * Called when the service is started with allowBackgroundActivityStarts set. We whitelist
-     * it for background activity starts, setting up a callback to remove the whitelisting after a
-     * timeout. Note that the whitelisting persists for the process even if the service is
-     * subsequently stopped.
+     * Called when the service is started with allowBackgroundActivityStarts set. We allow
+     * it for background activity starts, setting up a callback to remove this ability after a
+     * timeout. Note that the ability for starting background activities persists for the process
+     * even if the service is subsequently stopped.
      */
-    void whitelistBgActivityStartsOnServiceStart() {
-        setHasStartedWhitelistingBgActivityStarts(true);
+    void allowBgActivityStartsOnServiceStart() {
+        setAllowedBgActivityStartsByStart(true);
         if (app != null) {
-            mAppForStartedWhitelistingBgActivityStarts = app;
+            mAppForAllowingBgActivityStartsByStart = app;
         }
 
         // This callback is stateless, so we create it once when we first need it.
-        if (mStartedWhitelistingBgActivityStartsCleanUp == null) {
-            mStartedWhitelistingBgActivityStartsCleanUp = () -> {
+        if (mCleanUpAllowBgActivityStartsByStartCallback == null) {
+            mCleanUpAllowBgActivityStartsByStartCallback = () -> {
                 synchronized (ams) {
-                    if (app == mAppForStartedWhitelistingBgActivityStarts) {
-                        // The process we whitelisted is still running the service. We remove
-                        // the started whitelisting, but it may still be whitelisted via bound
-                        // connections.
-                        setHasStartedWhitelistingBgActivityStarts(false);
-                    } else  if (mAppForStartedWhitelistingBgActivityStarts != null) {
-                        // The process we whitelisted is not running the service. It therefore
-                        // can't be bound so we can unconditionally remove the whitelist.
-                        mAppForStartedWhitelistingBgActivityStarts
+                    if (app == mAppForAllowingBgActivityStartsByStart) {
+                        // The process we allowed is still running the service. We remove
+                        // the ability by start, but it may still be allowed via bound connections.
+                        setAllowedBgActivityStartsByStart(false);
+                    } else  if (mAppForAllowingBgActivityStartsByStart != null) {
+                        // The process we allowed is not running the service. It therefore can't be
+                        // bound so we can unconditionally remove the ability.
+                        mAppForAllowingBgActivityStartsByStart
                                 .removeAllowBackgroundActivityStartsToken(ServiceRecord.this);
                     }
-                    mAppForStartedWhitelistingBgActivityStarts = null;
+                    mAppForAllowingBgActivityStartsByStart = null;
                 }
             };
         }
 
         // if there's a request pending from the past, drop it before scheduling a new one
-        ams.mHandler.removeCallbacks(mStartedWhitelistingBgActivityStartsCleanUp);
-        ams.mHandler.postDelayed(mStartedWhitelistingBgActivityStartsCleanUp,
+        ams.mHandler.removeCallbacks(mCleanUpAllowBgActivityStartsByStartCallback);
+        ams.mHandler.postDelayed(mCleanUpAllowBgActivityStartsByStartCallback,
                 ams.mConstants.SERVICE_BG_ACTIVITY_START_TIMEOUT);
     }
 
-    private void setHasStartedWhitelistingBgActivityStarts(boolean newValue) {
-        if (mHasStartedWhitelistingBgActivityStarts != newValue) {
-            mHasStartedWhitelistingBgActivityStarts = newValue;
-            updateParentProcessBgActivityStartsWhitelistingToken();
+    private void setAllowedBgActivityStartsByStart(boolean newValue) {
+        if (mIsAllowedBgActivityStartsByStart != newValue) {
+            mIsAllowedBgActivityStartsByStart = newValue;
+            updateParentProcessBgActivityStartsToken();
         }
     }
 
     /**
-     * Whether the process this service runs in should be temporarily whitelisted to start
+     * Whether the process this service runs in should be temporarily allowed to start
      * activities from background depends on the current state of both
-     * {@code hasStartedWhitelistingBgActivityStarts} and
-     * {@code hasBindingWhitelistingBgActivityStarts}. If either is true, this ServiceRecord
+     * {@code mIsAllowedBgActivityStartsByStart} and
+     * {@code mIsAllowedBgActivityStartsByBinding}. If either is true, this ServiceRecord
      * should be contributing as a token in parent ProcessRecord.
      *
      * @see com.android.server.am.ProcessRecord#mAllowBackgroundActivityStartsTokens
      */
-    private void updateParentProcessBgActivityStartsWhitelistingToken() {
+    private void updateParentProcessBgActivityStartsToken() {
         if (app == null) {
             return;
         }
-        if (mHasStartedWhitelistingBgActivityStarts || mHasBindingWhitelistingBgActivityStarts) {
+        if (mIsAllowedBgActivityStartsByStart || mIsAllowedBgActivityStartsByBinding) {
             // if the token is already there it's safe to "re-add it" - we're dealing with
             // a set of Binder objects
             app.addAllowBackgroundActivityStartsToken(this);

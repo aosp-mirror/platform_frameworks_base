@@ -690,7 +690,7 @@ public final class ActiveServices {
         }
 
         if (allowBackgroundActivityStarts) {
-            r.whitelistBgActivityStartsOnServiceStart();
+            r.allowBgActivityStartsOnServiceStart();
         }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
 
@@ -2045,7 +2045,7 @@ public final class ActiveServices {
                 s.whitelistManager = true;
             }
             if ((flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
-                s.setHasBindingWhitelistingBgActivityStarts(true);
+                s.setAllowedBgActivityStartsByBinding(true);
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app, c, true);
@@ -3457,9 +3457,9 @@ public final class ActiveServices {
                     updateWhitelistManagerLocked(s.app);
                 }
             }
-            // And do the same for bg activity starts whitelisting.
+            // And do the same for bg activity starts ability.
             if ((c.flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
-                s.updateHasBindingWhitelistingBgActivityStarts();
+                s.updateIsAllowedBgActivityStartsByBinding();
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app, c, true);
