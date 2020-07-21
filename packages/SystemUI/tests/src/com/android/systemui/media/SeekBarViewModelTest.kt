@@ -204,6 +204,22 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun updateDurationNoMetadata() {
+        // GIVEN that the metadata is null
+        whenever(mockController.getMetadata()).thenReturn(null)
+        // AND a valid playback state (ie. media session is not destroyed)
+        val state = PlaybackState.Builder().run {
+            setState(PlaybackState.STATE_PLAYING, 200L, 1f)
+            build()
+        }
+        whenever(mockController.getPlaybackState()).thenReturn(state)
+        // WHEN the controller is updated
+        viewModel.updateController(mockController)
+        // THEN the seek bar is disabled
+        assertThat(viewModel.progress.value!!.enabled).isFalse()
+    }
+
+    @Test
     fun updateElapsedTime() {
         // GIVEN that the PlaybackState contains the current position
         val position = 200L
