@@ -16,7 +16,8 @@
 
 package android.text.format;
 
-import static android.text.format.DateUtilsBridge.FORMAT_UTC;
+import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
+import static android.text.format.DateUtils.FORMAT_UTC;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -84,8 +85,7 @@ public final class DateIntervalFormat {
         // This is not the behavior of icu4j's DateIntervalFormat, but it's the required behavior
         // of Android's DateUtils.formatDateRange.
         if (isExactlyMidnight(endCalendar)) {
-            boolean showTime =
-                    (flags & DateUtilsBridge.FORMAT_SHOW_TIME) == DateUtilsBridge.FORMAT_SHOW_TIME;
+            boolean showTime = (flags & FORMAT_SHOW_TIME) == FORMAT_SHOW_TIME;
             boolean endsDayAfterStart = DateUtilsBridge.dayDistance(startCalendar, endCalendar)
                     == 1;
             if ((!showTime && startMs != endMs)
