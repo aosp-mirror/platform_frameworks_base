@@ -49,7 +49,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -1454,6 +1453,22 @@ public final class SurfaceControl implements Parcelable {
                     + ", density=" + density
                     + ", secure=" + secure
                     + ", deviceProductInfo=" + deviceProductInfo + "}";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DisplayInfo that = (DisplayInfo) o;
+            return isInternal == that.isInternal
+                    && density == that.density
+                    && secure == that.secure
+                    && Objects.equals(deviceProductInfo, that.deviceProductInfo);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(isInternal, density, secure, deviceProductInfo);
         }
     }
 
