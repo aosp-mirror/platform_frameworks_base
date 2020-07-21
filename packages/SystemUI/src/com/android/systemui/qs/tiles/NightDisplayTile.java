@@ -36,6 +36,7 @@ import androidx.annotation.StringRes;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -68,6 +69,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
 
     private final ColorDisplayManager mManager;
     private final LocationController mLocationController;
+    private final NightDisplayListenerModule.Builder mNightDisplayListenerBuilder;
     private NightDisplayListener mListener;
     private boolean mIsListening;
 
@@ -81,13 +83,15 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             LocationController locationController,
-            ColorDisplayManager colorDisplayManager
+            ColorDisplayManager colorDisplayManager,
+            NightDisplayListenerModule.Builder nightDisplayListenerBuilder
     ) {
         super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
                 activityStarter, qsLogger);
         mLocationController = locationController;
         mManager = colorDisplayManager;
-        mListener = new NightDisplayListener(mContext, mainHandler);
+        mNightDisplayListenerBuilder = nightDisplayListenerBuilder;
+        mListener = mNightDisplayListenerBuilder.setUser(host.getUserContext().getUserId()).build();
     }
 
     @Override
@@ -123,7 +127,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
         }
 
         // Make a new controller for the new user.
-        mListener = new NightDisplayListener(mContext, newUserId, new Handler(Looper.myLooper()));
+        mListener = mNightDisplayListenerBuilder.setUser(newUserId).build();
         if (mIsListening) {
             mListener.setCallback(this);
         }
