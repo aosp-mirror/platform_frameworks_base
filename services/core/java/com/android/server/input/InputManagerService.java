@@ -236,7 +236,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetInteractive(long ptr, boolean interactive);
     private static native void nativeReloadCalibration(long ptr);
     private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
-            int repeat, int token);
+            int[] amplitudes, int repeat, int token);
     private static native void nativeCancelVibrate(long ptr, int deviceId, int token);
     private static native void nativeReloadKeyboardLayouts(long ptr);
     private static native void nativeReloadDeviceAliases(long ptr);
@@ -1716,7 +1716,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public void vibrate(int deviceId, long[] pattern, int repeat, IBinder token) {
+    public void vibrate(int deviceId, long[] pattern, int[] amplitudes, int repeat, IBinder token) {
         if (repeat >= pattern.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -1738,7 +1738,7 @@ public class InputManagerService extends IInputManager.Stub
 
         synchronized (v) {
             v.mVibrating = true;
-            nativeVibrate(mPtr, deviceId, pattern, repeat, v.mTokenValue);
+            nativeVibrate(mPtr, deviceId, pattern, amplitudes, repeat, v.mTokenValue);
         }
     }
 
