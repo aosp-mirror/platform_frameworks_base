@@ -54,8 +54,8 @@ import com.android.internal.os.SomeArgs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Provides information about input devices and available key layouts.
@@ -1298,14 +1298,17 @@ public final class InputManager {
         public void vibrate(int uid, String opPkg, VibrationEffect effect,
                 String reason, AudioAttributes attributes) {
             long[] pattern;
+            int[] amplitudes;
             int repeat;
             if (effect instanceof VibrationEffect.OneShot) {
                 VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
                 pattern = new long[] { 0, oneShot.getDuration() };
+                amplitudes = new int[] { 0, oneShot.getAmplitude() };
                 repeat = -1;
             } else if (effect instanceof VibrationEffect.Waveform) {
                 VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
                 pattern = waveform.getTimings();
+                amplitudes = waveform.getAmplitudes();
                 repeat = waveform.getRepeatIndex();
             } else {
                 // TODO: Add support for prebaked effects
@@ -1314,7 +1317,7 @@ public final class InputManager {
             }
 
             try {
-                mIm.vibrate(mDeviceId, pattern, repeat, mToken);
+                mIm.vibrate(mDeviceId, pattern, amplitudes, repeat, mToken);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }

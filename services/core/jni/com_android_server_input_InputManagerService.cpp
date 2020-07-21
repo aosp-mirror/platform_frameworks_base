@@ -1615,9 +1615,8 @@ static void nativeReloadCalibration(JNIEnv* env, jclass clazz, jlong ptr) {
     im->reloadCalibration();
 }
 
-static void nativeVibrate(JNIEnv* env,
-        jclass /* clazz */, jlong ptr, jint deviceId, jlongArray patternObj,
-        jint repeat, jint token) {
+static void nativeVibrate(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                          jlongArray patternObj, jintArray amplitudesObj, jint repeat, jint token) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     size_t patternSize = env->GetArrayLength(patternObj);
@@ -1630,14 +1629,19 @@ static void nativeVibrate(JNIEnv* env,
 
     jlong* patternMillis = static_cast<jlong*>(env->GetPrimitiveArrayCritical(
             patternObj, nullptr));
-    nsecs_t pattern[patternSize];
+    jint* amplitudes = static_cast<jint*>(env->GetPrimitiveArrayCritical(amplitudesObj, nullptr));
+
+    std::vector<VibrationElement> pattern(patternSize);
     for (size_t i = 0; i < patternSize; i++) {
-        pattern[i] = max(jlong(0), min(patternMillis[i],
-                (jlong)(MAX_VIBRATE_PATTERN_DELAY_NSECS / 1000000LL))) * 1000000LL;
+        jlong duration =
+                max(min(patternMillis[i], (jlong)MAX_VIBRATE_PATTERN_DELAY_MSECS), (jlong)0);
+        pattern[i].duration = std::chrono::milliseconds(duration);
+        pattern[i].channels = {amplitudes[i]};
     }
     env->ReleasePrimitiveArrayCritical(patternObj, patternMillis, JNI_ABORT);
+    env->ReleasePrimitiveArrayCritical(amplitudesObj, amplitudes, JNI_ABORT);
 
-    im->getInputManager()->getReader()->vibrate(deviceId, pattern, patternSize, repeat, token);
+    im->getInputManager()->getReader()->vibrate(deviceId, pattern, repeat, token);
 }
 
 static void nativeCancelVibrate(JNIEnv* /* env */,
@@ -1789,7 +1793,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeSetShowTouches", "(JZ)V", (void*)nativeSetShowTouches},
         {"nativeSetInteractive", "(JZ)V", (void*)nativeSetInteractive},
         {"nativeReloadCalibration", "(J)V", (void*)nativeReloadCalibration},
-        {"nativeVibrate", "(JI[JII)V", (void*)nativeVibrate},
+        {"nativeVibrate", "(JI[J[III)V", (void*)nativeVibrate},
         {"nativeCancelVibrate", "(JII)V", (void*)nativeCancelVibrate},
         {"nativeReloadKeyboardLayouts", "(J)V", (void*)nativeReloadKeyboardLayouts},
         {"nativeReloadDeviceAliases", "(J)V", (void*)nativeReloadDeviceAliases},
