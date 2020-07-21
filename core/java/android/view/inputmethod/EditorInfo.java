@@ -22,13 +22,14 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.text.Editable;
 import android.text.InputType;
+import android.text.ParcelableSpan;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.view.View;
@@ -543,6 +544,9 @@ public class EditorInfo implements InputType, Parcelable {
      * {@code #getInitialSelectedText}, and {@code #getInitialTextBeforeCursor}. System is allowed
      * to trim {@code sourceText} for various reasons while keeping the most valuable data to IMEs.
      *
+     * Starting from {@link VERSION_CODES#S}, spans that do not implement {@link Parcelable} will
+     * be automatically dropped.
+     *
      * <p><strong>Editor authors: </strong>Providing the initial input text helps reducing IPC calls
      * for IMEs to provide many modern features right after the connection setup. We recommend
      * calling this method in your implementation.
@@ -562,14 +566,16 @@ public class EditorInfo implements InputType, Parcelable {
      * try to include the selected text within {@code subText} to give the system best flexibility
      * to choose where and how to trim {@code subText} when necessary.
      *
+     * Starting from {@link VERSION_CODES#S}, spans that do not implement {@link Parcelable} will
+     * be automatically dropped.
+     *
      * @param subText The input text. When it was trimmed, {@code subTextStart} must be provided
      *                correctly.
      * @param subTextStart  The position that the input text got trimmed. For example, when the
      *                      editor wants to trim out the first 10 chars, subTextStart should be 10.
      */
     public void setInitialSurroundingSubText(@NonNull CharSequence subText, int subTextStart) {
-        CharSequence newSubText = Editable.Factory.getInstance().newEditable(subText);
-        Objects.requireNonNull(newSubText);
+        Objects.requireNonNull(subText);
 
         // Swap selection start and end if necessary.
         final int subTextSelStart = initialSelStart > initialSelEnd
@@ -577,7 +583,7 @@ public class EditorInfo implements InputType, Parcelable {
         final int subTextSelEnd = initialSelStart > initialSelEnd
                 ? initialSelStart - subTextStart : initialSelEnd - subTextStart;
 
-        final int subTextLength = newSubText.length();
+        final int subTextLength = subText.length();
         // Unknown or invalid selection.
         if (subTextStart < 0 || subTextSelStart < 0 || subTextSelEnd > subTextLength) {
             mInitialSurroundingText = new InitialSurroundingText();
@@ -591,12 +597,12 @@ public class EditorInfo implements InputType, Parcelable {
         }
 
         if (subTextLength <= MEMORY_EFFICIENT_TEXT_LENGTH) {
-            mInitialSurroundingText = new InitialSurroundingText(newSubText, subTextSelStart,
+            mInitialSurroundingText = new InitialSurroundingText(subText, subTextSelStart,
                     subTextSelEnd);
             return;
         }
 
-        trimLongSurroundingText(newSubText, subTextSelStart, subTextSelEnd);
+        trimLongSurroundingText(subText, subTextSelStart, subTextSelEnd);
     }
 
     /**
@@ -901,7 +907,9 @@ public class EditorInfo implements InputType, Parcelable {
 
         InitialSurroundingText(@Nullable CharSequence surroundingText, int selectionHead,
                 int selectionEnd) {
-            mSurroundingText = surroundingText;
+            // Copy the original text (without NoCopySpan) in case the original text is updated
+            // later.
+            mSurroundingText = copyWithParcelableSpans(surroundingText);
             mSelectionHead = selectionHead;
             mSelectionEnd = selectionEnd;
         }
@@ -975,5 +983,30 @@ public class EditorInfo implements InputType, Parcelable {
                         return new InitialSurroundingText[size];
                     }
                 };
+
+        /**
+         * Create a copy of the given {@link CharSequence} object, with completely copy
+         * {@link ParcelableSpan} instances.
+         *
+         * @param source the original {@link CharSequence} to be copied.
+         * @return the copied {@link CharSequence}. {@code null} if {@code source} is {@code null}.
+         */
+        @Nullable
+        private static CharSequence copyWithParcelableSpans(@Nullable CharSequence source) {
+            if (source == null) {
+                return null;
+            }
+            Parcel parcel = null;
+            try {
+                parcel = Parcel.obtain();
+                TextUtils.writeToParcel(source, parcel, /* parcelableFlags= */ 0);
+                parcel.setDataPosition(0);
+                return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+            } finally {
+                if (parcel != null) {
+                    parcel.recycle();
+                }
+            }
+        }
     }
 }
