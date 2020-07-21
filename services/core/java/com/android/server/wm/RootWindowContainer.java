@@ -112,7 +112,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.power.V1_0.PowerHint;
+import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Debug;
@@ -955,9 +955,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
             mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
-            mWmService.mPowerManagerInternal.powerHint(
-                    PowerHint.SUSTAINED_PERFORMANCE,
-                    mSustainedPerformanceModeEnabled ? 1 : 0);
+            mWmService.mPowerManagerInternal.setPowerMode(
+                    Mode.SUSTAINED_PERFORMANCE,
+                    mSustainedPerformanceModeEnabled);
         }
 
         if (mUpdateRotation) {
@@ -3528,7 +3528,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         if (sendPowerModeLaunch && mService.mPowerManagerInternal != null) {
-            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 1);
+            mService.mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
             mPowerModeLaunchStarted = true;
         }
     }
@@ -3536,7 +3536,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void endPowerModeLaunchIfNeeded() {
         // Trigger launch power mode off if activity is launched
         if (mPowerModeLaunchStarted && mService.mPowerManagerInternal != null) {
-            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 0);
+            mService.mPowerManagerInternal.setPowerMode(Mode.LAUNCH, false);
             mPowerModeLaunchStarted = false;
         }
     }
