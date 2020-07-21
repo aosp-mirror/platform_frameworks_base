@@ -49,6 +49,7 @@ import com.android.server.timezonedetector.TimeZoneDetectorStrategy.StrategyList
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -188,25 +189,44 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         int userId = UserHandle.getCallingUserId();
 
         ConfigListenerInfo listenerInfo = new ConfigListenerInfo(userId, listener);
-        final IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
-            @Override
-            public void binderDied() {
-                synchronized (mConfigurationListeners) {
-                    Slog.i(TAG, "Configuration listener died: " + listenerInfo);
-                    mConfigurationListeners.remove(listenerInfo);
-                }
-            }
-        };
 
         synchronized (mConfigurationListeners) {
+            if (mConfigurationListeners.contains(listenerInfo)) {
+                return;
+            }
             try {
-                // Remove the record of the listener if the client process dies.
-                listener.asBinder().linkToDeath(deathRecipient, 0 /* flags */);
+                // Ensure the reference to the listener is removed if the client process dies.
+                listenerInfo.linkToDeath();
 
                 // Only add the listener if we can linkToDeath().
                 mConfigurationListeners.add(listenerInfo);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to linkToDeath() for listener=" + listener, e);
+            }
+        }
+    }
+
+    @Override
+    public void removeConfigurationListener(@NonNull ITimeZoneConfigurationListener listener) {
+        enforceManageTimeZoneDetectorConfigurationPermission();
+        Objects.requireNonNull(listener);
+        int userId = UserHandle.getCallingUserId();
+
+        synchronized (mConfigurationListeners) {
+            ConfigListenerInfo toRemove = new ConfigListenerInfo(userId, listener);
+            Iterator<ConfigListenerInfo> listenerIterator = mConfigurationListeners.iterator();
+            while (listenerIterator.hasNext()) {
+                ConfigListenerInfo currentListenerInfo = listenerIterator.next();
+                if (currentListenerInfo.equals(toRemove)) {
+                    listenerIterator.remove();
+
+                    // Stop listening for the client process to die.
+                    try {
+                        currentListenerInfo.unlinkToDeath();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to unlinkToDeath() for listener=" + listener, e);
+                    }
+                }
             }
         }
     }
@@ -319,7 +339,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
                 this, in, out, err, args, callback, resultReceiver);
     }
 
-    private static class ConfigListenerInfo {
+    private class ConfigListenerInfo implements IBinder.DeathRecipient {
         private final @UserIdInt int mUserId;
         private final ITimeZoneConfigurationListener mListener;
 
@@ -335,6 +355,40 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         ITimeZoneConfigurationListener getListener() {
             return mListener;
+        }
+
+        void linkToDeath() throws RemoteException {
+            mListener.asBinder().linkToDeath(this, 0 /* flags */);
+        }
+
+        void unlinkToDeath() throws RemoteException {
+            mListener.asBinder().unlinkToDeath(this, 0 /* flags */);
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mConfigurationListeners) {
+                Slog.i(TAG, "Configuration listener client died: " + this);
+                mConfigurationListeners.remove(this);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ConfigListenerInfo that = (ConfigListenerInfo) o;
+            return mUserId == that.mUserId
+                    && mListener.equals(that.mListener);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUserId, mListener);
         }
 
         @Override
