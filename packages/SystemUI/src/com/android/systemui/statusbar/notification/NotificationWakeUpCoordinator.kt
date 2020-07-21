@@ -382,7 +382,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     private fun shouldAnimateVisibility() =
-            dozeParameters.getAlwaysOn() && !dozeParameters.getDisplayNeedsBlanking()
+            dozeParameters.alwaysOn && !dozeParameters.displayNeedsBlanking
 
     interface WakeUpListener {
         /**

@@ -364,9 +364,6 @@ public class DozeMachine {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
         }
-        if (requestedState == State.DOZE_AOD && mBatteryController.isAodPowerSave()) {
-            return State.DOZE;
-        }
         if (requestedState == State.DOZE_REQUEST_PULSE && !mState.canPulse()) {
             Log.i(TAG, "Dropping pulse request because current state can't pulse: " + mState);
             return mState;
