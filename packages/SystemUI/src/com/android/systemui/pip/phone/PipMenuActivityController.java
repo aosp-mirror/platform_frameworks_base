@@ -110,6 +110,8 @@ public class PipMenuActivityController {
         void onPipShowMenu();
     }
 
+    /** TODO(b/150319024): PipMenuActivity will move to a Window */
+    private Class<?> mPipMenuActivityClass;
     private Context mContext;
     private PipMediaController mMediaController;
     private InputConsumerController mInputConsumerController;
@@ -185,11 +187,13 @@ public class PipMenuActivityController {
         }
     };
 
-    public PipMenuActivityController(Context context,
-            PipMediaController mediaController, InputConsumerController inputConsumerController) {
+    public PipMenuActivityController(Context context, Class<?> pipMenuActivityClass,
+            PipMediaController mediaController, InputConsumerController inputConsumerController
+    ) {
         mContext = context;
         mMediaController = mediaController;
         mInputConsumerController = inputConsumerController;
+        mPipMenuActivityClass = pipMenuActivityClass;
     }
 
     public boolean isMenuActivityVisible() {
@@ -454,7 +458,7 @@ public class PipMenuActivityController {
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
-                Intent intent = new Intent(mContext, PipMenuActivity.class);
+                Intent intent = new Intent(mContext, mPipMenuActivityClass);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra(EXTRA_CONTROLLER_MESSENGER, mMessenger);
                 intent.putExtra(EXTRA_ACTIONS, resolveMenuActions());

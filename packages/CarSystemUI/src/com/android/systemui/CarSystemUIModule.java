@@ -38,6 +38,8 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
+import com.android.systemui.pip.phone.PipMenuActivity;
+import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -140,6 +142,13 @@ public abstract class CarSystemUIModule {
             @Main Handler mainHandler, TransactionPool transactionPool) {
         return new DisplaySystemBarsController.Builder(context, wmService, displayController,
                 mainHandler, transactionPool).build();
+    }
+
+    @Singleton
+    @PipMenuActivityClass
+    @Provides
+    static Class<?> providePipMenuActivityClass() {
+        return PipMenuActivity.class;
     }
 
     @Binds

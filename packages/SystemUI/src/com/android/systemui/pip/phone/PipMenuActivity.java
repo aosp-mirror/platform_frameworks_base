@@ -76,17 +76,15 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
-import com.android.systemui.SystemUIFactory;
 import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
 /**
  * Translucent activity that gets started on top of a task in PIP to allow the user to control it.
+ * TODO(b/150319024): PipMenuActivity will move to a Window
  */
 public class PipMenuActivity extends Activity {
 
@@ -126,18 +124,10 @@ public class PipMenuActivity extends Activity {
     private final List<RemoteAction> mActions = new ArrayList<>();
 
     private AccessibilityManager mAccessibilityManager;
-    private View mViewRoot;
     private Drawable mBackgroundDrawable;
     private View mMenuContainer;
     private LinearLayout mActionsGroup;
-    private View mSettingsButton;
-    private View mDismissButton;
-    private View mResizeHandle;
-    private View mTopEndContainer;
     private int mBetweenActionPaddingLand;
-
-    @Inject
-    PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
     private AnimatorSet mMenuContainerAnimator;
 
@@ -193,6 +183,9 @@ public class PipMenuActivity extends Activity {
                     break;
                 }
                 case MESSAGE_MENU_EXPANDED : {
+                    if (mMenuContainerAnimator == null) {
+                        return;
+                    }
                     mMenuContainerAnimator.setStartDelay(MENU_SHOW_ON_EXPAND_START_DELAY);
                     mMenuContainerAnimator.start();
                     break;
@@ -202,6 +195,9 @@ public class PipMenuActivity extends Activity {
                     break;
                 }
                 case MESSAGE_UPDATE_MENU_LAYOUT: {
+                    if (mPipMenuIconsAlgorithm == null) {
+                        return;
+                    }
                     final Rect bounds = (Rect) msg.obj;
                     mPipMenuIconsAlgorithm.onBoundsChanged(bounds);
                     break;
@@ -214,6 +210,13 @@ public class PipMenuActivity extends Activity {
 
     private final Runnable mFinishRunnable = this::hideMenu;
 
+    protected View mViewRoot;
+    protected View mSettingsButton;
+    protected View mDismissButton;
+    protected View mResizeHandle;
+    protected View mTopEndContainer;
+    protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         // Set the flags to allow us to watch for outside touches and also hide the menu and start
@@ -221,8 +224,6 @@ public class PipMenuActivity extends Activity {
         getWindow().addFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         super.onCreate(savedInstanceState);
-
-        SystemUIFactory.getInstance().getRootComponent().inject(this);
 
         setContentView(R.layout.pip_menu_activity);
 
@@ -254,7 +255,7 @@ public class PipMenuActivity extends Activity {
         mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
-
+        mPipMenuIconsAlgorithm = new PipMenuIconsAlgorithm(this.getApplicationContext());
         mPipMenuIconsAlgorithm.bindViews((ViewGroup) mViewRoot, (ViewGroup) mTopEndContainer,
                 mResizeHandle, mSettingsButton, mDismissButton);
         updateFromIntent(getIntent());
