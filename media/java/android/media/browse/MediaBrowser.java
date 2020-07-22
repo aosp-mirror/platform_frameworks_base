@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
 import android.media.MediaDescription;
-import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Bundle;
@@ -757,8 +756,8 @@ public final class MediaBrowser {
          * Flag: Indicates that the item is playable.
          * <p>
          * The id of this item may be passed to
-         * {@link MediaController.TransportControls#playFromMediaId(String, Bundle)}
-         * to start playing it.
+         * {@link android.media.session.MediaController.TransportControls
+         * #playFromMediaId(String, Bundle)} to start playing it.
          * </p>
          */
         public static final int FLAG_PLAYABLE = 1 << 1;
