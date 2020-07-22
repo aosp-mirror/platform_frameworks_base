@@ -23,18 +23,15 @@ import android.app.KeyguardManager;
 import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
-import android.os.BatteryManager;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.perftests.utils.PerfTestActivity;
-import android.provider.Settings;
 
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import androidx.test.runner.lifecycle.Stage;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -43,7 +40,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class WindowManagerPerfTestBase {
     static final UiAutomation sUiAutomation = getInstrumentation().getUiAutomation();
@@ -56,21 +55,11 @@ public class WindowManagerPerfTestBase {
      * is in /data because while enabling method profling of system server, it cannot write the
      * trace to external storage.
      */
-    static final File BASE_OUT_PATH = new File("/data/local/CorePerfTests");
-
-    private static int sOriginalStayOnWhilePluggedIn;
+    static final File BASE_OUT_PATH = new File("/data/local/WmPerfTests");
 
     @BeforeClass
     public static void setUpOnce() {
         final Context context = getInstrumentation().getContext();
-        final int stayOnWhilePluggedIn = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
-        sOriginalStayOnWhilePluggedIn = -1;
-        if (stayOnWhilePluggedIn != BatteryManager.BATTERY_PLUGGED_ANY) {
-            sOriginalStayOnWhilePluggedIn = stayOnWhilePluggedIn;
-            // Keep the device awake during testing.
-            setStayOnWhilePluggedIn(BatteryManager.BATTERY_PLUGGED_ANY);
-        }
 
         if (!BASE_OUT_PATH.exists()) {
             executeShellCommand("mkdir -p " + BASE_OUT_PATH);
@@ -82,18 +71,6 @@ public class WindowManagerPerfTestBase {
         }
         context.startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        if (sOriginalStayOnWhilePluggedIn != -1) {
-            setStayOnWhilePluggedIn(sOriginalStayOnWhilePluggedIn);
-        }
-    }
-
-    private static void setStayOnWhilePluggedIn(int value) {
-        executeShellCommand(String.format("settings put global %s %d",
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, value));
     }
 
     /**
@@ -122,6 +99,42 @@ public class WindowManagerPerfTestBase {
 
     void stopProfiling() {
         executeShellCommand("am profile stop system");
+    }
+
+    static void runWithShellPermissionIdentity(Runnable runnable) {
+        sUiAutomation.adoptShellPermissionIdentity();
+        try {
+            runnable.run();
+        } finally {
+            sUiAutomation.dropShellPermissionIdentity();
+        }
+    }
+
+    static class SettingsSession<T> implements AutoCloseable {
+        private final Consumer<T> mSetter;
+        private final T mOriginalValue;
+        private boolean mChanged;
+
+        SettingsSession(T originalValue, Consumer<T> setter) {
+            mOriginalValue = originalValue;
+            mSetter = setter;
+        }
+
+        void set(T value) {
+            if (Objects.equals(value, mOriginalValue)) {
+                mChanged = false;
+                return;
+            }
+            mSetter.accept(value);
+            mChanged = true;
+        }
+
+        @Override
+        public void close() {
+            if (mChanged) {
+                mSetter.accept(mOriginalValue);
+            }
+        }
     }
 
     /**
