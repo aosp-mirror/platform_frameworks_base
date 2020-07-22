@@ -81,6 +81,21 @@
     <dimen name="car_keyline_2">96dp</dimen>
     <dimen name="car_keyline_3">128dp</dimen>
 
+    <!-- Height of icons in Ongoing App Ops dialog. Both App Op icon and application icon -->
+    <dimen name="ongoing_appops_dialog_icon_height">48dp</dimen>
+    <!-- Margin between text lines in Ongoing App Ops dialog -->
+    <dimen name="ongoing_appops_dialog_text_margin">15dp</dimen>
+    <!-- Padding around Ongoing App Ops dialog content -->
+    <dimen name="ongoing_appops_dialog_content_padding">24dp</dimen>
+    <!-- Margins around the Ongoing App Ops chip. In landscape, the side margins are 0 -->
+    <dimen name="ongoing_appops_chip_margin">12dp</dimen>
+    <!-- Start and End padding for Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_side_padding">6dp</dimen>
+    <!-- Padding between background of Ongoing App Ops chip and content -->
+    <dimen name="ongoing_appops_chip_bg_padding">4dp</dimen>
+    <!-- Radius of Ongoing App Ops chip corners -->
+    <dimen name="ongoing_appops_chip_bg_corner_radius">12dp</dimen>
+
     <!-- Car volume dimens. -->
     <dimen name="car_volume_item_icon_size">@dimen/car_primary_icon_size</dimen>
     <dimen name="car_volume_item_height">@*android:dimen/car_single_line_list_item_height</dimen>

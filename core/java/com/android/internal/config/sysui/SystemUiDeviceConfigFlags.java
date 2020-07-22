@@ -120,6 +120,13 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
 
+    // Flag related to Privacy Indicators
+
+    /**
+     * Whether the Permissions Hub is showing.
+     */
+    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
+
     // Flags related to Assistant
 
     /**
