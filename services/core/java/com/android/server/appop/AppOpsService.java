@@ -2052,6 +2052,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void getHistoricalOps(int uid, String packageName, String attributionTag,
             List<String> opNames, int filter, long beginTimeMillis, long endTimeMillis,
             int flags, RemoteCallback callback) {
+        PackageManager pm = mContext.getPackageManager();
+
         ensureHistoricalOpRequestIsValid(uid, packageName, attributionTag, opNames, filter,
                 beginTimeMillis, endTimeMillis, flags);
         Objects.requireNonNull(callback, "callback cannot be null");
@@ -2059,8 +2061,16 @@ public class AppOpsService extends IAppOpsService.Stub {
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
         boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
         boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
+        boolean isCallerPermissionController;
+        try {
+            isCallerPermissionController = pm.getPackageUid(
+                    mContext.getPackageManager().getPermissionControllerPackageName(), 0)
+                    == Binder.getCallingUid();
+        } catch (PackageManager.NameNotFoundException doesNotHappen) {
+            return;
+        }
 
-        if (!isCallerSystem && !isCallerInstrumented) {
+        if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController) {
             mHandler.post(() -> callback.sendResult(new Bundle()));
             return;
         }

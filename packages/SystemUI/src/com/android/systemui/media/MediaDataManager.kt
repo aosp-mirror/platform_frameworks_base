@@ -316,18 +316,13 @@ class MediaDataManager(
                 as MediaSession.Token?
         val metadata = mediaControllerFactory.create(token).metadata
 
-        if (metadata == null) {
-            // TODO: handle this better, removing media notification
-            return
-        }
-
         // Foreground and Background colors computed from album art
         val notif: Notification = sbn.notification
-        var artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        var artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
         if (artworkBitmap == null) {
-            artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+            artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
         }
-        if (artworkBitmap == null) {
+        if (artworkBitmap == null && metadata != null) {
             artworkBitmap = loadBitmapFromUri(metadata)
         }
         val artWorkIcon = if (artworkBitmap == null) {
@@ -363,16 +358,16 @@ class MediaDataManager(
         val smallIconDrawable: Drawable = sbn.notification.smallIcon.loadDrawable(context)
 
         // Song name
-        var song: CharSequence? = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
         if (song == null) {
-            song = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
         }
         if (song == null) {
             song = HybridGroupManager.resolveTitle(notif)
         }
 
         // Artist name
-        var artist: CharSequence? = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        var artist: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
         if (artist == null) {
             artist = HybridGroupManager.resolveText(notif)
         }

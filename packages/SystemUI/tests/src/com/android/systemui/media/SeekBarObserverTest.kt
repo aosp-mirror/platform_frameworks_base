@@ -69,7 +69,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarGone() {
         // WHEN seek bar is disabled
         val isEnabled = false
-        val data = SeekBarViewModel.Progress(isEnabled, false, null, null)
+        val data = SeekBarViewModel.Progress(isEnabled, false, null, 0)
         observer.onChanged(data)
         // THEN seek bar shows just a thin line with no text
         assertThat(seekBarView.isEnabled()).isFalse()

@@ -395,19 +395,15 @@
 
         <!-- Springboard for launching the share and edit activity. This needs to be in the main
              system ui process since we need to notify the status bar to dismiss the keyguard -->
-        <receiver android:name=".screenshot.GlobalScreenshot$ActionProxyReceiver"
-            android:exported="false" />
-
-        <!-- Callback for dismissing screenshot notification after a share target is picked -->
-        <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
+        <receiver android:name=".screenshot.ActionProxyReceiver"
             android:exported="false" />
 
         <!-- Callback for deleting screenshot notification -->
-        <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
+        <receiver android:name=".screenshot.DeleteScreenshotReceiver"
             android:exported="false" />
 
         <!-- Callback for invoking a smart action from the screenshot notification. -->
-        <receiver android:name=".screenshot.GlobalScreenshot$SmartActionsReceiver"
+        <receiver android:name=".screenshot.SmartActionsReceiver"
                   android:exported="false"/>
 
         <!-- started from UsbDeviceSettingsManager -->
