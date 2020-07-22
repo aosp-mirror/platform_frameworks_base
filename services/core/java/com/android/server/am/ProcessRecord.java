@@ -274,7 +274,7 @@ class ProcessRecord implements WindowProcessListener {
     final ArrayMap<String, ContentProviderRecord> pubProviders = new ArrayMap<>();
     // All ContentProviderRecord process is using
     final ArrayList<ContentProviderConnection> conProviders = new ArrayList<>();
-    // A set of tokens that currently contribute to this process being temporarily whitelisted
+    // A set of tokens that currently contribute to this process being temporarily allowed
     // to start activities even if it's not in the foreground
     final ArraySet<Binder> mAllowBackgroundActivityStartsTokens = new ArraySet<>();
     // a set of UIDs of all bound clients
@@ -626,7 +626,7 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
         if (mAllowBackgroundActivityStartsTokens.size() > 0) {
-            pw.print(prefix); pw.println("Background activity start whitelist tokens:");
+            pw.print(prefix); pw.println("Background activity start tokens:");
             for (int i = 0; i < mAllowBackgroundActivityStartsTokens.size(); i++) {
                 pw.print(prefix); pw.print("  - ");
                 pw.println(mAllowBackgroundActivityStartsTokens.valueAt(i));

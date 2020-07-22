@@ -253,7 +253,8 @@ final class ActivityManagerConstants extends ContentObserver {
     // allowing the next pending start to run.
     public long BG_START_TIMEOUT = DEFAULT_BG_START_TIMEOUT;
 
-    // For how long after a whitelisted service's start its process can start a background activity
+    // For a service that has been allowed to start background activities, how long after it started
+    // its process can start a background activity.
     public long SERVICE_BG_ACTIVITY_START_TIMEOUT = DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT;
 
     // Initial backoff delay for retrying bound foreground services
