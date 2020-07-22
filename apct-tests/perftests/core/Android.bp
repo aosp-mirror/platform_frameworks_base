@@ -12,6 +12,8 @@ android_test {
         "androidx.appcompat_appcompat",
         "androidx.test.rules",
         "androidx.annotation_annotation",
+        "androidx.benchmark_benchmark-common",
+        "androidx.benchmark_benchmark-junit4",
         "apct-perftests-overlay-apps",
         "apct-perftests-resources-manager-apps",
         "apct-perftests-utils",
