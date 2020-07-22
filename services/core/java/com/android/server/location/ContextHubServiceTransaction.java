@@ -32,14 +32,32 @@ import java.util.concurrent.TimeUnit;
     @ContextHubTransaction.Type
     private final int mTransactionType;
 
+    /* The ID of the nanoapp this transaction is targeted for, null if not applicable. */
+    private final Long mNanoAppId;
+
+    /*
+     * The host package associated with this transaction.
+     */
+    private final String mPackage;
+
     /*
      * true if the transaction has already completed, false otherwise
      */
     private boolean mIsComplete = false;
 
-    /* package */ ContextHubServiceTransaction(int id, int type) {
+    /* package */ ContextHubServiceTransaction(int id, int type, String packageName) {
         mTransactionId = id;
         mTransactionType = type;
+        mNanoAppId = null;
+        mPackage = packageName;
+    }
+
+    /* package */ ContextHubServiceTransaction(int id, int type, long nanoAppId,
+            String packageName) {
+        mTransactionId = id;
+        mTransactionType = type;
+        mNanoAppId = nanoAppId;
+        mPackage = packageName;
     }
 
     /**
@@ -129,7 +147,13 @@ import java.util.concurrent.TimeUnit;
 
     @Override
     public String toString() {
-        return ContextHubTransaction.typeToString(mTransactionType, true /* upperCase */)
-                + " transaction (ID = " + mTransactionId + ")";
+        String out = ContextHubTransaction.typeToString(mTransactionType, true /* upperCase */)
+                + " (";
+        if (mNanoAppId != null) {
+            out += "appId = 0x" + Long.toHexString(mNanoAppId) + ", ";
+        }
+        out += "package = " + mPackage + ")";
+
+        return out;
     }
 }

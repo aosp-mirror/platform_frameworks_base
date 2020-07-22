@@ -317,7 +317,7 @@ key 366   DVR
 # key 367 "KEY_MHP"
 # key 368 "KEY_LANGUAGE"
 # key 369 "KEY_TITLE"
-# key 370 "KEY_SUBTITLE"
+key 370   CAPTIONS
 # key 371 "KEY_ANGLE"
 # key 372 "KEY_ZOOM"
 # key 373 "KEY_MODE"
@@ -352,7 +352,7 @@ key 397   CALENDAR
 key 402   CHANNEL_UP
 key 403   CHANNEL_DOWN
 # key 404 "KEY_FIRST"
-# key 405 "KEY_LAST"
+key 405   LAST_CHANNEL
 # key 406 "KEY_AB"
 # key 407 "KEY_NEXT"
 # key 408 "KEY_RESTART"

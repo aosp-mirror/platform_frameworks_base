@@ -23,17 +23,23 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Handler
 import android.service.quicksettings.IQSTileService
 import android.service.quicksettings.Tile
 import android.test.suitebuilder.annotation.SmallTest
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.IWindowManager
-import androidx.test.runner.AndroidJUnit4
+import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+import com.android.systemui.qs.logging.QSLogger
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +52,8 @@ import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class CustomTileTest : SysuiTestCase() {
 
     companion object {
@@ -56,36 +63,53 @@ class CustomTileTest : SysuiTestCase() {
         val TILE_SPEC = CustomTile.toSpec(componentName)
     }
 
-    @Mock private lateinit var mTileHost: QSHost
-    @Mock private lateinit var mTileService: IQSTileService
-    @Mock private lateinit var mTileServices: TileServices
-    @Mock private lateinit var mTileServiceManager: TileServiceManager
-    @Mock private lateinit var mWindowService: IWindowManager
-    @Mock private lateinit var mPackageManager: PackageManager
-    @Mock private lateinit var mApplicationInfo: ApplicationInfo
-    @Mock private lateinit var mServiceInfo: ServiceInfo
+    @Mock private lateinit var tileHost: QSHost
+    @Mock private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var tileService: IQSTileService
+    @Mock private lateinit var tileServices: TileServices
+    @Mock private lateinit var tileServiceManager: TileServiceManager
+    @Mock private lateinit var windowService: IWindowManager
+    @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var applicationInfo: ApplicationInfo
+    @Mock private lateinit var serviceInfo: ServiceInfo
 
     private lateinit var customTile: CustomTile
+    private lateinit var testableLooper: TestableLooper
+    private lateinit var customTileBuilder: CustomTile.Builder
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        testableLooper = TestableLooper.get(this)
 
-        mContext.addMockSystemService("window", mWindowService)
-        mContext.setMockPackageManager(mPackageManager)
-        `when`(mTileHost.tileServices).thenReturn(mTileServices)
-        `when`(mTileHost.context).thenReturn(mContext)
-        `when`(mTileServices.getTileWrapper(any(CustomTile::class.java)))
-                .thenReturn(mTileServiceManager)
-        `when`(mTileServiceManager.tileService).thenReturn(mTileService)
-        `when`(mPackageManager.getApplicationInfo(anyString(), anyInt()))
-                .thenReturn(mApplicationInfo)
+        mContext.addMockSystemService("window", windowService)
+        mContext.setMockPackageManager(packageManager)
+        `when`(tileHost.tileServices).thenReturn(tileServices)
+        `when`(tileHost.context).thenReturn(mContext)
+        `when`(tileServices.getTileWrapper(any(CustomTile::class.java)))
+                .thenReturn(tileServiceManager)
+        `when`(tileServiceManager.tileService).thenReturn(tileService)
+        `when`(packageManager.getApplicationInfo(anyString(), anyInt()))
+                .thenReturn(applicationInfo)
 
-        `when`(mPackageManager.getServiceInfo(any(ComponentName::class.java), anyInt()))
-                .thenReturn(mServiceInfo)
-        mServiceInfo.applicationInfo = mApplicationInfo
+        `when`(packageManager.getServiceInfo(any(ComponentName::class.java), anyInt()))
+                .thenReturn(serviceInfo)
+        serviceInfo.applicationInfo = applicationInfo
 
-        customTile = CustomTile.create(mTileHost, TILE_SPEC, mContext)
+        customTileBuilder = CustomTile.Builder(
+                { tileHost },
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                metricsLogger,
+                statusBarStateController,
+                activityStarter,
+                qsLogger
+        )
+
+        customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
     }
 
     @Test
@@ -93,18 +117,18 @@ class CustomTileTest : SysuiTestCase() {
         assertEquals(0, customTile.user)
 
         val userContext = mock(Context::class.java)
-        `when`(userContext.packageManager).thenReturn(mPackageManager)
+        `when`(userContext.packageManager).thenReturn(packageManager)
         `when`(userContext.userId).thenReturn(10)
 
-        val tile = CustomTile.create(mTileHost, TILE_SPEC, userContext)
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, userContext)
 
         assertEquals(10, tile.user)
     }
 
     @Test
     fun testToggleableTileHasBooleanState() {
-        `when`(mTileServiceManager.isToggleableTile).thenReturn(true)
-        customTile = CustomTile.create(mTileHost, TILE_SPEC, mContext)
+        `when`(tileServiceManager.isToggleableTile).thenReturn(true)
+        customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
 
         assertTrue(customTile.state is QSTile.BooleanState)
         assertTrue(customTile.newTileState() is QSTile.BooleanState)
@@ -118,8 +142,8 @@ class CustomTileTest : SysuiTestCase() {
 
     @Test
     fun testValueUpdatedInBooleanTile() {
-        `when`(mTileServiceManager.isToggleableTile).thenReturn(true)
-        customTile = CustomTile.create(mTileHost, TILE_SPEC, mContext)
+        `when`(tileServiceManager.isToggleableTile).thenReturn(true)
+        customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
         customTile.qsTile.icon = mock(Icon::class.java)
         `when`(customTile.qsTile.icon.loadDrawable(any(Context::class.java)))
                 .thenReturn(mock(Drawable::class.java))

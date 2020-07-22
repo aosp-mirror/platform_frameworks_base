@@ -16,14 +16,14 @@
 
 package android.text.format;
 
-import static android.text.format.DateUtilsBridge.FORMAT_ABBREV_ALL;
-import static android.text.format.DateUtilsBridge.FORMAT_ABBREV_MONTH;
-import static android.text.format.DateUtilsBridge.FORMAT_ABBREV_RELATIVE;
-import static android.text.format.DateUtilsBridge.FORMAT_NO_YEAR;
-import static android.text.format.DateUtilsBridge.FORMAT_NUMERIC_DATE;
-import static android.text.format.DateUtilsBridge.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtilsBridge.FORMAT_SHOW_TIME;
-import static android.text.format.DateUtilsBridge.FORMAT_SHOW_YEAR;
+import static android.text.format.DateUtils.FORMAT_ABBREV_ALL;
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE;
+import static android.text.format.DateUtils.FORMAT_NO_YEAR;
+import static android.text.format.DateUtils.FORMAT_NUMERIC_DATE;
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
+import static android.text.format.DateUtils.FORMAT_SHOW_YEAR;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 

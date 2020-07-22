@@ -369,9 +369,11 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testCreateService_initializesNativeService() {
+    public void testCreateService_initializesNativeServiceAndSetsPowerModes() {
         PowerManagerService service = createService();
         verify(mNativeWrapperMock).nativeInit(same(service));
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.INTERACTIVE), eq(true));
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.DOUBLE_TAP_TO_WAKE), eq(false));
     }
 
     @Test

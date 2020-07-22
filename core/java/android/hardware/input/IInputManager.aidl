@@ -83,7 +83,7 @@ interface IInputManager {
     int isMicMuted();
 
     // Input device vibrator control.
-    void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
+    void vibrate(int deviceId, in long[] pattern, in int[] amplitudes, int repeat, IBinder token);
     void cancelVibrate(int deviceId, IBinder token);
 
     void setPointerIconType(int typeId);

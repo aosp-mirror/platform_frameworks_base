@@ -44,8 +44,8 @@ import android.hardware.SystemSensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.hardware.power.Boost;
 import android.hardware.power.Mode;
-import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -203,9 +203,6 @@ public final class PowerManagerService extends SystemService
     // How long a partial wake lock must be held until we consider it a long wake lock.
     static final long MIN_LONG_WAKE_CHECK_INTERVAL = 60*1000;
 
-    // Power features defined in hardware/libhardware/include/hardware/power.h.
-    private static final int POWER_FEATURE_DOUBLE_TAP_TO_WAKE = 1;
-
     // Default setting for double tap to wake.
     private static final int DEFAULT_DOUBLE_TAP_TO_WAKE = 0;
 
@@ -325,7 +322,7 @@ public final class PowerManagerService extends SystemService
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
 
-    // Timestamp of last interactive power hint.
+    // Timestamp of last time power boost interaction was sent.
     private long mLastInteractivePowerHintTime;
 
     // Timestamp of the last screen brightness boost.
@@ -719,19 +716,9 @@ public final class PowerManagerService extends SystemService
             PowerManagerService.nativeReleaseSuspendBlocker(name);
         }
 
-        /** Wrapper for PowerManager.nativeSetInteractive */
-        public void nativeSetInteractive(boolean enable) {
-            PowerManagerService.nativeSetInteractive(enable);
-        }
-
         /** Wrapper for PowerManager.nativeSetAutoSuspend */
         public void nativeSetAutoSuspend(boolean enable) {
             PowerManagerService.nativeSetAutoSuspend(enable);
-        }
-
-        /** Wrapper for PowerManager.nativeSendPowerHint */
-        public void nativeSendPowerHint(int hintId, int data) {
-            PowerManagerService.nativeSendPowerHint(hintId, data);
         }
 
         /** Wrapper for PowerManager.nativeSetPowerBoost */
@@ -742,11 +729,6 @@ public final class PowerManagerService extends SystemService
         /** Wrapper for PowerManager.nativeSetPowerMode */
         public boolean nativeSetPowerMode(int mode, boolean enabled) {
             return PowerManagerService.nativeSetPowerMode(mode, enabled);
-        }
-
-        /** Wrapper for PowerManager.nativeSetFeature */
-        public void nativeSetFeature(int featureId, int data) {
-            PowerManagerService.nativeSetFeature(featureId, data);
         }
 
         /** Wrapper for PowerManager.nativeForceSuspend */
@@ -851,12 +833,9 @@ public final class PowerManagerService extends SystemService
     private native void nativeInit();
     private static native void nativeAcquireSuspendBlocker(String name);
     private static native void nativeReleaseSuspendBlocker(String name);
-    private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
-    private static native void nativeSendPowerHint(int hintId, int data);
     private static native void nativeSetPowerBoost(int boost, int durationMs);
     private static native boolean nativeSetPowerMode(int mode, boolean enabled);
-    private static native void nativeSetFeature(int featureId, int data);
     private static native boolean nativeForceSuspend();
 
     public PowerManagerService(Context context) {
@@ -1000,8 +979,8 @@ public final class PowerManagerService extends SystemService
 
             mNativeWrapper.nativeInit(this);
             mNativeWrapper.nativeSetAutoSuspend(false);
-            mNativeWrapper.nativeSetInteractive(true);
-            mNativeWrapper.nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
+            mNativeWrapper.nativeSetPowerMode(Mode.INTERACTIVE, true);
+            mNativeWrapper.nativeSetPowerMode(Mode.DOUBLE_TAP_TO_WAKE, false);
             mInjector.invalidateIsInteractiveCaches();
         }
     }
@@ -1252,8 +1231,7 @@ public final class PowerManagerService extends SystemService
                             UserHandle.USER_CURRENT) != 0;
             if (doubleTapWakeEnabled != mDoubleTapWakeEnabled) {
                 mDoubleTapWakeEnabled = doubleTapWakeEnabled;
-                mNativeWrapper.nativeSetFeature(
-                        POWER_FEATURE_DOUBLE_TAP_TO_WAKE, mDoubleTapWakeEnabled ? 1 : 0);
+                mNativeWrapper.nativeSetPowerMode(Mode.DOUBLE_TAP_TO_WAKE, mDoubleTapWakeEnabled);
             }
         }
 
@@ -1612,7 +1590,7 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
         try {
             if (eventTime > mLastInteractivePowerHintTime) {
-                powerHintInternal(PowerHint.INTERACTION, 0);
+                setPowerBoostInternal(Boost.INTERACTION, 0);
                 mLastInteractivePowerHintTime = eventTime;
             }
 
@@ -3171,7 +3149,7 @@ public final class PowerManagerService extends SystemService
             mHalInteractiveModeEnabled = enable;
             Trace.traceBegin(Trace.TRACE_TAG_POWER, "setHalInteractive(" + enable + ")");
             try {
-                mNativeWrapper.nativeSetInteractive(enable);
+                mNativeWrapper.nativeSetPowerMode(Mode.INTERACTIVE, enable);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_POWER);
             }
@@ -3643,19 +3621,6 @@ public final class PowerManagerService extends SystemService
     @VisibleForTesting
     void setVrModeEnabled(boolean enabled) {
         mIsVrModeEnabled = enabled;
-    }
-
-    private void powerHintInternal(int hintId, int data) {
-        // Maybe filter the event.
-        switch (hintId) {
-            case PowerHint.LAUNCH: // 1: activate launch boost 0: deactivate.
-                if (data == 1 && mBatterySaverController.isLaunchBoostDisabled()) {
-                    return;
-                }
-                break;
-        }
-
-        mNativeWrapper.nativeSendPowerHint(hintId, data);
     }
 
     private void setPowerBoostInternal(int boost, int durationMs) {
@@ -4404,7 +4369,7 @@ public final class PowerManagerService extends SystemService
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
         public void onVrStateChanged(boolean enabled) {
-            powerHintInternal(PowerHint.VR_MODE, enabled ? 1 : 0);
+            setPowerModeInternal(Mode.VR, enabled);
 
             synchronized (mLock) {
                 if (mIsVrModeEnabled != enabled) {
@@ -4712,16 +4677,6 @@ public final class PowerManagerService extends SystemService
                 uid = Binder.getCallingUid();
             }
             acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid), null);
-        }
-
-        @Override // Binder call
-        public void powerHint(int hintId, int data) {
-            if (!mSystemReady) {
-                // Service not ready yet, so who the heck cares about power hints, bah.
-                return;
-            }
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-            powerHintInternal(hintId, data);
         }
 
         @Override // Binder call
@@ -5556,11 +5511,6 @@ public final class PowerManagerService extends SystemService
         @Override
         public void uidIdle(int uid) {
             uidIdleInternal(uid);
-        }
-
-        @Override
-        public void powerHint(int hintId, int data) {
-            powerHintInternal(hintId, data);
         }
 
         @Override
