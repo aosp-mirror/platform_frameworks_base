@@ -55,6 +55,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -92,6 +93,7 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -190,7 +192,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 () -> mock(NotificationRowBinder.class),
                 () -> mRemoteInputManager,
                 mock(LeakDetector.class),
-                mock(ForegroundServiceDismissalFeatureController.class)
+                mock(ForegroundServiceDismissalFeatureController.class),
+                mock(HeadsUpManager.class),
+                mock(StatusBarStateController.class)
         );
         mEntryManager.setUpWithPresenter(mock(NotificationPresenter.class));
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);

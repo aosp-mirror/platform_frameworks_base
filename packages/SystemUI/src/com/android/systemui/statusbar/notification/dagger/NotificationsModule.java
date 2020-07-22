@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.concurrent.Executor;
@@ -88,7 +89,9 @@ public interface NotificationsModule {
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController) {
+            ForegroundServiceDismissalFeatureController fgsFeatureController,
+            HeadsUpManager headsUpManager,
+            StatusBarStateController statusBarStateController) {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
@@ -98,7 +101,9 @@ public interface NotificationsModule {
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,
                 leakDetector,
-                fgsFeatureController);
+                fgsFeatureController,
+                headsUpManager,
+                statusBarStateController);
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
