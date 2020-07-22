@@ -311,6 +311,15 @@ java_defaults {
     compile_dex: true,
 }
 
+java_defaults {
+    name: "android_stubs_dists_default",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        tag: ".jar",
+        dest: "android.jar",
+    },
+}
+
 java_library_static {
     name: "android_monolith_stubs_current",
     srcs: [ ":api-stubs-docs" ],
@@ -345,7 +354,21 @@ java_library_static {
     name: "android_system_monolith_stubs_current",
     srcs: [ ":system-api-stubs-docs" ],
     static_libs: [ "private-stub-annotations-jar" ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: [
+        "android_defaults_stubs_current",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/system",
+    },
+    dists: [
+        {
+            // Legacy dist path
+            targets: ["sdk", "win_sdk"],
+            tag: ".jar",
+            dest: "android_system.jar",
+        },
+    ],
 }
 
 java_library_static {
@@ -375,14 +398,34 @@ java_library_static {
     name: "android_test_stubs_current",
     srcs: [ ":test-api-stubs-docs" ],
     static_libs: [ "private-stub-annotations-jar" ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: [
+        "android_defaults_stubs_current",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/test",
+    },
+    dists: [
+        {
+            // Legacy dist path
+            targets: ["sdk", "win_sdk"],
+            tag: ".jar",
+            dest: "android_test.jar",
+        },
+    ],
 }
 
 java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs-non-updatable" ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: [
+        "android_defaults_stubs_current",
+        "android_stubs_dists_default",
+    ],
     libs: ["sdk_system_29_android"],
+    dist: {
+        dir: "apistubs/android/module-lib",
+    },
 }
 
 java_library_static {
