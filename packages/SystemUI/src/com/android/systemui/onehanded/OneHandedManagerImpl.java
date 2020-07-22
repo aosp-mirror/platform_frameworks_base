@@ -33,8 +33,8 @@ import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.wm.DisplayChangeController;
-import com.android.systemui.wm.DisplayController;
+import com.android.wm.shell.common.DisplayChangeController;
+import com.android.wm.shell.common.DisplayController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

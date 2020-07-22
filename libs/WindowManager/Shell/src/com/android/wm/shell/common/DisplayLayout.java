@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wm;
+package com.android.wm.shell.common;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -52,7 +52,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Contains information about the layout-properties of a display. This refers to internal layout
- * like insets/cutout/rotation. In general, this can be thought of as the System-UI analog to
+ * like insets/cutout/rotation. In general, this can be thought of as the shell analog to
  * DisplayPolicy.
  */
 public class DisplayLayout {
@@ -345,9 +345,9 @@ public class DisplayLayout {
     /** Retrieve the statusbar height from resources. */
     static int getStatusBarHeight(boolean landscape, Resources res) {
         return landscape ? res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height_landscape)
-                    : res.getDimensionPixelSize(
-                            com.android.internal.R.dimen.status_bar_height_portrait);
+                com.android.internal.R.dimen.status_bar_height_landscape)
+                : res.getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height_portrait);
     }
 
     /** Calculate the DisplayCutout for a particular display size/rotation. */

@@ -22,6 +22,7 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.view.IWindowManager;
 
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -67,8 +68,11 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.VolumeDialogComponent;
-import com.android.systemui.wm.DisplayImeController;
 import com.android.systemui.wm.DisplaySystemBarsController;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TransactionPool;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -99,10 +103,6 @@ public abstract class CarSystemUIModule {
                 groupManager, configurationController);
     }
 
-    @Binds
-    abstract DisplayImeController bindDisplayImeController(
-            DisplaySystemBarsController displaySystemBarsController);
-
     @Singleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
@@ -116,6 +116,31 @@ public abstract class CarSystemUIModule {
             CommandQueue commandQueue) {
         return new Recents(context, recentsImplementation, commandQueue);
     }
+
+    @Singleton
+    @Provides
+    static TransactionPool provideTransactionPool() {
+        return new TransactionPool();
+    }
+
+    @Singleton
+    @Provides
+    static DisplayController providerDisplayController(Context context, @Main Handler handler,
+            IWindowManager wmService) {
+        return new DisplayController(context, handler, wmService);
+    }
+
+    @Singleton
+    @Provides
+    static SystemWindows provideSystemWindows(Context context, DisplayController displayController,
+            IWindowManager wmService) {
+        return new SystemWindows(context, displayController, wmService);
+    }
+
+    @Singleton
+    @Binds
+    abstract DisplayImeController bindDisplayImeController(
+            DisplaySystemBarsController displaySystemBarsController);
 
     @Binds
     abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);

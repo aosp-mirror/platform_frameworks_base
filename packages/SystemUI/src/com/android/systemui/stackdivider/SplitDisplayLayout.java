@@ -34,7 +34,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
-import com.android.systemui.wm.DisplayLayout;
+import com.android.wm.shell.common.DisplayLayout;
 
 /**
  * Handles split-screen related internal display layout. In general, this represents the
