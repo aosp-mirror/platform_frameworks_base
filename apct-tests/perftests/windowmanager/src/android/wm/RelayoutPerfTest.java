@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
+import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.IWindow;
@@ -52,6 +53,7 @@ import java.util.function.IntSupplier;
 
 @RunWith(Parameterized.class)
 @LargeTest
+@Presubmit
 public class RelayoutPerfTest extends WindowManagerPerfTestBase {
     private int mIteration;
 
