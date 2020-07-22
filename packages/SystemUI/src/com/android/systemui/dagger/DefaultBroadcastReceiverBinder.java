@@ -18,7 +18,9 @@ package com.android.systemui.dagger;
 
 import android.content.BroadcastReceiver;
 
-import com.android.systemui.screenshot.GlobalScreenshot.ActionProxyReceiver;
+import com.android.systemui.screenshot.ActionProxyReceiver;
+import com.android.systemui.screenshot.DeleteScreenshotReceiver;
+import com.android.systemui.screenshot.SmartActionsReceiver;
 
 import dagger.Binds;
 import dagger.Module;
@@ -30,10 +32,31 @@ import dagger.multibindings.IntoMap;
  */
 @Module
 public abstract class DefaultBroadcastReceiverBinder {
-    /** */
+    /**
+     *
+     */
     @Binds
     @IntoMap
     @ClassKey(ActionProxyReceiver.class)
     public abstract BroadcastReceiver bindActionProxyReceiver(
             ActionProxyReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(DeleteScreenshotReceiver.class)
+    public abstract BroadcastReceiver bindDeleteScreenshotReceiver(
+            DeleteScreenshotReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(SmartActionsReceiver.class)
+    public abstract BroadcastReceiver bindSmartActionsReceiver(
+            SmartActionsReceiver broadcastReceiver);
+
 }
