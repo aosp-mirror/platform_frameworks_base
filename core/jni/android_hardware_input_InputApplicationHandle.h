@@ -39,8 +39,7 @@ private:
     jweak mObjWeak;
 };
 
-
-extern sp<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
+extern std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
         JNIEnv* env, jobject inputApplicationHandleObj);
 
 } // namespace android
