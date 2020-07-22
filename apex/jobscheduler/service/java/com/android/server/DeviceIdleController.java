@@ -890,7 +890,8 @@ public class DeviceIdleController extends SystemService
                 "mms_temp_app_whitelist_duration";
         private static final String KEY_SMS_TEMP_APP_WHITELIST_DURATION =
                 "sms_temp_app_whitelist_duration";
-        private static final String KEY_NOTIFICATION_WHITELIST_DURATION =
+        // TODO(b/124466289): update value to match the name
+        private static final String KEY_NOTIFICATION_ALLOWLIST_DURATION =
                 "notification_whitelist_duration";
         /**
          * Whether to wait for the user to unlock the device before causing screen-on to
@@ -1124,9 +1125,9 @@ public class DeviceIdleController extends SystemService
          * Amount of time we would like to whitelist an app that is handling a
          * {@link android.app.PendingIntent} triggered by a {@link android.app.Notification}.
          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
-         * @see #KEY_NOTIFICATION_WHITELIST_DURATION
+         * @see #KEY_NOTIFICATION_ALLOWLIST_DURATION
          */
-        public long NOTIFICATION_WHITELIST_DURATION;
+        public long NOTIFICATION_ALLOWLIST_DURATION;
 
         /**
          * Pre idle time factor use to make idle delay longer
@@ -1230,8 +1231,8 @@ public class DeviceIdleController extends SystemService
                         KEY_MMS_TEMP_APP_WHITELIST_DURATION, 60 * 1000L);
                 SMS_TEMP_APP_WHITELIST_DURATION = mParser.getDurationMillis(
                         KEY_SMS_TEMP_APP_WHITELIST_DURATION, 20 * 1000L);
-                NOTIFICATION_WHITELIST_DURATION = mParser.getDurationMillis(
-                        KEY_NOTIFICATION_WHITELIST_DURATION, 30 * 1000L);
+                NOTIFICATION_ALLOWLIST_DURATION = mParser.getDurationMillis(
+                        KEY_NOTIFICATION_ALLOWLIST_DURATION, 30 * 1000L);
                 WAIT_FOR_UNLOCK = mParser.getBoolean(KEY_WAIT_FOR_UNLOCK, true);
                 PRE_IDLE_FACTOR_LONG = mParser.getFloat(KEY_PRE_IDLE_FACTOR_LONG, 1.67f);
                 PRE_IDLE_FACTOR_SHORT = mParser.getFloat(KEY_PRE_IDLE_FACTOR_SHORT, 0.33f);
@@ -1343,8 +1344,8 @@ public class DeviceIdleController extends SystemService
             TimeUtils.formatDuration(SMS_TEMP_APP_WHITELIST_DURATION, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_NOTIFICATION_WHITELIST_DURATION); pw.print("=");
-            TimeUtils.formatDuration(NOTIFICATION_WHITELIST_DURATION, pw);
+            pw.print("    "); pw.print(KEY_NOTIFICATION_ALLOWLIST_DURATION); pw.print("=");
+            TimeUtils.formatDuration(NOTIFICATION_ALLOWLIST_DURATION, pw);
             pw.println();
 
             pw.print("    "); pw.print(KEY_WAIT_FOR_UNLOCK); pw.print("=");
@@ -1792,8 +1793,8 @@ public class DeviceIdleController extends SystemService
 
         // duration in milliseconds
         @Override
-        public long getNotificationWhitelistDuration() {
-            return mConstants.NOTIFICATION_WHITELIST_DURATION;
+        public long getNotificationAllowlistDuration() {
+            return mConstants.NOTIFICATION_ALLOWLIST_DURATION;
         }
 
         @Override
