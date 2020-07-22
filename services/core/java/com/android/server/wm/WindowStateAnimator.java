@@ -659,57 +659,7 @@ class WindowStateAnimator {
     }
 
     void computeShownFrameLocked() {
-        final ScreenRotationAnimation screenRotationAnimation =
-                mWin.getDisplayContent().getRotationAnimation();
-        final boolean windowParticipatesInScreenRotationAnimation =
-                !mWin.mForceSeamlesslyRotate;
-        final boolean screenAnimation = screenRotationAnimation != null
-                && screenRotationAnimation.isAnimating()
-                && windowParticipatesInScreenRotationAnimation;
-
-        if (screenAnimation) {
-            // cache often used attributes locally
-            final Rect frame = mWin.getFrameLw();
-            final float tmpFloats[] = mService.mTmpFloats;
-            final Matrix tmpMatrix = mWin.mTmpMatrix;
-
-            // Compute the desired transformation.
-            if (screenRotationAnimation.isRotating()) {
-                // If we are doing a screen animation, the global rotation
-                // applied to windows can result in windows that are carefully
-                // aligned with each other to slightly separate, allowing you
-                // to see what is behind them.  An unsightly mess.  This...
-                // thing...  magically makes it call good: scale each window
-                // slightly (two pixels larger in each dimension, from the
-                // window's center).
-                final float w = frame.width();
-                final float h = frame.height();
-                if (w>=1 && h>=1) {
-                    tmpMatrix.setScale(1 + 2/w, 1 + 2/h, w/2, h/2);
-                } else {
-                    tmpMatrix.reset();
-                }
-            } else {
-                tmpMatrix.reset();
-            }
-
-            tmpMatrix.postScale(mWin.mGlobalScale, mWin.mGlobalScale);
-
-            // "convert" it into SurfaceFlinger's format
-            // (a 2x2 matrix + an offset)
-            // Here we must not transform the position of the surface
-            // since it is already included in the transformation.
-            //Slog.i(TAG_WM, "Transform: " + matrix);
-
-            mHaveMatrix = true;
-            tmpMatrix.getValues(tmpFloats);
-            mDsDx = tmpFloats[Matrix.MSCALE_X];
-            mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDtDy = tmpFloats[Matrix.MSKEW_X];
-            mDsDy = tmpFloats[Matrix.MSCALE_Y];
-
-            return;
-        } else if (mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
+        if (mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
             return;
         } else if (mWin.isDragResizeChanged()) {
             // This window is awaiting a relayout because user just started (or ended)
