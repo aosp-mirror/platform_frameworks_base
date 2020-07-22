@@ -1021,9 +1021,9 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Параметрлер"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ұлғайту терезесі"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ұлғайту терезесінің басқару элементтері"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Құрылғы басқару виджеттері"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Құрылғыны басқару элементтері"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Жалғанған құрылғылар үшін басқару виджеттерін қосу"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Құрылғы басқару виджеттерін реттеу"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Құрылғыны басқару элементтерін реттеу"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Басқару элементтерін шығару үшін қуат түймесін басып тұрыңыз."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Басқару элементтері енгізілетін қолданбаны таңдаңыз"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1046,7 +1046,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Басқару элементтері жүктелмеді. Қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APP">%s</xliff:g> қолданбасын қараңыз."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару виджеттеріне қосу"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Басқару элементтері жаңартылды"</string>
