@@ -54,8 +54,6 @@ public interface ExpandableNotificationRowComponent {
         @BindsInstance
         Builder notificationEntry(NotificationEntry entry);
         @BindsInstance
-        Builder onDismissRunnable(@DismissRunnable Runnable runnable);
-        @BindsInstance
         Builder onExpandClickListener(ExpandableNotificationRow.OnExpandClickListener presenter);
         ExpandableNotificationRowComponent build();
     }

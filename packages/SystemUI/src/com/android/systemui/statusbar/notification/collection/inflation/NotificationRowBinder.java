@@ -38,7 +38,6 @@ public interface NotificationRowBinder {
      */
     void inflateViews(
             NotificationEntry entry,
-            Runnable onDismissRunnable,
             NotificationRowContentBinder.InflationCallback callback)
             throws InflationException;
 
