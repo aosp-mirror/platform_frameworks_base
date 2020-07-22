@@ -695,12 +695,6 @@ class WindowStateAnimator {
 
             tmpMatrix.postScale(mWin.mGlobalScale, mWin.mGlobalScale);
 
-            // WindowState.prepareSurfaces expands for surface insets (in order they don't get
-            // clipped by the WindowState surface), so we need to go into the other direction here.
-            tmpMatrix.postTranslate(mWin.mAttrs.surfaceInsets.left,
-                    mWin.mAttrs.surfaceInsets.top);
-
-
             // "convert" it into SurfaceFlinger's format
             // (a 2x2 matrix + an offset)
             // Here we must not transform the position of the surface
