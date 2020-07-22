@@ -36,9 +36,6 @@ android_test {
         "libstaticjvmtiagent",
     ],
 
-    sdk_version: "current",
-    platform_apis: true,
-
     optimize: {
         enabled: false,
     },

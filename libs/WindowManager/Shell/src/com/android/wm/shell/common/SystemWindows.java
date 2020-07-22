@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wm;
+package com.android.wm.shell.common;
 
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
@@ -52,23 +52,19 @@ import com.android.internal.os.IResultReceiver;
 
 import java.util.HashMap;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
- * Represents the "windowing" layer of the System-UI. This layer allows system-ui components to
- * place and manipulate windows without talking to WindowManager.
+ * Represents the "windowing" layer of the WM Shell. This layer allows shell components to place and
+ * manipulate windows without talking to WindowManager.
  */
-@Singleton
 public class SystemWindows {
     private static final String TAG = "SystemWindows";
 
     private final SparseArray<PerDisplay> mPerDisplay = new SparseArray<>();
     final HashMap<View, SurfaceControlViewHost> mViewRoots = new HashMap<>();
-    Context mContext;
+    public Context mContext;
+    public IWindowManager mWmService;
     IWindowSession mSession;
     DisplayController mDisplayController;
-    IWindowManager mWmService;
 
     private final DisplayController.OnDisplaysChangedListener mDisplayListener =
             new DisplayController.OnDisplaysChangedListener() {
@@ -88,7 +84,6 @@ public class SystemWindows {
                 public void onDisplayRemoved(int displayId) { }
             };
 
-    @Inject
     public SystemWindows(Context context, DisplayController displayController,
             IWindowManager wmService) {
         mContext = context;
@@ -172,7 +167,7 @@ public class SystemWindows {
     /**
      * Get the IWindow token for a specific root.
      *
-     * @param windowType A window type from {@link android.view.WindowManager}.
+     * @param windowType A window type from {@link WindowManager}.
      */
     IWindow getWindow(int displayId, int windowType) {
         PerDisplay pd = mPerDisplay.get(displayId);

@@ -122,9 +122,9 @@ import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
-import com.android.systemui.wm.DisplayController;
-import com.android.systemui.wm.DisplayImeController;
-import com.android.systemui.wm.SystemWindows;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SystemWindows;
 
 import java.util.function.Consumer;
 

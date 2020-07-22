@@ -33,8 +33,8 @@ import android.window.WindowOrganizer;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.TransactionPool;
-import com.android.systemui.wm.DisplayImeController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.TransactionPool;
 
 class DividerImeController implements DisplayImeController.ImePositionProcessor {
     private static final String TAG = "DividerImeController";

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wm;
+package com.android.wm.shell.common;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,13 +28,9 @@ import android.view.Display;
 import android.view.IDisplayWindowListener;
 import android.view.IWindowManager;
 
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.wm.DisplayChangeController.OnDisplayChangingListener;
+import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * This module deals with display rotations coming from WM. When WM starts a rotation: after it has
@@ -42,7 +38,6 @@ import javax.inject.Singleton;
  * controllers and give them a chance to queue up task changes to be applied synchronously with that
  * rotation.
  */
-@Singleton
 public class DisplayController {
     private static final String TAG = "DisplayController";
 
@@ -55,7 +50,7 @@ public class DisplayController {
     private final ArrayList<OnDisplaysChangedListener> mDisplayChangedListeners = new ArrayList<>();
 
     /**
-     * Get's a display by id from DisplayManager.
+     * Gets a display by id from DisplayManager.
      */
     public Display getDisplay(int displayId) {
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
@@ -169,10 +164,9 @@ public class DisplayController {
                 }
             };
 
-    @Inject
-    public DisplayController(Context context, @Main Handler mainHandler,
+    public DisplayController(Context context, Handler handler,
             IWindowManager wmService) {
-        mHandler = mainHandler;
+        mHandler = handler;
         mContext = context;
         mWmService = wmService;
         mChangeController = new DisplayChangeController(mHandler, mWmService);

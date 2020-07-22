@@ -40,7 +40,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.systemui.TransactionPool;
+import com.android.wm.shell.common.TransactionPool;
 
 import java.util.ArrayList;
 import java.util.List;

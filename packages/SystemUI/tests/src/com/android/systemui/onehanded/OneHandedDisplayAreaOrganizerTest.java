@@ -41,7 +41,7 @@ import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.wm.DisplayController;
+import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
 import org.junit.Ignore;
