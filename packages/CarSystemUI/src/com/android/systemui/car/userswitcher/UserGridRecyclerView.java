@@ -24,11 +24,15 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.car.userlib.CarUserManagerHelper;
+import android.car.user.CarUserManager;
+import android.car.user.UserCreationResult;
+import android.car.user.UserSwitchResult;
+import android.car.userlib.UserHelper;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,7 +44,9 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.sysprop.CarProperties;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +60,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.UserIcons;
 import com.android.systemui.R;
 
@@ -61,6 +68,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -68,9 +76,12 @@ import java.util.stream.Collectors;
  * One of the uses of this is for the lock screen in auto.
  */
 public class UserGridRecyclerView extends RecyclerView {
+    private static final String TAG = UserGridRecyclerView.class.getSimpleName();
+    private static final int TIMEOUT_MS = CarProperties.user_hal_timeout().orElse(5_000) + 500;
+
     private UserSelectionListener mUserSelectionListener;
     private UserAdapter mAdapter;
-    private CarUserManagerHelper mCarUserManagerHelper;
+    private CarUserManager mCarUserManager;
     private UserManager mUserManager;
     private Context mContext;
     private UserIconProvider mUserIconProvider;
@@ -85,7 +96,6 @@ public class UserGridRecyclerView extends RecyclerView {
     public UserGridRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mCarUserManagerHelper = new CarUserManagerHelper(mContext);
         mUserManager = UserManager.get(mContext);
         mUserIconProvider = new UserIconProvider();
 
@@ -184,6 +194,11 @@ public class UserGridRecyclerView extends RecyclerView {
         mUserSelectionListener = userSelectionListener;
     }
 
+    /** Sets a {@link CarUserManager}. */
+    public void setCarUserManager(CarUserManager carUserManager) {
+        mCarUserManager = carUserManager;
+    }
+
     private void onUsersUpdate() {
         mAdapter.clearUsers();
         mAdapter.updateUsers(createUserRecords(getUsersForUserGrid()));
@@ -273,7 +288,9 @@ public class UserGridRecyclerView extends RecyclerView {
                         notifyUserSelected(userRecord);
                         UserInfo guest = createNewOrFindExistingGuest(mContext);
                         if (guest != null) {
-                            mCarUserManagerHelper.switchToUser(guest);
+                            if (!switchUser(guest.id)) {
+                                Log.e(TAG, "Failed to switch to guest user: " + guest.id);
+                            }
                         }
                         break;
                     case UserRecord.ADD_USER:
@@ -289,7 +306,9 @@ public class UserGridRecyclerView extends RecyclerView {
                         // If the user doesn't want to be a guest or add a user, switch to the user
                         // selected
                         notifyUserSelected(userRecord);
-                        mCarUserManagerHelper.switchToUser(userRecord.mInfo);
+                        if (!switchUser(userRecord.mInfo.id)) {
+                            Log.e(TAG, "Failed to switch users: " + userRecord.mInfo.id);
+                        }
                 }
             });
 
@@ -430,8 +449,9 @@ public class UserGridRecyclerView extends RecyclerView {
          */
         @Nullable
         public UserInfo createNewOrFindExistingGuest(Context context) {
+            AndroidFuture<UserCreationResult> future = mCarUserManager.createGuest(mGuestName);
             // CreateGuest will return null if a guest already exists.
-            UserInfo newGuest = mUserManager.createGuest(context, mGuestName);
+            UserInfo newGuest = getUserInfo(future);
             if (newGuest != null) {
                 new UserIconProvider().assignDefaultIcon(
                         mUserManager, context.getResources(), newGuest);
@@ -444,7 +464,6 @@ public class UserGridRecyclerView extends RecyclerView {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             if (which == BUTTON_POSITIVE) {
-                notifyUserSelected(mAddUserRecord);
                 new AddNewUserTask().execute(mNewUserName);
             } else if (which == BUTTON_NEGATIVE) {
                 // Enable the add button only if cancel
@@ -462,11 +481,77 @@ public class UserGridRecyclerView extends RecyclerView {
             }
         }
 
+        @Nullable
+        private UserInfo getUserInfo(AndroidFuture<UserCreationResult> future) {
+            UserCreationResult userCreationResult;
+            try {
+                userCreationResult = future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                Log.w(TAG, "Could not create user.", e);
+                return null;
+            }
+
+            if (userCreationResult == null) {
+                Log.w(TAG, "Timed out while creating user: " + TIMEOUT_MS + "ms");
+                return null;
+            }
+            if (!userCreationResult.isSuccess() || userCreationResult.getUser() == null) {
+                Log.w(TAG, "Could not create user: " + userCreationResult);
+                return null;
+            }
+
+            return userCreationResult.getUser();
+        }
+
+        private boolean switchUser(@UserIdInt int userId) {
+            AndroidFuture<UserSwitchResult> userSwitchResultFuture =
+                    mCarUserManager.switchUser(userId);
+            UserSwitchResult userSwitchResult;
+            try {
+                userSwitchResult = userSwitchResultFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                Log.w(TAG, "Could not switch user.", e);
+                return false;
+            }
+
+            if (userSwitchResult == null) {
+                Log.w(TAG, "Timed out while switching user: " + TIMEOUT_MS + "ms");
+                return false;
+            }
+            if (!userSwitchResult.isSuccess()) {
+                Log.w(TAG, "Could not switch user: " + userSwitchResult);
+                return false;
+            }
+
+            return true;
+        }
+
+        // TODO(b/161539497): Replace AsyncTask with standard {@link java.util.concurrent} code.
         private class AddNewUserTask extends AsyncTask<String, Void, UserInfo> {
 
             @Override
             protected UserInfo doInBackground(String... userNames) {
-                return mCarUserManagerHelper.createNewNonAdminUser(userNames[0]);
+                AndroidFuture<UserCreationResult> future = mCarUserManager.createUser(userNames[0],
+                        /* flags= */ 0);
+                try {
+                    UserInfo user = getUserInfo(future);
+                    if (user != null) {
+                        UserHelper.setDefaultNonAdminRestrictions(mContext, user,
+                                /* enable= */ true);
+                        UserHelper.assignDefaultIcon(mContext, user);
+                        mAddUserRecord = new UserRecord(user, UserRecord.ADD_USER);
+                        return user;
+                    } else {
+                        Log.e(TAG, "Failed to create user in the background");
+                        return user;
+                    }
+                } catch (Exception e) {
+                    if (e instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                    Log.e(TAG, "Error creating new user: ", e);
+                }
+                return null;
             }
 
             @Override
@@ -476,7 +561,11 @@ public class UserGridRecyclerView extends RecyclerView {
             @Override
             protected void onPostExecute(UserInfo user) {
                 if (user != null) {
-                    mCarUserManagerHelper.switchToUser(user);
+                    notifyUserSelected(mAddUserRecord);
+                    mAddUserView.setEnabled(true);
+                    if (!switchUser(user.id)) {
+                        Log.e(TAG, "Failed to switch to new user: " + user.id);
+                    }
                 }
             }
         }
