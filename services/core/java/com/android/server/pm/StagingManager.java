@@ -870,8 +870,19 @@ public class StagingManager {
         mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
     }
 
-    private int parentOrOwnSessionId(PackageInstallerSession session) {
+    private int getSessionIdForParentOrSelf(PackageInstallerSession session) {
         return session.hasParentSessionId() ? session.getParentSessionId() : session.sessionId;
+    }
+
+    private PackageInstallerSession getParentSessionOrSelf(PackageInstallerSession session) {
+        return session.hasParentSessionId()
+                ? getStagedSession(session.getParentSessionId())
+                : session;
+    }
+
+    private boolean isRollback(PackageInstallerSession session) {
+        final PackageInstallerSession root = getParentSessionOrSelf(session);
+        return root.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
     }
 
     /**
@@ -899,6 +910,8 @@ public class StagingManager {
         boolean supportsCheckpoint = ((StorageManager) mContext.getSystemService(
                 Context.STORAGE_SERVICE)).isCheckpointSupported();
 
+        final boolean isRollback = isRollback(session);
+
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
@@ -913,8 +926,8 @@ public class StagingManager {
                 }
                 // Check if stagedSession has an active parent session or not
                 if (stagedSession.hasParentSessionId()) {
-                    int parentId = stagedSession.getParentSessionId();
-                    PackageInstallerSession parentSession = mStagedSessions.get(parentId);
+                    final int parentId = stagedSession.getParentSessionId();
+                    final PackageInstallerSession parentSession = mStagedSessions.get(parentId);
                     if (parentSession == null || parentSession.isStagedAndInTerminalState()
                             || parentSession.isDestroyed()) {
                         // Parent session has been abandoned or terminated already
@@ -930,21 +943,37 @@ public class StagingManager {
                     continue;
                 }
 
-                // If session is not among the active sessions, then it cannot have same package
-                // name as any of the active sessions.
+                // New session cannot have same package name as one of the active sessions
                 if (session.getPackageName().equals(stagedSession.getPackageName())) {
-                    throw new PackageManagerException(
-                            PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
-                            "Package: " + session.getPackageName() + " in session: "
-                                    + session.sessionId + " has been staged already by session: "
-                                    + stagedSession.sessionId, null);
+                    if (isRollback) {
+                        // If the new session is a rollback, then it gets priority. The existing
+                        // session is failed to unblock rollback.
+                        final PackageInstallerSession root = getParentSessionOrSelf(stagedSession);
+                        if (!ensureActiveApexSessionIsAborted(root)) {
+                            Slog.e(TAG, "Failed to abort apex session " + root.sessionId);
+                            // Safe to ignore active apex session abort failure since session
+                            // will be marked failed on next step and staging directory for session
+                            // will be deleted.
+                        }
+                        root.setStagedSessionFailed(
+                                SessionInfo.STAGED_SESSION_OTHER_ERROR,
+                                "Session was blocking rollback session: " + session.sessionId);
+                        Slog.i(TAG, "Session " + root.sessionId + " is marked failed due to "
+                                + "blocking rollback session: " + session.sessionId);
+                    } else {
+                        throw new PackageManagerException(
+                                PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                                "Package: " + session.getPackageName() + " in session: "
+                                        + session.sessionId + " has been staged already by session:"
+                                        + " " + stagedSession.sessionId, null);
+                    }
                 }
 
                 // Staging multiple root sessions is not allowed if device doesn't support
                 // checkpoint. If session and stagedSession do not have common ancestor, they are
                 // from two different root sessions.
-                if (!supportsCheckpoint
-                        && parentOrOwnSessionId(session) != parentOrOwnSessionId(stagedSession)) {
+                if (!supportsCheckpoint && getSessionIdForParentOrSelf(session)
+                        != getSessionIdForParentOrSelf(stagedSession)) {
                     throw new PackageManagerException(
                             PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
                             "Cannot stage multiple sessions without checkpoint support", null);
@@ -1260,8 +1289,8 @@ public class StagingManager {
                         + sessionId);
                 return;
             }
-            if (session.isDestroyed()) {
-                // No point in running verification on a destroyed session
+            if (session.isDestroyed() || session.isStagedSessionFailed()) {
+                // No point in running verification on a destroyed/failed session
                 onPreRebootVerificationComplete(sessionId);
                 return;
             }
