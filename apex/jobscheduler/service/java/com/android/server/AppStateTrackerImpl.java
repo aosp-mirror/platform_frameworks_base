@@ -73,8 +73,7 @@ import java.util.Objects;
  *
  * Test: atest com.android.server.AppStateTrackerTest
  */
-public class AppStateTracker {
-    private static final String TAG = "AppStateTracker";
+public class AppStateTrackerImpl implements AppStateTracker {
     private static final boolean DEBUG = false;
 
     private final Object mLock = new Object();
@@ -164,6 +163,16 @@ public class AppStateTracker {
     @GuardedBy("mLock")
     boolean mForcedAppStandbyEnabled;
 
+    @Override
+    public void addServiceStateListener(@NonNull ServiceStateListener listener) {
+        addListener(new Listener() {
+            @Override
+            public void stopForegroundServicesForUidPackage(int uid, String packageName) {
+                listener.stopForegroundServicesForUidPackage(uid, packageName);
+            }
+        });
+    }
+
     interface Stats {
         int UID_FG_STATE_CHANGED = 0;
         int UID_ACTIVE_STATE_CHANGED = 1;
@@ -228,7 +237,7 @@ public class AppStateTracker {
                     }
                     mForcedAppStandbyEnabled = enabled;
                     if (DEBUG) {
-                        Slog.d(TAG,"Forced app standby feature flag changed: "
+                        Slog.d(TAG, "Forced app standby feature flag changed: "
                                 + mForcedAppStandbyEnabled);
                     }
                 }
@@ -253,17 +262,20 @@ public class AppStateTracker {
         }
     }
 
-    public static abstract class Listener {
+    /**
+     * Listener for any state changes that affect any app's eligibility to run.
+     */
+    public abstract static class Listener {
         /**
          * This is called when the OP_RUN_ANY_IN_BACKGROUND appops changed for a package.
          */
-        private void onRunAnyAppOpsChanged(AppStateTracker sender,
+        private void onRunAnyAppOpsChanged(AppStateTrackerImpl sender,
                 int uid, @NonNull String packageName) {
             updateJobsForUidPackage(uid, packageName, sender.isUidActive(uid));
 
             if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ false)) {
                 unblockAlarmsForUidPackage(uid, packageName);
-            } else if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ true)){
+            } else if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ true)) {
                 // we need to deliver the allow-while-idle alarms for this uid, package
                 unblockAllUnrestrictedAlarms();
             }
@@ -278,14 +290,14 @@ public class AppStateTracker {
         /**
          * This is called when the foreground state changed for a UID.
          */
-        private void onUidForegroundStateChanged(AppStateTracker sender, int uid) {
+        private void onUidForegroundStateChanged(AppStateTrackerImpl sender, int uid) {
             onUidForeground(uid, sender.isUidInForeground(uid));
         }
 
         /**
          * This is called when the active/idle state changed for a UID.
          */
-        private void onUidActiveStateChanged(AppStateTracker sender, int uid) {
+        private void onUidActiveStateChanged(AppStateTrackerImpl sender, int uid) {
             final boolean isActive = sender.isUidActive(uid);
 
             updateJobsForUid(uid, isActive);
@@ -298,7 +310,7 @@ public class AppStateTracker {
         /**
          * This is called when an app-id(s) is removed from the power save whitelist.
          */
-        private void onPowerSaveUnwhitelisted(AppStateTracker sender) {
+        private void onPowerSaveUnwhitelisted(AppStateTrackerImpl sender) {
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
         }
@@ -307,14 +319,14 @@ public class AppStateTracker {
          * This is called when the power save whitelist changes, excluding the
          * {@link #onPowerSaveUnwhitelisted} case.
          */
-        private void onPowerSaveWhitelistedChanged(AppStateTracker sender) {
+        private void onPowerSaveWhitelistedChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
         }
 
         /**
          * This is called when the temp whitelist changes.
          */
-        private void onTempPowerSaveWhitelistChanged(AppStateTracker sender) {
+        private void onTempPowerSaveWhitelistChanged(AppStateTrackerImpl sender) {
 
             // TODO This case happens rather frequently; consider optimizing and update jobs
             // only for affected app-ids.
@@ -327,7 +339,7 @@ public class AppStateTracker {
         /**
          * This is called when the EXEMPT bucket is updated.
          */
-        private void onExemptChanged(AppStateTracker sender) {
+        private void onExemptChanged(AppStateTrackerImpl sender) {
             // This doesn't happen very often, so just re-evaluate all jobs / alarms.
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
@@ -336,7 +348,7 @@ public class AppStateTracker {
         /**
          * This is called when the global "force all apps standby" flag changes.
          */
-        private void onForceAllAppsStandbyChanged(AppStateTracker sender) {
+        private void onForceAllAppsStandbyChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
 
             if (!sender.isForceAllAppsStandbyEnabled()) {
@@ -401,14 +413,12 @@ public class AppStateTracker {
 
         /**
          * Called when an ephemeral uid goes to the background, so its alarms need to be removed.
-         *
-         * @param uid
          */
         public void removeAlarmsForUid(int uid) {
         }
     }
 
-    public AppStateTracker(Context context, Looper looper) {
+    public AppStateTrackerImpl(Context context, Looper looper) {
         mContext = context;
         mHandler = new MyHandler(looper);
     }
@@ -711,7 +721,7 @@ public class AppStateTracker {
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
                 int bucket, int reason) {
             if (DEBUG) {
-                Slog.d(TAG,"onAppIdleStateChanged: " + packageName + " u" + userId
+                Slog.d(TAG, "onAppIdleStateChanged: " + packageName + " u" + userId
                         + (idle ? " idle" : " active") + " " + bucket);
             }
             synchronized (mLock) {
@@ -751,7 +761,7 @@ public class AppStateTracker {
         private static final int MSG_ON_UID_GONE = 13;
         private static final int MSG_ON_UID_IDLE = 14;
 
-        public MyHandler(Looper looper) {
+        MyHandler(Looper looper) {
             super(looper);
         }
 
@@ -831,7 +841,7 @@ public class AppStateTracker {
                     return;
                 }
             }
-            final AppStateTracker sender = AppStateTracker.this;
+            final AppStateTrackerImpl sender = AppStateTrackerImpl.this;
 
             long start = mStatLogger.getTime();
             switch (msg.what) {
@@ -1077,7 +1087,7 @@ public class AppStateTracker {
     // Public interface.
 
     /**
-     * Register a new listener.
+     * Register a listener to get callbacks when any state changes.
      */
     public void addListener(@NonNull Listener listener) {
         synchronized (mLock) {
@@ -1127,8 +1137,7 @@ public class AppStateTracker {
             if (ArrayUtils.contains(mPowerWhitelistedAllAppIds, appId)) {
                 return false;
             }
-            if (useTempWhitelistToo &&
-                    ArrayUtils.contains(mTempWhitelistedAppIds, appId)) {
+            if (useTempWhitelistToo && ArrayUtils.contains(mTempWhitelistedAppIds, appId)) {
                 return false;
             }
             if (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName)) {
@@ -1197,7 +1206,6 @@ public class AppStateTracker {
 
     /**
      * @return whether force all apps standby is enabled or not.
-     *
      */
     public boolean isForceAllAppsStandbyEnabled() {
         synchronized (mLock) {
@@ -1248,11 +1256,18 @@ public class AppStateTracker {
         }
     }
 
+    /**
+     * @deprecated use {@link #dump(IndentingPrintWriter)} instead.
+     */
     @Deprecated
     public void dump(PrintWriter pw, String prefix) {
         dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
     }
 
+    /**
+     * Dump the internal state to the given PrintWriter. Can be included in the dump
+     * of a binder service to be output on the shell command "dumpsys".
+     */
     public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
             pw.println("Forced App Standby Feature enabled: " + mForcedAppStandbyEnabled);
@@ -1329,6 +1344,9 @@ public class AppStateTracker {
         pw.println("]");
     }
 
+    /**
+     * Proto version of {@link #dump(IndentingPrintWriter)}
+     */
     public void dumpProto(ProtoOutputStream proto, long fieldId) {
         synchronized (mLock) {
             final long token = proto.start(fieldId);

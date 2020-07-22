@@ -99,7 +99,8 @@ import com.android.internal.util.LocalLog;
 import com.android.internal.util.StatLogger;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppStateTracker;
-import com.android.server.AppStateTracker.Listener;
+import com.android.server.AppStateTrackerImpl;
+import com.android.server.AppStateTrackerImpl.Listener;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -286,7 +287,7 @@ public class AlarmManagerService extends SystemService {
     private final SparseArray<AlarmManager.AlarmClockInfo> mHandlerSparseAlarmClockArray =
             new SparseArray<>();
 
-    private AppStateTracker mAppStateTracker;
+    private AppStateTrackerImpl mAppStateTracker;
     private boolean mAppStandbyParole;
 
     /**
@@ -1593,7 +1594,8 @@ public class AlarmManagerService extends SystemService {
                         LocalServices.getService(AppStandbyInternal.class);
                 appStandbyInternal.addListener(new AppStandbyTracker());
 
-                mAppStateTracker = LocalServices.getService(AppStateTracker.class);
+                mAppStateTracker =
+                        (AppStateTrackerImpl) LocalServices.getService(AppStateTracker.class);
                 mAppStateTracker.addListener(mForceAppStandbyListener);
 
                 mClockReceiver.scheduleTimeTickEvent();
@@ -4393,8 +4395,7 @@ public class AlarmManagerService extends SystemService {
     /**
      * Tracking of app assignments to standby buckets
      */
-    private final class AppStandbyTracker extends
-            AppIdleStateChangeListener {
+    private final class AppStandbyTracker extends AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {
