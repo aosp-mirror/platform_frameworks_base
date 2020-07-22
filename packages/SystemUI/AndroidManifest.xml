@@ -606,6 +606,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".user.CreateUserActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.CreateUser" />
+
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"
