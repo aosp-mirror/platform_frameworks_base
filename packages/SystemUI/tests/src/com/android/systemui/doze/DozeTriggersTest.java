@@ -47,6 +47,7 @@ import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
 import com.android.systemui.util.sensors.FakeThresholdSensor;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -99,7 +100,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers = new DozeTriggers(mContext, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
-                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher);
+                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings());
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
