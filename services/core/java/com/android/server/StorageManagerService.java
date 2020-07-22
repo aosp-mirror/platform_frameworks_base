@@ -3238,6 +3238,12 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void lockUserKey(int userId) {
+        //  Do not lock user 0 data for headless system user
+        if (userId == UserHandle.USER_SYSTEM
+                && UserManager.isHeadlessSystemUserMode()) {
+            throw new IllegalArgumentException("Headless system user data cannot be locked..");
+        }
+
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         try {
