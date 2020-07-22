@@ -487,9 +487,6 @@ public class AppStandbyController implements AppStandbyInternal {
 
             mSystemServicesReady = true;
 
-            // Offload to handler thread to avoid boot time impact.
-            mHandler.post(AppStandbyController.this::updatePowerWhitelistCache);
-
             boolean userFileExists;
             synchronized (mAppIdleLock) {
                 userFileExists = mAppIdleHistory.userFileExists(UserHandle.USER_SYSTEM);
@@ -506,7 +503,9 @@ public class AppStandbyController implements AppStandbyInternal {
             setChargingState(mInjector.isCharging());
 
             // Offload to handler thread after boot completed to avoid boot time impact. This means
-            // that headless system apps may be put in a lower bucket until boot has completed.
+            // that app standby buckets may be slightly out of date and headless system apps may be
+            // put in a lower bucket until boot has completed.
+            mHandler.post(AppStandbyController.this::updatePowerWhitelistCache);
             mHandler.post(this::loadHeadlessSystemAppCache);
         }
     }

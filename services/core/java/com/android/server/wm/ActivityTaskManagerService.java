@@ -5070,7 +5070,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long sleepToken = proto.start(ActivityManagerServiceDumpProcessesProto.SLEEP_STATUS);
         proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.WAKEFULNESS,
                 PowerManagerInternal.wakefulnessToProtoEnum(wakeFullness));
-        for (ActivityTaskManagerInternal.SleepToken st : mRootWindowContainer.mSleepTokens) {
+        final int tokenSize = mRootWindowContainer.mSleepTokens.size();
+        for (int i = 0; i < tokenSize; i++) {
+            final RootWindowContainer.SleepToken st =
+                    mRootWindowContainer.mSleepTokens.valueAt(i);
             proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SLEEP_TOKENS,
                     st.toString());
         }
@@ -5504,12 +5507,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 reason);
     }
 
-    ActivityTaskManagerInternal.SleepToken acquireSleepToken(String tag, int displayId) {
-        synchronized (mGlobalLock) {
-            final ActivityTaskManagerInternal.SleepToken token =
-                    mRootWindowContainer.createSleepToken(tag, displayId);
-            updateSleepIfNeededLocked();
-            return token;
+    final class SleepTokenAcquirerImpl implements ActivityTaskManagerInternal.SleepTokenAcquirer {
+        private final String mTag;
+        private final SparseArray<RootWindowContainer.SleepToken> mSleepTokens =
+                new SparseArray<>();
+
+        SleepTokenAcquirerImpl(@NonNull String tag) {
+            mTag = tag;
+        }
+
+        @Override
+        public void acquire(int displayId) {
+            synchronized (mGlobalLock) {
+                if (!mSleepTokens.contains(displayId)) {
+                    mSleepTokens.append(displayId,
+                            mRootWindowContainer.createSleepToken(mTag, displayId));
+                    updateSleepIfNeededLocked();
+                }
+            }
+        }
+
+        @Override
+        public void release(int displayId) {
+            synchronized (mGlobalLock) {
+                final RootWindowContainer.SleepToken token = mSleepTokens.get(displayId);
+                if (token != null) {
+                    mRootWindowContainer.removeSleepToken(token);
+                    mSleepTokens.remove(displayId);
+                }
+            }
         }
     }
 
@@ -6068,9 +6094,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class LocalService extends ActivityTaskManagerInternal {
         @Override
-        public SleepToken acquireSleepToken(String tag, int displayId) {
+        public SleepTokenAcquirer createSleepTokenAcquirer(@NonNull String tag) {
             Objects.requireNonNull(tag);
-            return ActivityTaskManagerService.this.acquireSleepToken(tag, displayId);
+            return new SleepTokenAcquirerImpl(tag);
         }
 
         @Override

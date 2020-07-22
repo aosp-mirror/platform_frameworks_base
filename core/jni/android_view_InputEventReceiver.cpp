@@ -55,9 +55,9 @@ static struct {
 
 class NativeInputEventReceiver : public LooperCallback {
 public:
-    NativeInputEventReceiver(JNIEnv* env,
-            jobject receiverWeak, const sp<InputChannel>& inputChannel,
-            const sp<MessageQueue>& messageQueue);
+    NativeInputEventReceiver(JNIEnv* env, jobject receiverWeak,
+                             const std::shared_ptr<InputChannel>& inputChannel,
+                             const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
     void dispose();
@@ -91,13 +91,14 @@ private:
     virtual int handleEvent(int receiveFd, int events, void* data) override;
 };
 
-
-NativeInputEventReceiver::NativeInputEventReceiver(JNIEnv* env,
-        jobject receiverWeak, const sp<InputChannel>& inputChannel,
-        const sp<MessageQueue>& messageQueue) :
-        mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
-        mInputConsumer(inputChannel), mMessageQueue(messageQueue),
-        mBatchedInputEventPending(false), mFdEvents(0) {
+NativeInputEventReceiver::NativeInputEventReceiver(
+        JNIEnv* env, jobject receiverWeak, const std::shared_ptr<InputChannel>& inputChannel,
+        const sp<MessageQueue>& messageQueue)
+      : mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
+        mInputConsumer(inputChannel),
+        mMessageQueue(messageQueue),
+        mBatchedInputEventPending(false),
+        mFdEvents(0) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Initializing input event receiver.", getInputChannelName().c_str());
     }
@@ -356,8 +357,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
-    sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
-            inputChannelObj);
+    std::shared_ptr<InputChannel> inputChannel =
+            android_view_InputChannel_getInputChannel(env, inputChannelObj);
     if (inputChannel == nullptr) {
         jniThrowRuntimeException(env, "InputChannel is not initialized.");
         return 0;

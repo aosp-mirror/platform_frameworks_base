@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IPowerManager;
@@ -32,10 +31,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
-import android.system.StructRlimit;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -51,13 +46,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -143,7 +133,6 @@ public class Watchdog {
 
     private IActivityController mController;
     private boolean mAllowRestart = true;
-    private final OpenFdMonitor mOpenFdMonitor;
     private final List<Integer> mInterestingJavaPids = new ArrayList<>();
 
     /**
@@ -348,8 +337,6 @@ public class Watchdog {
 
         // Initialize monitor for Binder threads.
         addMonitor(new BinderThreadMonitor());
-
-        mOpenFdMonitor = OpenFdMonitor.create();
 
         mInterestingJavaPids.add(Process.myPid());
 
@@ -602,40 +589,30 @@ public class Watchdog {
                     timeout = CHECK_INTERVAL - (SystemClock.uptimeMillis() - start);
                 }
 
-                boolean fdLimitTriggered = false;
-                if (mOpenFdMonitor != null) {
-                    fdLimitTriggered = mOpenFdMonitor.monitor();
-                }
-
-                if (!fdLimitTriggered) {
-                    final int waitState = evaluateCheckerCompletionLocked();
-                    if (waitState == COMPLETED) {
-                        // The monitors have returned; reset
-                        waitedHalf = false;
-                        continue;
-                    } else if (waitState == WAITING) {
-                        // still waiting but within their configured intervals; back off and recheck
-                        continue;
-                    } else if (waitState == WAITED_HALF) {
-                        if (!waitedHalf) {
-                            Slog.i(TAG, "WAITED_HALF");
-                            // We've waited half the deadlock-detection interval.  Pull a stack
-                            // trace and wait another half.
-                            ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
-                            ActivityManagerService.dumpStackTraces(pids, null, null,
-                                    getInterestingNativePids(), null);
-                            waitedHalf = true;
-                        }
-                        continue;
+                final int waitState = evaluateCheckerCompletionLocked();
+                if (waitState == COMPLETED) {
+                    // The monitors have returned; reset
+                    waitedHalf = false;
+                    continue;
+                } else if (waitState == WAITING) {
+                    // still waiting but within their configured intervals; back off and recheck
+                    continue;
+                } else if (waitState == WAITED_HALF) {
+                    if (!waitedHalf) {
+                        Slog.i(TAG, "WAITED_HALF");
+                        // We've waited half the deadlock-detection interval.  Pull a stack
+                        // trace and wait another half.
+                        ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
+                        ActivityManagerService.dumpStackTraces(pids, null, null,
+                                getInterestingNativePids(), null);
+                        waitedHalf = true;
                     }
-
-                    // something is overdue!
-                    blockedCheckers = getBlockedCheckersLocked();
-                    subject = describeCheckersLocked(blockedCheckers);
-                } else {
-                    blockedCheckers = Collections.emptyList();
-                    subject = "Open FD high water mark reached";
+                    continue;
                 }
+
+                // something is overdue!
+                blockedCheckers = getBlockedCheckersLocked();
+                subject = describeCheckersLocked(blockedCheckers);
                 allowRestart = mAllowRestart;
             }
 
@@ -736,96 +713,6 @@ public class Watchdog {
             sysrq_trigger.close();
         } catch (IOException e) {
             Slog.w(TAG, "Failed to write to /proc/sysrq-trigger", e);
-        }
-    }
-
-    public static final class OpenFdMonitor {
-        /**
-         * Number of FDs below the soft limit that we trigger a runtime restart at. This was
-         * chosen arbitrarily, but will need to be at least 6 in order to have a sufficient number
-         * of FDs in reserve to complete a dump.
-         */
-        private static final int FD_HIGH_WATER_MARK = 12;
-
-        private final File mDumpDir;
-        private final File mFdHighWaterMark;
-
-        public static OpenFdMonitor create() {
-            // Only run the FD monitor on debuggable builds (such as userdebug and eng builds).
-            if (!Build.IS_DEBUGGABLE) {
-                return null;
-            }
-
-            final StructRlimit rlimit;
-            try {
-                rlimit = android.system.Os.getrlimit(OsConstants.RLIMIT_NOFILE);
-            } catch (ErrnoException errno) {
-                Slog.w(TAG, "Error thrown from getrlimit(RLIMIT_NOFILE)", errno);
-                return null;
-            }
-
-            // The assumption we're making here is that FD numbers are allocated (more or less)
-            // sequentially, which is currently (and historically) true since open is currently
-            // specified to always return the lowest-numbered non-open file descriptor for the
-            // current process.
-            //
-            // We do this to avoid having to enumerate the contents of /proc/self/fd in order to
-            // count the number of descriptors open in the process.
-            final File fdThreshold = new File("/proc/self/fd/" + (rlimit.rlim_cur - FD_HIGH_WATER_MARK));
-            return new OpenFdMonitor(new File("/data/anr"), fdThreshold);
-        }
-
-        OpenFdMonitor(File dumpDir, File fdThreshold) {
-            mDumpDir = dumpDir;
-            mFdHighWaterMark = fdThreshold;
-        }
-
-        /**
-         * Dumps open file descriptors and their full paths to a temporary file in {@code mDumpDir}.
-         */
-        private void dumpOpenDescriptors() {
-            // We cannot exec lsof to get more info about open file descriptors because a newly
-            // forked process will not have the permissions to readlink. Instead list all open
-            // descriptors from /proc/pid/fd and resolve them.
-            List<String> dumpInfo = new ArrayList<>();
-            String fdDirPath = String.format("/proc/%d/fd/", Process.myPid());
-            File[] fds = new File(fdDirPath).listFiles();
-            if (fds == null) {
-                dumpInfo.add("Unable to list " + fdDirPath);
-            } else {
-                for (File f : fds) {
-                    String fdSymLink = f.getAbsolutePath();
-                    String resolvedPath = "";
-                    try {
-                        resolvedPath = Os.readlink(fdSymLink);
-                    } catch (ErrnoException ex) {
-                        resolvedPath = ex.getMessage();
-                    }
-                    dumpInfo.add(fdSymLink + "\t" + resolvedPath);
-                }
-            }
-
-            // Dump the fds & paths to a temp file.
-            try {
-                File dumpFile = File.createTempFile("anr_fd_", "", mDumpDir);
-                Path out = Paths.get(dumpFile.getAbsolutePath());
-                Files.write(out, dumpInfo, StandardCharsets.UTF_8);
-            } catch (IOException ex) {
-                Slog.w(TAG, "Unable to write open descriptors to file: " + ex);
-            }
-        }
-
-        /**
-         * @return {@code true} if the high water mark was breached and a dump was written,
-         *     {@code false} otherwise.
-         */
-        public boolean monitor() {
-            if (mFdHighWaterMark.exists()) {
-                dumpOpenDescriptors();
-                return true;
-            }
-
-            return false;
         }
     }
 }

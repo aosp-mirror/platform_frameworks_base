@@ -27,7 +27,6 @@ import android.icu.util.MeasureUnit;
 
 import com.android.internal.R;
 
-import libcore.icu.DateIntervalFormat;
 import libcore.icu.LocaleData;
 
 import java.io.IOException;
@@ -226,7 +225,8 @@ public class DateUtils
      */
     @Deprecated
     public static String getAMPMString(int ampm) {
-        return LocaleData.get(Locale.getDefault()).amPm[ampm - Calendar.AM];
+        String[] amPm = DateFormat.getIcuDateFormatSymbols(Locale.getDefault()).getAmPmStrings();
+        return amPm[ampm - Calendar.AM];
     }
 
     /**

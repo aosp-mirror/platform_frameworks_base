@@ -22,6 +22,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaRouter.RouteInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -35,12 +37,16 @@ import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
@@ -64,20 +70,28 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final KeyguardStateController mKeyguard;
     private final NetworkController mNetworkController;
     private final Callback mCallback = new Callback();
-    private final ActivityStarter mActivityStarter;
     private Dialog mDialog;
     private boolean mWifiConnected;
 
     @Inject
-    public CastTile(QSHost host, CastController castController,
-            KeyguardStateController keyguardStateController, NetworkController networkController,
-            ActivityStarter activityStarter) {
-        super(host);
+    public CastTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            CastController castController,
+            KeyguardStateController keyguardStateController,
+            NetworkController networkController
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
         mController = castController;
         mDetailAdapter = new CastDetailAdapter();
         mKeyguard = keyguardStateController;
         mNetworkController = networkController;
-        mActivityStarter = activityStarter;
         mController.observe(this, mCallback);
         mKeyguard.observe(this, mCallback);
         mNetworkController.observe(this, mSignalCallback);

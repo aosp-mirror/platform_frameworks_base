@@ -134,7 +134,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         hdrCapabilities, isDefaultDisplay);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
-            } else if (device.updateDisplayPropertiesLocked(configs, activeConfig,
+            } else if (device.updateDisplayPropertiesLocked(info, configs, activeConfig,
                     configSpecs, colorModes, activeColorMode, hdrCapabilities)) {
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             }
@@ -212,8 +212,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
             mPhysicalDisplayId = physicalDisplayId;
             mIsDefaultDisplay = isDefaultDisplay;
-            mDisplayInfo = info;
-            updateDisplayPropertiesLocked(configs, activeConfigId, configSpecs, colorModes,
+            updateDisplayPropertiesLocked(info, configs, activeConfigId, configSpecs, colorModes,
                     activeColorMode, hdrCapabilities);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mIsDefaultDisplay) {
@@ -238,12 +237,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         /**
          * Returns true if there is a change.
          **/
-        public boolean updateDisplayPropertiesLocked(SurfaceControl.DisplayConfig[] configs,
+        public boolean updateDisplayPropertiesLocked(SurfaceControl.DisplayInfo info,
+                SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
                 int[] colorModes, int activeColorMode, Display.HdrCapabilities hdrCapabilities) {
             boolean changed = updateDisplayConfigsLocked(configs, activeConfigId, configSpecs);
+            changed |= updateDisplayInfo(info);
             changed |= updateColorModesLocked(colorModes, activeColorMode);
             changed |= updateHdrCapabilitiesLocked(hdrCapabilities);
+
             if (changed) {
                 mHavePendingChanges = true;
             }
@@ -418,6 +420,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             mNitsToHalBrightness = nitsToHal;
             mSystemBrightnessToNits = sysToNits;
+        }
+
+        private boolean updateDisplayInfo(SurfaceControl.DisplayInfo info) {
+            if (Objects.equals(mDisplayInfo, info)) {
+                return false;
+            }
+            mDisplayInfo = info;
+            return true;
         }
 
         private boolean updateColorModesLocked(int[] colorModes, int activeColorMode) {

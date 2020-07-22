@@ -42,6 +42,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -72,7 +73,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     private static final String ACTION_DELETE = "com.android.systemui.screenrecord.DELETE";
 
     private final RecordingController mController;
-
+    private final KeyguardDismissUtil mKeyguardDismissUtil;
     private ScreenRecordingAudioSource mAudioSource;
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
@@ -85,12 +86,13 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     @Inject
     public RecordingService(RecordingController controller, @LongRunning Executor executor,
             UiEventLogger uiEventLogger, NotificationManager notificationManager,
-            CurrentUserContextTracker userContextTracker) {
+            CurrentUserContextTracker userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
         mController = controller;
         mLongExecutor = executor;
         mUiEventLogger = uiEventLogger;
         mNotificationManager = notificationManager;
         mUserContextTracker = userContextTracker;
+        mKeyguardDismissUtil = keyguardDismissUtil;
     }
 
     /**
@@ -170,33 +172,36 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 Intent shareIntent = new Intent(Intent.ACTION_SEND)
                         .setType("video/mp4")
                         .putExtra(Intent.EXTRA_STREAM, shareUri);
-                String shareLabel = getResources().getString(R.string.screenrecord_share_label);
+                mKeyguardDismissUtil.executeWhenUnlocked(() -> {
+                    String shareLabel = getResources().getString(R.string.screenrecord_share_label);
+                    startActivity(Intent.createChooser(shareIntent, shareLabel)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                    // Remove notification
+                    mNotificationManager.cancelAsUser(null, NOTIFICATION_VIEW_ID, currentUser);
+                    return false;
+                }, false);
 
                 // Close quick shade
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-
-                // Remove notification
-                mNotificationManager.cancelAsUser(null, NOTIFICATION_VIEW_ID, currentUser);
-
-                startActivity(Intent.createChooser(shareIntent, shareLabel)
-                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 break;
             case ACTION_DELETE:
-                // Close quick shade
-                sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                mKeyguardDismissUtil.executeWhenUnlocked(() -> {
+                    // Close quick shade
+                    sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                    ContentResolver resolver = getContentResolver();
+                    Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
+                    resolver.delete(uri, null, null);
 
-                ContentResolver resolver = getContentResolver();
-                Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
-                resolver.delete(uri, null, null);
+                    Toast.makeText(
+                            this,
+                            R.string.screenrecord_delete_description,
+                            Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Deleted recording " + uri);
 
-                Toast.makeText(
-                        this,
-                        R.string.screenrecord_delete_description,
-                        Toast.LENGTH_LONG).show();
-
-                // Remove notification
-                mNotificationManager.cancelAsUser(null, NOTIFICATION_VIEW_ID, currentUser);
-                Log.d(TAG, "Deleted recording " + uri);
+                    // Remove notification
+                    mNotificationManager.cancelAsUser(null, NOTIFICATION_VIEW_ID, currentUser);
+                    return false;
+                }, false);
                 break;
         }
         return Service.START_STICKY;

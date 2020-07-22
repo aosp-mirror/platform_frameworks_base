@@ -26,11 +26,15 @@ import android.hardware.location.NanoAppState;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,6 +55,11 @@ import java.util.concurrent.atomic.AtomicInteger;
      * Maximum number of transaction requests that can be pending at a time
      */
     private static final int MAX_PENDING_REQUESTS = 10000;
+
+    /*
+     * The DateFormat for printing TransactionRecord.
+     */
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 
     /*
      * The proxy to talk to the Context Hub
@@ -83,6 +92,33 @@ import java.util.concurrent.atomic.AtomicInteger;
     private final ScheduledThreadPoolExecutor mTimeoutExecutor = new ScheduledThreadPoolExecutor(1);
     private ScheduledFuture<?> mTimeoutFuture = null;
 
+    /*
+     * The list of previous transaction records.
+     */
+    private static final int NUM_TRANSACTION_RECORDS = 20;
+    private final ConcurrentLinkedEvictingDeque<TransactionRecord> mTransactionRecordDeque =
+            new ConcurrentLinkedEvictingDeque<>(NUM_TRANSACTION_RECORDS);
+
+    /**
+     * A container class to store a record of transactions.
+     */
+    private class TransactionRecord {
+        private final String mTransaction;
+        private final long mTimestamp;
+
+        TransactionRecord(String transaction) {
+            mTransaction = transaction;
+            mTimestamp = System.currentTimeMillis();
+        }
+
+        // TODO: Add dump to proto here
+
+        @Override
+        public String toString() {
+            return DATE_FORMAT.format(new Date(mTimestamp)) + " " + mTransaction;
+        }
+    }
+
     /* package */ ContextHubTransactionManager(
             IContexthub contextHubProxy, ContextHubClientManager clientManager,
             NanoAppStateManager nanoAppStateManager) {
@@ -101,11 +137,12 @@ import java.util.concurrent.atomic.AtomicInteger;
      */
     /* package */ ContextHubServiceTransaction createLoadTransaction(
             int contextHubId, NanoAppBinary nanoAppBinary,
-            IContextHubTransactionCallback onCompleteCallback) {
+            IContextHubTransactionCallback onCompleteCallback, String packageName) {
         return new ContextHubServiceTransaction(
-                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_LOAD_NANOAPP) {
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_LOAD_NANOAPP,
+                nanoAppBinary.getNanoAppId(), packageName) {
             @Override
-            /* package */ int onTransact() {
+                /* package */ int onTransact() {
                 android.hardware.contexthub.V1_0.NanoAppBinary hidlNanoAppBinary =
                         ContextHubServiceUtil.createHidlNanoAppBinary(nanoAppBinary);
                 try {
@@ -119,7 +156,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
                 if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     // NOTE: The legacy JNI code used to do a query right after a load success
                     // to synchronize the service cache. Instead store the binary that was
@@ -149,11 +186,13 @@ import java.util.concurrent.atomic.AtomicInteger;
      * @return the generated transaction
      */
     /* package */ ContextHubServiceTransaction createUnloadTransaction(
-            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback) {
+            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback,
+            String packageName) {
         return new ContextHubServiceTransaction(
-                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_UNLOAD_NANOAPP) {
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_UNLOAD_NANOAPP,
+                nanoAppId, packageName) {
             @Override
-            /* package */ int onTransact() {
+                /* package */ int onTransact() {
                 try {
                     return mContextHubProxy.unloadNanoApp(
                             contextHubId, nanoAppId, this.getTransactionId());
@@ -165,7 +204,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
                 if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     mNanoAppStateManager.removeNanoAppInstance(contextHubId, nanoAppId);
                 }
@@ -190,11 +229,13 @@ import java.util.concurrent.atomic.AtomicInteger;
      * @return the generated transaction
      */
     /* package */ ContextHubServiceTransaction createEnableTransaction(
-            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback) {
+            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback,
+            String packageName) {
         return new ContextHubServiceTransaction(
-                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_ENABLE_NANOAPP) {
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_ENABLE_NANOAPP,
+                packageName) {
             @Override
-            /* package */ int onTransact() {
+                /* package */ int onTransact() {
                 try {
                     return mContextHubProxy.enableNanoApp(
                             contextHubId, nanoAppId, this.getTransactionId());
@@ -206,7 +247,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
                 try {
                     onCompleteCallback.onTransactionComplete(result);
                 } catch (RemoteException e) {
@@ -225,11 +266,13 @@ import java.util.concurrent.atomic.AtomicInteger;
      * @return the generated transaction
      */
     /* package */ ContextHubServiceTransaction createDisableTransaction(
-            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback) {
+            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback,
+            String packageName) {
         return new ContextHubServiceTransaction(
-                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_DISABLE_NANOAPP) {
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_DISABLE_NANOAPP,
+                packageName) {
             @Override
-            /* package */ int onTransact() {
+                /* package */ int onTransact() {
                 try {
                     return mContextHubProxy.disableNanoApp(
                             contextHubId, nanoAppId, this.getTransactionId());
@@ -241,7 +284,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
                 try {
                     onCompleteCallback.onTransactionComplete(result);
                 } catch (RemoteException e) {
@@ -259,11 +302,13 @@ import java.util.concurrent.atomic.AtomicInteger;
      * @return the generated transaction
      */
     /* package */ ContextHubServiceTransaction createQueryTransaction(
-            int contextHubId, IContextHubTransactionCallback onCompleteCallback) {
+            int contextHubId, IContextHubTransactionCallback onCompleteCallback,
+            String packageName) {
         return new ContextHubServiceTransaction(
-                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_QUERY_NANOAPPS) {
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_QUERY_NANOAPPS,
+                packageName) {
             @Override
-            /* package */ int onTransact() {
+                /* package */ int onTransact() {
                 try {
                     return mContextHubProxy.queryApps(contextHubId);
                 } catch (RemoteException e) {
@@ -273,12 +318,12 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
                 onQueryResponse(result, Collections.emptyList());
             }
 
             @Override
-            /* package */ void onQueryResponse(
+                /* package */ void onQueryResponse(
                     @ContextHubTransaction.Result int result, List<NanoAppState> nanoAppStateList) {
                 try {
                     onCompleteCallback.onQueryResponse(result, nanoAppStateList);
@@ -307,6 +352,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                     + MAX_PENDING_REQUESTS + ")");
         }
         mTransactionQueue.add(transaction);
+        mTransactionRecordDeque.add(new TransactionRecord(transaction.toString()));
 
         if (mTransactionQueue.size() == 1) {
             startNextTransaction();
@@ -432,5 +478,24 @@ import java.util.concurrent.atomic.AtomicInteger;
                 mTransactionQueue.remove();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(100);
+        TransactionRecord[] arr;
+        synchronized (this) {
+            arr = mTransactionQueue.toArray(new TransactionRecord[0]);
+        }
+        for (int i = 0; i < arr.length; i++) {
+            sb.append(i + ": " + arr[i] + "\n");
+        }
+
+        sb.append("Transaction History:\n");
+        Iterator<TransactionRecord> iterator = mTransactionRecordDeque.descendingIterator();
+        while (iterator.hasNext()) {
+            sb.append(iterator.next() + "\n");
+        }
+        return sb.toString();
     }
 }
