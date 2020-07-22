@@ -26,8 +26,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 
-import libcore.icu.LocaleData;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -287,8 +285,10 @@ public class DateFormat {
      */
     @UnsupportedAppUsage
     public static String getTimeFormatString(Context context, int userHandle) {
-        final LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        return is24HourFormat(context, userHandle) ? d.timeFormat_Hm : d.timeFormat_hm;
+        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
+                context.getResources().getConfiguration().locale);
+        return is24HourFormat(context, userHandle) ? dtpg.getBestPattern("Hm")
+            : dtpg.getBestPattern("hm");
     }
 
     /**
@@ -475,7 +475,6 @@ public class DateFormat {
         SpannableStringBuilder s = new SpannableStringBuilder(inFormat);
         int count;
 
-        LocaleData localeData = LocaleData.get(Locale.getDefault());
         DateFormatSymbols dfs = getIcuDateFormatSymbols(Locale.getDefault());
         String[] amPm = dfs.getAmPmStrings();
 
@@ -506,7 +505,7 @@ public class DateFormat {
                     break;
                 case 'c':
                 case 'E':
-                    replacement = getDayOfWeekString(localeData,
+                    replacement = getDayOfWeekString(dfs,
                                                      inDate.get(Calendar.DAY_OF_WEEK), count, c);
                     break;
                 case 'K': // hour in am/pm (0-11)
@@ -534,8 +533,7 @@ public class DateFormat {
                     break;
                 case 'L':
                 case 'M':
-                    replacement = getMonthString(localeData,
-                                                 inDate.get(Calendar.MONTH), count, c);
+                    replacement = getMonthString(dfs, inDate.get(Calendar.MONTH), count, c);
                     break;
                 case 'm':
                     replacement = zeroPad(inDate.get(Calendar.MINUTE), count);
@@ -568,25 +566,29 @@ public class DateFormat {
         }
     }
 
-    private static String getDayOfWeekString(LocaleData ld, int day, int count, int kind) {
+    private static String getDayOfWeekString(DateFormatSymbols dfs, int day, int count, int kind) {
         boolean standalone = (kind == 'c');
+        int context = standalone ? DateFormatSymbols.STANDALONE : DateFormatSymbols.FORMAT;
+        final int width;
         if (count == 5) {
-            return standalone ? ld.tinyStandAloneWeekdayNames[day] : ld.tinyWeekdayNames[day];
+            width = DateFormatSymbols.NARROW;
         } else if (count == 4) {
-            return standalone ? ld.longStandAloneWeekdayNames[day] : ld.longWeekdayNames[day];
+            width = DateFormatSymbols.WIDE;
         } else {
-            return standalone ? ld.shortStandAloneWeekdayNames[day] : ld.shortWeekdayNames[day];
+            width = DateFormatSymbols.ABBREVIATED;
         }
+        return dfs.getWeekdays(context, width)[day];
     }
 
-    private static String getMonthString(LocaleData ld, int month, int count, int kind) {
+    private static String getMonthString(DateFormatSymbols dfs, int month, int count, int kind) {
         boolean standalone = (kind == 'L');
+        int monthContext = standalone ? DateFormatSymbols.STANDALONE : DateFormatSymbols.FORMAT;
         if (count == 5) {
-            return standalone ? ld.tinyStandAloneMonthNames[month] : ld.tinyMonthNames[month];
+            return dfs.getMonths(monthContext, DateFormatSymbols.NARROW)[month];
         } else if (count == 4) {
-            return standalone ? ld.longStandAloneMonthNames[month] : ld.longMonthNames[month];
+            return dfs.getMonths(monthContext, DateFormatSymbols.WIDE)[month];
         } else if (count == 3) {
-            return standalone ? ld.shortStandAloneMonthNames[month] : ld.shortMonthNames[month];
+            return dfs.getMonths(monthContext, DateFormatSymbols.ABBREVIATED)[month];
         } else {
             // Calendar.JANUARY == 0, so add 1 to month.
             return zeroPad(month+1, count);
