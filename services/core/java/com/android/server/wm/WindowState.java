@@ -5940,4 +5940,37 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void requestRedrawForSync() {
         mRedrawForSyncReported = false;
     }
+
+    void calculateSurfaceBounds(WindowManager.LayoutParams attrs, Rect outSize) {
+        outSize.setEmpty();
+        if ((attrs.flags & FLAG_SCALED) != 0) {
+            // For a scaled surface, we always want the requested size.
+            outSize.right = mRequestedWidth;
+            outSize.bottom = mRequestedHeight;
+        } else {
+            // When we're doing a drag-resizing, request a surface that's fullscreen size,
+            // so that we don't need to reallocate during the process. This also prevents
+            // buffer drops due to size mismatch.
+            if (isDragResizing()) {
+                final DisplayInfo displayInfo = getDisplayInfo();
+                outSize.right = displayInfo.logicalWidth;
+                outSize.bottom = displayInfo.logicalHeight;
+            } else {
+                getCompatFrameSize(outSize);
+            }
+        }
+
+        // This doesn't necessarily mean that there is an error in the system. The sizes might be
+        // incorrect, because it is before the first layout or draw.
+        if (outSize.width() < 1) {
+            outSize.right = 1;
+        }
+        if (outSize.height() < 1) {
+            outSize.bottom = 1;
+        }
+
+        // Adjust for surface insets.
+        outSize.inset(-attrs.surfaceInsets.left, -attrs.surfaceInsets.top,
+                -attrs.surfaceInsets.right, -attrs.surfaceInsets.bottom);
+    }
 }

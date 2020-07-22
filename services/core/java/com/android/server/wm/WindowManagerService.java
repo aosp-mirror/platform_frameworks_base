@@ -2427,8 +2427,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
             if (winAnimator.mSurfaceController != null) {
-                outSurfaceSize.set(winAnimator.mSurfaceController.getWidth(),
-                                         winAnimator.mSurfaceController.getHeight());
+                win.calculateSurfaceBounds(win.getAttrs(), mTmpRect);
+                outSurfaceSize.set(mTmpRect.width(), mTmpRect.height());
             }
             getInsetsSourceControls(win, outActiveControls);
         }

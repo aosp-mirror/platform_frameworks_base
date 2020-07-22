@@ -456,7 +456,8 @@ class WindowStateAnimator {
             flags |= SurfaceControl.SKIP_SCREENSHOT;
         }
 
-        calculateSurfaceBounds(w, attrs, mTmpSize);
+        w.calculateSurfaceBounds(attrs, mTmpSize);
+
         final int width = mTmpSize.width();
         final int height = mTmpSize.height();
 
@@ -530,40 +531,6 @@ class WindowStateAnimator {
 
         if (DEBUG) Slog.v(TAG, "Created surface " + this);
         return mSurfaceController;
-    }
-
-    private void calculateSurfaceBounds(WindowState w, LayoutParams attrs, Rect outSize) {
-        outSize.setEmpty();
-        if ((attrs.flags & FLAG_SCALED) != 0) {
-            // For a scaled surface, we always want the requested size.
-            outSize.right = w.mRequestedWidth;
-            outSize.bottom = w.mRequestedHeight;
-        } else {
-            // When we're doing a drag-resizing, request a surface that's fullscreen size,
-            // so that we don't need to reallocate during the process. This also prevents
-            // buffer drops due to size mismatch.
-            if (w.isDragResizing()) {
-                final DisplayInfo displayInfo = w.getDisplayInfo();
-                outSize.right = displayInfo.logicalWidth;
-                outSize.bottom = displayInfo.logicalHeight;
-            } else {
-                w.getCompatFrameSize(outSize);
-            }
-        }
-
-        // Something is wrong and SurfaceFlinger will not like this, try to revert to reasonable
-        // values. This doesn't necessarily mean that there is an error in the system. The sizes
-        // might be incorrect, because it is before the first layout or draw.
-        if (outSize.width() < 1) {
-            outSize.right = 1;
-        }
-        if (outSize.height() < 1) {
-            outSize.bottom = 1;
-        }
-
-        // Adjust for surface insets.
-        outSize.inset(-attrs.surfaceInsets.left, -attrs.surfaceInsets.top,
-                -attrs.surfaceInsets.right, -attrs.surfaceInsets.bottom);
     }
 
     boolean hasSurface() {
@@ -771,20 +738,6 @@ class WindowStateAnimator {
         final LayoutParams attrs = mWin.getAttrs();
         final Task task = w.getTask();
 
-        calculateSurfaceBounds(w, attrs, mTmpSize);
-
-        // Once relayout has been called at least once, we need to make sure
-        // we only resize the client surface during calls to relayout. For
-        // clients which use indeterminate measure specs (MATCH_PARENT),
-        // we may try and change their window size without a call to relayout.
-        // However, this would be unsafe, as the client may be in the middle
-        // of producing a frame at the old size, having just completed layout
-        // to find the surface size changed underneath it.
-        final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
-        if (relayout) {
-            mSurfaceController.setBufferSizeInTransaction(
-                    mTmpSize.width(), mTmpSize.height(), recoveringMemory);
-        }
         // If we are undergoing seamless rotation, the surface has already
         // been set up to persist at it's old location. We need to freeze
         // updates until a resize occurs.
@@ -807,6 +760,11 @@ class WindowStateAnimator {
         float surfaceHeight = mSurfaceController.getHeight();
 
         final Rect insets = attrs.surfaceInsets;
+
+        // getFrameNumber is only valid in the call-stack of relayoutWindow
+        // as this is the only-time we know the client renderer
+        // is paused.
+        final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
 
         if (!w.mSeamlesslyRotated) {
             // Used to offset the WSA when stack position changes before a resize.
