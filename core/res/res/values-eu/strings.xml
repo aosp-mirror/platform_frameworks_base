@@ -832,7 +832,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Desblokeatzeko edo larrialdi-deia egiteko, sakatu Menua."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Desblokeatzeko, sakatu Menua."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desblokeatzeko, marraztu eredua"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Larrialdi-deiak"</string>
+    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Itzuli deira"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Eredua zuzena da!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Saiatu berriro"</string>
@@ -846,7 +847,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Sartu SIM txartela."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM txartela falta da edo ezin da irakurri. Sartu SIM txartel bat."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM txartela hondatuta dago."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM txartela behin betiko desgaitu zaizu.\n Beste SIM txartel bat lortzeko, jarri zerbitzu-hornitzailearekin harremanetan."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM txartela betiko desgaitu zaizu.\n Beste SIM txartel bat lortzeko, jarri zerbitzu-hornitzailearekin harremanetan."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Aurreko pista"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Hurrengo pista"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausatu"</string>

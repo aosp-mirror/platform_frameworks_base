@@ -838,7 +838,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Chcete-li odemknout telefon nebo provést tísňové volání, stiskněte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Telefon odemknete stisknutím tlačítka Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Odblokujte pomocí gesta"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Stav nouze"</string>
+    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Zavolat zpět"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Správně!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Zkusit znovu"</string>

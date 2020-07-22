@@ -832,7 +832,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryk på Menu for at låse op eller foretage et nødopkald."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryk på Menu for at låse op."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Tegn oplåsningsmønster"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Nødsituation"</string>
+    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tilbage til opkald"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Prøv igen"</string>
