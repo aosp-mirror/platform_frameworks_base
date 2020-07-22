@@ -275,7 +275,7 @@ message TaskProto {
     optional bool adjusted_for_ime = 23;
     optional float adjust_ime_amount = 24;
     optional float adjust_divider_amount = 25;
-    optional bool animating_bounds = 26;
+    optional bool animating_bounds = 26 [deprecated = true];
     optional float minimize_amount = 27;
     optional bool created_by_organizer = 28;
 }

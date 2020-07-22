@@ -68,7 +68,6 @@ public class WindowAnimator {
     Object mLastWindowFreezeSource;
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
-
     private boolean mInitialized = false;
 
     // When set to true the animator will go over all windows after an animation frame is posted and

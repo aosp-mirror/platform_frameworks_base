@@ -129,7 +129,6 @@ import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
-import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
 import static com.android.server.wm.TaskProto.DISPLAY_ID;
@@ -599,16 +598,6 @@ class Task extends WindowContainer<WindowContainer> {
     // that this transaction manipulates because deferUntilFrame acts on individual surfaces.
     SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
     Task mMainWindowSizeChangeTask;
-
-    // If this is true, we are in the bounds animating mode. The task will be down or upscaled to
-    // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
-    // would otherwise apply while resizing, while resizing in the bounds animating mode.
-    private boolean mBoundsAnimating = false;
-    // Set when an animation has been requested but has not yet started from the UI thread. This is
-    // cleared when the animation actually starts.
-    private boolean mBoundsAnimatingRequested = false;
-    private Rect mBoundsAnimationTarget = new Rect();
-    private Rect mBoundsAnimationSourceHintBounds = new Rect();
 
     Rect mPreAnimationBounds = new Rect();
 
@@ -7116,14 +7105,6 @@ class Task extends WindowContainer<WindowContainer> {
             forAllTasks(c, true /* traverseTopToBottom */);
             c.recycle();
 
-            if (mBoundsAnimating) {
-                // Force to update task surface bounds and relayout windows, since configBounds
-                // remains unchanged during bounds animation.
-                updateSurfaceBounds();
-                getDisplay().setLayoutNeeded();
-                mWmService.requestTraversal();
-            }
-
             if (!deferResume) {
                 ensureVisibleActivitiesConfiguration(topRunningActivity(), preserveWindows);
             }
@@ -7525,20 +7506,6 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * @return the final bounds for the bounds animation.
-     */
-    void getFinalAnimationBounds(Rect outBounds) {
-        outBounds.set(mBoundsAnimationTarget);
-    }
-
-    /**
-     * @return the final source bounds for the bounds animation.
-     */
-    void getFinalAnimationSourceHintBounds(Rect outBounds) {
-        outBounds.set(mBoundsAnimationSourceHintBounds);
-    }
-
-    /**
      * Put a Task in this stack. Used for adding only.
      * When task is added to top of the stack, the entire branch of the hierarchy (including stack
      * and display) will be brought to top.
@@ -7693,10 +7660,6 @@ class Task extends WindowContainer<WindowContainer> {
         getDisplayContent().getPinnedStackController().setActions(actions);
     }
 
-    public boolean isForceScaled() {
-        return mBoundsAnimating;
-    }
-
     /** Returns true if a removal action is still being deferred. */
     boolean handleCompleteDeferredRemoval() {
         if (isAnimating(TRANSITION | CHILDREN)) {
@@ -7782,8 +7745,6 @@ class Task extends WindowContainer<WindowContainer> {
         if (mLastNonFullscreenBounds != null) {
             mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
         }
-
-        proto.write(ANIMATING_BOUNDS, mBoundsAnimating);
 
         if (mSurfaceControl != null) {
             proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
