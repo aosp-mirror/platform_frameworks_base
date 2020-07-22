@@ -1106,13 +1106,7 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(String parentId, ParceledListSlice list) {
-            onLoadChildrenWithOptions(parentId, list, null);
-        }
-
-        @Override
-        public void onLoadChildrenWithOptions(String parentId, ParceledListSlice list,
-                final Bundle options) {
+        public void onLoadChildren(String parentId, ParceledListSlice list, Bundle options) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
                 mediaBrowser.onLoadChildren(this, parentId, list, options);
