@@ -714,23 +714,6 @@ class WindowStateAnimator {
             mDtDy = tmpFloats[Matrix.MSKEW_X];
             mDsDy = tmpFloats[Matrix.MSCALE_Y];
 
-            // Now set the alpha...  but because our current hardware
-            // can't do alpha transformation on a non-opaque surface,
-            // turn it off if we are running an animation that is also
-            // transforming since it is more important to have that
-            // animation be smooth.
-            mShownAlpha = mAlpha;
-            if (!mService.mLimitedAlphaCompositing
-                    || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
-                    || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDtDy, mDsDy)))) {
-                mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
-            }
-
-            if ((DEBUG_ANIM || DEBUG) && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) {
-                Slog.v(TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
-                                + " screen=" + (screenAnimation
-                        ? screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
-            }
             return;
         } else if (mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
             return;
