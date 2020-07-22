@@ -6053,9 +6053,8 @@ public class Editor {
             return trueLine;
         }
 
-        final int lineHeight = layout.getLineBottom(prevLine) - layout.getLineTop(prevLine);
-        int slop = (int)(mLineSlopRatio
-                * (layout.getLineBottom(trueLine) - layout.getLineTop(trueLine)));
+        final int lineHeight = mTextView.getLineHeight();
+        int slop = (int)(mLineSlopRatio * lineHeight);
         slop = Math.max(mLineChangeSlopMin,
                 Math.min(mLineChangeSlopMax, lineHeight + slop)) - lineHeight;
         slop = Math.max(0, slop);
