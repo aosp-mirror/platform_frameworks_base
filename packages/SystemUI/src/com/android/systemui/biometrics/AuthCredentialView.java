@@ -16,6 +16,9 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -38,12 +41,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
@@ -283,14 +284,11 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     protected void onErrorTimeoutFinish() {}
 
-    protected void onCredentialVerified(byte[] attestation, int timeoutMs) {
-
-        final boolean matched = attestation != null;
-
-        if (matched) {
+    protected void onCredentialVerified(@NonNull VerifyCredentialResponse response, int timeoutMs) {
+        if (response.isMatched()) {
             mClearErrorRunnable.run();
             mLockPatternUtils.userPresent(mEffectiveUserId);
-            mCallback.onCredentialMatched(attestation);
+            mCallback.onCredentialMatched(response.getGatekeeperHAT());
         } else {
             if (timeoutMs > 0) {
                 mHandler.removeCallbacks(mClearErrorRunnable);

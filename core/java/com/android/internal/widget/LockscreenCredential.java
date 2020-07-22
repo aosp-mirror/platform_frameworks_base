@@ -48,7 +48,7 @@ import java.util.Objects;
  *     // Process the credential in some way
  * }
  * </pre>
- * With this construct, we can garantee that there will be no copies of the password left in
+ * With this construct, we can guarantee that there will be no copies of the password left in
  * memory when the credential goes out of scope. This should help mitigate certain class of
  * attacks where the attcker gains read-only access to full device memory (cold boot attack,
  * unsecured software/hardware memory dumping interfaces such as JTAG).

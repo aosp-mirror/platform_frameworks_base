@@ -130,6 +130,18 @@ public class LockPatternUtils {
     public @interface CredentialType {}
 
     /**
+     * Flag provided to {@link #verifyCredential(LockscreenCredential, long, int, int)} . If set,
+     * the method will return the Gatekeeper Password in the {@link VerifyCredentialResponse}.
+     */
+    public static final int VERIFY_FLAG_RETURN_GK_PW = 1 << 0;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            VERIFY_FLAG_RETURN_GK_PW
+    })
+    public @interface VerifyFlag {}
+
+    /**
      * Special user id for triggering the FRP verification flow.
      */
     public static final int USER_FRP = UserHandle.USER_NULL + 1;
@@ -376,27 +388,56 @@ public class LockPatternUtils {
      * @param credential The credential to check.
      * @param challenge The challenge to verify against the credential
      * @param userId The user whose credential is being verified
-     * @return the attestation that the challenge was verified, or null
+     * @param flags See {@link VerifyFlag}
      * @throws RequestThrottledException if credential verification is being throttled due to
      *         to many incorrect attempts.
      * @throws IllegalStateException if called on the main thread.
+     *
+     * TODO: This probably doesn't need to throw RequestThrottledException anymore, since the
+     * method now returns a VerifyCredentialResponse object, which contains the timeout
      */
-    public byte[] verifyCredential(@NonNull LockscreenCredential credential, long challenge,
-            int userId) throws RequestThrottledException {
+    @NonNull
+    public VerifyCredentialResponse verifyCredential(@NonNull LockscreenCredential credential,
+            long challenge, int userId, @VerifyFlag int flags) throws RequestThrottledException {
         throwIfCalledOnMainThread();
         try {
-            VerifyCredentialResponse response = getLockSettings().verifyCredential(
-                    credential, challenge, userId);
+            final VerifyCredentialResponse response = getLockSettings().verifyCredential(
+                    credential, challenge, userId, flags);
+            if (response == null) {
+                return VerifyCredentialResponse.ERROR;
+            }
+
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return response.getPayload();
+                return response;
             } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
                 throw new RequestThrottledException(response.getTimeout());
             } else {
-                return null;
+                return VerifyCredentialResponse.ERROR;
             }
         } catch (RemoteException re) {
             Log.e(TAG, "failed to verify credential", re);
-            return null;
+            return VerifyCredentialResponse.ERROR;
+        }
+    }
+
+    /**
+     * With the Gatekeeper Password returned via {@link #verifyCredential(LockscreenCredential,
+     * long, int, boolean)}, request Gatekeeper to create a HardwareAuthToken wrapping the
+     * given challenge.
+     */
+    @NonNull
+    public VerifyCredentialResponse verifyGatekeeperPassword(@NonNull byte[] gatekeeperPassword,
+            long challenge, int userId) {
+        try {
+            final VerifyCredentialResponse response = getLockSettings().verifyGatekeeperPassword(
+                    gatekeeperPassword, challenge, userId);
+            if (response == null) {
+                return VerifyCredentialResponse.ERROR;
+            }
+            return response;
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to verify gatekeeper password", e);
+            return VerifyCredentialResponse.ERROR;
         }
     }
 
@@ -418,8 +459,9 @@ public class LockPatternUtils {
         try {
             VerifyCredentialResponse response = getLockSettings().checkCredential(
                     credential, userId, wrapCallback(progressCallback));
-
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            if (response == null) {
+                return false;
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return true;
             } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
                 throw new RequestThrottledException(response.getTimeout());
@@ -442,27 +484,36 @@ public class LockPatternUtils {
      * @param challenge The challenge to verify against the credential
      * @return the attestation that the challenge was verified, or null
      * @param userId The managed profile user id
+     * @param flags See {@link VerifyFlag}
      * @throws RequestThrottledException if credential verification is being throttled due to
      *         to many incorrect attempts.
      * @throws IllegalStateException if called on the main thread.
+     *
+     * TODO: This probably doesn't need to throw RequestThrottledException anymore, since the
+     * method now returns a VerifyCredentialResponse object, which contains the timeout
      */
-    public byte[] verifyTiedProfileChallenge(@NonNull LockscreenCredential credential,
-            long challenge, int userId) throws RequestThrottledException {
+    @NonNull
+    public VerifyCredentialResponse verifyTiedProfileChallenge(
+            @NonNull LockscreenCredential credential,
+            long challenge, int userId, @VerifyFlag int flags) throws RequestThrottledException {
         throwIfCalledOnMainThread();
         try {
-            VerifyCredentialResponse response =
-                    getLockSettings().verifyTiedProfileChallenge(credential, challenge, userId);
+            final VerifyCredentialResponse response = getLockSettings()
+                    .verifyTiedProfileChallenge(credential, challenge, userId, flags);
+            if (response == null) {
+                return VerifyCredentialResponse.ERROR;
+            }
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return response.getPayload();
+                return response;
             } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
                 throw new RequestThrottledException(response.getTimeout());
             } else {
-                return null;
+                return VerifyCredentialResponse.ERROR;
             }
         } catch (RemoteException re) {
             Log.e(TAG, "failed to verify tied profile credential", re);
-            return null;
+            return VerifyCredentialResponse.ERROR;
         }
     }
 

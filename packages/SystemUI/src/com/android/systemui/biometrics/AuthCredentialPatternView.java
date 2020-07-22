@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -23,6 +24,7 @@ import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -61,7 +63,7 @@ public class AuthCredentialPatternView extends AuthCredentialView {
 
             if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                 // Pattern size is less than the minimum, do not count it as a failed attempt.
-                onPatternVerified(null /* attestation */, 0 /* timeoutMs */);
+                onPatternVerified(VerifyCredentialResponse.ERROR, 0 /* timeoutMs */);
                 return;
             }
 
@@ -71,12 +73,13 @@ public class AuthCredentialPatternView extends AuthCredentialView {
                         credential,
                         mOperationId,
                         mEffectiveUserId,
+                        0 /* flags */,
                         this::onPatternVerified);
             }
         }
 
-        private void onPatternVerified(byte[] attestation, int timeoutMs) {
-            AuthCredentialPatternView.this.onCredentialVerified(attestation, timeoutMs);
+        private void onPatternVerified(@NonNull VerifyCredentialResponse response, int timeoutMs) {
+            AuthCredentialPatternView.this.onCredentialVerified(response, timeoutMs);
             if (timeoutMs > 0) {
                 mLockPatternView.setEnabled(false);
             } else {
