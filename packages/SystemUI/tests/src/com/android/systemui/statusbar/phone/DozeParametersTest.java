@@ -16,13 +16,18 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -30,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Assert;
@@ -50,6 +56,7 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
     @Mock private PowerManager mPowerManager;
     @Mock private TunerService mTunerService;
+    @Mock private BatteryController mBatteryController;
 
     @Before
     public void setup() {
@@ -59,11 +66,12 @@ public class DozeParametersTest extends SysuiTestCase {
             mAmbientDisplayConfiguration,
             mAlwaysOnDisplayPolicy,
             mPowerManager,
+            mBatteryController,
             mTunerService
         );
     }
     @Test
-    public void test_setControlScreenOffAnimation_setsDozeAfterScreenOff_false() {
+    public void testSetControlScreenOffAnimation_setsDozeAfterScreenOff_false() {
         mDozeParameters.setControlScreenOffAnimation(true);
         reset(mPowerManager);
         mDozeParameters.setControlScreenOffAnimation(false);
@@ -71,7 +79,7 @@ public class DozeParametersTest extends SysuiTestCase {
     }
 
     @Test
-    public void test_setControlScreenOffAnimation_setsDozeAfterScreenOff_true() {
+    public void testSetControlScreenOffAnimation_setsDozeAfterScreenOff_true() {
         mDozeParameters.setControlScreenOffAnimation(false);
         reset(mPowerManager);
         mDozeParameters.setControlScreenOffAnimation(true);
@@ -79,11 +87,28 @@ public class DozeParametersTest extends SysuiTestCase {
     }
 
     @Test
-    public void test_getWallpaperAodDuration_when_shouldControlScreenOff() {
+    public void testGetWallpaperAodDuration_when_shouldControlScreenOff() {
         mDozeParameters.setControlScreenOffAnimation(true);
         Assert.assertEquals(
                 "wallpaper hides faster when controlling screen off",
                 mDozeParameters.getWallpaperAodDuration(),
                 DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY);
+    }
+
+    @Test
+    public void testGetAlwaysOn() {
+        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
+        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
+
+        assertThat(mDozeParameters.getAlwaysOn()).isTrue();
+    }
+
+    @Test
+    public void testGetAlwaysOn_whenBatterySaver() {
+        when(mBatteryController.isAodPowerSave()).thenReturn(true);
+        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
+        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
+
+        assertThat(mDozeParameters.getAlwaysOn()).isFalse();
     }
 }
