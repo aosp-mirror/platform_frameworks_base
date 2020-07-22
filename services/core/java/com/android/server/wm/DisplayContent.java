@@ -3556,18 +3556,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                                 == mRemoteInsetsControlTarget)) {
             return mRemoteInsetsControlTarget;
         } else {
-            // Now, a special case -- if the last target's window is in the process of exiting, but
-            // not removed, keep on the last target to avoid IME flicker.
-            final WindowState cur = InsetsControlTarget.asWindowOrNull(mInputMethodControlTarget);
-            if (cur != null && !cur.mRemoved && cur.isDisplayedLw() && cur.isClosing()
-                    && !cur.isActivityTypeHome()) {
-                if (DEBUG_INPUT_METHOD) {
-                    Slog.v(TAG_WM, "Not changing control while current window"
-                            + " is closing and not removed");
-                }
-                return cur;
-            }
-            // Otherwise, we just use the ime target as received from IME.
             return mInputMethodInputTarget;
         }
     }
