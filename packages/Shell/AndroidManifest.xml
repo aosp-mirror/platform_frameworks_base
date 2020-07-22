@@ -214,6 +214,9 @@
     <!-- Permission needed to test tcp keepalive offload. -->
     <uses-permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
 
+    <!-- Permission needed for CTS test - UnsupportedErrorDialogTests -->
+    <uses-permission android:name="android.permission.RESET_APP_ERRORS" />
+
     <!-- Permission needed to run keyguard manager tests in CTS -->
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
 
