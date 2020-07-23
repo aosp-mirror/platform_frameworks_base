@@ -29,7 +29,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -39,12 +38,10 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
-import android.hardware.fingerprint.IFingerprintService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -247,6 +244,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         IActivityTaskManager getActivityTaskManager() {
             return ActivityTaskManager.getService();
         }
+
+        FingerprintManager getFingerprintManager(Context context) {
+            return context.getSystemService(FingerprintManager.class);
+        }
     }
 
     @Inject
@@ -273,7 +274,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mActivityTaskManager = mInjector.getActivityTaskManager();
 
-        final FingerprintManager fpm = mContext.getSystemService(FingerprintManager.class);
+        final FingerprintManager fpm = mInjector.getFingerprintManager(mContext);
         if (fpm != null && fpm.isHardwareDetected()) {
             final List<FingerprintSensorProperties> fingerprintSensorProperties =
                     fpm.getSensorProperties();
