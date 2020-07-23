@@ -239,6 +239,7 @@
 
     <!-- Listen app op changes -->
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
+    <uses-permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS" />
 
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
