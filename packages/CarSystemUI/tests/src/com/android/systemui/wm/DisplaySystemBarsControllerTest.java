@@ -33,7 +33,9 @@ import android.view.IWindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.TransactionPool;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TransactionPool;
 
 import org.junit.Before;
 import org.junit.Test;

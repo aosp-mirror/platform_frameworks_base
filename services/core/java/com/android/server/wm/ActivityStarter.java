@@ -1288,11 +1288,11 @@ class ActivityStarter {
                 return false;
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
-            // wasn't whitelisted to start an activity
+            // wasn't allowed to start an activity
             if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
-                            + ") is persistent system process AND intent sender whitelisted "
+                            + ") is persistent system process AND intent sender allowed "
                             + "(allowBackgroundActivityStart = true)");
                 }
                 return false;
@@ -1346,23 +1346,23 @@ class ActivityStarter {
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
         // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
-        // caller, so that we can make the decision based on its foreground/whitelisted state.
+        // caller, so that we can make the decision based on its state.
         int callerAppUid = callingUid;
         if (callerApp == null) {
             callerApp = mService.getProcessController(realCallingPid, realCallingUid);
             callerAppUid = realCallingUid;
         }
-        // don't abort if the callerApp or other processes of that uid are whitelisted in any way
+        // don't abort if the callerApp or other processes of that uid are allowed in any way
         if (callerApp != null) {
             // first check the original calling process
             if (callerApp.areBackgroundActivityStartsAllowed()) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Background activity start allowed: callerApp process (pid = "
-                            + callerApp.getPid() + ", uid = " + callerAppUid + ") is whitelisted");
+                            + callerApp.getPid() + ", uid = " + callerAppUid + ") is allowed");
                 }
                 return false;
             }
-            // only if that one wasn't whitelisted, check the other ones
+            // only if that one wasn't allowed, check the other ones
             final ArraySet<WindowProcessController> uidProcesses =
                     mService.mProcessMap.getProcesses(callerAppUid);
             if (uidProcesses != null) {
@@ -1372,7 +1372,7 @@ class ActivityStarter {
                         if (DEBUG_ACTIVITY_STARTS) {
                             Slog.d(TAG,
                                     "Background activity start allowed: process " + proc.getPid()
-                                            + " from uid " + callerAppUid + " is whitelisted");
+                                            + " from uid " + callerAppUid + " is allowed");
                         }
                         return false;
                     }
@@ -1401,7 +1401,7 @@ class ActivityStarter {
                 + "; isRealCallingUidPersistentSystemProcess: "
                 + isRealCallingUidPersistentSystemProcess
                 + "; originatingPendingIntent: " + originatingPendingIntent
-                + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
+                + "; allowBackgroundActivityStart: " + allowBackgroundActivityStart
                 + "; intent: " + intent
                 + "; callerApp: " + callerApp
                 + "]");

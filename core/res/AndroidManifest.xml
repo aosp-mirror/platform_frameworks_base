@@ -5034,6 +5034,11 @@
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|appPredictor" />
 
+    <!-- @hide @TestApi Allows apps to reset the state of {@link com.android.server.am.AppErrors}.
+         <p>CTS tests will use UiAutomation.adoptShellPermissionIdentity() to gain access.  -->
+    <permission android:name="android.permission.RESET_APP_ERRORS"
+        android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

@@ -28,6 +28,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
@@ -52,6 +53,7 @@ public class DozeParameters implements TunerService.Tunable,
 
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
     private final Resources mResources;
+    private final BatteryController mBatteryController;
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
@@ -62,10 +64,12 @@ public class DozeParameters implements TunerService.Tunable,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
             PowerManager powerManager,
+            BatteryController batteryController,
             TunerService tunerService) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAlwaysOnPolicy = alwaysOnDisplayPolicy;
+        mBatteryController = batteryController;
 
         mControlScreenOffAnimation = !getDisplayNeedsBlanking();
         mPowerManager = powerManager;
@@ -164,7 +168,7 @@ public class DozeParameters implements TunerService.Tunable,
      * @return {@code true} if enabled and available.
      */
     public boolean getAlwaysOn() {
-        return mDozeAlwaysOn;
+        return mDozeAlwaysOn && !mBatteryController.isAodPowerSave();
     }
 
     /**

@@ -54,6 +54,7 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenrecord.RecordingController;
@@ -122,9 +123,9 @@ import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
-import com.android.systemui.wm.DisplayController;
-import com.android.systemui.wm.DisplayImeController;
-import com.android.systemui.wm.SystemWindows;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SystemWindows;
 
 import java.util.function.Consumer;
 
@@ -294,6 +295,7 @@ public class Dependency {
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
     @Inject Lazy<AutoHideController> mAutoHideController;
     @Inject Lazy<ForegroundServiceNotificationListener> mForegroundServiceNotificationListener;
+    @Inject Lazy<PrivacyItemController> mPrivacyItemController;
     @Inject @Background Lazy<Looper> mBgLooper;
     @Inject @Background Lazy<Handler> mBgHandler;
     @Inject @Main Lazy<Looper> mMainLooper;
@@ -491,6 +493,7 @@ public class Dependency {
         mProviders.put(ForegroundServiceNotificationListener.class,
                 mForegroundServiceNotificationListener::get);
         mProviders.put(ClockManager.class, mClockManager::get);
+        mProviders.put(PrivacyItemController.class, mPrivacyItemController::get);
         mProviders.put(ActivityManagerWrapper.class, mActivityManagerWrapper::get);
         mProviders.put(DevicePolicyManagerWrapper.class, mDevicePolicyManagerWrapper::get);
         mProviders.put(PackageManagerWrapper.class, mPackageManagerWrapper::get);

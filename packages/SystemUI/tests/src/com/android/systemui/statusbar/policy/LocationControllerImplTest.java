@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import android.app.AppOpsManager;
 import android.content.Intent;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -60,8 +61,11 @@ public class LocationControllerImplTest extends SysuiTestCase {
         mLocationController = spy(new LocationControllerImpl(mContext,
                 mAppOpsController,
                 mTestableLooper.getLooper(),
+                new Handler(mTestableLooper.getLooper()),
                 mock(BroadcastDispatcher.class),
                 mock(BootCompleteCache.class)));
+
+        mTestableLooper.processAllMessages();
     }
 
     @Test

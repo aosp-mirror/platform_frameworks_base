@@ -143,6 +143,9 @@ applications that come with the platform
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
+
+        <!-- For permission hub 2 debugging only -->
+        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">

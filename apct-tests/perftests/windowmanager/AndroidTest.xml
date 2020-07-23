@@ -21,9 +21,17 @@
         <option name="test-file-name" value="WmPerfTests.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <option name="force-skip-system-props" value="true" />
+        <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
+        <option name="run-command" value="cmd window dismiss-keyguard" />
+        <option name="run-command" value="cmd package compile -m speed com.android.perftests.wm" />
+    </target_preparer>
+
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.perftests.wm" />
         <option name="hidden-api-checks" value="false"/>
+        <option name="device-listeners" value="android.wm.WmPerfRunListener" />
     </test>
 
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">

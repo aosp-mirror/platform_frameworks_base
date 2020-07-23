@@ -39,6 +39,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.appops.AppOpItem;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.Utils;
 
@@ -65,8 +66,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     @Inject
     public LocationControllerImpl(Context context, AppOpsController appOpsController,
-            @Main Looper mainLooper, BroadcastDispatcher broadcastDispatcher,
-            BootCompleteCache bootCompleteCache) {
+            @Main Looper mainLooper, @Background Handler backgroundHandler,
+            BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache) {
         mContext = context;
         mAppOpsController = appOpsController;
         mBootCompleteCache = bootCompleteCache;
@@ -80,7 +81,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         mAppOpsController.addCallback(new int[]{OP_MONITOR_HIGH_POWER_LOCATION}, this);
 
         // Examine the current location state and initialize the status view.
-        updateActiveLocationRequests();
+        backgroundHandler.post(this::updateActiveLocationRequests);
     }
 
     /**

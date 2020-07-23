@@ -18,7 +18,7 @@ package com.android.server;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 
-import static com.android.server.AppStateTracker.TARGET_OP;
+import static com.android.server.AppStateTrackerImpl.TARGET_OP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -68,7 +68,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-import com.android.server.AppStateTracker.Listener;
+import com.android.server.AppStateTrackerImpl.Listener;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
@@ -91,7 +91,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Tests for {@link AppStateTracker}
+ * Tests for {@link AppStateTrackerImpl}
  *
  * Run with: atest com.android.server.AppStateTrackerTest
  */
@@ -100,7 +100,7 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class AppStateTrackerTest {
 
-    private class AppStateTrackerTestable extends AppStateTracker {
+    private class AppStateTrackerTestable extends AppStateTrackerImpl {
         AppStateTrackerTestable() {
             super(mMockContext, Looper.getMainLooper());
         }
@@ -722,7 +722,7 @@ public class AppStateTrackerTest {
                 AppOpsManager.MODE_IGNORED,
                 Collections.emptyMap()));
         entries.add(new OpEntry(
-                AppStateTracker.TARGET_OP,
+                AppStateTrackerImpl.TARGET_OP,
                 AppOpsManager.MODE_IGNORED,
                 Collections.emptyMap()));
 
@@ -731,7 +731,7 @@ public class AppStateTrackerTest {
         //--------------------------------------------------
         entries = new ArrayList<>();
         entries.add(new OpEntry(
-                AppStateTracker.TARGET_OP,
+                AppStateTrackerImpl.TARGET_OP,
                 AppOpsManager.MODE_IGNORED,
                 Collections.emptyMap()));
 
@@ -740,7 +740,7 @@ public class AppStateTrackerTest {
         //--------------------------------------------------
         entries = new ArrayList<>();
         entries.add(new OpEntry(
-                AppStateTracker.TARGET_OP,
+                AppStateTrackerImpl.TARGET_OP,
                 AppOpsManager.MODE_ALLOWED,
                 Collections.emptyMap()));
 
@@ -749,7 +749,7 @@ public class AppStateTrackerTest {
         //--------------------------------------------------
         entries = new ArrayList<>();
         entries.add(new OpEntry(
-                AppStateTracker.TARGET_OP,
+                AppStateTrackerImpl.TARGET_OP,
                 AppOpsManager.MODE_IGNORED,
                 Collections.emptyMap()));
         entries.add(new OpEntry(
@@ -1266,7 +1266,7 @@ public class AppStateTrackerTest {
 
     private void checkAnyAppIdUnwhitelisted(int[] prevArray, int[] newArray, boolean expected) {
         assertEquals("Input: " + Arrays.toString(prevArray) + " " + Arrays.toString(newArray),
-                expected, AppStateTracker.isAnyAppIdUnwhitelisted(prevArray, newArray));
+                expected, AppStateTrackerImpl.isAnyAppIdUnwhitelisted(prevArray, newArray));
 
         // Also test isAnyAppIdUnwhitelistedSlow.
         assertEquals("Input: " + Arrays.toString(prevArray) + " " + Arrays.toString(newArray),
@@ -1298,7 +1298,7 @@ public class AppStateTrackerTest {
             final int[] array2 = makeRandomArray();
 
             final boolean expected = isAnyAppIdUnwhitelistedSlow(array1, array2);
-            final boolean actual = AppStateTracker.isAnyAppIdUnwhitelisted(array1, array2);
+            final boolean actual = AppStateTrackerImpl.isAnyAppIdUnwhitelisted(array1, array2);
 
             assertEquals("Input: " + Arrays.toString(array1) + " " + Arrays.toString(array2),
                     expected, actual);
