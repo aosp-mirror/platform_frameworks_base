@@ -1019,12 +1019,6 @@ public class ActivityManager {
         return ActivityTaskManager.getMaxRecentTasksStatic();
     }
 
-    /** @removed */
-    @Deprecated
-    public static int getMaxNumPictureInPictureActions() {
-        return 3;
-    }
-
     /**
      * Information you can set and retrieve about the current activity within the recent task list.
      */
