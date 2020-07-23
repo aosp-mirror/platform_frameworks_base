@@ -153,6 +153,20 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
+    public void testIsPanicButtonGestureEnabled_settingDisabled() {
+        withPanicGestureEnabledSettingValue(false);
+        assertFalse(mGestureLauncherService.isPanicButtonGestureEnabled(
+                mContext, FAKE_USER_ID));
+    }
+
+    @Test
+    public void testIsPanicButtonGestureEnabled_settingEnabled() {
+        withPanicGestureEnabledSettingValue(true);
+        assertTrue(mGestureLauncherService.isPanicButtonGestureEnabled(
+                mContext, FAKE_USER_ID));
+    }
+
+    @Test
     public void testHandleCameraLaunchGesture_userSetupComplete() {
         withUserSetupCompleteValue(true);
 
@@ -879,6 +893,14 @@ public class GestureLauncherServiceTest {
                 mContentResolver,
                 Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
                 disableSettingValue,
+                UserHandle.USER_CURRENT);
+    }
+
+    private void withPanicGestureEnabledSettingValue(boolean enable) {
+        Settings.Secure.putIntForUser(
+                mContentResolver,
+                Settings.Secure.PANIC_GESTURE_ENABLED,
+                enable ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
 

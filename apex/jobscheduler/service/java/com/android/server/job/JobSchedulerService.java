@@ -86,6 +86,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.AppStateTracker;
+import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
@@ -283,7 +284,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     IBatteryStats mBatteryStats;
     DeviceIdleInternal mLocalDeviceIdleController;
     @VisibleForTesting
-    AppStateTracker mAppStateTracker;
+    AppStateTrackerImpl mAppStateTracker;
     final UsageStatsManagerInternal mUsageStats;
     private final AppStandbyInternal mAppStandbyInternal;
 
@@ -1524,7 +1525,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 controller.onSystemServicesReady();
             }
 
-            mAppStateTracker = Objects.requireNonNull(
+            mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
                     LocalServices.getService(AppStateTracker.class));
 
             // Register br for package removals and user removals.

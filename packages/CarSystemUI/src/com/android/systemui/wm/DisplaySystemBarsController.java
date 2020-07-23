@@ -29,8 +29,11 @@ import android.view.WindowInsets;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.TransactionPool;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TransactionPool;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

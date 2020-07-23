@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.wmshell.WindowManagerShellModule;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -71,7 +72,7 @@ import dagger.Provides;
  * A dagger module for injecting default implementations of components of System UI that may be
  * overridden by the System UI implementation.
  */
-@Module(includes = {DividerModule.class, QSModule.class})
+@Module(includes = {DividerModule.class, QSModule.class, WindowManagerShellModule.class})
 public abstract class SystemUIDefaultModule {
 
     @Singleton

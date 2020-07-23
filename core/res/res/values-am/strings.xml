@@ -832,7 +832,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ለመክፈት ምናሌ ተጫንወይም የአደጋ ጊዜ ጥሪ አድርግ።"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ለመክፈት ምናሌ ተጫን"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ለመክፈት ስርዓተ ጥለት ሳል"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ድንገተኛ አደጋ"</string>
+    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ወደ ጥሪ ተመለስ"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ትክክል!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"እንደገና ሞክር"</string>

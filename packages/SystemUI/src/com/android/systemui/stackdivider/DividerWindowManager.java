@@ -32,7 +32,7 @@ import android.os.Binder;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.android.systemui.wm.SystemWindows;
+import com.android.wm.shell.common.SystemWindows;
 
 /**
  * Manages the window parameters of the docked stack divider.

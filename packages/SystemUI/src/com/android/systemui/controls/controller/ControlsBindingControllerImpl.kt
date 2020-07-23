@@ -49,6 +49,11 @@ open class ControlsBindingControllerImpl @Inject constructor(
         private const val SUGGESTED_STRUCTURES = 6L
         private const val SUGGESTED_CONTROLS_REQUEST =
             ControlsControllerImpl.SUGGESTED_CONTROLS_PER_STRUCTURE * SUGGESTED_STRUCTURES
+
+        private val emptyCallback = object : ControlsBindingController.LoadCallback {
+            override fun accept(controls: List<Control>) {}
+            override fun error(message: String) {}
+        }
     }
 
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
@@ -283,7 +288,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     }
 
     private inner class LoadSubscriber(
-        val callback: ControlsBindingController.LoadCallback,
+        var callback: ControlsBindingController.LoadCallback,
         val requestLimit: Long
     ) : IControlsSubscriber.Stub() {
         val loadedControls = ArrayList<Control>()
@@ -337,6 +342,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
             if (isTerminated.get()) return
 
             _loadCancelInternal = {}
+
+            // Reassign the callback to clear references to other areas of code. Binders such as
+            // this may not be GC'd right away, so do not hold onto these references.
+            callback = emptyCallback
             currentProvider?.cancelLoadTimeout()
 
             backgroundExecutor.execute {

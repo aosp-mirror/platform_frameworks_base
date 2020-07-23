@@ -20518,4 +20518,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             Binder.restoreCallingIdentity(token);
         }
     }
+
+    /**
+     * Resets the state of the {@link com.android.server.am.AppErrors} instance.
+     * This is intended for testing within the CTS only and is protected by
+     * android.permission.RESET_APP_ERRORS.
+     */
+    @Override
+    public void resetAppErrors() {
+        enforceCallingPermission(Manifest.permission.RESET_APP_ERRORS, "resetAppErrors");
+        synchronized (this) {
+            mAppErrors.resetStateLocked();
+        }
+    }
 }

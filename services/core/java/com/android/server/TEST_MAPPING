@@ -25,21 +25,6 @@
         {
             "name": "CtsScopedStorageHostTest",
             "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "FrameworksMockingServicesTests",
-            "file_patterns": ["AppStateTracker\\.java"],
-            "options": [
-                {
-                    "include-filter": "com.android.server.AppStateTrackerTest"
-                },
-                {
-                    "include-annotation": "android.platform.test.annotations.Presubmit"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
         }
     ]
 }

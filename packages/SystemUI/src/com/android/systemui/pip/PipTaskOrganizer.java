@@ -58,8 +58,8 @@ import android.window.WindowOrganizer;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.pip.phone.PipUpdateThread;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.wm.DisplayController;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

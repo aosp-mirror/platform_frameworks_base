@@ -89,8 +89,8 @@ final class BroadcastRecord extends Binder {
     int manifestSkipCount;  // number of manifest receivers skipped.
     BroadcastQueue queue;   // the outbound queue handling this broadcast
 
-    // if set to true, app's process will be temporarily whitelisted to start activities
-    // from background for the duration of the broadcast dispatch
+    // if set to true, app's process will be temporarily allowed to start activities from background
+    // for the duration of the broadcast dispatch
     final boolean allowBackgroundActivityStarts;
 
     static final int IDLE = 0;

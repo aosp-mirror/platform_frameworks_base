@@ -164,7 +164,7 @@ public class DeviceIdleControllerTest {
         }
 
         @Override
-        AppStateTracker getAppStateTracker(Context ctx, Looper loop) {
+        AppStateTrackerImpl getAppStateTracker(Context ctx, Looper loop) {
             return mAppStateTracker;
         }
 
@@ -260,7 +260,7 @@ public class DeviceIdleControllerTest {
         }
     }
 
-    private class AppStateTrackerForTest extends AppStateTracker {
+    private class AppStateTrackerForTest extends AppStateTrackerImpl {
         AppStateTrackerForTest(Context ctx, Looper looper) {
             super(ctx, looper);
         }

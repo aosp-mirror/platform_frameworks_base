@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.tests;
+package com.android.systemui.privacy
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.SmallTest;
+import com.android.internal.logging.UiEvent
+import com.android.internal.logging.UiEventLogger
 
-import com.android.wm.shell.WindowManagerShell;
+enum class PrivacyChipEvent(private val _id: Int) : UiEventLogger.UiEventEnum {
+    @UiEvent(doc = "Privacy chip is viewed by the user. Logged at most once per time QS is visible")
+    ONGOING_INDICATORS_CHIP_VIEW(601),
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+    @UiEvent(doc = "Privacy chip is clicked")
+    ONGOING_INDICATORS_CHIP_CLICK(602);
 
-/**
- * Tests for the shell.
- */
-@SmallTest
-@RunWith(AndroidJUnit4.class)
-public class WindowManagerShellTest {
-
-    WindowManagerShell mShell;
-
-    @Test
-    public void testNothing() {
-        // Do nothing
-    }
+    override fun getId() = _id
 }

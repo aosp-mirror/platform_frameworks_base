@@ -832,7 +832,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Кулпусун ачып же Шашылыш чалуу аткаруу үчүн менюну басыңыз."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Бөгөттөн чыгаруу үчүн Менюну басыңыз."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Кулпуну ачуу үчүн, үлгүнү тартыңыз"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Тез жардам"</string>
+    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Чалууга кайтуу"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Туура!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дагы аракет кылыңыз"</string>
@@ -1125,7 +1126,7 @@
     <string name="capital_off" msgid="7443704171014626777">"ӨЧҮК"</string>
     <string name="checked" msgid="9179896827054513119">"белгиленген"</string>
     <string name="not_checked" msgid="7972320087569023342">"белгилене элек"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Аракет колдонууну бүтүрүү"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Кайсынысын колдоносуз?"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s аркылуу аракетти аягына чейин чыгаруу"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Аракетти аягына чыгаруу"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Төмөнкү менен ачуу"</string>

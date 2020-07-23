@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -163,7 +164,8 @@ public class DozeTriggers implements DozeMachine.Part {
             DozeParameters dozeParameters, AsyncSensorManager sensorManager,
             WakeLock wakeLock, DockManager dockManager,
             ProximitySensor proximitySensor, ProximitySensor.ProximityCheck proxCheck,
-            DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher) {
+            DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher,
+            SecureSettings secureSettings) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -172,7 +174,8 @@ public class DozeTriggers implements DozeMachine.Part {
         mWakeLock = wakeLock;
         mAllowPulseTriggers = true;
         mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
-                config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor);
+                config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
+                secureSettings);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = proxCheck;

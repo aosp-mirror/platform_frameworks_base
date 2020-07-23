@@ -56,9 +56,8 @@ import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.systemui.wm.DisplayChangeController;
-import com.android.systemui.wm.DisplayController;
-import com.android.systemui.wm.DisplayLayout;
+import com.android.wm.shell.common.DisplayChangeController;
+import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
 
@@ -79,7 +78,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
     private final Rect mTmpNormalBounds = new Rect();
-    private final Rect mReentryBounds = new Rect();
+    protected final Rect mReentryBounds = new Rect();
 
     private PipBoundsHandler mPipBoundsHandler;
     private InputConsumerController mInputConsumerController;

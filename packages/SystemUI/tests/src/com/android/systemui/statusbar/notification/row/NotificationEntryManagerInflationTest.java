@@ -184,7 +184,9 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
-                mock(ForegroundServiceDismissalFeatureController.class)
+                mock(ForegroundServiceDismissalFeatureController.class),
+                mock(HeadsUpManager.class),
+                mock(StatusBarStateController.class)
         );
 
         NotifRemoteViewCache cache = new NotifRemoteViewCacheImpl(mEntryManager);

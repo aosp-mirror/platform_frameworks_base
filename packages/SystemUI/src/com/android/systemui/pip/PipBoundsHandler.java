@@ -39,8 +39,8 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.window.WindowContainerTransaction;
 
-import com.android.systemui.wm.DisplayController;
-import com.android.systemui.wm.DisplayLayout;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
 

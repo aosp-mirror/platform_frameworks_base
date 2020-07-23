@@ -122,8 +122,8 @@ static jlongArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv* e
     ScopedUtfChars nameChars(env, nameObj);
     std::string name = nameChars.c_str();
 
-    std::shared_ptr<InputChannel> serverChannel;
-    std::shared_ptr<InputChannel> clientChannel;
+    std::unique_ptr<InputChannel> serverChannel;
+    std::unique_ptr<InputChannel> clientChannel;
     status_t result = InputChannel::openInputChannelPair(name, serverChannel, clientChannel);
 
     if (result) {
@@ -139,12 +139,12 @@ static jlongArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv* e
     }
 
     jlong* outArray = env->GetLongArrayElements(channelPair, 0);
-    outArray[0] = android_view_InputChannel_createInputChannel(env, serverChannel);
+    outArray[0] = android_view_InputChannel_createInputChannel(env, std::move(serverChannel));
     if (env->ExceptionCheck()) {
         return nullptr;
     }
 
-    outArray[1] = android_view_InputChannel_createInputChannel(env, clientChannel);
+    outArray[1] = android_view_InputChannel_createInputChannel(env, std::move(clientChannel));
     if (env->ExceptionCheck()) {
         return nullptr;
     }

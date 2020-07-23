@@ -103,17 +103,16 @@ public abstract class ActivityManagerInternal {
             IBinder whitelistToken, long duration);
 
     /**
-     * Allows for a {@link PendingIntent} to be whitelisted to start activities from background.
+     * Allows a {@link PendingIntent} to start activities from background.
      */
     public abstract void setPendingIntentAllowBgActivityStarts(
-            IIntentSender target, IBinder whitelistToken, int flags);
+            IIntentSender target, IBinder allowlistToken, int flags);
 
     /**
-     * Voids {@link PendingIntent}'s privilege to be whitelisted to start activities from
-     * background.
+     * Voids {@link PendingIntent}'s privilege to start activities from background.
      */
     public abstract void clearPendingIntentAllowBgActivityStarts(IIntentSender target,
-            IBinder whitelistToken);
+            IBinder allowlistToken);
 
     /**
      * Allow DeviceIdleController to tell us about what apps are whitelisted.
