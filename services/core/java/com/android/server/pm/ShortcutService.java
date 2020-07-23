@@ -108,6 +108,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -614,13 +615,13 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mService.handleStopUser(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            mService.handleStopUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(int userId) {
-            mService.handleUnlockUser(userId);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.handleUnlockUser(user.getUserIdentifier());
         }
     }
 

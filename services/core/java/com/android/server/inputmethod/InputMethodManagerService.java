@@ -159,6 +159,7 @@ import com.android.internal.view.InputBindResult;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
@@ -1596,10 +1597,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onSwitchUser(@UserIdInt int userHandle) {
+        public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
             // Called on ActivityManager thread.
             synchronized (mService.mMethodMap) {
-                mService.scheduleSwitchUserTaskLocked(userHandle, null /* clientToBeReset */);
+                mService.scheduleSwitchUserTaskLocked(to.getUserIdentifier(),
+                        /* clientToBeReset= */ null);
             }
         }
 
@@ -1615,10 +1617,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onUnlockUser(final @UserIdInt int userHandle) {
+        public void onUserUnlocking(@NonNull TargetUser user) {
             // Called on ActivityManager thread.
             mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER,
-                    userHandle /* arg1 */, 0 /* arg2 */));
+                    /* arg1= */ user.getUserIdentifier(), /* arg2= */ 0));
         }
     }
 

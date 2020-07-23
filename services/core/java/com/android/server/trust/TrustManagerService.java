@@ -17,6 +17,8 @@
 package com.android.server.trust;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -71,6 +73,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1042,28 +1045,28 @@ public class TrustManagerService extends SystemService {
     // User lifecycle
 
     @Override
-    public void onStartUser(int userId) {
-        mHandler.obtainMessage(MSG_START_USER, userId, 0, null).sendToTarget();
+    public void onUserStarting(@NonNull TargetUser user) {
+        mHandler.obtainMessage(MSG_START_USER, user.getUserIdentifier(), 0, null).sendToTarget();
     }
 
     @Override
-    public void onCleanupUser(int userId) {
-        mHandler.obtainMessage(MSG_CLEANUP_USER, userId, 0, null).sendToTarget();
+    public void onUserStopped(@NonNull TargetUser user) {
+        mHandler.obtainMessage(MSG_CLEANUP_USER, user.getUserIdentifier(), 0, null).sendToTarget();
     }
 
     @Override
-    public void onSwitchUser(int userId) {
-        mHandler.obtainMessage(MSG_SWITCH_USER, userId, 0, null).sendToTarget();
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        mHandler.obtainMessage(MSG_SWITCH_USER, to.getUserIdentifier(), 0, null).sendToTarget();
     }
 
     @Override
-    public void onUnlockUser(int userId) {
-        mHandler.obtainMessage(MSG_UNLOCK_USER, userId, 0, null).sendToTarget();
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        mHandler.obtainMessage(MSG_UNLOCK_USER, user.getUserIdentifier(), 0, null).sendToTarget();
     }
 
     @Override
-    public void onStopUser(@UserIdInt int userId) {
-        mHandler.obtainMessage(MSG_STOP_USER, userId, 0, null).sendToTarget();
+    public void onUserStopping(@NonNull TargetUser user) {
+        mHandler.obtainMessage(MSG_STOP_USER, user.getUserIdentifier(), 0, null).sendToTarget();
     }
 
     // Plumbing

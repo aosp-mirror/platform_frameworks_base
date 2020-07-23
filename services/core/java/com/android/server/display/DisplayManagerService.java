@@ -104,6 +104,7 @@ import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.UiThread;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
@@ -417,7 +418,8 @@ public final class DisplayManagerService extends SystemService {
     }
 
     @Override
-    public void onSwitchUser(@UserIdInt int newUserId) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        final int newUserId = to.getUserIdentifier();
         final int userSerial = getUserManager().getUserSerialNumber(newUserId);
         synchronized (mSyncRoot) {
             if (mCurrentUserId != newUserId) {

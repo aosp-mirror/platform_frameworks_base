@@ -354,6 +354,7 @@ import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
@@ -2391,8 +2392,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onCleanupUser(int userId) {
-            mService.mBatteryStatsService.onCleanupUser(userId);
+        public void onUserStopped(@NonNull TargetUser user) {
+            mService.mBatteryStatsService.onCleanupUser(user.getUserIdentifier());
         }
 
         public ActivityManagerService getService() {

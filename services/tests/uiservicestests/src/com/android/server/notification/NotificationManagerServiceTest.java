@@ -166,6 +166,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -178,7 +179,6 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -6434,7 +6434,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnUnlockUser() {
         UserInfo ui = new UserInfo();
         ui.id = 10;
-        mService.onUnlockUser(ui);
+        mService.onUserUnlocking(new TargetUser(ui));
         waitForIdle();
 
         verify(mHistoryManager, timeout(MAX_POST_DELAY).times(1)).onUserUnlocked(ui.id);
@@ -6444,7 +6444,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnStopUser() {
         UserInfo ui = new UserInfo();
         ui.id = 10;
-        mService.onStopUser(ui);
+        mService.onUserStopping(new TargetUser(ui));
         waitForIdle();
 
         verify(mHistoryManager, timeout(MAX_POST_DELAY).times(1)).onUserStopped(ui.id);

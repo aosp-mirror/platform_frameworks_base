@@ -221,14 +221,6 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
-    @Override
-    public void onStartUser(int userHandle) {
-    }
-
-    @Override
-    public void onSwitchUser(int userHandle) {
-    }
-
     private synchronized void initSoundTriggerHelper() {
         if (mSoundTriggerHelper == null) {
             mSoundTriggerHelper = new SoundTriggerHelper(mContext);
