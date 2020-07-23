@@ -52,16 +52,16 @@ public class WindowManagerShellModule {
 
     @Singleton
     @Provides
-    static SystemWindows provideSystemWindows(Context context, DisplayController displayController,
+    static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
-        return new SystemWindows(context, displayController, wmService);
+        return new SystemWindows(displayController, wmService);
     }
 
     @Singleton
     @Provides
     static DisplayImeController provideDisplayImeController(
-            SystemWindows syswin, DisplayController displayController,
+            IWindowManager wmService, DisplayController displayController,
             @Main Handler mainHandler, TransactionPool transactionPool) {
-        return new DisplayImeController(syswin, displayController, mainHandler, transactionPool);
+        return new DisplayImeController(wmService, displayController, mainHandler, transactionPool);
     }
 }

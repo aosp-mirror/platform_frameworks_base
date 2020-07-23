@@ -34,7 +34,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
 import org.junit.Before;
@@ -53,8 +52,6 @@ public class DisplaySystemBarsControllerTest extends SysuiTestCase {
     private static final int DISPLAY_ID = 1;
 
     @Mock
-    private SystemWindows mSystemWindows;
-    @Mock
     private IWindowManager mIWindowManager;
     @Mock
     private DisplayController mDisplayController;
@@ -66,11 +63,10 @@ public class DisplaySystemBarsControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mSystemWindows.mContext = mContext;
-        mSystemWindows.mWmService = mIWindowManager;
 
         mController = new DisplaySystemBarsController(
-                mSystemWindows,
+                mContext,
+                mIWindowManager,
                 mDisplayController,
                 mHandler,
                 mTransactionPool
