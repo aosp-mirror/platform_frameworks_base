@@ -337,6 +337,11 @@ public class AppTransition implements Dump {
         mNextAppTransitionFlags |= flags;
         setLastAppTransition(TRANSIT_UNSET, null, null, null);
         updateBooster();
+        if (isTransitionSet()) {
+            removeAppTransitionTimeoutCallbacks();
+            mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable,
+                    APP_TRANSITION_TIMEOUT_MS);
+        }
     }
 
     void setLastAppTransition(int transit, ActivityRecord openingApp, ActivityRecord closingApp,
@@ -2229,12 +2234,7 @@ public class AppTransition implements Dump {
                 setAppTransition(transit, flags);
             }
         }
-        boolean prepared = prepare();
-        if (isTransitionSet()) {
-            removeAppTransitionTimeoutCallbacks();
-            mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable, APP_TRANSITION_TIMEOUT_MS);
-        }
-        return prepared;
+        return prepare();
     }
 
     /**

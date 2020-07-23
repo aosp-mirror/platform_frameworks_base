@@ -4114,6 +4114,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Now that the app is going invisible, we can remove it. It will be restarted
             // if made visible again.
             removeDeadWindows();
+            // If this activity is about to finish/stopped and now becomes invisible, remove it
+            // from the unknownApp list in case the activity does not want to draw anything, which
+            // keep the user waiting for the next transition to start.
+            if (finishing || isState(STOPPED)) {
+                displayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+            }
         } else {
             if (!appTransition.isTransitionSet()
                     && appTransition.isReady()) {
