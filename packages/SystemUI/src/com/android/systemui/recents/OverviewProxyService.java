@@ -809,7 +809,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     @Override
     public void addCallback(OverviewProxyListener listener) {
-        mConnectionCallbacks.add(listener);
+        if (!mConnectionCallbacks.contains(listener)) {
+            mConnectionCallbacks.add(listener);
+        }
         listener.onConnectionChanged(mOverviewProxy != null);
         listener.onNavBarButtonAlphaChanged(mNavBarButtonAlpha, false);
     }
