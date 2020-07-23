@@ -45,6 +45,7 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -529,6 +530,11 @@ public class AuthControllerTest extends SysuiTestCase {
         @Override
         IActivityTaskManager getActivityTaskManager() {
             return mock(IActivityTaskManager.class);
+        }
+
+        @Override
+        FingerprintManager getFingerprintManager(Context context) {
+            return mock(FingerprintManager.class);
         }
     }
 }
