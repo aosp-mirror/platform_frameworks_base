@@ -109,8 +109,8 @@ void RenderProxy::setOpaque(bool opaque) {
     mRenderThread.queue().post([=]() { mContext->setOpaque(opaque); });
 }
 
-void RenderProxy::setWideGamut(bool wideGamut) {
-    mRenderThread.queue().post([=]() { mContext->setWideGamut(wideGamut); });
+void RenderProxy::setColorMode(ColorMode mode) {
+    mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
 }
 
 int64_t* RenderProxy::frameInfo() {

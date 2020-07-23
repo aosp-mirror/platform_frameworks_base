@@ -174,7 +174,10 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     } else {
         mNativeSurface = nullptr;
     }
+    setupPipelineSurface();
+}
 
+void CanvasContext::setupPipelineSurface() {
     bool hasSurface = mRenderPipeline->setSurface(
             mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior);
 
@@ -184,7 +187,7 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
 
     mFrameNumber = -1;
 
-    if (window != nullptr && hasSurface) {
+    if (mNativeSurface != nullptr && hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
         // Enable frame stats after the surface has been bound to the appropriate graphics API.
@@ -239,9 +242,9 @@ void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
 }
 
-void CanvasContext::setWideGamut(bool wideGamut) {
-    ColorMode colorMode = wideGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
-    mRenderPipeline->setSurfaceColorProperties(colorMode);
+void CanvasContext::setColorMode(ColorMode mode) {
+    mRenderPipeline->setSurfaceColorProperties(mode);
+    setupPipelineSurface();
 }
 
 bool CanvasContext::makeCurrent() {

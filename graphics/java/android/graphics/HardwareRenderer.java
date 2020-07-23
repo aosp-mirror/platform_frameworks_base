@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
@@ -157,7 +158,7 @@ public class HardwareRenderer {
     protected RenderNode mRootNode;
     private boolean mOpaque = true;
     private boolean mForceDark = false;
-    private boolean mIsWideGamut = false;
+    private @ActivityInfo.ColorMode int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
 
     /**
      * Creates a new instance of a HardwareRenderer. The HardwareRenderer will default
@@ -167,7 +168,7 @@ public class HardwareRenderer {
         ProcessInitializer.sInstance.initDisplayInfo();
         mRootNode = RenderNode.adopt(nCreateRootRenderNode());
         mRootNode.setClipToBounds(false);
-        mNativeProxy = nCreateProxy(!mOpaque, mIsWideGamut, mRootNode.mNativeRenderNode);
+        mNativeProxy = nCreateProxy(!mOpaque, mRootNode.mNativeRenderNode);
         if (mNativeProxy == 0) {
             throw new OutOfMemoryError("Unable to create hardware renderer");
         }
@@ -619,17 +620,17 @@ public class HardwareRenderer {
     }
 
     /**
-     * Enable/disable wide gamut rendering on this renderer. Whether or not the actual rendering
-     * will be wide gamut depends on the hardware support for such rendering.
+     * Sets the desired color mode on this renderer. Whether or not the actual rendering
+     * will use the requested colorMode depends on the hardware support for such rendering.
      *
-     * @param wideGamut true if this renderer should render in wide gamut, false if it should
-     *                  render in sRGB
-     *                  TODO: Figure out color...
+     * @param colorMode The @{@link ActivityInfo.ColorMode} to request
      * @hide
      */
-    public void setWideGamut(boolean wideGamut) {
-        mIsWideGamut = wideGamut;
-        nSetWideGamut(mNativeProxy, wideGamut);
+    public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
+        if (mColorMode != colorMode) {
+            mColorMode = colorMode;
+            nSetColorMode(mNativeProxy, colorMode);
+        }
     }
 
     /**
@@ -802,11 +803,6 @@ public class HardwareRenderer {
     /** @hide */
     public void setPictureCaptureCallback(@Nullable PictureCapturedCallback callback) {
         nSetPictureCaptureCallback(mNativeProxy, callback);
-    }
-
-    /** @hide */
-    public boolean isWideGamut() {
-        return mIsWideGamut;
     }
 
     /** called by native */
@@ -1207,8 +1203,7 @@ public class HardwareRenderer {
 
     private static native long nCreateRootRenderNode();
 
-    private static native long nCreateProxy(boolean translucent, boolean isWideGamut,
-            long rootRenderNode);
+    private static native long nCreateProxy(boolean translucent, long rootRenderNode);
 
     private static native void nDeleteProxy(long nativeProxy);
 
@@ -1230,7 +1225,7 @@ public class HardwareRenderer {
 
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
 
-    private static native void nSetWideGamut(long nativeProxy, boolean wideGamut);
+    private static native void nSetColorMode(long nativeProxy, int colorMode);
 
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
 
