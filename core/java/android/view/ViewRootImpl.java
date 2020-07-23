@@ -462,6 +462,7 @@ public final class ViewRootImpl implements ViewParent,
     // used in relayout to get SurfaceControl size
     // for BLAST adapter surface setup
     private final Point mSurfaceSize = new Point();
+    private final Point mLastSurfaceSize = new Point();
 
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
@@ -2636,9 +2637,12 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 cutoutChanged = !mPendingDisplayCutout.equals(mAttachInfo.mDisplayCutout);
-                surfaceSizeChanged = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
-                final boolean alwaysConsumeSystemBarsChanged =
+                surfaceSizeChanged = false;
+                if (!mLastSurfaceSize.equals(mSurfaceSize)) {
+                    surfaceSizeChanged = true;
+                    mLastSurfaceSize.set(mSurfaceSize.x, mSurfaceSize.y);
+                }
+                  final boolean alwaysConsumeSystemBarsChanged =
                         mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars;
                 updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();
