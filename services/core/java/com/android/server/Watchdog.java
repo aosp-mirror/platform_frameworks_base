@@ -99,6 +99,7 @@ public class Watchdog {
             "android.hardware.audio@4.0::IDevicesFactory",
             "android.hardware.audio@5.0::IDevicesFactory",
             "android.hardware.audio@6.0::IDevicesFactory",
+            "android.hardware.audio@7.0::IDevicesFactory",
             "android.hardware.biometrics.face@1.0::IBiometricsFace",
             "android.hardware.biometrics.fingerprint@2.1::IBiometricsFingerprint",
             "android.hardware.bluetooth@1.0::IBluetoothHci",
