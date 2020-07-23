@@ -244,7 +244,7 @@ abstract class HdmiCecLocalDevice {
         if (dest != mAddress && dest != Constants.ADDR_BROADCAST) {
             return false;
         }
-        // Cache incoming message. Note that it caches only white-listed one.
+        // Cache incoming message if it is included in the list of cacheable opcodes.
         mCecMessageCache.cacheMessage(message);
         return onMessage(message);
     }
