@@ -92,6 +92,10 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addUsesOptionalLibrary(String libraryName);
 
+    ParsingPackage addUsesNativeLibrary(String libraryName);
+
+    ParsingPackage addUsesOptionalNativeLibrary(String libraryName);
+
     ParsingPackage addUsesStaticLibrary(String libraryName);
 
     ParsingPackage addUsesStaticLibraryCertDigests(String[] certSha256Digests);
@@ -218,6 +222,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setVmSafeMode(boolean vmSafeMode);
 
     ParsingPackage removeUsesOptionalLibrary(String libraryName);
+
+    ParsingPackage removeUsesOptionalNativeLibrary(String libraryName);
 
     ParsingPackage setAnyDensity(int anyDensity);
 

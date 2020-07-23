@@ -412,6 +412,12 @@ public final class LoadedApk {
             return;
         }
         for (SharedLibraryInfo lib : sharedLibraries) {
+            if (lib.isNative()) {
+                // Native shared lib doesn't contribute to the native lib search path. Its name is
+                // sent to libnativeloader and then the native shared lib is exported from the
+                // default linker namespace.
+                continue;
+            }
             List<String> paths = lib.getAllCodePaths();
             outSeenPaths.addAll(paths);
             for (String path : paths) {
@@ -696,6 +702,12 @@ public final class LoadedApk {
         }
         List<ClassLoader> loaders = new ArrayList<>();
         for (SharedLibraryInfo info : sharedLibraries) {
+            if (info.isNative()) {
+                // Native shared lib doesn't contribute to the native lib search path. Its name is
+                // sent to libnativeloader and then the native shared lib is exported from the
+                // default linker namespace.
+                continue;
+            }
             loaders.add(createSharedLibraryLoader(
                     info, isBundledApp, librarySearchPath, libraryPermittedPath));
         }
@@ -898,10 +910,19 @@ public final class LoadedApk {
                     mApplicationInfo.sharedLibraryInfos, isBundledApp, librarySearchPath,
                     libraryPermittedPath);
 
+            List<String> nativeSharedLibraries = new ArrayList<>();
+            if (mApplicationInfo.sharedLibraryInfos != null) {
+                for (SharedLibraryInfo info : mApplicationInfo.sharedLibraryInfos) {
+                    if (info.isNative()) {
+                        nativeSharedLibraries.add(info.getName());
+                    }
+                }
+            }
+
             mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(
                     zip, mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
-                    mApplicationInfo.classLoaderName, sharedLibraries);
+                    mApplicationInfo.classLoaderName, sharedLibraries, nativeSharedLibraries);
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
 
             setThreadPolicy(oldPolicy);
