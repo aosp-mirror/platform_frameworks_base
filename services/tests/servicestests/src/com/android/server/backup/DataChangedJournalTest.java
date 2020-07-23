@@ -39,7 +39,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @SmallTest
@@ -90,7 +89,13 @@ public class DataChangedJournalTest {
 
     @Test
     public void equals_isTrueForTheSameFile() throws Exception {
-        assertThat(mJournal.equals(new DataChangedJournal(mFile))).isTrue();
+        assertEqualsBothWaysAndHashCode(mJournal, new DataChangedJournal(mFile));
+    }
+
+    private static <T> void assertEqualsBothWaysAndHashCode(T a, T b) {
+        assertEquals(a, b);
+        assertEquals(b, a);
+        assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
@@ -117,9 +122,7 @@ public class DataChangedJournalTest {
         DataChangedJournal.newJournal(folder);
         DataChangedJournal.newJournal(folder);
 
-        ArrayList<DataChangedJournal> journals = DataChangedJournal.listJournals(folder);
-
-        assertThat(journals).hasSize(2);
+        assertThat(DataChangedJournal.listJournals(folder)).hasSize(2);
     }
 
     @Test
@@ -140,6 +143,6 @@ public class DataChangedJournalTest {
     public void listJournals_invalidJournalFile_returnsEmptyList() throws Exception {
         when(invalidFile.listFiles()).thenReturn(null);
 
-        assertEquals(0, DataChangedJournal.listJournals(invalidFile).size());
+        assertThat(DataChangedJournal.listJournals(invalidFile)).isEmpty();
     }
 }

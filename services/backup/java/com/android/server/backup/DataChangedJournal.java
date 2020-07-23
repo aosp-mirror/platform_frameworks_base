@@ -36,7 +36,7 @@ import java.util.function.Consumer;
  * <p>This information is persisted to the filesystem so that it is not lost in the event of a
  * reboot.
  */
-public class DataChangedJournal {
+public final class DataChangedJournal {
     private static final String TAG = "DataChangedJournal";
     private static final String FILE_NAME_PREFIX = "journal";
 
@@ -53,6 +53,7 @@ public class DataChangedJournal {
     DataChangedJournal(File file) {
         mFile = file;
     }
+
 
     /**
      * Adds the given package to the journal.
@@ -107,14 +108,15 @@ public class DataChangedJournal {
     }
 
     @Override
+    public int hashCode() {
+        return mFile.hashCode();
+    }
+
+    @Override
     public boolean equals(@Nullable Object object) {
         if (object instanceof DataChangedJournal) {
             DataChangedJournal that = (DataChangedJournal) object;
-            try {
-                return this.mFile.getCanonicalPath().equals(that.mFile.getCanonicalPath());
-            } catch (IOException exception) {
-                return false;
-            }
+            return mFile.equals(that.mFile);
         }
         return false;
     }

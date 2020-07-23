@@ -1155,7 +1155,6 @@ public class UserBackupManagerService {
 
     private void parseLeftoverJournals() {
         ArrayList<DataChangedJournal> journals = DataChangedJournal.listJournals(mJournalDir);
-        // TODO(b/162022005): Fix DataChangedJournal implementing equals() but not hashCode().
         journals.removeAll(Collections.singletonList(mJournal));
         if (!journals.isEmpty()) {
             Slog.i(TAG, addUserIdToLogMessage(mUserId,
