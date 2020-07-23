@@ -18530,7 +18530,6 @@ public class PackageManagerService extends IPackageManager.Stub
         // user handle installed state
         int[] allUsers;
         /** enabled state of the uninstalled application */
-        final int origEnabledState;
         synchronized (mLock) {
             uninstalledPs = mSettings.mPackages.get(packageName);
             if (uninstalledPs == null) {
@@ -18546,10 +18545,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             disabledSystemPs = mSettings.getDisabledSystemPkgLPr(packageName);
-            // Save the enabled state before we delete the package. When deleting a stub
-            // application we always set the enabled state to 'disabled'.
-            origEnabledState = uninstalledPs == null
-                    ? COMPONENT_ENABLED_STATE_DEFAULT : uninstalledPs.getEnabled(userId);
             // Static shared libs can be declared by any package, so let us not
             // allow removing a package if it provides a lib others depend on.
             pkg = mPackages.get(packageName);
@@ -18628,20 +18623,32 @@ public class PackageManagerService extends IPackageManager.Stub
             if (stubPkg != null && stubPkg.isStub()) {
                 final PackageSetting stubPs;
                 synchronized (mLock) {
-                    // restore the enabled state of the stub; the state is overwritten when
-                    // the stub is uninstalled
                     stubPs = mSettings.getPackageLPr(stubPkg.getPackageName());
-                    if (stubPs != null) {
-                        stubPs.setEnabled(origEnabledState, userId, "android");
-                    }
                 }
-                if (origEnabledState == COMPONENT_ENABLED_STATE_DEFAULT
-                        || origEnabledState == COMPONENT_ENABLED_STATE_ENABLED) {
-                    if (DEBUG_COMPRESSION) {
-                        Slog.i(TAG, "Enabling system stub after removal; pkg: "
-                                + stubPkg.getPackageName());
+
+                if (stubPs != null) {
+                    boolean enable = false;
+                    for (int aUserId : allUsers) {
+                        if (stubPs.getInstalled(aUserId)) {
+                            int enabled = stubPs.getEnabled(aUserId);
+                            if (enabled == COMPONENT_ENABLED_STATE_DEFAULT
+                                    || enabled == COMPONENT_ENABLED_STATE_ENABLED) {
+                                enable = true;
+                                break;
+                            }
+                        }
                     }
-                    enableCompressedPackage(stubPkg, stubPs);
+
+                    if (enable) {
+                        if (DEBUG_COMPRESSION) {
+                            Slog.i(TAG, "Enabling system stub after removal; pkg: "
+                                    + stubPkg.getPackageName());
+                        }
+                        enableCompressedPackage(stubPkg, stubPs);
+                    } else if (DEBUG_COMPRESSION) {
+                        Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
+                                + "after removal; pkg: " + stubPkg.getPackageName());
+                    }
                 }
             }
         }
@@ -18985,8 +18992,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 // and re-enable it afterward.
                 final PackageSetting stubPs = mSettings.mPackages.get(deletedPkg.getPackageName());
                 if (stubPs != null) {
-                    stubPs.setEnabled(
-                            COMPONENT_ENABLED_STATE_DISABLED, UserHandle.USER_SYSTEM, "android");
+                    int userId = action.user == null
+                            ? UserHandle.USER_ALL : action.user.getIdentifier();
+                    if (userId == UserHandle.USER_ALL) {
+                        for (int aUserId : allUserHandles) {
+                            stubPs.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, aUserId, "android");
+                        }
+                    } else if (userId >= UserHandle.USER_SYSTEM) {
+                        stubPs.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, userId, "android");
+                    }
                 }
             }
         }

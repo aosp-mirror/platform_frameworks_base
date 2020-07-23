@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -49,7 +51,7 @@ import javax.annotation.Nullable;
 public class SystemPreparer extends ExternalResource {
     private static final long OVERLAY_ENABLE_TIMEOUT_MS = 30000;
 
-    // The paths of the files pushed onto the device through this rule.
+    // The paths of the files pushed onto the device through this rule to be removed after.
     private ArrayList<String> mPushedFiles = new ArrayList<>();
 
     // The package names of packages installed through this rule.
@@ -81,7 +83,7 @@ public class SystemPreparer extends ExternalResource {
         final ITestDevice device = mDeviceProvider.getDevice();
         remount();
         assertTrue(device.pushFile(copyResourceToTemp(filePath), outputPath));
-        mPushedFiles.add(outputPath);
+        addPushedFile(device, outputPath);
         return this;
     }
 
@@ -91,8 +93,21 @@ public class SystemPreparer extends ExternalResource {
         final ITestDevice device = mDeviceProvider.getDevice();
         remount();
         assertTrue(device.pushFile(file, outputPath));
-        mPushedFiles.add(outputPath);
+        addPushedFile(device, outputPath);
         return this;
+    }
+
+    private void addPushedFile(ITestDevice device, String outputPath)
+            throws DeviceNotAvailableException {
+        Path pathCreated = Paths.get(outputPath);
+
+        // Find the top most parent that is new to the device
+        while (pathCreated.getParent() != null
+                && !device.doesFileExist(pathCreated.getParent().toString())) {
+            pathCreated = pathCreated.getParent();
+        }
+
+        mPushedFiles.add(pathCreated.toString());
     }
 
     /** Deletes the given path from the device */
@@ -203,7 +218,7 @@ public class SystemPreparer extends ExternalResource {
 
     /** Removes installed packages and files that were pushed to the device. */
     @Override
-    protected void after() {
+    public void after() {
         final ITestDevice device = mDeviceProvider.getDevice();
         try {
             remount();
