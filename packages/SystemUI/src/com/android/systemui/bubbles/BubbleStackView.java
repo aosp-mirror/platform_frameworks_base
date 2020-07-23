@@ -907,7 +907,16 @@ public class BubbleStackView extends FrameLayout
         setFocusable(true);
         mBubbleContainer.bringToFront();
 
-        setUpOverflow();
+        mBubbleOverflow = new BubbleOverflow(getContext(), this);
+        mBubbleContainer.addView(mBubbleOverflow.getIconView(),
+                mBubbleContainer.getChildCount() /* index */,
+                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+        updateOverflow();
+        mBubbleOverflow.getIconView().setOnClickListener((View v) -> {
+            setSelectedBubble(mBubbleOverflow);
+            showManageMenu(false);
+        });
 
         mOnImeVisibilityChanged = onImeVisibilityChanged;
         mHideCurrentInputMethodCallback = hideCurrentInputMethodCallback;
@@ -933,7 +942,7 @@ public class BubbleStackView extends FrameLayout
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
                     mStackAnimationController.updateResources(mOrientation);
-                    mBubbleOverflow.updateDimensions();
+                    mBubbleOverflow.updateResources();
 
                     // Need to update the padding around the view
                     WindowInsets insets = getRootWindowInsets();
@@ -1187,32 +1196,21 @@ public class BubbleStackView extends FrameLayout
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
-    private void setUpOverflow() {
-        int overflowBtnIndex = 0;
-        if (mBubbleOverflow == null) {
-            mBubbleOverflow = new BubbleOverflow(getContext());
-            mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
-        } else {
-            mBubbleContainer.removeView(mBubbleOverflow.getIconView());
-            mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
-            overflowBtnIndex = mBubbleContainer.getChildCount();
-        }
-        mBubbleContainer.addView(mBubbleOverflow.getIconView(), overflowBtnIndex,
-                new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mBubbleOverflow.getIconView().setOnClickListener(v -> {
-            setSelectedBubble(mBubbleOverflow);
-            showManageMenu(false);
-        });
+    private void updateOverflow() {
+        mBubbleOverflow.update();
+        mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),
+                mBubbleContainer.getChildCount() - 1 /* index */);
         updateOverflowVisibility();
     }
+
     /**
      * Handle theme changes.
      */
     public void onThemeChanged() {
         setUpFlyout();
-        setUpOverflow();
         setUpUserEducation();
         setUpManageMenu();
+        updateOverflow();
         updateExpandedViewTheme();
     }
 
@@ -1261,7 +1259,7 @@ public class BubbleStackView extends FrameLayout
 
     /** Respond to the display size change by recalculating view size and location. */
     public void onDisplaySizeChanged() {
-        setUpOverflow();
+        updateOverflow();
 
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getRealSize(mDisplaySize);
