@@ -60,11 +60,10 @@ public class SystemWindows {
     private static final String TAG = "SystemWindows";
 
     private final SparseArray<PerDisplay> mPerDisplay = new SparseArray<>();
-    final HashMap<View, SurfaceControlViewHost> mViewRoots = new HashMap<>();
-    public Context mContext;
-    public IWindowManager mWmService;
-    IWindowSession mSession;
-    DisplayController mDisplayController;
+    private final HashMap<View, SurfaceControlViewHost> mViewRoots = new HashMap<>();
+    private final DisplayController mDisplayController;
+    private final IWindowManager mWmService;
+    private IWindowSession mSession;
 
     private final DisplayController.OnDisplaysChangedListener mDisplayListener =
             new DisplayController.OnDisplaysChangedListener() {
@@ -84,9 +83,7 @@ public class SystemWindows {
                 public void onDisplayRemoved(int displayId) { }
             };
 
-    public SystemWindows(Context context, DisplayController displayController,
-            IWindowManager wmService) {
-        mContext = context;
+    public SystemWindows(DisplayController displayController, IWindowManager wmService) {
         mWmService = wmService;
         mDisplayController = displayController;
         mDisplayController.addDisplayWindowListener(mDisplayListener);
@@ -210,8 +207,8 @@ public class SystemWindows {
             }
             final Display display = mDisplayController.getDisplay(mDisplayId);
             SurfaceControlViewHost viewRoot =
-                    new SurfaceControlViewHost(mContext, display, wwm,
-                            true /* useSfChoreographer */);
+                    new SurfaceControlViewHost(
+                            view.getContext(), display, wwm, true /* useSfChoreographer */);
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);
@@ -313,7 +310,7 @@ public class SystemWindows {
         }
     }
 
-    class ContainerWindow extends IWindow.Stub {
+    static class ContainerWindow extends IWindow.Stub {
         ContainerWindow() {}
 
         @Override
