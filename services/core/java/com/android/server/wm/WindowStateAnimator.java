@@ -121,12 +121,6 @@ class WindowStateAnimator {
 
     boolean mAnimationIsEntrance;
 
-    /**
-     * Set when we have changed the size of the surface, to know that
-     * we must tell them application to resize (and thus redraw itself).
-     */
-    boolean mSurfaceResized;
-
     WindowSurfaceController mSurfaceController;
     private WindowSurfaceController mPendingDestroySurface;
 
@@ -788,10 +782,8 @@ class WindowStateAnimator {
         // to find the surface size changed underneath it.
         final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
         if (relayout) {
-            mSurfaceResized = mSurfaceController.setBufferSizeInTransaction(
+            mSurfaceController.setBufferSizeInTransaction(
                     mTmpSize.width(), mTmpSize.height(), recoveringMemory);
-        } else {
-            mSurfaceResized = false;
         }
         // If we are undergoing seamless rotation, the surface has already
         // been set up to persist at it's old location. We need to freeze
@@ -865,10 +857,6 @@ class WindowStateAnimator {
                     mDtDy * w.mHScale,
                     mDsDy * w.mVScale, recoveringMemory);
             }
-        }
-
-        if (mSurfaceResized) {
-            mWin.getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
     }
 
@@ -1288,8 +1276,7 @@ class WindowStateAnimator {
             pw.print(prefix); pw.print("mPendingDestroySurface=");
                     pw.println(mPendingDestroySurface);
         }
-        if (mSurfaceResized || mSurfaceDestroyDeferred) {
-            pw.print(prefix); pw.print("mSurfaceResized="); pw.print(mSurfaceResized);
+        if (mSurfaceDestroyDeferred) {
                     pw.print(" mSurfaceDestroyDeferred="); pw.println(mSurfaceDestroyDeferred);
         }
         if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {

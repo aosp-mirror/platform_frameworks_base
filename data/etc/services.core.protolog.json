@@ -1801,6 +1801,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "625447638": {
+      "message": "Resize reasons for w=%s:  %s configChanged=%b dragResizingChanged=%b reportOrientationChanged=%b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_RESIZE",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
     "628276090": {
       "message": "Delaying app transition for screen rotation animation to finish",
       "level": "VERBOSE",
@@ -2112,12 +2118,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
-    },
-    "1160771501": {
-      "message": "Resize reasons for w=%s:  %s surfaceResized=%b configChanged=%b dragResizingChanged=%b reportOrientationChanged=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_RESIZE",
-      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "1166381079": {
       "message": "Execute app transition: %s, displayId: %d Callers=%s",
