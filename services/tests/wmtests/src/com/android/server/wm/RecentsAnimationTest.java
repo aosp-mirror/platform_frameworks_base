@@ -33,6 +33,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.Task.ActivityState.PAUSED;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -118,7 +119,8 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         TaskDisplayArea defaultTaskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task homeStack =
                 defaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
-        defaultTaskDisplayArea.positionStackAtTop(homeStack, false /* includingParents */);
+        defaultTaskDisplayArea.positionChildAt(POSITION_TOP, homeStack,
+                false /* includingParents */);
         ActivityRecord topRunningHomeActivity = homeStack.topRunningActivity();
         if (topRunningHomeActivity == null) {
             topRunningHomeActivity = new ActivityBuilder(mService)

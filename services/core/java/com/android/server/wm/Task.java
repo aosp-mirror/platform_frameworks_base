@@ -2459,7 +2459,7 @@ class Task extends WindowContainer<WindowContainer> {
             // Since always on top is only on when the stack is freeform or pinned, the state
             // can be toggled when the windowing mode changes. We must make sure the stack is
             // placed properly when always on top state changes.
-            taskDisplayArea.positionStackAtTop(this, false /* includingParents */);
+            taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */);
         }
     }
 
@@ -5340,7 +5340,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (isRootTask()) {
-            taskDisplayArea.positionStackAtTop(this, false /* includingParents */, reason);
+            taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */,
+                    reason);
         }
         if (task == null) {
             task = this;
@@ -5368,7 +5369,8 @@ class Task extends WindowContainer<WindowContainer> {
             if (parentTask != null) {
                 parentTask.moveToBack(reason, this);
             } else {
-                displayArea.positionStackAtBottom(this, reason);
+                displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/,
+                        reason);
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
@@ -7448,7 +7450,7 @@ class Task extends WindowContainer<WindowContainer> {
         // always on top windows. Since the position the stack should be inserted into is calculated
         // properly in {@link DisplayContent#getTopInsertPosition()} in both cases, we can just
         // request that the stack is put at top here.
-        taskDisplayArea.positionStackAtTop(this, false /* includingParents */);
+        taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */);
     }
 
     /** NOTE: Should only be called from {@link Task#reparent}. */
@@ -7493,7 +7495,7 @@ class Task extends WindowContainer<WindowContainer> {
             final Task task = getBottomMostTask();
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
 
-            getDisplayArea().positionStackAtTop(this, false /* includingParents */);
+            getDisplayArea().positionChildAt(POSITION_TOP, this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
             MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,

@@ -2829,7 +2829,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         if (toTop) {
-            taskDisplayArea.positionStackAt(POSITION_TOP, primarySplitTask,
+            taskDisplayArea.positionChildAt(POSITION_TOP, primarySplitTask,
                     false /* includingParents */);
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
