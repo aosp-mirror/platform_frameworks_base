@@ -4112,10 +4112,6 @@ package android.media {
     field public static final int ROLE_OUTPUT = 2; // 0x2
   }
 
-  public final class AudioDeviceInfo {
-    field public static final int TYPE_REMOTE_SUBMIX = 25; // 0x19
-  }
-
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAttributes();
