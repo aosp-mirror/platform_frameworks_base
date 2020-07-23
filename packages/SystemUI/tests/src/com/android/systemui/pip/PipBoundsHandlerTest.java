@@ -19,7 +19,6 @@ package com.android.systemui.pip;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
@@ -33,7 +32,6 @@ import android.view.Gravity;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,8 +63,7 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         initializeMockResources();
-        mPipBoundsHandler = new PipBoundsHandler(mContext, new PipSnapAlgorithm(mContext),
-                mock(DisplayController.class));
+        mPipBoundsHandler = new PipBoundsHandler(mContext);
         mTestComponentName1 = new ComponentName(mContext, "component1");
         mTestComponentName2 = new ComponentName(mContext, "component2");
 
@@ -113,7 +110,7 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
         res.addOverride(com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
                 newDefaultAspectRatio);
 
-        mPipBoundsHandler.onConfigurationChanged();
+        mPipBoundsHandler.onConfigurationChanged(mContext);
 
         assertEquals("Default aspect ratio should be reloaded",
                 mPipBoundsHandler.getDefaultAspectRatio(), newDefaultAspectRatio,
