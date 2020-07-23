@@ -414,13 +414,6 @@ public class AudioService extends IAudioService.Stub
         AppOpsManager.OP_AUDIO_MEDIA_VOLUME             // STREAM_ASSISTANT
     };
 
-    private static Set<Integer> sDeviceVolumeBehaviorSupportedDeviceOutSet = new HashSet<>(
-            Arrays.asList(
-                    AudioSystem.DEVICE_OUT_HDMI,
-                    AudioSystem.DEVICE_OUT_HDMI_ARC,
-                    AudioSystem.DEVICE_OUT_SPDIF,
-                    AudioSystem.DEVICE_OUT_LINE));
-
     private final boolean mUseFixedVolume;
 
     // If absolute volume is supported in AVRCP device
@@ -4952,11 +4945,6 @@ public class AudioService extends IAudioService.Stub
 
     private void setDeviceVolumeBehaviorInternal(int audioSystemDeviceOut,
             @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior, @NonNull String caller) {
-        if (!sDeviceVolumeBehaviorSupportedDeviceOutSet.contains(audioSystemDeviceOut)) {
-            // unsupported for now
-            throw new IllegalArgumentException("Unsupported device type " + audioSystemDeviceOut);
-        }
-
         // update device masks based on volume behavior
         switch (deviceVolumeBehavior) {
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE:
@@ -4990,20 +4978,14 @@ public class AudioService extends IAudioService.Stub
      * @param device the audio output device type
      * @return the volume behavior for the device
      */
-    public @AudioManager.DeviceVolumeBehaviorState int getDeviceVolumeBehavior(
-            @NonNull AudioDeviceAttributes device) {
+    public @AudioManager.DeviceVolumeBehavior
+    int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
         // verify permissions
         enforceModifyAudioRoutingPermission();
 
         // translate Java device type to native device type (for the devices masks for full / fixed)
         final int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
                 device.getType());
-        if (!sDeviceVolumeBehaviorSupportedDeviceOutSet.contains(audioSystemDeviceOut)
-                && audioSystemDeviceOut != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
-                && audioSystemDeviceOut != AudioSystem.DEVICE_OUT_HEARING_AID) {
-            throw new IllegalArgumentException("Unsupported volume behavior "
-                    + audioSystemDeviceOut);
-        }
 
         int setDeviceVolumeBehavior = retrieveStoredDeviceVolumeBehavior(audioSystemDeviceOut);
         if (setDeviceVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET) {
@@ -9078,7 +9060,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void restoreDeviceVolumeBehavior() {
-        for (int deviceType : sDeviceVolumeBehaviorSupportedDeviceOutSet) {
+        for (int deviceType : AudioSystem.DEVICE_OUT_ALL_SET) {
             if (DEBUG_VOL) {
                 Log.d(TAG, "Retrieving Volume Behavior for DeviceType: " + deviceType);
             }
