@@ -727,16 +727,22 @@ public final class AutofillManager {
             mState = savedInstanceState.getInt(STATE_TAG, STATE_UNKNOWN);
 
             if (mSessionId != NO_SESSION) {
-                ensureServiceClientAddedIfNeededLocked();
+                final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
                 final AutofillClient client = getClient();
                 if (client != null) {
                     final SyncResultReceiver receiver = new SyncResultReceiver(
                             SYNC_CALLS_TIMEOUT_MS);
                     try {
-                        mService.restoreSession(mSessionId, client.autofillClientGetActivityToken(),
-                                mServiceClient.asBinder(), receiver);
-                        final boolean sessionWasRestored = receiver.getIntResult() == 1;
+                        boolean sessionWasRestored = false;
+                        if (clientAdded) {
+                            mService.restoreSession(mSessionId,
+                                    client.autofillClientGetActivityToken(),
+                                    mServiceClient.asBinder(), receiver);
+                            sessionWasRestored = receiver.getIntResult() == 1;
+                        } else {
+                            Log.w(TAG, "No service client for session " + mSessionId);
+                        }
 
                         if (!sessionWasRestored) {
                             Log.w(TAG, "Session " + mSessionId + " could not be restored");
@@ -850,8 +856,8 @@ public final class AutofillManager {
             if (isDisabledByServiceLocked()) {
                 return false;
             }
-            ensureServiceClientAddedIfNeededLocked();
-            return mEnabled;
+            final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+            return clientAdded ? mEnabled : false;
         }
     }
 
@@ -1007,7 +1013,12 @@ public final class AutofillManager {
 
         AutofillCallback callback = null;
 
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+
+        if (!clientAdded) {
+            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
+            return callback;
+        }
 
         if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
@@ -1060,9 +1071,10 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     void notifyViewExitedLocked(@NonNull View view) {
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
-        if ((mEnabled || mEnabledForAugmentedAutofillOnly) && isActiveLocked()) {
+        if (clientAdded && (mEnabled || mEnabledForAugmentedAutofillOnly)
+                && isActiveLocked()) {
             // dont notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = view.getAutofillId();
@@ -1178,7 +1190,12 @@ public final class AutofillManager {
         AutofillCallback callback = null;
         if (shouldIgnoreViewEnteredLocked(id, flags)) return callback;
 
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+
+        if (!clientAdded) {
+            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
+            return callback;
+        }
 
         if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) {
@@ -1241,9 +1258,10 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private void notifyViewExitedLocked(@NonNull View view, int virtualId) {
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
-        if ((mEnabled || mEnabledForAugmentedAutofillOnly) && isActiveLocked()) {
+        if (clientAdded && (mEnabled || mEnabledForAugmentedAutofillOnly)
+                && isActiveLocked()) {
             // don't notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view, virtualId);
@@ -1905,11 +1923,16 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     * Tries to add AutofillManagerClient to service if it does not been added. Returns {@code true}
+     * if the AutofillManagerClient is added successfully or is already added. Otherwise,
+     * returns {@code false}.
+     */
     @GuardedBy("mLock")
-    private void ensureServiceClientAddedIfNeededLocked() {
+    private boolean tryAddServiceClientIfNeededLocked() {
         final AutofillClient client = getClient();
         if (client == null) {
-            return;
+            return false;
         }
 
         if (mServiceClient == null) {
@@ -1924,7 +1947,10 @@ public final class AutofillManager {
                     flags = receiver.getIntResult();
                 } catch (SyncResultReceiver.TimeoutException e) {
                     Log.w(TAG, "Failed to initialize autofill: " + e);
-                    return;
+                    // Reset the states initialized above.
+                    mService.removeClient(mServiceClient, userId);
+                    mServiceClient = null;
+                    return false;
                 }
                 mEnabled = (flags & FLAG_ADD_CLIENT_ENABLED) != 0;
                 sDebug = (flags & FLAG_ADD_CLIENT_DEBUG) != 0;
@@ -1949,6 +1975,7 @@ public final class AutofillManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -1962,12 +1989,13 @@ public final class AutofillManager {
                 && view.isLaidOut()
                 && view.isVisibleToUser()) {
 
-            ensureServiceClientAddedIfNeededLocked();
+            final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
             if (sVerbose) {
-                Log.v(TAG, "startAutofillIfNeededLocked(): enabled=" + mEnabled);
+                Log.v(TAG, "startAutofillIfNeededLocked(): enabled=" + mEnabled + " mServiceClient="
+                        + mServiceClient);
             }
-            if (mEnabled && !isClientDisablingEnterExitEvent()) {
+            if (clientAdded && mEnabled && !isClientDisablingEnterExitEvent()) {
                 final AutofillId id = view.getAutofillId();
                 final AutofillValue value = view.getAutofillValue();
                 // Starts new session.
@@ -2692,6 +2720,7 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
         pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
         pw.print(pfx); pw.print("context: "); pw.println(mContext);
+        pw.print(pfx); pw.print("service client: "); pw.println(mServiceClient);
         final AutofillClient client = getClient();
         if (client != null) {
             pw.print(pfx); pw.print("client: "); pw.print(client);
