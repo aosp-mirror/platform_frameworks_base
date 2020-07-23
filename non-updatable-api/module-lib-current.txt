@@ -9,3 +9,11 @@ package android.annotation {
 
 }
 
+package android.os {
+
+  public class Binder implements android.os.IBinder {
+    method public final void markVintfStability();
+  }
+
+}
+
