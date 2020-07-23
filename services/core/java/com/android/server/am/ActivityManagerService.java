@@ -184,6 +184,8 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
@@ -5415,7 +5417,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 thread.scheduleCreateBackupAgent(backupTarget.appInfo,
                         compatibilityInfoForPackage(backupTarget.appInfo),
-                        backupTarget.backupMode, backupTarget.userId);
+                        backupTarget.backupMode, backupTarget.userId, backupTarget.operationType);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
                 badApp = true;
@@ -15248,7 +15250,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Cause the target app to be launched if necessary and its backup agent
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
-    public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId) {
+    public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
+            @OperationType int operationType) {
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
                     + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
@@ -15291,7 +15294,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode, targetUserId);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, operationType);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
@@ -15330,7 +15333,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackage(app), backupMode, targetUserId);
+                            compatibilityInfoForPackage(app), backupMode, targetUserId,
+                            operationType);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
