@@ -3733,7 +3733,8 @@ public class ActivityManager {
      * manner, excessive calls to this API could result a {@link java.lang.RuntimeException}.
      * </p>
      *
-     * @param state The state data
+     * @param state The state data. To be advised, <b>DO NOT</b> include sensitive information/data
+     * (PII, SPII, or other sensitive user data) here. Maximum length is 128 bytes.
      */
     public void setProcessStateSummary(@Nullable byte[] state) {
         try {
