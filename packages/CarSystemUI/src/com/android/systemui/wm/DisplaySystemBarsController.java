@@ -36,25 +36,20 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.TransactionPool;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Controller that maps between displays and {@link IDisplayWindowInsetsController} in order to
  * give system bar control to SystemUI.
  * {@link R.bool#config_remoteInsetsControllerControlsSystemBars} determines whether this controller
  * takes control or not.
  */
-@Singleton
 public class DisplaySystemBarsController extends DisplayImeController {
 
     private static final String TAG = "DisplaySystemBarsController";
 
-    private SparseArray<PerDisplay> mPerDisplaySparseArray;
     private final Context mContext;
+    private SparseArray<PerDisplay> mPerDisplaySparseArray;
 
-    @Inject
-    public DisplaySystemBarsController(
+    private DisplaySystemBarsController(
             Context context,
             IWindowManager wmService,
             DisplayController displayController,
@@ -170,6 +165,35 @@ public class DisplaySystemBarsController extends DisplayImeController {
             for (int i = internalTypes.size() - 1; i >= 0; i--) {
                 mInsetsState.getSource(internalTypes.valueAt(i)).setVisible(visible);
             }
+        }
+    }
+
+    /** Builds {@link DisplaySystemBarsController} instance. */
+    public static class Builder {
+        private Context mContext;
+        private IWindowManager mWmService;
+        private DisplayController mDisplayController;
+        private Handler mHandler;
+        private TransactionPool mTransactionPool;
+
+        public Builder(Context context, IWindowManager wmService,
+                DisplayController displayController, Handler handler,
+                TransactionPool transactionPool) {
+            mContext = context;
+            mWmService = wmService;
+            mDisplayController = displayController;
+            mHandler = handler;
+            mTransactionPool = transactionPool;
+        }
+
+        /** Builds and initializes {@link DisplaySystemBarsController} instance. */
+        public DisplaySystemBarsController build() {
+            DisplaySystemBarsController displaySystemBarsController =
+                    new DisplaySystemBarsController(
+                            mContext, mWmService, mDisplayController, mHandler, mTransactionPool);
+            // Separates startMonitorDisplays from constructor to prevent circular init issue.
+            displaySystemBarsController.startMonitorDisplays();
+            return displaySystemBarsController;
         }
     }
 }

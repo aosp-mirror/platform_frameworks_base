@@ -59,9 +59,10 @@ public class WindowManagerShellModule {
 
     @Singleton
     @Provides
-    static DisplayImeController provideDisplayImeController(
-            IWindowManager wmService, DisplayController displayController,
-            @Main Handler mainHandler, TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, mainHandler, transactionPool);
+    static DisplayImeController provideDisplayImeController(IWindowManager wmService,
+            DisplayController displayController, @Main Handler mainHandler,
+            TransactionPool transactionPool) {
+        return new DisplayImeController.Builder(wmService, displayController, mainHandler,
+                transactionPool).build();
     }
 }
