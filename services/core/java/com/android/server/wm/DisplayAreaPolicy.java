@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT;
+import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
@@ -94,6 +95,8 @@ public abstract class DisplayAreaPolicy {
             // Define the features that will be supported under the root of the whole logical
             // display. The policy will build the DisplayArea hierarchy based on this.
             HierarchyBuilder rootHierarchy = new HierarchyBuilder(root)
+                    // WindowedMagnification should be on the top so that there is only one surface
+                    // to be magnified.
                     .addFeature(new Feature.Builder(wmService.mPolicy, "WindowedMagnification",
                             FEATURE_WINDOWED_MAGNIFICATION)
                             .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
@@ -119,6 +122,10 @@ public abstract class DisplayAreaPolicy {
                             .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, TYPE_INPUT_METHOD,
                                     TYPE_INPUT_METHOD_DIALOG, TYPE_MAGNIFICATION_OVERLAY,
                                     TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                            .build())
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "ImePlaceholder",
+                            FEATURE_IME_PLACEHOLDER)
+                            .and(TYPE_INPUT_METHOD, TYPE_INPUT_METHOD_DIALOG)
                             .build())
                     .setImeContainer(imeContainer)
                     .setTaskDisplayAreas(tdaList);

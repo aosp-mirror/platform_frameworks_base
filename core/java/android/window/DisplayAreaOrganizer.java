@@ -84,6 +84,13 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_HIDE_DISPLAY_CUTOUT = FEATURE_SYSTEM_FIRST + 6;
 
     /**
+     * Display area that the IME container can be placed in. Should be enabled on every root
+     * hierarchy if IME container may be reparented to that hierarchy when the IME target changed.
+     * @hide
+     */
+    public static final int FEATURE_IME_PLACEHOLDER = FEATURE_SYSTEM_FIRST + 7;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;

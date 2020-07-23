@@ -311,6 +311,21 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(childWin, imeTarget);
     }
 
+    @UseTestDisplay(addAllCommonWindows = true)
+    @Test
+    public void testComputeImeTarget_placeImeToTheTargetRoot() {
+        ActivityRecord activity = createActivityRecord(mDisplayContent);
+
+        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, activity,
+                "startingWin");
+        startingWin.setHasSurface(true);
+        assertTrue(startingWin.canBeImeTarget());
+        DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+
+        WindowState imeTarget = mDisplayContent.computeImeTarget(true /* updateImeTarget */);
+        verify(imeTarget.getRootDisplayArea()).placeImeContainer(imeContainer);
+    }
+
     /**
      * This tests stack movement between displays and proper stack's, task's and app token's display
      * container references updates.
