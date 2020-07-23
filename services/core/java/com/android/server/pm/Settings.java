@@ -4784,6 +4784,23 @@ public final class Settings {
                 }
             }
 
+            List<String> usesNativeLibraries = pkg.getUsesNativeLibraries();
+            if (usesNativeLibraries.size() > 0) {
+                pw.print(prefix); pw.println("  usesNativeLibraries:");
+                for (int i=0; i< usesNativeLibraries.size(); i++) {
+                    pw.print(prefix); pw.print("    "); pw.println(usesNativeLibraries.get(i));
+                }
+            }
+
+            List<String> usesOptionalNativeLibraries = pkg.getUsesOptionalNativeLibraries();
+            if (usesOptionalNativeLibraries.size() > 0) {
+                pw.print(prefix); pw.println("  usesOptionalNativeLibraries:");
+                for (int i=0; i< usesOptionalNativeLibraries.size(); i++) {
+                    pw.print(prefix); pw.print("    ");
+                    pw.println(usesOptionalNativeLibraries.get(i));
+                }
+            }
+
             List<String> usesLibraryFiles = ps.getPkgState().getUsesLibraryFiles();
             if (usesLibraryFiles.size() > 0) {
                 pw.print(prefix); pw.println("  usesLibraryFiles:");

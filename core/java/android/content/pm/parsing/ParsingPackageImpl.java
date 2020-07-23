@@ -186,6 +186,13 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
+    protected List<String> usesNativeLibraries = emptyList();
+    @NonNull
+    @DataClass.ParcelWith(ForInternedStringList.class)
+    protected List<String> usesOptionalNativeLibraries = emptyList();
+
+    @NonNull
+    @DataClass.ParcelWith(ForInternedStringList.class)
     private List<String> usesStaticLibraries = emptyList();
     @Nullable
     private long[] usesStaticLibrariesVersions;
@@ -669,6 +676,27 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public final ParsingPackageImpl addUsesOptionalNativeLibrary(String libraryName) {
+        this.usesOptionalNativeLibraries = CollectionUtils.add(this.usesOptionalNativeLibraries,
+                TextUtils.safeIntern(libraryName));
+        return this;
+    }
+
+    @Override
+    public final ParsingPackageImpl addUsesNativeLibrary(String libraryName) {
+        this.usesNativeLibraries = CollectionUtils.add(this.usesNativeLibraries,
+                TextUtils.safeIntern(libraryName));
+        return this;
+    }
+
+
+    @Override public ParsingPackageImpl removeUsesOptionalNativeLibrary(String libraryName) {
+        this.usesOptionalNativeLibraries = CollectionUtils.remove(this.usesOptionalNativeLibraries,
+                libraryName);
+        return this;
+    }
+
+    @Override
     public ParsingPackageImpl addUsesStaticLibrary(String libraryName) {
         this.usesStaticLibraries = CollectionUtils.add(this.usesStaticLibraries,
                 TextUtils.safeIntern(libraryName));
@@ -982,6 +1010,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         sForInternedStringList.parcel(this.libraryNames, dest, flags);
         sForInternedStringList.parcel(this.usesLibraries, dest, flags);
         sForInternedStringList.parcel(this.usesOptionalLibraries, dest, flags);
+        sForInternedStringList.parcel(this.usesNativeLibraries, dest, flags);
+        sForInternedStringList.parcel(this.usesOptionalNativeLibraries, dest, flags);
         sForInternedStringList.parcel(this.usesStaticLibraries, dest, flags);
         dest.writeLongArray(this.usesStaticLibrariesVersions);
 
@@ -1144,6 +1174,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.libraryNames = sForInternedStringList.unparcel(in);
         this.usesLibraries = sForInternedStringList.unparcel(in);
         this.usesOptionalLibraries = sForInternedStringList.unparcel(in);
+        this.usesNativeLibraries = sForInternedStringList.unparcel(in);
+        this.usesOptionalNativeLibraries = sForInternedStringList.unparcel(in);
         this.usesStaticLibraries = sForInternedStringList.unparcel(in);
         this.usesStaticLibrariesVersions = in.createLongArray();
 
@@ -1413,6 +1445,18 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public List<String> getUsesOptionalLibraries() {
         return usesOptionalLibraries;
+    }
+
+    @NonNull
+    @Override
+    public List<String> getUsesNativeLibraries() {
+        return usesNativeLibraries;
+    }
+
+    @NonNull
+    @Override
+    public List<String> getUsesOptionalNativeLibraries() {
+        return usesOptionalNativeLibraries;
     }
 
     @NonNull

@@ -49,10 +49,12 @@ import libcore.io.IoUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -104,11 +106,17 @@ public class SystemConfig {
         public final String name;
         public final String filename;
         public final String[] dependencies;
+        public final boolean isNative;
 
         SharedLibraryEntry(String name, String filename, String[] dependencies) {
+            this(name, filename, dependencies, false /* isNative */);
+        }
+
+        SharedLibraryEntry(String name, String filename, String[] dependencies, boolean isNative) {
             this.name = name;
             this.filename = filename;
             this.dependencies = dependencies;
+            this.isNative = isNative;
         }
     }
 
@@ -457,6 +465,7 @@ public class SystemConfig {
         log.traceBegin("readAllPermissions");
         try {
             readAllPermissions();
+            readPublicNativeLibrariesList();
         } finally {
             log.traceEnd();
         }
@@ -1510,6 +1519,37 @@ public class SystemConfig {
 
                 componentEnabledStates.put(clsname, !"false".equals(enabled));
             }
+        }
+    }
+
+    private void readPublicNativeLibrariesList() {
+        readPublicLibrariesListFile(new File("/vendor/etc/public.libraries.txt"));
+        String[] dirs = {"/system/etc", "/system_ext/etc", "/product/etc"};
+        for (String dir : dirs) {
+            for (File f : (new File(dir)).listFiles()) {
+                String name = f.getName();
+                if (name.startsWith("public.libraries-") && name.endsWith(".txt")) {
+                    readPublicLibrariesListFile(f);
+                }
+            }
+        }
+    }
+
+    private void readPublicLibrariesListFile(File listFile) {
+        try (BufferedReader br = new BufferedReader(new FileReader(listFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                // Line format is <soname> [abi]. We take the soname part.
+                String soname = line.trim().split(" ")[0];
+                SharedLibraryEntry entry = new SharedLibraryEntry(
+                        soname, soname, new String[0], true);
+                mSharedLibraries.put(entry.name, entry);
+            }
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to read public libraries file " + listFile, e);
         }
     }
 
