@@ -39,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 @SmallTest
@@ -132,6 +133,16 @@ public class DataChangedJournalTest {
         DataChangedJournal.newJournal(folder);
 
         assertThat(folder.listFiles()).hasLength(1);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void newJournal_nullJournalDir() throws IOException {
+        DataChangedJournal.newJournal(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void nullFile() {
+        new DataChangedJournal(null);
     }
 
     @Test

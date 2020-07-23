@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Slog;
 
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -50,8 +52,8 @@ public final class DataChangedJournal {
     /**
      * Constructs an instance that reads from and writes to the given file.
      */
-    DataChangedJournal(File file) {
-        mFile = file;
+    DataChangedJournal(@NonNull File file) {
+        mFile = Objects.requireNonNull(file);
     }
 
 
@@ -133,9 +135,10 @@ public final class DataChangedJournal {
      * @return The journal.
      * @throws IOException if there is an IO error creating the file.
      */
-    static DataChangedJournal newJournal(File journalDirectory) throws IOException {
-        return new DataChangedJournal(
-                File.createTempFile(FILE_NAME_PREFIX, null, journalDirectory));
+    static DataChangedJournal newJournal(@NonNull File journalDirectory) throws IOException {
+        Objects.requireNonNull(journalDirectory);
+        File file = File.createTempFile(FILE_NAME_PREFIX, null, journalDirectory);
+        return new DataChangedJournal(file);
     }
 
     /**
