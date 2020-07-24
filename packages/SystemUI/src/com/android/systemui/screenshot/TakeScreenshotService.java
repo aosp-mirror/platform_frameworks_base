@@ -61,7 +61,7 @@ public class TakeScreenshotService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
-                mScreenshot.dismissScreenshot("close system dialogs", true);
+                mScreenshot.dismissScreenshot("close system dialogs", false);
             }
         }
     };
