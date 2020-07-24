@@ -40,8 +40,10 @@ import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFea
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
+import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
@@ -221,4 +223,8 @@ public interface NotificationsModule {
     @Binds
     NotificationInterruptStateProvider bindNotificationInterruptStateProvider(
             NotificationInterruptStateProviderImpl notificationInterruptStateProviderImpl);
+
+    /** */
+    @Binds
+    NotifInflater bindNotifInflater(NotifInflaterImpl notifInflaterImpl);
 }

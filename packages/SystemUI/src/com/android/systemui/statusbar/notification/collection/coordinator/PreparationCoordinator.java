@@ -30,7 +30,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
-import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -83,30 +82,42 @@ public class PreparationCoordinator implements Coordinator {
      */
     private final int mChildBindCutoff;
 
+    /** How long we can delay a group while waiting for all children to inflate */
+    private final long mMaxGroupInflationDelay;
+
     @Inject
     public PreparationCoordinator(
             PreparationCoordinatorLogger logger,
-            NotifInflaterImpl notifInflater,
+            NotifInflater notifInflater,
             NotifInflationErrorManager errorManager,
             NotifViewBarn viewBarn,
             IStatusBarService service) {
-        this(logger, notifInflater, errorManager, viewBarn, service, CHILD_BIND_CUTOFF);
+        this(
+                logger,
+                notifInflater,
+                errorManager,
+                viewBarn,
+                service,
+                CHILD_BIND_CUTOFF,
+                MAX_GROUP_INFLATION_DELAY);
     }
 
     @VisibleForTesting
     PreparationCoordinator(
             PreparationCoordinatorLogger logger,
-            NotifInflaterImpl notifInflater,
+            NotifInflater notifInflater,
             NotifInflationErrorManager errorManager,
             NotifViewBarn viewBarn,
             IStatusBarService service,
-            int childBindCutoff) {
+            int childBindCutoff,
+            long maxGroupInflationDelay) {
         mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifErrorManager = errorManager;
         mViewBarn = viewBarn;
         mStatusBarService = service;
         mChildBindCutoff = childBindCutoff;
+        mMaxGroupInflationDelay = maxGroupInflationDelay;
     }
 
     @Override
@@ -166,12 +177,27 @@ public class PreparationCoordinator implements Coordinator {
     };
 
     private final NotifFilter mNotifInflatingFilter = new NotifFilter(TAG + "Inflating") {
+        private final Map<GroupEntry, Boolean> mIsDelayedGroupCache = new ArrayMap<>();
+
         /**
-         * Filters out notifications that aren't inflated
+         * Filters out notifications that either (a) aren't inflated or (b) are part of a group
+         * that isn't completely inflated yet
          */
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            return !isInflated(entry);
+            final GroupEntry parent = requireNonNull(entry.getParent());
+            Boolean isMemberOfDelayedGroup = mIsDelayedGroupCache.get(parent);
+            if (isMemberOfDelayedGroup == null) {
+                isMemberOfDelayedGroup = shouldWaitForGroupToInflate(parent, now);
+                mIsDelayedGroupCache.put(parent, isMemberOfDelayedGroup);
+            }
+
+            return !isInflated(entry) || isMemberOfDelayedGroup;
+        }
+
+        @Override
+        public void onCleanup() {
+            mIsDelayedGroupCache.clear();
         }
     };
 
@@ -304,6 +330,31 @@ public class PreparationCoordinator implements Coordinator {
         return stateObj;
     }
 
+    private boolean shouldWaitForGroupToInflate(GroupEntry group, long now) {
+        if (group == GroupEntry.ROOT_ENTRY || group.hasBeenAttachedBefore()) {
+            return false;
+        }
+        if (isBeyondGroupInitializationWindow(group, now)) {
+            mLogger.logGroupInflationTookTooLong(group.getKey());
+            return false;
+        }
+        if (mInflatingNotifs.contains(group.getSummary())) {
+            mLogger.logDelayingGroupRelease(group.getKey(), group.getSummary().getKey());
+            return true;
+        }
+        for (NotificationEntry child : group.getChildren()) {
+            if (mInflatingNotifs.contains(child) && !child.hasBeenAttachedBefore()) {
+                mLogger.logDelayingGroupRelease(group.getKey(), child.getKey());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isBeyondGroupInitializationWindow(GroupEntry entry, long now) {
+        return now - entry.getCreationTime() > mMaxGroupInflationDelay;
+    }
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"STATE_"},
             value = {STATE_UNINFLATED, STATE_INFLATED_INVALID, STATE_INFLATED, STATE_ERROR})
@@ -329,6 +380,8 @@ public class PreparationCoordinator implements Coordinator {
      * dynamically inflate a row.
      */
     private static final int EXTRA_VIEW_BUFFER_COUNT = 1;
+
+    private static final long MAX_GROUP_INFLATION_DELAY = 500;
 
     private static final int CHILD_BIND_CUTOFF =
             NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED + EXTRA_VIEW_BUFFER_COUNT;
