@@ -154,7 +154,7 @@ public class NavigationBarController implements Callbacks {
                             Dependency.get(IWindowManager.class));
             navBar.setAutoHideController(autoHideController);
             navBar.restoreAppearanceAndTransientState();
-            mNavigationBars.append(displayId, navBar);
+            mNavigationBars.put(displayId, navBar);
 
             if (result != null) {
                 navBar.setImeWindowStatus(display.getDisplayId(), result.mImeToken,
