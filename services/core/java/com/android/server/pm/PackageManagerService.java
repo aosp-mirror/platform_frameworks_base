@@ -8551,6 +8551,15 @@ public class PackageManagerService extends IPackageManager.Stub
             if (listUninstalled) {
                 list = new ArrayList<>(mSettings.mPackages.size());
                 for (PackageSetting ps : mSettings.mPackages.values()) {
+                    if (listFactory) {
+                        if (!ps.isSystem()) {
+                            continue;
+                        }
+                        PackageSetting psDisabled = mSettings.getDisabledSystemPkgLPr(ps);
+                        if (psDisabled != null) {
+                            ps = psDisabled;
+                        }
+                    }
                     if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
                         continue;
                     }
@@ -8565,7 +8574,16 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 list = new ArrayList<>(mPackages.size());
                 for (AndroidPackage p : mPackages.values()) {
-                    final PackageSetting ps = getPackageSetting(p.getPackageName());
+                    PackageSetting ps = getPackageSetting(p.getPackageName());
+                    if (listFactory) {
+                        if (!p.isSystem()) {
+                            continue;
+                        }
+                        PackageSetting psDisabled = mSettings.getDisabledSystemPkgLPr(ps);
+                        if (psDisabled != null) {
+                            ps = psDisabled;
+                        }
+                    }
                     if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
                         continue;
                     }
