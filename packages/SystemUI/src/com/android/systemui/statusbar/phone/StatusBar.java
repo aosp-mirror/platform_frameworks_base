@@ -18,9 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
-import static android.app.StatusBarManager.DISABLE_CLOCK;
-import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
@@ -4174,7 +4171,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) {
         mTopHidesStatusBar = topAppHidesStatusBar;
-        updateStatusBarIcons(topAppHidesStatusBar);
         if (!topAppHidesStatusBar && mWereIconsJustHidden) {
             // Immediately update the icon hidden state, since that should only apply if we're
             // staying fullscreen.
@@ -4182,17 +4178,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mCommandQueue.recomputeDisableFlags(mDisplayId, true);
         }
         updateHideIconsForBouncer(true /* animate */);
-    }
-
-    private void updateStatusBarIcons(boolean topAppHidesStatusBar) {
-        int flags1 = StatusBarManager.DISABLE_NONE;
-        int flags2 = StatusBarManager.DISABLE2_NONE;
-        if (topAppHidesStatusBar) {
-            flags1 = DISABLE_NOTIFICATION_ICONS | DISABLE_CLOCK;
-            flags2 = DISABLE2_SYSTEM_ICONS;
-        }
-
-        mCommandQueue.disable(mDisplayId, flags1, flags2, false);
     }
 
     protected void toggleKeyboardShortcuts(int deviceId) {
