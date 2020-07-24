@@ -2008,9 +2008,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final class FusedLocationListener extends LocationChangeListener {
         @Override
         public void onLocationChanged(Location location) {
-            if (LocationManager.FUSED_PROVIDER.equals(location.getProvider())) {
-                injectBestLocation(location);
-            }
+            injectBestLocation(location);
         }
     }
 
