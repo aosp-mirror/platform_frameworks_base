@@ -6059,12 +6059,7 @@ public class Editor {
             return trueLine;
         }
 
-        final int lineHeight = layout.getLineBottom(prevLine) - layout.getLineTop(prevLine);
-        int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS
-                * (layout.getLineBottom(trueLine) - layout.getLineTop(trueLine)));
-        slop = Math.max(mLineChangeSlopMin,
-                Math.min(mLineChangeSlopMax, lineHeight + slop)) - lineHeight;
-        slop = Math.max(0, slop);
+        final int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS * mTextView.getLineHeight());
 
         final float verticalOffset = mTextView.viewportToContentVerticalOffset();
         if (trueLine > prevLine && y >= layout.getLineBottom(prevLine) + slop + verticalOffset) {
