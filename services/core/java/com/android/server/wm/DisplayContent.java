@@ -5403,6 +5403,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
          */
         private ActivityRecord mAnimatingRecents;
 
+        /** Whether {@link #mAnimatingRecents} is going to be the top activity. */
+        private boolean mRecentsWillBeTop;
+
         /**
          * If the recents activity has a fixed orientation which is different from the current top
          * activity, it will be rotated before being shown so we avoid a screen rotation animation
@@ -5428,10 +5431,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
          * If {@link #mAnimatingRecents} still has fixed rotation, it should be moved to top so we
          * don't clear {@link #mFixedRotationLaunchingApp} that will be handled by transition.
          */
-        void onFinishRecentsAnimation(boolean moveRecentsToBack) {
+        void onFinishRecentsAnimation() {
             final ActivityRecord animatingRecents = mAnimatingRecents;
+            final boolean recentsWillBeTop = mRecentsWillBeTop;
             mAnimatingRecents = null;
-            if (!moveRecentsToBack) {
+            mRecentsWillBeTop = false;
+            if (recentsWillBeTop) {
                 // The recents activity will be the top, such as staying at recents list or
                 // returning to home (if home and recents are the same activity).
                 return;
@@ -5454,6 +5459,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
+        void notifyRecentsWillBeTop() {
+            mRecentsWillBeTop = true;
+        }
+
         /**
          * Return {@code true} if there is an ongoing animation to the "Recents" activity and this
          * activity as a fixed orientation so shouldn't be rotated.
@@ -5472,6 +5481,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // due to wait for previous activity to be paused if it supports PiP that ignores the
             // effect of resume-while-pausing.
             if (r == null || r == mAnimatingRecents) {
+                return;
+            }
+            if (mAnimatingRecents != null && mRecentsWillBeTop) {
+                // The activity is not the recents and it should be moved to back later, so it is
+                // better to keep its current appearance for the next transition. Otherwise the
+                // display orientation may be updated too early and the layout procedures at the
+                // end of finishing recents animation is skipped. That causes flickering because
+                // the surface of closing app hasn't updated to invisible.
                 return;
             }
             if (mFixedRotationLaunchingApp == null) {
