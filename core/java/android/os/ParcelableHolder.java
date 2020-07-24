@@ -37,10 +37,10 @@ public final class ParcelableHolder implements Parcelable {
      * if {@link ParcelableHolder} contains value, otherwise, both are null.
      */
     private Parcel mParcel;
-    private boolean mIsStable = false;
+    private @Parcelable.Stability int mStability = Parcelable.PARCELABLE_STABILITY_LOCAL;
 
-    public ParcelableHolder(boolean isStable) {
-        mIsStable = isStable;
+    public ParcelableHolder(@Parcelable.Stability int stability) {
+        mStability = stability;
     }
 
     private ParcelableHolder() {
@@ -50,11 +50,11 @@ public final class ParcelableHolder implements Parcelable {
     /**
      * {@link ParcelableHolder}'s stability is determined by the parcelable
      * which contains this ParcelableHolder.
-     * For more detail refer to {@link Parcelable#isStable}.
+     * For more detail refer to {@link Parcelable#getStability}.
      */
     @Override
-    public boolean isStable() {
-        return mIsStable;
+    public @Parcelable.Stability int getStability() {
+        return mStability;
     }
 
     @NonNull
@@ -81,7 +81,8 @@ public final class ParcelableHolder implements Parcelable {
      * @return {@code false} if the parcelable's stability is more unstable ParcelableHolder.
      */
     public synchronized boolean setParcelable(@Nullable Parcelable p) {
-        if (p != null && this.isStable() && !p.isStable()) {
+        // a ParcelableHolder can only hold things at its stability or higher
+        if (p != null && this.getStability() > p.getStability()) {
             return false;
         }
         mParcelable = p;
@@ -123,7 +124,7 @@ public final class ParcelableHolder implements Parcelable {
      * Read ParcelableHolder from a parcel.
      */
     public synchronized void readFromParcel(@NonNull Parcel parcel) {
-        this.mIsStable = parcel.readBoolean();
+        this.mStability = parcel.readInt();
 
         mParcelable = null;
 
@@ -145,7 +146,7 @@ public final class ParcelableHolder implements Parcelable {
 
     @Override
     public synchronized void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeBoolean(this.mIsStable);
+        parcel.writeInt(this.mStability);
 
         if (mParcel != null) {
             parcel.writeInt(mParcel.dataSize());
