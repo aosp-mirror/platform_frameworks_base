@@ -943,6 +943,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
      */
     @Nullable
     public WifiEnterpriseConfig getEnterpriseConfig() {
+        if (!wifiConfiguration.isEnterprise()) {
+            return null;
+        }
         return wifiConfiguration.enterpriseConfig;
     }
 
