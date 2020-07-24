@@ -55,11 +55,11 @@ public class SettingsBackupTest {
             "hybrid_sysui_battery_warning_flags";
 
     /**
-     * The following blacklists contain settings that should *not* be backed up and restored to
+     * The following denylists contain settings that should *not* be backed up and restored to
      * another device.  As a general rule, anything that is not user configurable should be
-     * blacklisted (and conversely, things that *are* user configurable *should* be backed up)
+     * denied (and conversely, things that *are* user configurable *should* be backed up)
      */
-    private static final Set<String> BACKUP_BLACKLISTED_SYSTEM_SETTINGS =
+    private static final Set<String> BACKUP_DENY_LIST_SYSTEM_SETTINGS =
             newHashSet(
                     Settings.System.ADVANCED_SETTINGS, // candidate for backup?
                     Settings.System.ALARM_ALERT_CACHE, // internal cache
@@ -105,7 +105,7 @@ public class SettingsBackupTest {
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
                     );
 
-    private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
+    private static final Set<String> BACKUP_DENY_LIST_GLOBAL_SETTINGS =
             newHashSet(
                     Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
                     Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED,
@@ -590,7 +590,7 @@ public class SettingsBackupTest {
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
                     Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
 
-    private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
+    private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                  Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, // Deprecated since O.
@@ -745,42 +745,42 @@ public class SettingsBackupTest {
                  Settings.Secure.SUPPRESS_DOZE);
 
     @Test
-    public void systemSettingsBackedUpOrBlacklisted() {
-        checkSettingsBackedUpOrBlacklisted(
+    public void systemSettingsBackedUpOrDenied() {
+        checkSettingsBackedUpOrDenied(
                 getCandidateSettings(Settings.System.class),
                 newHashSet(SystemSettings.SETTINGS_TO_BACKUP),
-                BACKUP_BLACKLISTED_SYSTEM_SETTINGS);
+                BACKUP_DENY_LIST_SYSTEM_SETTINGS);
     }
 
     @Test
-    public void globalSettingsBackedUpOrBlacklisted() {
-        checkSettingsBackedUpOrBlacklisted(
+    public void globalSettingsBackedUpOrDenied() {
+        checkSettingsBackedUpOrDenied(
                 getCandidateSettings(Settings.Global.class),
                 newHashSet(GlobalSettings.SETTINGS_TO_BACKUP),
-                BACKUP_BLACKLISTED_GLOBAL_SETTINGS);
+                BACKUP_DENY_LIST_GLOBAL_SETTINGS);
     }
 
     @Test
     @Suppress //("b/148236308")
-    public void secureSettingsBackedUpOrBlacklisted() {
+    public void secureSettingsBackedUpOrDenied() {
         HashSet<String> keys = new HashSet<String>();
         Collections.addAll(keys, SecureSettings.SETTINGS_TO_BACKUP);
         Collections.addAll(keys, DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
-        checkSettingsBackedUpOrBlacklisted(
+        checkSettingsBackedUpOrDenied(
                 getCandidateSettings(Settings.Secure.class),
                 keys,
-                BACKUP_BLACKLISTED_SECURE_SETTINGS);
+                BACKUP_DENY_LIST_SECURE_SETTINGS);
     }
 
-    private static void checkSettingsBackedUpOrBlacklisted(
-            Set<String> settings, Set<String> settingsToBackup, Set<String> blacklist) {
+    private static void checkSettingsBackedUpOrDenied(
+            Set<String> settings, Set<String> settingsToBackup, Set<String> denylist) {
         Set<String> settingsNotBackedUp = difference(settings, settingsToBackup);
-        Set<String> settingsNotBackedUpOrBlacklisted = difference(settingsNotBackedUp, blacklist);
-        assertWithMessage("Settings not backed up or blacklisted")
-                .that(settingsNotBackedUpOrBlacklisted).isEmpty();
+        Set<String> settingsNotBackedUpOrDenied = difference(settingsNotBackedUp, denylist);
+        assertWithMessage("Settings not backed up or denied")
+                .that(settingsNotBackedUpOrDenied).isEmpty();
 
-        assertWithMessage("blacklisted settings backed up")
-                .that(intersect(settingsToBackup, blacklist)).isEmpty();
+        assertWithMessage("denied settings backed up")
+                .that(intersect(settingsToBackup, denylist)).isEmpty();
     }
 
     private static Set<String> getCandidateSettings(
