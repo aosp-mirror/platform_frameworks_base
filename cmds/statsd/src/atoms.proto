@@ -499,7 +499,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10084
+    // Next: 10087
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -598,6 +598,7 @@ message Atom {
         DNDModeProto dnd_mode_rule = 10084 [(module) = "framework"];
         GeneralExternalStorageAccessStats general_external_storage_access_stats =
             10085 [(module) = "mediaprovider"];
+        IncomingSms incoming_sms = 10086 [(module) = "telephony"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -10458,6 +10459,59 @@ message SupportedRadioAccessFamily {
     // A bitmask of supported radio technologies.
     // See android.telephony.TelephonyManager.NetworkTypeBitMask.
     optional int64 network_type_bitmask = 1;
+}
+
+/**
+ * Pulls information for a single incoming SMS.
+ *
+ * Each pull creates multiple atoms, one for each SMS. The sequence is randomized when pulled.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
+ */
+message IncomingSms {
+    // Format of the SMS (3GPP or 3GPP2).
+    optional android.telephony.SmsFormatEnum sms_format = 1;
+
+    // Technology of the SMS (CS or IMS).
+    optional android.telephony.SmsTechEnum sms_tech = 2;
+
+    // Radio access technology (RAT) used for the SMS. It can be IWLAN in case of IMS.
+    optional android.telephony.NetworkTypeEnum rat = 3;
+
+    // Type the SMS.
+    optional android.telephony.SmsTypeEnum sms_type = 4;
+
+    // Number of total parts.
+    optional int32 total_parts = 5;
+
+    // Number of received parts (if smaller than total parts, the SMS was dropped).
+    optional int32 received_parts = 6;
+
+    // Indicates if the incoming SMS was blocked.
+    optional bool blocked = 7;
+
+    // Indicate a specific error handling the SMS
+    optional android.telephony.SmsIncomingErrorEnum error = 8;
+
+    // Whether the SMS was received while roaming.
+    optional bool is_roaming = 9;
+
+    // Index of the SIM is used, 0 for single-SIM devices.
+    optional int32 sim_slot_index = 10;
+
+    // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
+    optional bool is_multi_sim = 11;
+
+    // Whether the message was received with an eSIM profile.
+    optional bool is_esim = 12;
+
+    // Carrier ID of the SIM card used for the SMS.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 13;
+
+    // Random message ID.
+    optional int64 message_id = 14;
 }
 
 /**
