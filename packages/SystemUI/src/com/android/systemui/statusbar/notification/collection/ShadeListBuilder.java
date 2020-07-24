@@ -421,7 +421,7 @@ public class ShadeListBuilder implements Dumpable {
 
                 GroupEntry group = mGroups.get(topLevelKey);
                 if (group == null) {
-                    group = new GroupEntry(topLevelKey);
+                    group = new GroupEntry(topLevelKey, mSystemClock.uptimeMillis());
                     group.mFirstAddedIteration = mIterationCount;
                     mGroups.put(topLevelKey, group);
                 }
