@@ -505,15 +505,17 @@ public class Binder implements IBinder {
 
     /**
      * Mark as being built with VINTF-level stability promise. This API should
-     * only ever be invoked by the build system. It means that the interface
-     * represented by this binder is guaranteed to be kept stable for several
-     * years, and the build system also keeps snapshots of these APIs and
-     * invokes the AIDL compiler to make sure that these snapshots are
-     * backwards compatible. Instead of using this API, use an @VintfStability
-     * interface.
+     * only ever be invoked by generated code from the aidl compiler. It means
+     * that the interface represented by this binder is guaranteed to be kept
+     * stable for several years, according to the VINTF compatibility lifecycle,
+     * and the build system also keeps snapshots of these APIs and invokes the
+     * AIDL compiler to make sure that these snapshots are backwards compatible.
+     * Instead of using this API, use the @VintfStability annotation on your
+     * AIDL interface.
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final native void markVintfStability();
 
     /**
