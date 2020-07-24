@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.location.ActivityRecognitionHardware;
 import android.hardware.location.IActivityRecognitionHardwareClient;
@@ -77,7 +78,7 @@ public class HardwareActivityRecognitionProxy {
         return mServiceWatcher.register();
     }
 
-    private void onBind(IBinder binder) throws RemoteException {
+    private void onBind(IBinder binder, ComponentName service) throws RemoteException {
         String descriptor = binder.getInterfaceDescriptor();
 
         if (IActivityRecognitionHardwareWatcher.class.getCanonicalName().equals(descriptor)) {
