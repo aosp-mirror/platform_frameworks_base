@@ -1081,11 +1081,10 @@ public class BubbleStackView extends FrameLayout
                     final Bubble bubble = mBubbleData.getSelectedBubble();
                     if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                         final Intent intent = bubble.getSettingsIntent(mContext);
-                        collapseStack(() -> {
-                            mContext.startActivityAsUser(intent, bubble.getUser());
-                            logBubbleEvent(bubble,
-                                    SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
-                        });
+                        mBubbleData.setExpanded(false);
+                        mContext.startActivityAsUser(intent, bubble.getUser());
+                        logBubbleEvent(bubble,
+                                SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
                     }
                 });
 
@@ -1790,36 +1789,6 @@ public class BubbleStackView extends FrameLayout
                         mManageEducationView.setVisibility(GONE);
                     });
         }
-    }
-
-    /**
-     * Dismiss the stack of bubbles.
-     *
-     * @deprecated
-     */
-    @Deprecated
-    void stackDismissed(int reason) {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "stackDismissed: reason=" + reason);
-        }
-        mBubbleData.dismissAll(reason);
-        logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
-                SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
-    }
-
-    /**
-     * @deprecated use {@link #setExpanded(boolean)} and
-     * {@link BubbleData#setSelectedBubble(Bubble)}
-     */
-    @Deprecated
-    @MainThread
-    void collapseStack(Runnable endRunnable) {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "collapseStack(endRunnable)");
-        }
-        mBubbleData.setExpanded(false);
-        // TODO - use the runnable at end of animation
-        endRunnable.run();
     }
 
     void showExpandedViewContents(int displayId) {
