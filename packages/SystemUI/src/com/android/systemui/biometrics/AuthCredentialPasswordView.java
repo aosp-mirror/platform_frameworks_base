@@ -28,6 +28,7 @@ import android.widget.ImeAwareEditText;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternChecker;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.R;
@@ -106,8 +107,11 @@ public class AuthCredentialPasswordView extends AuthCredentialView
                 return;
             }
 
+            // Request LockSettingsService to return the Gatekeeper Password in the
+            // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
+            // Gatekeeper Password and operationId.
             mPendingLockCheck = LockPatternChecker.verifyCredential(mLockPatternUtils,
-                    password, mOperationId, mEffectiveUserId, 0 /* flags */,
+                    password, mEffectiveUserId, LockPatternUtils.VERIFY_FLAG_RETURN_GK_PW,
                     this::onCredentialVerified);
         }
     }

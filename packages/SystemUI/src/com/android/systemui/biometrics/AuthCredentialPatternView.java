@@ -68,12 +68,14 @@ public class AuthCredentialPatternView extends AuthCredentialView {
             }
 
             try (LockscreenCredential credential = LockscreenCredential.createPattern(pattern)) {
+                // Request LockSettingsService to return the Gatekeeper Password in the
+                // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
+                // Gatekeeper Password and operationId.
                 mPendingLockCheck = LockPatternChecker.verifyCredential(
                         mLockPatternUtils,
                         credential,
-                        mOperationId,
                         mEffectiveUserId,
-                        0 /* flags */,
+                        LockPatternUtils.VERIFY_FLAG_RETURN_GK_PW,
                         this::onPatternVerified);
             }
         }

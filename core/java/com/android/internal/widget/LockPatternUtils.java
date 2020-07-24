@@ -386,18 +386,17 @@ public class LockPatternUtils {
      * If credential matches, return an opaque attestation that the challenge was verified.
      *
      * @param credential The credential to check.
-     * @param challenge The challenge to verify against the credential
      * @param userId The user whose credential is being verified
      * @param flags See {@link VerifyFlag}
      * @throws IllegalStateException if called on the main thread.
      */
     @NonNull
     public VerifyCredentialResponse verifyCredential(@NonNull LockscreenCredential credential,
-            long challenge, int userId, @VerifyFlag int flags) {
+            int userId, @VerifyFlag int flags) {
         throwIfCalledOnMainThread();
         try {
             final VerifyCredentialResponse response = getLockSettings().verifyCredential(
-                    credential, challenge, userId, flags);
+                    credential, userId, flags);
             if (response == null) {
                 return VerifyCredentialResponse.ERROR;
             } else {
@@ -411,8 +410,8 @@ public class LockPatternUtils {
 
     /**
      * With the Gatekeeper Password returned via {@link #verifyCredential(LockscreenCredential,
-     * long, int, boolean)}, request Gatekeeper to create a HardwareAuthToken wrapping the
-     * given challenge.
+     * int, int)}, request Gatekeeper to create a HardwareAuthToken wrapping the given
+     * challenge.
      */
     @NonNull
     public VerifyCredentialResponse verifyGatekeeperPassword(@NonNull byte[] gatekeeperPassword,
@@ -470,7 +469,6 @@ public class LockPatternUtils {
      * verified.
      *
      * @param credential The parent user's credential to check.
-     * @param challenge The challenge to verify against the credential
      * @return the attestation that the challenge was verified, or null
      * @param userId The managed profile user id
      * @param flags See {@link VerifyFlag}
@@ -478,12 +476,11 @@ public class LockPatternUtils {
      */
     @NonNull
     public VerifyCredentialResponse verifyTiedProfileChallenge(
-            @NonNull LockscreenCredential credential,
-            long challenge, int userId, @VerifyFlag int flags) {
+            @NonNull LockscreenCredential credential, int userId, @VerifyFlag int flags) {
         throwIfCalledOnMainThread();
         try {
             final VerifyCredentialResponse response = getLockSettings()
-                    .verifyTiedProfileChallenge(credential, challenge, userId, flags);
+                    .verifyTiedProfileChallenge(credential, userId, flags);
             if (response == null) {
                 return VerifyCredentialResponse.ERROR;
             } else {

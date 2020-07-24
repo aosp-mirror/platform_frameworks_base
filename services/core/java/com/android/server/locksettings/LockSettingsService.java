@@ -187,6 +187,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String SYNTHETIC_PASSWORD_UPDATE_TIME_KEY = "sp-handle-ts";
     private static final String USER_SERIAL_NUMBER_KEY = "serial-number";
 
+    // TODO (b/145978626) LockSettingsService no longer accepts challenges in the verifyCredential
+    //  paths. These are temporarily left around to ensure that resetLockout works. It will be
+    //  removed once resetLockout is compartmentalized.
     // No challenge provided
     private static final int CHALLENGE_NONE = 0;
     // Challenge was provided from the external caller (non-LockSettingsService)
@@ -1609,8 +1612,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Verify the parent credential again, to make sure we have a fresh enough
             // auth token such that getDecryptedPasswordForTiedProfile() inside
             // setLockCredentialInternal() can function correctly.
-            verifyCredential(savedCredential, /* challenge */ 0,
-                    mUserManager.getProfileParent(userId).id, 0 /* flags */);
+            verifyCredential(savedCredential, mUserManager.getProfileParent(userId).id,
+                    0 /* flags */);
             savedCredential.zeroize();
             savedCredential = LockscreenCredential.createNone();
         }
@@ -1969,7 +1972,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             ICheckCredentialProgressCallback progressCallback) {
         checkPasswordReadPermission(userId);
         try {
-            return doVerifyCredential(credential, CHALLENGE_NONE, 0, userId, progressCallback,
+            return doVerifyCredential(credential, CHALLENGE_NONE, 0L, userId, progressCallback,
                     0 /* flags */);
         } finally {
             scheduleGc();
@@ -1979,21 +1982,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     @Nullable
     public VerifyCredentialResponse verifyCredential(LockscreenCredential credential,
-            long challenge, int userId, @LockPatternUtils.VerifyFlag int flags) {
+            int userId, int flags) {
         checkPasswordReadPermission(userId);
-        @ChallengeType int challengeType = CHALLENGE_FROM_CALLER;
-        if (challenge == 0) {
-            Slog.w(TAG, "VerifyCredential called with challenge=0");
-            challengeType = CHALLENGE_NONE;
-        }
-        if (challenge != 0 && ((flags & VERIFY_FLAG_RETURN_GK_PW) != 0)) {
-            // Caller requests Gatekeeper Password to be returned. Challenge is a no-op here, since
-            // its only used when Gatekeeper verifies the SP.
-            Slog.w(TAG, "Challenge will not be used");
-        }
 
         try {
-            return doVerifyCredential(credential, challengeType, challenge, userId,
+            return doVerifyCredential(credential, CHALLENGE_NONE, 0L, userId,
                     null /* progressCallback */, flags);
         } finally {
             scheduleGc();
@@ -2083,7 +2076,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public VerifyCredentialResponse verifyTiedProfileChallenge(LockscreenCredential credential,
-            long challenge, int userId, @LockPatternUtils.VerifyFlag int flags) {
+            int userId, @LockPatternUtils.VerifyFlag int flags) {
         checkPasswordReadPermission(userId);
         if (!isManagedProfileWithUnifiedLock(userId)) {
             throw new IllegalArgumentException("User id must be managed profile with unified lock");
@@ -2092,8 +2085,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         // Unlock parent by using parent's challenge
         final VerifyCredentialResponse parentResponse = doVerifyCredential(
                 credential,
-                CHALLENGE_FROM_CALLER,
-                challenge,
+                CHALLENGE_NONE,
+                0L,
                 parentProfileId,
                 null /* progressCallback */,
                 flags);
@@ -2105,8 +2098,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             // Unlock work profile, and work profile with unified lock must use password only
             return doVerifyCredential(getDecryptedPasswordForTiedProfile(userId),
-                    CHALLENGE_FROM_CALLER,
-                    challenge,
+                    CHALLENGE_NONE,
+                    0L,
                     userId, null /* progressCallback */,
                     flags);
         } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException

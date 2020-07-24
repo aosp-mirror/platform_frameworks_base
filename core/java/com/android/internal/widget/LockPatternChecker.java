@@ -54,14 +54,12 @@ public final class LockPatternChecker {
      *
      * @param utils The LockPatternUtils instance to use.
      * @param credential The credential to check.
-     * @param challenge The challenge to verify against the credential.
      * @param userId The user to check against the credential.
      * @param flags See {@link LockPatternUtils.VerifyFlag}
      * @param callback The callback to be invoked with the verification result.
      */
     public static AsyncTask<?, ?, ?> verifyCredential(final LockPatternUtils utils,
             final LockscreenCredential credential,
-            final long challenge,
             final int userId,
             final @LockPatternUtils.VerifyFlag int flags,
             final OnVerifyCallback callback) {
@@ -71,7 +69,7 @@ public final class LockPatternChecker {
                 new AsyncTask<Void, Void, VerifyCredentialResponse>() {
             @Override
             protected VerifyCredentialResponse doInBackground(Void... args) {
-                return utils.verifyCredential(credentialCopy, challenge, userId, flags);
+                return utils.verifyCredential(credentialCopy, userId, flags);
             }
 
             @Override
@@ -138,14 +136,12 @@ public final class LockPatternChecker {
      *
      * @param utils The LockPatternUtils instance to use.
      * @param credential The credential to check.
-     * @param challenge The challenge to verify against the credential.
      * @param userId The user to check against the credential.
      * @param flags See {@link LockPatternUtils.VerifyFlag}
      * @param callback The callback to be invoked with the verification result.
      */
     public static AsyncTask<?, ?, ?> verifyTiedProfileChallenge(final LockPatternUtils utils,
             final LockscreenCredential credential,
-            final long challenge,
             final int userId,
             final @LockPatternUtils.VerifyFlag int flags,
             final OnVerifyCallback callback) {
@@ -155,7 +151,7 @@ public final class LockPatternChecker {
                 new AsyncTask<Void, Void, VerifyCredentialResponse>() {
             @Override
             protected VerifyCredentialResponse doInBackground(Void... args) {
-                return utils.verifyTiedProfileChallenge(credentialCopy, challenge, userId, flags);
+                return utils.verifyTiedProfileChallenge(credentialCopy, userId, flags);
             }
 
             @Override
