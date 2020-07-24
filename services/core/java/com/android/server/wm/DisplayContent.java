@@ -1557,7 +1557,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // the heavy operations. This also benefits that the states of multiple activities
             // are handled together.
             r.linkFixedRotationTransform(prevRotatedLaunchingApp);
-            setFixedRotationLaunchingAppUnchecked(r, rotation);
+            if (r != mFixedRotationTransitionListener.mAnimatingRecents) {
+                // Only update the record for normal activity so the display orientation can be
+                // updated when the transition is done if it becomes the top. And the case of
+                // recents can be handled when the recents animation is finished.
+                setFixedRotationLaunchingAppUnchecked(r, rotation);
+            }
             return;
         }
 
