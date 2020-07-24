@@ -16,7 +16,6 @@
 
 package com.android.server.location.util;
 
-import android.os.Process;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.SparseArray;
@@ -27,10 +26,12 @@ import com.android.internal.util.Preconditions;
 import java.io.FileDescriptor;
 
 /**
- * Version of UserInfoHelper for testing. The user this code is running under is set as the current
- * user by default, with no profiles.
+ * Version of UserInfoHelper for testing. By default there is one user that starts in a running
+ * state with a userId of 0;
  */
 public class FakeUserInfoHelper extends UserInfoHelper {
+
+    public static final int DEFAULT_USERID = 0;
 
     private final IntArray mRunningUserIds;
     private final SparseArray<IntArray> mProfiles;
@@ -38,8 +39,8 @@ public class FakeUserInfoHelper extends UserInfoHelper {
     private int mCurrentUserId;
 
     public FakeUserInfoHelper() {
-        mCurrentUserId = Process.myUserHandle().getIdentifier();
-        mRunningUserIds = IntArray.wrap(new int[]{mCurrentUserId});
+        mCurrentUserId = DEFAULT_USERID;
+        mRunningUserIds = IntArray.wrap(new int[]{DEFAULT_USERID});
         mProfiles = new SparseArray<>();
     }
 
@@ -65,6 +66,10 @@ public class FakeUserInfoHelper extends UserInfoHelper {
         }
 
         dispatchOnUserStopped(userId);
+    }
+
+    public void setCurrentUserId(int parentUser) {
+        setCurrentUserIds(parentUser, new int[]{parentUser});
     }
 
     public void setCurrentUserIds(int parentUser, int[] currentProfileUserIds) {

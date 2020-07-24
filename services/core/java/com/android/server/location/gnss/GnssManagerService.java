@@ -18,10 +18,9 @@ package com.android.server.location.gnss;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 
-import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
-
 import android.Manifest;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.location.GnssAntennaInfo;
 import android.location.GnssMeasurementCorrections;
@@ -47,10 +46,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
-import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
-import com.android.server.location.util.SettingsHelper;
 
 import java.io.FileDescriptor;
 import java.util.List;
@@ -68,9 +65,7 @@ public class GnssManagerService implements GnssNative.Callbacks {
     }
 
     private final Context mContext;
-    private final SettingsHelper mSettingsHelper;
     private final AppOpsHelper mAppOpsHelper;
-    private final AppForegroundHelper mAppForegroundHelper;
     private final LocationManagerInternal mLocationManagerInternal;
 
     private final GnssLocationProvider mGnssLocationProvider;
@@ -109,9 +104,7 @@ public class GnssManagerService implements GnssNative.Callbacks {
         GnssNative.initialize();
 
         mContext = context.createAttributionContext(ATTRIBUTION_ID);
-        mSettingsHelper = injector.getSettingsHelper();
         mAppOpsHelper = injector.getAppOpsHelper();
-        mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationManagerInternal = LocalServices.getService(LocationManagerInternal.class);
 
         if (gnssLocationProvider == null) {
@@ -192,9 +185,10 @@ public class GnssManagerService implements GnssNative.Callbacks {
     public boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName,
             String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        if (!mAppOpsHelper.checkLocationAccess(identity, PERMISSION_FINE)) {
+        if (!mAppOpsHelper.checkOpNoThrow(AppOpsManager.OP_FINE_LOCATION, identity)) {
             return false;
         }
 
