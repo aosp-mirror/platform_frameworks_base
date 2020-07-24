@@ -29,6 +29,10 @@ package android.graphics {
 
 package android.os {
 
+  public class Binder implements android.os.IBinder {
+    method public final void markVintfStability();
+  }
+
   public class StatsServiceManager {
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
