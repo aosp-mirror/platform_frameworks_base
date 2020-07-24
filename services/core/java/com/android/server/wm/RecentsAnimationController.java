@@ -929,7 +929,7 @@ public class RecentsAnimationController implements DeathRecipient {
                     ? MODE_OPENING
                     : MODE_CLOSING;
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, mode, mCapturedLeash,
-                    !topApp.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
+                    !topApp.fillsParent(), new Rect(),
                     insets, mTask.getPrefixOrderIndex(), new Point(mBounds.left, mBounds.top),
                     mLocalBounds, mBounds, mTask.getWindowConfiguration(),
                     mIsRecentTaskInvisible, null, null);
