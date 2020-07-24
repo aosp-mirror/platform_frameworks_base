@@ -18,52 +18,56 @@ package com.android.systemui.bubbles
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
-import android.util.AttributeSet
-import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.Interpolators
+import com.android.systemui.Prefs
+import com.android.systemui.Prefs.Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION
 import com.android.systemui.R
 
 /**
- * Educational view to highlight the manage button that allows a user to configure the settings
+ * User education view to highlight the manage button that allows a user to configure the settings
  * for the bubble. Shown only the first time a user expands a bubble.
  */
-class ManageEducationView @JvmOverloads constructor(
-    context: Context?,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-    defStyleRes: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
+class ManageEducationView constructor(context: Context) : LinearLayout(context) {
+
+    private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleManageEducationView"
+        else BubbleDebugConfig.TAG_BUBBLES
+
+    private val ANIMATE_DURATION : Long = 200
+    private val ANIMATE_DURATION_SHORT : Long = 40
 
     private val manageView by lazy { findViewById<View>(R.id.manage_education_view) }
     private val manageButton by lazy { findViewById<Button>(R.id.manage) }
     private val gotItButton by lazy { findViewById<Button>(R.id.got_it) }
     private val titleTextView by lazy { findViewById<TextView>(R.id.user_education_title) }
     private val descTextView by lazy { findViewById<TextView>(R.id.user_education_description) }
-    private var isInflated = false
+
+    private var isHiding = false
 
     init {
-        this.visibility = View.GONE
-        this.elevation = resources.getDimensionPixelSize(R.dimen.bubble_elevation).toFloat()
-        this.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
+        LayoutInflater.from(context).inflate(R.layout.bubbles_manage_button_education, this);
+        visibility = View.GONE
+        elevation = resources.getDimensionPixelSize(R.dimen.bubble_elevation).toFloat()
+
+        // BubbleStackView forces LTR by default
+        // since most of Bubble UI direction depends on positioning by the user.
+        // This view actually lays out differently in RTL, so we set layout LOCALE here.
+        layoutDirection = View.LAYOUT_DIRECTION_LOCALE
     }
 
-    override fun setLayoutDirection(direction: Int) {
-        super.setLayoutDirection(direction)
-        // setLayoutDirection runs before onFinishInflate
-        // so skip if views haven't inflated; otherwise we'll get NPEs
-        if (!isInflated) return
-        setDirection()
+    override fun setLayoutDirection(layoutDirection: Int) {
+        super.setLayoutDirection(layoutDirection)
+        setDrawableDirection()
     }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        isInflated = true
-        setDirection()
+        layoutDirection = resources.configuration.layoutDirection
         setTextColor()
     }
 
@@ -78,29 +82,35 @@ class ManageEducationView @JvmOverloads constructor(
         descTextView.setTextColor(textColor)
     }
 
-    fun setDirection() {
+    private fun setDrawableDirection() {
         manageView.setBackgroundResource(
             if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL)
                 R.drawable.bubble_stack_user_education_bg_rtl
             else R.drawable.bubble_stack_user_education_bg)
-        titleTextView.gravity = Gravity.START
-        descTextView.gravity = Gravity.START
     }
 
-    fun show(expandedView: BubbleExpandedView, rect : Rect, hideMenu: Runnable) {
+    /**
+     * If necessary, toggles the user education view for the manage button. This is shown when the
+     * bubble stack is expanded for the first time.
+     *
+     * @param show whether the user education view should show or not.
+     */
+    fun show(expandedView: BubbleExpandedView, rect : Rect) {
+        if (visibility == VISIBLE) return
+
         alpha = 0f
         visibility = View.VISIBLE
         post {
             expandedView.getManageButtonBoundsOnScreen(rect)
-            with(hideMenu) {
-                manageButton
-                    .setOnClickListener {
-                        expandedView.findViewById<View>(R.id.settings_button).performClick()
-                        this.run()
-                    }
-                gotItButton.setOnClickListener { this.run() }
-                setOnClickListener { this.run() }
-            }
+
+            manageButton
+                .setOnClickListener {
+                    expandedView.findViewById<View>(R.id.settings_button).performClick()
+                    hide(true /* isStackExpanding */)
+                }
+            gotItButton.setOnClickListener { hide(true /* isStackExpanding */) }
+            setOnClickListener { hide(true /* isStackExpanding */) }
+
             with(manageView) {
                 translationX = 0f
                 val inset = resources.getDimensionPixelSize(
@@ -109,9 +119,27 @@ class ManageEducationView @JvmOverloads constructor(
             }
             bringToFront()
             animate()
-                .setDuration(BubbleStackView.ANIMATE_STACK_USER_EDUCATION_DURATION.toLong())
+                .setDuration(ANIMATE_DURATION)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
         }
+        setShouldShow(false)
+    }
+
+    fun hide(isStackExpanding: Boolean) {
+        if (visibility != VISIBLE || isHiding) return
+
+        animate()
+            .withStartAction { isHiding = true }
+            .alpha(0f)
+            .setDuration(if (isStackExpanding) ANIMATE_DURATION_SHORT else ANIMATE_DURATION)
+            .withEndAction {
+                isHiding = false
+                visibility = GONE
+            };
+    }
+
+    private fun setShouldShow(shouldShow: Boolean) {
+        Prefs.putBoolean(context, HAS_SEEN_BUBBLES_MANAGE_EDUCATION, !shouldShow)
     }
 }
