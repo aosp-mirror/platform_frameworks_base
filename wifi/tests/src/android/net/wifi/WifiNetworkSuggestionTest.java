@@ -62,6 +62,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(-1, suggestion.wifiConfiguration.priority);
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
         assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -92,6 +93,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(0, suggestion.wifiConfiguration.priority);
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
         assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -122,6 +124,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(-1, suggestion.wifiConfiguration.priority);
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
         assertFalse(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -152,6 +155,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(-1, suggestion.wifiConfiguration.priority);
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
         assertFalse(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -174,6 +178,7 @@ public class WifiNetworkSuggestionTest {
         assertTrue(suggestion.wifiConfiguration.requirePmf);
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
         assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -197,6 +202,7 @@ public class WifiNetworkSuggestionTest {
         assertTrue(suggestion.wifiConfiguration.requirePmf);
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
         assertFalse(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
 
@@ -230,6 +236,7 @@ public class WifiNetworkSuggestionTest {
         // here.
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
         assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNotNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -286,6 +293,7 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.GroupCipher.SMS4));
         assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
                 suggestion.wifiConfiguration.preSharedKey);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
 
@@ -316,6 +324,7 @@ public class WifiNetworkSuggestionTest {
                 suggestion.wifiConfiguration.enterpriseConfig.getEapMethod());
         assertEquals(TEST_WAPI_CERT_SUITE,
                 suggestion.wifiConfiguration.enterpriseConfig.getWapiCertSuite());
+        assertNotNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -345,6 +354,7 @@ public class WifiNetworkSuggestionTest {
                 suggestion.wifiConfiguration.enterpriseConfig.getEapMethod());
         assertEquals("",
                 suggestion.wifiConfiguration.enterpriseConfig.getWapiCertSuite());
+        assertNotNull(suggestion.getEnterpriseConfig());
     }
 
     /**
@@ -367,6 +377,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(suggestion.getPasspointConfig().getMeteredOverride(),
                 WifiConfiguration.METERED_OVERRIDE_METERED);
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
+        assertNull(suggestion.getEnterpriseConfig());
     }
 
     /**
