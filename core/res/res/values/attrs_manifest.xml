@@ -2173,6 +2173,29 @@
         <attr name="required" />
     </declare-styleable>
 
+    <!-- The <code>uses-native-library</code> specifies a native shared library that this
+         package requires to be linked against.  Specifying this flag tells the
+         system to make the native library to be available to your app.
+
+         <p>On devices running R or lower, this is ignored and the app has access to all
+         the public native shared libraries that are exported from the platform. This is
+         also ignored if the app is targeting R or lower.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestUsesNativeLibrary" parent="AndroidManifestApplication">
+        <!-- Required name of the library you use. -->
+        <attr name="name" />
+        <!--  Specify whether this native library is required for the application.
+              The default is true, meaning the application requires the
+              library, and does not want to be installed on devices that
+              don't support it. If you set this to false, then this will
+              allow the application to be installed even if the library
+              doesn't exist, and you will need to check for its presence
+              dynamically at runtime. -->
+        <attr name="required" />
+    </declare-styleable>
+
     <!-- The <code>uses-static-library</code> specifies a shared <strong>static</strong>
          library that this package requires to be statically linked against. Specifying
          this tag tells the system to include this library's code in your class loader.

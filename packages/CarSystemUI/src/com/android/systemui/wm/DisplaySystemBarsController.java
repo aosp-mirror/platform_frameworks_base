@@ -16,12 +16,14 @@
 
 package com.android.systemui.wm;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
+import android.view.IWindowManager;
 import android.view.InsetsController;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -32,7 +34,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
 import javax.inject.Inject;
@@ -50,29 +51,32 @@ public class DisplaySystemBarsController extends DisplayImeController {
     private static final String TAG = "DisplaySystemBarsController";
 
     private SparseArray<PerDisplay> mPerDisplaySparseArray;
+    private final Context mContext;
 
     @Inject
     public DisplaySystemBarsController(
-            SystemWindows syswin,
+            Context context,
+            IWindowManager wmService,
             DisplayController displayController,
             @Main Handler mainHandler,
             TransactionPool transactionPool) {
-        super(syswin, displayController, mainHandler, transactionPool);
+        super(wmService, displayController, mainHandler, transactionPool);
+        mContext = context;
     }
 
     @Override
     public void onDisplayAdded(int displayId) {
         PerDisplay pd = new PerDisplay(displayId);
         try {
-            mSystemWindows.mWmService.setDisplayWindowInsetsController(displayId, pd);
+            mWmService.setDisplayWindowInsetsController(displayId, pd);
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to set insets controller on display " + displayId);
         }
         // Lazy loading policy control filters instead of during boot.
         if (mPerDisplaySparseArray == null) {
             mPerDisplaySparseArray = new SparseArray<>();
-            BarControlPolicy.reloadFromSetting(mSystemWindows.mContext);
-            BarControlPolicy.registerContentObserver(mSystemWindows.mContext, mHandler, () -> {
+            BarControlPolicy.reloadFromSetting(mContext);
+            BarControlPolicy.registerContentObserver(mContext, mHandler, () -> {
                 int size = mPerDisplaySparseArray.size();
                 for (int i = 0; i < size; i++) {
                     mPerDisplaySparseArray.valueAt(i).modifyDisplayWindowInsets();
@@ -85,7 +89,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
     @Override
     public void onDisplayRemoved(int displayId) {
         try {
-            mSystemWindows.mWmService.setDisplayWindowInsetsController(displayId, null);
+            mWmService.setDisplayWindowInsetsController(displayId, null);
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to remove insets controller on display " + displayId);
         }
@@ -155,7 +159,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
             showInsets(barVisibilities[0], /* fromIme= */ false);
             hideInsets(barVisibilities[1], /* fromIme= */ false);
             try {
-                mSystemWindows.mWmService.modifyDisplayWindowInsets(mDisplayId, mInsetsState);
+                mWmService.modifyDisplayWindowInsets(mDisplayId, mInsetsState);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Unable to update window manager service.");
             }

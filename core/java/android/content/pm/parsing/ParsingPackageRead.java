@@ -230,6 +230,19 @@ public interface ParsingPackageRead extends Parcelable {
     @NonNull
     List<String> getUsesOptionalLibraries();
 
+    /** @see R.styleabele#AndroidManifestUsesNativeLibrary */
+    @NonNull
+    List<String> getUsesNativeLibraries();
+
+    /**
+     * Like {@link #getUsesNativeLibraries()}, but marked optional by setting
+     * {@link R.styleable#AndroidManifestUsesNativeLibrary_required} to false . Application is
+     * expected to handle absence manually.
+     * @see R.styleable#AndroidManifestUsesNativeLibrary
+     */
+    @NonNull
+    List<String> getUsesOptionalNativeLibraries();
+
     /**
      * TODO(b/135203078): Move static library stuff to an inner data class
      * @see R.styleable#AndroidManifestUsesStaticLibrary

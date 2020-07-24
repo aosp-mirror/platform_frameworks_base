@@ -1405,6 +1405,29 @@ class UsesStaticLibrary : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <uses-native-library> elements. **/
+class UsesNativeLibrary : public ManifestExtractor::Element {
+ public:
+  UsesNativeLibrary() = default;
+  std::string name;
+  int required;
+
+  void Extract(xml::Element* element) override {
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
+      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+      required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
+    }
+  }
+
+  void Print(text::Printer* printer) override {
+    if (!name.empty()) {
+      printer->Print(StringPrintf("uses-native-library%s:'%s'\n",
+                                 (required == 0) ? "-not-required" : "", name.data()));
+    }
+  }
+};
+
 /**
  * Represents <meta-data> elements. These tags are only printed when a flag is passed in to
  * explicitly enable meta data printing.
@@ -2245,6 +2268,7 @@ T* ElementCast(ManifestExtractor::Element* element) {
     {"uses-static-library", std::is_base_of<UsesStaticLibrary, T>::value},
     {"additional-certificate", std::is_base_of<AdditionalCertificate, T>::value},
     {"uses-sdk", std::is_base_of<UsesSdkBadging, T>::value},
+    {"uses-native-library", std::is_base_of<UsesNativeLibrary, T>::value},
   };
 
   auto check = kTagCheck.find(element->tag());
@@ -2295,6 +2319,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
     {"uses-package", &CreateType<UsesPackage>},
     {"additional-certificate", &CreateType<AdditionalCertificate>},
     {"uses-sdk", &CreateType<UsesSdkBadging>},
+    {"uses-native-library", &CreateType<UsesNativeLibrary>},
   };
 
   // Attempt to map the xml tag to a element inflater

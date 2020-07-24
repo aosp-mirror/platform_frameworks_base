@@ -361,7 +361,7 @@ public class Time {
      */
     @Override
     public String toString() {
-        // toString() uses its own TimeCalculator rather than the shared one. Otherwise crazy stuff
+        // toString() uses its own TimeCalculator rather than the shared one. Otherwise weird stuff
         // happens during debugging when the debugger calls toString().
         TimeCalculator calculator = new TimeCalculator(this.timezone);
         calculator.copyFieldsFromTime(this);

@@ -225,7 +225,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             if (SystemProperties.getBoolean(Constants.PROPERTY_KEEP_AWAKE, true)) {
                 mWakeLock = new SystemWakeLock();
             } else {
-                // Create a dummy lock object that doesn't do anything about wake lock,
+                // Create a stub lock object that doesn't do anything about wake lock,
                 // hence allows the device to go to sleep even if it's the active source.
                 mWakeLock = new ActiveWakeLock() {
                     @Override

@@ -354,6 +354,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             // If the button will actually become visible and the navbar is about to hide,
             // tell the statusbar to keep it around for longer
             mAutoHideController.touchAutoHide();
+            mNavigationBarView.notifyActiveTouchRegions();
         }
     };
 

@@ -79,6 +79,7 @@ public final class SharedLibraryInfo implements Parcelable {
 
     private final long mVersion;
     private final @Type int mType;
+    private final boolean mIsNative;
     private final VersionedPackage mDeclaringPackage;
     private final List<VersionedPackage> mDependentPackages;
     private List<SharedLibraryInfo> mDependencies;
@@ -93,13 +94,14 @@ public final class SharedLibraryInfo implements Parcelable {
      * @param type The lib type.
      * @param declaringPackage The package that declares the library.
      * @param dependentPackages The packages that depend on the library.
+     * @param isNative indicate if this shared lib is a native lib or not (i.e. java)
      *
      * @hide
      */
     public SharedLibraryInfo(String path, String packageName, List<String> codePaths,
             String name, long version, int type,
             VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages,
-            List<SharedLibraryInfo> dependencies) {
+            List<SharedLibraryInfo> dependencies, boolean isNative) {
         mPath = path;
         mPackageName = packageName;
         mCodePaths = codePaths;
@@ -109,6 +111,16 @@ public final class SharedLibraryInfo implements Parcelable {
         mDeclaringPackage = declaringPackage;
         mDependentPackages = dependentPackages;
         mDependencies = dependencies;
+        mIsNative = isNative;
+    }
+
+    /** @hide */
+    public SharedLibraryInfo(String path, String packageName, List<String> codePaths,
+            String name, long version, int type,
+            VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages,
+            List<SharedLibraryInfo> dependencies) {
+        this(path, packageName, codePaths, name, version, type, declaringPackage, dependentPackages,
+            dependencies, false /* isNative */);
     }
 
     private SharedLibraryInfo(Parcel parcel) {
@@ -125,6 +137,7 @@ public final class SharedLibraryInfo implements Parcelable {
         mDeclaringPackage = parcel.readParcelable(null);
         mDependentPackages = parcel.readArrayList(null);
         mDependencies = parcel.createTypedArrayList(SharedLibraryInfo.CREATOR);
+        mIsNative = parcel.readBoolean();
     }
 
     /**
@@ -134,6 +147,15 @@ public final class SharedLibraryInfo implements Parcelable {
      */
     public @Type int getType() {
         return mType;
+    }
+
+    /**
+     * Tells whether this library is a native shared library or not.
+     *
+     * @hide
+     */
+    public boolean isNative() {
+        return mIsNative;
     }
 
     /**
@@ -320,6 +342,7 @@ public final class SharedLibraryInfo implements Parcelable {
         parcel.writeParcelable(mDeclaringPackage, flags);
         parcel.writeList(mDependentPackages);
         parcel.writeTypedList(mDependencies);
+        parcel.writeBoolean(mIsNative);
     }
 
     private static String typeToString(int type) {

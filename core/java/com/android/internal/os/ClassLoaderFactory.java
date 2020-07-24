@@ -101,7 +101,7 @@ public class ClassLoaderFactory {
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName) {
         return createClassLoader(dexPath, librarySearchPath, libraryPermittedPath,
-            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null);
+            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null, null);
     }
 
 
@@ -111,10 +111,15 @@ public class ClassLoaderFactory {
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName,
-            List<ClassLoader> sharedLibraries) {
+            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries) {
 
         final ClassLoader classLoader = createClassLoader(dexPath, librarySearchPath, parent,
                 classLoaderName, sharedLibraries);
+
+        String sonameList = "";
+        if (nativeSharedLibraries != null) {
+            sonameList = String.join(":", nativeSharedLibraries);
+        }
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "createClassloaderNamespace");
         String errorMessage = createClassloaderNamespace(classLoader,
@@ -122,7 +127,8 @@ public class ClassLoaderFactory {
                                                          librarySearchPath,
                                                          libraryPermittedPath,
                                                          isNamespaceShared,
-                                                         dexPath);
+                                                         dexPath,
+                                                         sonameList);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         if (errorMessage != null) {
@@ -139,5 +145,6 @@ public class ClassLoaderFactory {
                                                             String librarySearchPath,
                                                             String libraryPermittedPath,
                                                             boolean isNamespaceShared,
-                                                            String dexPath);
+                                                            String dexPath,
+                                                            String sonameList);
 }

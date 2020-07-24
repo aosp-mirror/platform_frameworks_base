@@ -687,7 +687,7 @@ public abstract class MediaBrowserService extends Service {
                 final ParceledListSlice<MediaBrowser.MediaItem> pls =
                         filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
-                    connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
+                    connection.callbacks.onLoadChildren(parentId, pls, options);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId
