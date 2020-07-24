@@ -53,7 +53,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
-import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -976,8 +975,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(stack.isOrganized());
 
         // Verify a back pressed does not call the organizer
-        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token,
-                new IRequestFinishCallback.Default());
+        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token);
         verify(organizer, never()).onBackPressedOnTaskRoot(any());
 
         // Enable intercepting back
@@ -985,8 +983,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 true);
 
         // Verify now that the back press does call the organizer
-        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token,
-                new IRequestFinishCallback.Default());
+        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token);
         verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
     }
 
