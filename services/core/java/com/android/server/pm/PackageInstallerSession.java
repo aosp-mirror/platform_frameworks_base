@@ -164,10 +164,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final boolean LOGD = true;
     private static final String REMOVE_MARKER_EXTENSION = ".removed";
 
-    private static final int MSG_STREAM_VALIDATE_AND_COMMIT = 1;
-    private static final int MSG_INSTALL = 2;
-    private static final int MSG_ON_PACKAGE_INSTALLED = 3;
-    private static final int MSG_SESSION_VERIFICATION_FAILURE = 4;
+    private static final int MSG_ON_SESSION_SEALED = 1;
+    private static final int MSG_STREAM_VALIDATE_AND_COMMIT = 2;
+    private static final int MSG_INSTALL = 3;
+    private static final int MSG_ON_PACKAGE_INSTALLED = 4;
+    private static final int MSG_SESSION_VERIFICATION_FAILURE = 5;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -444,6 +445,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_ON_SESSION_SEALED:
+                    handleSessionSealed();
+                    break;
                 case MSG_STREAM_VALIDATE_AND_COMMIT:
                     handleStreamValidateAndCommit();
                     break;
@@ -1172,6 +1176,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        dispatchSessionSealed();
+    }
+
+    /**
+     * Kicks off the install flow. The first step is to persist 'sealed' flags
+     * to prevent mutations of hard links created later.
+     */
+    private void dispatchSessionSealed() {
+        mHandler.obtainMessage(MSG_ON_SESSION_SEALED).sendToTarget();
+    }
+
+    private void handleSessionSealed() {
+        assertSealed("dispatchSessionSealed");
+        // Persist the fact that we've sealed ourselves to prevent
+        // mutations of any hard links we create.
+        mCallback.onSessionSealedBlocking(this);
         dispatchStreamValidateAndCommit();
     }
 
@@ -1424,11 +1444,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return false;
             }
         }
-
-        // Persist the fact that we've sealed ourselves to prevent
-        // mutations of any hard links we create. We do this without holding
-        // the session lock, since otherwise it's a lock inversion.
-        mCallback.onSessionSealedBlocking(this);
 
         return true;
     }
@@ -1701,11 +1716,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mInstallerUid = newOwnerAppInfo.uid;
             mInstallSource = InstallSource.create(packageName, null, packageName, null);
         }
-
-        // Persist the fact that we've sealed ourselves to prevent
-        // mutations of any hard links we create. We do this without holding
-        // the session lock, since otherwise it's a lock inversion.
-        mCallback.onSessionSealedBlocking(this);
     }
 
     private void handleInstall() {
@@ -2923,9 +2933,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             }
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
-                                        getParentSessionId()).dispatchStreamValidateAndCommit();
+                                        getParentSessionId()).dispatchSessionSealed();
                             } else {
-                                dispatchStreamValidateAndCommit();
+                                dispatchSessionSealed();
                             }
                             if (manualStartAndDestroy) {
                                 dataLoader.destroy(dataLoaderId);
