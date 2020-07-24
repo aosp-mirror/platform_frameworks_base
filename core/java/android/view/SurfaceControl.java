@@ -49,7 +49,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -1954,37 +1953,6 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @see SurfaceControl#screenshot(IBinder, Surface, Rect, int, int, boolean, int)
-     * @hide
-     */
-    public static void screenshot(IBinder display, Surface consumer) {
-        screenshot(display, consumer, new Rect(), 0, 0, false, 0);
-    }
-
-    /**
-     * Copy the current screen contents into the provided {@link Surface}
-     *
-     * @param consumer The {@link Surface} to take the screenshot into.
-     * @see SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)
-     * @hide
-     */
-    public static void screenshot(IBinder display, Surface consumer, Rect sourceCrop, int width,
-            int height, boolean useIdentityTransform, int rotation) {
-        if (consumer == null) {
-            throw new IllegalArgumentException("consumer must not be null");
-        }
-
-        final ScreenshotHardwareBuffer buffer = screenshotToBuffer(display, sourceCrop, width,
-                height, useIdentityTransform, rotation);
-        try {
-            consumer.attachAndQueueBufferWithColorSpace(buffer.getHardwareBuffer(),
-                    buffer.getColorSpace());
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Failed to take screenshot - " + e.getMessage());
-        }
-    }
-
-    /**
      * @see SurfaceControl#screenshot(Rect, int, int, boolean, int)}
      * @hide
      */
@@ -1999,8 +1967,7 @@ public final class SurfaceControl implements Parcelable {
      * a software Bitmap using {@link Bitmap#copy(Bitmap.Config, boolean)}
      *
      * CAVEAT: Versions of screenshot that return a {@link Bitmap} can be extremely slow; avoid use
-     * unless absolutely necessary; prefer the versions that use a {@link Surface} such as
-     * {@link SurfaceControl#screenshot(IBinder, Surface)} or {@link HardwareBuffer} such as
+     * unless absolutely necessary; prefer the versions that use a {@link HardwareBuffer} such as
      * {@link SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)}.
      *
      * @see SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)}
