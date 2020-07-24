@@ -526,4 +526,19 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
     }
+
+    @Test
+    public void handleSetStreamPath_afterHotplug_hasCorrectActiveSource() {
+        mHdmiControlService.onHotplug(1, false);
+        mHdmiControlService.onHotplug(1, true);
+
+        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
+                mPlaybackPhysicalAddress);
+        mHdmiCecLocalDevicePlayback.dispatchMessage(setStreamPath);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(
+                mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress());
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isTrue();
+    }
 }
