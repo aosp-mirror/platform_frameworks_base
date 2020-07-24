@@ -141,6 +141,11 @@ public class CarKeyguardViewController extends OverlayViewController implements
     }
 
     @Override
+    protected boolean shouldShowNavigationBar() {
+        return true;
+    }
+
+    @Override
     public void onFinishInflate() {
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils,
