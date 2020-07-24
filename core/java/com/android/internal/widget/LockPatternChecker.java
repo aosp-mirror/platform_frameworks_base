@@ -71,11 +71,7 @@ public final class LockPatternChecker {
                 new AsyncTask<Void, Void, VerifyCredentialResponse>() {
             @Override
             protected VerifyCredentialResponse doInBackground(Void... args) {
-                try {
-                    return utils.verifyCredential(credentialCopy, challenge, userId, flags);
-                } catch (RequestThrottledException ex) {
-                    return VerifyCredentialResponse.fromTimeout(ex.getTimeoutMs());
-                }
+                return utils.verifyCredential(credentialCopy, challenge, userId, flags);
             }
 
             @Override
@@ -159,12 +155,7 @@ public final class LockPatternChecker {
                 new AsyncTask<Void, Void, VerifyCredentialResponse>() {
             @Override
             protected VerifyCredentialResponse doInBackground(Void... args) {
-                try {
-                    return utils.verifyTiedProfileChallenge(credentialCopy, challenge, userId,
-                            flags);
-                } catch (RequestThrottledException ex) {
-                    return VerifyCredentialResponse.fromTimeout(ex.getTimeoutMs());
-                }
+                return utils.verifyTiedProfileChallenge(credentialCopy, challenge, userId, flags);
             }
 
             @Override

@@ -389,30 +389,19 @@ public class LockPatternUtils {
      * @param challenge The challenge to verify against the credential
      * @param userId The user whose credential is being verified
      * @param flags See {@link VerifyFlag}
-     * @throws RequestThrottledException if credential verification is being throttled due to
-     *         to many incorrect attempts.
      * @throws IllegalStateException if called on the main thread.
-     *
-     * TODO: This probably doesn't need to throw RequestThrottledException anymore, since the
-     * method now returns a VerifyCredentialResponse object, which contains the timeout
      */
     @NonNull
     public VerifyCredentialResponse verifyCredential(@NonNull LockscreenCredential credential,
-            long challenge, int userId, @VerifyFlag int flags) throws RequestThrottledException {
+            long challenge, int userId, @VerifyFlag int flags) {
         throwIfCalledOnMainThread();
         try {
             final VerifyCredentialResponse response = getLockSettings().verifyCredential(
                     credential, challenge, userId, flags);
             if (response == null) {
                 return VerifyCredentialResponse.ERROR;
-            }
-
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return response;
-            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
-                throw new RequestThrottledException(response.getTimeout());
             } else {
-                return VerifyCredentialResponse.ERROR;
+                return response;
             }
         } catch (RemoteException re) {
             Log.e(TAG, "failed to verify credential", re);
@@ -485,31 +474,20 @@ public class LockPatternUtils {
      * @return the attestation that the challenge was verified, or null
      * @param userId The managed profile user id
      * @param flags See {@link VerifyFlag}
-     * @throws RequestThrottledException if credential verification is being throttled due to
-     *         to many incorrect attempts.
      * @throws IllegalStateException if called on the main thread.
-     *
-     * TODO: This probably doesn't need to throw RequestThrottledException anymore, since the
-     * method now returns a VerifyCredentialResponse object, which contains the timeout
      */
     @NonNull
     public VerifyCredentialResponse verifyTiedProfileChallenge(
             @NonNull LockscreenCredential credential,
-            long challenge, int userId, @VerifyFlag int flags) throws RequestThrottledException {
+            long challenge, int userId, @VerifyFlag int flags) {
         throwIfCalledOnMainThread();
         try {
             final VerifyCredentialResponse response = getLockSettings()
                     .verifyTiedProfileChallenge(credential, challenge, userId, flags);
             if (response == null) {
                 return VerifyCredentialResponse.ERROR;
-            }
-
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return response;
-            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
-                throw new RequestThrottledException(response.getTimeout());
             } else {
-                return VerifyCredentialResponse.ERROR;
+                return response;
             }
         } catch (RemoteException re) {
             Log.e(TAG, "failed to verify tied profile credential", re);
