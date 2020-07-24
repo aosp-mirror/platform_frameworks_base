@@ -2050,7 +2050,9 @@ public final class ProcessList {
             final int pid = precedence.pid;
             long now = System.currentTimeMillis();
             final long end = now + PROC_KILL_TIMEOUT;
+            final int oldPolicy = StrictMode.getThreadPolicyMask();
             try {
+                StrictMode.setThreadPolicyMask(0);
                 Process.waitForProcessDeath(pid, PROC_KILL_TIMEOUT);
                 // It's killed successfully, but we'd make sure the cleanup work is done.
                 synchronized (precedence) {
@@ -2069,9 +2071,11 @@ public final class ProcessList {
                     }
                 }
             } catch (Exception e) {
-                // It's still alive...
+                // It's still alive... maybe blocked at uninterruptible sleep ?
                 Slog.wtf(TAG, precedence.toString() + " refused to die, but we need to launch "
-                        + app);
+                        + app, e);
+            } finally {
+                StrictMode.setThreadPolicyMask(oldPolicy);
             }
         }
         try {
@@ -2416,7 +2420,15 @@ public final class ProcessList {
             ProcessList.killProcessGroup(app.uid, app.pid);
             checkSlow(startTime, "startProcess: done killing old proc");
 
-            Slog.wtf(TAG_PROCESSES, app.toString() + " is attached to a previous process");
+            if (!app.killed || mService.mLastMemoryLevel <= ProcessStats.ADJ_MEM_FACTOR_NORMAL
+                    || app.setProcState < ActivityManager.PROCESS_STATE_CACHED_EMPTY
+                    || app.lastCachedPss < getCachedRestoreThresholdKb()) {
+                // Throw a wtf if it's not killed, or killed but not because the system was in
+                // memory pressure + the app was in "cch-empty" and used large amount of memory
+                Slog.wtf(TAG_PROCESSES, app.toString() + " is attached to a previous process");
+            } else {
+                Slog.w(TAG_PROCESSES, app.toString() + " is attached to a previous process");
+            }
             // We are not going to re-use the ProcessRecord, as we haven't dealt with the cleanup
             // routine of it yet, but we'd set it as the precedence of the new process.
             precedence = app;
@@ -2819,7 +2831,15 @@ public final class ProcessList {
             // We are re-adding a persistent process.  Whatevs!  Just leave it there.
             Slog.w(TAG, "Re-adding persistent process " + proc);
         } else if (old != null) {
-            Slog.wtf(TAG, "Already have existing proc " + old + " when adding " + proc);
+            if (old.killed) {
+                // The old process has been killed, we probably haven't had
+                // a chance to clean up the old record, just log a warning
+                Slog.w(TAG, "Existing proc " + old + " was killed "
+                        + (SystemClock.uptimeMillis() - old.mKillTime)
+                        + "ms ago when adding " + proc);
+            } else {
+                Slog.wtf(TAG, "Already have existing proc " + old + " when adding " + proc);
+            }
         }
         UidRecord uidRec = mActiveUids.get(proc.uid);
         if (uidRec == null) {
