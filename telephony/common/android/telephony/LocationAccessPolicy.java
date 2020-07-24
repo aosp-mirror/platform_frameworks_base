@@ -306,11 +306,12 @@ public final class LocationAccessPolicy {
     /** Check if location permissions have been granted */
     public static LocationPermissionResult checkLocationPermission(
             Context context, LocationPermissionQuery query) {
-        // Always allow the phone process and system server to access location. This avoid
-        // breaking legacy code that rely on public-facing APIs to access cell location, and
-        // it doesn't create an info leak risk because the cell location is stored in the phone
+        // Always allow the phone process, system server, and network stack to access location.
+        // This avoid breaking legacy code that rely on public-facing APIs to access cell location,
+        // and it doesn't create an info leak risk because the cell location is stored in the phone
         // process anyway, and the system server already has location access.
         if (query.callingUid == Process.PHONE_UID || query.callingUid == Process.SYSTEM_UID
+                || query.callingUid == Process.NETWORK_STACK_UID
                 || query.callingUid == Process.ROOT_UID) {
             return LocationPermissionResult.ALLOWED;
         }
