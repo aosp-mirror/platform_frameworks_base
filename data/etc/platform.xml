@@ -263,10 +263,4 @@
          be able to connect to the internet when such a proxy is in use, since
          all outgoing connections originate from this app. -->
     <allow-in-power-save-except-idle package="com.android.proxyhandler" />
-
-    <!-- These are the packages that are white-listed to be able to run as system user -->
-    <system-user-whitelisted-app package="com.android.settings" />
-
-    <!-- These are the packages that shouldn't run as system user -->
-    <system-user-blacklisted-app package="com.android.wallpaper.livepicker" />
 </permissions>
