@@ -27,6 +27,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "MediaDataFilter"
+private const val DEBUG = true
 
 /**
  * Filters data updates from [MediaDataCombineLatest] based on the current user ID, and handles user
@@ -98,7 +99,7 @@ class MediaDataFilter @Inject constructor(
         // are up to date
         mediaEntries.clear()
         keyCopy.forEach {
-            Log.d(TAG, "Removing $it after user change")
+            if (DEBUG) Log.d(TAG, "Removing $it after user change")
             listenersCopy.forEach { listener ->
                 listener.onMediaDataRemoved(it)
             }
@@ -106,7 +107,7 @@ class MediaDataFilter @Inject constructor(
 
         dataSource.getData().forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
-                Log.d(TAG, "Re-adding $key after user change")
+                if (DEBUG) Log.d(TAG, "Re-adding $key after user change")
                 mediaEntries.put(key, data)
                 listenersCopy.forEach { listener ->
                     listener.onMediaDataLoaded(key, null, data)
@@ -119,6 +120,7 @@ class MediaDataFilter @Inject constructor(
      * Invoked when the user has dismissed the media carousel
      */
     fun onSwipeToDismiss() {
+        if (DEBUG) Log.d(TAG, "Media carousel swiped away")
         val mediaKeys = mediaEntries.keys.toSet()
         mediaKeys.forEach {
             mediaDataManager.setTimedOut(it, timedOut = true)

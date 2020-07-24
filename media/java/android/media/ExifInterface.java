@@ -1411,9 +1411,9 @@ public class ExifInterface {
     private static final int IMAGE_TYPE_WEBP = 14;
 
     static {
-        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US);
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        sFormatterTz = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss XXX");
+        sFormatterTz = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss XXX", Locale.US);
         sFormatterTz.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         // Build up the hash tables to look up Exif tags for reading Exif tags.

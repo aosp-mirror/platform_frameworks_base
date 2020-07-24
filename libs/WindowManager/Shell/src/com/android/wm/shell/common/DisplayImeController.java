@@ -30,6 +30,7 @@ import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
+import android.view.IWindowManager;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -60,20 +61,20 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private static final int DIRECTION_HIDE = 2;
     private static final int FLOATING_IME_BOTTOM_INSET = -80;
 
-    protected final SystemWindows mSystemWindows;
+    protected final IWindowManager mWmService;
     protected final Handler mHandler;
-    final TransactionPool mTransactionPool;
+    private final TransactionPool mTransactionPool;
+    private final DisplayController mDisplayController;
+    private final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
+    private final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
-    final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
-
-    final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
-
-    public DisplayImeController(SystemWindows syswin, DisplayController displayController,
-            Handler handler, TransactionPool transactionPool) {
-        mHandler = handler;
-        mSystemWindows = syswin;
+    public DisplayImeController(IWindowManager wmService, DisplayController displayController,
+            Handler mainHandler, TransactionPool transactionPool) {
+        mHandler = mainHandler;
+        mWmService = wmService;
         mTransactionPool = transactionPool;
-        displayController.addDisplayWindowListener(this);
+        mDisplayController = displayController;
+        mDisplayController.addDisplayWindowListener(this);
     }
 
     @Override
@@ -81,9 +82,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         // Add's a system-ui window-manager specifically for ime. This type is special because
         // WM will defer IME inset handling to it in multi-window scenarious.
         PerDisplay pd = new PerDisplay(displayId,
-                mSystemWindows.mDisplayController.getDisplayLayout(displayId).rotation());
+                mDisplayController.getDisplayLayout(displayId).rotation());
         try {
-            mSystemWindows.mWmService.setDisplayWindowInsetsController(displayId, pd);
+            mWmService.setDisplayWindowInsetsController(displayId, pd);
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to set insets controller on display " + displayId);
         }
@@ -96,7 +97,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         if (pd == null) {
             return;
         }
-        if (mSystemWindows.mDisplayController.getDisplayLayout(displayId).rotation()
+        if (mDisplayController.getDisplayLayout(displayId).rotation()
                 != pd.mRotation && isImeShowing(displayId)) {
             pd.startAnimation(true, false /* forceRestart */);
         }
@@ -105,7 +106,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     @Override
     public void onDisplayRemoved(int displayId) {
         try {
-            mSystemWindows.mWmService.setDisplayWindowInsetsController(displayId, null);
+            mWmService.setDisplayWindowInsetsController(displayId, null);
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to remove insets controller on display " + displayId);
         }
@@ -263,7 +264,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         private void setVisibleDirectly(boolean visible) {
             mInsetsState.getSource(InsetsState.ITYPE_IME).setVisible(visible);
             try {
-                mSystemWindows.mWmService.modifyDisplayWindowInsets(mDisplayId, mInsetsState);
+                mWmService.modifyDisplayWindowInsets(mDisplayId, mInsetsState);
             } catch (RemoteException e) {
             }
         }
@@ -282,7 +283,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             // an IME inset). For now, we assume that no non-floating IME will be <= this nav bar
             // frame height so any reported frame that is <= nav-bar frame height is assumed to
             // be floating.
-            return frame.height() <= mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId)
+            return frame.height() <= mDisplayController.getDisplayLayout(mDisplayId)
                     .navBarFrameHeight();
         }
 
@@ -297,8 +298,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // This is a "floating" or "expanded" IME, so to get animations, just
                 // pretend the ime has some size just below the screen.
                 mImeFrame.set(newFrame);
-                final int floatingInset = (int) (
-                        mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId)
+                final int floatingInset = (int) (mDisplayController.getDisplayLayout(mDisplayId)
                         .density() * FLOATING_IME_BOTTOM_INSET);
                 mImeFrame.bottom -= floatingInset;
             } else if (newFrame.height() != 0) {

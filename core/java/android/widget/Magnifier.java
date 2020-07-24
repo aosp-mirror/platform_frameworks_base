@@ -1142,7 +1142,7 @@ public final class Magnifier {
             bitmapRenderNode.setOutline(outline);
             bitmapRenderNode.setClipToOutline(true);
 
-            // Create a dummy draw, which will be replaced later with real drawing.
+            // Create a placeholder draw, which will be replaced later with real drawing.
             final RecordingCanvas canvas = bitmapRenderNode.beginRecording(
                     mContentWidth, mContentHeight);
             try {

@@ -209,11 +209,8 @@ static SkImageInfo validateAlpha(const SkImageInfo& info) {
 void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes) {
     mInfo = validateAlpha(newInfo);
 
-    // Dirty hack is dirty
-    // TODO: Figure something out here, Skia's current design makes this
-    // really hard to work with. Skia really, really wants immutable objects,
-    // but with the nested-ref-count hackery going on that's just not
-    // feasible without going insane trying to figure it out
+    // TODO: Skia intends for SkPixelRef to be immutable, but this method
+    // modifies it. Find another way to support reusing the same pixel memory.
     this->android_only_reset(mInfo.width(), mInfo.height(), rowBytes);
 }
 

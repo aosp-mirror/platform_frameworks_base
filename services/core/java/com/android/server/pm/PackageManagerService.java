@@ -651,6 +651,23 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long THROW_EXCEPTION_ON_REQUIRE_INSTALL_PACKAGES_TO_ADD_INSTALLER_PACKAGE =
             150857253;
 
+    /**
+     * Apps targeting Android S and above need to declare dependencies to the public native
+     * shared libraries that are defined by the device maker using {@code uses-native-library} tag
+     * in its {@code AndroidManifest.xml}.
+     *
+     * If any of the dependencies cannot be satisfied, i.e. one of the dependency doesn't exist,
+     * the package manager rejects to install the app. The dependency can be specified as optional
+     * using {@code android:required} attribute in the tag, in which case failing to satisfy the
+     * dependency doesn't stop the installation.
+     * <p>Once installed, an app is provided with only the native shared libraries that are
+     * specified in the app manifest. {@code dlopen}ing a native shared library that doesn't appear
+     * in the app manifest will fail even if it actually exists on the device.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES = 142191088;
+
     public static final String PLATFORM_PACKAGE_NAME = "android";
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
@@ -2952,9 +2969,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     = systemConfig.getSharedLibraries();
             final int builtInLibCount = libConfig.size();
             for (int i = 0; i < builtInLibCount; i++) {
-                String name = libConfig.keyAt(i);
                 SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
-                addBuiltInSharedLibraryLocked(entry.filename, name);
+                addBuiltInSharedLibraryLocked(libConfig.valueAt(i));
             }
 
             // Now that we have added all the libraries, iterate again to add dependency
@@ -10486,6 +10502,19 @@ public class PackageManagerService extends IPackageManager.Stub
                     null, null, pkg.getPackageName(), false, pkg.getTargetSdkVersion(),
                     usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
         }
+        // TODO(b/160928779) gate this behavior using ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES
+        if (pkg.getTargetSdkVersion() > 30) {
+            if (!pkg.getUsesNativeLibraries().isEmpty() && pkg.getTargetSdkVersion() > 30) {
+                usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesNativeLibraries(), null,
+                        null, pkg.getPackageName(), true, pkg.getTargetSdkVersion(),
+                        usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
+            }
+            if (!pkg.getUsesOptionalNativeLibraries().isEmpty()) {
+                usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesOptionalNativeLibraries(),
+                        null, null, pkg.getPackageName(), false, pkg.getTargetSdkVersion(),
+                        usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
+            }
+        }
         return usesLibraryInfos;
     }
 
@@ -12177,15 +12206,16 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mLock")
-    private boolean addBuiltInSharedLibraryLocked(String path, String name) {
-        if (nonStaticSharedLibExistsLocked(name)) {
+    private boolean addBuiltInSharedLibraryLocked(SystemConfig.SharedLibraryEntry entry) {
+        if (nonStaticSharedLibExistsLocked(entry.name)) {
             return false;
         }
 
-        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, null, null, name,
-                (long) SharedLibraryInfo.VERSION_UNDEFINED, SharedLibraryInfo.TYPE_BUILTIN,
-                new VersionedPackage(PLATFORM_PACKAGE_NAME, (long) 0),
-                null, null);
+        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(entry.filename, null, null,
+                entry.name, (long) SharedLibraryInfo.VERSION_UNDEFINED,
+                SharedLibraryInfo.TYPE_BUILTIN,
+                new VersionedPackage(PLATFORM_PACKAGE_NAME, (long)0), null, null,
+                entry.isNative);
 
         commitSharedLibraryInfoLocked(libraryInfo);
         return true;
@@ -21900,7 +21930,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             pw.print(" -> ");
                         }
                         if (libraryInfo.getPath() != null) {
-                            pw.print(" (jar) ");
+                            if (libraryInfo.isNative()) {
+                                pw.print(" (so) ");
+                            } else {
+                                pw.print(" (jar) ");
+                            }
                             pw.print(libraryInfo.getPath());
                         } else {
                             pw.print(" (apk) ");

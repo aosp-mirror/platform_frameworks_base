@@ -1511,7 +1511,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param hosts the list of hosts
      * @param callback will be called with {@code true} if hosts are successfully added to the
-     * whitelist. It will be called with {@code false} if any hosts are malformed. The callback
+     * allowlist. It will be called with {@code false} if any hosts are malformed. The callback
      * will be run on the UI thread
      */
     public static void setSafeBrowsingWhitelist(@NonNull List<String> hosts,
