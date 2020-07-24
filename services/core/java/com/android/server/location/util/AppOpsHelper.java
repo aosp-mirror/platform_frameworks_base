@@ -16,14 +16,7 @@
 
 package com.android.server.location.util;
 
-import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
-import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
-
-import android.app.AppOpsManager;
 import android.location.util.identity.CallerIdentity;
-
-import com.android.server.location.LocationPermissions;
-import com.android.server.location.LocationPermissions.PermissionLevel;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -70,84 +63,27 @@ public abstract class AppOpsHelper {
     }
 
     /**
-     * Checks if the given identity may have locations delivered without noting that a location is
-     * being delivered. This is a looser guarantee than
-     * {@link #noteLocationAccess(CallerIdentity, int)}, and this function does not validate package
-     * arguments and so should not be used with unvalidated arguments or before actually delivering
-     * locations.
-     *
-     * @see AppOpsManager#checkOpNoThrow(int, int, String)
+     * Starts the given appop.
      */
-    public final boolean checkLocationAccess(CallerIdentity callerIdentity,
-            @PermissionLevel int permissionLevel) {
-        if (permissionLevel == LocationPermissions.PERMISSION_NONE) {
-            return false;
-        }
-
-        return checkOpNoThrow(LocationPermissions.asAppOp(permissionLevel), callerIdentity);
-    }
+    public abstract boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity);
 
     /**
-     * Notes location access to the given identity, ie, location delivery. This method should be
-     * called right before a location is delivered, and if it returns false, the location should not
-     * be delivered.
+     * Finishes the given appop.
      */
-    public final boolean noteLocationAccess(CallerIdentity identity,
-            @PermissionLevel int permissionLevel) {
-        if (permissionLevel == LocationPermissions.PERMISSION_NONE) {
-            return false;
-        }
-
-        return noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel), identity);
-    }
+    public abstract void finishOp(int appOp, CallerIdentity callerIdentity);
 
     /**
-     * Notifies app ops that the given identity is using location at normal/low power levels. If
-     * this function returns false, do not later call
-     * {@link #stopLocationMonitoring(CallerIdentity)}.
+     * Checks the given appop.
      */
-    public final boolean startLocationMonitoring(CallerIdentity identity) {
-        return startOpNoThrow(OP_MONITOR_LOCATION, identity);
-    }
+    public abstract boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity);
 
     /**
-     * Notifies app ops that the given identity is no longer using location at normal/low power
-     * levels.
+     * Notes the given appop (and may throw a security exception).
      */
-    public final void stopLocationMonitoring(CallerIdentity identity) {
-        finishOp(OP_MONITOR_LOCATION, identity);
-    }
+    public abstract boolean noteOp(int appOp, CallerIdentity callerIdentity);
 
     /**
-     * Notifies app ops that the given identity is using location at high levels. If this function
-     * returns false, do not later call {@link #stopLocationMonitoring(CallerIdentity)}.
+     * Notes the given appop.
      */
-    public final boolean startHighPowerLocationMonitoring(CallerIdentity identity) {
-        return startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, identity);
-    }
-
-    /**
-     * Notifies app ops that the given identity is no longer using location at high power levels.
-     */
-    public final void stopHighPowerLocationMonitoring(CallerIdentity identity) {
-        finishOp(OP_MONITOR_HIGH_POWER_LOCATION, identity);
-    }
-
-    /**
-     * Notes access to any mock location APIs. If this call returns false, access to the APIs should
-     * silently fail.
-     */
-    public final boolean noteMockLocationAccess(CallerIdentity callerIdentity) {
-        return noteOp(AppOpsManager.OP_MOCK_LOCATION, callerIdentity);
-    }
-
-    protected abstract boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity);
-
-    protected abstract void finishOp(int appOp, CallerIdentity callerIdentity);
-
-    protected abstract boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity);
-
-    protected abstract boolean noteOp(int appOp, CallerIdentity callerIdentity);
-
-    protected abstract boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity);
+    public abstract boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity);
 }

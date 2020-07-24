@@ -20,11 +20,7 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MOCK_LOCATION;
-import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
-
-import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
-import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -34,10 +30,12 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertThrows;
 
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -105,41 +103,41 @@ public class SystemAppOpsHelperTest {
     }
 
     @Test
-    public void testCheckLocationAccess() {
+    public void testCheckOp() {
         CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).checkOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_FINE)).isTrue();
+        assertThat(mHelper.checkOpNoThrow(OP_FINE_LOCATION, identity)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).checkOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_FINE)).isFalse();
+        assertThat(mHelper.checkOpNoThrow(OP_FINE_LOCATION, identity)).isFalse();
 
         identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).checkOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_COARSE)).isTrue();
+        assertThat(mHelper.checkOpNoThrow(OP_COARSE_LOCATION, identity)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).checkOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_COARSE)).isFalse();
+        assertThat(mHelper.checkOpNoThrow(OP_COARSE_LOCATION, identity)).isFalse();
     }
 
     @Test
-    public void testNoteLocationAccess() {
+    public void testNoteOpNoThrow() {
         CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).noteOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_FINE)).isTrue();
+        assertThat(mHelper.noteOpNoThrow(OP_FINE_LOCATION, identity)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).noteOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_FINE)).isFalse();
+        assertThat(mHelper.noteOpNoThrow(OP_FINE_LOCATION, identity)).isFalse();
 
 
         identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
@@ -147,74 +145,55 @@ public class SystemAppOpsHelperTest {
         doReturn(MODE_ALLOWED).when(
                 mAppOps).noteOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_COARSE)).isTrue();
+        assertThat(mHelper.noteOpNoThrow(OP_COARSE_LOCATION, identity)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).noteOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_COARSE)).isFalse();
+        assertThat(mHelper.noteOpNoThrow(OP_COARSE_LOCATION, identity)).isFalse();
     }
 
     @Test
-    public void testStartLocationMonitoring() {
+    public void testStartOp() {
         CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).startOpNoThrow(eq(OP_MONITOR_LOCATION), eq(1000), eq("mypackage"),
                         eq(false), eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.startLocationMonitoring(identity)).isTrue();
+        assertThat(mHelper.startOpNoThrow(OP_MONITOR_LOCATION, identity)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).startOpNoThrow(eq(OP_MONITOR_LOCATION), eq(1000), eq("mypackage"),
                         eq(false), eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.startLocationMonitoring(identity)).isFalse();
+        assertThat(mHelper.startOpNoThrow(OP_MONITOR_LOCATION, identity)).isFalse();
     }
 
     @Test
-    public void testStartHighPowerLocationMonitoring() {
+    public void testFinishOp() {
         CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
-        doReturn(MODE_ALLOWED).when(
-                mAppOps).startOpNoThrow(eq(OP_MONITOR_HIGH_POWER_LOCATION), eq(1000),
-                        eq("mypackage"),
-                        eq(false), eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.startHighPowerLocationMonitoring(identity)).isTrue();
-
-        doReturn(MODE_IGNORED).when(
-                mAppOps).startOpNoThrow(eq(OP_MONITOR_HIGH_POWER_LOCATION), eq(1000),
-                        eq("mypackage"),
-                        eq(false), eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.startHighPowerLocationMonitoring(identity)).isFalse();
-    }
-
-    @Test
-    public void testStopLocationMonitoring() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
-
-        mHelper.stopLocationMonitoring(identity);
+        mHelper.finishOp(OP_MONITOR_LOCATION, identity);
         verify(mAppOps).finishOp(OP_MONITOR_LOCATION, 1000, "mypackage", "myfeature");
     }
 
     @Test
-    public void testStopHighPowerLocationMonitoring() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
-
-        mHelper.stopHighPowerLocationMonitoring(identity);
-        verify(mAppOps).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, 1000, "mypackage", "myfeature");
-    }
-
-    @Test
-    public void testNoteMockLocationAccess() {
+    public void testNoteOp() {
         CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).noteOp(eq(OP_MOCK_LOCATION), eq(1000), eq("mypackage"), eq("myfeature"),
                         nullable(String.class));
-        assertThat(mHelper.noteMockLocationAccess(identity)).isTrue();
+        assertThat(mHelper.noteOp(OP_MOCK_LOCATION, identity)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).noteOp(eq(OP_MOCK_LOCATION), eq(1000), eq("mypackage"), eq("myfeature"),
                         nullable(String.class));
-        assertThat(mHelper.noteMockLocationAccess(identity)).isFalse();
+        assertThat(mHelper.noteOp(OP_MOCK_LOCATION, identity)).isFalse();
+
+
+        doThrow(new SecurityException()).when(
+                mAppOps).noteOp(eq(OP_MOCK_LOCATION), eq(1000), eq("mypackage"), eq("myfeature"),
+                nullable(String.class));
+        assertThrows(SecurityException.class, () -> mHelper.noteOp(OP_MOCK_LOCATION, identity));
     }
 }

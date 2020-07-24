@@ -16,7 +16,11 @@
 
 package com.android.server.location.util;
 
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,9 +50,7 @@ public class LocationAttributionHelperTest {
     public void setUp() {
         initMocks(this);
 
-        when(mAppOpsHelper.startLocationMonitoring(any(CallerIdentity.class))).thenReturn(true);
-        when(mAppOpsHelper.startHighPowerLocationMonitoring(any(CallerIdentity.class))).thenReturn(
-                true);
+        when(mAppOpsHelper.startOpNoThrow(anyInt(), any(CallerIdentity.class))).thenReturn(true);
 
         mHelper = new LocationAttributionHelper(mAppOpsHelper);
     }
@@ -63,30 +65,30 @@ public class LocationAttributionHelperTest {
         Object key4 = new Object();
 
         mHelper.reportLocationStart(caller1, "gps", key1);
-        verify(mAppOpsHelper).startLocationMonitoring(caller1);
-        verify(mAppOpsHelper, never()).stopLocationMonitoring(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller1);
 
         mHelper.reportLocationStart(caller1, "gps", key2);
-        verify(mAppOpsHelper).startLocationMonitoring(caller1);
-        verify(mAppOpsHelper, never()).stopLocationMonitoring(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller1);
 
         mHelper.reportLocationStart(caller2, "gps", key3);
-        verify(mAppOpsHelper).startLocationMonitoring(caller2);
-        verify(mAppOpsHelper, never()).stopLocationMonitoring(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller2);
 
         mHelper.reportLocationStart(caller2, "gps", key4);
-        verify(mAppOpsHelper).startLocationMonitoring(caller2);
-        verify(mAppOpsHelper, never()).stopLocationMonitoring(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller2);
 
         mHelper.reportLocationStop(caller1, "gps", key2);
-        verify(mAppOpsHelper, never()).stopLocationMonitoring(caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller1);
         mHelper.reportLocationStop(caller1, "gps", key1);
-        verify(mAppOpsHelper).stopLocationMonitoring(caller1);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_LOCATION, caller1);
 
         mHelper.reportLocationStop(caller2, "gps", key3);
-        verify(mAppOpsHelper, never()).stopLocationMonitoring(caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller2);
         mHelper.reportLocationStop(caller2, "gps", key4);
-        verify(mAppOpsHelper).stopLocationMonitoring(caller2);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_LOCATION, caller2);
     }
 
     @Test
@@ -99,29 +101,29 @@ public class LocationAttributionHelperTest {
         Object key4 = new Object();
 
         mHelper.reportHighPowerLocationStart(caller1, "gps", key1);
-        verify(mAppOpsHelper).startHighPowerLocationMonitoring(caller1);
-        verify(mAppOpsHelper, never()).stopHighPowerLocationMonitoring(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
 
         mHelper.reportHighPowerLocationStart(caller1, "gps", key2);
-        verify(mAppOpsHelper).startHighPowerLocationMonitoring(caller1);
-        verify(mAppOpsHelper, never()).stopHighPowerLocationMonitoring(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
 
         mHelper.reportHighPowerLocationStart(caller2, "gps", key3);
-        verify(mAppOpsHelper).startHighPowerLocationMonitoring(caller2);
-        verify(mAppOpsHelper, never()).stopHighPowerLocationMonitoring(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
 
         mHelper.reportHighPowerLocationStart(caller2, "gps", key4);
-        verify(mAppOpsHelper).startHighPowerLocationMonitoring(caller2);
-        verify(mAppOpsHelper, never()).stopHighPowerLocationMonitoring(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
 
         mHelper.reportHighPowerLocationStop(caller1, "gps", key2);
-        verify(mAppOpsHelper, never()).stopHighPowerLocationMonitoring(caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
         mHelper.reportHighPowerLocationStop(caller1, "gps", key1);
-        verify(mAppOpsHelper).stopHighPowerLocationMonitoring(caller1);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
 
         mHelper.reportHighPowerLocationStop(caller2, "gps", key3);
-        verify(mAppOpsHelper, never()).stopHighPowerLocationMonitoring(caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
         mHelper.reportHighPowerLocationStop(caller2, "gps", key4);
-        verify(mAppOpsHelper).stopHighPowerLocationMonitoring(caller2);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
     }
 }

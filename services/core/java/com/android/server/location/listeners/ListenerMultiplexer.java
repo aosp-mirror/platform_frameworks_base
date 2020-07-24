@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Build;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 
@@ -40,8 +41,8 @@ import java.util.function.Predicate;
  * A base class to multiplex client listener registrations within system server. Registrations are
  * divided into two categories, active registrations and inactive registrations, as defined by
  * {@link #isActive(ListenerRegistration)}. If a registration's active state changes,
- * {@link #updateRegistrations(Predicate)} or {@link #updateRegistration(Object, Predicate)} must be
- * invoked and return true for any registration whose active state may have changed.
+ * {@link #updateRegistrations(Predicate)} must be invoked and return true for any registration
+ * whose active state may have changed.
  *
  * Callbacks invoked for various changes will always be ordered according to this lifecycle list:
  *
@@ -217,7 +218,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                     mRegistrations.put(key, registration);
                 }
 
-
                 if (wasEmpty) {
                     onRegister();
                 }
@@ -268,7 +268,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
-                for (int i = 0; i < mRegistrations.size(); i++) {
+                final int size = mRegistrations.size();
+                for (int i = 0; i < size; i++) {
                     TKey key = mRegistrations.keyAt(i);
                     if (predicate.test(key)) {
                         removeRegistration(key, mRegistrations.valueAt(i));
@@ -287,7 +288,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      * completely at some later time.
      */
     protected final void removeRegistration(@NonNull Object key,
-            @NonNull ListenerRegistration registration) {
+            @NonNull ListenerRegistration<?, ?> registration) {
         synchronized (mRegistrations) {
             int index = mRegistrations.indexOfKey(key);
             if (index < 0) {
@@ -353,7 +354,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             }
 
             ArrayList<TRegistration> actives = new ArrayList<>(mRegistrations.size());
-            for (int i = 0; i < mRegistrations.size(); i++) {
+            final int size = mRegistrations.size();
+            for (int i = 0; i < size; i++) {
                 TRegistration registration = mRegistrations.valueAt(i);
                 if (registration.isActive()) {
                     actives.add(registration);
@@ -395,7 +397,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     protected final void updateService(Predicate<TRegistration> predicate) {
         synchronized (mRegistrations) {
             boolean updateService = false;
-            for (int i = 0; i < mRegistrations.size(); i++) {
+            final int size = mRegistrations.size();
+            for (int i = 0; i < size; i++) {
                 TRegistration registration = mRegistrations.valueAt(i);
                 if (predicate.test(registration) && registration.isActive()) {
                     updateService = true;
@@ -434,38 +437,12 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
-                for (int i = 0; i < mRegistrations.size(); i++) {
+                final int size = mRegistrations.size();
+                for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     if (predicate.test(registration)) {
                         onRegistrationActiveChanged(registration);
                     }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    /**
-     * Evaluates the predicate on the registration with the given key. The predicate should return
-     * true if the active state of the registration may have changed as a result. Any
-     * {@link #updateService()} invocations made while this method is executing will be deferred
-     * until after the method is complete so as to avoid redundant work.
-     */
-    protected final void updateRegistration(TKey key, @NonNull Predicate<TRegistration> predicate) {
-        synchronized (mRegistrations) {
-            // since updating a registration can invoke a variety of callbacks, we need to ensure
-            // those callbacks themselves do not re-enter, as this could lead to out-of-order
-            // callbacks. note that try-with-resources ordering is meaningful here as well. we want
-            // to close the reentrancy guard first, as this may generate additional service updates,
-            // then close the update service buffer.
-            long identity = Binder.clearCallingIdentity();
-            try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
-                 ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
-
-                TRegistration registration = mRegistrations.get(key);
-                if (registration != null && predicate.test(registration)) {
-                    onRegistrationActiveChanged(registration);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -511,7 +488,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
         synchronized (mRegistrations) {
             long identity = Binder.clearCallingIdentity();
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
-                for (int i = 0; i < mRegistrations.size(); i++) {
+                final int size = mRegistrations.size();
+                for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     if (registration.isActive()) {
                         ListenerOperation<TListener> operation = function.apply(registration);
@@ -537,7 +515,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
         synchronized (mRegistrations) {
             long identity = Binder.clearCallingIdentity();
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
-                for (int i = 0; i < mRegistrations.size(); i++) {
+                final int size = mRegistrations.size();
+                for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     if (registration.isActive()) {
                         execute(registration, operation);
@@ -571,7 +550,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                 ipw.println("listeners:");
 
                 ipw.increaseIndent();
-                for (int i = 0; i < mRegistrations.size(); i++) {
+                final int size = mRegistrations.size();
+                for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     ipw.print(registration);
                     if (!registration.isActive()) {
@@ -612,23 +592,33 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      */
     private final class ReentrancyGuard implements AutoCloseable {
 
+        @GuardedBy("mRegistrations")
         private int mGuardCount;
-        private @Nullable ArrayList<Pair<Object, ListenerRegistration>> mScheduledRemovals;
+        @GuardedBy("mRegistrations")
+        private @Nullable ArraySet<Pair<Object, ListenerRegistration<?, ?>>> mScheduledRemovals;
 
         ReentrancyGuard() {
             mGuardCount = 0;
             mScheduledRemovals = null;
         }
 
+        @GuardedBy("mRegistrations")
         boolean isReentrant() {
+            if (Build.IS_DEBUGGABLE) {
+                Preconditions.checkState(Thread.holdsLock(mRegistrations));
+            }
             return mGuardCount != 0;
         }
 
-        void markForRemoval(Object key, ListenerRegistration registration) {
+        @GuardedBy("mRegistrations")
+        void markForRemoval(Object key, ListenerRegistration<?, ?> registration) {
+            if (Build.IS_DEBUGGABLE) {
+                Preconditions.checkState(Thread.holdsLock(mRegistrations));
+            }
             Preconditions.checkState(isReentrant());
 
             if (mScheduledRemovals == null) {
-                mScheduledRemovals = new ArrayList<>(mRegistrations.size());
+                mScheduledRemovals = new ArraySet<>(mRegistrations.size());
             }
             mScheduledRemovals.add(new Pair<>(key, registration));
         }
@@ -640,7 +630,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
         @Override
         public void close() {
-            ArrayList<Pair<Object, ListenerRegistration>> scheduledRemovals = null;
+            ArraySet<Pair<Object, ListenerRegistration<?, ?>>> scheduledRemovals = null;
 
             Preconditions.checkState(mGuardCount > 0);
             if (--mGuardCount == 0) {
@@ -650,8 +640,10 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
             if (scheduledRemovals != null) {
                 try (UpdateServiceBuffer ignored = mUpdateServiceBuffer.acquire()) {
-                    for (int i = 0; i < scheduledRemovals.size(); i++) {
-                        Pair<Object, ListenerRegistration> pair = scheduledRemovals.get(i);
+                    final int size = scheduledRemovals.size();
+                    for (int i = 0; i < size; i++) {
+                        Pair<Object, ListenerRegistration<?, ?>> pair = scheduledRemovals.valueAt(
+                                i);
                         removeRegistration(pair.first, pair.second);
                     }
                 }

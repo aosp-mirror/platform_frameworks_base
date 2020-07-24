@@ -17,6 +17,7 @@
 package com.android.server.location.util;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.LocationRequestStatistics;
 
 /**
  * Injects various location dependencies so that they may be controlled by tests.
@@ -30,15 +31,27 @@ public interface Injector {
     /** Returns an AppOpsHelper. */
     AppOpsHelper getAppOpsHelper();
 
+    /** Returns a LocationPermissionsHelper. */
+    LocationPermissionsHelper getLocationPermissionsHelper();
+
     /** Returns a SettingsHelper. */
     SettingsHelper getSettingsHelper();
 
     /** Returns an AppForegroundHelper. */
     AppForegroundHelper getAppForegroundHelper();
 
-    /** Returns a LocationUsageLogger. */
-    LocationUsageLogger getLocationUsageLogger();
+    /** Returns a LocationPowerSaveModeHelper. */
+    LocationPowerSaveModeHelper getLocationPowerSaveModeHelper();
+
+    /** Returns a ScreenInteractiveHelper. */
+    ScreenInteractiveHelper getScreenInteractiveHelper();
 
     /** Returns a LocationAttributionHelper. */
     LocationAttributionHelper getLocationAttributionHelper();
+
+    /** Returns a LocationUsageLogger. */
+    LocationUsageLogger getLocationUsageLogger();
+
+    /** Returns a LocationRequestStatistics. */
+    LocationRequestStatistics getLocationRequestStatistics();
 }

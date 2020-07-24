@@ -36,7 +36,9 @@ import android.os.Bundle;
 public interface LocationListener {
 
     /**
-     * Called when the location has changed.
+     * Called when the location has changed. A wakelock is held on behalf on the listener for some
+     * brief amount of time as this callback executes. If this callback performs long running
+     * operations, it is the client's responsibility to obtain their own wakelock.
      *
      * @param location the updated location
      */
@@ -52,18 +54,17 @@ public interface LocationListener {
     default void onStatusChanged(String provider, int status, Bundle extras) {}
 
     /**
-     * Called when the provider is enabled by the user.
+     * Called when a provider this listener is registered with becomes enabled.
      *
-     * @param provider the name of the location provider that has become enabled
+     * @param provider the name of the location provider
      */
     default void onProviderEnabled(@NonNull String provider) {}
 
     /**
-     * Called when the provider is disabled by the user. If requestLocationUpdates
-     * is called on an already disabled provider, this method is called
-     * immediately.
+     * Called when the provider this listener is registered with becomes disabled. If a provider is
+     * disabled when this listener is registered, this callback will be invoked immediately.
      *
-     * @param provider the name of the location provider that has become disabled
+     * @param provider the name of the location provider
      */
     default void onProviderDisabled(@NonNull String provider) {}
 }

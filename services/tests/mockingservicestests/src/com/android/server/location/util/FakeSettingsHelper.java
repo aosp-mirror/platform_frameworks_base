@@ -90,7 +90,7 @@ public class FakeSettingsHelper extends SettingsHelper {
 
     @Override
     public boolean isLocationEnabled(int userId) {
-        return mLocationEnabledSetting.getValue(Boolean.class);
+        return mLocationEnabledSetting.getValue(userId, Boolean.class);
     }
 
     @Override

@@ -17,6 +17,9 @@
 package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.app.AppOpsManager.OP_MOCK_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -120,10 +123,16 @@ import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationAttributionHelper;
+import com.android.server.location.util.LocationPermissionsHelper;
+import com.android.server.location.util.LocationPowerSaveModeHelper;
 import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.ScreenInteractiveHelper;
 import com.android.server.location.util.SettingsHelper;
 import com.android.server.location.util.SystemAppForegroundHelper;
 import com.android.server.location.util.SystemAppOpsHelper;
+import com.android.server.location.util.SystemLocationPermissionsHelper;
+import com.android.server.location.util.SystemLocationPowerSaveModeHelper;
+import com.android.server.location.util.SystemScreenInteractiveHelper;
 import com.android.server.location.util.SystemSettingsHelper;
 import com.android.server.location.util.SystemUserInfoHelper;
 import com.android.server.location.util.UserInfoHelper;
@@ -173,7 +182,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             publishBinderService(Context.LOCATION_SERVICE, mService);
 
             // client caching behavior is only enabled after seeing the first invalidate
-            invalidateLocalLocationEnabledCaches();
+            LocationManager.invalidateLocalLocationEnabledCaches();
             // disable caching for our own process
             Objects.requireNonNull(mService.mContext.getSystemService(LocationManager.class))
                     .disableLocalLocationEnabledCaches();
@@ -486,7 +495,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void onLocationModeChanged(int userId) {
         boolean enabled = mSettingsHelper.isLocationEnabled(userId);
-        invalidateLocalLocationEnabledCaches();
+        LocationManager.invalidateLocalLocationEnabledCaches();
 
         if (D) {
             Log.d(TAG, "[u" + userId + "] location enabled = " + enabled);
@@ -1232,19 +1241,20 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (!currentlyMonitoring) {
                 if (allowMonitoring) {
                     if (!highPower) {
-                        return mAppOpsHelper.startLocationMonitoring(mCallerIdentity);
+                        return mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, mCallerIdentity);
                     } else {
-                        return mAppOpsHelper.startHighPowerLocationMonitoring(mCallerIdentity);
+                        return mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION,
+                                mCallerIdentity);
                     }
                 }
             } else {
-                if (!allowMonitoring || !mAppOpsHelper.checkLocationAccess(mCallerIdentity,
+                if (!allowMonitoring || !mAppOpsHelper.checkOpNoThrow(LocationPermissions.asAppOp(
                         LocationPermissions.getPermissionLevel(mContext, mCallerIdentity.getUid(),
-                                mCallerIdentity.getPid()))) {
+                                mCallerIdentity.getPid())), mCallerIdentity)) {
                     if (!highPower) {
-                        mAppOpsHelper.stopLocationMonitoring(mCallerIdentity);
+                        mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, mCallerIdentity);
                     } else {
-                        mAppOpsHelper.stopHighPowerLocationMonitoring(mCallerIdentity);
+                        mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, mCallerIdentity);
                     }
                     return false;
                 }
@@ -1589,8 +1599,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                     continue;
                 }
 
-                if (!mAppOpsHelper.checkLocationAccess(identity,
-                        record.mRequest.isCoarse() ? PERMISSION_COARSE : PERMISSION_FINE)) {
+                if (!mAppOpsHelper.checkOpNoThrow(LocationPermissions.asAppOp(
+                        record.mRequest.isCoarse() ? PERMISSION_COARSE : PERMISSION_FINE),
+                        identity)) {
                     continue;
                 }
                 final boolean isBatterySaverDisablingLocation = shouldThrottleRequests
@@ -2118,7 +2129,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             // appops check should always be right before delivery
-            if (!mAppOpsHelper.noteLocationAccess(identity, permissionLevel)) {
+            if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
+                    identity)) {
                 return null;
             }
 
@@ -2179,7 +2191,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             if (locationAgeMs < MAX_CURRENT_LOCATION_AGE_MS) {
                 // appops check should always be right before delivery
-                if (mAppOpsHelper.noteLocationAccess(identity, permissionLevel)) {
+                if (mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
+                        identity)) {
                     transport.deliverResult(lastLocation);
                 } else {
                     transport.deliverResult(null);
@@ -2329,7 +2342,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean sendExtraCommand(String provider, String command, Bundle extras) {
+    public void sendExtraCommand(String provider, String command, Bundle extras) {
         LocationPermissions.enforceCallingOrSelfLocationPermission(mContext, PERMISSION_COARSE);
         mContext.enforceCallingOrSelfPermission(
                 permission.ACCESS_LOCATION_EXTRA_COMMANDS, null);
@@ -2350,8 +2363,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_SEND_EXTRA_COMMAND,
                 provider);
-
-        return true;
     }
 
     @Override
@@ -2553,7 +2564,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 r.mLastFixBroadcast = location;
 
                 // appops check should always be right before delivery
-                if (!mAppOpsHelper.noteLocationAccess(receiver.mCallerIdentity, permissionLevel)) {
+                if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
+                        receiver.mCallerIdentity)) {
                     continue;
                 }
 
@@ -2644,7 +2656,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // unsafe is ok because app ops will verify the package name
         CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName,
                 attributionTag);
-        if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
+        if (!mAppOpsHelper.noteOp(OP_MOCK_LOCATION, identity)) {
             return;
         }
 
@@ -2664,7 +2676,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // unsafe is ok because app ops will verify the package name
         CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName,
                 attributionTag);
-        if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
+        if (!mAppOpsHelper.noteOp(OP_MOCK_LOCATION, identity)) {
             return;
         }
 
@@ -2687,7 +2699,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // unsafe is ok because app ops will verify the package name
         CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName,
                 attributionTag);
-        if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
+        if (!mAppOpsHelper.noteOp(OP_MOCK_LOCATION, identity)) {
             return;
         }
 
@@ -2708,7 +2720,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // unsafe is ok because app ops will verify the package name
         CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName,
                 attributionTag);
-        if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
+        if (!mAppOpsHelper.noteOp(OP_MOCK_LOCATION, identity)) {
             return;
         }
 
@@ -2926,24 +2938,36 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         private final UserInfoHelper mUserInfoHelper;
         private final SystemAppOpsHelper mAppOpsHelper;
+        private final SystemLocationPermissionsHelper mLocationPermissionsHelper;
         private final SystemSettingsHelper mSettingsHelper;
         private final SystemAppForegroundHelper mAppForegroundHelper;
-        private final LocationUsageLogger mLocationUsageLogger;
+        private final SystemLocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
+        private final SystemScreenInteractiveHelper mScreenInteractiveHelper;
         private final LocationAttributionHelper mLocationAttributionHelper;
+        private final LocationUsageLogger mLocationUsageLogger;
+        private final LocationRequestStatistics mLocationRequestStatistics;
 
         SystemInjector(Context context, UserInfoHelper userInfoHelper) {
             mUserInfoHelper = userInfoHelper;
             mAppOpsHelper = new SystemAppOpsHelper(context);
+            mLocationPermissionsHelper = new SystemLocationPermissionsHelper(context,
+                    mAppOpsHelper);
             mSettingsHelper = new SystemSettingsHelper(context);
             mAppForegroundHelper = new SystemAppForegroundHelper(context);
-            mLocationUsageLogger = new LocationUsageLogger();
+            mLocationPowerSaveModeHelper = new SystemLocationPowerSaveModeHelper(context);
+            mScreenInteractiveHelper = new SystemScreenInteractiveHelper(context);
             mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
+            mLocationUsageLogger = new LocationUsageLogger();
+            mLocationRequestStatistics = new LocationRequestStatistics();
         }
 
         void onSystemReady() {
             mAppOpsHelper.onSystemReady();
+            mLocationPermissionsHelper.onSystemReady();
             mSettingsHelper.onSystemReady();
             mAppForegroundHelper.onSystemReady();
+            mLocationPowerSaveModeHelper.onSystemReady();
+            mScreenInteractiveHelper.onSystemReady();
         }
 
         @Override
@@ -2954,6 +2978,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         @Override
         public AppOpsHelper getAppOpsHelper() {
             return mAppOpsHelper;
+        }
+
+        @Override
+        public LocationPermissionsHelper getLocationPermissionsHelper() {
+            return mLocationPermissionsHelper;
         }
 
         @Override
@@ -2972,8 +3001,23 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
+        public LocationPowerSaveModeHelper getLocationPowerSaveModeHelper() {
+            return mLocationPowerSaveModeHelper;
+        }
+
+        @Override
+        public ScreenInteractiveHelper getScreenInteractiveHelper() {
+            return mScreenInteractiveHelper;
+        }
+
+        @Override
         public LocationAttributionHelper getLocationAttributionHelper() {
             return mLocationAttributionHelper;
+        }
+
+        @Override
+        public LocationRequestStatistics getLocationRequestStatistics() {
+            return mLocationRequestStatistics;
         }
     }
 }

@@ -31,8 +31,8 @@ import com.android.server.LocalServices;
 import com.android.server.location.listeners.BinderListenerRegistration;
 import com.android.server.location.listeners.ListenerMultiplexer;
 import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
+import com.android.server.location.util.LocationPermissionsHelper;
 import com.android.server.location.util.SettingsHelper;
 import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
@@ -65,7 +65,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         // we store these values because we don't trust the listeners not to give us dupes, not to
         // spam us, and because checking the values may be more expensive
         private boolean mForeground;
-        private boolean mAppOpsAllowed;
+        private boolean mPermitted;
 
         protected GnssListenerRegistration(@Nullable TRequest request,
                 CallerIdentity callerIdentity, TListener listener) {
@@ -84,24 +84,39 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             return mForeground;
         }
 
-        boolean isAppOpsAllowed() {
-            return mAppOpsAllowed;
+        boolean isPermitted() {
+            return mPermitted;
         }
 
         @Override
         protected void onBinderListenerRegister() {
-            mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(), PERMISSION_FINE);
+            mPermitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
+                    getIdentity());
             mForeground = mAppForegroundHelper.isAppForeground(getIdentity().getUid());
         }
 
-        boolean onAppOpsChanged(String packageName) {
+        boolean onLocationPermissionsChanged(String packageName) {
             if (getIdentity().getPackageName().equals(packageName)) {
-                boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(),
-                        PERMISSION_FINE);
-                if (appOpsAllowed != mAppOpsAllowed) {
-                    mAppOpsAllowed = appOpsAllowed;
-                    return true;
-                }
+                return onLocationPermissionsChanged();
+            }
+
+            return false;
+        }
+
+        boolean onLocationPermissionsChanged(int uid) {
+            if (getIdentity().getUid() == uid) {
+                return onLocationPermissionsChanged();
+            }
+
+            return false;
+        }
+
+        private boolean onLocationPermissionsChanged() {
+            boolean permitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
+                    getIdentity());
+            if (permitted != mPermitted) {
+                mPermitted = permitted;
+                return true;
             }
 
             return false;
@@ -125,7 +140,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             if (!mForeground) {
                 flags.add("bg");
             }
-            if (!mAppOpsAllowed) {
+            if (!mPermitted) {
                 flags.add("na");
             }
             if (!flags.isEmpty()) {
@@ -141,7 +156,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     protected final UserInfoHelper mUserInfoHelper;
     protected final SettingsHelper mSettingsHelper;
-    protected final AppOpsHelper mAppOpsHelper;
+    protected final LocationPermissionsHelper mLocationPermissionsHelper;
     protected final AppForegroundHelper mAppForegroundHelper;
     protected final LocationManagerInternal mLocationManagerInternal;
 
@@ -154,14 +169,26 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     private final SettingsHelper.UserSettingChangedListener
             mLocationPackageBlacklistChangedListener =
             this::onLocationPackageBlacklistChanged;
-    private final AppOpsHelper.LocationAppOpListener mAppOpsChangedListener = this::onAppOpsChanged;
+    private final LocationPermissionsHelper.LocationPermissionsListener
+            mLocationPermissionsListener =
+            new LocationPermissionsHelper.LocationPermissionsListener() {
+                @Override
+                public void onLocationPermissionsChanged(String packageName) {
+                    GnssListenerMultiplexer.this.onLocationPermissionsChanged(packageName);
+                }
+
+                @Override
+                public void onLocationPermissionsChanged(int uid) {
+                    GnssListenerMultiplexer.this.onLocationPermissionsChanged(uid);
+                }
+            };
     private final AppForegroundHelper.AppForegroundListener mAppForegroundChangedListener =
             this::onAppForegroundChanged;
 
     protected GnssListenerMultiplexer(Injector injector) {
         mUserInfoHelper = injector.getUserInfoHelper();
         mSettingsHelper = injector.getSettingsHelper();
-        mAppOpsHelper = injector.getAppOpsHelper();
+        mLocationPermissionsHelper = injector.getLocationPermissionsHelper();
         mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
@@ -208,7 +235,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         CallerIdentity identity = registration.getIdentity();
         // TODO: this should be checking if the gps provider is enabled, not if location is enabled,
         //  but this is the same for now.
-        return registration.isAppOpsAllowed()
+        return registration.isPermitted()
                 && (registration.isForeground() || isBackgroundRestrictionExempt(identity))
                 && mUserInfoHelper.isCurrentUserId(identity.getUserId())
                 && mSettingsHelper.isLocationEnabled(identity.getUserId())
@@ -241,7 +268,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
-        mAppOpsHelper.addListener(mAppOpsChangedListener);
+        mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
         mAppForegroundHelper.addListener(mAppForegroundChangedListener);
     }
 
@@ -257,7 +284,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
-        mAppOpsHelper.removeListener(mAppOpsChangedListener);
+        mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
         mAppForegroundHelper.removeListener(mAppForegroundChangedListener);
     }
 
@@ -279,8 +306,12 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onAppOpsChanged(String packageName) {
-        updateRegistrations(registration -> registration.onAppOpsChanged(packageName));
+    private void onLocationPermissionsChanged(String packageName) {
+        updateRegistrations(registration -> registration.onLocationPermissionsChanged(packageName));
+    }
+
+    private void onLocationPermissionsChanged(int uid) {
+        updateRegistrations(registration -> registration.onLocationPermissionsChanged(uid));
     }
 
     private void onAppForegroundChanged(int uid, boolean foreground) {
