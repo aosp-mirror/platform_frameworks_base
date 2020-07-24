@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="enabled_by_admin" msgid="6630472777476410137">"ବ୍ୟବସ୍ଥାପକଙ୍କ ଦ୍ୱାରା ସକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"ବ୍ୟବସ୍ଥାପକଙ୍କ ଦ୍ଵାରା ଅକ୍ଷମ କରାଯାଇଛି"</string>
+    <string name="enabled_by_admin" msgid="6630472777476410137">"ଆଡମିନଙ୍କ ଦ୍ୱାରା ସକ୍ଷମ କରାଯାଇଛି"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"ଆଡମିନଙ୍କ ଦ୍ଵାରା ଅକ୍ଷମ କରାଯାଇଛି"</string>
 </resources>
