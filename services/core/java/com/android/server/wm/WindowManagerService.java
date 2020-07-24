@@ -395,6 +395,21 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
+    /**
+     * Restrict ability of activities overriding transition animation in a way such that
+     * an activity can do it only when the transition happens within a same task.
+     *
+     * @see android.app.Activity#overridePendingTransition(int, int)
+     */
+    private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
+            "persist.wm.disable_custom_task_animation";
+
+    /**
+     * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
+     */
+    static boolean sDisableCustomTaskAnimationProperty =
+            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, false);
+
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
 
