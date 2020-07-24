@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.IntDef;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
@@ -38,12 +40,12 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager.NotifInflationErrorListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -102,7 +104,6 @@ public class PreparationCoordinator implements Coordinator {
         mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifErrorManager = errorManager;
-        mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
         mViewBarn = viewBarn;
         mStatusBarService = service;
         mChildBindCutoff = childBindCutoff;
@@ -110,6 +111,8 @@ public class PreparationCoordinator implements Coordinator {
 
     @Override
     public void attach(NotifPipeline pipeline) {
+        mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
+
         pipeline.addCollectionListener(mNotifCollectionListener);
         // Inflate after grouping/sorting since that affects what views to inflate.
         pipeline.addOnBeforeFinalizeFilterListener(mOnBeforeFinalizeFilterListener);
@@ -127,7 +130,6 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onEntryUpdated(NotificationEntry entry) {
             abortInflation(entry, "entryUpdated");
-            mInflatingNotifs.remove(entry);
             @InflationState int state = getInflationState(entry);
             if (state == STATE_INFLATED) {
                 mInflationStates.put(entry, STATE_INFLATED_INVALID);
@@ -145,7 +147,6 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onEntryCleanUp(NotificationEntry entry) {
             mInflationStates.remove(entry);
-            mInflatingNotifs.remove(entry);
             mViewBarn.removeViewForEntry(entry);
         }
     };
@@ -174,8 +175,8 @@ public class PreparationCoordinator implements Coordinator {
         }
     };
 
-    private final NotifInflationErrorManager.NotifInflationErrorListener mInflationErrorListener =
-            new NotifInflationErrorManager.NotifInflationErrorListener() {
+    private final NotifInflationErrorListener mInflationErrorListener =
+            new NotifInflationErrorListener() {
         @Override
         public void onNotifInflationError(NotificationEntry entry, Exception e) {
             mViewBarn.removeViewForEntry(entry);
@@ -191,8 +192,9 @@ public class PreparationCoordinator implements Coordinator {
                         sbn.getUid(),
                         sbn.getInitialPid(),
                         e.getMessage(),
-                        sbn.getUserId());
+                        sbn.getUser().getIdentifier());
             } catch (RemoteException ex) {
+                // System server is dead, nothing to do about that
             }
             mNotifInflationErrorFilter.invalidateList();
         }
@@ -297,7 +299,7 @@ public class PreparationCoordinator implements Coordinator {
 
     private @InflationState int getInflationState(NotificationEntry entry) {
         Integer stateObj = mInflationStates.get(entry);
-        Objects.requireNonNull(stateObj,
+        requireNonNull(stateObj,
                 "Asking state of a notification preparation coordinator doesn't know about");
         return stateObj;
     }
