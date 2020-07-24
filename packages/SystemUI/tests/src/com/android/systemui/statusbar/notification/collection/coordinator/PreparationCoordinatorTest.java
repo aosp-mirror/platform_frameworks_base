@@ -34,7 +34,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
-import com.android.systemui.statusbar.notification.collection.GroupEntryHelper;
+import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
@@ -199,7 +199,11 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                     .build();
             children.add(child);
         }
-        GroupEntry groupEntry = GroupEntryHelper.createGroup(TEST_GROUP_KEY, summary, children);
+        GroupEntry groupEntry = new GroupEntryBuilder()
+                .setKey(TEST_GROUP_KEY)
+                .setSummary(summary)
+                .setChildren(children)
+                .build();
 
         mCollectionListener.onEntryInit(summary);
         for (NotificationEntry entry : children) {

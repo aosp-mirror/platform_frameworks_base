@@ -24,7 +24,7 @@ package com.android.systemui.statusbar.notification.collection
  */
 inline fun modifyEntry(
     entry: NotificationEntry,
-    modifier: NotificationEntryBuilder.() -> Unit
+    crossinline modifier: NotificationEntryBuilder.() -> Unit
 ) {
     val builder = NotificationEntryBuilder(entry)
     modifier(builder)
