@@ -69,6 +69,10 @@ package android.net {
 
 package android.os {
 
+  public class Binder implements android.os.IBinder {
+    method public final void markVintfStability();
+  }
+
   public class StatsFrameworkInitializer {
     method public static void registerServiceWrappers();
     method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
