@@ -437,7 +437,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (reboundAService || configurationChanged) {
                         onUserStateChangedLocked(userState);
                     }
-                    migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, packageName);
+                    // Passing 0 for restoreFromSdkInt to have this migration check execute each
+                    // time. It can make sure a11y button settings are correctly if there's an a11y
+                    // service updated and modifies the a11y button configuration.
+                    migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, packageName,
+                            /* restoreFromSdkInt = */0);
                 }
             }
 
@@ -548,7 +552,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         synchronized (mLock) {
                             restoreEnabledAccessibilityServicesLocked(
                                     intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
+                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
+                                            0));
                         }
                     } else if (ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED.equals(which)) {
                         synchronized (mLock) {
@@ -556,6 +562,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                     intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
                                     intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
                                             0));
+                        }
+                    } else if (Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(which)) {
+                        synchronized (mLock) {
+                            restoreAccessibilityButtonTargetsLocked(
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                         }
                     }
                 }
@@ -582,7 +594,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
         final Set<String> targetsFromSetting = new ArraySet<>();
         readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                userState.mUserId, targetsFromSetting, str -> str);
+                userState.mUserId, str -> str, targetsFromSetting);
         final boolean targetsContainMagnification = targetsFromSetting.contains(
                 MAGNIFICATION_CONTROLLER_NAME);
         if (targetsContainMagnification == displayMagnificationNavBarEnabled) {
@@ -1145,7 +1157,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // the state since the context in which the current user
             // state was used has changed since it was inactive.
             onUserStateChangedLocked(userState);
-            migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null);
+            // It's better to have this migration in SettingsProvider. Unfortunately,
+            // SettingsProvider migrated database in a very early stage which A11yManagerService
+            // haven't finished or started the initialization. We cannot get enough information from
+            // A11yManagerService to execute these migrations in SettingsProvider. Passing 0 for
+            // restoreFromSdkInt to have this migration check execute every time, because we did not
+            // find out a way to detect the device finished the OTA and switch the user.
+            migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null,
+                    /* restoreFromSdkInt = */0);
 
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
@@ -1190,7 +1209,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     // Called only during settings restore; currently supports only the owner user
     // TODO: http://b/22388012
-    void restoreEnabledAccessibilityServicesLocked(String oldSetting, String newSetting) {
+    void restoreEnabledAccessibilityServicesLocked(String oldSetting, String newSetting,
+            int restoreFromSdkInt) {
         readComponentNamesFromStringLocked(oldSetting, mTempComponentNameSet, false);
         readComponentNamesFromStringLocked(newSetting, mTempComponentNameSet, true);
 
@@ -1202,7 +1222,32 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userState.mEnabledServices,
                 UserHandle.USER_SYSTEM);
         onUserStateChangedLocked(userState);
-        migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null);
+        migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null, restoreFromSdkInt);
+    }
+
+    /**
+     * User could enable accessibility services and configure accessibility button during the SUW.
+     * Merges current value of accessibility button settings into the restored one to make sure
+     * user's preferences of accessibility button updated in SUW are not lost.
+     *
+     * Called only during settings restore; currently supports only the owner user
+     * TODO: http://b/22388012
+     */
+    void restoreAccessibilityButtonTargetsLocked(String oldSetting, String newSetting) {
+        final Set<String> targetsFromSetting = new ArraySet<>();
+        readColonDelimitedStringToSet(oldSetting, str -> str, targetsFromSetting,
+                /* doMerge = */false);
+        readColonDelimitedStringToSet(newSetting, str -> str, targetsFromSetting,
+                /* doMerge = */true);
+
+        final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+        userState.mAccessibilityButtonTargets.clear();
+        userState.mAccessibilityButtonTargets.addAll(targetsFromSetting);
+        persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                UserHandle.USER_SYSTEM, userState.mAccessibilityButtonTargets, str -> str);
+
+        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+        onUserStateChangedLocked(userState);
     }
 
     private int getClientStateLocked(AccessibilityUserState userState) {
@@ -1525,8 +1570,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void readComponentNamesFromSettingLocked(String settingName, int userId,
             Set<ComponentName> outComponentNames) {
-        readColonDelimitedSettingToSet(settingName, userId, outComponentNames,
-                str -> ComponentName.unflattenFromString(str));
+        readColonDelimitedSettingToSet(settingName, userId,
+                str -> ComponentName.unflattenFromString(str), outComponentNames);
     }
 
     /**
@@ -1541,8 +1586,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void readComponentNamesFromStringLocked(String names,
             Set<ComponentName> outComponentNames,
             boolean doMerge) {
-        readColonDelimitedStringToSet(names, outComponentNames, doMerge,
-                str -> ComponentName.unflattenFromString(str));
+        readColonDelimitedStringToSet(names, str -> ComponentName.unflattenFromString(str),
+                outComponentNames, doMerge);
     }
 
     @Override
@@ -1552,15 +1597,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 componentName -> componentName.flattenToShortString());
     }
 
-    private <T> void readColonDelimitedSettingToSet(String settingName, int userId, Set<T> outSet,
-            Function<String, T> toItem) {
+    private <T> void readColonDelimitedSettingToSet(String settingName, int userId,
+            Function<String, T> toItem, Set<T> outSet) {
         final String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 settingName, userId);
-        readColonDelimitedStringToSet(settingValue, outSet, false, toItem);
+        readColonDelimitedStringToSet(settingValue, toItem, outSet, false);
     }
 
-    private <T> void readColonDelimitedStringToSet(String names, Set<T> outSet, boolean doMerge,
-            Function<String, T> toItem) {
+    private <T> void readColonDelimitedStringToSet(String names, Function<String, T> toItem,
+            Set<T> outSet, boolean doMerge) {
         if (!doMerge) {
             outSet.clear();
         }
@@ -2058,7 +2103,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userState.mUserId);
         final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedStringToSet(settingValue, targetsFromSetting, false, str -> str);
+        readColonDelimitedStringToSet(settingValue, str -> str, targetsFromSetting, false);
         // Fall back to device's default a11y service, only when setting is never updated.
         if (settingValue == null) {
             final String defaultService = mContext.getString(
@@ -2082,7 +2127,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private boolean readAccessibilityButtonTargetsLocked(AccessibilityUserState userState) {
         final Set<String> targetsFromSetting = new ArraySet<>();
         readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                userState.mUserId, targetsFromSetting, str -> str);
+                userState.mUserId, str -> str, targetsFromSetting);
 
         final Set<String> currentTargets =
                 userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
@@ -2346,9 +2391,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *    (It happens when an enabled accessibility service package is upgraded.)
      *
      * @param packageName The package name to check, or {@code null} to check all services.
+     * @param restoreFromSdkInt The target sdk version of the restored source device, or {@code 0}
+     *                          if the caller is not related to the restore.
      */
     private void migrateAccessibilityButtonSettingsIfNecessaryLocked(
-            AccessibilityUserState userState, @Nullable String packageName) {
+            AccessibilityUserState userState, @Nullable String packageName, int restoreFromSdkInt) {
+        // No need to migrate settings if they are restored from a version after Q.
+        if (restoreFromSdkInt > Build.VERSION_CODES.Q) {
+            return;
+        }
         final Set<String> buttonTargets =
                 userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
         int lastSize = buttonTargets.size();
