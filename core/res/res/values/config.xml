@@ -1166,6 +1166,7 @@
             0 - Nothing
             1 - Launch all apps intent
             2 - Launch assist intent
+            3 - Launch notification panel
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
@@ -3388,6 +3389,9 @@
          tv remote provider. The tv remote service is an example of such a
          service. -->
     <string name="config_tvRemoteServicePackage" translatable="false"></string>
+
+    <!-- The package name of the package implementing the custom notification panel -->
+    <string name="config_notificationHandlerPackage" translatable="false"></string>
 
     <!-- True if the device supports persisting security logs across reboots.
          This requires the device's kernel to have pstore and pmsg enabled,

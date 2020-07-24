@@ -35,6 +35,7 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.tv.TvNotificationPanel;
 import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.toast.ToastUI;
@@ -155,6 +156,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(TvStatusBar.class)
     public abstract SystemUI bindsTvStatusBar(TvStatusBar sysui);
+
+    /** Inject into TvNotificationPanel. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvNotificationPanel.class)
+    public abstract SystemUI bindsTvNotificationPanel(TvNotificationPanel sysui);
 
     /** Inject into VolumeUI. */
     @Binds
