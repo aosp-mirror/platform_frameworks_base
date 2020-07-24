@@ -16,9 +16,12 @@
 
 package com.android.systemui.car.window;
 
+import static android.view.WindowInsets.Type.statusBars;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.WindowInsets;
 
 /**
  * Owns a {@link View} that is present in SystemUIOverlayWindow.
@@ -140,9 +143,25 @@ public class OverlayViewController {
     }
 
     /**
+     * Returns {@code true} if status bar should be displayed over this view.
+     */
+    protected boolean shouldShowStatusBar() {
+        return false;
+    }
+
+    /**
      * Returns {@code true} if this view should be hidden during the occluded state.
      */
     protected boolean shouldShowWhenOccluded() {
         return false;
+    }
+
+    /**
+     * Returns the insets types to fit to the sysui overlay window when this
+     * {@link OverlayViewController} is in the foreground.
+     */
+    @WindowInsets.Type.InsetsType
+    protected int getInsetTypesToFit() {
+        return statusBars();
     }
 }
