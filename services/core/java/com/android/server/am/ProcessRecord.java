@@ -352,6 +352,8 @@ class ProcessRecord implements WindowProcessListener {
 
     boolean mReachable; // Whether or not this process is reachable from given process
 
+    long mKillTime; // The timestamp in uptime when this process was killed.
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -925,6 +927,7 @@ class ProcessRecord implements WindowProcessListener {
             if (!mPersistent) {
                 killed = true;
                 killedByAm = true;
+                mKillTime = SystemClock.uptimeMillis();
             }
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }

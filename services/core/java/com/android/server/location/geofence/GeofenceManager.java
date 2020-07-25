@@ -16,7 +16,6 @@
 
 package com.android.server.location.geofence;
 
-import static android.Manifest.permission;
 import static android.location.LocationManager.KEY_PROXIMITY_ENTERING;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
@@ -44,8 +43,8 @@ import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.listeners.ListenerMultiplexer;
 import com.android.server.location.listeners.PendingIntentListenerRegistration;
-import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
+import com.android.server.location.util.LocationPermissionsHelper;
 import com.android.server.location.util.LocationUsageLogger;
 import com.android.server.location.util.SettingsHelper;
 import com.android.server.location.util.UserInfoHelper;
@@ -86,7 +85,7 @@ public class GeofenceManager extends
 
         // we store these values because we don't trust the listeners not to give us dupes, not to
         // spam us, and because checking the values may be more expensive
-        private boolean mAppOpsAllowed;
+        private boolean mPermitted;
 
         private @Nullable Location mCachedLocation;
         private float mCachedLocationDistanceM;
@@ -101,7 +100,7 @@ public class GeofenceManager extends
 
             mWakeLock = Objects.requireNonNull(mContext.getSystemService(PowerManager.class))
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    TAG + ":" + identity.getPackageName());
+                            TAG + ":" + identity.getPackageName());
             mWakeLock.setReferenceCounted(true);
             mWakeLock.setWorkSource(identity.addToWorkSource(null));
         }
@@ -114,7 +113,8 @@ public class GeofenceManager extends
         @Override
         protected void onPendingIntentListenerRegister() {
             mGeofenceState = STATE_UNKNOWN;
-            mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(), PERMISSION_FINE);
+            mPermitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
+                    getIdentity());
         }
 
         @Override
@@ -127,18 +127,32 @@ public class GeofenceManager extends
             }
         }
 
-        boolean isAppOpsAllowed() {
-            return mAppOpsAllowed;
+        boolean isPermitted() {
+            return mPermitted;
         }
 
-        boolean onAppOpsChanged(String packageName) {
+        boolean onLocationPermissionsChanged(String packageName) {
             if (getIdentity().getPackageName().equals(packageName)) {
-                boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(),
-                        PERMISSION_FINE);
-                if (appOpsAllowed != mAppOpsAllowed) {
-                    mAppOpsAllowed = appOpsAllowed;
-                    return true;
-                }
+                return onLocationPermissionsChanged();
+            }
+
+            return false;
+        }
+
+        boolean onLocationPermissionsChanged(int uid) {
+            if (getIdentity().getUid() == uid) {
+                return onLocationPermissionsChanged();
+            }
+
+            return false;
+        }
+
+        private boolean onLocationPermissionsChanged() {
+            boolean permitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
+                    getIdentity());
+            if (permitted != mPermitted) {
+                mPermitted = permitted;
+                return true;
             }
 
             return false;
@@ -186,10 +200,10 @@ public class GeofenceManager extends
 
             mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
             try {
-                pendingIntent.send(mContext, 0, intent,
-                        (pI, i, rC, rD, rE) -> mWakeLock.release(),
-                        null, permission.ACCESS_FINE_LOCATION,
-                        PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                // send() only enforces permissions for broadcast intents, but since clients can
+                // select any kind of pending intent we do not rely on send() to enforce permissions
+                pendingIntent.send(mContext, 0, intent, (pI, i, rC, rD, rE) -> mWakeLock.release(),
+                        null, null, PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
             } catch (PendingIntent.CanceledException e) {
                 mWakeLock.release();
                 removeRegistration(new GeofenceKey(pendingIntent, getRequest()), this);
@@ -202,7 +216,7 @@ public class GeofenceManager extends
             builder.append(getIdentity());
 
             ArraySet<String> flags = new ArraySet<>(1);
-            if (!mAppOpsAllowed) {
+            if (!mPermitted) {
                 flags.add("na");
             }
             if (!flags.isEmpty()) {
@@ -224,10 +238,22 @@ public class GeofenceManager extends
     private final SettingsHelper.UserSettingChangedListener
             mLocationPackageBlacklistChangedListener =
             this::onLocationPackageBlacklistChanged;
-    private final AppOpsHelper.LocationAppOpListener mAppOpsChangedListener = this::onAppOpsChanged;
+    private final LocationPermissionsHelper.LocationPermissionsListener
+            mLocationPermissionsListener =
+            new LocationPermissionsHelper.LocationPermissionsListener() {
+                @Override
+                public void onLocationPermissionsChanged(String packageName) {
+                    GeofenceManager.this.onLocationPermissionsChanged(packageName);
+                }
+
+                @Override
+                public void onLocationPermissionsChanged(int uid) {
+                    GeofenceManager.this.onLocationPermissionsChanged(uid);
+                }
+            };
 
     protected final UserInfoHelper mUserInfoHelper;
-    protected final AppOpsHelper mAppOpsHelper;
+    protected final LocationPermissionsHelper mLocationPermissionsHelper;
     protected final SettingsHelper mSettingsHelper;
     protected final LocationUsageLogger mLocationUsageLogger;
 
@@ -241,7 +267,7 @@ public class GeofenceManager extends
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mUserInfoHelper = injector.getUserInfoHelper();
         mSettingsHelper = injector.getSettingsHelper();
-        mAppOpsHelper = injector.getAppOpsHelper();
+        mLocationPermissionsHelper = injector.getLocationPermissionsHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
     }
 
@@ -281,7 +307,7 @@ public class GeofenceManager extends
     @Override
     protected boolean isActive(GeofenceRegistration registration) {
         CallerIdentity identity = registration.getIdentity();
-        return registration.isAppOpsAllowed()
+        return registration.isPermitted()
                 && mUserInfoHelper.isCurrentUserId(identity.getUserId())
                 && mSettingsHelper.isLocationEnabled(identity.getUserId())
                 && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
@@ -294,7 +320,7 @@ public class GeofenceManager extends
         mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
         mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
-        mAppOpsHelper.addListener(mAppOpsChangedListener);
+        mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
     }
 
     @Override
@@ -303,7 +329,7 @@ public class GeofenceManager extends
         mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
         mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
-        mAppOpsHelper.removeListener(mAppOpsChangedListener);
+        mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
     }
 
     @Override
@@ -434,7 +460,11 @@ public class GeofenceManager extends
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onAppOpsChanged(String packageName) {
-        updateRegistrations(registration -> registration.onAppOpsChanged(packageName));
+    private void onLocationPermissionsChanged(String packageName) {
+        updateRegistrations(registration -> registration.onLocationPermissionsChanged(packageName));
+    }
+
+    private void onLocationPermissionsChanged(int uid) {
+        updateRegistrations(registration -> registration.onLocationPermissionsChanged(uid));
     }
 }

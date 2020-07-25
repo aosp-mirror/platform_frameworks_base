@@ -24,6 +24,6 @@ import android.os.IRemoteCallback;
  */
 oneway interface ILocationListener
 {
-    void onLocationChanged(in Location location, in IRemoteCallback onCompleteCallback);
+    void onLocationChanged(in Location location, in @nullable IRemoteCallback onCompleteCallback);
     void onProviderEnabledChanged(String provider, boolean enabled);
 }

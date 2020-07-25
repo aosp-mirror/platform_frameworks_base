@@ -81,6 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
@@ -1446,6 +1447,8 @@ final class UiModeManagerService extends SystemService {
             pw.println("    Print this help text.");
             pw.println("  night [yes|no|auto|custom]");
             pw.println("    Set or read night mode.");
+            pw.println("  car [yes|no]");
+            pw.println("    Set or read car mode.");
             pw.println("  time [start|end] <ISO time>");
             pw.println("    Set custom start/end schedule time"
                     + " (night mode must be set to custom to apply).");
@@ -1461,6 +1464,8 @@ final class UiModeManagerService extends SystemService {
                 switch (cmd) {
                     case "night":
                         return handleNightMode();
+                    case "car":
+                        return handleCarMode();
                     case "time":
                         return handleCustomTime();
                     default:
@@ -1557,6 +1562,34 @@ final class UiModeManagerService extends SystemService {
                 default:
                     return -1;
             }
+        }
+
+        private int handleCarMode() throws RemoteException {
+            final PrintWriter err = getErrPrintWriter();
+            final String modeStr = getNextArg();
+            if (modeStr == null) {
+                printCurrentCarMode();
+                return 0;
+            }
+
+            if (modeStr.equals("yes")) {
+                mInterface.enableCarMode(0 /* flags */, DEFAULT_PRIORITY, "" /* package */);
+                printCurrentCarMode();
+                return 0;
+            } else if (modeStr.equals("no")) {
+                mInterface.disableCarMode(0 /* flags */);
+                printCurrentCarMode();
+                return 0;
+            } else {
+                err.println("Error: mode must be 'yes', or 'no'");
+                return -1;
+            }
+        }
+
+        private void printCurrentCarMode() throws RemoteException {
+            final PrintWriter pw = getOutPrintWriter();
+            final int currMode = mInterface.getCurrentModeType();
+            pw.println("Car mode: " + (currMode == Configuration.UI_MODE_TYPE_CAR ? "yes" : "no"));
         }
     }
 

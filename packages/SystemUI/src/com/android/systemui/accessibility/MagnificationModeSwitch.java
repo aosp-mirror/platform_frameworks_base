@@ -30,6 +30,7 @@ import com.android.systemui.R;
 /**
  * Shows/hides a {@link android.widget.ImageView} on the screen and changes the values of
  * {@link Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE} when the UI is toggled.
+ * The button UI would automatically be dismissed after displaying for a period of time.
  */
 class MagnificationModeSwitch {
 

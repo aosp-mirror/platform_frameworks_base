@@ -16,6 +16,8 @@
 
 package com.android.systemui.car.notification;
 
+import static android.view.WindowInsets.Type.navigationBars;
+
 import android.app.ActivityManager;
 import android.car.Car;
 import android.car.drivingstate.CarUxRestrictionsManager;
@@ -194,6 +196,16 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     @Override
     protected boolean shouldShowNavigationBar() {
         return true;
+    }
+
+    @Override
+    protected boolean shouldShowStatusBar() {
+        return true;
+    }
+
+    @Override
+    protected int getInsetTypesToFit() {
+        return navigationBars();
     }
 
     @Override

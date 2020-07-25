@@ -303,7 +303,6 @@ public class LocationManager {
     public static final String METADATA_SETTINGS_FOOTER_STRING =
             "com.android.settings.location.FOOTER_STRING";
 
-
     private static final long MAX_SINGLE_LOCATION_TIMEOUT_MS = 30 * 1000;
 
     @GuardedBy("sLocationListeners")
@@ -311,7 +310,9 @@ public class LocationManager {
             sLocationListeners = new WeakHashMap<>();
 
     final Context mContext;
-    @UnsupportedAppUsage
+
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
+            + "LocationManager}")
     final ILocationManager mService;
 
     private final Object mLock = new Object();
@@ -421,8 +422,7 @@ public class LocationManager {
         try {
             return mService.getExtraLocationControllerPackage();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -437,7 +437,7 @@ public class LocationManager {
         try {
             mService.setExtraLocationControllerPackage(packageName);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -452,7 +452,7 @@ public class LocationManager {
         try {
             mService.setExtraLocationControllerPackageEnabled(enabled);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -466,8 +466,7 @@ public class LocationManager {
         try {
             return mService.isExtraLocationControllerPackageEnabled();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -485,7 +484,7 @@ public class LocationManager {
         try {
             mService.setExtraLocationControllerPackage(packageName);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -503,7 +502,7 @@ public class LocationManager {
         try {
             mService.setExtraLocationControllerPackageEnabled(enabled);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1199,7 +1198,7 @@ public class LocationManager {
                         mContext.getPackageName(), mContext.getAttributionTag(),
                         AppOpsManager.toReceiverId(listener));
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1301,7 +1300,7 @@ public class LocationManager {
                     // unregistration is complete.
                     mService.unregisterLocationListener(transport);
                 } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
@@ -1517,7 +1516,8 @@ public class LocationManager {
         Preconditions.checkArgument(command != null, "invalid null command");
 
         try {
-            return mService.sendExtraCommand(provider, command, extras);
+            mService.sendExtraCommand(provider, command, extras);
+            return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1835,6 +1835,10 @@ public class LocationManager {
             } else {
                 status.setStatus(gnssStatus, ttff);
             }
+        } else if (status == null) {
+            // even though this method is marked as nullable, legacy behavior was to never return
+            // a null result, and there are applications that rely on this behavior.
+            status = GpsStatus.createEmpty();
         }
         return status;
     }
@@ -2424,7 +2428,7 @@ public class LocationManager {
                 try {
                     cancellationSignal.cancel();
                 } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
@@ -2464,7 +2468,8 @@ public class LocationManager {
         }
 
         @Override
-        public void onLocationChanged(Location location, IRemoteCallback onCompleteCallback) {
+        public void onLocationChanged(Location location,
+                @Nullable IRemoteCallback onCompleteCallback) {
             executeSafely(mExecutor, () -> mListener, new ListenerOperation<LocationListener>() {
                 @Override
                 public void operate(LocationListener listener) {
@@ -2473,7 +2478,13 @@ public class LocationManager {
 
                 @Override
                 public void onComplete(boolean success) {
-                    markComplete(onCompleteCallback);
+                    if (onCompleteCallback != null) {
+                        try {
+                            onCompleteCallback.sendResult(null);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
                 }
             });
         }
@@ -2487,14 +2498,6 @@ public class LocationManager {
                     listener.onProviderDisabled(provider);
                 }
             });
-        }
-
-        private void markComplete(IRemoteCallback onCompleteCallback) {
-            try {
-                onCompleteCallback.sendResult(null);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
         }
     }
 

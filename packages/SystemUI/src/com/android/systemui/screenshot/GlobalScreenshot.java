@@ -493,7 +493,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         });
         mScreenshotLayout.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                dismissScreenshot("back pressed", true);
+                dismissScreenshot("back pressed", false);
                 return true;
             }
             return false;

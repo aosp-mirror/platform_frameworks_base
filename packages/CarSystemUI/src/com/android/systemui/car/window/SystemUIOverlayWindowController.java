@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
@@ -99,7 +100,6 @@ public class SystemUIOverlayWindowController implements
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
-        mLp.setFitInsetsTypes(/* types= */ 0);
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("SystemUIOverlayWindow");
         mLp.packageName = mContext.getPackageName();
@@ -108,6 +108,12 @@ public class SystemUIOverlayWindowController implements
         mWindowManager.addView(mBaseLayout, mLp);
         mLpChanged.copyFrom(mLp);
         setWindowVisible(false);
+    }
+
+    /** Sets the types of insets to fit. Note: This should be rarely used. */
+    public void setFitInsetsTypes(@WindowInsets.Type.InsetsType int types) {
+        mLpChanged.setFitInsetsTypes(types);
+        updateWindow();
     }
 
     /** Sets the window to the visible state. */

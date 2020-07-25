@@ -6445,9 +6445,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
+            final boolean queryMayBeFiltered =
+                    UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
+                            && !resolveForStart;
+
             final ResolveInfo bestChoice =
                     chooseBestActivity(
-                            intent, resolvedType, flags, privateResolveFlags, query, userId);
+                            intent, resolvedType, flags, privateResolveFlags, query, userId,
+                            queryMayBeFiltered);
             final boolean nonBrowserOnly =
                     (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
             if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
@@ -6611,7 +6616,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
-            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId) {
+            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId,
+            boolean queryMayBeFiltered) {
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -6636,7 +6642,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
                 ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
-                        flags, query, r0.priority, true, false, debug, userId);
+                        flags, query, r0.priority, true, false, debug, userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -6818,11 +6824,19 @@ public class PackageManagerService extends IPackageManager.Stub
                 && intent.hasCategory(CATEGORY_DEFAULT);
     }
 
+    ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
+            List<ResolveInfo> query, int priority, boolean always,
+            boolean removeMatches, boolean debug, int userId) {
+        return findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, priority, always, removeMatches, debug, userId,
+                UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
+    }
+
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link #mLock}</b> */
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
-            boolean removeMatches, boolean debug, int userId) {
+            boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
@@ -6916,10 +6930,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                         final boolean excludeSetupWizardHomeActivity = isHomeIntent(intent)
                                 && !isDeviceProvisioned;
+                        final boolean allowSetMutation = !excludeSetupWizardHomeActivity
+                                && !queryMayBeFiltered;
                         if (ai == null) {
                             // Do not remove launcher's preferred activity during SetupWizard
                             // due to it may not install yet
-                            if (excludeSetupWizardHomeActivity) {
+                            if (!allowSetMutation) {
                                 continue;
                             }
 
@@ -6944,7 +6960,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 continue;
                             }
 
-                            if (removeMatches) {
+                            if (removeMatches && allowSetMutation) {
                                 pir.removeFilter(pa);
                                 changed = true;
                                 if (DEBUG_PREFERRED) {
@@ -6961,7 +6977,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                             if (always && !pa.mPref.sameSet(query, excludeSetupWizardHomeActivity)) {
                                 if (pa.mPref.isSuperset(query, excludeSetupWizardHomeActivity)) {
-                                    if (!excludeSetupWizardHomeActivity) {
+                                    if (allowSetMutation) {
                                         // some components of the set are no longer present in
                                         // the query, but the preferred activity can still be reused
                                         if (DEBUG_PREFERRED) {
@@ -6982,24 +6998,28 @@ public class PackageManagerService extends IPackageManager.Stub
                                         changed = true;
                                     } else {
                                         if (DEBUG_PREFERRED) {
-                                            Slog.i(TAG, "Do not remove preferred activity for launcher"
-                                                    + " during SetupWizard");
+                                            Slog.i(TAG, "Do not remove preferred activity");
                                         }
                                     }
                                 } else {
-                                    Slog.i(TAG,
-                                            "Result set changed, dropping preferred activity for "
-                                                    + intent + " type " + resolvedType);
-                                    if (DEBUG_PREFERRED) {
-                                        Slog.v(TAG, "Removing preferred activity since set changed "
-                                                + pa.mPref.mComponent);
+                                    if (allowSetMutation) {
+                                        Slog.i(TAG,
+                                                "Result set changed, dropping preferred activity "
+                                                        + "for " + intent + " type "
+                                                        + resolvedType);
+                                        if (DEBUG_PREFERRED) {
+                                            Slog.v(TAG,
+                                                    "Removing preferred activity since set changed "
+                                                            + pa.mPref.mComponent);
+                                        }
+                                        pir.removeFilter(pa);
+                                        // Re-add the filter as a "last chosen" entry (!always)
+                                        PreferredActivity lastChosen = new PreferredActivity(
+                                                pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
+                                                false);
+                                        pir.addFilter(lastChosen);
+                                        changed = true;
                                     }
-                                    pir.removeFilter(pa);
-                                    // Re-add the filter as a "last chosen" entry (!always)
-                                    PreferredActivity lastChosen = new PreferredActivity(
-                                            pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
-                                    pir.addFilter(lastChosen);
-                                    changed = true;
                                     return null;
                                 }
                             }
