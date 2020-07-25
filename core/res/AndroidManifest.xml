@@ -353,6 +353,7 @@
     <protected-broadcast android:name="com.android.server.wifi.action.CarrierNetwork.USER_ALLOWED_CARRIER" />
     <protected-broadcast android:name="com.android.server.wifi.action.CarrierNetwork.USER_DISALLOWED_CARRIER" />
     <protected-broadcast android:name="com.android.server.wifi.action.CarrierNetwork.USER_DISMISSED" />
+    <protected-broadcast android:name="com.android.server.wifi.action.CarrierNetwork.USER_CLICKED" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.USER_DISMISSED_NOTIFICATION" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.CONNECT_TO_NETWORK" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.PICK_WIFI_NETWORK" />
