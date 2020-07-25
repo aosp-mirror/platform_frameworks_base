@@ -34,7 +34,7 @@ import com.android.systemui.R;
 /**
  * View for the handle in the docked stack divider.
  */
-public class DividerHandleView extends View {
+class DividerHandleView extends View {
 
     private final static Property<DividerHandleView, Integer> WIDTH_PROPERTY
             = new Property<DividerHandleView, Integer>(Integer.class, "width") {

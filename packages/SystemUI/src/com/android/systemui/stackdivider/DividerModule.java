@@ -46,7 +46,10 @@ public class DividerModule {
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, @Main Handler handler,
             KeyguardStateController keyguardStateController, TransactionPool transactionPool) {
-        return new Divider(context, recentsOptionalLazy, displayController, systemWindows,
-                imeController, handler, keyguardStateController, transactionPool);
+        // TODO(b/161116823): fetch DividerProxy from WM shell lib.
+        DividerController dividerController = new DividerController(context, displayController,
+                systemWindows, imeController, handler, transactionPool);
+        return new Divider(context, dividerController, keyguardStateController,
+                recentsOptionalLazy);
     }
 }
