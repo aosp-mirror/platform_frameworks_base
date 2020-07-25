@@ -34,6 +34,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.service.storage.ExternalStorageService;
@@ -62,19 +63,25 @@ import java.util.concurrent.TimeoutException;
 public final class StorageUserConnection {
     private static final String TAG = "StorageUserConnection";
 
-    public static final int REMOTE_TIMEOUT_SECONDS = 20;
+    private static final int DEFAULT_REMOTE_TIMEOUT_SECONDS = 20;
+    // TODO(b/161702661): Workaround for demo user to have shorter timeout.
+    // This allows the DevicePolicyManagerService#enableSystemApp call to succeed without ANR.
+    private static final int DEMO_USER_REMOTE_TIMEOUT_SECONDS = 5;
 
     private final Object mLock = new Object();
     private final Context mContext;
     private final int mUserId;
     private final StorageSessionController mSessionController;
     private final ActiveConnection mActiveConnection = new ActiveConnection();
+    private final boolean mIsDemoUser;
     @GuardedBy("mLock") private final Map<String, Session> mSessions = new HashMap<>();
 
     public StorageUserConnection(Context context, int userId, StorageSessionController controller) {
         mContext = Objects.requireNonNull(context);
         mUserId = Preconditions.checkArgumentNonnegative(userId);
         mSessionController = controller;
+        mIsDemoUser = LocalServices.getService(UserManagerInternal.class)
+                .getUserInfo(userId).isDemo();
     }
 
     /**
@@ -200,7 +207,8 @@ public final class StorageUserConnection {
 
     private void waitForLatch(CountDownLatch latch, String reason) throws TimeoutException {
         try {
-            if (!latch.await(REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            if (!latch.await(mIsDemoUser ? DEMO_USER_REMOTE_TIMEOUT_SECONDS
+                            : DEFAULT_REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 // TODO(b/140025078): Call ActivityManager ANR API?
                 Slog.wtf(TAG, "Failed to bind to the ExternalStorageService for user " + mUserId);
                 throw new TimeoutException("Latch wait for " + reason + " elapsed");
