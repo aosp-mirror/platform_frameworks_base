@@ -6200,6 +6200,24 @@ public class AudioManager {
         }
     }
 
+
+    /**
+     * Retrieves the Hardware A/V synchronization ID corresponding to the given audio session ID.
+     * For more details on Hardware A/V synchronization please refer to
+     *  <a href="https://source.android.com/devices/tv/multimedia-tunneling/">
+     * media tunneling documentation</a>.
+     * @param sessionId the audio session ID for which the HW A/V sync ID is retrieved.
+     * @return the HW A/V sync ID for this audio session (an integer different from 0).
+     * @throws UnsupportedOperationException if HW A/V synchronization is not supported.
+     */
+    public int getAudioHwSyncForSession(int sessionId) {
+        int hwSyncId = AudioSystem.getAudioHwSyncForSession(sessionId);
+        if (hwSyncId == AudioSystem.AUDIO_HW_SYNC_INVALID) {
+            throw new UnsupportedOperationException("HW A/V synchronization is not supported.");
+        }
+        return hwSyncId;
+    }
+
     //---------------------------------------------------------
     // Inner classes
     //--------------------
