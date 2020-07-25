@@ -63,7 +63,6 @@ import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
 import android.telephony.CellSignalStrengthTdscdma;
 import android.telephony.CellSignalStrengthWcdma;
-import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneCapability;
@@ -1800,11 +1799,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 mPreciseDataConnectionStates.get(phoneId).put(
                         apnType,
-                        new PreciseDataConnectionState(
-                                TelephonyManager.DATA_UNKNOWN,
-                                TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                                apnType, null, null,
-                                DataFailCause.NONE, null));
+                        new PreciseDataConnectionState.Builder()
+                                .setApnTypes(apnType)
+                                .build());
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
@@ -1986,11 +1983,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 mPreciseDataConnectionStates.get(phoneId).put(
                         apnType,
-                        new PreciseDataConnectionState(
-                                TelephonyManager.DATA_UNKNOWN,
-                                TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                                apnType, null, null,
-                                failCause, null));
+                        new PreciseDataConnectionState.Builder()
+                                .setApnTypes(apnType)
+                                .setFailCause(failCause)
+                                .build());
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
