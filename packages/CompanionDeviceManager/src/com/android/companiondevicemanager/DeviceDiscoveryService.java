@@ -349,10 +349,6 @@ public class DeviceDiscoveryService extends Service {
                         ? WIFI_ICON
                         : BLUETOOTH_ICON,
                     null, null, null);
-            textView.setOnClickListener((view) -> {
-                mSelectedDevice = device;
-                notifyDataSetChanged();
-            });
         }
 
         //TODO move to a layout file

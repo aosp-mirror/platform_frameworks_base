@@ -16,22 +16,32 @@
 
 package com.android.server.location.util;
 
+import com.android.server.location.LocationRequestStatistics;
+
 public class TestInjector implements Injector {
 
     private final FakeUserInfoHelper mUserInfoHelper;
     private final FakeAppOpsHelper mAppOpsHelper;
+    private final FakeLocationPermissionsHelper mLocationPermissionsHelper;
     private final FakeSettingsHelper mSettingsHelper;
     private final FakeAppForegroundHelper mAppForegroundHelper;
-    private final LocationUsageLogger mLocationUsageLogger;
+    private final FakeLocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
+    private final FakeScreenInteractiveHelper mScreenInteractiveHelper;
     private final LocationAttributionHelper mLocationAttributionHelper;
+    private final LocationUsageLogger mLocationUsageLogger;
+    private final LocationRequestStatistics mLocationRequestStatistics;
 
     public TestInjector() {
         mUserInfoHelper = new FakeUserInfoHelper();
         mAppOpsHelper = new FakeAppOpsHelper();
+        mLocationPermissionsHelper = new FakeLocationPermissionsHelper(mAppOpsHelper);
         mSettingsHelper = new FakeSettingsHelper();
         mAppForegroundHelper = new FakeAppForegroundHelper();
-        mLocationUsageLogger = new LocationUsageLogger();
+        mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper();
+        mScreenInteractiveHelper = new FakeScreenInteractiveHelper();
         mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
+        mLocationUsageLogger = new LocationUsageLogger();
+        mLocationRequestStatistics = new LocationRequestStatistics();
     }
 
     @Override
@@ -45,6 +55,11 @@ public class TestInjector implements Injector {
     }
 
     @Override
+    public FakeLocationPermissionsHelper getLocationPermissionsHelper() {
+        return mLocationPermissionsHelper;
+    }
+
+    @Override
     public FakeSettingsHelper getSettingsHelper() {
         return mSettingsHelper;
     }
@@ -55,12 +70,27 @@ public class TestInjector implements Injector {
     }
 
     @Override
-    public LocationUsageLogger getLocationUsageLogger() {
-        return mLocationUsageLogger;
+    public FakeLocationPowerSaveModeHelper getLocationPowerSaveModeHelper() {
+        return mLocationPowerSaveModeHelper;
+    }
+
+    @Override
+    public FakeScreenInteractiveHelper getScreenInteractiveHelper() {
+        return mScreenInteractiveHelper;
     }
 
     @Override
     public LocationAttributionHelper getLocationAttributionHelper() {
         return mLocationAttributionHelper;
+    }
+
+    @Override
+    public LocationUsageLogger getLocationUsageLogger() {
+        return mLocationUsageLogger;
+    }
+
+    @Override
+    public LocationRequestStatistics getLocationRequestStatistics() {
+        return mLocationRequestStatistics;
     }
 }

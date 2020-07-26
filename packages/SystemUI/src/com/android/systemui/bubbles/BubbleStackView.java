@@ -116,7 +116,7 @@ public class BubbleStackView extends FrameLayout
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** Animation durations for bubble stack user education views. **/
-    private static final int ANIMATE_STACK_USER_EDUCATION_DURATION = 200;
+    static final int ANIMATE_STACK_USER_EDUCATION_DURATION = 200;
     private static final int ANIMATE_STACK_USER_EDUCATION_DURATION_SHORT = 40;
 
     /** How far the flyout needs to be dragged before it's dismissed regardless of velocity. */
@@ -748,7 +748,7 @@ public class BubbleStackView extends FrameLayout
     private View mUserEducationView;
 
     private boolean mShouldShowManageEducation;
-    private BubbleManageEducationView mManageEducationView;
+    private ManageEducationView mManageEducationView;
     private boolean mAnimatingManageEducationAway;
 
     private ViewGroup mManageMenu;
@@ -1135,12 +1135,9 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, "shouldShowManageEducation: " + mShouldShowManageEducation);
         }
         if (mShouldShowManageEducation) {
-            mManageEducationView = (BubbleManageEducationView)
-                    mInflater.inflate(R.layout.bubbles_manage_button_education, this,
+            mManageEducationView = (ManageEducationView)
+                    mInflater.inflate(R.layout.bubbles_manage_button_education, this /* root */,
                             false /* attachToRoot */);
-            mManageEducationView.setVisibility(GONE);
-            mManageEducationView.setElevation(mBubbleElevation);
-            mManageEducationView.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             addView(mManageEducationView);
         }
     }
@@ -1753,28 +1750,8 @@ public class BubbleStackView extends FrameLayout
                 && mManageEducationView.getVisibility() != VISIBLE
                 && mIsExpanded
                 && mExpandedBubble.getExpandedView() != null) {
-            mManageEducationView.setAlpha(0);
-            mManageEducationView.setVisibility(VISIBLE);
-            mManageEducationView.post(() -> {
-                mExpandedBubble.getExpandedView().getManageButtonBoundsOnScreen(mTempRect);
-                final int viewHeight = mManageEducationView.getManageViewHeight();
-                final int inset = getResources().getDimensionPixelSize(
-                        R.dimen.bubbles_manage_education_top_inset);
-                mManageEducationView.bringToFront();
-                mManageEducationView.setManageViewPosition(0, mTempRect.top - viewHeight + inset);
-                mManageEducationView.animate()
-                        .setDuration(ANIMATE_STACK_USER_EDUCATION_DURATION)
-                        .setInterpolator(FAST_OUT_SLOW_IN).alpha(1);
-                mManageEducationView.findViewById(R.id.manage).setOnClickListener(view -> {
-                            mExpandedBubble.getExpandedView().findViewById(R.id.settings_button)
-                                    .performClick();
-                            maybeShowManageEducation(false);
-                        });
-                mManageEducationView.findViewById(R.id.got_it).setOnClickListener(view ->
-                        maybeShowManageEducation(false));
-                mManageEducationView.setOnClickListener(view ->
-                        maybeShowManageEducation(false));
-            });
+            mManageEducationView.show(mExpandedBubble.getExpandedView(), mTempRect,
+                    () -> maybeShowManageEducation(false) /* run on click */);
             Prefs.putBoolean(getContext(), HAS_SEEN_BUBBLES_MANAGE_EDUCATION, true);
         } else if (!show
                 && mManageEducationView.getVisibility() == VISIBLE

@@ -329,6 +329,7 @@ class NotificationSectionsManager @Inject internal constructor(
         // shade.
         for (i in parent.childCount - 1 downTo -1) {
             val child: View? = parent.getChildAt(i)
+
             child?.let {
                 logShadeChild(i, child)
                 // If this child is a header, update the tracked positions
@@ -342,7 +343,8 @@ class NotificationSectionsManager @Inject internal constructor(
                 }
             }
 
-            val row = child as? ExpandableNotificationRow
+            val row = (child as? ExpandableNotificationRow)
+                    ?.takeUnless { it.visibility == View.GONE }
 
             // Is there a section discontinuity? This usually occurs due to HUNs
             inIncomingSection = inIncomingSection || nextBucket?.let { next ->
@@ -389,7 +391,7 @@ class NotificationSectionsManager @Inject internal constructor(
 
             // Offset the target to account for the current position of the people header.
             peopleState?.targetPosition = peopleState?.currentPosition?.let { current ->
-                peopleState?.targetPosition?.let { target ->
+                peopleState.targetPosition?.let { target ->
                     if (current < target) target - 1 else target
                 }
             }

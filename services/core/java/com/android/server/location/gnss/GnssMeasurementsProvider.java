@@ -16,10 +16,10 @@
 
 package com.android.server.location.gnss;
 
-import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
+import android.app.AppOpsManager;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssRequest;
 import android.location.IGnssMeasurementsListener;
@@ -30,6 +30,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationUsageLogger;
 import com.android.server.location.util.SettingsHelper;
@@ -47,6 +48,7 @@ public class GnssMeasurementsProvider extends
         GnssListenerMultiplexer<GnssRequest, IGnssMeasurementsListener, Boolean> implements
         SettingsHelper.GlobalSettingChangedListener {
 
+    private final AppOpsHelper mAppOpsHelper;
     private final LocationUsageLogger mLogger;
     private final GnssMeasurementProviderNative mNative;
 
@@ -57,6 +59,7 @@ public class GnssMeasurementsProvider extends
     @VisibleForTesting
     public GnssMeasurementsProvider(Injector injector, GnssMeasurementProviderNative aNative) {
         super(injector);
+        mAppOpsHelper = injector.getAppOpsHelper();
         mLogger = injector.getLocationUsageLogger();
         mNative = aNative;
     }
@@ -163,7 +166,8 @@ public class GnssMeasurementsProvider extends
      */
     public void onMeasurementsAvailable(GnssMeasurementsEvent event) {
         deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity(), PERMISSION_FINE)) {
+            if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
+                    registration.getIdentity())) {
                 return listener -> listener.onGnssMeasurementsReceived(event);
             } else {
                 return null;

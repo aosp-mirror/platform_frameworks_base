@@ -417,9 +417,6 @@ android.app.INotificationManager
 android.app.IProcessObserver$Stub$Proxy
 android.app.IProcessObserver$Stub
 android.app.IProcessObserver
-android.app.IRequestFinishCallback$Stub$Proxy
-android.app.IRequestFinishCallback$Stub
-android.app.IRequestFinishCallback
 android.app.ISearchManager$Stub$Proxy
 android.app.ISearchManager$Stub
 android.app.ISearchManager

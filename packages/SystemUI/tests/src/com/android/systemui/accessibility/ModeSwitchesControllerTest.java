@@ -16,20 +16,13 @@
 
 package com.android.systemui.accessibility;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.view.Display;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.WindowMetrics;
 
 import androidx.test.filters.SmallTest;
 
@@ -38,45 +31,43 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 /** Tests the ModeSwitchesController. */
 public class ModeSwitchesControllerTest extends SysuiTestCase {
 
-    private WindowManager mWindowManager;
+    @Mock
+    private ModeSwitchesController.SwitchSupplier mSupplier;
+    @Mock
+    private MagnificationModeSwitch mModeSwitch;
     private ModeSwitchesController mModeSwitchesController;
+
 
     @Before
     public void setUp() {
-        mWindowManager = mock(WindowManager.class);
-        Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
-        when(mWindowManager.getDefaultDisplay()).thenReturn(display);
-        WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
-                .getMaximumWindowMetrics();
-        when(mWindowManager.getMaximumWindowMetrics()).thenReturn(metrics);
-        mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
-        mModeSwitchesController = new ModeSwitchesController(mContext);
+        MockitoAnnotations.initMocks(this);
+        when(mSupplier.get(anyInt())).thenReturn(mModeSwitch);
+        mModeSwitchesController = new ModeSwitchesController(mSupplier);
     }
 
     @Test
     public void testShowButton() {
         mModeSwitchesController.showButton(Display.DEFAULT_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
-        verify(mWindowManager).addView(any(), any());
+
+        verify(mModeSwitch).showButton(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     @Test
     public void testRemoveButton() {
         mModeSwitchesController.showButton(Display.DEFAULT_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
-        ArgumentCaptor<View> captor = ArgumentCaptor.forClass(View.class);
-        verify(mWindowManager).addView(captor.capture(), any(WindowManager.LayoutParams.class));
 
         mModeSwitchesController.removeButton(Display.DEFAULT_DISPLAY);
 
-        verify(mWindowManager).removeView(eq(captor.getValue()));
+        verify(mModeSwitch).removeButton();
     }
 }

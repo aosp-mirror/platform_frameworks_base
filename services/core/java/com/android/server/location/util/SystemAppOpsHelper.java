@@ -57,7 +57,7 @@ public class SystemAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity) {
+    public boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity) {
         Preconditions.checkState(mAppOps != null);
 
         long identity = Binder.clearCallingIdentity();
@@ -75,7 +75,7 @@ public class SystemAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected void finishOp(int appOp, CallerIdentity callerIdentity) {
+    public void finishOp(int appOp, CallerIdentity callerIdentity) {
         Preconditions.checkState(mAppOps != null);
 
         long identity = Binder.clearCallingIdentity();
@@ -91,7 +91,7 @@ public class SystemAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity) {
+    public boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity) {
         Preconditions.checkState(mAppOps != null);
 
         long identity = Binder.clearCallingIdentity();
@@ -106,7 +106,7 @@ public class SystemAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected boolean noteOp(int appOp, CallerIdentity callerIdentity) {
+    public boolean noteOp(int appOp, CallerIdentity callerIdentity) {
         Preconditions.checkState(mAppOps != null);
 
         long identity = Binder.clearCallingIdentity();
@@ -123,7 +123,7 @@ public class SystemAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity) {
+    public boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity) {
         Preconditions.checkState(mAppOps != null);
 
         long identity = Binder.clearCallingIdentity();

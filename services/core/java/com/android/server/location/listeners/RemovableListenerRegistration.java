@@ -61,7 +61,7 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
      * Removes this registration. Does nothing if invoked before {@link #onRegister(Object)} or
      * after {@link #onUnregister()}. It is safe to invoke this from within either function.
      */
-    public void remove() {
+    public final void remove() {
         Object key = mKey;
         if (key != null) {
             getOwner().removeRegistration(key, this);

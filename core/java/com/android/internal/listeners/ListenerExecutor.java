@@ -40,7 +40,7 @@ public interface ListenerExecutor {
         /**
          * Called before this operation is to be run. Some operations may be canceled before they
          * are run, in which case this method may not be called. {@link #onPostExecute(boolean)}
-         * will only be run if this method was run.
+         * will only be run if this method was run. This callback is invoked on the calling thread.
          */
         default void onPreExecute() {}
 
@@ -49,7 +49,7 @@ public interface ListenerExecutor {
          * RuntimeException, which will propagate normally. Implementations of
          * {@link ListenerExecutor} have the option to override
          * {@link ListenerExecutor#onOperationFailure(ListenerOperation, Exception)} instead to
-         * intercept failures at the class level.
+         * intercept failures at the class level. This callback is invoked on the executor thread.
          */
         default void onFailure(Exception e) {
             // implementations should handle any exceptions that may be thrown
@@ -59,21 +59,24 @@ public interface ListenerExecutor {
         /**
          * Called after the operation is run. This method will always be called if
          * {@link #onPreExecute()} is called. Success implies that the operation was run to
-         * completion with no failures.
+         * completion with no failures. This callback may be invoked on the calling thread or
+         * executor thread.
          */
         default void onPostExecute(boolean success) {}
 
         /**
          * Called after this operation is complete (which does not imply that it was necessarily
          * run). Will always be called once per operation, no matter if the operation was run or
-         * not. Success implies that the operation was run to completion with no failures.
+         * not. Success implies that the operation was run to completion with no failures. This
+         * callback may be invoked on the calling thread or executor thread.
          */
         default void onComplete(boolean success) {}
     }
 
     /**
      * May be override to handle operation failures at a class level. Will not be invoked in the
-     * event of a RuntimeException, which will propagate normally.
+     * event of a RuntimeException, which will propagate normally. This callback is invoked on the
+     * executor thread.
      */
     default <TListener> void onOperationFailure(ListenerOperation<TListener> operation,
             Exception exception) {
@@ -83,7 +86,8 @@ public interface ListenerExecutor {
     /**
      * Executes the given listener operation on the given executor, using the provided listener
      * supplier. If the supplier returns a null value, or a value during the operation that does not
-     * match the value prior to the operation, then the operation is considered canceled.
+     * match the value prior to the operation, then the operation is considered canceled. If a null
+     * operation is supplied, nothing happens.
      */
     default <TListener> void executeSafely(Executor executor, Supplier<TListener> listenerSupplier,
             @Nullable ListenerOperation<TListener> operation) {

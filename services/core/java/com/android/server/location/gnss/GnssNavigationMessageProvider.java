@@ -16,10 +16,10 @@
 
 package com.android.server.location.gnss;
 
-import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
+import android.app.AppOpsManager;
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
 import android.location.util.identity.CallerIdentity;
@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 
 /**
@@ -39,6 +40,7 @@ import com.android.server.location.util.Injector;
 public class GnssNavigationMessageProvider extends
         GnssListenerMultiplexer<Void, IGnssNavigationMessageListener, Void> {
 
+    private final AppOpsHelper mAppOpsHelper;
     private final GnssNavigationMessageProviderNative mNative;
 
     public GnssNavigationMessageProvider(Injector injector) {
@@ -49,6 +51,7 @@ public class GnssNavigationMessageProvider extends
     public GnssNavigationMessageProvider(Injector injector,
             GnssNavigationMessageProviderNative aNative) {
         super(injector);
+        mAppOpsHelper = injector.getAppOpsHelper();
         mNative = aNative;
     }
 
@@ -90,7 +93,8 @@ public class GnssNavigationMessageProvider extends
      */
     public void onNavigationMessageAvailable(GnssNavigationMessage event) {
         deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity(), PERMISSION_FINE)) {
+            if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
+                    registration.getIdentity())) {
                 return listener -> listener.onGnssNavigationMessageReceived(event);
             } else {
                 return null;

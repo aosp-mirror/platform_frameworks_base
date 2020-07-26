@@ -16,9 +16,16 @@
 
 package com.android.server.location.util;
 
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
+
+import static com.android.server.location.LocationManagerService.D;
+import static com.android.server.location.LocationManagerService.TAG;
+
 import android.location.util.identity.CallerIdentity;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -83,7 +90,7 @@ public class LocationAttributionHelper {
                 i -> new ArraySet<>());
         boolean empty = keySet.isEmpty();
         if (keySet.add(new ProviderListener(provider, key)) && empty) {
-            if (!mAppOpsHelper.startLocationMonitoring(identity)) {
+            if (!mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, identity)) {
                 mAttributions.remove(identity);
             }
         }
@@ -99,7 +106,7 @@ public class LocationAttributionHelper {
         if (keySet != null && keySet.remove(new ProviderListener(provider, key))
                 && keySet.isEmpty()) {
             mAttributions.remove(identity);
-            mAppOpsHelper.stopLocationMonitoring(identity);
+            mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, identity);
         }
     }
 
@@ -113,14 +120,18 @@ public class LocationAttributionHelper {
                 i -> new ArraySet<>());
         boolean empty = keySet.isEmpty();
         if (keySet.add(new ProviderListener(provider, key)) && empty) {
-            if (!mAppOpsHelper.startHighPowerLocationMonitoring(identity)) {
+            if (mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, identity)) {
+                if (D) {
+                    Log.v(TAG, "starting high power location attribution for " + identity);
+                }
+            } else {
                 mHighPowerAttributions.remove(identity);
             }
         }
     }
 
     /**
-     * Report high power  location usage has stopped for the given caller on the given provider,
+     * Report high power location usage has stopped for the given caller on the given provider,
      * with a unique key.
      */
     public synchronized void reportHighPowerLocationStop(CallerIdentity identity, String provider,
@@ -128,8 +139,11 @@ public class LocationAttributionHelper {
         Set<ProviderListener> keySet = mHighPowerAttributions.get(identity);
         if (keySet != null && keySet.remove(new ProviderListener(provider, key))
                 && keySet.isEmpty()) {
+            if (D) {
+                Log.v(TAG, "stopping high power location attribution for " + identity);
+            }
             mHighPowerAttributions.remove(identity);
-            mAppOpsHelper.stopHighPowerLocationMonitoring(identity);
+            mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, identity);
         }
     }
 }

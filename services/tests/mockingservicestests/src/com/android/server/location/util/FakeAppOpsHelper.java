@@ -57,7 +57,7 @@ public class FakeAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity) {
+    public boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity) {
         AppOp myAppOp = getOp(callerIdentity.getPackageName(), appOp);
         if (!myAppOp.mAllowed) {
             return false;
@@ -68,20 +68,20 @@ public class FakeAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected void finishOp(int appOp, CallerIdentity callerIdentity) {
+    public void finishOp(int appOp, CallerIdentity callerIdentity) {
         AppOp myAppOp = getOp(callerIdentity.getPackageName(), appOp);
         Preconditions.checkState(myAppOp.mStarted);
         myAppOp.mStarted = false;
     }
 
     @Override
-    protected boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity) {
+    public boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity) {
         AppOp myAppOp = getOp(callerIdentity.getPackageName(), appOp);
         return myAppOp.mAllowed;
     }
 
     @Override
-    protected boolean noteOp(int appOp, CallerIdentity callerIdentity) {
+    public boolean noteOp(int appOp, CallerIdentity callerIdentity) {
         if (!noteOpNoThrow(appOp, callerIdentity)) {
             throw new SecurityException(
                     "noteOp not allowed for op " + appOp + " and caller " + callerIdentity);
@@ -91,7 +91,7 @@ public class FakeAppOpsHelper extends AppOpsHelper {
     }
 
     @Override
-    protected boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity) {
+    public boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity) {
         AppOp myAppOp = getOp(callerIdentity.getPackageName(), appOp);
         if (!myAppOp.mAllowed) {
             return false;

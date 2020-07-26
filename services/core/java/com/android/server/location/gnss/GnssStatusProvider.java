@@ -16,10 +16,10 @@
 
 package com.android.server.location.gnss;
 
-import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
+import android.app.AppOpsManager;
 import android.location.GnssStatus;
 import android.location.IGnssStatusListener;
 import android.location.util.identity.CallerIdentity;
@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
+import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationUsageLogger;
 
@@ -35,10 +36,12 @@ import com.android.server.location.util.LocationUsageLogger;
  */
 public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatusListener, Void> {
 
+    private final AppOpsHelper mAppOpsHelper;
     private final LocationUsageLogger mLogger;
 
     public GnssStatusProvider(Injector injector) {
         super(injector);
+        mAppOpsHelper = injector.getAppOpsHelper();
         mLogger = injector.getLocationUsageLogger();
     }
 
@@ -113,7 +116,8 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
      */
     public void onSvStatusChanged(GnssStatus gnssStatus) {
         deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity(), PERMISSION_FINE)) {
+            if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
+                    registration.getIdentity())) {
                 return listener -> listener.onSvStatusChanged(gnssStatus);
             } else {
                 return null;
@@ -126,7 +130,8 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
      */
     public void onNmeaReceived(long timestamp, String nmea) {
         deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity(), PERMISSION_FINE)) {
+            if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
+                    registration.getIdentity())) {
                 return listener -> listener.onNmeaReceived(timestamp, nmea);
             } else {
                 return null;

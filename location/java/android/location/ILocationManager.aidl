@@ -113,7 +113,7 @@ interface ILocationManager
     List<LocationRequest> getTestProviderCurrentRequests(String provider);
     LocationTime getGnssTimeMillis();
 
-    boolean sendExtraCommand(String provider, String command, inout Bundle extras);
+    void sendExtraCommand(String provider, String command, inout Bundle extras);
 
     // used by gts tests to verify whitelists
     String[] getBackgroundThrottlingWhitelist();

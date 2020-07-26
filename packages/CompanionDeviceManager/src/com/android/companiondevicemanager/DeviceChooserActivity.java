@@ -29,6 +29,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -75,6 +76,14 @@ public class DeviceChooserActivity extends Activity {
             mDeviceListView = findViewById(R.id.device_list);
             final DeviceDiscoveryService.DevicesAdapter adapter = getService().mDevicesAdapter;
             mDeviceListView.setAdapter(adapter);
+            mDeviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                    getService().mSelectedDevice =
+                            (DeviceFilterPair) adapterView.getItemAtPosition(pos);
+                    adapter.notifyDataSetChanged();
+                }
+            });
             adapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
