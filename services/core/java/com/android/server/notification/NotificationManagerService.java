@@ -4752,6 +4752,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean hasEnabledNotificationListener(String packageName, int userId) {
+            checkCallerIsSystem();
+            return mListeners.isPackageAllowed(packageName, userId);
+        }
+
+        @Override
         public boolean isNotificationListenerAccessGranted(ComponentName listener) {
             Objects.requireNonNull(listener);
             checkCallerIsSystemOrSameApp(listener.getPackageName());
