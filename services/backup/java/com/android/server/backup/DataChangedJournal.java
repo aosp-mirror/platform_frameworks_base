@@ -22,9 +22,11 @@ import android.util.Slog;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,15 +80,17 @@ public final class DataChangedJournal {
      */
     public void forEach(Consumer<String> consumer) throws IOException {
         try (
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(
-                    new FileInputStream(mFile), BUFFER_SIZE_BYTES);
-            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream)
+            InputStream in = new FileInputStream(mFile);
+            InputStream bufferedIn = new BufferedInputStream(in, BUFFER_SIZE_BYTES);
+            DataInputStream dataInputStream = new DataInputStream(bufferedIn)
         ) {
-            while (dataInputStream.available() > 0) {
+            while (true) {
                 String packageName = dataInputStream.readUTF();
                 consumer.accept(packageName);
             }
-        }
+        } catch (EOFException tolerated) {
+            // no more data; we're done
+        } // other kinds of IOExceptions are error conditions and handled in the caller
     }
 
     /**
