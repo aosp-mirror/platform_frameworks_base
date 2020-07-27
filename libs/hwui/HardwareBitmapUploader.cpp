@@ -21,7 +21,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
 #include <utils/GLUtils.h>
@@ -285,7 +285,7 @@ private:
         return (image.get() != nullptr);
     }
 
-    sk_sp<GrContext> mGrContext;
+    sk_sp<GrDirectContext> mGrContext;
     renderthread::VulkanManager mVulkanManager;
     std::mutex mVkLock;
 };

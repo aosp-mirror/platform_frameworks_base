@@ -106,7 +106,7 @@ private:
         ~ImageSlot() { clear(); }
 
         sk_sp<SkImage> createIfNeeded(AHardwareBuffer* buffer, android_dataspace dataspace,
-                                      bool forceCreate, GrContext* context);
+                                      bool forceCreate, GrDirectContext* context);
 
     private:
         void clear();

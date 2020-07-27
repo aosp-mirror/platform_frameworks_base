@@ -20,7 +20,7 @@
 #include <EGL/eglext.h>
 #include <GrBackendSemaphore.h>
 #include <GrBackendSurface.h>
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <GrTypes.h>
 #include <android/sync.h>
 #include <ui/FatVector.h>
@@ -369,7 +369,7 @@ void VulkanManager::initialize() {
     }
 }
 
-sk_sp<GrContext> VulkanManager::createContext(const GrContextOptions& options) {
+sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options) {
     auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
         if (device != VK_NULL_HANDLE) {
             return vkGetDeviceProcAddr(device, proc_name);
@@ -388,7 +388,7 @@ sk_sp<GrContext> VulkanManager::createContext(const GrContextOptions& options) {
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
     backendContext.fGetProc = std::move(getProc);
 
-    return GrContext::MakeVulkan(backendContext, options);
+    return GrDirectContext::MakeVulkan(backendContext, options);
 }
 
 VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
@@ -562,9 +562,11 @@ void VulkanManager::destroySurface(VulkanSurface* surface) {
     delete surface;
 }
 
-VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode,
+VulkanSurface* VulkanManager::createSurface(ANativeWindow* window,
+                                            ColorMode colorMode,
                                             sk_sp<SkColorSpace> surfaceColorSpace,
-                                            SkColorType surfaceColorType, GrContext* grContext,
+                                            SkColorType surfaceColorType,
+                                            GrDirectContext* grContext,
                                             uint32_t extraBuffers) {
     LOG_ALWAYS_FATAL_IF(!hasVkContext(), "Not initialized");
     if (!window) {
@@ -575,7 +577,7 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode col
                                  *this, extraBuffers);
 }
 
-status_t VulkanManager::fenceWait(int fence, GrContext* grContext) {
+status_t VulkanManager::fenceWait(int fence, GrDirectContext* grContext) {
     if (!hasVkContext()) {
         ALOGE("VulkanManager::fenceWait: VkDevice not initialized");
         return INVALID_OPERATION;
@@ -623,7 +625,7 @@ status_t VulkanManager::fenceWait(int fence, GrContext* grContext) {
     return OK;
 }
 
-status_t VulkanManager::createReleaseFence(int* nativeFence, GrContext* grContext) {
+status_t VulkanManager::createReleaseFence(int* nativeFence, GrDirectContext* grContext) {
     *nativeFence = -1;
     if (!hasVkContext()) {
         ALOGE("VulkanManager::createReleaseFence: VkDevice not initialized");

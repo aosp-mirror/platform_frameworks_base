@@ -25,7 +25,8 @@ using namespace android::uirenderer::renderthread;
 namespace android {
 namespace uirenderer {
 
-AutoBackendTextureRelease::AutoBackendTextureRelease(GrContext* context, AHardwareBuffer* buffer) {
+AutoBackendTextureRelease::AutoBackendTextureRelease(GrDirectContext* context,
+                                                     AHardwareBuffer* buffer) {
     AHardwareBuffer_Desc desc;
     AHardwareBuffer_describe(buffer, &desc);
     bool createProtectedImage = 0 != (desc.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT);
@@ -67,8 +68,9 @@ static void releaseProc(SkImage::ReleaseContext releaseContext) {
     textureRelease->unref(false);
 }
 
-void AutoBackendTextureRelease::makeImage(AHardwareBuffer* buffer, android_dataspace dataspace,
-                                          GrContext* context) {
+void AutoBackendTextureRelease::makeImage(AHardwareBuffer* buffer,
+                                          android_dataspace dataspace,
+                                          GrDirectContext* context) {
     AHardwareBuffer_Desc desc;
     AHardwareBuffer_describe(buffer, &desc);
     SkColorType colorType = GrAHardwareBufferUtils::GetSkColorTypeFromBufferFormat(desc.format);
@@ -81,7 +83,7 @@ void AutoBackendTextureRelease::makeImage(AHardwareBuffer* buffer, android_datas
     }
 }
 
-void AutoBackendTextureRelease::newBufferContent(GrContext* context) {
+void AutoBackendTextureRelease::newBufferContent(GrDirectContext* context) {
     if (mBackendTexture.isValid()) {
         mUpdateProc(mImageCtx, context);
     }
