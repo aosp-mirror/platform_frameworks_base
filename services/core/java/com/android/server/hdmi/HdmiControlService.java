@@ -2290,7 +2290,7 @@ public class HdmiControlService extends SystemService {
             pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
             pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
             pw.println("mSystemAudioActivated: " + isSystemAudioActivated());
-            pw.println("mHdmiCecVolumeControlEnabled " + mHdmiCecVolumeControlEnabled);
+            pw.println("mHdmiCecVolumeControlEnabled: " + mHdmiCecVolumeControlEnabled);
             pw.decreaseIndent();
 
             pw.println("mMhlController: ");
