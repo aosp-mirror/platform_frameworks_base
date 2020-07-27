@@ -324,6 +324,14 @@
     <uses-permission android:name="android.car.permission.CAR_DRIVING_STATE" />
     <!-- Permissions required for ATS tests - AtsDeviceInfo, AtsAudioDeviceTestCases -->
     <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
+    <!-- Permissions required for ATS tests - AtsDeviceInfo -->
+    <uses-permission android:name="android.car.permission.CAR_DIAGNOSTICS" />
+    <!-- Permissions required for ATS tests - AtsDeviceInfo -->
+    <uses-permission android:name="android.car.permission.CLEAR_CAR_DIAGNOSTICS" />
+    <!-- Permissions required for ATS tests - AtsCarHostTestCases -->
+    <uses-permission android:name="android.car.permission.CONTROL_APP_BLOCKING" />
+    <!-- Permissions required for ATS tests - AtsCarHostTestCases -->
+    <uses-permission android:name="android.car.permission.CAR_UX_RESTRICTIONS_CONFIGURATION" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
