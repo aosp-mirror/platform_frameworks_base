@@ -575,7 +575,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     ? _proc : null;
             if (mIsAllowedBgActivityStartsByStart
                     || mIsAllowedBgActivityStartsByBinding) {
-                _proc.addAllowBackgroundActivityStartsToken(this);
+                _proc.addAllowBackgroundActivityStartsToken(this, null);
             } else {
                 _proc.removeAllowBackgroundActivityStartsToken(this);
             }
@@ -723,7 +723,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * {@code mIsAllowedBgActivityStartsByBinding}. If either is true, this ServiceRecord
      * should be contributing as a token in parent ProcessRecord.
      *
-     * @see com.android.server.am.ProcessRecord#mAllowBackgroundActivityStartsTokens
+     * @see com.android.server.am.ProcessRecord#addAllowBackgroundActivityStartsToken(Binder,
+     * IBinder)
+     * @see com.android.server.am.ProcessRecord#removeAllowBackgroundActivityStartsToken(Binder)
      */
     private void updateParentProcessBgActivityStartsToken() {
         if (app == null) {
@@ -732,7 +734,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (mIsAllowedBgActivityStartsByStart || mIsAllowedBgActivityStartsByBinding) {
             // if the token is already there it's safe to "re-add it" - we're dealing with
             // a set of Binder objects
-            app.addAllowBackgroundActivityStartsToken(this);
+            app.addAllowBackgroundActivityStartsToken(this, null);
         } else {
             app.removeAllowBackgroundActivityStartsToken(this);
         }

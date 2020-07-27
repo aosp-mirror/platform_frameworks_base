@@ -437,15 +437,17 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                     break;
                 case ActivityManager.INTENT_SENDER_BROADCAST:
                     try {
+                        final boolean allowedByToken =
+                                mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken);
+                        final IBinder bgStartsToken = (allowedByToken) ? whitelistToken : null;
+
                         // If a completion callback has been requested, require
                         // that the broadcast be delivered synchronously
                         int sent = controller.mAmInternal.broadcastIntentInPackage(key.packageName,
                                 key.featureId, uid, callingUid, callingPid, finalIntent,
                                 resolvedType, finishedReceiver, code, null, null,
                                 requiredPermission, options, (finishedReceiver != null), false,
-                                userId,
-                                mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken)
-                                        || allowTrampoline);
+                                userId, allowedByToken || allowTrampoline, bgStartsToken);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }
@@ -456,11 +458,14 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 case ActivityManager.INTENT_SENDER_SERVICE:
                 case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
                     try {
+                        final boolean allowedByToken =
+                                mAllowBgActivityStartsForServiceSender.contains(whitelistToken);
+                        final IBinder bgStartsToken = (allowedByToken) ? whitelistToken : null;
+
                         controller.mAmInternal.startServiceInPackage(uid, finalIntent, resolvedType,
                                 key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE,
                                 key.packageName, key.featureId, userId,
-                                mAllowBgActivityStartsForServiceSender.contains(whitelistToken)
-                                || allowTrampoline);
+                                allowedByToken || allowTrampoline, bgStartsToken);
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Unable to send startService intent", e);
                     } catch (TransactionTooLargeException e) {
