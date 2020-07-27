@@ -47,7 +47,7 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Терилген PIN\'дер дал келбейт."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Узундугу 4төн 8ге чейинки сандан турган PIN-кодду териңиз."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Узундугу 8 же көбүрөөк сандан турган PUK-кодду териңиз."</string>
-    <string name="needPuk" msgid="7321876090152422918">"SIM картаңыз PUK менен кулпуланган. Кулпусун ачуу үчүн PUK-кодду териңиз."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM картаңыз PUK менен кулпуланган. Кулпусун ачуу үчүн, PUK-кодду териңиз."</string>
     <string name="needPuk2" msgid="7032612093451537186">"SIM картаны бөгөттөн чыгаруу үчүн PUK2 кодун териңиз."</string>
     <string name="enablePin" msgid="2543771964137091212">"Оңунан чыкпады, SIM/RUIM бөгөттөөсүн жандырыңыз."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
@@ -239,7 +239,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Өчүрүү"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Кубат"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Өчүрүп күйгүзүү"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Тез жардам"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Шашылыш чалуу"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Ката тууралуу билдирүү"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Сеансты бүтүрүү"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Скриншот"</string>
@@ -1317,7 +1317,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялык консоль иштетилди"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Аны өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB портунда суюктук же урандылар бар"</string>
-    <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порт автоматтык түрдө өчүрүлдү. Кененирээк маалымат алуу үчүн таптап коюңуз."</string>
+    <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порт автоматтык түрдө өчүрүлдү. Кененирээк маалымат алуу үчүн, таптап коюңуз."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB портун колдонууга болот"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"Телефон суюктук менен урандыларды аныктаган жок."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"Мүчүлүштүк тууралуу кабар алынууда…"</string>

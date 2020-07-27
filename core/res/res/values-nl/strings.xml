@@ -324,7 +324,7 @@
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Schermvergroting bedienen"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Het zoomniveau en de positionering van het scherm bedienen."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Gebaren uitvoeren"</string>
-    <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan tikken, vegen, samenknijpen en andere gebaren uitvoeren."</string>
+    <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan tikken, swipen, knijpen en andere gebaren uitvoeren."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Vingerafdrukgebaren"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebaren registreren die op de vingerafdruksensor van het apparaat worden getekend."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot maken"</string>
@@ -449,7 +449,7 @@
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"toegang tot IMS-service voor bellen"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Hiermee kan de app de IMS-service gebruiken om te bellen zonder je tussenkomst."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefoonstatus en -identiteit lezen"</string>
-    <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze toestemming kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een gesprek actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
+    <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze rechten kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een gesprek actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"gesprekken doorschakelen via het systeem"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Hiermee kan de app de bijbehorende gesprekken doorschakelen via het systeem om de belfunctionaliteit te verbeteren."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"gesprekken via het systeem bekijken en beheren"</string>
@@ -487,7 +487,7 @@
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"netwerkverbindingen weergeven"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Hiermee kan de app informatie bekijken over netwerkverbindingen, zoals welke netwerken er zijn en welke verbonden zijn."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"volledige netwerktoegang"</string>
-    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Hiermee kan de app netwerksockets maken en aangepaste netwerkprotocollen gebruiken. De browser en andere apps bieden mogelijkheden om gegevens via internet te verzenden, dus deze toestemming is niet vereist om gegevens via internet te verzenden."</string>
+    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Hiermee kan de app netwerksockets maken en aangepaste netwerkprotocollen gebruiken. De browser en andere apps bieden mogelijkheden om gegevens via internet te verzenden, dus deze rechten zijn niet vereist om gegevens via internet te verzenden."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"netwerkverbinding wijzigen"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Hiermee kan de app de status van de netwerkverbinding wijzigen."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"getetherde verbinding wijzigen"</string>
@@ -566,7 +566,7 @@
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Vingerafdruk-pictogram"</string>
+    <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Vingerafdruk-icoon"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"hardware voor ontgrendelen via gezichtsherkenning beheren"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Hiermee kan de app methoden aanroepen om gezichtstemplates toe te voegen en te verwijderen voor gebruik."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"hardware voor ontgrendelen via gezichtsherkenning gebruiken"</string>
@@ -950,12 +950,12 @@
     <string name="autofill_parish" msgid="6847960518334530198">"Gemeente"</string>
     <string name="autofill_area" msgid="8289022370678448983">"Gebied"</string>
     <string name="autofill_emirate" msgid="2544082046790551168">"Emiraat"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"je webbladwijzers en -geschiedenis lezen"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bookmarks in de systeemeigen browser. Let op: deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"webbladwijzers en -geschiedenis schrijven"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je tablet. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden.."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"je webbookmarks en -geschiedenis lezen"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bookmarks in de systeemeigen browser. Let op: deze rechten kunnen niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"webbookmarks en -geschiedenis schrijven"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je tablet. Deze rechten kunnen niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Hiermee kan de app de browsergeschiedenis of opgeslagen bookmarks bewerken op je Android TV-apparaat. Hierdoor kan de app mogelijk browsergegevens wissen of aanpassen. Opmerking: Dit recht kan niet worden afgedwongen door andere browsers of andere apps met internetmogelijkheden."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je telefoon. Deze rechten kunnen niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"een wekker instellen"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"voicemail toevoegen"</string>
@@ -966,7 +966,7 @@
     <string name="save_password_notnow" msgid="2878327088951240061">"Niet nu"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"Onthouden"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Nooit"</string>
-    <string name="open_permission_deny" msgid="5136793905306987251">"Je hebt geen toestemming om deze pagina te openen."</string>
+    <string name="open_permission_deny" msgid="5136793905306987251">"Je hebt geen rechten om deze pagina te openen."</string>
     <string name="text_copied" msgid="2531420577879738860">"Tekst naar klembord gekopieerd."</string>
     <string name="copied" msgid="4675902854553014676">"Gekopieerd"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Meer"</string>
@@ -1394,7 +1394,7 @@
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"verwijdering van pakketten aanvragen"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Hiermee kan een app verwijdering van pakketten aanvragen."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"vragen om batterijoptimalisatie te negeren"</string>
-    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Hiermee kan een app toestemming vragen om batterijoptimalisatie voor die app te negeren."</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Hiermee kan een app rechten vragen om batterijoptimalisatie voor die app te negeren."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tik twee keer voor zoomregeling"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Kan widget niet toevoegen."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ga"</string>
@@ -1406,13 +1406,13 @@
     <string name="ime_action_default" msgid="8265027027659800121">"Uitvoeren"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Nummer bellen\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Contact maken\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"De volgende apps verzoeken om toegang tot je account, nu en in de toekomst."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"De volgende apps willen toegangsrechten voor je account, nu en in de toekomst."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Wil je dit verzoek toestaan?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Verzoek om toegang"</string>
     <string name="allow" msgid="6195617008611933762">"Toestaan"</string>
     <string name="deny" msgid="6632259981847676572">"Weigeren"</string>
-    <string name="permission_request_notification_title" msgid="1810025922441048273">"Toestemming gevraagd"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Toestemming gevraagd\nvoor account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_title" msgid="1810025922441048273">"Rechten gevraagd"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Rechten gevraagd\nvoor account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Je gebruikt deze app buiten je werkprofiel"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"U gebruikt deze app in je werkprofiel"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Invoermethode"</string>
@@ -1501,7 +1501,7 @@
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Delen met"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Delen met <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Schuifgreep. Tikken en blijven aanraken."</string>
-    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Vegen om te ontgrendelen"</string>
+    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Swipen om te ontgrendelen"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Navigeren naar startpositie"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Omhoog navigeren"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Meer opties"</string>
@@ -1772,7 +1772,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probeer het later opnieuw"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt weergegeven"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Veeg omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
+    <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
     <string name="done_label" msgid="7283767013231718521">"Gereed"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ronde schuifregelaar voor uren"</string>
