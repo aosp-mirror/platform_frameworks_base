@@ -271,8 +271,7 @@ public final class UserTypeDetails {
     }
 
     /** Dumps details of the UserTypeDetails. Do not parse this. */
-    public void dump(PrintWriter pw) {
-        final String prefix = "        ";
+    public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mName: "); pw.println(mName);
         pw.print(prefix); pw.print("mBaseType: "); pw.println(UserInfo.flagsToString(mBaseType));
         pw.print(prefix); pw.print("mEnabled: "); pw.println(mEnabled);
@@ -282,6 +281,7 @@ public final class UserTypeDetails {
         pw.println(UserInfo.flagsToString(mDefaultUserInfoPropertyFlags));
         pw.print(prefix); pw.print("mLabel: "); pw.println(mLabel);
 
+        final String restrictionsPrefix = prefix + "    ";
         if (isSystem()) {
             pw.print(prefix); pw.println("config_defaultFirstUserRestrictions: ");
             try {
@@ -293,13 +293,13 @@ public final class UserTypeDetails {
                         restrictions.putBoolean(userRestriction, true);
                     }
                 }
-                UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", restrictions);
+                UserRestrictionsUtils.dumpRestrictions(pw, restrictionsPrefix, restrictions);
             } catch (Resources.NotFoundException e) {
-                pw.print(prefix); pw.println("    none - resource not found");
+                pw.print(restrictionsPrefix); pw.println("none - resource not found");
             }
         } else {
             pw.print(prefix); pw.println("mDefaultRestrictions: ");
-            UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", mDefaultRestrictions);
+            UserRestrictionsUtils.dumpRestrictions(pw, restrictionsPrefix, mDefaultRestrictions);
         }
 
         pw.print(prefix); pw.print("mIconBadge: "); pw.println(mIconBadge);
