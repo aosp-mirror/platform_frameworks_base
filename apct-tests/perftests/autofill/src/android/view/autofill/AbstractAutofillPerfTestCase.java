@@ -26,7 +26,6 @@ import android.perftests.utils.SettingsStateKeeperRule;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
 import org.junit.After;
@@ -37,7 +36,6 @@ import org.junit.Rule;
 /**
  * Base class for all autofill tests.
  */
-@LargeTest
 public abstract class AbstractAutofillPerfTestCase {
 
     @ClassRule
