@@ -4032,7 +4032,7 @@ public final class ViewRootImpl implements ViewParent,
             yOffset -= surfaceInsets.top;
 
             // Offset dirty rect for surface insets.
-            dirty.offset(surfaceInsets.left, surfaceInsets.right);
+            dirty.offset(surfaceInsets.left, surfaceInsets.top);
         }
 
         boolean accessibilityFocusDirty = false;
