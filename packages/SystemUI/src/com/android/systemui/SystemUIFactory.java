@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -30,7 +29,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.DaggerSystemUIRootComponent;
-import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
@@ -47,9 +45,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.concurrent.Executor;
-
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -97,24 +92,13 @@ public class SystemUIFactory {
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
-
-        Dependency dependency = new Dependency();
-        mRootComponent.createDependency().createSystemUI(dependency);
+        Dependency dependency = mRootComponent.createDependency();
         dependency.start();
-    }
-
-    protected void initWithRootComponent(@NonNull SystemUIRootComponent rootComponent) {
-        if (mRootComponent != null) {
-            throw new RuntimeException("Root component can be set only once.");
-        }
-
-        mRootComponent = rootComponent;
     }
 
     protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
         return DaggerSystemUIRootComponent.builder()
-                .dependencyProvider(new DependencyProvider())
-                .contextHolder(new ContextHolder(context))
+                .context(context)
                 .build();
     }
 
@@ -167,19 +151,5 @@ public class SystemUIFactory {
                 Dependency.get(NotificationListener.class),
                 Dependency.get(DozeParameters.class),
                 Dependency.get(BubbleController.class));
-    }
-
-    @Module
-    public static class ContextHolder {
-        private Context mContext;
-
-        public ContextHolder(Context context) {
-            mContext = context;
-        }
-
-        @Provides
-        public Context provideContext() {
-            return mContext;
-        }
     }
 }
