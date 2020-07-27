@@ -3092,6 +3092,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void addChildSessionId(int childSessionId) {
+        if (!params.isMultiPackage) {
+            throw new IllegalStateException("Single-session " + sessionId + " can't have child.");
+        }
+
         final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
         if (childSession == null) {
             throw new IllegalStateException("Unable to add child session " + childSessionId
