@@ -113,12 +113,8 @@ public class NavigationBarView extends FrameLayout implements
     int mNavigationIconHints = 0;
     private int mNavBarMode;
 
-    private Rect mHomeButtonBounds = new Rect();
-    private Rect mBackButtonBounds = new Rect();
-    private Rect mRecentsButtonBounds = new Rect();
-    private Rect mRotationButtonBounds = new Rect();
     private final Region mActiveRegion = new Region();
-    private int[] mTmpPosition = new int[2];
+    private Rect mTmpBounds = new Rect();
 
     private KeyButtonDrawable mBackIcon;
     private KeyButtonDrawable mHomeDefaultIcon;
@@ -709,6 +705,7 @@ public class NavigationBarView extends FrameLayout implements
         getHomeButton().setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent  ? View.INVISIBLE : View.VISIBLE);
         getHomeHandle().setVisibility(disableHomeHandle ? View.INVISIBLE : View.VISIBLE);
+        notifyActiveTouchRegions();
     }
 
     @VisibleForTesting
@@ -927,42 +924,30 @@ public class NavigationBarView extends FrameLayout implements
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        mActiveRegion.setEmpty();
-        updateButtonLocation(getBackButton(), mBackButtonBounds, true);
-        updateButtonLocation(getHomeButton(), mHomeButtonBounds, false);
-        updateButtonLocation(getRecentsButton(), mRecentsButtonBounds, false);
-        updateButtonLocation(getRotateSuggestionButton(), mRotationButtonBounds, true);
-        // TODO: Handle button visibility changes
-        mOverviewProxyService.onActiveNavBarRegionChanges(mActiveRegion);
+        notifyActiveTouchRegions();
         mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
 
-    private void updateButtonLocation(ButtonDispatcher button, Rect buttonBounds,
-            boolean isActive) {
+    /**
+     * Notifies the overview service of the active touch regions.
+     */
+    public void notifyActiveTouchRegions() {
+        mActiveRegion.setEmpty();
+        updateButtonLocation(getBackButton());
+        updateButtonLocation(getHomeButton());
+        updateButtonLocation(getRecentsButton());
+        updateButtonLocation(getRotateSuggestionButton());
+        mOverviewProxyService.onActiveNavBarRegionChanges(mActiveRegion);
+    }
+
+    private void updateButtonLocation(ButtonDispatcher button) {
         View view = button.getCurrentView();
-        if (view == null) {
-            buttonBounds.setEmpty();
+        if (view == null || !button.isVisible()) {
             return;
         }
-        // Temporarily reset the translation back to origin to get the position in window
-        final float posX = view.getTranslationX();
-        final float posY = view.getTranslationY();
-        view.setTranslationX(0);
-        view.setTranslationY(0);
 
-        if (isActive) {
-            view.getLocationOnScreen(mTmpPosition);
-            buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
-                    mTmpPosition[0] + view.getMeasuredWidth(),
-                    mTmpPosition[1] + view.getMeasuredHeight());
-            mActiveRegion.op(buttonBounds, Op.UNION);
-        }
-        view.getLocationInWindow(mTmpPosition);
-        buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
-                mTmpPosition[0] + view.getMeasuredWidth(),
-                mTmpPosition[1] + view.getMeasuredHeight());
-        view.setTranslationX(posX);
-        view.setTranslationY(posY);
+        view.getBoundsOnScreen(mTmpBounds);
+        mActiveRegion.op(mTmpBounds, Op.UNION);
     }
 
     private void updateOrientationViews() {
