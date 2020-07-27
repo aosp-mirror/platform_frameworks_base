@@ -39,6 +39,7 @@ import static android.os.PowerManager.locationPowerSaveModeToString;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
+import static com.android.server.location.LocationPermissions.PERMISSION_NONE;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -1248,9 +1249,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                     }
                 }
             } else {
-                if (!allowMonitoring || !mAppOpsHelper.checkOpNoThrow(LocationPermissions.asAppOp(
-                        LocationPermissions.getPermissionLevel(mContext, mCallerIdentity.getUid(),
-                                mCallerIdentity.getPid())), mCallerIdentity)) {
+                int permissionLevel = LocationPermissions.getPermissionLevel(mContext,
+                        mCallerIdentity.getUid(), mCallerIdentity.getPid());
+                if (!allowMonitoring || permissionLevel == PERMISSION_NONE
+                        || !mAppOpsHelper.checkOpNoThrow(
+                        LocationPermissions.asAppOp(permissionLevel), mCallerIdentity)) {
                     if (!highPower) {
                         mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, mCallerIdentity);
                     } else {
