@@ -801,8 +801,8 @@ public class NotificationManager {
      *
      * <p>The name and description should only be changed if the locale changes
      * or in response to the user renaming this channel. For example, if a user has a channel
-     * named 'John Doe' that represents messages from a 'John Doe', and 'John Doe' changes his name
-     * to 'John Smith,' the channel can be renamed to match.
+     * named 'Messages' and the user changes their locale, this channel's name should be updated
+     * with the translation of 'Messages' in the new locale.
      *
      * <p>The importance of an existing channel will only be changed if the new importance is lower
      * than the current value and the user has not altered any settings on this channel.
