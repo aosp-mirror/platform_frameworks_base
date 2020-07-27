@@ -27,7 +27,18 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
@@ -66,9 +77,6 @@ final class InputMonitor {
     private boolean mUpdateInputWindowsNeeded = true;
     private boolean mUpdateInputWindowsPending;
     private boolean mUpdateInputWindowsImmediately;
-
-    // Currently focused input window handle.
-    private InputWindowHandle mFocusedInputWindowHandle;
 
     private boolean mDisableWallpaperTouchEvents;
     private final Rect mTmpRect = new Rect();
@@ -308,10 +316,6 @@ final class InputMonitor {
         if (DEBUG_INPUT) {
             Slog.d(TAG_WM, "addInputWindowHandle: "
                     + child + ", " + inputWindowHandle);
-        }
-
-        if (hasFocus) {
-            mFocusedInputWindowHandle = inputWindowHandle;
         }
     }
 
@@ -578,6 +582,7 @@ final class InputMonitor {
         inputWindowHandle.portalToDisplayId = INVALID_DISPLAY;
         inputWindowHandle.touchableRegion.setEmpty();
         inputWindowHandle.setTouchableRegionCrop(null);
+        inputWindowHandle.trustedOverlay = isTrustedOverlay(type);
     }
 
     /**
@@ -591,5 +596,18 @@ final class InputMonitor {
         InputWindowHandle inputWindowHandle = new InputWindowHandle(null, displayId);
         populateOverlayInputInfo(inputWindowHandle, name, TYPE_SECURE_SYSTEM_OVERLAY, true);
         t.setInputWindowInfo(sc, inputWindowHandle);
+    }
+
+    static boolean isTrustedOverlay(int type) {
+        return type == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY
+                || type == TYPE_INPUT_METHOD || type == TYPE_INPUT_METHOD_DIALOG
+                || type == TYPE_MAGNIFICATION_OVERLAY || type == TYPE_STATUS_BAR
+                || type == TYPE_NOTIFICATION_SHADE
+                || type == TYPE_NAVIGATION_BAR
+                || type == TYPE_NAVIGATION_BAR_PANEL
+                || type == TYPE_SECURE_SYSTEM_OVERLAY
+                || type == TYPE_DOCK_DIVIDER
+                || type == TYPE_ACCESSIBILITY_OVERLAY
+                || type == TYPE_INPUT_CONSUMER;
     }
 }
