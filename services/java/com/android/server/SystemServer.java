@@ -1119,7 +1119,7 @@ public final class SystemServer {
             t.traceEnd();
 
             t.traceBegin("InstallSystemProviders");
-            mActivityManagerService.installSystemProviders();
+            mActivityManagerService.getContentProviderHelper().installSystemProviders();
             // Now that SettingsProvider is ready, reactivate SQLiteCompatibilityWalFlags
             SQLiteCompatibilityWalFlags.reset();
             t.traceEnd();
