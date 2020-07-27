@@ -372,7 +372,7 @@ public class Ringtone {
                     AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
                 startLocalPlayer();
             }
-        } else if (mAllowRemote && (mRemotePlayer != null)) {
+        } else if (mAllowRemote && (mRemotePlayer != null) && (mUri != null)) {
             final Uri canonicalUri = mUri.getCanonicalUri();
             final boolean looping;
             final float volume;
