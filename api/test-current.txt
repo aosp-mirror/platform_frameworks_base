@@ -451,6 +451,7 @@ package android.app {
     method public void lockFields(int);
     method public void setBlockable(boolean);
     method public void setDeleted(boolean);
+    method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
     method public void setImportanceLockedByOEM(boolean);
@@ -474,6 +475,7 @@ package android.app {
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public boolean matchesCallFilter(android.os.Bundle);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+    method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
