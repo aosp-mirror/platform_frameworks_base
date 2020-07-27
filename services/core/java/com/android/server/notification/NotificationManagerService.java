@@ -9938,7 +9938,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public IBinder getToken() {
-            return WHITELIST_TOKEN;
+            return ALLOWLIST_TOKEN;
         }
 
         @Override
