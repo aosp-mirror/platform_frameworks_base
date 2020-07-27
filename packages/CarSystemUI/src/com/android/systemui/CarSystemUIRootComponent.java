@@ -36,12 +36,17 @@ import dagger.Component;
                 DependencyBinder.class,
                 PipModule.class,
                 OneHandedModule.class,
-                SystemUIFactory.ContextHolder.class,
                 SystemServicesModule.class,
                 SystemUIModule.class,
                 CarSystemUIModule.class,
                 CarSystemUIBinder.class
         })
 public interface CarSystemUIRootComponent extends SystemUIRootComponent {
-
+    /**
+     * Builder for a CarSystemUIRootComponent.
+     */
+    @Component.Builder
+    interface Builder extends SystemUIRootComponent.Builder {
+        CarSystemUIRootComponent build();
+    }
 }

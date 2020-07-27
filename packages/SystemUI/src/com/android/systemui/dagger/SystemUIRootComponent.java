@@ -19,12 +19,12 @@ package com.android.systemui.dagger;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 
 import android.content.ContentProvider;
+import android.content.Context;
 
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
@@ -37,6 +37,7 @@ import com.android.systemui.util.InjectionInflationController;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import dagger.BindsInstance;
 import dagger.Component;
 
 /**
@@ -50,11 +51,21 @@ import dagger.Component;
         OneHandedModule.class,
         PipModule.class,
         SystemServicesModule.class,
-        SystemUIFactory.ContextHolder.class,
         SystemUIBinder.class,
         SystemUIModule.class,
         SystemUIDefaultModule.class})
 public interface SystemUIRootComponent {
+
+    /**
+     * Builder for a SystemUIRootComponent.
+     */
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        Builder context(Context context);
+
+        SystemUIRootComponent build();
+    }
 
     /**
      * Provides a BootCompleteCache.
@@ -78,7 +89,7 @@ public interface SystemUIRootComponent {
      * Main dependency providing module.
      */
     @Singleton
-    Dependency.DependencyInjector createDependency();
+    Dependency createDependency();
 
     /** */
     @Singleton
