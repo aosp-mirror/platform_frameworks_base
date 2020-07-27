@@ -18,11 +18,6 @@
 
 #include "condition_util.h"
 
-#include <log/event_tag_map.h>
-#include <log/log_event_list.h>
-#include <log/logprint.h>
-#include <utils/Errors.h>
-#include <unordered_map>
 #include "../matchers/matcher_util.h"
 #include "ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
@@ -32,9 +27,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::set;
-using std::string;
-using std::unordered_map;
 using std::vector;
 
 

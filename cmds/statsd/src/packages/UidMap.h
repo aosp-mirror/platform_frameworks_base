@@ -21,10 +21,8 @@
 #include "packages/PackageInfoListener.h"
 #include "stats_util.h"
 
-#include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
 #include <gtest/gtest_prod.h>
-#include <log/logprint.h>
 #include <stdio.h>
 #include <utils/RefBase.h>
 #include <list>

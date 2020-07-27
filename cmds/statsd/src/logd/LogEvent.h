@@ -20,10 +20,8 @@
 
 #include <android/os/StatsLogEventWrapper.h>
 #include <android/util/ProtoOutputStream.h>
-#include <log/log_event_list.h>
 #include <log/log_read.h>
 #include <private/android_logger.h>
-#include <utils/Errors.h>
 
 #include <string>
 #include <vector>
@@ -239,4 +237,3 @@ void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::v
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-

@@ -20,16 +20,11 @@
 #include "StatsService.h"
 #include "socket/StatsSocketListener.h"
 
-#include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
-#include <binder/Status.h>
 #include <hidl/HidlTransportSupport.h>
 #include <utils/Looper.h>
-#include <utils/StrongPointer.h>
-
-#include <memory>
 
 #include <stdio.h>
 #include <sys/stat.h>
