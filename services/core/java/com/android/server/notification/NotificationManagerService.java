@@ -274,6 +274,7 @@ import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
@@ -1894,6 +1895,7 @@ public class NotificationManagerService extends SystemService {
                 (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAm = am;
         mAtm = atm;
+        mAtm.setBackgroundActivityStartCallback(new NotificationTrampolineCallback());
         mUgm = ugm;
         mUgmInternal = ugmInternal;
         mPackageManager = packageManager;
@@ -9923,5 +9925,37 @@ public class NotificationManagerService extends SystemService {
     private static boolean safeBoolean(String val, boolean defValue) {
         if (TextUtils.isEmpty(val)) return defValue;
         return Boolean.parseBoolean(val);
+    }
+
+    /**
+     * Shows a warning on logcat. Shows the toast only once per package. This is to avoid being too
+     * aggressive and annoying the user.
+     *
+     * TODO(b/161957908): Remove dogfooder toast.
+     */
+    private class NotificationTrampolineCallback implements BackgroundActivityStartCallback {
+        private Set<String> mPackagesShown = new ArraySet<>();
+
+        @Override
+        public IBinder getToken() {
+            return WHITELIST_TOKEN;
+        }
+
+        @Override
+        public void onExclusiveTokenActivityStart(String packageName) {
+            Slog.w(TAG, "Indirect notification activity start from " + packageName);
+            boolean isFirstOccurrence = mPackagesShown.add(packageName);
+            if (!isFirstOccurrence) {
+                return;
+            }
+
+            mUiHandler.post(() ->
+                    Toast.makeText(getUiContext(),
+                            "Indirect activity start from "
+                                    + packageName + ". "
+                                    + "This will be blocked in S.\n"
+                                    + "See go/s-trampolines.",
+                            Toast.LENGTH_LONG).show());
+        }
     }
 }
