@@ -958,6 +958,20 @@ public class NotificationManager {
      * @hide
      */
     @TestApi
+    public void updateNotificationChannel(@NonNull String pkg, int uid,
+            @NonNull NotificationChannel channel) {
+        INotificationManager service = getService();
+        try {
+            service.updateNotificationChannelForPackage(pkg, uid, channel);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
     public ComponentName getEffectsSuppressor() {
         INotificationManager service = getService();
         try {
