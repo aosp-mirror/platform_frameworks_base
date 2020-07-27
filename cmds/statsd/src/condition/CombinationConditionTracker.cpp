@@ -18,15 +18,10 @@
 #include "Log.h"
 #include "CombinationConditionTracker.h"
 
-#include <log/logprint.h>
-
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
-using std::string;
-using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 

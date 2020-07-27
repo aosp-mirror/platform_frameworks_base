@@ -22,8 +22,6 @@
 #include <utils/RefBase.h>
 #include <utils/threads.h>
 #include <list>
-#include <string>
-#include <unordered_map>
 #include <vector>
 #include "PullDataReceiver.h"
 #include "StatsPuller.h"

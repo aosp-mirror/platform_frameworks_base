@@ -18,11 +18,6 @@
 
 #include "logd/LogEvent.h"
 
-#include <log/log_read.h>
-#include <log/logprint.h>
-#include <set>
-#include <string>
-#include <unordered_map>
 #include <vector>
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "packages/UidMap.h"

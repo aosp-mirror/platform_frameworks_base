@@ -19,14 +19,12 @@
 #include "config/ConfigKey.h"
 
 #include <utils/RefBase.h>
-#include <string>
 
 namespace android {
 namespace os {
 namespace statsd {
 
 using android::RefBase;
-using std::string;
 
 /**
  * Callback for different subsystems inside statsd to implement to find out
