@@ -185,6 +185,7 @@ interface INotificationManager
     List<ComponentName> getEnabledNotificationListeners(int userId);
     ComponentName getAllowedNotificationAssistantForUser(int userId);
     ComponentName getAllowedNotificationAssistant();
+    boolean hasEnabledNotificationListener(String packageName, int userId);
 
     @UnsupportedAppUsage
     int getZenMode();

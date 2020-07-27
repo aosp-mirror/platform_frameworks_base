@@ -5,6 +5,10 @@ package android.app {
     field public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
   }
 
+  public class NotificationManager {
+    method public boolean hasEnabledNotificationListener(@NonNull String, @NonNull android.os.UserHandle);
+  }
+
 }
 
 package android.content.rollback {
