@@ -2882,7 +2882,7 @@ class UserController implements Handler.Callback {
         }
 
         void installEncryptionUnawareProviders(@UserIdInt int userId) {
-            mService.installEncryptionUnawareProviders(userId);
+            mService.mCpHelper.installEncryptionUnawareProviders(userId);
         }
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
