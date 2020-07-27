@@ -229,7 +229,8 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
-     * Get the total time this package spent in the foreground, measured in milliseconds.
+     * Get the total time this package spent in the foreground, measured in milliseconds. When in
+     * the foreground, the user is actively interacting with the app.
      */
     public long getTotalTimeInForeground() {
         return mTotalTimeInForeground;
@@ -237,6 +238,8 @@ public final class UsageStats implements Parcelable {
 
     /**
      * Get the total time this package's activity is visible in the UI, measured in milliseconds.
+     * Note: An app may be visible but not considered foreground. Apps in the foreground must be
+     * visible, so visible time includes time in the foreground.
      */
     public long getTotalTimeVisible() {
         return mTotalTimeVisible;
