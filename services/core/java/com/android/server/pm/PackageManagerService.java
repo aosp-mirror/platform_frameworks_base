@@ -3010,7 +3010,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int packageSettingCount = mSettings.mPackages.size();
             for (int i = packageSettingCount - 1; i >= 0; i--) {
                 PackageSetting ps = mSettings.mPackages.valueAt(i);
-                if (!isExternal(ps) && (ps.codePath == null || !ps.codePath.exists())
+                if (!isExternal(ps) && (ps.getCodePath() == null || !ps.getCodePath().exists())
                         && mSettings.getDisabledSystemPkgLPr(ps.name) != null) {
                     mSettings.mPackages.removeAt(i);
                     mSettings.enableSystemPackageLPw(ps.name);
@@ -3175,11 +3175,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             logCriticalInfo(Log.WARN,
                                     "Expecting better updated system app for " + ps.name
                                     + "; removing system app.  Last known"
-                                    + " codePath=" + ps.codePathString
+                                    + " codePath=" + ps.getCodePathString()
                                     + ", versionCode=" + ps.versionCode
                                     + "; scanned versionCode=" + scannedPkg.getLongVersionCode());
                             removePackageLI(scannedPkg, true);
-                            mExpectingBetter.put(ps.name, ps.codePath);
+                            mExpectingBetter.put(ps.name, ps.getCodePath());
                         }
 
                         continue;
@@ -3202,14 +3202,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         // code path, but, changes the package name.
                         final PackageSetting disabledPs =
                                 mSettings.getDisabledSystemPkgLPr(ps.name);
-                        if (disabledPs.codePath == null || !disabledPs.codePath.exists()
+                        if (disabledPs.getCodePath() == null || !disabledPs.getCodePath().exists()
                                 || disabledPs.pkg == null) {
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
                         } else {
                             // We're expecting that the system app should remain disabled, but add
                             // it to expecting better to recover in case the data version cannot
                             // be scanned.
-                            mExpectingBetter.put(disabledPs.name, disabledPs.codePath);
+                            mExpectingBetter.put(disabledPs.name, disabledPs.getCodePath());
                         }
                     }
                 }
@@ -9150,7 +9150,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 : getLastModifiedTime(parsedPackage);
         final VersionInfo settingsVersionForPackage = getSettingsVersionForPackage(parsedPackage);
         if (ps != null && !forceCollect
-                && ps.codePathString.equals(parsedPackage.getCodePath())
+                && ps.getCodePathString().equals(parsedPackage.getCodePath())
                 && ps.timeStamp == lastModifiedTime
                 && !isCompatSignatureUpdateNeeded(settingsVersionForPackage)
                 && !isRecoverSignatureUpdateNeeded(settingsVersionForPackage)) {
@@ -9383,8 +9383,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        final boolean newPkgChangedPaths =
-                pkgAlreadyExists && !pkgSetting.codePathString.equals(parsedPackage.getCodePath());
+        final boolean newPkgChangedPaths = pkgAlreadyExists
+                && !pkgSetting.getCodePathString().equals(parsedPackage.getCodePath());
         final boolean newPkgVersionGreater =
                 pkgAlreadyExists && parsedPackage.getLongVersionCode() > pkgSetting.versionCode;
         final boolean isSystemPkgBetter = scanSystemPartition && isSystemPkgUpdated
@@ -9403,11 +9403,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     "System package updated;"
                     + " name: " + pkgSetting.name
                     + "; " + pkgSetting.versionCode + " --> " + parsedPackage.getLongVersionCode()
-                    + "; " + pkgSetting.codePathString + " --> " + parsedPackage.getCodePath());
+                    + "; " + pkgSetting.getCodePathString()
+                            + " --> " + parsedPackage.getCodePath());
 
             final InstallArgs args = createInstallArgsForExisting(
-                    pkgSetting.codePathString,
-                    pkgSetting.resourcePathString, getAppDexInstructionSets(
+                    pkgSetting.getCodePathString(), getAppDexInstructionSets(
                             pkgSetting.primaryCpuAbiString, pkgSetting.secondaryCpuAbiString));
             args.cleanUpResourcesLI();
             synchronized (mLock) {
@@ -9482,11 +9482,10 @@ public class PackageManagerService extends IPackageManager.Stub
                                 + " name: " + pkgSetting.name
                                 + "; " + pkgSetting.versionCode + " --> "
                                 + parsedPackage.getLongVersionCode()
-                                + "; " + pkgSetting.codePathString + " --> "
+                                + "; " + pkgSetting.getCodePathString() + " --> "
                                 + parsedPackage.getCodePath());
                 InstallArgs args = createInstallArgsForExisting(
-                        pkgSetting.codePathString,
-                        pkgSetting.resourcePathString, getAppDexInstructionSets(
+                        pkgSetting.getCodePathString(), getAppDexInstructionSets(
                                 pkgSetting.primaryCpuAbiString, pkgSetting.secondaryCpuAbiString));
                 synchronized (mInstallLock) {
                     args.cleanUpResourcesLI();
@@ -9499,7 +9498,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 logCriticalInfo(Log.INFO,
                         "System package disabled;"
                                 + " name: " + pkgSetting.name
-                                + "; old: " + pkgSetting.codePathString + " @ "
+                                + "; old: " + pkgSetting.getCodePathString() + " @ "
                                 + pkgSetting.versionCode
                                 + "; new: " + parsedPackage.getCodePath() + " @ "
                                 + parsedPackage.getCodePath());
@@ -11325,7 +11324,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (changedAbiCodePath == null) {
                             changedAbiCodePath = new ArrayList<>();
                         }
-                        changedAbiCodePath.add(ps.codePathString);
+                        changedAbiCodePath.add(ps.getCodePathString());
                     }
                 }
             }
@@ -11421,7 +11420,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Initialize package source and resource directories
         final File destCodeFile = new File(parsedPackage.getCodePath());
-        final File destResourceFile = new File(parsedPackage.getCodePath());
 
         // We keep references to the derived CPU Abis from settings in oder to reuse
         // them in the case where we're not upgrading or booting for the first time.
@@ -11479,7 +11477,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // REMOVE SharedUserSetting from method; update in a separate call
             pkgSetting = Settings.createNewSetting(parsedPackage.getPackageName(),
                     originalPkgSetting, disabledPkgSetting, realPkgName, sharedUserSetting,
-                    destCodeFile, destResourceFile, parsedPackage.getNativeLibraryRootDir(),
+                    destCodeFile, parsedPackage.getNativeLibraryRootDir(),
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
                     parsedPackage.getVersionCode(), pkgFlags, pkgPrivateFlags, user,
@@ -11497,7 +11495,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // secondaryCpuAbi are not known at this point so we always update them
             // to null here, only to reset them at a later point.
             Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, sharedUserSetting,
-                    destCodeFile, destResourceFile, parsedPackage.getNativeLibraryDir(),
+                    destCodeFile, parsedPackage.getNativeLibraryDir(),
                     AndroidPackageUtils.getPrimaryCpuAbi(parsedPackage, pkgSetting),
                     AndroidPackageUtils.getSecondaryCpuAbi(parsedPackage, pkgSetting),
                     PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
@@ -12066,15 +12064,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (known != null) {
                         if (DEBUG_PACKAGE_SCANNING) {
                             Log.d(TAG, "Examining " + pkg.getCodePath()
-                                    + " and requiring known paths " + known.codePathString
-                                    + " & " + known.resourcePathString);
+                                    + " and requiring known path " + known.getCodePathString());
                         }
-                        if (!pkg.getCodePath().equals(known.codePathString)
-                                || !pkg.getCodePath().equals(known.resourcePathString)) {
+                        if (!pkg.getCodePath().equals(known.getCodePathString())) {
                             throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
                                     "Application package " + pkg.getPackageName()
                                     + " found at " + pkg.getCodePath()
-                                    + " but expected at " + known.codePathString
+                                    + " but expected at " + known.getCodePathString()
                                     + "; ignoring.");
                         }
                     } else {
@@ -15586,9 +15582,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * Create args that describe an existing installed package. Typically used
      * when cleaning up old installs, or used as a move source.
      */
-    private InstallArgs createInstallArgsForExisting(String codePath,
-            String resourcePath, String[] instructionSets) {
-        return new FileInstallArgs(codePath, resourcePath, instructionSets);
+    private InstallArgs createInstallArgsForExisting(String codePath, String[] instructionSets) {
+        return new FileInstallArgs(codePath, instructionSets);
     }
 
     static abstract class InstallArgs {
@@ -15669,10 +15664,8 @@ public class PackageManagerService extends IPackageManager.Stub
         abstract boolean doRename(int status, ParsedPackage parsedPackage);
         abstract int doPostInstall(int status, int uid);
 
-        /** @see PackageSettingBase#codePathString */
+        /** @see PackageSettingBase#getCodePath() */
         abstract String getCodePath();
-        /** @see PackageSettingBase#resourcePathString */
-        abstract String getResourcePath();
 
         // Need installer lock especially for dex file removal.
         abstract void cleanUpResourcesLI();
@@ -15743,14 +15736,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         /** Existing install */
-        FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
+        FileInstallArgs(String codePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
                     PackageParser.SigningDetails.UNKNOWN,
                     PackageManager.INSTALL_REASON_UNKNOWN, false,
                     DataLoaderType.NONE);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
-            this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
 
         int copyApk() {
@@ -15766,7 +15758,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (origin.staged) {
                 if (DEBUG_INSTALL) Slog.d(TAG, origin.file + " already staged; skipping copy");
                 codeFile = origin.file;
-                resourceFile = origin.file;
                 return PackageManager.INSTALL_SUCCEEDED;
             }
 
@@ -15775,7 +15766,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 final File tempDir =
                         mInstallerService.allocateStageDirLegacy(volumeUuid, isEphemeral);
                 codeFile = tempDir;
-                resourceFile = tempDir;
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to create copy file: " + e);
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -15846,7 +15836,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Reflect the rename internally
             codeFile = afterCodeFile;
-            resourceFile = afterCodeFile;
 
             // Reflect the rename in scanned details
             try {
@@ -15875,11 +15864,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return (codeFile != null) ? codeFile.getAbsolutePath() : null;
         }
 
-        @Override
-        String getResourcePath() {
-            return (resourceFile != null) ? resourceFile.getAbsolutePath() : null;
-        }
-
         private boolean cleanUp() {
             if (codeFile == null || !codeFile.exists()) {
                 return false;
@@ -15891,10 +15875,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             removeCodePathLI(codeFile);
-
-            if (resourceFile != null && !FileUtils.contains(codeFile, resourceFile)) {
-                resourceFile.delete();
-            }
 
             return true;
         }
@@ -15927,7 +15907,6 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     class MoveInstallArgs extends InstallArgs {
         private File codeFile;
-        private File resourceFile;
 
         /** New install */
         MoveInstallArgs(InstallParams params) {
@@ -15950,7 +15929,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final String toPathName = new File(move.fromCodePath).getName();
             codeFile = new File(Environment.getDataAppDirectory(move.toUuid), toPathName);
-            resourceFile = codeFile;
             if (DEBUG_INSTALL) Slog.d(TAG, "codeFile after move is " + codeFile);
 
             return PackageManager.INSTALL_SUCCEEDED;
@@ -15985,11 +15963,6 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         String getCodePath() {
             return (codeFile != null) ? codeFile.getAbsolutePath() : null;
-        }
-
-        @Override
-        String getResourcePath() {
-            return (resourceFile != null) ? resourceFile.getAbsolutePath() : null;
         }
 
         private boolean cleanUp(String volumeUuid) {
@@ -16776,7 +16749,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         // which means we are replacing another update that is already
                         // installed.  We need to make sure to delete the older one's .apk.
                         res.removedInfo.args = createInstallArgsForExisting(
-                                oldPackage.getCodePath(),
                                 oldPackage.getCodePath(),
                                 getAppDexInstructionSets(
                                         AndroidPackageUtils.getPrimaryCpuAbi(oldPackage,
@@ -18998,7 +18970,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
         try {
-            installPackageFromSystemLIF(disabledPs.codePathString, allUserHandles,
+            installPackageFromSystemLIF(disabledPs.getCodePathString(), allUserHandles,
                     outInfo == null ? null : outInfo.origUsers, deletedPs.getPermissionsState(),
                     writeSettings);
         } catch (PackageManagerException e) {
@@ -19123,7 +19095,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Delete application code and resources only for parent packages
         if (deleteCodeAndResources && (outInfo != null)) {
             outInfo.args = createInstallArgsForExisting(
-                    ps.codePathString, ps.resourcePathString, getAppDexInstructionSets(
+                    ps.getCodePathString(), getAppDexInstructionSets(
                             ps.primaryCpuAbiString, ps.secondaryCpuAbiString));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.args);
         }
@@ -19660,7 +19632,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final String[] packageNames = { packageName };
         final long[] ceDataInodes = { ps.getCeDataInode(userId) };
-        final String[] codePaths = { ps.codePathString };
+        final String[] codePaths = { ps.getCodePathString() };
 
         try {
             mInstaller.getAppSize(ps.volumeUuid, packageNames, userId, 0,
@@ -22582,11 +22554,11 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mInstallLock) {
                 final AndroidPackage pkg;
                 try {
-                    pkg = scanPackageTracedLI(ps.codePath, parseFlags, SCAN_INITIAL, 0, null);
+                    pkg = scanPackageTracedLI(ps.getCodePath(), parseFlags, SCAN_INITIAL, 0, null);
                     loaded.add(pkg);
 
                 } catch (PackageManagerException e) {
-                    Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
+                    Slog.w(TAG, "Failed to scan " + ps.getCodePath() + ": " + e.getMessage());
                 }
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
@@ -22657,33 +22629,33 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final ArrayList<AndroidPackage> unloaded = new ArrayList<>();
         synchronized (mInstallLock) {
-        synchronized (mLock) {
-            final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(volumeUuid);
-            for (PackageSetting ps : packages) {
-                if (ps.pkg == null) continue;
+            synchronized (mLock) {
+                final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(volumeUuid);
+                for (PackageSetting ps : packages) {
+                    if (ps.pkg == null) continue;
 
-                final AndroidPackage pkg = ps.pkg;
-                final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
-                final PackageRemovedInfo outInfo = new PackageRemovedInfo(this);
+                    final AndroidPackage pkg = ps.pkg;
+                    final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
+                    final PackageRemovedInfo outInfo = new PackageRemovedInfo(this);
 
-                try (PackageFreezer freezer = freezePackageForDelete(ps.name, deleteFlags,
-                        "unloadPrivatePackagesInner")) {
-                    if (deletePackageLIF(ps.name, null, false, null, deleteFlags, outInfo,
-                            false, null)) {
-                        unloaded.add(pkg);
-                    } else {
-                        Slog.w(TAG, "Failed to unload " + ps.codePath);
+                    try (PackageFreezer freezer = freezePackageForDelete(ps.name, deleteFlags,
+                            "unloadPrivatePackagesInner")) {
+                        if (deletePackageLIF(ps.name, null, false, null, deleteFlags, outInfo,
+                                false, null)) {
+                            unloaded.add(pkg);
+                        } else {
+                            Slog.w(TAG, "Failed to unload " + ps.getCodePath());
+                        }
                     }
+
+                    // Try very hard to release any references to this package
+                    // so we don't risk the system server being killed due to
+                    // open FDs
+                    AttributeCache.instance().removePackage(ps.name);
                 }
 
-                // Try very hard to release any references to this package
-                // so we don't risk the system server being killed due to
-                // open FDs
-                AttributeCache.instance().removePackage(ps.name);
+                mSettings.writeLPr();
             }
-
-            mSettings.writeLPr();
-        }
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
@@ -22726,7 +22698,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int packageCount = mSettings.mPackages.size();
             for (int i = 0; i < packageCount; i++) {
                 final PackageSetting ps = mSettings.mPackages.valueAt(i);
-                codePaths.add(ps.codePath.getAbsolutePath());
+                codePaths.add(ps.getCodePath().getAbsolutePath());
             }
             return codePaths;
         }
