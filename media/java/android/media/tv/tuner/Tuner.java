@@ -98,15 +98,34 @@ public class Tuner implements AutoCloseable  {
      * Invalid timestamp.
      *
      * <p>Returned by {@link android.media.tv.tuner.filter.TimeFilter#getSourceTime()},
-     * {@link android.media.tv.tuner.filter.TimeFilter#getTimeStamp()}, or
-     * {@link Tuner#getAvSyncTime(int)} when the requested timestamp is not available.
+     * {@link android.media.tv.tuner.filter.TimeFilter#getTimeStamp()},
+     * {@link Tuner#getAvSyncTime(int)} or {@link TsRecordEvent#getPts()} and
+     * {@link MmtpRecordEvent#getPts()} when the requested timestamp is not available.
      *
      * @see android.media.tv.tuner.filter.TimeFilter#getSourceTime()
      * @see android.media.tv.tuner.filter.TimeFilter#getTimeStamp()
      * @see Tuner#getAvSyncTime(int)
+     * @see android.media.tv.tuner.filter.TsRecordEvent#getPts()
+     * @see android.media.tv.tuner.filter.MmtpRecordEvent#getPts()
      */
-    public static final long INVALID_TIMESTAMP = -1L;
-
+    public static final long INVALID_TIMESTAMP =
+            android.hardware.tv.tuner.V1_1.Constants.Constant64Bit.INVALID_PRESENTATION_TIME_STAMP;
+    /**
+     * Invalid mpu sequence number in MmtpRecordEvent.
+     *
+     * <p>Returned by {@link MmtpRecordEvent#getMpuSequenceNumber()} when the requested sequence
+     * number is not available.
+     *
+     * @see android.media.tv.tuner.filter.MmtpRecordEvent#getMpuSequenceNumber()
+     */
+    public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM =
+            android.hardware.tv.tuner.V1_1.Constants.Constant
+                    .INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM;
+    /**
+     * Invalid 64-bit filter ID.
+     */
+    public static final long INVALID_FILTER_ID_64BIT =
+            android.hardware.tv.tuner.V1_1.Constants.Constant64Bit.INVALID_FILTER_ID_64BIT;
 
     /** @hide */
     @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
