@@ -303,15 +303,18 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     @Override
-    void addChild(Task stack, int position) {
-        if (DEBUG_STACK) Slog.d(TAG_WM, "Set stack=" + stack + " on taskDisplayArea=" + this);
-        addStackReferenceIfNeeded(stack);
-        position = findPositionForStack(position, stack, true /* adding */);
+    void addChild(Task task, int position) {
+        if (DEBUG_STACK) Slog.d(TAG_WM, "Set task=" + task + " on taskDisplayArea=" + this);
+        if (mDisplayContent.mSingleTaskInstance && getStackCount() == 1) {
+            throw new IllegalStateException("addChild: Can only have one task on display=" + this);
+        }
 
-        super.addChild(stack, position);
+        addStackReferenceIfNeeded(task);
+        position = findPositionForStack(position, task, true /* adding */);
+
+        super.addChild(task, position);
         mAtmService.updateSleepIfNeededLocked();
-
-        positionStackAt(stack, position);
+        onStackOrderChanged(task);
     }
 
     @Override
@@ -328,19 +331,42 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return true;
     }
 
+    void positionChildAt(int position, Task child, boolean includingParents,
+            String updateLastFocusedTaskReason) {
+        final Task prevFocusedTask = updateLastFocusedTaskReason != null ? getFocusedStack() : null;
+
+        positionChildAt(position, child, includingParents);
+
+        if (updateLastFocusedTaskReason == null) {
+            return;
+        }
+
+        final Task currentFocusedStack = getFocusedStack();
+        if (currentFocusedStack == prevFocusedTask) {
+            return;
+        }
+
+        mLastFocusedStack = prevFocusedTask;
+        EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser,
+                mDisplayContent.mDisplayId,
+                currentFocusedStack == null ? -1 : currentFocusedStack.getRootTaskId(),
+                mLastFocusedStack == null ? -1 : mLastFocusedStack.getRootTaskId(),
+                updateLastFocusedTaskReason);
+    }
+
     @Override
     void positionChildAt(int position, Task child, boolean includingParents) {
         final boolean moveToTop = position >= getChildCount() - 1;
         final boolean moveToBottom = position <= 0;
 
+        final int oldPosition = mChildren.indexOf(child);
         if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
             // This stack is always-on-top, override the default behavior.
             Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
 
             // Moving to its current position, as we must call super but we don't want to
             // perform any meaningful action.
-            final int currentPosition = mChildren.indexOf(child);
-            super.positionChildAt(currentPosition, child, false /* includingParents */);
+            super.positionChildAt(oldPosition, child, false /* includingParents */);
             return;
         }
         // We don't allow untrusted display to top when task stack moves to top,
@@ -358,7 +384,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
         child.updateTaskMovement(moveToTop);
 
-        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
 
         // The insert position may be adjusted to non-top when there is always-on-top stack. Since
         // the original position is preferred to be top, the stack should have higher priority when
@@ -373,6 +399,10 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
         mAtmService.mStackSupervisor.updateTopResumedActivityIfNeeded();
+
+        if (mChildren.indexOf(child) != oldPosition) {
+            onStackOrderChanged(child);
+        }
     }
 
     @Override
@@ -800,66 +830,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
     }
 
-    void positionStackAt(int position, Task child, boolean includingParents) {
-        positionChildAt(position, child, includingParents);
-        mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
-    }
-
-    void positionStackAtTop(Task stack, boolean includingParents) {
-        positionStackAtTop(stack, includingParents, null /* updateLastFocusedStackReason */);
-    }
-
-    void positionStackAtTop(Task stack, boolean includingParents,
-            String updateLastFocusedStackReason) {
-        positionStackAt(stack, getStackCount(), includingParents,
-                updateLastFocusedStackReason);
-    }
-
-    void positionStackAtBottom(Task stack) {
-        positionStackAtBottom(stack, null /* updateLastFocusedStackReason */);
-    }
-
-    void positionStackAtBottom(Task stack, String updateLastFocusedStackReason) {
-        positionStackAt(stack, 0, false /* includingParents */,
-                updateLastFocusedStackReason);
-    }
-
-    void positionStackAt(Task stack, int position) {
-        positionStackAt(stack, position, false /* includingParents */,
-                null /* updateLastFocusedStackReason */);
-    }
-
-    void positionStackAt(Task stack, int position, boolean includingParents,
-            String updateLastFocusedStackReason) {
-        // TODO: Keep in sync with WindowContainer.positionChildAt(), once we change that to adjust
-        //       the position internally, also update the logic here
-        final Task prevFocusedStack = updateLastFocusedStackReason != null
-                ? getFocusedStack() : null;
-        final boolean wasContained = mChildren.contains(stack);
-        if (mDisplayContent.mSingleTaskInstance && getStackCount() == 1 && !wasContained) {
-            throw new IllegalStateException(
-                    "positionStackAt: Can only have one task on display=" + this);
-        }
-
-        // Since positionChildAt() is called during the creation process of pinned stacks,
-        // ActivityStack#getStack() can be null.
-        positionStackAt(position, stack, includingParents);
-
-        if (updateLastFocusedStackReason != null) {
-            final Task currentFocusedStack = getFocusedStack();
-            if (currentFocusedStack != prevFocusedStack) {
-                mLastFocusedStack = prevFocusedStack;
-                EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser,
-                        mDisplayContent.mDisplayId,
-                        currentFocusedStack == null ? -1 : currentFocusedStack.getRootTaskId(),
-                        mLastFocusedStack == null ? -1 : mLastFocusedStack.getRootTaskId(),
-                        updateLastFocusedStackReason);
-            }
-        }
-
-        onStackOrderChanged(stack);
-    }
-
     /**
      * Moves/reparents `task` to the back of whatever container the home stack is in. This is for
      * when we just want to move a task to "the back" vs. a specific place. The primary use-case
@@ -872,7 +842,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         if (homeParentTask == null) {
             // reparent throws if parent didn't change...
             if (task.getParent() == this) {
-                positionStackAtBottom(task);
+                positionChildAt(POSITION_BOTTOM, task, false /*includingParents*/);
             } else {
                 task.reparent(this, false /* onTop */);
             }
@@ -1091,7 +1061,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         if (launchRootTask != null) {
             launchRootTask.addChild(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
             if (onTop) {
-                positionStackAtTop(launchRootTask, false /* includingParents */);
+                positionChildAt(POSITION_TOP, launchRootTask, false /* includingParents */);
             }
         } else {
             addChild(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
@@ -1666,15 +1636,11 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             return;
         }
 
-        final boolean isRootTask = stack.isRootTask();
-        if (isRootTask) {
-            // Move the stack to the bottom to not affect the following visibility checks
-            positionStackAtBottom(stack);
-        } else {
-            stack.getParent().positionChildAt(POSITION_BOTTOM, stack, false /* includingParents */);
-        }
+        // Move the stack to the bottom to not affect the following visibility checks
+        stack.getParent().positionChildAt(POSITION_BOTTOM, stack, false /* includingParents */);
 
         // Find the next position where the stack should be placed
+        final boolean isRootTask = stack.isRootTask();
         final int numStacks = isRootTask ? getStackCount() : stack.getParent().getChildCount();
         for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
             final Task s = isRootTask ? getStackAt(stackNdx)
@@ -1688,11 +1654,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             if (s.shouldBeVisible(null) && isValidWindowingMode) {
                 // Move the provided stack to behind this stack
                 final int position = Math.max(0, stackNdx - 1);
-                if (isRootTask) {
-                    positionStackAt(stack, position);
-                } else {
-                    stack.getParent().positionChildAt(position, stack, false /*includingParents */);
-                }
+                stack.getParent().positionChildAt(position, stack, false /*includingParents */);
                 break;
             }
         }
@@ -1722,11 +1684,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         final int insertIndex = stackIndex <= behindStackIndex
                 ? behindStackIndex - 1 : behindStackIndex;
         final int position = Math.max(0, insertIndex);
-        if (stack.isRootTask()) {
-            positionStackAt(stack, position);
-        } else {
-            parent.positionChildAt(position, stack, false /* includingParents */);
-        }
+        parent.positionChildAt(position, stack, false /* includingParents */);
     }
 
     boolean hasPinnedTask() {

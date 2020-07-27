@@ -48,6 +48,7 @@ import static com.android.server.wm.Task.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.TaskDisplayArea.getStackAbove;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -210,7 +211,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         final Task secondaryTask = mDefaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mDefaultTaskDisplayArea.positionStackAtTop(organizer.mPrimary,
+        mDefaultTaskDisplayArea.positionChildAt(POSITION_TOP, organizer.mPrimary,
                 false /* includingParents */);
 
         // Move primary to back.
@@ -988,18 +989,14 @@ public class ActivityStackTests extends ActivityTestsBase {
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private Task createStackForShouldBeVisibleTest(
             TaskDisplayArea taskDisplayArea, int windowingMode, int activityType, boolean onTop) {
-        final Task stack;
+        final Task task;
         if (activityType == ACTIVITY_TYPE_HOME) {
             // Home stack and activity are created in ActivityTestsBase#setupActivityManagerService
-            stack = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
-            if (onTop) {
-                mDefaultTaskDisplayArea.positionStackAtTop(stack,
-                        false /* includingParents */);
-            } else {
-                mDefaultTaskDisplayArea.positionStackAtBottom(stack);
-            }
+            task = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+            mDefaultTaskDisplayArea.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, task,
+                    false /* includingParents */);
         } else {
-            stack = new StackBuilder(mRootWindowContainer)
+            task = new StackBuilder(mRootWindowContainer)
                     .setTaskDisplayArea(taskDisplayArea)
                     .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
@@ -1007,7 +1004,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                     .setCreateActivity(true)
                     .build();
         }
-        return stack;
+        return task;
     }
 
     @Test
@@ -1256,7 +1253,8 @@ public class ActivityStackTests extends ActivityTestsBase {
                     mDefaultTaskDisplayArea, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                     true /* onTop */);
             mDefaultTaskDisplayArea.registerStackOrderChangedListener(listener);
-            mDefaultTaskDisplayArea.positionStackAtBottom(fullscreenStack1);
+            mDefaultTaskDisplayArea.positionChildAt(POSITION_BOTTOM, fullscreenStack1,
+                    false /*includingParents*/);
         } finally {
             mDefaultTaskDisplayArea.unregisterStackOrderChangedListener(listener);
         }

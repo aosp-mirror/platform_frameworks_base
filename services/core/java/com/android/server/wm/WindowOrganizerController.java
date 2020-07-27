@@ -345,29 +345,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final Task rootTask = (Task) (
                             (newParent != null && !(newParent instanceof TaskDisplayArea))
                                     ? newParent : task.getRootTask());
-                    if (hop.getToTop()) {
-                        as.getDisplayArea().positionStackAtTop(rootTask,
-                                false /* includingParents */);
-                    } else {
-                        as.getDisplayArea().positionStackAtBottom(rootTask);
-                    }
+                    as.getDisplayArea().positionChildAt(
+                            hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM, rootTask,
+                            false /* includingParents */);
                 }
             } else {
                 throw new RuntimeException("Reparenting leaf Tasks is not supported now. " + task);
             }
         } else {
-            // Ugh, of course ActivityStack has its own special reorder logic...
-            if (task.isRootTask()) {
-                if (hop.getToTop()) {
-                    as.getDisplayArea().positionStackAtTop(as, false /* includingParents */);
-                } else {
-                    as.getDisplayArea().positionStackAtBottom(as);
-                }
-            } else {
-                task.getParent().positionChildAt(
-                        hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
-                        task, false /* includingParents */);
-            }
+            task.getParent().positionChildAt(
+                    hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
+                    task, false /* includingParents */);
         }
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
