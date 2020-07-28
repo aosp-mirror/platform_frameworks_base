@@ -65,7 +65,7 @@ int write_java_methods_q_schema(FILE* out, const SignatureInfoMap& signatureInfo
         for (vector<java_type_t>::const_iterator arg = signature.begin(); arg != signature.end();
              arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
+                for (const auto& chainField : attributionDecl.fields) {
                     fprintf(out, ", %s[] %s", java_type_name(chainField.javaType),
                             chainField.name.c_str());
                 }
@@ -407,7 +407,7 @@ void write_java_helpers_for_q_schema_methods(FILE* out, const AtomDecl& attribut
     if (requiredHelpers & JAVA_MODULE_REQUIRES_ATTRIBUTION) {
         fprintf(out, "%sprivate static void writeAttributionChain(byte[] buff, int pos",
                 indent.c_str());
-        for (auto chainField : attributionDecl.fields) {
+        for (const auto& chainField : attributionDecl.fields) {
             fprintf(out, ", %s[] %s", java_type_name(chainField.javaType), chainField.name.c_str());
         }
         fprintf(out, ") {\n");

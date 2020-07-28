@@ -24,6 +24,7 @@ namespace stats_log_api_gen {
 static void write_native_annotation_constants(FILE* out) {
     fprintf(out, "// Annotation constants.\n");
 
+    const map<AnnotationId, string>& ANNOTATION_ID_CONSTANTS = get_annotation_id_constants();
     for (const auto& [id, name] : ANNOTATION_ID_CONSTANTS) {
         fprintf(out, "const uint8_t %s = %hhu;\n", name.c_str(), id);
     }
@@ -39,6 +40,7 @@ static void write_annotations(FILE* out, int argIndex,
         return;
     }
     const AtomDeclSet& atomDeclSet = fieldNumberToAtomDeclSetIt->second;
+    const map<AnnotationId, string>& ANNOTATION_ID_CONSTANTS = get_annotation_id_constants();
     for (const shared_ptr<AtomDecl>& atomDecl : atomDeclSet) {
         const string atomConstant = make_constant_name(atomDecl->name);
         fprintf(out, "    if (%s == code) {\n", atomConstant.c_str());
@@ -60,8 +62,6 @@ static void write_annotations(FILE* out, int argIndex,
                     }
                     break;
                 case ANNOTATION_TYPE_BOOL:
-                    // TODO(b/151786433): Write annotation constant name instead of
-                    // annotation id literal.
                     fprintf(out, "        %saddBoolAnnotation(%s%s, %s);\n", methodPrefix.c_str(),
                             methodSuffix.c_str(), annotationConstant.c_str(),
                             annotation->value.boolValue ? "true" : "false");
@@ -145,7 +145,8 @@ static int write_native_stats_write_methods(FILE* out, const SignatureInfoMap& s
         vector<java_type_t> signature = signatureInfoMapIt->first;
         const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = signatureInfoMapIt->second;
         // Key value pairs not supported in native.
-        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+        if (std::find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) !=
+            signature.end()) {
             continue;
         }
         write_native_method_signature(out, "int stats_write(", signature, attributionDecl, " {");
@@ -219,7 +220,8 @@ static void write_native_stats_write_non_chained_methods(FILE* out,
          signature_it != signatureInfoMap.end(); signature_it++) {
         vector<java_type_t> signature = signature_it->first;
         // Key value pairs not supported in native.
-        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+        if (std::find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) !=
+            signature.end()) {
             continue;
         }
 
@@ -258,7 +260,8 @@ static int write_native_build_stats_event_methods(FILE* out,
         vector<java_type_t> signature = signatureInfoMapIt->first;
         const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = signatureInfoMapIt->second;
         // Key value pairs not supported in native.
-        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+        if (std::find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) !=
+            signature.end()) {
             continue;
         }
         write_native_method_signature(out, "void addAStatsEvent(AStatsEventList* pulled_data, ",
@@ -285,7 +288,8 @@ static void write_native_method_header(FILE* out, const string& methodName,
         vector<java_type_t> signature = signatureInfoMapIt->first;
 
         // Key value pairs not supported in native.
-        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+        if (std::find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) !=
+            signature.end()) {
             continue;
         }
         write_native_method_signature(out, methodName, signature, attributionDecl, ";");
