@@ -426,7 +426,7 @@ java_library {
         "apex_aidl_interface-java",
         "suspend_control_aidl_interface-java",
         "framework-protos",
-        "game-driver-protos",
+        "updatable-driver-protos",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.0-java",
         "android.hardware.cas-V1.1-java",
