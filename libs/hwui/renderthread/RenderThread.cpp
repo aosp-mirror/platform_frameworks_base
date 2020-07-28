@@ -190,7 +190,7 @@ void RenderThread::requireGlContext() {
     auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     auto size = glesVersion ? strlen(glesVersion) : -1;
     cacheManager().configureContext(&options, glesVersion, size);
-    sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+    sk_sp<GrDirectContext> grContext(GrDirectContext::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }
@@ -204,7 +204,7 @@ void RenderThread::requireVkContext() {
     initGrContextOptions(options);
     auto vkDriverVersion = mVkManager->getDriverVersion();
     cacheManager().configureContext(&options, &vkDriverVersion, sizeof(vkDriverVersion));
-    sk_sp<GrContext> grContext = mVkManager->createContext(options);
+    sk_sp<GrDirectContext> grContext = mVkManager->createContext(options);
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }
@@ -263,7 +263,7 @@ Readback& RenderThread::readback() {
     return *mReadback;
 }
 
-void RenderThread::setGrContext(sk_sp<GrContext> context) {
+void RenderThread::setGrContext(sk_sp<GrDirectContext> context) {
     mCacheManager->reset(context);
     if (mGrContext) {
         mRenderState->onContextDestroyed();

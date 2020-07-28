@@ -15,7 +15,7 @@
  */
 
 #include "GLFunctorDrawable.h"
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <private/hwui/DrawGlInfo.h>
 #include "FunctorDrawable.h"
 #include "GrBackendSurface.h"

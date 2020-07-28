@@ -118,7 +118,7 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
     }
     int imgWidth = image->width();
     int imgHeight = image->height();
-    sk_sp<GrContext> grContext = sk_ref_sp(mRenderThread.getGrContext());
+    sk_sp<GrDirectContext> grContext = sk_ref_sp(mRenderThread.getGrContext());
 
     if (bitmap->colorType() == kRGBA_F16_SkColorType &&
         !grContext->colorTypeSupportedAsSurface(bitmap->colorType())) {

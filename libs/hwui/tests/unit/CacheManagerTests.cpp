@@ -26,7 +26,7 @@ using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 
-static size_t getCacheUsage(GrContext* grContext) {
+static size_t getCacheUsage(GrDirectContext* grContext) {
     size_t cacheUsage;
     grContext->getResourceCacheUsage(nullptr, &cacheUsage);
     return cacheUsage;
@@ -35,7 +35,7 @@ static size_t getCacheUsage(GrContext* grContext) {
 RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     int32_t width = DeviceInfo::get()->getWidth();
     int32_t height = DeviceInfo::get()->getHeight();
-    GrContext* grContext = renderThread.getGrContext();
+    GrDirectContext* grContext = renderThread.getGrContext();
     ASSERT_TRUE(grContext != nullptr);
 
     // create pairs of offscreen render targets and images until we exceed the

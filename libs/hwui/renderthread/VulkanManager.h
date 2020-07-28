@@ -57,9 +57,11 @@ public:
     bool hasVkContext() { return mDevice != VK_NULL_HANDLE; }
 
     // Create and destroy functions for wrapping an ANativeWindow in a VulkanSurface
-    VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode,
+    VulkanSurface* createSurface(ANativeWindow* window,
+                                 ColorMode colorMode,
                                  sk_sp<SkColorSpace> surfaceColorSpace,
-                                 SkColorType surfaceColorType, GrContext* grContext,
+                                 SkColorType surfaceColorType,
+                                 GrDirectContext* grContext,
                                  uint32_t extraBuffers);
     void destroySurface(VulkanSurface* surface);
 
@@ -70,18 +72,18 @@ public:
     void destroy();
 
     // Inserts a wait on fence command into the Vulkan command buffer.
-    status_t fenceWait(int fence, GrContext* grContext);
+    status_t fenceWait(int fence, GrDirectContext* grContext);
 
     // Creates a fence that is signaled when all the pending Vulkan commands are finished on the
     // GPU.
-    status_t createReleaseFence(int* nativeFence, GrContext* grContext);
+    status_t createReleaseFence(int* nativeFence, GrDirectContext* grContext);
 
     // Returned pointers are owned by VulkanManager.
     // An instance of VkFunctorInitParams returned from getVkFunctorInitParams refers to
     // the internal state of VulkanManager: VulkanManager must be alive to use the returned value.
     VkFunctorInitParams getVkFunctorInitParams() const;
 
-    sk_sp<GrContext> createContext(const GrContextOptions& options);
+    sk_sp<GrDirectContext> createContext(const GrContextOptions& options);
 
     uint32_t getDriverVersion() const { return mDriverVersion; }
 
