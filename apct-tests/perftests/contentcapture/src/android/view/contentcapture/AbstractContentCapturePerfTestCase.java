@@ -33,7 +33,6 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.compatibility.common.util.ActivitiesWatcher;
@@ -51,7 +50,6 @@ import org.junit.runners.model.Statement;
 /**
  * Base class for all content capture tests.
  */
-@LargeTest
 public abstract class AbstractContentCapturePerfTestCase {
 
     private static final String TAG = AbstractContentCapturePerfTestCase.class.getSimpleName();
