@@ -17,7 +17,7 @@
 #ifndef RENDERTHREAD_H_
 #define RENDERTHREAD_H_
 
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <SkBitmap.h>
 #include <apex/choreographer.h>
 #include <cutils/compiler.h>
@@ -106,8 +106,8 @@ public:
     ProfileDataContainer& globalProfileData() { return mGlobalProfileData; }
     Readback& readback();
 
-    GrContext* getGrContext() const { return mGrContext.get(); }
-    void setGrContext(sk_sp<GrContext> cxt);
+    GrDirectContext* getGrContext() const { return mGrContext.get(); }
+    void setGrContext(sk_sp<GrDirectContext> cxt);
 
     CacheManager& cacheManager() { return *mCacheManager; }
     VulkanManager& vulkanManager() { return *mVkManager; }
@@ -186,7 +186,7 @@ private:
     ProfileDataContainer mGlobalProfileData;
     Readback* mReadback = nullptr;
 
-    sk_sp<GrContext> mGrContext;
+    sk_sp<GrDirectContext> mGrContext;
     CacheManager* mCacheManager;
     VulkanManager* mVkManager;
 };
