@@ -1294,7 +1294,13 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     void onSplitScreenModeDismissed() {
-        onSplitScreenModeDismissed(null /* toTop */);
+        // The focused task could be a non-resizeable fullscreen root task that is on top of the
+        // other split-screen tasks, therefore had to dismiss split-screen, make sure the current
+        // focused root task can still be on top after dismissal
+        final Task rootTask = getFocusedStack();
+        final Task toTop =
+                rootTask != null && !rootTask.inSplitScreenWindowingMode() ? rootTask : null;
+        onSplitScreenModeDismissed(toTop);
     }
 
     void onSplitScreenModeDismissed(Task toTop) {
