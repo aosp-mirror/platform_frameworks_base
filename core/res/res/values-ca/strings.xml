@@ -543,7 +543,7 @@
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No s\'ha reconegut"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"S\'ha cancel·lat l\'autenticació"</string>
-    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha establert cap PIN, patró o contrasenya"</string>
+    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha definit cap PIN, patró o contrasenya"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error en l\'autenticació"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
@@ -832,7 +832,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Premeu Menú per desbloquejar-lo o per fer una trucada d\'emergència."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Premeu Menú per desbloquejar."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dibuixeu el patró de desbloqueig"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergència"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Trucada d\'emergència"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Torna a la trucada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcte!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Torna-ho a provar"</string>

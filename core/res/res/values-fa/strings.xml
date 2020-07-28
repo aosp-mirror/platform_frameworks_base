@@ -829,11 +829,10 @@
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"شماره اضطراری"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"بدون سرویس"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"صفحه قفل شد."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازگشایی قفل یا انجام تماس اضطراری روی منو فشار دهید."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازکردن قفل یا انجام تماس اضطراری روی «منو» فشار دهید."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"برای بازگشایی قفل روی منو فشار دهید."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"الگو را بکشید تا قفل آن باز شود"</string>
-    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"تماس اضطراری"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"بازگشت به تماس"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح است!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوباره امتحان کنید"</string>
@@ -1927,7 +1926,7 @@
     <string name="time_picker_header_text" msgid="9073802285051516688">"تنظیم زمان"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"زمان معتبری وارد کنید"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"زمان را تایپ کنید"</string>
-    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
+    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"برای وارد کردن زمان، به حالت ورودی نوشتاری تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"گزینه‌های تکمیل خودکار"</string>
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ذخیره کردن برای تکمیل خودکار"</string>
