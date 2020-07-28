@@ -3101,6 +3101,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException("Unable to add child session " + childSessionId
                     + " as it does not exist.");
         }
+        if (childSession.params.isMultiPackage) {
+            throw new IllegalStateException("Multi-session " + childSessionId
+                    + " can't be a child.");
+        }
 
         try {
             acquireTransactionLock();
