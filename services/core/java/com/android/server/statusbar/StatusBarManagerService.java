@@ -67,6 +67,7 @@ import com.android.server.UiThread;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.policy.GlobalActionsProvider;
+import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.power.ShutdownThread;
 
 import java.io.FileDescriptor;
@@ -1182,13 +1183,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void shutdown() {
         enforceStatusBarService();
+        String reason = PowerManager.SHUTDOWN_USER_REQUESTED;
+        ShutdownCheckPoints.recordCheckPoint(Binder.getCallingPid(), reason);
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.prepareForPossibleShutdown();
             // ShutdownThread displays UI, so give it a UI context.
             mHandler.post(() ->
-                    ShutdownThread.shutdown(getUiContext(),
-                        PowerManager.SHUTDOWN_USER_REQUESTED, false));
+                    ShutdownThread.shutdown(getUiContext(), reason, false));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1200,6 +1202,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void reboot(boolean safeMode) {
         enforceStatusBarService();
+        String reason = safeMode
+                ? PowerManager.REBOOT_SAFE_MODE
+                : PowerManager.SHUTDOWN_USER_REQUESTED;
+        ShutdownCheckPoints.recordCheckPoint(Binder.getCallingPid(), reason);
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.prepareForPossibleShutdown();
@@ -1208,8 +1214,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 if (safeMode) {
                     ShutdownThread.rebootSafeMode(getUiContext(), true);
                 } else {
-                    ShutdownThread.reboot(getUiContext(),
-                            PowerManager.SHUTDOWN_USER_REQUESTED, false);
+                    ShutdownThread.reboot(getUiContext(), reason, false);
                 }
             });
         } finally {
