@@ -140,7 +140,7 @@ public class SntpClient {
             final long receiveTime = readTimeStamp(buffer, RECEIVE_TIME_OFFSET);
             final long transmitTime = readTimeStamp(buffer, TRANSMIT_TIME_OFFSET);
 
-            /* do sanity check according to RFC */
+            /* Do validation according to RFC */
             // TODO: validate originateTime == requestTime.
             checkValidServerReply(leap, mode, stratum, transmitTime);
 
