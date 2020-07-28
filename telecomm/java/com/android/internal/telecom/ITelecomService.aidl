@@ -322,6 +322,8 @@ interface ITelecomService {
      */
     void handleCallIntent(in Intent intent, in String callingPackageProxy);
 
+    void cleanupStuckCalls();
+
     void setTestDefaultCallRedirectionApp(String packageName);
 
     void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);
