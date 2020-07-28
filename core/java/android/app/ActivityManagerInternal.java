@@ -318,12 +318,14 @@ public abstract class ActivityManagerInternal {
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
             String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
-            @UserIdInt int userId, boolean allowBackgroundActivityStarts);
+            @UserIdInt int userId, boolean allowBackgroundActivityStarts,
+            @Nullable IBinder backgroundActivityStartsToken);
 
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage,
             @Nullable String callingFeatureId, @UserIdInt int userId,
-            boolean allowBackgroundActivityStarts) throws TransactionTooLargeException;
+            boolean allowBackgroundActivityStarts,
+            @Nullable IBinder backgroundActivityStartsToken) throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,

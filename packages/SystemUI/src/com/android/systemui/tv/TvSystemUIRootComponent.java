@@ -16,8 +16,6 @@
 
 package com.android.systemui.tv;
 
-import android.content.Context;
-
 import com.android.systemui.dagger.DefaultComponentBinder;
 import com.android.systemui.dagger.DependencyBinder;
 import com.android.systemui.dagger.DependencyProvider;
@@ -30,7 +28,6 @@ import com.android.systemui.onehanded.dagger.OneHandedModule;
 
 import javax.inject.Singleton;
 
-import dagger.BindsInstance;
 import dagger.Component;
 
 /**
@@ -52,9 +49,7 @@ public interface TvSystemUIRootComponent extends SystemUIRootComponent {
      * Component Builder interface. This allows to bind Context instance in the component
      */
     @Component.Builder
-    interface Builder {
-        @BindsInstance Builder context(Context context);
-
+    interface Builder extends SystemUIRootComponent.Builder {
         TvSystemUIRootComponent build();
     }
 }

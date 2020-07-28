@@ -37,18 +37,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Policy that manages DisplayAreas.
+ * Policy that manages {@link DisplayArea}.
  */
 public abstract class DisplayAreaPolicy {
     protected final WindowManagerService mWmService;
 
     /**
-     * The root DisplayArea. Attach all DisplayAreas to this area (directly or indirectly).
+     * The {@link RootDisplayArea} of the whole logical display. All {@link DisplayArea}s must be
+     * (direct or indirect) descendants of this area.
      */
     protected final RootDisplayArea mRoot;
 
     /**
-     * Construct a new {@link DisplayAreaPolicy}
+     * Constructs a new {@link DisplayAreaPolicy}
      *
      * @param wmService the window manager service instance
      * @param root the root display area under which the policy operates
@@ -59,9 +60,10 @@ public abstract class DisplayAreaPolicy {
     }
 
     /**
-     * Called to ask the policy to attach the given WindowToken to the DisplayArea hierarchy.
+     * Called to ask the policy to attach the given {@link WindowToken} to the {@link DisplayArea}
+     * hierarchy.
      *
-     * This must attach the token to mRoot (or one of its descendants).
+     * <p>This must attach the token to {@link #mRoot} (or one of its descendants).
      */
     public abstract void addWindow(WindowToken token);
 
@@ -121,13 +123,14 @@ public abstract class DisplayAreaPolicy {
     /**
      * Provider for {@link DisplayAreaPolicy} instances.
      *
-     * By implementing this interface and overriding the
+     * <p>By implementing this interface and overriding the
      * {@code config_deviceSpecificDisplayAreaPolicyProvider}, a device-specific implementations
      * of {@link DisplayAreaPolicy} can be supplied.
      */
     public interface Provider {
         /**
-         * Instantiates a new DisplayAreaPolicy. It should set up the {@link DisplayArea} hierarchy.
+         * Instantiates a new {@link DisplayAreaPolicy}. It should set up the {@link DisplayArea}
+         * hierarchy.
          *
          * @see DisplayAreaPolicy#DisplayAreaPolicy
          */

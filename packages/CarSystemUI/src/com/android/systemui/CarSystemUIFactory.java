@@ -32,7 +32,7 @@ public class CarSystemUIFactory extends SystemUIFactory {
     @Override
     protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
         return DaggerCarSystemUIRootComponent.builder()
-                .contextHolder(new ContextHolder(context))
+                .context(context)
                 .build();
     }
 

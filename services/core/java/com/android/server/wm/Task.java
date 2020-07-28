@@ -2384,6 +2384,15 @@ class Task extends WindowContainer<WindowContainer> {
 
         saveLaunchingStateIfNeeded();
         final boolean taskOrgChanged = updateTaskOrganizerState(false /* forceUpdate */);
+        if (taskOrgChanged) {
+            updateSurfacePosition(getSyncTransaction());
+            if (!isOrganized()) {
+                // Surface-size update was skipped before (since internally it no-ops if
+                // isOrganized() is true); however, now that this is not organized, the surface
+                // size needs to be updated by WM.
+                updateSurfaceSize(getSyncTransaction());
+            }
+        }
         // If the task organizer has changed, then it will already be receiving taskAppeared with
         // the latest task-info thus the task-info won't have changed.
         if (!taskOrgChanged && isOrganized()) {
@@ -2459,7 +2468,7 @@ class Task extends WindowContainer<WindowContainer> {
             // Since always on top is only on when the stack is freeform or pinned, the state
             // can be toggled when the windowing mode changes. We must make sure the stack is
             // placed properly when always on top state changes.
-            taskDisplayArea.positionStackAtTop(this, false /* includingParents */);
+            taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */);
         }
     }
 
@@ -3367,7 +3376,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         final int boundsChange = super.setBounds(bounds);
         mRotation = rotation;
-        updateSurfacePosition();
+        updateSurfacePositionNonOrganized();
         return boundsChange;
     }
 
@@ -3740,6 +3749,12 @@ class Task extends WindowContainer<WindowContainer> {
         // case, reparent the task to the home animation layer while it is being animated to allow
         // the home activity to reorder the app windows relative to its own.
         return getAppAnimationLayer(ANIMATION_LAYER_HOME);
+    }
+
+    @Override
+    void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
+        if (isOrganized()) return;
+        super.resetSurfacePositionForAnimationLeash(t);
     }
 
     @Override
@@ -4960,7 +4975,9 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean updateTaskOrganizerState(boolean forceUpdate) {
         if (!isRootTask()) {
-            return false;
+            final boolean result = setTaskOrganizer(null);
+            mLastTaskOrganizerWindowingMode = -1;
+            return result;
         }
 
         final int windowingMode = getWindowingMode();
@@ -4979,7 +4996,7 @@ class Task extends WindowContainer<WindowContainer> {
         final ITaskOrganizer org =
                 mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
         final boolean result = setTaskOrganizer(org);
-        mLastTaskOrganizerWindowingMode = windowingMode;
+        mLastTaskOrganizerWindowingMode = org != null ? windowingMode : -1;
         return result;
     }
 
@@ -5340,7 +5357,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (isRootTask()) {
-            taskDisplayArea.positionStackAtTop(this, false /* includingParents */, reason);
+            taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */,
+                    reason);
         }
         if (task == null) {
             task = this;
@@ -5368,7 +5386,8 @@ class Task extends WindowContainer<WindowContainer> {
             if (parentTask != null) {
                 parentTask.moveToBack(reason, this);
             } else {
-                displayArea.positionStackAtBottom(this, reason);
+                displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/,
+                        reason);
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
@@ -7448,7 +7467,7 @@ class Task extends WindowContainer<WindowContainer> {
         // always on top windows. Since the position the stack should be inserted into is calculated
         // properly in {@link DisplayContent#getTopInsertPosition()} in both cases, we can just
         // request that the stack is put at top here.
-        taskDisplayArea.positionStackAtTop(this, false /* includingParents */);
+        taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */);
     }
 
     /** NOTE: Should only be called from {@link Task#reparent}. */
@@ -7493,7 +7512,7 @@ class Task extends WindowContainer<WindowContainer> {
             final Task task = getBottomMostTask();
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
 
-            getDisplayArea().positionStackAtTop(this, false /* includingParents */);
+            getDisplayArea().positionChildAt(POSITION_TOP, this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
             MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,
@@ -7619,7 +7638,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     private void updateSurfaceBounds() {
         updateSurfaceSize(getSyncTransaction());
-        updateSurfacePosition();
+        updateSurfacePositionNonOrganized();
         scheduleAnimation();
     }
 

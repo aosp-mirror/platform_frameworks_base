@@ -369,13 +369,14 @@ static jlong android_view_MotionEvent_nativeInitialize(
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
+    ui::Transform transform;
+    transform.set(xOffset, yOffset);
     event->initialize(InputEvent::nextId(), deviceId, source, displayId, INVALID_HMAC, action, 0,
                       flags, edgeFlags, metaState, buttonState,
-                      static_cast<MotionClassification>(classification), 1 /*xScale*/, 1 /*yScale*/,
-                      xOffset, yOffset, xPrecision, yPrecision,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      downTimeNanos, eventTimeNanos, pointerCount, pointerProperties,
-                      rawPointerCoords);
+                      static_cast<MotionClassification>(classification), transform, xPrecision,
+                      yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, downTimeNanos, eventTimeNanos,
+                      pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event.release());
 }
@@ -569,9 +570,9 @@ static void android_view_MotionEvent_nativeTransform(JNIEnv* env, jclass clazz,
         jlong nativePtr, jobject matrixObj) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
 
-    float m[9];
-    AMatrix_getContents(env, matrixObj, m);
-    event->transform(m);
+    std::array<float, 9> matrix;
+    AMatrix_getContents(env, matrixObj, matrix.data());
+    event->transform(matrix);
 }
 
 // ----------------- @CriticalNative ------------------------------

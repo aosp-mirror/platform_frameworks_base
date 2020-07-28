@@ -320,7 +320,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
-        updateSurfacePosition();
+        updateSurfacePositionNonOrganized();
         scheduleAnimation();
     }
 
@@ -418,7 +418,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         setSurfaceControl(b.setCallsite("WindowContainer.setInitialSurfaceControlProperties").build());
         getSyncTransaction().show(mSurfaceControl);
         onSurfaceShown(getSyncTransaction());
-        updateSurfacePosition();
+        updateSurfacePositionNonOrganized();
     }
 
     /**
@@ -2022,7 +2022,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
-        mSurfaceAnimator.reparent(t, newParent);
+        // Don't reparent active leashes since the animator won't know about the change.
+        if (mSurfaceFreezer.hasLeash() || mSurfaceAnimator.hasLeash()) return;
+        t.reparent(getSurfaceControl(), newParent);
     }
 
     void assignChildLayers(Transaction t) {
@@ -2703,14 +2705,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    final void updateSurfacePosition() {
+    final void updateSurfacePositionNonOrganized() {
+        // Avoid fighting with the organizer over Surface position.
+        if (isOrganized()) return;
         updateSurfacePosition(getSyncTransaction());
     }
 
+    /**
+     * Only for use internally (see PROTECTED annotation). This should only be used over
+     * {@link #updateSurfacePositionNonOrganized} when the surface position needs to be
+     * updated even if organized (eg. while changing to organized).
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     void updateSurfacePosition(Transaction t) {
-        // Avoid fighting with the organizer over Surface position.
-        if (isOrganized()) return;
-
         if (mSurfaceControl == null || mSurfaceAnimator.hasLeash()) {
             return;
         }
@@ -2750,13 +2757,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void getRelativePosition(Point outPos) {
-        // In addition to updateSurfacePosition, we keep other code that sets
-        // position from fighting with the organizer
-        if (isOrganized()) {
-            outPos.set(0, 0);
-            return;
-        }
-
         final Rect dispBounds = getBounds();
         outPos.set(dispBounds.left, dispBounds.top);
         final WindowContainer parent = getParent();
