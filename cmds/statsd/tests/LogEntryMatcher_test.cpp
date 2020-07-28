@@ -13,9 +13,6 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include <log/log_event_list.h>
-#include <log/log_read.h>
-#include <log/logprint.h>
 #include <stdio.h>
 
 #include "annotations.h"
