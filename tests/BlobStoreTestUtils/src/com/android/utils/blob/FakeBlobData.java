@@ -35,7 +35,7 @@ import java.security.MessageDigest;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-public class DummyBlobData {
+public class FakeBlobData {
     private static final long DEFAULT_SIZE_BYTES = 10 * 1024L * 1024L;
 
     private final Random mRandom;
@@ -47,7 +47,7 @@ public class DummyBlobData {
     byte[] mFileDigest;
     long mExpiryTimeMs;
 
-    private DummyBlobData(Builder builder) {
+    private FakeBlobData(Builder builder) {
         mRandom = new Random(builder.getRandomSeed());
         mFile = new File(builder.getContext().getFilesDir(), builder.getFileName());
         mFileSize = builder.getFileSize();
@@ -116,8 +116,8 @@ public class DummyBlobData {
             return mExpiryDurationMs;
         }
 
-        public DummyBlobData build() {
-            return new DummyBlobData(this);
+        public FakeBlobData build() {
+            return new FakeBlobData(this);
         }
     }
 
