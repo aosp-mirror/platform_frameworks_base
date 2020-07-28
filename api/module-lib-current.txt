@@ -55,5 +55,10 @@ package android.os {
     method public final void markVintfStability();
   }
 
+  public interface Parcelable {
+    field public static final int PARCELABLE_STABILITY_LOCAL = 0; // 0x0
+    field public static final int PARCELABLE_STABILITY_VINTF = 1; // 0x1
+  }
+
 }
 

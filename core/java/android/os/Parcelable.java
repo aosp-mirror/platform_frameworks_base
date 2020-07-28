@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -119,6 +120,7 @@ public interface Parcelable {
      * @see ParcelableHolder
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int PARCELABLE_STABILITY_LOCAL = 0x0000;
     /**
      * Something that is meant to be used between system and vendor.
@@ -126,6 +128,7 @@ public interface Parcelable {
      * @see ParcelableHolder
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int PARCELABLE_STABILITY_VINTF = 0x0001;
 
     /**
