@@ -12322,24 +12322,24 @@ public final class Settings {
         public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
 
         /**
-         * Apps on the blacklist that are forbidden to use Game Driver.
+         * Apps on the denylist that are forbidden to use Game Driver.
          * @hide
          */
-        public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
+        public static final String GAME_DRIVER_DENYLIST = "game_driver_denylist";
 
         /**
-         * List of blacklists, each blacklist is a blacklist for a specific version of Game Driver.
+         * List of denylists, each denylist is a denylist for a specific version of Game Driver.
          * @hide
          */
-        public static final String GAME_DRIVER_BLACKLISTS = "game_driver_blacklists";
+        public static final String GAME_DRIVER_DENYLISTS = "game_driver_denylists";
 
         /**
-         * Apps on the whitelist that are allowed to use Game Driver.
+         * Apps on the allowlist that are allowed to use Game Driver.
          * The string is a list of application package names, seperated by comma.
          * i.e. <apk1>,<apk2>,...,<apkN>
          * @hide
          */
-        public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
+        public static final String GAME_DRIVER_ALLOWLIST = "game_driver_allowlist";
 
         /**
          * List of libraries in sphal accessible by Game Driver
