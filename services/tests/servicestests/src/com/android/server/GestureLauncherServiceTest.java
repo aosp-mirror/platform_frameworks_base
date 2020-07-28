@@ -28,11 +28,13 @@ import static org.mockito.Mockito.when;
 
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.test.mock.MockContentResolver;
 import android.util.MutableBoolean;
 import android.view.KeyEvent;
@@ -80,6 +82,7 @@ public class GestureLauncherServiceTest {
     private @Mock Context mContext;
     private @Mock Resources mResources;
     private @Mock StatusBarManagerInternal mStatusBarManagerInternal;
+    private @Mock TelecomManager mTelecomManager;
     private @Mock MetricsLogger mMetricsLogger;
     private MockContentResolver mContentResolver;
     private GestureLauncherService mGestureLauncherService;
@@ -104,6 +107,8 @@ public class GestureLauncherServiceTest {
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mContext.getSystemService(Context.TELECOM_SERVICE)).thenReturn(mTelecomManager);
+        when(mTelecomManager.createLaunchEmergencyDialerIntent(null)).thenReturn(new Intent());
 
         mGestureLauncherService = new GestureLauncherService(mContext, mMetricsLogger);
     }
@@ -176,11 +181,25 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
+    public void testHandlePanicGesture_userSetupComplete() {
+        withUserSetupCompleteValue(true);
+
+        assertTrue(mGestureLauncherService.handlePanicButtonGesture());
+    }
+
+    @Test
     public void testHandleCameraLaunchGesture_userSetupNotComplete() {
         withUserSetupCompleteValue(false);
 
         boolean useWakeLock = false;
         assertFalse(mGestureLauncherService.handleCameraGesture(useWakeLock, FAKE_SOURCE));
+    }
+
+    @Test
+    public void testHandlePanicGesture_userSetupNotComplete() {
+        withUserSetupCompleteValue(false);
+
+        assertFalse(mGestureLauncherService.handlePanicButtonGesture());
     }
 
     @Test
