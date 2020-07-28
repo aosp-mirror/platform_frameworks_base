@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
@@ -73,6 +74,7 @@ import android.widget.ScrollView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
@@ -97,7 +99,6 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -260,6 +261,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mDismissAllInProgress;
     private boolean mFadeNotificationsOnDismiss;
     private FooterDismissListener mFooterDismissListener;
+    private boolean mFlingAfterUpEvent;
 
     /**
      * Was the scroller scrolled to the top when the down motion was observed?
@@ -3789,6 +3791,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                             if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
                                 float currentOverScrollTop = getCurrentOverScrollAmount(true);
                                 if (currentOverScrollTop == 0.0f || initialVelocity > 0) {
+                                    mFlingAfterUpEvent = true;
+                                    setFinishScrollingCallback(() -> {
+                                        mFlingAfterUpEvent = false;
+                                        InteractionJankMonitor.getInstance()
+                                                .end(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                                        setFinishScrollingCallback(null);
+                                    });
                                     fling(-initialVelocity);
                                 } else {
                                     onOverScrollFling(false, initialVelocity);
@@ -3838,6 +3847,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 break;
         }
         return true;
+    }
+
+    boolean isFlingAfterUpEvent() {
+        return mFlingAfterUpEvent;
     }
 
     @ShadeViewRefactor(RefactorComponent.INPUT)

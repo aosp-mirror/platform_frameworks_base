@@ -49,6 +49,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.FloatingToolbar;
 import com.android.systemui.R;
@@ -145,6 +146,7 @@ public class NotificationShadeWindowView extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setWillNotDraw(!DEBUG);
+        InteractionJankMonitor.getInstance().init(this);
     }
 
     @Override
