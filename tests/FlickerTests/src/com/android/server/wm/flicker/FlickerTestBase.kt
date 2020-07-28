@@ -16,15 +16,12 @@
 
 package com.android.server.wm.flicker
 
+import android.os.RemoteException
+import android.os.SystemClock
 import android.platform.helpers.IAppHelper
-import android.util.Log
-import androidx.test.InstrumentationRegistry
+import android.view.Surface
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.android.server.wm.flicker.helpers.AutomationUtils
-import com.google.common.truth.Truth
-import org.junit.After
-import org.junit.AfterClass
-import org.junit.Before
 
 /**
  * Base class of all Flicker test that performs common functions for all flicker tests:
@@ -37,101 +34,96 @@ import org.junit.Before
  * - Fails tests if results are not available for any test due to jank.
  */
 abstract class FlickerTestBase {
-    lateinit var testApp: IAppHelper
-    open val instrumentation by lazy {
+    val instrumentation by lazy {
         InstrumentationRegistry.getInstrumentation()
     }
     val uiDevice by lazy {
         UiDevice.getInstance(instrumentation)
     }
-    lateinit var tesults: List<TransitionResult>
-    private var lastResult: TransitionResult? = null
 
     /**
-     * Runs a transition, returns a cached result if the transition has run before.
-     */
-    fun run(transition: TransitionRunner) {
-        if (transitionResults.containsKey(transition.testTag)) {
-            tesults = transitionResults[transition.testTag]
-                    ?: throw IllegalStateException("Results do not contain test tag " +
-                            transition.testTag)
-            return
+     * Build a test tag for the test
+     * @param testName Name of the transition(s) being tested
+     * @param app App being launcher
+     * @param rotation Initial screen rotation
+     *
+     * @return test tag with pattern <NAME>__<APP>__<ROTATION>
+    </ROTATION></APP></NAME> */
+    protected fun buildTestTag(testName: String, app: IAppHelper, rotation: Int): String {
+        return buildTestTag(
+                testName, app, rotation, rotation, app2 = null, extraInfo = "")
+    }
+
+    /**
+     * Build a test tag for the test
+     * @param testName Name of the transition(s) being tested
+     * @param app App being launcher
+     * @param beginRotation Initial screen rotation
+     * @param endRotation End screen rotation (if any, otherwise use same as initial)
+     *
+     * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
+    </END_ROTATION></BEGIN_ROTATION></APP></NAME> */
+    protected fun buildTestTag(
+        testName: String,
+        app: IAppHelper,
+        beginRotation: Int,
+        endRotation: Int
+    ): String {
+        return buildTestTag(
+                testName, app, beginRotation, endRotation, app2 = null, extraInfo = "")
+    }
+
+    /**
+     * Build a test tag for the test
+     * @param testName Name of the transition(s) being tested
+     * @param app App being launcher
+     * @param app2 Second app being launched (if any)
+     * @param beginRotation Initial screen rotation
+     * @param endRotation End screen rotation (if any, otherwise use same as initial)
+     * @param extraInfo Additional information to append to the tag
+     *
+     * @return test tag with pattern <NAME>__<APP></APP>(S)>__<ROTATION></ROTATION>(S)>[__<EXTRA>]
+    </EXTRA></NAME> */
+    protected fun buildTestTag(
+        testName: String,
+        app: IAppHelper,
+        beginRotation: Int,
+        endRotation: Int,
+        app2: IAppHelper?,
+        extraInfo: String
+    ): String {
+        var testTag = "${testName}__$${app.launcherName}"
+        if (app2 != null) {
+            testTag += "-${app2.launcherName}"
         }
-        tesults = transition.run().results
-        /* Fail if we don't have any results due to jank */
-        Truth.assertWithMessage("No results to test because all transition runs were invalid " +
-                "because of Jank").that(tesults).isNotEmpty()
-        transitionResults[transition.testTag] = tesults
-    }
-
-    /**
-     * Runs a transition, returns a cached result if the transition has run before.
-     */
-    @Before
-    fun runTransition() {
-        run(transitionToRun)
-    }
-
-    /**
-     * Gets the transition that will be executed
-     */
-    abstract val transitionToRun: TransitionRunner
-
-    /**
-     * Goes through a list of transition results and checks assertions on each result.
-     */
-    fun checkResults(assertion: (TransitionResult) -> Unit) {
-        for (result in tesults) {
-            lastResult = result
-            assertion(result)
+        testTag += "__${Surface.rotationToString(beginRotation)}"
+        if (endRotation != beginRotation) {
+            testTag += "-${Surface.rotationToString(endRotation)}"
         }
-        lastResult = null
+        if (extraInfo.isNotEmpty()) {
+            testTag += "__$extraInfo"
+        }
+        return testTag
     }
 
-    /**
-     * Kludge to mark a file for saving. If `checkResults` fails, the last result is not
-     * cleared. This indicates the assertion failed for the result, so mark it for saving.
-     */
-    @After
-    fun markArtifactsForSaving() {
-        lastResult?.flagForSaving()
+    protected fun Flicker.setRotation(rotation: Int) {
+        try {
+            when (rotation) {
+                Surface.ROTATION_270 -> device.setOrientationLeft()
+                Surface.ROTATION_90 -> device.setOrientationRight()
+                Surface.ROTATION_0 -> device.setOrientationNatural()
+                else -> device.setOrientationNatural()
+            }
+            // Wait for animation to complete
+            SystemClock.sleep(1000)
+        } catch (e: RemoteException) {
+            throw RuntimeException(e)
+        }
     }
 
     companion object {
-        const val TAG = "FLICKER"
         const val NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar"
         const val STATUS_BAR_WINDOW_TITLE = "StatusBar"
         const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
-        private val transitionResults = mutableMapOf<String, List<TransitionResult>>()
-
-        /**
-         * Teardown any system settings and clean up test artifacts from the file system.
-         *
-         * Note: test artifacts for failed tests will remain on the device.
-         */
-        @AfterClass
-        @JvmStatic
-        fun teardown() {
-            AutomationUtils.setDefaultWait()
-            transitionResults.values
-                .flatten()
-                .forEach {
-                    if (it.canDelete()) {
-                        it.delete()
-                    } else {
-                        if (it.layersTraceExists()) {
-                            Log.e(TAG, "Layers trace saved to ${it.layersTracePath}")
-                        }
-                        if (it.windowManagerTraceExists()) {
-                            Log.e(TAG,
-                                    "WindowManager trace saved to ${it.windowManagerTracePath}")
-                        }
-                        if (it.screenCaptureVideoExists()) {
-                            Log.e(TAG,
-                                    "Screen capture video saved to ${it.screenCaptureVideoPath()}")
-                        }
-                    }
-                }
-        }
     }
 }

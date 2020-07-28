@@ -16,15 +16,21 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.util.Log
-import androidx.test.filters.FlakyTest
+import android.view.Surface
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.NonRotationTestBase.Companion.SCREENSHOT_LAYER
 import com.android.server.wm.flicker.RotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WindowUtils
+import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,42 +50,76 @@ class ChangeAppRotationTest(
     beginRotation: Int,
     endRotation: Int
 ) : RotationTestBase(beginRotationName, endRotationName, beginRotation, endRotation) {
-    init {
-        testApp = StandardAppHelper(instrumentation,
+    @Test
+    fun test() {
+        val testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
-    }
 
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.changeAppRotation(testApp, instrumentation, uiDevice,
-                beginRotation, endRotation)
-                .includeJankyRuns().build()
+        flicker(instrumentation) {
+            withTag {
+                buildTestTag("changeAppRotation", testApp, beginRotation, endRotation)
+            }
+            repeat { 1 }
+            setup {
+                eachRun {
+                    device.wakeUpAndGoToHomeScreen()
+                    testApp.open()
+                    this.setRotation(beginRotation)
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+            }
+            transitions {
+                this.setRotation(endRotation)
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible(bugId = 140855415)
+                    statusBarWindowIsAlwaysVisible(bugId = 140855415)
+                }
 
-    @Test
-    fun checkPosition_appLayerRotates() {
-        val startingPos = WindowUtils.getAppPosition(beginRotation)
-        val endingPos = WindowUtils.getAppPosition(endRotation)
-        Log.e(TAG, "startingPos=$startingPos endingPos=$endingPos")
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .hasVisibleRegion(testApp.getPackage(), startingPos).inTheBeginning()
-            LayersTraceSubject.assertThat(it)
-                    .hasVisibleRegion(testApp.getPackage(), endingPos).atTheEnd()
-        }
-    }
+                layersTrace {
+                    navBarLayerIsAlwaysVisible(bugId = 140855415)
+                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                    noUncoveredRegions(beginRotation, endRotation, allStates = false)
+                    navBarLayerRotatesAndScales(beginRotation, endRotation)
+                    statusBarLayerRotatesScales(beginRotation, endRotation)
+                }
 
-    @FlakyTest
-    @Test
-    fun checkVisibility_screenshotLayerBecomesInvisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer(testApp.getPackage())
-                    .then()
-                    .replaceVisibleLayer(testApp.getPackage(), SCREENSHOT_LAYER)
-                    .then()
-                    .showsLayer(testApp.getPackage()).and().showsLayer(SCREENSHOT_LAYER)
-                    .then()
-                    .replaceVisibleLayer(SCREENSHOT_LAYER, testApp.getPackage())
-                    .forAllEntries()
+                layersTrace {
+                    val startingPos = WindowUtils.getDisplayBounds(beginRotation)
+                    val endingPos = WindowUtils.getDisplayBounds(endRotation)
+
+                    start("appLayerRotates_StartingPos") {
+                        this.hasVisibleRegion(testApp.getPackage(), startingPos)
+                    }
+
+                    end("appLayerRotates_EndingPos") {
+                        this.hasVisibleRegion(testApp.getPackage(), endingPos)
+                    }
+
+                    all("screenshotLayerBecomesInvisible", enabled = false) {
+                        this.showsLayer(testApp.getPackage())
+                                .then()
+                                .replaceVisibleLayer(
+                                        testApp.getPackage(),
+                                        SCREENSHOT_LAYER)
+                                .then()
+                                .showsLayer(testApp.getPackage())
+                                .and()
+                                .showsLayer(SCREENSHOT_LAYER)
+                                .then()
+                                .replaceVisibleLayer(
+                                        SCREENSHOT_LAYER,
+                                        testApp.getPackage()
+                                )
+                    }
+                }
+            }
         }
     }
 }
