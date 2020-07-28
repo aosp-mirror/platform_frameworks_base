@@ -25,6 +25,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
@@ -274,9 +275,6 @@ class ProcessRecord implements WindowProcessListener {
     final ArrayMap<String, ContentProviderRecord> pubProviders = new ArrayMap<>();
     // All ContentProviderRecord process is using
     final ArrayList<ContentProviderConnection> conProviders = new ArrayList<>();
-    // A set of tokens that currently contribute to this process being temporarily allowed
-    // to start activities even if it's not in the foreground
-    final ArraySet<Binder> mAllowBackgroundActivityStartsTokens = new ArraySet<>();
     // a set of UIDs of all bound clients
     private ArraySet<Integer> mBoundClientUids = new ArraySet<>();
 
@@ -625,13 +623,6 @@ class ProcessRecord implements WindowProcessListener {
             pw.print(prefix); pw.println("Receivers:");
             for (int i=0; i<receivers.size(); i++) {
                 pw.print(prefix); pw.print("  - "); pw.println(receivers.valueAt(i));
-            }
-        }
-        if (mAllowBackgroundActivityStartsTokens.size() > 0) {
-            pw.print(prefix); pw.println("Background activity start tokens:");
-            for (int i = 0; i < mAllowBackgroundActivityStartsTokens.size(); i++) {
-                pw.print(prefix); pw.print("  - ");
-                pw.println(mAllowBackgroundActivityStartsTokens.valueAt(i));
             }
         }
     }
@@ -1331,17 +1322,23 @@ class ProcessRecord implements WindowProcessListener {
         return mUsingWrapper;
     }
 
-    void addAllowBackgroundActivityStartsToken(Binder entity) {
+    /**
+     * Allows background activity starts using token {@param entity}. Optionally, you can provide
+     * {@param originatingToken} if you have one such originating token, this is useful for tracing
+     * back the grant in the case of the notification token.
+     */
+    void addAllowBackgroundActivityStartsToken(Binder entity, @Nullable IBinder originatingToken) {
         if (entity == null) return;
-        mAllowBackgroundActivityStartsTokens.add(entity);
-        mWindowProcessController.setAllowBackgroundActivityStarts(true);
+        mWindowProcessController.addAllowBackgroundActivityStartsToken(entity, originatingToken);
     }
 
     void removeAllowBackgroundActivityStartsToken(Binder entity) {
         if (entity == null) return;
-        mAllowBackgroundActivityStartsTokens.remove(entity);
-        mWindowProcessController.setAllowBackgroundActivityStarts(
-                !mAllowBackgroundActivityStartsTokens.isEmpty());
+        mWindowProcessController.removeAllowBackgroundActivityStartsToken(entity);
+    }
+
+    boolean areBackgroundActivityStartsAllowedByToken() {
+        return mWindowProcessController.areBackgroundActivityStartsAllowedByToken();
     }
 
     void addBoundClientUid(int clientUid) {

@@ -241,13 +241,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         final int configMask = change.getConfigSetMask() & CONTROLLABLE_CONFIGS;
         final int windowMask = change.getWindowSetMask() & CONTROLLABLE_WINDOW_CONFIGS;
         int effects = 0;
+        final int windowingMode = change.getWindowingMode();
         if (configMask != 0) {
-            Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
-            c.setTo(change.getConfiguration(), configMask, windowMask);
-            container.onRequestedOverrideConfigurationChanged(c);
-            // TODO(b/145675353): remove the following once we could apply new bounds to the
-            // pinned stack together with its children.
-            resizePinnedStackIfNeeded(container, configMask, windowMask, c);
+            if (windowingMode > -1 && windowingMode != container.getWindowingMode()) {
+                // Special handling for when we are setting a windowingMode in the same transaction.
+                // Setting the windowingMode is going to call onConfigurationChanged so we don't
+                // need it called right now. Additionally, some logic requires everything in the
+                // configuration to change at the same time (ie. surface-freezer requires bounds
+                // and mode to change at the same time).
+                final Configuration c = container.getRequestedOverrideConfiguration();
+                c.setTo(change.getConfiguration(), configMask, windowMask);
+            } else {
+                final Configuration c =
+                        new Configuration(container.getRequestedOverrideConfiguration());
+                c.setTo(change.getConfiguration(), configMask, windowMask);
+                container.onRequestedOverrideConfigurationChanged(c);
+                // TODO(b/145675353): remove the following once we could apply new bounds to the
+                // pinned stack together with its children.
+            }
+            resizePinnedStackIfNeeded(container, configMask, windowMask,
+                    container.getRequestedOverrideConfiguration());
             effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
         }
         if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_FOCUSABLE) != 0) {
@@ -256,7 +269,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
 
-        final int windowingMode = change.getWindowingMode();
         if (windowingMode > -1) {
             container.setWindowingMode(windowingMode);
         }
@@ -345,29 +357,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final Task rootTask = (Task) (
                             (newParent != null && !(newParent instanceof TaskDisplayArea))
                                     ? newParent : task.getRootTask());
-                    if (hop.getToTop()) {
-                        as.getDisplayArea().positionStackAtTop(rootTask,
-                                false /* includingParents */);
-                    } else {
-                        as.getDisplayArea().positionStackAtBottom(rootTask);
-                    }
+                    as.getDisplayArea().positionChildAt(
+                            hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM, rootTask,
+                            false /* includingParents */);
                 }
             } else {
                 throw new RuntimeException("Reparenting leaf Tasks is not supported now. " + task);
             }
         } else {
-            // Ugh, of course ActivityStack has its own special reorder logic...
-            if (task.isRootTask()) {
-                if (hop.getToTop()) {
-                    as.getDisplayArea().positionStackAtTop(as, false /* includingParents */);
-                } else {
-                    as.getDisplayArea().positionStackAtBottom(as);
-                }
-            } else {
-                task.getParent().positionChildAt(
-                        hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
-                        task, false /* includingParents */);
-            }
+            task.getParent().positionChildAt(
+                    hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
+                    task, false /* includingParents */);
         }
         return TRANSACT_EFFECTS_LIFECYCLE;
     }

@@ -2969,7 +2969,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     = systemConfig.getSharedLibraries();
             final int builtInLibCount = libConfig.size();
             for (int i = 0; i < builtInLibCount; i++) {
-                SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
                 addBuiltInSharedLibraryLocked(libConfig.valueAt(i));
             }
 

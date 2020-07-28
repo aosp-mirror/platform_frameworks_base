@@ -29,7 +29,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -56,6 +58,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private static final String TAG = "OneHandedUI";
     private static final String ONE_HANDED_MODE_GESTURAL_OVERLAY =
             "com.android.internal.systemui.onehanded.gestural";
+    private static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
     private final OneHandedManagerImpl mOneHandedManager;
     private final CommandQueue mCommandQueue;
@@ -136,10 +139,18 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             ScreenLifecycle screenLifecycle) {
         super(context);
 
+        if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
+            Log.i(TAG, "Device config SUPPORT_ONE_HANDED_MODE off");
+            mCommandQueue = null;
+            mOneHandedManager = null;
+            mOverlayManager = null;
+            mSettingUtil = null;
+            mTimeoutHandler = null;
+            mScreenLifecycle = null;
+            return;
+        }
+
         mCommandQueue = commandQueue;
-        /* TODO(b/154290458) define a boolean system properties "support_one_handed_mode"
-            boolean supportOneHanded = SystemProperties.getBoolean("support_one_handed_mode");
-            if (!supportOneHanded) return; */
         mOneHandedManager = oneHandedManager;
         mSettingUtil = settingsUtil;
         mTimeoutHandler = OneHandedTimeoutHandler.get();
@@ -150,9 +161,9 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
 
     @Override
     public void start() {
-        /* TODO(b/154290458) define a boolean system properties "support_one_handed_mode"
-            boolean supportOneHanded = SystemProperties.getBoolean("support_one_handed_mode");
-            if (!supportOneHanded) return; */
+        if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
+            return;
+        }
         mCommandQueue.addCallback(this);
         setupKeyguardUpdateMonitor();
         setupScreenObserver();

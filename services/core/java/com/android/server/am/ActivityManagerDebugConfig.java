@@ -81,7 +81,6 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_PROCESS_OBSERVERS = (APPEND_CATEGORY_NAME)
             ? "_ProcessObservers" : "";
     static final String POSTFIX_PROCESSES = (APPEND_CATEGORY_NAME) ? "_Processes" : "";
-    static final String POSTFIX_PROVIDER = (APPEND_CATEGORY_NAME) ? "_Provider" : "";
     static final String POSTFIX_PSS = (APPEND_CATEGORY_NAME) ? "_Pss" : "";
     static final String POSTFIX_SERVICE = (APPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =

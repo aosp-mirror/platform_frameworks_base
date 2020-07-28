@@ -221,6 +221,14 @@ public abstract class ActivityTaskManagerInternal {
             boolean allowBackgroundActivityStart);
 
     /**
+     * Callback to be called on certain activity start scenarios.
+     *
+     * @see BackgroundActivityStartCallback
+     */
+    public abstract void setBackgroundActivityStartCallback(
+            @Nullable BackgroundActivityStartCallback callback);
+
+    /**
      * Start activity {@code intent} without calling user-id check.
      *
      * - DO NOT call it with the calling UID cleared.

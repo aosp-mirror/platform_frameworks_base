@@ -828,12 +828,15 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void setDemoted(boolean demoted) {
         mDemoted = demoted;
     }
 
     /**
-     * @hide
+     * Returns whether the user has decided that this channel does not represent a conversation. The
+     * value will always be false for channels that never claimed to be conversations - that is,
+     * for channels where {@link #getConversationId()} and {@link #getParentChannelId()} are empty.
      */
     public boolean isDemoted() {
         return mDemoted;

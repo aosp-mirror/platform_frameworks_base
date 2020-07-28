@@ -368,7 +368,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     /** Sets the always on top flag for this configuration container.
      *  When you call this function, make sure that the following functions are called as well to
      *  keep proper z-order.
-     *  - {@Link DisplayContent#positionStackAt(POSITION_TOP, TaskStack)};
+     *  - {@link TaskDisplayArea#positionChildAt(int POSITION_TOP, Task, boolean)};
      * */
     public void setAlwaysOnTop(boolean alwaysOnTop) {
         mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());

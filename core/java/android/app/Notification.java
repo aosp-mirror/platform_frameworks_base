@@ -958,7 +958,7 @@ public class Notification implements Parcelable
      *
      * @hide
      */
-    private IBinder mWhitelistToken;
+    private IBinder mAllowlistToken;
 
     /**
      * Must be set by a process to start associating tokens with Notification objects
@@ -966,7 +966,7 @@ public class Notification implements Parcelable
      *
      * @hide
      */
-    static public IBinder processWhitelistToken;
+    static public IBinder processAllowlistToken;
 
     /**
      * {@link #extras} key: this is the title of the notification,
@@ -2245,12 +2245,12 @@ public class Notification implements Parcelable
     {
         int version = parcel.readInt();
 
-        mWhitelistToken = parcel.readStrongBinder();
-        if (mWhitelistToken == null) {
-            mWhitelistToken = processWhitelistToken;
+        mAllowlistToken = parcel.readStrongBinder();
+        if (mAllowlistToken == null) {
+            mAllowlistToken = processAllowlistToken;
         }
         // Propagate this token to all pending intents that are unmarshalled from the parcel.
-        parcel.setClassCookie(PendingIntent.class, mWhitelistToken);
+        parcel.setClassCookie(PendingIntent.class, mAllowlistToken);
 
         when = parcel.readLong();
         creationTime = parcel.readLong();
@@ -2368,7 +2368,7 @@ public class Notification implements Parcelable
      * @hide
      */
     public void cloneInto(Notification that, boolean heavy) {
-        that.mWhitelistToken = this.mWhitelistToken;
+        that.mAllowlistToken = this.mAllowlistToken;
         that.when = this.when;
         that.creationTime = this.creationTime;
         that.mSmallIcon = this.mSmallIcon;
@@ -2678,7 +2678,7 @@ public class Notification implements Parcelable
     private void writeToParcelImpl(Parcel parcel, int flags) {
         parcel.writeInt(1);
 
-        parcel.writeStrongBinder(mWhitelistToken);
+        parcel.writeStrongBinder(mAllowlistToken);
         parcel.writeLong(when);
         parcel.writeLong(creationTime);
         if (mSmallIcon == null && icon != 0) {

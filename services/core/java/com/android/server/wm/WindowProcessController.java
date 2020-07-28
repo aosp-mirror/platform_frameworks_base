@@ -55,11 +55,14 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
+import android.os.Binder;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -98,6 +101,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     final ApplicationInfo mInfo;
     final String mName;
     final int mUid;
+
+    // A set of tokens that currently contribute to this process being temporarily allowed
+    // to start activities even if it's not in the foreground. The values of this map are optional
+    // (can be null) and are used to trace back the grant to the notification token mechanism.
+    private final ArrayMap<Binder, IBinder> mBackgroundActivityStartTokens = new ArrayMap<>();
     // The process of this application; 0 if none
     private volatile int mPid;
     // user of process.
@@ -160,9 +168,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
-    // Set to true if this process is currently temporarily allowed to start activities even if
-    // it's not in the foreground
-    private volatile boolean mAllowBackgroundActivityStarts;
     // Set of UIDs of clients currently bound to this process
     private volatile ArraySet<Integer> mBoundClientUids = new ArraySet<Integer>();
 
@@ -208,6 +213,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
 
+    @Nullable
+    private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
+
     public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
@@ -218,6 +226,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mListener = listener;
         mAtm = atm;
         mDisplayId = INVALID_DISPLAY;
+        mBackgroundActivityStartCallback = mAtm.getBackgroundActivityStartCallback();
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
@@ -449,19 +458,39 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mLastActivityFinishTime = finishTime;
     }
 
-    public void setAllowBackgroundActivityStarts(boolean allowBackgroundActivityStarts) {
-        mAllowBackgroundActivityStarts = allowBackgroundActivityStarts;
+    /**
+     * Allows background activity starts using token {@code entity}. Optionally, you can provide
+     * {@code originatingToken} if you have one such originating token, this is useful for tracing
+     * back the grant in the case of the notification token.
+     */
+    public void addAllowBackgroundActivityStartsToken(Binder entity,
+            @Nullable IBinder originatingToken) {
+        synchronized (mAtm.mGlobalLock) {
+            mBackgroundActivityStartTokens.put(entity, originatingToken);
+        }
+    }
+
+    /**
+     * Removes token {@code entity} that allowed background activity starts added via {@link
+     * #addAllowBackgroundActivityStartsToken(Binder, IBinder)}.
+     */
+    public void removeAllowBackgroundActivityStartsToken(Binder entity) {
+        synchronized (mAtm.mGlobalLock) {
+            mBackgroundActivityStartTokens.remove(entity);
+        }
+    }
+
+    /**
+     * Returns true if background activity starts are allowed by any token added via {@link
+     * #addAllowBackgroundActivityStartsToken(Binder, IBinder)}.
+     */
+    public boolean areBackgroundActivityStartsAllowedByToken() {
+        synchronized (mAtm.mGlobalLock) {
+            return !mBackgroundActivityStartTokens.isEmpty();
+        }
     }
 
     boolean areBackgroundActivityStartsAllowed() {
-        // allow if the flag was explicitly set
-        if (mAllowBackgroundActivityStarts) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid
-                        + ")] Activity start allowed: mAllowBackgroundActivityStarts = true");
-            }
-            return true;
-        }
         // allow if any activity in the caller has either started or finished very recently, and
         // it must be started or finished after last stop app switches time.
         final long now = SystemClock.uptimeMillis();
@@ -510,7 +539,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             return true;
         }
+        // allow if the flag was explicitly set
+        if (!mBackgroundActivityStartTokens.isEmpty()) {
+            onBackgroundStartAllowedByToken();
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process allowed by token");
+            }
+            return true;
+        }
         return false;
+    }
+
+    private void onBackgroundStartAllowedByToken() {
+        if (mBackgroundActivityStartCallback == null) {
+            return;
+        }
+        IBinder callbackToken = mBackgroundActivityStartCallback.getToken();
+        for (IBinder token : mBackgroundActivityStartTokens.values()) {
+            if (token != callbackToken) {
+                return;
+            }
+        }
+        mAtm.mH.post(() ->
+                mBackgroundActivityStartCallback.onExclusiveTokenActivityStart(mInfo.packageName));
     }
 
     private boolean isBoundByForegroundUid() {
@@ -1433,6 +1485,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
             if (mVrThreadTid != 0) {
                 pw.print(prefix); pw.print("mVrThreadTid="); pw.println(mVrThreadTid);
+            }
+            if (mBackgroundActivityStartTokens.size() > 0) {
+                pw.print(prefix); pw.println("Background activity start tokens:");
+                for (int i = 0; i < mBackgroundActivityStartTokens.size(); i++) {
+                    pw.print(prefix); pw.print("  - ");
+                    pw.println(mBackgroundActivityStartTokens.keyAt(i));
+                }
             }
         }
         pw.println(prefix + " Configuration=" + getConfiguration());

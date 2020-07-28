@@ -92,6 +92,9 @@ final class BroadcastRecord extends Binder {
     // if set to true, app's process will be temporarily allowed to start activities from background
     // for the duration of the broadcast dispatch
     final boolean allowBackgroundActivityStarts;
+    // token used to trace back the grant for activity starts, optional
+    @Nullable
+    final IBinder mBackgroundActivityStartsToken;
 
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
@@ -240,7 +243,8 @@ final class BroadcastRecord extends Binder {
             String[] _requiredPermissions, int _appOp, BroadcastOptions _options, List _receivers,
             IIntentReceiver _resultTo, int _resultCode, String _resultData, Bundle _resultExtras,
             boolean _serialized, boolean _sticky, boolean _initialSticky, int _userId,
-            boolean _allowBackgroundActivityStarts, boolean _timeoutExempt) {
+            boolean allowBackgroundActivityStarts, @Nullable IBinder backgroundActivityStartsToken,
+            boolean timeoutExempt) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -270,8 +274,9 @@ final class BroadcastRecord extends Binder {
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
-        allowBackgroundActivityStarts = _allowBackgroundActivityStarts;
-        timeoutExempt = _timeoutExempt;
+        this.allowBackgroundActivityStarts = allowBackgroundActivityStarts;
+        mBackgroundActivityStartsToken = backgroundActivityStartsToken;
+        this.timeoutExempt = timeoutExempt;
     }
 
     /**
@@ -317,6 +322,7 @@ final class BroadcastRecord extends Binder {
         manifestSkipCount = from.manifestSkipCount;
         queue = from.queue;
         allowBackgroundActivityStarts = from.allowBackgroundActivityStarts;
+        mBackgroundActivityStartsToken = from.mBackgroundActivityStartsToken;
         timeoutExempt = from.timeoutExempt;
     }
 
@@ -352,7 +358,7 @@ final class BroadcastRecord extends Binder {
                 callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, appOp, options, splitReceivers, resultTo, resultCode,
                 resultData, resultExtras, ordered, sticky, initialSticky, userId,
-                allowBackgroundActivityStarts, timeoutExempt);
+                allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt);
 
         split.splitToken = this.splitToken;
         return split;

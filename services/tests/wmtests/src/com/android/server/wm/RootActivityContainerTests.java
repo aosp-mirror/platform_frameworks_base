@@ -40,6 +40,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -459,7 +460,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
         final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
-        taskDisplayArea.positionStackAtBottom(targetStack);
+        taskDisplayArea.positionChildAt(POSITION_BOTTOM, targetStack, false /*includingParents*/);
 
         // Assume the stack is not at the topmost position (e.g. behind always-on-top stacks) but it
         // is the current top focused stack.
@@ -560,7 +561,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
         activity.setState(ActivityState.RESUMED, "test");
-        taskDisplayArea.positionStackAtBottom(targetStack);
+        taskDisplayArea.positionChildAt(POSITION_BOTTOM, targetStack, false /*includingParents*/);
 
         // Assume the stack is at the topmost position
         assertFalse(targetStack.isTopStackInDisplayArea());

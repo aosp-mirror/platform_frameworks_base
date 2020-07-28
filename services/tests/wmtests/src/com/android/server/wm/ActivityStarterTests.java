@@ -74,6 +74,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -665,7 +666,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
         mService.mStackSupervisor.setRecentTasks(recentTasks);
         doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
         // caller is temp allowed
-        callerApp.setAllowBackgroundActivityStarts(callerIsTempAllowed);
+        if (callerIsTempAllowed) {
+            callerApp.addAllowBackgroundActivityStartsToken(new Binder(), null);
+        }
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);

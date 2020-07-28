@@ -131,9 +131,9 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import dagger.Lazy;
-import dagger.Subcomponent;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -150,6 +150,7 @@ import dagger.Subcomponent;
  * they have no clients they should not have any registered resources like bound
  * services, registered receivers, etc.
  */
+@Singleton
 public class Dependency {
     /**
      * Key for getting a the main looper.
@@ -522,7 +523,12 @@ public class Dependency {
         mProviders.put(RecordingController.class, mRecordingController::get);
         mProviders.put(Divider.class, mDivider::get);
 
-        sDependency = this;
+        Dependency.setInstance(this);
+    }
+
+    @VisibleForTesting
+    public static void setInstance(Dependency dependency) {
+        sDependency = dependency;
     }
 
     protected final <T> T getDependency(Class<T> cls) {
@@ -549,7 +555,7 @@ public class Dependency {
     }
 
     @VisibleForTesting
-    protected <T> T createDependency(Object cls) {
+    public <T> T createDependency(Object cls) {
         Preconditions.checkArgument(cls instanceof DependencyKey<?> || cls instanceof Class<?>);
 
         @SuppressWarnings("unchecked")
@@ -637,10 +643,5 @@ public class Dependency {
         public String toString() {
             return mDisplayName;
         }
-    }
-
-    @Subcomponent
-    public interface DependencyInjector {
-        void createSystemUI(Dependency dependency);
     }
 }

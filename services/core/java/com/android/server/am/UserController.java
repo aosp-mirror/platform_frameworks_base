@@ -1891,8 +1891,7 @@ class UserController implements Handler.Callback {
         if (callingUid != 0 && callingUid != SYSTEM_UID) {
             final boolean allow;
             final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, targetUserId);
-            if (mInjector.isCallerRecents(callingUid)
-                    && isSameProfileGroup(callingUserId, targetUserId)) {
+            if (mInjector.isCallerRecents(callingUid) && isSameProfileGroup) {
                 // If the caller is Recents and the caller has ownership of the profile group,
                 // we then allow it to access its profiles.
                 allow = true;
@@ -2883,7 +2882,7 @@ class UserController implements Handler.Callback {
         }
 
         void installEncryptionUnawareProviders(@UserIdInt int userId) {
-            mService.installEncryptionUnawareProviders(userId);
+            mService.mCpHelper.installEncryptionUnawareProviders(userId);
         }
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,

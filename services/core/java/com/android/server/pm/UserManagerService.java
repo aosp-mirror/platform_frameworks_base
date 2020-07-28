@@ -4699,6 +4699,7 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("N/A");
         }
 
+        pw.println();
         StringBuilder sb = new StringBuilder();
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
@@ -4786,6 +4787,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             pw.println();
+            pw.println("Device properties:");
             pw.println("  Device owner id:" + mDeviceOwnerUserId);
             pw.println();
             pw.println("  Guest restrictions:");
@@ -4819,10 +4821,10 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Dump UserTypes
         pw.println();
-        pw.println("  User types (" + mUserTypes.size() + " types):");
+        pw.println("User types (" + mUserTypes.size() + " types):");
         for (int i = 0; i < mUserTypes.size(); i++) {
             pw.println("    " + mUserTypes.keyAt(i) + ": ");
-            mUserTypes.valueAt(i).dump(pw);
+            mUserTypes.valueAt(i).dump(pw, "        ");
         }
 
         // Dump package whitelist

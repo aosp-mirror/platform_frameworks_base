@@ -274,6 +274,7 @@ import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
@@ -515,7 +516,7 @@ public class NotificationManagerService extends SystemService {
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
-    private static final IBinder WHITELIST_TOKEN = new Binder();
+    private static final IBinder ALLOWLIST_TOKEN = new Binder();
     protected RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
@@ -1722,7 +1723,7 @@ public class NotificationManagerService extends SystemService {
         super(context);
         mNotificationRecordLogger = notificationRecordLogger;
         mNotificationInstanceIdSequence = notificationInstanceIdSequence;
-        Notification.processWhitelistToken = WHITELIST_TOKEN;
+        Notification.processAllowlistToken = ALLOWLIST_TOKEN;
     }
 
     // TODO - replace these methods with new fields in the VisibleForTesting constructor
@@ -1894,6 +1895,7 @@ public class NotificationManagerService extends SystemService {
                 (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAm = am;
         mAtm = atm;
+        mAtm.setBackgroundActivityStartCallback(new NotificationTrampolineCallback());
         mUgm = ugm;
         mUgmInternal = ugmInternal;
         mPackageManager = packageManager;
@@ -5781,21 +5783,21 @@ public class NotificationManagerService extends SystemService {
             mShortcutHelper.cacheShortcut(info, user);
         }
 
-        // Whitelist pending intents.
+        // temporarily allow apps to perform extra work when their pending intents are launched
         if (notification.allPendingIntents != null) {
             final int intentCount = notification.allPendingIntents.size();
             if (intentCount > 0) {
                 final ActivityManagerInternal am = LocalServices
                         .getService(ActivityManagerInternal.class);
                 final long duration = LocalServices.getService(
-                        DeviceIdleInternal.class).getNotificationWhitelistDuration();
+                        DeviceIdleInternal.class).getNotificationAllowlistDuration();
                 for (int i = 0; i < intentCount; i++) {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {
                         am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(),
-                                WHITELIST_TOKEN, duration);
+                                ALLOWLIST_TOKEN, duration);
                         am.setPendingIntentAllowBgActivityStarts(pendingIntent.getTarget(),
-                                WHITELIST_TOKEN, (FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER
+                                ALLOWLIST_TOKEN, (FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER
                                         | FLAG_SERVICE_SENDER));
                     }
                 }
@@ -7648,7 +7650,7 @@ public class NotificationManagerService extends SystemService {
                     // make sure deleteIntent cannot be used to start activities from background
                     LocalServices.getService(ActivityManagerInternal.class)
                             .clearPendingIntentAllowBgActivityStarts(deleteIntent.getTarget(),
-                            WHITELIST_TOKEN);
+                                    ALLOWLIST_TOKEN);
                     deleteIntent.send();
                 } catch (PendingIntent.CanceledException ex) {
                     // do nothing - there's no relevant way to recover, and
@@ -9923,5 +9925,37 @@ public class NotificationManagerService extends SystemService {
     private static boolean safeBoolean(String val, boolean defValue) {
         if (TextUtils.isEmpty(val)) return defValue;
         return Boolean.parseBoolean(val);
+    }
+
+    /**
+     * Shows a warning on logcat. Shows the toast only once per package. This is to avoid being too
+     * aggressive and annoying the user.
+     *
+     * TODO(b/161957908): Remove dogfooder toast.
+     */
+    private class NotificationTrampolineCallback implements BackgroundActivityStartCallback {
+        private Set<String> mPackagesShown = new ArraySet<>();
+
+        @Override
+        public IBinder getToken() {
+            return ALLOWLIST_TOKEN;
+        }
+
+        @Override
+        public void onExclusiveTokenActivityStart(String packageName) {
+            Slog.w(TAG, "Indirect notification activity start from " + packageName);
+            boolean isFirstOccurrence = mPackagesShown.add(packageName);
+            if (!isFirstOccurrence) {
+                return;
+            }
+
+            mUiHandler.post(() ->
+                    Toast.makeText(getUiContext(),
+                            "Indirect activity start from "
+                                    + packageName + ". "
+                                    + "This will be blocked in S.\n"
+                                    + "See go/s-trampolines.",
+                            Toast.LENGTH_LONG).show());
+        }
     }
 }
