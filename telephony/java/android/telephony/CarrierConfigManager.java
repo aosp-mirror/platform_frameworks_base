@@ -773,7 +773,7 @@ public class CarrierConfigManager {
      * {@link #KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL}). If false, this device will fallback to
      * circuit switch for supplementary services and will disable this capability for IMS entirely.
      *
-     * The default value for this key is {@code true}.
+     * The default value for this key is {@code false}.
      */
     public static final String KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL =
             "carrier_supports_ss_over_ut_bool";
