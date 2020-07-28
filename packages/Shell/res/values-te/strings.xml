@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"షెల్"</string>
-    <string name="bugreport_notification_channel" msgid="2574150205913861141">"బగ్ నివేదికలు"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"బగ్ రిపోర్ట్స్"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"బగ్ నివేదిక <xliff:g id="ID">#%d</xliff:g> ఉత్పాదించబడుతోంది"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"బగ్ నివేదిక <xliff:g id="ID">#%d</xliff:g> సంగ్రహించబడింది"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"బగ్ నివేదికకు వివరాలను జోడిస్తోంది"</string>
@@ -28,9 +28,9 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"స్క్రీన్‌షాట్ లేకుండా మీ బగ్ నివేదికను భాగస్వామ్యం చేయడానికి ఎంచుకోండి లేదా స్క్రీన్‌షాట్ ముగిసేదాకా వేచి ఉండండి"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"స్క్రీన్‌షాట్ లేకుండా మీ బగ్ నివే. భాగ. చేయడానికి నొక్కండి లేదా స్క్రీన్‌షాట్ ముగిసేదాకా వేచి ఉండండి"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"స్క్రీన్‌షాట్ లేకుండా మీ బగ్ నివే. భాగ. చేయడానికి నొక్కండి లేదా స్క్రీన్‌షాట్ ముగిసేదాకా వేచి ఉండండి"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"బగ్ నివేదికల్లో మీరు గోప్యమైనదిగా పరిగణించే (యాప్ వినియోగం మరియు స్థాన డేటా వంటి) డేటాతో సహా సిస్టమ్‌కు సంబంధించిన విభిన్న లాగ్ ఫైల్‌ల డేటా ఉంటుంది. బగ్ నివేదికలను మీరు విశ్వసించే యాప్‌లు మరియు వ్యక్తులతో మాత్రమే షేర్ చేయండి."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"బగ్ రిపోర్ట్స్‌లో మీరు గోప్యమైనదిగా పరిగణించే (యాప్ వినియోగం, లొకేష‌న్‌ డేటా వంటి) డేటాతో పాటు సిస్టమ్‌కు సంబంధించిన విభిన్న లాగ్ ఫైల్‌ల డేటా ఉంటుంది. బగ్ నివేదికలను మీరు విశ్వసించే యాప్‌లు, వ్యక్తులతో మాత్రమే షేర్ చేయండి."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"మళ్లీ చూపవద్దు"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"బగ్ నివేదికలు"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"బగ్ రిపోర్ట్స్"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"బగ్ నివేదిక ఫైల్‌ను చదవడం సాధ్యపడలేదు"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"బగ్ నివేదిక వివరాలను జిప్ ఫైల్‌కు జోడించడం సాధ్యపడలేదు"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"పేరు లేనివి"</string>
