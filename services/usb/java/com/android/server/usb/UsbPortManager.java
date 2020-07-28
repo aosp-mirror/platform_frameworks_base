@@ -922,7 +922,7 @@ public class UsbPortManager {
                     contaminantDetectionStatus);
             mPorts.put(portId, portInfo);
         } else {
-            // Sanity check that ports aren't changing definition out from under us.
+            // Validate that ports aren't changing definition out from under us.
             if (supportedModes != portInfo.mUsbPort.getSupportedModes()) {
                 logAndPrint(Log.WARN, pw, "Ignoring inconsistent list of supported modes from "
                         + "USB port driver (should be immutable): "
