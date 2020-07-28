@@ -36,6 +36,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
+import android.media.session.ParcelableListBinder;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Binder;
@@ -905,11 +906,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
-        public void setQueue(ParceledListSlice queue) throws RemoteException {
+        public void resetQueue() throws RemoteException {
             synchronized (mLock) {
-                mQueue = queue == null ? null : (List<QueueItem>) queue.getList();
+                mQueue = null;
             }
             mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
+        }
+
+        @Override
+        public IBinder getBinderForSetQueue() throws RemoteException {
+            return new ParcelableListBinder<QueueItem>((list) -> {
+                synchronized (mLock) {
+                    mQueue = list;
+                }
+                mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
+            });
         }
 
         @Override
