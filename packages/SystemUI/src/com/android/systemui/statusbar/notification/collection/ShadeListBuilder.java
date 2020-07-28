@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
@@ -321,6 +322,7 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.incrementTo(STATE_FINALIZING);
         logChanges();
         freeEmptyGroups();
+        cleanupPluggables();
 
         // Step 8: Dispatch the new list, first to any listeners and then to the view layer
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
@@ -421,7 +423,7 @@ public class ShadeListBuilder implements Dumpable {
 
                 GroupEntry group = mGroups.get(topLevelKey);
                 if (group == null) {
-                    group = new GroupEntry(topLevelKey);
+                    group = new GroupEntry(topLevelKey, mSystemClock.uptimeMillis());
                     group.mFirstAddedIteration = mIterationCount;
                     mGroups.put(topLevelKey, group);
                 }
@@ -670,6 +672,20 @@ public class ShadeListBuilder implements Dumpable {
                         curr.getSection(),
                         curr.getSectionIndex());
             }
+        }
+    }
+
+    private void cleanupPluggables() {
+        callOnCleanup(mNotifPreGroupFilters);
+        callOnCleanup(mNotifPromoters);
+        callOnCleanup(mNotifFinalizeFilters);
+        callOnCleanup(mNotifComparators);
+        callOnCleanup(mNotifSections);
+    }
+
+    private void callOnCleanup(List<? extends Pluggable<?>> pluggables) {
+        for (int i = 0; i < pluggables.size(); i++) {
+            pluggables.get(i).onCleanup();
         }
     }
 
