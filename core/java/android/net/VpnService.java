@@ -119,7 +119,7 @@ import java.util.Set;
  * <p> The Android system starts a VPN in the background by calling
  * {@link android.content.Context#startService startService()}. In Android 8.0
  * (API level 26) and higher, the system places VPN apps on the temporary
- * whitelist for a short period so the app can start in the background. The VPN
+ * allowlist for a short period so the app can start in the background. The VPN
  * app must promote itself to the foreground after it's launched or the system
  * will shut down the app.
  *
