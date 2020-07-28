@@ -110,6 +110,7 @@ class AccessibilityUserState {
     private boolean mIsTouchExplorationEnabled;
     private boolean mServiceHandlesDoubleTap;
     private boolean mRequestMultiFingerGestures;
+    private boolean mRequestTwoFingerPassthrough;
     private int mUserInteractiveUiTimeout;
     private int mUserNonInteractiveUiTimeout;
     private int mNonInteractiveUiTimeout = 0;
@@ -169,6 +170,7 @@ class AccessibilityUserState {
         mIsTouchExplorationEnabled = false;
         mServiceHandlesDoubleTap = false;
         mRequestMultiFingerGestures = false;
+        mRequestTwoFingerPassthrough = false;
         mIsDisplayMagnificationEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
@@ -456,6 +458,8 @@ class AccessibilityUserState {
                 .append(String.valueOf(mServiceHandlesDoubleTap));
         pw.append(", requestMultiFingerGestures=")
                 .append(String.valueOf(mRequestMultiFingerGestures));
+        pw.append(", requestTwoFingerPassthrough=")
+                .append(String.valueOf(mRequestTwoFingerPassthrough));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
                 mIsDisplayMagnificationEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
@@ -790,6 +794,14 @@ class AccessibilityUserState {
     public void setMultiFingerGesturesLocked(boolean enabled) {
         mRequestMultiFingerGestures = enabled;
     }
+    public boolean isTwoFingerPassthroughEnabledLocked() {
+        return mRequestTwoFingerPassthrough;
+    }
+
+    public void setTwoFingerPassthroughLocked(boolean enabled) {
+        mRequestTwoFingerPassthrough = enabled;
+    }
+
 
     public int getUserInteractiveUiTimeoutLocked() {
         return mUserInteractiveUiTimeout;
