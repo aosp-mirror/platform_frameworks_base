@@ -1156,15 +1156,14 @@ public class CarrierConfigManager {
     /**
      * Determines whether adhoc conference calls are supported by a carrier.  When {@code true},
      * adhoc conference calling is supported, {@code false otherwise}.
-     * @hide
      */
     public static final String KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL =
             "support_adhoc_conference_calls_bool";
 
     /**
-     * Determines whether conference participants can be added to existing call.  When {@code true},
+     * Determines whether conference participants can be added to existing call to form an adhoc
+     * conference call (in contrast to merging calls to form a conference).  When {@code true},
      * adding conference participants to existing call is supported, {@code false otherwise}.
-     * @hide
      */
     public static final String KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL =
             "support_add_conference_participants_bool";
