@@ -832,8 +832,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Qulfdan chiqarish yoki favqulodda qo‘ng‘iroqni amalga oshirish uchun \"Menyu\"ni bosing."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Qulfni ochish uchun \"Menyu\"ga bosing."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Qulfni ochish uchun grafik kalitni chizing"</string>
-    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Favqulodda chaqiruv"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Qo‘ng‘iroqni qaytarish"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"To‘g‘ri!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Qaytadan urining"</string>
@@ -902,7 +901,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Foydalanuvchi tanlagichi"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Holati"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Kamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Media boshqaruvlari"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Media boshqaruvi"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Vidjetlarni saralashni boshlandi."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Vidjetlarni saralash tugatildi."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> vidjeti o‘chirildi."</string>
