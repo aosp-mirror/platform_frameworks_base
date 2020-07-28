@@ -1844,6 +1844,10 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return lastReparentedStack;
     }
 
+    @Override
+    protected boolean isTaskDisplayArea() {
+        return true;
+    }
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
