@@ -204,6 +204,7 @@ message DisplayAreaProto {
     optional WindowContainerProto window_container = 1;
     optional string name = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     repeated DisplayAreaChildProto children = 3 [deprecated=true];
+    optional bool is_task_display_area = 4;
 }
 
 /* represents a generic child of a DisplayArea */
