@@ -49,7 +49,7 @@
     <string name="print_options_collapsed" msgid="7455930445670414332">"Параметры друку згорнуты"</string>
     <string name="search" msgid="5421724265322228497">"Пошук"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Усе прынтары"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"Дадаць службу"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Дадаць сэрвіс"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Паказваецца поле пошуку"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Поле пошуку схавана"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Дадаць прынтар"</string>
@@ -66,9 +66,9 @@
     <string name="notification_channel_progress" msgid="872788690775721436">"Заданні друку, якія выконваюцца"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"Заданні друку са збоямі"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Не ўдалося стварыць файл"</string>
-    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Некаторыя службы друку адключаны"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Некаторыя сэрвісы друку адключаны"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Пошук прынтараў"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"Службы друку не ўключаны"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"Сэрвісы друку не ўключаны"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Прынтараў не знойдзена"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Немагчыма дадаць прынтары"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"Выберыце, каб дадаць прынтар"</string>
