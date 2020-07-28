@@ -21,11 +21,14 @@ import static com.android.compatibility.common.util.ActivitiesWatcher.ActivityLi
 import android.perftests.utils.BenchmarkState;
 import android.view.View;
 
+import androidx.test.filters.LargeTest;
+
 import com.android.compatibility.common.util.ActivitiesWatcher.ActivityWatcher;
 import com.android.perftests.contentcapture.R;
 
 import org.junit.Test;
 
+@LargeTest
 public class LoginTest extends AbstractContentCapturePerfTestCase {
 
     @Test
