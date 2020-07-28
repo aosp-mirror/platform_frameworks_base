@@ -356,6 +356,8 @@ public class DisplayPolicy {
     private WindowState mFocusedWindow;
     private WindowState mLastFocusedWindow;
 
+    private WindowState mSystemUiControllingWindow;
+
     // The states of decor windows from the last layout. These are used to generate another display
     // layout in different bounds but with the same states.
     private boolean mLastNavVisible;
@@ -3436,6 +3438,7 @@ public class DisplayPolicy {
             }
         }
         final WindowState win = winCandidate;
+        mSystemUiControllingWindow = win;
 
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
@@ -3740,8 +3743,12 @@ public class DisplayPolicy {
                         & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
         final boolean hideStatusBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
-        final boolean hideNavBarSysui =
-                (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+        final boolean hideNavBarSysui = (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
+                // We shouldn't rely on the system UI visibilities anymore because the window can
+                // use the new API (e.g., WindowInsetsController.hide) to hide navigation bar.
+                // TODO(b/149813814): clean up the system UI flag usages in this function.
+                || !win.getRequestedInsetsState().getSourceOrDefaultVisibility(
+                        ITYPE_NAVIGATION_BAR);
 
         final boolean transientStatusBarAllowed = getStatusBar() != null
                 && (notificationShadeHasFocus || (!mForceShowSystemBars
@@ -3755,15 +3762,16 @@ public class DisplayPolicy {
                 && now - mPendingPanicGestureUptime <= PANIC_GESTURE_EXPIRATION;
         final DisplayPolicy defaultDisplayPolicy =
                 mService.getDefaultDisplayContentLocked().getDisplayPolicy();
-        if (pendingPanic && hideNavBarSysui && !isKeyguardShowing()
+        if (pendingPanic && hideNavBarSysui && win != mNotificationShade
+                && getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)
                 // TODO (b/111955725): Show keyguard presentation on all external displays
                 && defaultDisplayPolicy.isKeyguardDrawComplete()) {
             // The user performed the panic gesture recently, we're about to hide the bars,
             // we're no longer on the Keyguard and the screen is ready. We can now request the bars.
             mPendingPanicGestureUptime = 0;
-            mStatusBarController.showTransient();
             if (!isNavBarEmpty(vis)) {
-                mNavigationBarController.showTransient();
+                mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
+                        new int[] {ITYPE_NAVIGATION_BAR}));
             }
         }
 
@@ -3908,6 +3916,9 @@ public class DisplayPolicy {
     }
 
     private boolean isImmersiveMode(WindowState win) {
+        if (win == null) {
+            return false;
+        }
         final int behavior = win.mAttrs.insetsFlags.behavior;
         return getNavigationBar() != null
                 && canHideNavigationBar()
@@ -3942,11 +3953,7 @@ public class DisplayPolicy {
                     return;
                 }
                 mPendingPanicGestureUptime = SystemClock.uptimeMillis();
-                if (!isNavBarEmpty(mLastSystemUiFlags)) {
-                    mNavigationBarController.showTransient();
-                    mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
-                            new int[] {ITYPE_NAVIGATION_BAR}));
-                }
+                updateSystemUiVisibilityLw();
             }
         }
     };
@@ -3955,7 +3962,7 @@ public class DisplayPolicy {
         // Detect user pressing the power button in panic when an application has
         // taken over the whole screen.
         boolean panic = mImmersiveModeConfirmation.onPowerKeyDown(isScreenOn,
-                SystemClock.elapsedRealtime(), isImmersiveMode(mLastSystemUiFlags),
+                SystemClock.elapsedRealtime(), isImmersiveMode(mSystemUiControllingWindow),
                 isNavBarEmpty(mLastSystemUiFlags));
         if (panic) {
             mHandler.post(mHiddenNavPanic);
