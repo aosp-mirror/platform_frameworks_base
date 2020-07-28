@@ -17,20 +17,27 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.support.test.launcherhelper.ILauncherStrategy
+import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import org.junit.Assert
 
-class PipAppHelper(instr: Instrumentation) : FlickerAppHelper(instr, "PipApp") {
+class PipAppHelper(
+    instr: Instrumentation,
+    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
+            .getInstance(instr)
+            .launcherStrategy
+) : FlickerAppHelper(instr, "PipApp", launcherStrategy) {
     fun clickEnterPipButton(device: UiDevice) {
         val enterPipButton = device.findObject(By.res(getPackage(), "enter_pip"))
         Assert.assertNotNull("Pip button not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)", enterPipButton)
         enterPipButton.click()
-        AutomationUtils.hasPipWindow(device)
+        device.hasPipWindow()
     }
 
     fun closePipWindow(device: UiDevice) {
-        AutomationUtils.closePipWindow(device)
+        device.closePipWindow()
     }
 }

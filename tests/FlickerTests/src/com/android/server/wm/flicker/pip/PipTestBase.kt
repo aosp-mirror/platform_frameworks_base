@@ -16,66 +16,36 @@
 
 package com.android.server.wm.flicker.pip
 
-import androidx.test.InstrumentationRegistry
-import androidx.test.filters.LargeTest
-import androidx.test.uiautomator.UiDevice
-import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.WmTraceSubject
-import com.android.server.wm.flicker.helpers.AutomationUtils
+import com.android.server.wm.flicker.dsl.WmAssertion
 import com.android.server.wm.flicker.helpers.PipAppHelper
-import org.junit.AfterClass
-import org.junit.FixMethodOrder
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
-import org.junit.runners.Parameterized
 
-@LargeTest
-@RunWith(Parameterized::class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 abstract class PipTestBase(
-    beginRotationName: String,
-    beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        testApp = PipAppHelper(instrumentation)
-    }
+    rotationName: String,
+    rotation: Int
+) : NonRotationTestBase(rotationName, rotation) {
+    protected val testApp = PipAppHelper(instrumentation)
 
-    @Test
-    fun checkVisibility_pipWindowBecomesVisible() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .skipUntilFirstAssertion()
+    protected fun WmAssertion.pipWindowBecomesVisible() {
+        all("pipWindowBecomesVisible") {
+            this.skipUntilFirstAssertion()
                     .showsAppWindowOnTop(sPipWindowTitle)
                     .then()
                     .hidesAppWindow(sPipWindowTitle)
-                    .forAllEntries()
         }
     }
 
-    @Test
-    fun checkVisibility_pipLayerBecomesVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .skipUntilFirstAssertion()
+    protected fun LayersAssertion.pipLayerBecomesVisible() {
+        all("pipLayerBecomesVisible") {
+            this.skipUntilFirstAssertion()
                     .showsLayer(sPipWindowTitle)
                     .then()
                     .hidesLayer(sPipWindowTitle)
-                    .forAllEntries()
         }
     }
 
     companion object {
         const val sPipWindowTitle = "PipMenuActivity"
-
-        @AfterClass
-        @JvmStatic
-        fun teardown() {
-            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            if (AutomationUtils.hasPipWindow(device)) {
-                AutomationUtils.closePipWindow(device)
-            }
-        }
     }
 }

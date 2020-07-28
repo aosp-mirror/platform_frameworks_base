@@ -16,11 +16,19 @@
 
 package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
+import android.view.Surface
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,33 +43,53 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CloseImeAutoOpenWindowToHomeTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : CloseImeWindowToHomeTest(beginRotationName, beginRotation) {
-    init {
-        testApp = ImeAppAutoFocusHelper(instrumentation)
-    }
+    rotationName: String,
+    rotation: Int
+) : CloseImeWindowToHomeTest(rotationName, rotation) {
+    override val testApp: ImeAppHelper
+        get() = ImeAppAutoFocusHelper(instrumentation)
 
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.editTextLoseFocusToHome(testApp as ImeAppAutoFocusHelper,
-                instrumentation, uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
-    @FlakyTest(bugId = 141458352)
     @Test
-    override fun checkVisibility_imeWindowBecomesInvisible() {
-        super.checkVisibility_imeWindowBecomesInvisible()
-    }
+    override fun test() {
+        flicker(instrumentation) {
+            withTag { buildTestTag("imeToHomeAutoOpen", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                eachRun {
+                    device.wakeUpAndGoToHomeScreen()
+                    this.setRotation(rotation)
+                    testApp.open()
+                    testApp.openIME(device)
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+            }
+            transitions {
+                device.pressHome()
+                device.waitForIdle()
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+                    imeWindowBecomesInvisible(bugId = 141458352)
+                    imeAppWindowBecomesInvisible(testApp, bugId = 157449248)
+                }
 
-    @FlakyTest(bugId = 141458352)
-    @Test
-    override fun checkVisibility_imeLayerBecomesInvisible() {
-        super.checkVisibility_imeLayerBecomesInvisible()
-    }
-
-    @FlakyTest(bugId = 157449248)
-    @Test
-    override fun checkVisibility_imeAppWindowBecomesInvisible() {
-        super.checkVisibility_imeAppWindowBecomesInvisible()
+                layersTrace {
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible()
+                    noUncoveredRegions(rotation)
+                    navBarLayerRotatesAndScales(rotation)
+                    statusBarLayerRotatesScales(rotation)
+                    imeLayerBecomesInvisible(bugId = 141458352)
+                    imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
+                }
+            }
+        }
     }
 }
