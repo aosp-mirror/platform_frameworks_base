@@ -3402,6 +3402,7 @@ public abstract class Context {
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
             CONNECTIVITY_SERVICE,
+            VCN_MANAGEMENT_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
             VPN_MANAGEMENT_SERVICE,
@@ -3964,6 +3965,16 @@ public abstract class Context {
      * @see android.net.ConnectivityManager
      */
     public static final String CONNECTIVITY_SERVICE = "connectivity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.vcn.VcnManager}
+     * for managing Virtual Carrier Networks
+     *
+     * @see #getSystemService(String)
+     * @see android.net.vcn.VcnManager
+     * @hide
+     */
+    public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
