@@ -4664,7 +4664,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // case where this is the top activity in a pinned stack.
         final boolean isTop = this == stack.getTopNonFinishingActivity();
         final boolean isTopNotPinnedStack = stack.isAttached()
-                && stack.getDisplayArea().isTopNotPinnedStack(stack);
+                && stack.getDisplayArea().isTopNotFinishNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
 
