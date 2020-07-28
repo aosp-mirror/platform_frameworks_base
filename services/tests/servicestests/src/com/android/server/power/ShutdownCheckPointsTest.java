@@ -72,21 +72,32 @@ public class ShutdownCheckPointsTest {
     @Test
     public void testSystemServerEntry() {
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal();
+        mInstance.recordCheckPointInternal("reason1");
 
         assertTrue(dumpToString().startsWith(
-                "Shutdown request from SYSTEM at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from SYSTEM for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
                         + ".testSystemServerEntry\n at "));
     }
 
     @Test
-    public void testSystemServiceBinderEntry() {
+    public void testSystemServerEntryWithoutReason() {
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal(Process.myPid());
+        mInstance.recordCheckPointInternal(null);
 
         assertTrue(dumpToString().startsWith(
-                "Shutdown request from SYSTEM at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from SYSTEM at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"));
+    }
+
+    @Test
+    public void testSystemServiceBinderEntry() {
+        mTestInjector.setCurrentTime(1000);
+        mInstance.recordCheckPointInternal(Process.myPid(), "reason1");
+
+        assertTrue(dumpToString().startsWith(
+                "Shutdown request from SYSTEM for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
                         + ".testSystemServiceBinderEntry\n at "));
     }
@@ -99,10 +110,11 @@ public class ShutdownCheckPointsTest {
         when(mActivityManager.getRunningAppProcesses()).thenReturn(runningAppProcessInfos);
 
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal(1);
+        mInstance.recordCheckPointInternal(1, "reason1");
 
         assertEquals(
-                "Shutdown request from BINDER at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from BINDER for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
                         + ".testCallerProcessBinderEntry\n"
                         + "From process process_name (pid=1)\n\n",
@@ -114,10 +126,11 @@ public class ShutdownCheckPointsTest {
         when(mActivityManager.getRunningAppProcesses()).thenThrow(new RemoteException("Error"));
 
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal(1);
+        mInstance.recordCheckPointInternal(1, "reason1");
 
         assertEquals(
-                "Shutdown request from BINDER at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from BINDER for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
                         + ".testRemoteExceptionOnBinderEntry\n"
                         + "From process ? (pid=1)\n\n",
@@ -127,10 +140,11 @@ public class ShutdownCheckPointsTest {
     @Test
     public void testUnknownProcessBinderEntry() {
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal(1);
+        mInstance.recordCheckPointInternal(1, "reason1");
 
         assertEquals(
-                "Shutdown request from BINDER at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from BINDER for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
                         + ".testUnknownProcessBinderEntry\n"
                         + "From process ? (pid=1)\n\n",
@@ -138,12 +152,22 @@ public class ShutdownCheckPointsTest {
     }
 
     @Test
-    public void testSystemServiceIntentEntry() {
+    public void testBinderEntryWithoutReason() throws RemoteException {
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal("some.intent", "android");
+        mInstance.recordCheckPointInternal(1, null);
 
         assertTrue(dumpToString().startsWith(
-                "Shutdown request from SYSTEM at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from BINDER at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"));
+    }
+
+    @Test
+    public void testSystemServiceIntentEntry() {
+        mTestInjector.setCurrentTime(1000);
+        mInstance.recordCheckPointInternal("some.intent", "android", "reason1");
+
+        assertTrue(dumpToString().startsWith(
+                "Shutdown request from SYSTEM for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
                         + ".testSystemServiceIntentEntry\n at "));
     }
@@ -151,39 +175,47 @@ public class ShutdownCheckPointsTest {
     @Test
     public void testIntentEntry() {
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal("some.intent", "some.app");
+        mInstance.recordCheckPointInternal("some.intent", "some.app", "reason1");
 
         assertEquals(
-                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from INTENT for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "Intent: some.intent\n"
                         + "Package: some.app\n\n",
                 dumpToString());
     }
 
     @Test
+    public void testIntentEntryWithoutReason() {
+        mTestInjector.setCurrentTime(1000);
+        mInstance.recordCheckPointInternal("some.intent", "some.app", null);
+
+        assertTrue(dumpToString().startsWith(
+                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"));
+    }
+
+    @Test
     public void testMultipleEntries() {
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal(1);
+        mInstance.recordCheckPointInternal(1, "reason1");
         mTestInjector.setCurrentTime(2000);
-        mInstance.recordCheckPointInternal(2);
+        mInstance.recordCheckPointInternal(2, "reason2");
         mTestInjector.setCurrentTime(3000);
-        mInstance.recordCheckPointInternal("intent", "app");
+        mInstance.recordCheckPointInternal("intent", "app", "reason3");
 
         assertEquals(
-                "Shutdown request from BINDER at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from BINDER for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest.testMultipleEntries\n"
-                        + "From process ? (pid=1)\n"
-                        + "\n"
-                        + "Shutdown request from BINDER at 1970-01-01 00:00:02.000 UTC (epoch=2000)"
-                        + "\n"
+                        + "From process ? (pid=1)\n\n"
+                        + "Shutdown request from BINDER for reason reason2 "
+                        + "at 1970-01-01 00:00:02.000 UTC (epoch=2000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest.testMultipleEntries\n"
-                        + "From process ? (pid=2)\n"
-                        + "\n"
-                        + "Shutdown request from INTENT at 1970-01-01 00:00:03.000 UTC (epoch=3000)"
-                        + "\n"
+                        + "From process ? (pid=2)\n\n"
+                        + "Shutdown request from INTENT for reason reason3 "
+                        + "at 1970-01-01 00:00:03.000 UTC (epoch=3000)\n"
                         + "Intent: intent\n"
-                        + "Package: app\n"
-                        + "\n",
+                        + "Package: app\n\n",
                 dumpToString());
     }
 
@@ -193,23 +225,22 @@ public class ShutdownCheckPointsTest {
         ShutdownCheckPoints limitedInstance = new ShutdownCheckPoints(mTestInjector);
 
         mTestInjector.setCurrentTime(1000);
-        limitedInstance.recordCheckPointInternal("intent.1", "app.1");
+        limitedInstance.recordCheckPointInternal("intent.1", "app.1", "reason1");
         mTestInjector.setCurrentTime(2000);
-        limitedInstance.recordCheckPointInternal("intent.2", "app.2");
+        limitedInstance.recordCheckPointInternal("intent.2", "app.2", "reason2");
         mTestInjector.setCurrentTime(3000);
-        limitedInstance.recordCheckPointInternal("intent.3", "app.3");
+        limitedInstance.recordCheckPointInternal("intent.3", "app.3", "reason3");
 
         // Drops first intent.
         assertEquals(
-                "Shutdown request from INTENT at 1970-01-01 00:00:02.000 UTC (epoch=2000)\n"
+                "Shutdown request from INTENT for reason reason2 "
+                        + "at 1970-01-01 00:00:02.000 UTC (epoch=2000)\n"
                         + "Intent: intent.2\n"
-                        + "Package: app.2\n"
-                        + "\n"
-                        + "Shutdown request from INTENT at 1970-01-01 00:00:03.000 UTC (epoch=3000)"
-                        + "\n"
+                        + "Package: app.2\n\n"
+                        + "Shutdown request from INTENT for reason reason3 "
+                        + "at 1970-01-01 00:00:03.000 UTC (epoch=3000)\n"
                         + "Intent: intent.3\n"
-                        + "Package: app.3\n"
-                        + "\n",
+                        + "Package: app.3\n\n",
                 dumpToString(limitedInstance));
     }
 
@@ -219,11 +250,11 @@ public class ShutdownCheckPointsTest {
         File baseFile = new File(tempDir, "checkpoints");
 
         mTestInjector.setCurrentTime(1000);
-        mInstance.recordCheckPointInternal("first.intent", "first.app");
+        mInstance.recordCheckPointInternal("first.intent", "first.app", "reason1");
         dumpToFile(baseFile);
 
         mTestInjector.setCurrentTime(2000);
-        mInstance.recordCheckPointInternal("second.intent", "second.app");
+        mInstance.recordCheckPointInternal("second.intent", "second.app", "reason2");
         dumpToFile(baseFile);
 
         File[] dumpFiles = tempDir.listFiles();
@@ -231,16 +262,18 @@ public class ShutdownCheckPointsTest {
 
         assertEquals(2, dumpFiles.length);
         assertEquals(
-                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from INTENT for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "Intent: first.intent\n"
                         + "Package: first.app\n\n",
                 readFileAsString(dumpFiles[0].getAbsolutePath()));
         assertEquals(
-                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from INTENT for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "Intent: first.intent\n"
                         + "Package: first.app\n\n"
-                        + "Shutdown request from INTENT at 1970-01-01 00:00:02.000 UTC (epoch=2000)"
-                        + "\n"
+                        + "Shutdown request from INTENT for reason reason2 "
+                        + "at 1970-01-01 00:00:02.000 UTC (epoch=2000)\n"
                         + "Intent: second.intent\n"
                         + "Package: second.app\n\n",
                 readFileAsString(dumpFiles[1].getAbsolutePath()));
@@ -254,21 +287,22 @@ public class ShutdownCheckPointsTest {
         File baseFile = new File(tempDir, "checkpoints");
 
         mTestInjector.setCurrentTime(1000);
-        instance.recordCheckPointInternal("first.intent", "first.app");
+        instance.recordCheckPointInternal("first.intent", "first.app", "reason1");
         dumpToFile(instance, baseFile);
 
         mTestInjector.setCurrentTime(2000);
-        instance.recordCheckPointInternal("second.intent", "second.app");
+        instance.recordCheckPointInternal("second.intent", "second.app", "reason2");
         dumpToFile(instance, baseFile);
 
         File[] dumpFiles = tempDir.listFiles();
         assertEquals(1, dumpFiles.length);
         assertEquals(
-                "Shutdown request from INTENT at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                "Shutdown request from INTENT for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "Intent: first.intent\n"
                         + "Package: first.app\n\n"
-                        + "Shutdown request from INTENT at 1970-01-01 00:00:02.000 UTC (epoch=2000)"
-                        + "\n"
+                        + "Shutdown request from INTENT for reason reason2 "
+                        + "at 1970-01-01 00:00:02.000 UTC (epoch=2000)\n"
                         + "Intent: second.intent\n"
                         + "Package: second.app\n\n",
                 readFileAsString(dumpFiles[0].getAbsolutePath()));

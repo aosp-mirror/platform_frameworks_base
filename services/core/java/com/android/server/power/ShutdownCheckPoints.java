@@ -90,18 +90,19 @@ public final class ShutdownCheckPoints {
     }
 
     /** Records the stack trace of this {@link Thread} as a shutdown check point. */
-    public static void recordCheckPoint() {
-        INSTANCE.recordCheckPointInternal();
+    public static void recordCheckPoint(@Nullable String reason) {
+        INSTANCE.recordCheckPointInternal(reason);
     }
 
     /** Records the pid of the caller process as a shutdown check point. */
-    public static void recordCheckPoint(int callerProcessId) {
-        INSTANCE.recordCheckPointInternal(callerProcessId);
+    public static void recordCheckPoint(int callerProcessId, @Nullable String reason) {
+        INSTANCE.recordCheckPointInternal(callerProcessId, reason);
     }
 
     /** Records the {@link android.content.Intent} name and package as a shutdown check point. */
-    public static void recordCheckPoint(String intentName, String packageName) {
-        INSTANCE.recordCheckPointInternal(intentName, packageName);
+    public static void recordCheckPoint(
+            String intentName, String packageName, @Nullable String reason) {
+        INSTANCE.recordCheckPointInternal(intentName, packageName, reason);
     }
 
     /** Serializes the recorded check points and writes them to given {@code printWriter}. */
@@ -119,24 +120,24 @@ public final class ShutdownCheckPoints {
     }
 
     @VisibleForTesting
-    void recordCheckPointInternal() {
-        recordCheckPointInternal(new SystemServerCheckPoint(mInjector));
+    void recordCheckPointInternal(@Nullable String reason) {
+        recordCheckPointInternal(new SystemServerCheckPoint(mInjector, reason));
         Slog.v(TAG, "System server shutdown checkpoint recorded");
     }
 
     @VisibleForTesting
-    void recordCheckPointInternal(int callerProcessId) {
+    void recordCheckPointInternal(int callerProcessId, @Nullable String reason) {
         recordCheckPointInternal(callerProcessId == Process.myPid()
-                ? new SystemServerCheckPoint(mInjector)
-                : new BinderCheckPoint(mInjector, callerProcessId));
+                ? new SystemServerCheckPoint(mInjector, reason)
+                : new BinderCheckPoint(mInjector, callerProcessId, reason));
         Slog.v(TAG, "Binder shutdown checkpoint recorded with pid=" + callerProcessId);
     }
 
     @VisibleForTesting
-    void recordCheckPointInternal(String intentName, String packageName) {
+    void recordCheckPointInternal(String intentName, String packageName, @Nullable String reason) {
         recordCheckPointInternal("android".equals(packageName)
-                ? new SystemServerCheckPoint(mInjector)
-                : new IntentCheckPoint(mInjector, intentName, packageName));
+                ? new SystemServerCheckPoint(mInjector, reason)
+                : new IntentCheckPoint(mInjector, intentName, packageName, reason));
         Slog.v(TAG, String.format("Shutdown intent checkpoint recorded intent=%s from package=%s",
                 intentName, packageName));
     }
@@ -182,14 +183,20 @@ public final class ShutdownCheckPoints {
     private abstract static class CheckPoint {
 
         private final long mTimestamp;
+        @Nullable private final String mReason;
 
-        CheckPoint(Injector injector) {
+        CheckPoint(Injector injector, @Nullable String reason) {
             mTimestamp = injector.currentTimeMillis();
+            mReason = reason;
         }
 
         final void dump(PrintWriter printWriter) {
             printWriter.print("Shutdown request from ");
             printWriter.print(getOrigin());
+            if (mReason != null) {
+                printWriter.print(" for reason ");
+                printWriter.print(mReason);
+            }
             printWriter.print(" at ");
             printWriter.print(DATE_FORMAT.format(new Date(mTimestamp)));
             printWriter.println(" (epoch=" + mTimestamp + ")");
@@ -206,8 +213,8 @@ public final class ShutdownCheckPoints {
 
         private final StackTraceElement[] mStackTraceElements;
 
-        SystemServerCheckPoint(Injector injector) {
-            super(injector);
+        SystemServerCheckPoint(Injector injector, @Nullable String reason) {
+            super(injector, reason);
             mStackTraceElements = Thread.currentThread().getStackTrace();
         }
 
@@ -263,8 +270,8 @@ public final class ShutdownCheckPoints {
         private final int mCallerProcessId;
         private final IActivityManager mActivityManager;
 
-        BinderCheckPoint(Injector injector, int callerProcessId) {
-            super(injector);
+        BinderCheckPoint(Injector injector, int callerProcessId, @Nullable String reason) {
+            super(injector, reason);
             mCallerProcessId = callerProcessId;
             mActivityManager = injector.activityManager();
         }
@@ -307,8 +314,9 @@ public final class ShutdownCheckPoints {
         private final String mIntentName;
         private final String mPackageName;
 
-        IntentCheckPoint(Injector injector, String intentName, String packageName) {
-            super(injector);
+        IntentCheckPoint(
+                Injector injector, String intentName, String packageName, @Nullable String reason) {
+            super(injector, reason);
             mIntentName = intentName;
             mPackageName = packageName;
         }
