@@ -445,14 +445,14 @@ message GlobalSettingsProto {
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
         optional SettingProto game_driver_opt_out_apps = 10;
         // Game Driver - List of Apps that are forbidden to use Game Driver
-        optional SettingProto game_driver_blacklist = 11;
+        optional SettingProto game_driver_denylist = 11;
         // Game Driver - List of Apps that are allowed to use Game Driver
-        optional SettingProto game_driver_whitelist = 12;
+        optional SettingProto game_driver_allowlist = 12;
         // ANGLE - List of Apps that can check ANGLE rules
         optional SettingProto angle_whitelist = 13;
-        // Game Driver - List of blacklists, each blacklist is a blacklist for
+        // Game Driver - List of denylists, each denylist is a denylist for
         // a specific Game Driver version
-        optional SettingProto game_driver_blacklists = 14;
+        optional SettingProto game_driver_denylists = 14;
         // ANGLE - Show a dialog box when ANGLE is selected for the currently running PKG
         optional SettingProto show_angle_in_use_dialog = 15;
         // Game Driver - List of libraries in sphal accessible by Game Driver
