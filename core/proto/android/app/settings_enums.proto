@@ -2693,4 +2693,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R QPR
     SETTINGS_SWIPE_BOTTOM_TO_NOTIFICATION = 1846;
+
+    // OPEN: Settings > System > Gestures > Emergency SOS Gesture
+    // CATEGORY: SETTINGS
+    // OS: S
+    EMERGENCY_SOS_GESTURE_SETTINGS = 1847;
 }
