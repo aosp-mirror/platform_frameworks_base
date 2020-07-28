@@ -75,6 +75,16 @@ public class TimeZoneDetectorInternalImplTest {
         mFakeTimeZoneDetectorStrategy.verifySuggestGeolocationTimeZoneCalled(timeZoneSuggestion);
     }
 
+    @Test
+    public void testAddDumpable() throws Exception {
+        Dumpable stubbedDumpable = mock(Dumpable.class);
+
+        mTimeZoneDetectorInternal.addDumpable(stubbedDumpable);
+        mTestHandler.assertTotalMessagesEnqueued(0);
+
+        mFakeTimeZoneDetectorStrategy.verifyHasDumpable(stubbedDumpable);
+    }
+
     private static GeolocationTimeZoneSuggestion createGeolocationTimeZoneSuggestion() {
         return new GeolocationTimeZoneSuggestion(ARBITRARY_ZONE_IDS);
     }

@@ -30,9 +30,9 @@ import android.util.IndentingPrintWriter;
  * <p>The strategy uses suggestions to decide whether to modify the device's time zone setting
  * and what to set it to.
  *
- * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
- * {@link #dump(IndentingPrintWriter, String[])}) may be called on a different thread so
- * implementations mustvhandle thread safety.
+ * <p>Most calls will be handled by a single thread, but that is not true for all calls. For example
+ * {@link #dump(IndentingPrintWriter, String[])}) may be called on a different thread concurrently
+ * with other operations so implementations must still handle thread safety.
  *
  * @hide
  */
