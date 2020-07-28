@@ -3143,13 +3143,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             synchronized (mLock) {
                 assertCallerIsOwnerOrRootLocked();
                 assertPreparedAndNotSealedLocked("removeChildSessionId");
+
                 final int indexOfSession = mChildSessionIds.indexOfKey(sessionId);
-                if (session != null) {
-                    session.setParentSessionId(SessionInfo.INVALID_ID);
-                }
                 if (indexOfSession < 0) {
                     // not added in the first place; no-op
                     return;
+                }
+                if (session != null) {
+                    session.setParentSessionId(SessionInfo.INVALID_ID);
                 }
                 mChildSessionIds.removeAt(indexOfSession);
             }
