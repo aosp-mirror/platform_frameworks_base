@@ -462,8 +462,8 @@ public final class Call {
 
         /**
          * Call supports adding participants to the call via
-         * {@link #addConferenceParticipants(List)}.
-         * @hide
+         * {@link #addConferenceParticipants(List)}. Once participants are added, the call becomes
+         * an adhoc conference call ({@link #PROPERTY_IS_ADHOC_CONFERENCE}).
          */
         public static final int CAPABILITY_ADD_PARTICIPANT = 0x02000000;
 
@@ -599,8 +599,11 @@ public final class Call {
 
         /**
          * Indicates that the call is an adhoc conference call. This property can be set for both
-         * incoming and outgoing calls.
-         * @hide
+         * incoming and outgoing calls. An adhoc conference call is formed using
+         * {@link #addConferenceParticipants(List)},
+         * {@link TelecomManager#addNewIncomingConference(PhoneAccountHandle, Bundle)}, or
+         * {@link TelecomManager#startConference(List, Bundle)}, rather than by merging existing
+         * call using {@link #conference(Call)}.
          */
         public static final int PROPERTY_IS_ADHOC_CONFERENCE = 0x00002000;
 
@@ -1775,7 +1778,6 @@ public final class Call {
      * See {@link Details#CAPABILITY_ADD_PARTICIPANT}.
      *
      * @param participants participants to be pulled to existing call.
-     * @hide
      */
     public void addConferenceParticipants(@NonNull List<Uri> participants) {
         mInCallAdapter.addConferenceParticipants(mTelecomCallId, participants);
