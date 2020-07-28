@@ -25,7 +25,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
-import android.util.Slog;
 
 import com.android.server.SystemService;
 
@@ -53,7 +52,7 @@ public class MediaResourceMonitorService extends SystemService {
         public void notifyResourceGranted(int pid, int type)
                 throws RemoteException {
             if (DEBUG) {
-                Slog.d(TAG, "notifyResourceGranted(pid=" + pid + ", type=" + type + ")");
+                Log.d(TAG, "notifyResourceGranted(pid=" + pid + ", type=" + type + ")");
             }
             final long identity = Binder.clearCallingIdentity();
             try {
