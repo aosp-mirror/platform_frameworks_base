@@ -2544,10 +2544,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayAreaPolicy.getDefaultTaskDisplayArea();
     }
 
-    void positionDisplayAt(int position, boolean includingParents) {
-        getParent().positionChildAt(position, this, includingParents);
-    }
-
     /**
      * Returns true if the input point is within an app window.
      */
