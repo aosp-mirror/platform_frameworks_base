@@ -16,16 +16,16 @@
 
 syntax = "proto2";
 
-package android.gamedriver;
+package android.updatabledriver;
 
-option java_package = "android.gamedriver";
-option java_outer_classname = "GameDriverProto";
+option java_package = "android.updatabledriver";
+option java_outer_classname = "UpdatableDriverProto";
 
-message Blacklist {
+message Denylist {
     optional int64 version_code = 1;
     repeated string package_names = 2;
 }
 
-message Blacklists {
-    repeated Blacklist blacklists = 1;
+message Denylists {
+    repeated Denylist denylists = 1;
 }
