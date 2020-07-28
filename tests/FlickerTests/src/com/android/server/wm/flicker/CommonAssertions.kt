@@ -53,19 +53,19 @@ fun LayersAssertion.noUncoveredRegions(
     if (allStates) {
         all("noUncoveredRegions", enabled, bugId) {
             if (startingBounds == endingBounds) {
-                this.coversRegion(startingBounds)
+                this.coversAtLeastRegion(startingBounds)
             } else {
-                this.coversRegion(startingBounds)
+                this.coversAtLeastRegion(startingBounds)
                         .then()
-                        .coversRegion(endingBounds)
+                        .coversAtLeastRegion(endingBounds)
             }
         }
     } else {
         start("noUncoveredRegions_StartingPos") {
-            this.coversRegion(startingBounds)
+            this.coversAtLeastRegion(startingBounds)
         }
         end("noUncoveredRegions_EndingPos") {
-            this.coversRegion(endingBounds)
+            this.coversAtLeastRegion(endingBounds)
         }
     }
 }
