@@ -3402,7 +3402,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void destroyInternal() {
         synchronized (mLock) {
             mSealed = true;
-            if (!params.isStaged || isStagedAndInTerminalState()) {
+            if (!params.isStaged) {
                 mDestroyed = true;
             }
             // Force shut down all bridges
