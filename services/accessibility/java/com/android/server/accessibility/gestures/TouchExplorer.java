@@ -24,6 +24,7 @@ import android.accessibilityservice.AccessibilityGestureEvent;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -73,11 +74,20 @@ public class TouchExplorer extends BaseEventStreamTransformation
     // The timeout after which we are no longer trying to detect a gesture.
     private static final int EXIT_GESTURE_DETECTION_TIMEOUT = 2000;
 
+    // The height of the top and bottom edges for  edge-swipes.
+    // For now this is only used to allow three-finger edge-swipes from the bottom.
+    private static final float EDGE_SWIPE_HEIGHT_CM = 0.25f;
+
+    // The calculated edge height for the top and bottom edges.
+    private final float mEdgeSwipeHeightPixels;
     // Timeout before trying to decide what the user is trying to do.
     private final int mDetermineUserIntentTimeout;
 
     // Slop between the first and second tap to be a double tap.
     private final int mDoubleTapSlop;
+
+    // Slop to move before being considered a move rather than a tap.
+    private final int mTouchSlop;
 
     // The current state of the touch explorer.
     private TouchState mState;
@@ -151,6 +161,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mDispatcher = new EventDispatcher(context, mAms, super.getNext(), mState);
         mDetermineUserIntentTimeout = ViewConfiguration.getDoubleTapTimeout();
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        mEdgeSwipeHeightPixels = metrics.ydpi / GestureUtils.CM_PER_INCH * EDGE_SWIPE_HEIGHT_CM;
         mHandler = new Handler(context.getMainLooper());
         mExitGestureDetectionModeDelayed = new ExitGestureDetectionModeDelayed();
         mSendHoverEnterAndMoveDelayed = new SendHoverEnterAndMoveDelayed();
@@ -196,16 +209,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (mState.isTouchExploring()) {
             // If a touch exploration gesture is in progress send events for its end.
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-        }  else if (mState.isDragging()) {
-            mDraggingPointerId = INVALID_POINTER_ID;
-            // Send exit to all pointers that we have delivered.
-            mDispatcher.sendUpForInjectedDownPointers(event, policyFlags);
-        } else if (mState.isDelegating()) {
-            // Send exit to all pointers that we have delivered.
-            mDispatcher.sendUpForInjectedDownPointers(event, policyFlags);
-        } else if (mState.isGestureDetecting()) {
-            // No state specific cleanup required.
         }
+        mDraggingPointerId = INVALID_POINTER_ID;
+        // Send exit to any pointers that we have delivered as part of delegating or dragging.
+        mDispatcher.sendUpForInjectedDownPointers(event, policyFlags);
         // Remove all pending callbacks.
         mSendHoverEnterAndMoveDelayed.cancel();
         mSendHoverExitDelayed.cancel();
@@ -532,7 +539,26 @@ public class TouchExplorer extends BaseEventStreamTransformation
             // stream consistent.
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         }
+        if (mGestureDetector.isMultiFingerGesturesEnabled()
+                && mGestureDetector.isTwoFingerPassthroughEnabled()) {
+            if (event.getPointerCount() == 3) {
+                boolean isOnBottomEdge = false;
+                // If three fingers go down on the bottom edge of the screen, delegate immediately.
+                final long screenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
+                for (int i = 0; i < TouchState.MAX_POINTER_COUNT; ++i) {
+                    if (mReceivedPointerTracker.getReceivedPointerDownY(i)
+                            > (screenHeight - mEdgeSwipeHeightPixels)) {
+                        isOnBottomEdge = true;
+                    }
+                }
+                if (isOnBottomEdge) {
+                    mState.startDelegating();
+                    mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
+                }
+            }
+        }
     }
+
     /**
      * Handles ACTION_MOVE while in the touch interacting state. This is where transitions to
      * delegating and dragging states are handled.
@@ -541,7 +567,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
             MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
         final int pointerIndex = event.findPointerIndex(pointerId);
-        final int pointerIdBits = (1 << pointerId);
+        int pointerIdBits = (1 << pointerId);
         switch (event.getPointerCount()) {
             case 1:
                 // We have not started sending events since we try to
@@ -552,12 +578,26 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 }
                 break;
             case 2:
-                if (mGestureDetector.isMultiFingerGesturesEnabled()) {
+                if (mGestureDetector.isMultiFingerGesturesEnabled()
+                        && !mGestureDetector.isTwoFingerPassthroughEnabled()) {
                     return;
                 }
                 // Make sure we don't have any pending transitions to touch exploration
                 mSendHoverEnterAndMoveDelayed.cancel();
                 mSendHoverExitDelayed.cancel();
+                if (mGestureDetector.isMultiFingerGesturesEnabled()
+                        && mGestureDetector.isTwoFingerPassthroughEnabled()) {
+                    final float deltaX =
+                            mReceivedPointerTracker.getReceivedPointerDownX(pointerId)
+                                    - rawEvent.getX(pointerIndex);
+                    final float deltaY =
+                            mReceivedPointerTracker.getReceivedPointerDownY(pointerId)
+                                    - rawEvent.getY(pointerIndex);
+                    final double moveDelta = Math.hypot(deltaX, deltaY);
+                    if (moveDelta < mTouchSlop) {
+                        return;
+                    }
+                }
                 // More than one pointer so the user is not touch exploring
                 // and now we have to decide whether to delegate or drag.
                 // Remove move history before send injected non-move events
@@ -566,8 +606,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     // Two pointers moving in the same direction within
                     // a given distance perform a drag.
                     mState.startDragging();
-                    mDraggingPointerId = pointerId;
                     adjustEventLocationForDrag(event);
+                    pointerIdBits = 1 << mDraggingPointerId;
                     event.setEdgeFlags(mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
                     mDispatcher.sendMotionEvent(
                             event, MotionEvent.ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
@@ -626,7 +666,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
                         event, MotionEvent.ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
                 break;
             case 2:
-                if (mGestureDetector.isMultiFingerGesturesEnabled()) {
+                if (mGestureDetector.isMultiFingerGesturesEnabled()
+                        && !mGestureDetector.isTwoFingerPassthroughEnabled()) {
                     return;
                 }
                 if (mSendHoverEnterAndMoveDelayed.isPending()) {
@@ -681,7 +722,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
      */
     private void handleMotionEventStateDragging(
             MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (mGestureDetector.isMultiFingerGesturesEnabled()) {
+        if (mGestureDetector.isMultiFingerGesturesEnabled()
+                && !mGestureDetector.isTwoFingerPassthroughEnabled()) {
             // Multi-finger gestures conflict with this functionality.
             return;
         }
@@ -734,6 +776,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                             // The two pointers are moving either in different directions or
                             // no close enough => delegate the gesture to the view hierarchy.
                             mState.startDelegating();
+                            mDraggingPointerId = INVALID_POINTER_ID;
                             // Remove move history before send injected non-move events
                             event = MotionEvent.obtainNoHistory(event);
                             // Send an event to the end of the drag gesture.
@@ -749,6 +792,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     } break;
                     default: {
                         mState.startDelegating();
+                        mDraggingPointerId = INVALID_POINTER_ID;
                         event = MotionEvent.obtainNoHistory(event);
                         // Send an event to the end of the drag gesture.
                         mDispatcher.sendMotionEvent(
@@ -772,17 +816,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
                  }
             } break;
             case MotionEvent.ACTION_UP: {
+                final int pointerId = event.getPointerId(event.getActionIndex());
+                if (pointerId == mDraggingPointerId) {
+                    mDispatcher.sendMotionEvent(
+                            event, MotionEvent.ACTION_UP, rawEvent, pointerIdBits, policyFlags);
+                }
                 mAms.onTouchInteractionEnd();
                 // Announce the end of a new touch interaction.
                 mDispatcher.sendAccessibilityEvent(
                         AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-                final int pointerId = event.getPointerId(event.getActionIndex());
-                if (pointerId == mDraggingPointerId) {
-                    mDraggingPointerId = INVALID_POINTER_ID;
-                    // Send an event to the end of the drag gesture.
-                    mDispatcher.sendMotionEvent(
-                            event, MotionEvent.ACTION_UP, rawEvent, pointerIdBits, policyFlags);
-                }
             } break;
         }
     }
@@ -901,21 +943,55 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     /**
-     * Adjust the location of an injected event when performing a drag The new location will be in
-     * between the two fingers touching the screen.
+     * Adjust the location of an injected event when performing a drag. The location will be the
+     * location of the finger closest to an edge of the screen.
      */
     private void adjustEventLocationForDrag(MotionEvent event) {
-
         final float firstPtrX = event.getX(0);
         final float firstPtrY = event.getY(0);
+        final int firstPtrId = event.getPointerId(0);
         final float secondPtrX = event.getX(1);
         final float secondPtrY = event.getY(1);
-        final int pointerIndex = event.findPointerIndex(mDraggingPointerId);
-        final float deltaX =
-                (pointerIndex == 0) ? (secondPtrX - firstPtrX) : (firstPtrX - secondPtrX);
-        final float deltaY =
-                (pointerIndex == 0) ? (secondPtrY - firstPtrY) : (firstPtrY - secondPtrY);
-        event.offsetLocation(deltaX / 2, deltaY / 2);
+        final int secondPtrId = event.getPointerId(1);
+        float draggingX;
+        float draggingY;
+        if (mDraggingPointerId == INVALID_POINTER_ID) {
+            // The goal is to use the coordinates of the finger that is closest to its closest edge.
+            if (getDistanceToClosestEdge(firstPtrX, firstPtrY)
+                    < getDistanceToClosestEdge(secondPtrX, secondPtrY)) {
+                draggingX = firstPtrX;
+                draggingY = firstPtrY;
+                mDraggingPointerId = firstPtrId;
+            } else {
+                draggingX = secondPtrX;
+                draggingY = secondPtrY;
+                mDraggingPointerId = secondPtrId;
+            }
+        } else {
+            // Just use the coordinates of the dragging pointer.
+            int pointerIndex = event.findPointerIndex(mDraggingPointerId);
+            draggingX = event.getX(pointerIndex);
+            draggingY = event.getY(pointerIndex);
+        }
+        event.setLocation(draggingX, draggingY);
+    }
+
+    private float getDistanceToClosestEdge(float x, float y) {
+        final long width = mContext.getResources().getDisplayMetrics().widthPixels;
+        final long height = mContext.getResources().getDisplayMetrics().heightPixels;
+        float distance = Float.MAX_VALUE;
+        if (x < (width - x)) {
+            distance = x;
+        } else {
+            distance = width - x;
+        }
+        if (distance > y) {
+            distance = y;
+        }
+        if (distance > (height - y)) {
+            distance = (height - y);
+        }
+        return distance;
     }
 
     public TouchState getState() {
@@ -944,6 +1020,13 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mGestureDetector.setMultiFingerGesturesEnabled(enabled);
     }
 
+    /**
+     * This function turns on and off two-finger passthrough gestures such as drag and pinch when
+     * multi-finger gestures are enabled.
+     */
+    public void setTwoFingerPassthroughEnabled(boolean enabled) {
+        mGestureDetector.setTwoFingerPassthroughEnabled(enabled);
+    }
     public void setGestureDetectionPassthroughRegion(Region region) {
         mGestureDetectionPassthroughRegion = region;
     }

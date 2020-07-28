@@ -31,6 +31,7 @@ import android.os.SystemClock;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -72,6 +73,8 @@ public class TouchExplorerTest {
     private EventStreamTransformation mCaptor;
     private MotionEvent mLastEvent;
     private TouchExplorer mTouchExplorer;
+    private Context mContext;
+    private int mTouchSlop;
     private long mLastDownTime = Integer.MIN_VALUE;
 
     // mock package-private GestureManifold class
@@ -109,11 +112,12 @@ public class TouchExplorerTest {
 
     @Before
     public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-        AccessibilityManagerService ams = new AccessibilityManagerService(context);
+        mContext = InstrumentationRegistry.getContext();
+        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        AccessibilityManagerService ams = new AccessibilityManagerService(mContext);
         GestureManifold detector = mock(GestureManifold.class);
         mCaptor = new EventCaptor();
-        mTouchExplorer = new TouchExplorer(context, ams, detector);
+        mTouchExplorer = new TouchExplorer(mContext, ams, detector);
         mTouchExplorer.setNext(mCaptor);
     }
 
@@ -226,13 +230,13 @@ public class TouchExplorerTest {
                 break;
                 case STATE_DRAGGING_2FINGERS: {
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
-                    moveEachPointers(mLastEvent, p(10, 0), p(10, 0));
+                    moveEachPointers(mLastEvent, p(mTouchSlop, 0), p(mTouchSlop, 0));
                     send(mLastEvent);
                 }
                 break;
                 case STATE_PINCH_2FINGERS: {
                     goFromStateClearTo(STATE_DRAGGING_2FINGERS);
-                    moveEachPointers(mLastEvent, p(10, 0), p(-10, 1));
+                    moveEachPointers(mLastEvent, p(mTouchSlop, 0), p(-mTouchSlop, 1));
                     send(mLastEvent);
                 }
                 break;
