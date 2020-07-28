@@ -46,31 +46,90 @@ import java.util.function.BiFunction;
  * A builder for instantiating a complex {@link DisplayAreaPolicy}
  *
  * <p>Given a set of features (that each target a set of window types), it builds the necessary
- * DisplayArea hierarchy.
+ * {@link DisplayArea} hierarchy.
  *
- * <p>Example: <br />
+ * <p>Example:
  *
- * <pre>
- *     // Feature for targeting everything below the magnification overlay:
- *     new DisplayAreaPolicyBuilder(...)
- *             .addFeature(new Feature.Builder(..., "Magnification")
- *                     .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
- *                     .build())
- *             .build(...)
+ * <pre class="prettyprint">
+ *      // Build root hierarchy of the logical display.
+ *      DisplayAreaPolicyBuilder.HierarchyBuilder rootHierarchy =
+ *          new DisplayAreaPolicyBuilder.HierarchyBuilder(root)
+ *              // Feature for targeting everything below the magnification overlay
+ *              .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
+ *                             "WindowedMagnification", FEATURE_WINDOWED_MAGNIFICATION)
+ *                             .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+ *                             .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+ *                             // Make the DA dimmable so that the magnify window also mirrors the
+ *                             // dim layer
+ *                             .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
+ *                             .build())
+ *              .setImeContainer(imeContainer)
+ *              .setTaskDisplayAreas(rootTdaList);
  *
- *     // Builds a policy with the following hierarchy:
- *      - RootDisplayArea
- *        - Magnification
- *          - DisplayArea.Tokens (Wallpapers are attached here)
- *          - TaskDisplayArea
- *          - DisplayArea.Tokens (windows above Tasks up to IME are attached here)
- *          - ImeContainers
- *          - DisplayArea.Tokens (windows above IME up to TYPE_ACCESSIBILITY_OVERLAY attached here)
- *        - DisplayArea.Tokens (TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY and up are attached here)
+ *      // Build root hierarchy of front and rear DisplayAreaGroup.
+ *      RootDisplayArea frontRoot = new RootDisplayArea(wmService, "FrontRoot", FEATURE_FRONT_ROOT);
+ *      DisplayAreaPolicyBuilder.HierarchyBuilder frontGroupHierarchy =
+ *          new DisplayAreaPolicyBuilder.HierarchyBuilder(frontRoot)
+ *              // (Optional) .addFeature(...)
+ *              .setTaskDisplayAreas(frontTdaList);
  *
+ *      RootDisplayArea rearRoot = new RootDisplayArea(wmService, "RearRoot", FEATURE_REAR_ROOT);
+ *      DisplayAreaPolicyBuilder.HierarchyBuilder rearGroupHierarchy =
+ *          new DisplayAreaPolicyBuilder.HierarchyBuilder(rearRoot)
+ *              // (Optional) .addFeature(...)
+ *              .setTaskDisplayAreas(rearTdaList);
+ *
+ *      // Define the function to select root for window to attach.
+ *      BiFunction<WindowToken, Bundle, RootDisplayArea> selectRootForWindowFunc =
+ *                (windowToken, bundle) -> {
+ *                    if (bundle == null) {
+ *                        return root;
+ *                    }
+ *                    // OEMs need to define the condition.
+ *                    if (...) {
+ *                        return frontRoot;
+ *                    }
+ *                    if (...) {
+ *                        return rearRoot;
+ *                    }
+ *                    return root;
+ *                };
+ *
+ *      return new DisplayAreaPolicyBuilder()
+ *                .setRootHierarchy(rootHierarchy)
+ *                .addDisplayAreaGroupHierarchy(frontGroupHierarchy)
+ *                .addDisplayAreaGroupHierarchy(rearGroupHierarchy)
+ *                .setSelectRootForWindowFunc(selectRootForWindowFunc)
+ *                .build(wmService, content);
  * </pre>
  *
- * // TODO(b/158713595): document more complex scenarios where we need multiple areas per feature.
+ * This builds a policy with the following hierarchy:
+ * <pre class="prettyprint">
+ *      - RootDisplayArea (DisplayContent)
+ *          - WindowedMagnification
+ *              - DisplayArea.Tokens (Wallpapers can be attached here)
+ *              - TaskDisplayArea
+ *              - RootDisplayArea (FrontRoot)
+ *                  - DisplayArea.Tokens (Wallpapers can be attached here)
+ *                  - TaskDisplayArea
+ *                  - DisplayArea.Tokens (windows above Tasks up to IME can be attached here)
+ *                  - DisplayArea.Tokens (windows above IME can be attached here)
+ *              - RootDisplayArea (RearRoot)
+ *                  - DisplayArea.Tokens (Wallpapers can be attached here)
+ *                  - TaskDisplayArea
+ *                  - DisplayArea.Tokens (windows above Tasks up to IME can be attached here)
+ *                  - DisplayArea.Tokens (windows above IME can be attached here)
+ *              - DisplayArea.Tokens (windows above Tasks up to IME can be attached here)
+ *              - ImeContainers
+ *              - DisplayArea.Tokens (windows above IME up to TYPE_ACCESSIBILITY_OVERLAY can be
+ *                                    attached here)
+ *          - DisplayArea.Tokens (TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY and up can be attached
+ *                                here)
+ * </pre>
+ * When a {@link WindowToken} of Wallpaper needs to be attached, the policy will call the OEM
+ * defined {@link #mSelectRootForWindowFunc} to get a {@link RootDisplayArea}. It will then place
+ * the window to the corresponding {@link DisplayArea.Tokens} under the returned root
+ * {@link RootDisplayArea}.
  */
 class DisplayAreaPolicyBuilder {
     @Nullable private HierarchyBuilder mRootHierarchyBuilder;
@@ -396,7 +455,7 @@ class DisplayAreaPolicyBuilder {
         /**
          * Returns the id of the feature.
          *
-         * Must be unique among the features added to a {@link DisplayAreaPolicyBuilder}.
+         * <p>Must be unique among the features added to a {@link DisplayAreaPolicyBuilder}.
          *
          * @see android.window.DisplayAreaOrganizer#FEATURE_SYSTEM_FIRST
          * @see android.window.DisplayAreaOrganizer#FEATURE_VENDOR_FIRST
@@ -425,7 +484,7 @@ class DisplayAreaPolicyBuilder {
              * For example, {@code all().except(TYPE_STATUS_BAR)} expresses that a feature should
              * apply to all types except TYPE_STATUS_BAR.
              *
-             * The builder starts out with the feature not applying to any types.
+             * <p>The builder starts out with the feature not applying to any types.
              *
              * @param name the name of the feature.
              * @param id of the feature. {@see Feature#getId}
@@ -599,7 +658,7 @@ class DisplayAreaPolicyBuilder {
          * Whether to skip creating a {@link DisplayArea.Tokens} if {@link #mExisting} is
          * {@code null}.
          *
-         * This will be set for {@link HierarchyBuilder#LEAF_TYPE_IME_CONTAINERS} and
+         * <p>This will be set for {@link HierarchyBuilder#LEAF_TYPE_IME_CONTAINERS} and
          * {@link HierarchyBuilder#LEAF_TYPE_TASK_CONTAINERS}, because we don't want to create
          * {@link DisplayArea.Tokens} for them even if they are not set.
          */
