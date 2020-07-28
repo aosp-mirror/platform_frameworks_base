@@ -349,6 +349,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return info;
     }
 
+    @Override
+    public boolean providesMaxBounds() {
+        return true;
+    }
+
     /**
      * DisplayArea that contains WindowTokens, and orders them according to their type.
      */
