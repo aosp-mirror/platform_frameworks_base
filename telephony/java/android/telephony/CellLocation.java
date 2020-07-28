@@ -33,10 +33,12 @@ import com.android.internal.telephony.PhoneConstants;
 public abstract class CellLocation {
 
     /**
-     * This method will not do anything.
+     * Request an updated CellLocation for callers targeting SDK 30 or older.
      *
-     * Whenever location changes, a callback will automatically be be sent to
-     * all registrants of {@link PhoneStateListener#LISTEN_CELL_LOCATION}.
+     * Whenever Android is aware of location changes, a callback will automatically be sent to
+     * all registrants of {@link PhoneStateListener#LISTEN_CELL_LOCATION}. This API requests an
+     * additional location update for cases where power saving might cause location updates to be
+     * missed.
      *
      * <p>This method is a no-op for callers targeting SDK level 31 or greater.
      * <p>This method is a no-op for callers that target SDK level 29 or 30 and lack
@@ -44,14 +46,7 @@ public abstract class CellLocation {
      * <p>This method is a no-op for callers that target SDK level 28 or below and lack
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
      *
-     * Callers wishing to request a single location update should use
-     * {@link TelephonyManager#requestCellInfoUpdate}.
-     *
-     * @deprecated this method has undesirable side-effects, and it calls into the OS without
-     * access to a {@link android.content.Context Context}, meaning that certain safety checks and
-     * attribution are error-prone. Given that this method has numerous downsides, and given that
-     * there are long-available superior alternatives, callers are strongly discouraged from using
-     * this method.
+     * @deprecated use {@link TelephonyManager#requestCellInfoUpdate}.
      */
     @Deprecated
     public static void requestLocationUpdate() {
