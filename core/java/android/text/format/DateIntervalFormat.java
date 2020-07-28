@@ -62,7 +62,7 @@ public final class DateIntervalFormat {
 
     /**
      * Format a date range. This is our slightly more sensible internal API.
-     * A truly sane replacement would take a skeleton instead of int flags.
+     * A truly reasonable replacement would take a skeleton instead of int flags.
      */
     @VisibleForTesting(visibility = PACKAGE)
     public static String formatDateRange(ULocale icuLocale, android.icu.util.TimeZone icuTimeZone,
