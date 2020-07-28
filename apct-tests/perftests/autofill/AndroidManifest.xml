@@ -16,6 +16,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.perftests.autofill">
 
+    <uses-sdk android:targetSdkVersion="28" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
+
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:name="android.perftests.utils.PerfTestActivity"
