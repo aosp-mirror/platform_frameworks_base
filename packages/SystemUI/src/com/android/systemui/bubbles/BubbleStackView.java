@@ -253,13 +253,8 @@ public class BubbleStackView extends FrameLayout
 
     /** Layout change listener that moves the stack to the nearest valid position on rotation. */
     private OnLayoutChangeListener mOrientationChangedListener;
-    /** Whether the stack was on the left side of the screen prior to rotation. */
-    private boolean mWasOnLeftBeforeRotation = false;
-    /**
-     * How far down the screen the stack was before rotation, in terms of percentage of the way down
-     * the allowable region. Defaults to -1 if not set.
-     */
-    private float mVerticalPosPercentBeforeRotation = -1;
+
+    @Nullable private RelativeStackPosition mRelativeStackPositionBeforeRotation;
 
     private int mMaxBubbles;
     private int mBubbleSize;
@@ -940,9 +935,10 @@ public class BubbleStackView extends FrameLayout
                         mExpandedViewContainer.setTranslationY(getExpandedViewY());
                         mExpandedViewContainer.setAlpha(1f);
                     }
-                    if (mVerticalPosPercentBeforeRotation >= 0) {
-                        mStackAnimationController.moveStackToSimilarPositionAfterRotation(
-                                mWasOnLeftBeforeRotation, mVerticalPosPercentBeforeRotation);
+                    if (mRelativeStackPositionBeforeRotation != null) {
+                        mStackAnimationController.setStackPosition(
+                                mRelativeStackPositionBeforeRotation);
+                        mRelativeStackPositionBeforeRotation = null;
                     }
                     removeOnLayoutChangeListener(mOrientationChangedListener);
                 };
@@ -1190,13 +1186,7 @@ public class BubbleStackView extends FrameLayout
                 com.android.internal.R.dimen.status_bar_height);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
 
-        final RectF allowablePos = mStackAnimationController.getAllowableStackPositionRegion();
-        mWasOnLeftBeforeRotation = mStackAnimationController.isStackOnLeftSide();
-        mVerticalPosPercentBeforeRotation =
-                (mStackAnimationController.getStackPosition().y - allowablePos.top)
-                        / (allowablePos.bottom - allowablePos.top);
-        mVerticalPosPercentBeforeRotation =
-                Math.max(0f, Math.min(1f, mVerticalPosPercentBeforeRotation));
+        mRelativeStackPositionBeforeRotation = mStackAnimationController.getRelativeStackPosition();
         addOnLayoutChangeListener(mOrientationChangedListener);
         hideFlyoutImmediate();
 
@@ -1460,7 +1450,7 @@ public class BubbleStackView extends FrameLayout
         if (getBubbleCount() == 0 && mShouldShowUserEducation) {
             // Override the default stack position if we're showing user education.
             mStackAnimationController.setStackPosition(
-                    mStackAnimationController.getDefaultStartPosition());
+                    mStackAnimationController.getStartPosition());
         }
 
         if (getBubbleCount() == 0) {
@@ -1675,7 +1665,7 @@ public class BubbleStackView extends FrameLayout
             // Post so we have height of mUserEducationView
             mUserEducationView.post(() -> {
                 final int viewHeight = mUserEducationView.getHeight();
-                PointF stackPosition = mStackAnimationController.getDefaultStartPosition();
+                PointF stackPosition = mStackAnimationController.getStartPosition();
                 final float translationY = stackPosition.y + (mBubbleSize / 2) - (viewHeight / 2);
                 mUserEducationView.setTranslationY(translationY);
                 mUserEducationView.animate()
@@ -2771,8 +2761,16 @@ public class BubbleStackView extends FrameLayout
                 .floatValue();
     }
 
+    public void setStackStartPosition(RelativeStackPosition position) {
+        mStackAnimationController.setStackStartPosition(position);
+    }
+
     public PointF getStackPosition() {
         return mStackAnimationController.getStackPosition();
+    }
+
+    public RelativeStackPosition getRelativeStackPosition() {
+        return mStackAnimationController.getRelativeStackPosition();
     }
 
     /**
@@ -2827,5 +2825,48 @@ public class BubbleStackView extends FrameLayout
             }
         }
         return bubbles;
+    }
+
+    /**
+     * Representation of stack position that uses relative properties rather than absolute
+     * coordinates. This is used to maintain similar stack positions across configuration changes.
+     */
+    public static class RelativeStackPosition {
+        /** Whether to place the stack at the leftmost allowed position. */
+        private boolean mOnLeft;
+
+        /**
+         * How far down the vertically allowed region to place the stack. For example, if the stack
+         * allowed region is between y = 100 and y = 1100 and this is 0.2f, we'll place the stack at
+         * 100 + (0.2f * 1000) = 300.
+         */
+        private float mVerticalOffsetPercent;
+
+        public RelativeStackPosition(boolean onLeft, float verticalOffsetPercent) {
+            mOnLeft = onLeft;
+            mVerticalOffsetPercent = clampVerticalOffsetPercent(verticalOffsetPercent);
+        }
+
+        /** Constructs a relative position given a region and a point in that region. */
+        public RelativeStackPosition(PointF position, RectF region) {
+            mOnLeft = position.x < region.width() / 2;
+            mVerticalOffsetPercent =
+                    clampVerticalOffsetPercent((position.y - region.top) / region.height());
+        }
+
+        /** Ensures that the offset percent is between 0f and 1f. */
+        private float clampVerticalOffsetPercent(float offsetPercent) {
+            return Math.max(0f, Math.min(1f, offsetPercent));
+        }
+
+        /**
+         * Given an allowable stack position region, returns the point within that region
+         * represented by this relative position.
+         */
+        public PointF getAbsolutePositionInRegion(RectF region) {
+            return new PointF(
+                    mOnLeft ? region.left : region.right,
+                    region.top + mVerticalOffsetPercent * region.height());
+        }
     }
 }

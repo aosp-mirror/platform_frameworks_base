@@ -35,6 +35,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleStackView;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.animation.PhysicsAnimator;
 import com.android.systemui.util.magnetictarget.MagnetizedObject;
@@ -124,6 +125,9 @@ public class StackAnimationController extends
      * floating content out of the way proactively.
      */
     private Rect mAnimatingToBounds = new Rect();
+
+    /** Initial starting location for the stack. */
+    @Nullable private BubbleStackView.RelativeStackPosition mStackStartPosition;
 
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
@@ -429,21 +433,6 @@ public class StackAnimationController extends
 
         stackPos.x = onLeft ? bounds.left : bounds.right;
         return stackPos;
-    }
-
-    /**
-     * Moves the stack in response to rotation. We keep it in the most similar position by keeping
-     * it on the same side, and positioning it the same percentage of the way down the screen
-     * (taking status bar/nav bar into account by using the allowable region's height).
-     */
-    public void moveStackToSimilarPositionAfterRotation(boolean wasOnLeft, float verticalPercent) {
-        final RectF allowablePos = getAllowableStackPositionRegion();
-        final float allowableRegionHeight = allowablePos.bottom - allowablePos.top;
-
-        final float x = wasOnLeft ? allowablePos.left : allowablePos.right;
-        final float y = (allowableRegionHeight * verticalPercent) + allowablePos.top;
-
-        setStackPosition(new PointF(x, y));
     }
 
     /** Description of current animation controller state. */
@@ -815,7 +804,7 @@ public class StackAnimationController extends
         } else {
             // When all children are removed ensure stack position is sane
             setStackPosition(mRestingStackPosition == null
-                    ? getDefaultStartPosition()
+                    ? getStartPosition()
                     : mRestingStackPosition);
 
             // Remove the stack from the coordinator since we don't have any bubbles and aren't
@@ -868,7 +857,7 @@ public class StackAnimationController extends
         mLayout.setVisibility(View.INVISIBLE);
         mLayout.post(() -> {
             setStackPosition(mRestingStackPosition == null
-                    ? getDefaultStartPosition()
+                    ? getStartPosition()
                     : mRestingStackPosition);
             mStackMovedToStartPosition = true;
             mLayout.setVisibility(View.VISIBLE);
@@ -938,15 +927,47 @@ public class StackAnimationController extends
         }
     }
 
-    /** Returns the default stack position, which is on the top left. */
-    public PointF getDefaultStartPosition() {
-        boolean isRtl = mLayout != null
-                && mLayout.getResources().getConfiguration().getLayoutDirection()
-                == View.LAYOUT_DIRECTION_RTL;
-        return new PointF(isRtl
-                        ? getAllowableStackPositionRegion().right
-                        : getAllowableStackPositionRegion().left,
-                getAllowableStackPositionRegion().top + mStackStartingVerticalOffset);
+    public void setStackPosition(BubbleStackView.RelativeStackPosition position) {
+        setStackPosition(position.getAbsolutePositionInRegion(getAllowableStackPositionRegion()));
+    }
+
+    public BubbleStackView.RelativeStackPosition getRelativeStackPosition() {
+        return new BubbleStackView.RelativeStackPosition(
+                mStackPosition, getAllowableStackPositionRegion());
+    }
+
+    /**
+     * Sets the starting position for the stack, where it will be located when the first bubble is
+     * added.
+     */
+    public void setStackStartPosition(BubbleStackView.RelativeStackPosition position) {
+        mStackStartPosition = position;
+    }
+
+    /**
+     * Returns the starting stack position. If {@link #setStackStartPosition} was called, this will
+     * return that position - otherwise, a reasonable default will be returned.
+     */
+    @Nullable public PointF getStartPosition() {
+        if (mLayout == null) {
+            return null;
+        }
+
+        if (mStackStartPosition == null) {
+            // Start on the left if we're in LTR, right otherwise.
+            final boolean startOnLeft =
+                    mLayout.getResources().getConfiguration().getLayoutDirection()
+                            != View.LAYOUT_DIRECTION_RTL;
+
+            final float startingVerticalOffset = mLayout.getResources().getDimensionPixelOffset(
+                    R.dimen.bubble_stack_starting_offset_y);
+
+            mStackStartPosition = new BubbleStackView.RelativeStackPosition(
+                    startOnLeft,
+                    startingVerticalOffset / getAllowableStackPositionRegion().height());
+        }
+
+        return mStackStartPosition.getAbsolutePositionInRegion(getAllowableStackPositionRegion());
     }
 
     private boolean isStackPositionSet() {
