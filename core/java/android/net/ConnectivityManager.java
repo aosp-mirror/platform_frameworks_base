@@ -608,7 +608,7 @@ public class ConnectivityManager {
     public static final int TYPE_BLUETOOTH   = 7;
 
     /**
-     * Dummy data connection.  This should not be used on shipping devices.
+     * Fake data connection.  This should not be used on shipping devices.
      * @deprecated This is not used any more.
      */
     @Deprecated
@@ -1084,9 +1084,9 @@ public class ConnectivityManager {
      *                   to remove an existing always-on VPN configuration.
      * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
      *        {@code false} otherwise.
-     * @param lockdownWhitelist The list of packages that are allowed to access network directly
+     * @param lockdownAllowlist The list of packages that are allowed to access network directly
      *         when VPN is in lockdown mode but is not running. Non-existent packages are ignored so
-     *         this method must be called when a package that should be whitelisted is installed or
+     *         this method must be called when a package that should be allowed is installed or
      *         uninstalled.
      * @return {@code true} if the package is set as always-on VPN controller;
      *         {@code false} otherwise.
@@ -1094,10 +1094,10 @@ public class ConnectivityManager {
      */
     @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
     public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
-            boolean lockdownEnabled, @Nullable List<String> lockdownWhitelist) {
+            boolean lockdownEnabled, @Nullable List<String> lockdownAllowlist) {
         try {
             return mService.setAlwaysOnVpnPackage(
-                    userId, vpnPackage, lockdownEnabled, lockdownWhitelist);
+                    userId, vpnPackage, lockdownEnabled, lockdownAllowlist);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
