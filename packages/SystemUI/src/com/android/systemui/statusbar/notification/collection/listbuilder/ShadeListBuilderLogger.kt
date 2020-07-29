@@ -125,13 +125,18 @@ class ShadeListBuilderLogger @Inject constructor(
             str2 = prevParent?.key
             str3 = newParent?.key
         }, {
-            if (str2 == null && str3 != null) {
-                "(Build $int1) ATTACHED {$str1}"
+
+            val action = if (str2 == null && str3 != null) {
+                "ATTACHED"
             } else if (str2 != null && str3 == null) {
-                "(Build $int1) DETACHED {$str1}"
+                "DETACHED"
+            } else if (str2 == null && str3 == null) {
+                "MODIFIED (DETACHED)"
             } else {
-                "(Build $int1) MODIFIED {$str1}"
+                "MODIFIED (ATTACHED)"
             }
+
+            "(Build $int1) $action {$str1}"
         })
     }
 
@@ -146,7 +151,7 @@ class ShadeListBuilderLogger @Inject constructor(
             } else if (str1 != null && str2 == null) {
                 "(Build $int1)     Parent was {$str1}"
             } else {
-                "(Build $int1)     Reparent: {$str2} -> {$str3}"
+                "(Build $int1)     Reparent: {$str1} -> {$str2}"
             }
         })
     }
