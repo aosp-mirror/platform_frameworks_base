@@ -208,16 +208,6 @@ class WindowStateAnimator {
 
     int mAttrType;
 
-    boolean mForceScaleUntilResize;
-
-    // WindowState.mHScale and WindowState.mVScale contain the
-    // scale according to client specified layout parameters (e.g.
-    // one layout size, with another surface size, creates such scaling).
-    // Here we track an additional scaling factor used to follow stack
-    // scaling (as in the case of the Pinned stack animation).
-    float mExtraHScale = (float) 1.0;
-    float mExtraVScale = (float) 1.0;
-
     // An offset in pixel of the surface contents from the window position. Used for Wallpaper
     // to provide the effect of scrolling within a large surface. We just use these values as
     // a cache.
@@ -246,11 +236,6 @@ class WindowStateAnimator {
      */
     private final SurfaceControl.Transaction mPostDrawTransaction =
             new SurfaceControl.Transaction();
-
-    // Set to true after the first frame of the Pinned stack animation
-    // and reset after the last to ensure we only reset mForceScaleUntilResize
-    // once per animation.
-    boolean mPipAnimationStarted = false;
 
     private final Point mTmpPos = new Point();
 
@@ -870,11 +855,6 @@ class WindowStateAnimator {
 
         calculateSurfaceBounds(w, attrs, mTmpSize);
 
-        mExtraHScale = (float) 1.0;
-        mExtraVScale = (float) 1.0;
-
-        boolean wasForceScaled = mForceScaleUntilResize;
-
         // Once relayout has been called at least once, we need to make sure
         // we only resize the client surface during calls to relayout. For
         // clients which use indeterminate measure specs (MATCH_PARENT),
@@ -889,7 +869,6 @@ class WindowStateAnimator {
         } else {
             mSurfaceResized = false;
         }
-        mForceScaleUntilResize = mForceScaleUntilResize && !mSurfaceResized;
         // If we are undergoing seamless rotation, the surface has already
         // been set up to persist at it's old location. We need to freeze
         // updates until a resize occurs.
@@ -913,173 +892,43 @@ class WindowStateAnimator {
 
         final Rect insets = attrs.surfaceInsets;
 
-        if (isForceScaled()) {
-            int hInsets = insets.left + insets.right;
-            int vInsets = insets.top + insets.bottom;
-            float surfaceContentWidth = surfaceWidth - hInsets;
-            float surfaceContentHeight = surfaceHeight - vInsets;
-            if (!mForceScaleUntilResize) {
-                mSurfaceController.forceScaleableInTransaction(true);
-            }
-
-            int posX = 0;
-            int posY = 0;
-            task.getRootTask().getDimBounds(mTmpStackBounds);
-
-            boolean allowStretching = false;
-            task.getRootTask().getFinalAnimationSourceHintBounds(mTmpSourceBounds);
-            // If we don't have source bounds, we can attempt to use the content insets
-            // if we have content insets.
-            if (mTmpSourceBounds.isEmpty() && (mWin.mLastRelayoutContentInsets.width() > 0
-                    || mWin.mLastRelayoutContentInsets.height() > 0)) {
-                mTmpSourceBounds.set(task.getRootTask().mPreAnimationBounds);
-                mTmpSourceBounds.inset(mWin.mLastRelayoutContentInsets);
-                allowStretching = true;
-            }
-
-            // Make sure that what we're animating to and from is actually the right size in case
-            // the window cannot take up the full screen.
-            mTmpStackBounds.intersectUnchecked(w.getParentFrame());
-            mTmpSourceBounds.intersectUnchecked(w.getParentFrame());
-            mTmpAnimatingBounds.intersectUnchecked(w.getParentFrame());
-
-            if (!mTmpSourceBounds.isEmpty()) {
-                // Get the final target stack bounds, if we are not animating, this is just the
-                // current stack bounds
-                task.getRootTask().getFinalAnimationBounds(mTmpAnimatingBounds);
-
-                // Calculate the current progress and interpolate the difference between the target
-                // and source bounds
-                float finalWidth = mTmpAnimatingBounds.width();
-                float initialWidth = mTmpSourceBounds.width();
-                float tw = (surfaceContentWidth - mTmpStackBounds.width())
-                        / (surfaceContentWidth - mTmpAnimatingBounds.width());
-                float th = tw;
-                mExtraHScale = (initialWidth + tw * (finalWidth - initialWidth)) / initialWidth;
-                if (allowStretching) {
-                    float finalHeight = mTmpAnimatingBounds.height();
-                    float initialHeight = mTmpSourceBounds.height();
-                    th = (surfaceContentHeight - mTmpStackBounds.height())
-                        / (surfaceContentHeight - mTmpAnimatingBounds.height());
-                    mExtraVScale = (initialHeight + tw * (finalHeight - initialHeight))
-                            / initialHeight;
+        if (!w.mSeamlesslyRotated) {
+            // Used to offset the WSA when stack position changes before a resize.
+            int xOffset = mXOffset;
+            int yOffset = mYOffset;
+            if (mOffsetPositionForStackResize) {
+                if (relayout) {
+                    // Once a relayout is called, reset the offset back to 0 and defer
+                    // setting it until a new frame with the updated size. This ensures that
+                    // the WS position is reset (so the stack position is shown) at the same
+                    // time that the buffer size changes.
+                    setOffsetPositionForStackResize(false);
+                    mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
+                            mWin.getFrameNumber());
                 } else {
-                    mExtraVScale = mExtraHScale;
-                }
-
-                // Adjust the position to account for the inset bounds
-                posX -= (int) (tw * mExtraHScale * mTmpSourceBounds.left);
-                posY -= (int) (th * mExtraVScale * mTmpSourceBounds.top);
-
-                // In pinned mode the clip rectangle applied to us by our stack has been
-                // expanded outwards to allow for shadows. However in case of source bounds set
-                // we need to crop to within the surface. The code above has scaled and positioned
-                // the surface to fit the unexpanded stack bounds, but now we need to reapply
-                // the cropping that the stack would have applied if it weren't expanded. This
-                // can be different in each direction based on the source bounds.
-                clipRect = mTmpClipRect;
-                clipRect.set((int)((insets.left + mTmpSourceBounds.left) * tw),
-                        (int)((insets.top + mTmpSourceBounds.top) * th),
-                        insets.left + (int)(surfaceWidth
-                                - (tw* (surfaceWidth - mTmpSourceBounds.right))),
-                        insets.top + (int)(surfaceHeight
-                                - (th * (surfaceHeight - mTmpSourceBounds.bottom))));
-            } else {
-                // We want to calculate the scaling based on the content area, not based on
-                // the entire surface, so that we scale in sync with windows that don't have insets.
-                mExtraHScale = mTmpStackBounds.width() / surfaceContentWidth;
-                mExtraVScale = mTmpStackBounds.height() / surfaceContentHeight;
-
-                // Since we are scaled to fit in our previously desired crop, we can now
-                // expose the whole window in buffer space, and not risk extending
-                // past where the system would have cropped us
-                clipRect = null;
-            }
-
-            // In the case of ForceScaleToStack we scale entire tasks together,
-            // and so we need to scale our offsets relative to the task bounds
-            // or parent and child windows would fall out of alignment.
-            posX -= (int) (attrs.x * (1 - mExtraHScale));
-            posY -= (int) (attrs.y * (1 - mExtraVScale));
-
-            // Imagine we are scaling down. As we scale the buffer down, we decrease the
-            // distance between the surface top left, and the start of the surface contents
-            // (previously it was surfaceInsets.left pixels in screen space but now it
-            // will be surfaceInsets.left*mExtraHScale). This means in order to keep the
-            // non inset content at the same position, we have to shift the whole window
-            // forward. Likewise for scaling up, we've increased this distance, and we need
-            // to shift by a negative number to compensate.
-            posX += insets.left * (1 - mExtraHScale);
-            posY += insets.top * (1 - mExtraVScale);
-
-            mSurfaceController.setPositionInTransaction((float) Math.floor(posX),
-                    (float) Math.floor(posY), recoveringMemory);
-
-            // Various surfaces in the scaled stack may resize at different times.
-            // We need to ensure for each surface, that we disable transformation matrix
-            // scaling in the same transaction which we resize the surface in.
-            // As we are in SCALING_MODE_SCALE_TO_WINDOW, SurfaceFlinger will
-            // then take over the scaling until the new buffer arrives, and things
-            // will be seamless.
-            if (mPipAnimationStarted == false) {
-                mForceScaleUntilResize = true;
-                mPipAnimationStarted = true;
-            }
-        } else {
-            mPipAnimationStarted = false;
-
-            if (!w.mSeamlesslyRotated) {
-                // Used to offset the WSA when stack position changes before a resize.
-                int xOffset = mXOffset;
-                int yOffset = mYOffset;
-                if (mOffsetPositionForStackResize) {
-                    if (relayout) {
-                        // Once a relayout is called, reset the offset back to 0 and defer
-                        // setting it until a new frame with the updated size. This ensures that
-                        // the WS position is reset (so the stack position is shown) at the same
-                        // time that the buffer size changes.
-                        setOffsetPositionForStackResize(false);
-                        mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
-                                mWin.getFrameNumber());
-                    } else {
-                        final Task stack = mWin.getRootTask();
-                        mTmpPos.x = 0;
-                        mTmpPos.y = 0;
-                        if (stack != null) {
-                            stack.getRelativePosition(mTmpPos);
-                        }
-
-                        xOffset = -mTmpPos.x;
-                        yOffset = -mTmpPos.y;
-
-                        // Crop also needs to be extended so the bottom isn't cut off when the WSA
-                        // position is moved.
-                        if (clipRect != null) {
-                            clipRect.right += mTmpPos.x;
-                            clipRect.bottom += mTmpPos.y;
-                        }
+                    final Task stack = mWin.getRootTask();
+                    mTmpPos.x = 0;
+                    mTmpPos.y = 0;
+                    if (stack != null) {
+                        stack.getRelativePosition(mTmpPos);
+                    }
+                     xOffset = -mTmpPos.x;
+                    yOffset = -mTmpPos.y;
+                     // Crop also needs to be extended so the bottom isn't cut off when the WSA
+                    // position is moved.
+                    if (clipRect != null) {
+                        clipRect.right += mTmpPos.x;
+                        clipRect.bottom += mTmpPos.y;
                     }
                 }
-                if (!mIsWallpaper) {
-                    mSurfaceController.setPositionInTransaction(xOffset, yOffset, recoveringMemory);
-                } else {
-                    setWallpaperPositionAndScale(
-                            xOffset, yOffset, mWallpaperScale, recoveringMemory);
-                }
+            }
+            if (!mIsWallpaper) {
+                mSurfaceController.setPositionInTransaction(xOffset, yOffset, recoveringMemory);
+            } else {
+                setWallpaperPositionAndScale(
+                        xOffset, yOffset, mWallpaperScale, recoveringMemory);
             }
         }
-
-        // If we are ending the scaling mode. We switch to SCALING_MODE_FREEZE
-        // to prevent further updates until buffer latch.
-        // We also need to freeze the Surface geometry until a buffer
-        // comes in at the new size (normally position and crop are unfrozen).
-        // deferTransactionUntil accomplishes this for us.
-        if (wasForceScaled && !mForceScaleUntilResize) {
-            mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
-                    mWin.getFrameNumber());
-            mSurfaceController.forceScaleableInTransaction(false);
-        }
-
 
         if (!w.mSeamlesslyRotated) {
             // Wallpaper is already updated above when calling setWallpaperPositionAndScale so
@@ -1087,10 +936,10 @@ class WindowStateAnimator {
             if (!mIsWallpaper) {
                 applyCrop(clipRect, recoveringMemory);
                 mSurfaceController.setMatrixInTransaction(
-                        mDsDx * w.mHScale * mExtraHScale,
-                        mDtDx * w.mVScale * mExtraVScale,
-                        mDtDy * w.mHScale * mExtraHScale,
-                        mDsDy * w.mVScale * mExtraVScale, recoveringMemory);
+                    mDsDx * w.mHScale,
+                    mDtDx * w.mVScale,
+                    mDtDy * w.mHScale,
+                    mDsDy * w.mVScale, recoveringMemory);
             }
         }
 
@@ -1177,10 +1026,10 @@ class WindowStateAnimator {
             } else {
                 prepared =
                     mSurfaceController.prepareToShowInTransaction(mShownAlpha,
-                        mDsDx * w.mHScale * mExtraHScale,
-                        mDtDx * w.mVScale * mExtraVScale,
-                        mDtDy * w.mHScale * mExtraHScale,
-                        mDsDy * w.mVScale * mExtraVScale,
+                        mDsDx * w.mHScale,
+                        mDtDx * w.mVScale,
+                        mDtDy * w.mHScale,
+                        mDsDy * w.mVScale,
                         recoveringMemory);
             }
 
@@ -1287,10 +1136,10 @@ class WindowStateAnimator {
         mSurfaceController.setPositionInTransaction(mWin.mTmpMatrixArray[MTRANS_X],
                 mWin.mTmpMatrixArray[MTRANS_Y], recoveringMemory);
         mSurfaceController.setMatrixInTransaction(
-                mDsDx * mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale * mExtraHScale,
-                mDtDx * mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale * mExtraVScale,
-                mDtDy * mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale * mExtraHScale,
-                mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale * mExtraVScale,
+                mDsDx * mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale,
+                mDtDx * mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale,
+                mDtDy * mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale,
+                mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale,
                 recoveringMemory);
         applyCrop(null, recoveringMemory);
     }
@@ -1568,18 +1417,6 @@ class WindowStateAnimator {
             mSurfaceController = null;
             mDrawState = NO_SURFACE;
         }
-    }
-
-    /** The force-scaled state for a given window can persist past
-     * the state for it's stack as the windows complete resizing
-     * independently of one another.
-     */
-    boolean isForceScaled() {
-        final Task task = mWin.getTask();
-        if (task != null && task.getRootTask().isForceScaled()) {
-            return true;
-        }
-        return mForceScaleUntilResize;
     }
 
     void detachChildren() {
