@@ -135,6 +135,7 @@ class MediaCarouselController @Inject constructor(
         }
 
         override fun onOverlayChanged() {
+            recreatePlayers()
             inflateSettingsButton()
         }
 
