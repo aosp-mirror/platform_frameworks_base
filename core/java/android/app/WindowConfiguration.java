@@ -310,7 +310,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * Sets the maximum bounds to the provided {@link Rect}.
      * @param rect the new bounds value.
      * @see #getMaxBounds()
-     * @hide
      */
     public void setMaxBounds(@Nullable Rect rect) {
         if (rect == null) {
@@ -364,10 +363,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mBounds;
     }
 
-    /**
-     * @see #setMaxBounds(Rect)
-     * @hide
-     */
+    /** @see #setMaxBounds(Rect) */
+    @NonNull
     public Rect getMaxBounds() {
         return mMaxBounds;
     }

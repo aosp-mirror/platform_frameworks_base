@@ -3208,6 +3208,7 @@ public final class PowerManagerService extends SystemService
                 // If we're stuck in a really low-level reboot loop, and a
                 // rescue party is trying to prompt the user for a factory data
                 // reset, we must GET TO DA CHOPPA!
+                // No check point from ShutdownCheckPoints will be dumped at this state.
                 PowerManagerService.lowLevelReboot(reason);
             } else {
                 throw new IllegalStateException("Too early to call shutdown() or reboot()");
@@ -5114,6 +5115,7 @@ public final class PowerManagerService extends SystemService
                 mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
             }
 
+            ShutdownCheckPoints.recordCheckPoint(Binder.getCallingPid(), reason);
             final long ident = Binder.clearCallingIdentity();
             try {
                 shutdownOrRebootInternal(HALT_MODE_REBOOT, confirm, reason, wait);
@@ -5132,10 +5134,11 @@ public final class PowerManagerService extends SystemService
         public void rebootSafeMode(boolean confirm, boolean wait) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
 
+            String reason = PowerManager.REBOOT_SAFE_MODE;
+            ShutdownCheckPoints.recordCheckPoint(Binder.getCallingPid(), reason);
             final long ident = Binder.clearCallingIdentity();
             try {
-                shutdownOrRebootInternal(HALT_MODE_REBOOT_SAFE_MODE, confirm,
-                        PowerManager.REBOOT_SAFE_MODE, wait);
+                shutdownOrRebootInternal(HALT_MODE_REBOOT_SAFE_MODE, confirm, reason, wait);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5151,6 +5154,7 @@ public final class PowerManagerService extends SystemService
         public void shutdown(boolean confirm, String reason, boolean wait) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
 
+            ShutdownCheckPoints.recordCheckPoint(Binder.getCallingPid(), reason);
             final long ident = Binder.clearCallingIdentity();
             try {
                 shutdownOrRebootInternal(HALT_MODE_SHUTDOWN, confirm, reason, wait);

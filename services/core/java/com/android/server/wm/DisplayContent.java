@@ -1930,6 +1930,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode, config);
         calculateBounds(displayInfo, mTmpBounds);
         config.windowConfiguration.setBounds(mTmpBounds);
+        config.windowConfiguration.setMaxBounds(mTmpBounds);
         config.windowConfiguration.setWindowingMode(getWindowingMode());
         config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
 
@@ -2542,10 +2543,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     TaskDisplayArea getDefaultTaskDisplayArea() {
         return mDisplayAreaPolicy.getDefaultTaskDisplayArea();
-    }
-
-    void positionDisplayAt(int position, boolean includingParents) {
-        getParent().positionChildAt(position, this, includingParents);
     }
 
     /**
@@ -5391,6 +5388,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return true; /* stop */
             }
         });
+    }
+
+    @Override
+    public boolean providesMaxBounds() {
+        return true;
     }
 
     /** The entry for proceeding to handle {@link #mFixedRotationLaunchingApp}. */

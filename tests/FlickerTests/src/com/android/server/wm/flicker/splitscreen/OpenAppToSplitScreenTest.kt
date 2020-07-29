@@ -16,13 +16,22 @@
 
 package com.android.server.wm.flicker.splitscreen
 
+import android.os.SystemClock
+import android.view.Surface
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.LayersTraceSubject
 import com.android.server.wm.flicker.NonRotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WmTraceSubject
+import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.helpers.exitSplitScreen
+import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,42 +46,63 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenAppToSplitScreenTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        testApp = StandardAppHelper(instrumentation,
-                "com.android.server.wm.flicker.testapp", "SimpleApp")
-    }
-
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.appToSplitScreen(testApp, instrumentation, uiDevice,
-                beginRotation).includeJankyRuns().build()
-
+    rotationName: String,
+    rotation: Int
+) : NonRotationTestBase(rotationName, rotation) {
     @Test
-    fun checkVisibility_navBarWindowIsAlwaysVisible() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries()
+    fun test() {
+        val testApp = StandardAppHelper(instrumentation,
+        "com.android.server.wm.flicker.testapp", "SimpleApp")
+
+        flicker(instrumentation) {
+            withTag { buildTestTag("appToSplitScreen", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                eachRun {
+                    device.wakeUpAndGoToHomeScreen()
+                    this.setRotation(rotation)
+                    testApp.open()
+                    SystemClock.sleep(500)
+                }
+            }
+            teardown {
+                eachRun {
+                    device.exitSplitScreen()
+                    testApp.exit()
+                }
+            }
+            transitions {
+                device.launchSplitScreen()
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+                }
+
+                layersTrace {
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible()
+                    noUncoveredRegions(rotation)
+                    navBarLayerRotatesAndScales(rotation)
+                    statusBarLayerRotatesScales(rotation)
+
+                    all("dividerLayerBecomesVisible") {
+                        this.hidesLayer(DOCKED_STACK_DIVIDER)
+                                .then()
+                                .showsLayer(DOCKED_STACK_DIVIDER)
+                    }
+                }
+            }
         }
     }
 
-    @Test
-    fun checkVisibility_statusBarWindowIsAlwaysVisible() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAboveAppWindow(STATUS_BAR_WINDOW_TITLE).forAllEntries()
-        }
-    }
-
-    @Test
-    fun checkVisibility_dividerLayerBecomesVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .hidesLayer(DOCKED_STACK_DIVIDER)
-                    .then()
-                    .showsLayer(DOCKED_STACK_DIVIDER)
-                    .forAllEntries()
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<Array<Any>> {
+            val supportedRotations = intArrayOf(Surface.ROTATION_0)
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }

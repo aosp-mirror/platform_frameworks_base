@@ -35,7 +35,6 @@ import static com.android.systemui.statusbar.notification.stack.NotificationSect
 
 import static java.util.Objects.requireNonNull;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
@@ -96,7 +95,6 @@ public final class NotificationEntry extends ListEntry {
     private final String mKey;
     private StatusBarNotification mSbn;
     private Ranking mRanking;
-    private long mCreationTime;
 
     /*
      * Bookkeeping members
@@ -198,11 +196,10 @@ public final class NotificationEntry extends ListEntry {
             boolean allowFgsDismissal,
             long creationTime
     ) {
-        super(requireNonNull(requireNonNull(sbn).getKey()));
+        super(requireNonNull(requireNonNull(sbn).getKey()), creationTime);
 
         requireNonNull(ranking);
 
-        mCreationTime = creationTime;
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
@@ -252,21 +249,6 @@ public final class NotificationEntry extends ListEntry {
      */
     public Ranking getRanking() {
         return mRanking;
-    }
-
-    /**
-     * A timestamp of SystemClock.uptimeMillis() of when this entry was first created, regardless
-     * of any changes to the data presented. It is set once on creation and will never change, and
-     * allows us to know exactly how long this notification has been alive for in our listener
-     * service. It is entirely unrelated to the information inside of the notification.
-     *
-     * This is different to Notification#when because it persists throughout updates, whereas
-     * system server treats every single call to notify() as a new notification and we handle
-     * updates to NotificationEntry locally.
-     */
-    @CurrentTimeMillisLong
-    public long getCreationTime() {
-        return mCreationTime;
     }
 
     /**

@@ -832,8 +832,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"আনলক করতে বা জরুরি কল করতে মেনু টিপুন৷"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"আনলক করতে মেনু টিপুন৷"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"আনলক করতে প্যাটার্ন আঁকুন"</string>
-    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"জরুরি কল"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"কলে ফিরুন"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"সঠিক!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"আবার চেষ্টা করুন"</string>

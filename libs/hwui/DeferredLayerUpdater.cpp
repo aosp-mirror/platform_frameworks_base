@@ -189,7 +189,7 @@ void DeferredLayerUpdater::detachSurfaceTexture() {
 sk_sp<SkImage> DeferredLayerUpdater::ImageSlot::createIfNeeded(AHardwareBuffer* buffer,
                                                                android_dataspace dataspace,
                                                                bool forceCreate,
-                                                               GrContext* context) {
+                                                               GrDirectContext* context) {
     if (!mTextureRelease || !mTextureRelease->getImage().get() || dataspace != mDataspace ||
         forceCreate || mBuffer != buffer) {
         if (buffer != mBuffer) {

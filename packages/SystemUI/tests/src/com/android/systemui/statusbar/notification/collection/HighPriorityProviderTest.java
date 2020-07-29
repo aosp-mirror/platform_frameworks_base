@@ -191,9 +191,10 @@ public class HighPriorityProviderTest extends SysuiTestCase {
     @Test
     public void testIsHighPriority_summaryUpdated() {
         // GIVEN a GroupEntry with a lowPrioritySummary and no children
-        final GroupEntry parentEntry = new GroupEntry("test_group_key");
         final NotificationEntry lowPrioritySummary = createNotifEntry(false);
-        setSummary(parentEntry, lowPrioritySummary);
+        final GroupEntry parentEntry = new GroupEntryBuilder()
+                .setSummary(lowPrioritySummary)
+                .build();
         assertFalse(mHighPriorityProvider.isHighPriority(parentEntry));
 
         // WHEN the summary changes to high priority
@@ -214,10 +215,11 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         // GroupEntry = parentEntry, summary = lowPrioritySummary
         //      NotificationEntry = lowPriorityChild
         //      NotificationEntry = highPriorityChild
-        final GroupEntry parentEntry = new GroupEntry("test_group_key");
-        setSummary(parentEntry, createNotifEntry(false));
-        addChild(parentEntry, createNotifEntry(false));
-        addChild(parentEntry, createNotifEntry(true));
+        final GroupEntry parentEntry = new GroupEntryBuilder()
+                .setSummary(createNotifEntry(false))
+                .addChild(createNotifEntry(false))
+                .addChild(createNotifEntry(true))
+                .build();
 
         // THEN the GroupEntry parentEntry is high priority since it has a high priority child
         assertTrue(mHighPriorityProvider.isHighPriority(parentEntry));
@@ -228,10 +230,11 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         // GIVEN:
         // GroupEntry = parentEntry, summary = lowPrioritySummary
         //      NotificationEntry = lowPriorityChild
-        final GroupEntry parentEntry = new GroupEntry("test_group_key");
         final NotificationEntry lowPriorityChild = createNotifEntry(false);
-        setSummary(parentEntry, createNotifEntry(false));
-        addChild(parentEntry, lowPriorityChild);
+        final GroupEntry parentEntry = new GroupEntryBuilder()
+                .setSummary(createNotifEntry(false))
+                .addChild(lowPriorityChild)
+                .build();
 
         // WHEN the child entry ranking changes to high priority
         lowPriorityChild.setRanking(
@@ -249,15 +252,5 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         return new NotificationEntryBuilder()
                 .setImportance(highPriority ? IMPORTANCE_HIGH : IMPORTANCE_MIN)
                 .build();
-    }
-
-    private void setSummary(GroupEntry parent, NotificationEntry summary) {
-        parent.setSummary(summary);
-        summary.setParent(parent);
-    }
-
-    private void addChild(GroupEntry parent, NotificationEntry child) {
-        parent.addChild(child);
-        child.setParent(parent);
     }
 }

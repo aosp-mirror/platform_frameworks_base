@@ -17,14 +17,15 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.support.test.launcherhelper.ILauncherStrategy
 import com.android.server.wm.flicker.StandardAppHelper
 
 abstract class FlickerAppHelper(
     instr: Instrumentation,
-    launcherName: String
-) : StandardAppHelper(instr, sFlickerPackage, launcherName) {
+    launcherName: String,
+    launcherStrategy: ILauncherStrategy
+) : StandardAppHelper(instr, sFlickerPackage, launcherName, launcherStrategy) {
     companion object {
-        var sFindTimeout = 10000
         var sFlickerPackage = "com.android.server.wm.flicker.testapp"
     }
 }

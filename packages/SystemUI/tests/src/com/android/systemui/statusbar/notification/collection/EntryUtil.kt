@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-syntax = "proto2";
+package com.android.systemui.statusbar.notification.collection
 
-package android.gamedriver;
-
-option java_package = "android.gamedriver";
-option java_outer_classname = "GameDriverProto";
-
-message Blacklist {
-    optional int64 version_code = 1;
-    repeated string package_names = 2;
-}
-
-message Blacklists {
-    repeated Blacklist blacklists = 1;
+/**
+ * Modifies a NotificationEntry
+ *
+ * The [modifier] function will be passed an instance of a NotificationEntryBuilder. Any
+ * modifications made to the builder will be applied to the [entry].
+ */
+inline fun modifyEntry(
+    entry: NotificationEntry,
+    crossinline modifier: NotificationEntryBuilder.() -> Unit
+) {
+    val builder = NotificationEntryBuilder(entry)
+    modifier(builder)
+    builder.apply(entry)
 }

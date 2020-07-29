@@ -16,12 +16,20 @@
 
 package com.android.server.wm.flicker.pip
 
+import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WmTraceSubject
-import com.android.server.wm.flicker.helpers.PipAppHelper
+import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.helpers.closePipWindow
+import com.android.server.wm.flicker.helpers.hasPipWindow
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,24 +45,63 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)
 class PipToHomeTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : PipTestBase(beginRotationName, beginRotation) {
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.exitPipModeToHome(testApp as PipAppHelper, instrumentation,
-                uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
+    rotationName: String,
+    rotation: Int
+) : PipTestBase(rotationName, rotation) {
     @Test
-    fun checkVisibility_backgroundWindowVisibleBehindPipLayer() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAppWindowOnTop(sPipWindowTitle)
-                    .then()
-                    .showsBelowAppWindow("Wallpaper")
-                    .then()
-                    .showsAppWindowOnTop("Wallpaper")
-                    .forAllEntries()
+    fun test() {
+        flicker(instrumentation) {
+            withTag { buildTestTag("exitPipModeToApp", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                eachRun {
+                    device.wakeUpAndGoToHomeScreen()
+                    device.pressHome()
+                    this.setRotation(rotation)
+                    testApp.open()
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+                test {
+                    if (device.hasPipWindow()) {
+                        device.closePipWindow()
+                    }
+                }
+            }
+            transitions {
+                testApp.clickEnterPipButton(device)
+                testApp.closePipWindow(device)
+                device.waitForIdle()
+                testApp.exit()
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+                    pipWindowBecomesVisible()
+
+                    all {
+                        this.showsAppWindowOnTop(sPipWindowTitle)
+                                .and()
+                                .showsBelowAppWindow("Wallpaper")
+                                .then()
+                                .showsAboveAppWindow("Wallpaper")
+                    }
+                }
+
+                layersTrace {
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible()
+                    noUncoveredRegions(rotation)
+                    navBarLayerRotatesAndScales(rotation)
+                    statusBarLayerRotatesScales(rotation)
+                    pipLayerBecomesVisible()
+                }
+            }
         }
     }
 }

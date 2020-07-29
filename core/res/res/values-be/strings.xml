@@ -568,7 +568,7 @@
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Занадта шмат спроб. Сканер адбіткаў пальцаў выключаны."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Паўтарыце спробу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчык часова выключаны."</string>
@@ -838,11 +838,10 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Націсніце \"Меню\", каб разблакаваць, або зрабіце экстраны выклік."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Націсніце \"Меню\", каб разблакаваць."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Намалюйце камбінацыю разблакоўкі, каб разблакаваць"</string>
-    <!-- no translation found for lockscreen_emergency_call (7549683825868928636) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Экстранны выклік"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Вярнуцца да выкліку"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Правільна!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Паспрабуйце яшчэ раз"</string>
+    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Паўтарыце спробу"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Паўтарыце спробу"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Разблакіраваць для ўсіх функцый і даных"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перавышана максімальная колькасць спроб разблакоўкі праз Фэйскантроль"</string>

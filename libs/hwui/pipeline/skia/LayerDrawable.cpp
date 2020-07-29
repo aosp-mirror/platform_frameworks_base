@@ -29,7 +29,7 @@ namespace skiapipeline {
 void LayerDrawable::onDraw(SkCanvas* canvas) {
     Layer* layer = mLayerUpdater->backingLayer();
     if (layer) {
-        DrawLayer(canvas->getGrContext(), canvas, layer, nullptr, nullptr, true);
+        DrawLayer(canvas->recordingContext(), canvas, layer, nullptr, nullptr, true);
     }
 }
 
@@ -67,8 +67,12 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
              isIntegerAligned(dstDevRect.y()));
 }
 
-bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
-                              const SkRect* srcRect, const SkRect* dstRect,
+// TODO: Context arg probably doesn't belong here – do debug check at callsite instead.
+bool LayerDrawable::DrawLayer(GrRecordingContext* context,
+                              SkCanvas* canvas,
+                              Layer* layer,
+                              const SkRect* srcRect,
+                              const SkRect* dstRect,
                               bool useLayerTransform) {
     if (context == nullptr) {
         SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));

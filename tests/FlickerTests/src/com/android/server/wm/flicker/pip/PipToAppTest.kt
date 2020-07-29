@@ -16,12 +16,21 @@
 
 package com.android.server.wm.flicker.pip
 
+import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WmTraceSubject
-import com.android.server.wm.flicker.helpers.PipAppHelper
+import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.helpers.closePipWindow
+import com.android.server.wm.flicker.helpers.expandPipWindow
+import com.android.server.wm.flicker.helpers.hasPipWindow
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,27 +46,55 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)
 class PipToAppTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : PipTestBase(beginRotationName, beginRotation) {
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.exitPipModeToApp(testApp as PipAppHelper, instrumentation,
-                uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
+    rotationName: String,
+    rotation: Int
+) : PipTestBase(rotationName, rotation) {
     @Test
-    fun checkVisibility_backgroundWindowVisibleBehindPipLayer() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .skipUntilFirstAssertion()
-                    .showsAppWindowOnTop(sPipWindowTitle)
-                    .then()
-                    .showsBelowAppWindow("Wallpaper")
-                    .then()
-                    .showsAppWindowOnTop(testApp.getPackage())
-                    .then()
-                    .appWindowNotOnTop(testApp.getPackage())
-                    .forAllEntries()
+    fun test() {
+        flicker(instrumentation) {
+            withTag { buildTestTag("exitPipModeToApp", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                eachRun {
+                    device.wakeUpAndGoToHomeScreen()
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+                test {
+                    if (device.hasPipWindow()) {
+                        device.closePipWindow()
+                    }
+                }
+            }
+            transitions {
+                device.pressHome()
+                this.setRotation(rotation)
+                testApp.open()
+                testApp.clickEnterPipButton(device)
+                device.expandPipWindow()
+                device.waitForIdle()
+                testApp.exit()
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+                    pipWindowBecomesVisible()
+                }
+
+                layersTrace {
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible()
+                    noUncoveredRegions(rotation)
+                    navBarLayerRotatesAndScales(rotation)
+                    statusBarLayerRotatesScales(rotation)
+                    pipLayerBecomesVisible()
+                }
+            }
         }
     }
 }

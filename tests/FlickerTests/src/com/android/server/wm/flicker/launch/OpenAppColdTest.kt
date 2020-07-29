@@ -16,14 +16,17 @@
 
 package com.android.server.wm.flicker.launch
 
-import androidx.test.filters.FlakyTest
+import android.view.Surface
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.CommonTransitions
-import com.android.server.wm.flicker.LayersTraceSubject
-import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.StandardAppHelper
-import com.android.server.wm.flicker.TransitionRunner
-import com.android.server.wm.flicker.WmTraceSubject
+import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,50 +41,49 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenAppColdTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        testApp = StandardAppHelper(instrumentation,
-                "com.android.server.wm.flicker.testapp", "SimpleApp")
-    }
-
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.openAppCold(testApp, instrumentation, uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
+    rotationName: String,
+    rotation: Int
+) : OpenAppTestBase(rotationName, rotation) {
     @Test
-    fun checkVisibility_wallpaperWindowBecomesInvisible() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsBelowAppWindow("Wallpaper")
-                    .then()
-                    .hidesBelowAppWindow("Wallpaper")
-                    .forAllEntries()
-        }
-    }
+    fun test() {
+        flicker(instrumentation) {
+            withTag { buildTestTag("openAppCold", testApp, rotation) }
+            repeat { 1 }
+            setup {
+                test {
+                    device.wakeUpAndGoToHomeScreen()
+                }
+                eachRun {
+                    this.setRotation(rotation)
+                }
+            }
+            transitions {
+                testApp.open()
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                    this.setRotation(Surface.ROTATION_0)
+                }
+            }
+            assertions {
+                windowManagerTrace {
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
+                    appWindowReplacesLauncherAsTopWindow(bugId = 141361128)
+                    wallpaperWindowBecomesInvisible()
+                }
 
-    @FlakyTest(bugId = 140855415)
-    @Test
-    fun checkZOrder_appWindowReplacesLauncherAsTopWindow() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAppWindowOnTop(
-                            "com.android.launcher3/.Launcher")
-                    .then()
-                    .showsAppWindowOnTop(testApp.getPackage())
-                    .forAllEntries()
-        }
-    }
-
-    @Test
-    fun checkVisibility_wallpaperLayerBecomesInvisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer("Wallpaper")
-                    .then()
-                    .replaceVisibleLayer("Wallpaper", testApp.getPackage())
-                    .forAllEntries()
+                layersTrace {
+                    noUncoveredRegions(rotation, bugId = 141361128)
+                    // During testing the launcher is always in portrait mode
+                    navBarLayerRotatesAndScales(Surface.ROTATION_0, rotation)
+                    statusBarLayerRotatesScales(Surface.ROTATION_0, rotation)
+                    navBarLayerIsAlwaysVisible(bugId = 141361128)
+                    statusBarLayerIsAlwaysVisible(bugId = 141361128)
+                    wallpaperLayerBecomesInvisible(bugId = 141361128)
+                }
+            }
         }
     }
 }
