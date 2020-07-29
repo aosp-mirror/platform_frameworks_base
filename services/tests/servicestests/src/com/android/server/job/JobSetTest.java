@@ -97,9 +97,9 @@ public class JobSetTest {
         mJobSet.remove(testJob1);
         mJobSet.remove(testJob2);
         assertHaveSameJobs(mJobSet.mJobsPerSourceUid, mJobSet.mJobs);
-        mJobSet.removeJobsOfNonUsers(new int[] {mContext.getUserId(), SECONDARY_USER_ID_1});
+        mJobSet.removeJobsOfUnlistedUsers(new int[] {mContext.getUserId(), SECONDARY_USER_ID_1});
         assertHaveSameJobs(mJobSet.mJobsPerSourceUid, mJobSet.mJobs);
-        mJobSet.removeJobsOfNonUsers(new int[] {mContext.getUserId()});
+        mJobSet.removeJobsOfUnlistedUsers(new int[] {mContext.getUserId()});
         assertTrue("mJobs should be empty", mJobSet.mJobs.size() == 0);
         assertTrue("mJobsPerSourceUid should be empty", mJobSet.mJobsPerSourceUid.size() == 0);
     }
