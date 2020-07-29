@@ -2792,7 +2792,7 @@
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=NONE] -->
     <string name="controls_media_close_session">Hide the current session.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
-    <string name="controls_media_dismiss_button">Hide</string>
+    <string name="controls_media_dismiss_button">Dismiss</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->

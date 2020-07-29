@@ -142,4 +142,11 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
                 any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
     }
+
+    @Test
+    fun testCloseGutsRelayToCarousel() {
+        mediaHiearchyManager.closeGuts()
+
+        verify(mediaCarouselController).closeGuts()
+    }
 }
