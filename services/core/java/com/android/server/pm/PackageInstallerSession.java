@@ -1437,7 +1437,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             try {
-                sealLocked(getChildSessionsLocked());
+                sealLocked();
             } catch (PackageManagerException e) {
                 return false;
             }
@@ -1547,14 +1547,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *                                 session was sealed this is the only possible exception.
      */
     @GuardedBy("mLock")
-    private void sealLocked(List<PackageInstallerSession> childSessions)
+    private void sealLocked()
             throws PackageManagerException {
         try {
             assertNoWriteFileTransfersOpenLocked();
             assertPreparedAndNotDestroyedLocked("sealing of session");
 
             mSealed = true;
-
+            List<PackageInstallerSession> childSessions = getChildSessionsLocked();
             if (childSessions != null) {
                 assertMultiPackageConsistencyLocked(childSessions);
             }
@@ -1666,7 +1666,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         synchronized (mLock) {
             try {
-                sealLocked(getChildSessionsLocked());
+                sealLocked();
 
                 if (isApexInstallation()) {
                     // APEX installations rely on certain fields to be populated after reboot.
@@ -1712,7 +1712,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotSealedLocked("transfer");
 
             try {
-                sealLocked(getChildSessionsLocked());
+                sealLocked();
             } catch (PackageManagerException e) {
                 throw new IllegalArgumentException("Package is not valid", e);
             }
@@ -1743,13 +1743,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        final List<PackageInstallerSession> childSessions;
-        synchronized (mLock) {
-            childSessions = getChildSessionsLocked();
-        }
-
         try {
-            verifyNonStaged(childSessions);
+            verifyNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
             Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
@@ -1758,7 +1753,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void verifyNonStaged(List<PackageInstallerSession> childSessions)
+    private void verifyNonStaged()
             throws PackageManagerException {
         final PackageManagerService.VerificationParams verifyingSession =
                 makeVerificationParams();
@@ -1766,6 +1761,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
         if (isMultiPackage()) {
+            final List<PackageInstallerSession> childSessions;
+            synchronized (mLock) {
+                childSessions = getChildSessionsLocked();
+            }
             List<PackageManagerService.VerificationParams> verifyingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
@@ -1799,7 +1798,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void installNonStaged(List<PackageInstallerSession> childSessions)
+    private void installNonStaged()
             throws PackageManagerException {
         final PackageManagerService.InstallParams installingSession =
                 makeInstallParams();
@@ -1807,6 +1806,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
         if (isMultiPackage()) {
+            final List<PackageInstallerSession> childSessions;
+            synchronized (mLock) {
+                childSessions = getChildSessionsLocked();
+            }
             List<PackageManagerService.InstallParams> installingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
@@ -2000,9 +2003,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
         try {
-            installNonStaged(childSessions);
+            installNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
             Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
