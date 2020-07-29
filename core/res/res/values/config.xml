@@ -2795,6 +2795,9 @@
              eutran : eutranSupportedRelease
              nfc : contactlessSupportedRelease
              crl : rspCrlSupportedVersion
+             nrepc : nrEpcSupportedRelease
+             nr5gc : nr5gcSupportedRelease
+             eutran5gc : eutran5gcSupportedRelease
     -->
     <string-array translatable="false" name="config_telephonyEuiccDeviceCapabilities">
         <!-- Example:
@@ -2806,6 +2809,9 @@
         <item>"eutran,11"</item>
         <item>"nfc,1"</item>
         <item>"crl,1"</item>
+        <item>"nrepc,15"</item>
+        <item>"nr5gc,15"</item>
+        <item>"eutran5gc,15"</item>
         -->
     </string-array>
 
