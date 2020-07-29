@@ -1663,8 +1663,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!mShouldBeSealed || isStagedAndInTerminalState()) {
                 return;
             }
-        }
-        synchronized (mLock) {
             try {
                 sealLocked();
 
