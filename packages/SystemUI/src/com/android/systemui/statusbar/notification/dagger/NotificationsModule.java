@@ -87,6 +87,7 @@ public interface NotificationsModule {
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
+            Lazy<BubbleController> bubbleController,
             ForegroundServiceDismissalFeatureController fgsFeatureController) {
         return new NotificationEntryManager(
                 logger,
@@ -97,6 +98,7 @@ public interface NotificationsModule {
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,
                 leakDetector,
+                bubbleController,
                 fgsFeatureController);
     }
 
