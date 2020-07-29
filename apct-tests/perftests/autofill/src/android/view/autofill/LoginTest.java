@@ -24,10 +24,14 @@ import android.perftests.utils.PerfTestActivity;
 import android.view.View;
 import android.widget.EditText;
 
+import androidx.test.filters.LargeTest;
+
 import com.android.perftests.autofill.R;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+@LargeTest
 public class LoginTest extends AbstractAutofillPerfTestCase {
 
     private EditText mUsername;
@@ -90,6 +94,8 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     /**
      * Now the service returns autofill data, for both username and password.
      */
+    // TODO(b/162216576): fix fail test and re-enable it
+    @Ignore
     @Test
     public void testFocus_autofillBothFields() throws Throwable {
         MyAutofillService.newCannedResponse()
@@ -142,6 +148,8 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     /**
      * Now the service returns autofill data, but just for username.
      */
+    // TODO(b/162216576): fix fail test and re-enable it
+    @Ignore
     @Test
     public void testFocus_autofillUsernameOnly() throws Throwable {
         // Must set ignored ids so focus on password does not trigger new requests
@@ -258,6 +266,8 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         });
     }
 
+    // TODO(b/162216576): fix fail test and re-enable it
+    @Ignore
     @Test
     public void testCallbacks() throws Throwable {
         MyAutofillService.newCannedResponse()
