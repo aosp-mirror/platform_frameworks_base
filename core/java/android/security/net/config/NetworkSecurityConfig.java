@@ -216,7 +216,7 @@ public final class NetworkSecurityConfig {
          * in {@link Builder#build()}, recursively if needed.
          */
         public Builder setParent(Builder parent) {
-            // Sanity check to avoid adding loops.
+            // Quick check to avoid adding loops.
             Builder current = parent;
             while (current != null) {
                 if (current == this) {
