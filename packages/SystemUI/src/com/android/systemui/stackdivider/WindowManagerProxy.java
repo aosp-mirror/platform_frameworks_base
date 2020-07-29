@@ -50,7 +50,7 @@ import java.util.concurrent.Executors;
 /**
  * Proxy to simplify calls into window manager/activity manager
  */
-public class WindowManagerProxy {
+class WindowManagerProxy {
 
     private static final String TAG = "WindowManagerProxy";
     private static final int[] HOME_AND_RECENTS = {ACTIVITY_TYPE_HOME, ACTIVITY_TYPE_RECENTS};
