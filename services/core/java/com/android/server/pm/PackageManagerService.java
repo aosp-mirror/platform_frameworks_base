@@ -331,6 +331,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
@@ -2588,7 +2589,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) ->
                         new Settings(Environment.getDataDirectory(),
                                 i.getPermissionManagerServiceInternal().getPermissionSettings(),
-                                lock),
+                                RuntimePermissionsPersistence.createInstance(), lock),
                 new Injector.LocalServicesProducer<>(ActivityTaskManagerInternal.class),
                 new Injector.LocalServicesProducer<>(ActivityManagerInternal.class),
                 new Injector.LocalServicesProducer<>(DeviceIdleInternal.class),
