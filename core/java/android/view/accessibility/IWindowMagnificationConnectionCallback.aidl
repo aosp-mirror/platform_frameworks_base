@@ -19,7 +19,7 @@ package android.view.accessibility;
 import android.graphics.Rect;
 
 /**
- * interface to notify the change of the window magnifier bounds and request to change
+ * interface to notify the changes of the window magnification and request to change
  * the magnification mode.
  *
  * @hide
@@ -27,12 +27,13 @@ import android.graphics.Rect;
  oneway interface IWindowMagnificationConnectionCallback {
 
     /**
-     * Called when the bounds of the window magnifier is changed.
+     * Called when the bounds of the mirrow window is changed.
      *
      * @param displayId The logical display id.
      * @param bounds The window magnifier bounds in screen coordinates.
      */
     void onWindowMagnifierBoundsChanged(int displayId, in Rect bounds);
+
     /**
      * Changes the magnification mode on specified display. It is invoked by System UI when the
      *  switch button is toggled.
@@ -41,4 +42,12 @@ import android.graphics.Rect;
      * @param magnificationMode new magnification mode.
      */
     void onChangeMagnificationMode(int displayId, int magnificationMode);
+
+    /**
+     * Called when the magnified bounds is changed.
+     *
+     * @param displayId The logical display id.
+     * @param sourceBounds The magnified bounds in screen coordinates.
+     */
+    void onSourceBoundsChanged(int displayId, in Rect sourceBounds);
 }
