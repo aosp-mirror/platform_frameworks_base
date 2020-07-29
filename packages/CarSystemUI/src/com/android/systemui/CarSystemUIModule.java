@@ -134,9 +134,13 @@ public abstract class CarSystemUIModule {
     }
 
     @Singleton
-    @Binds
-    abstract DisplayImeController bindDisplayImeController(
-            DisplaySystemBarsController displaySystemBarsController);
+    @Provides
+    static DisplayImeController provideDisplayImeController(Context context,
+            IWindowManager wmService, DisplayController displayController,
+            @Main Handler mainHandler, TransactionPool transactionPool) {
+        return new DisplaySystemBarsController.Builder(context, wmService, displayController,
+                mainHandler, transactionPool).build();
+    }
 
     @Binds
     abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
