@@ -135,16 +135,11 @@ AStatsManager_PullAtomCallbackReturn PowerStatsPuller::Pull(int32_t atomTag,
                                             }
                                             const RailInfo& rail = gRailInfo[energyData.index];
 
-                                            AStatsEvent* event =
-                                                    AStatsEventList_addStatsEvent(data);
-                                            AStatsEvent_setAtomId(
-                                                    event,
-                                                    android::util::ON_DEVICE_POWER_MEASUREMENT);
-                                            AStatsEvent_writeString(event, rail.subsysName.c_str());
-                                            AStatsEvent_writeString(event, rail.railName.c_str());
-                                            AStatsEvent_writeInt64(event, energyData.timestamp);
-                                            AStatsEvent_writeInt64(event, energyData.energy);
-                                            AStatsEvent_build(event);
+                                            android::util::addAStatsEvent(
+                                                    data,
+                                                    android::util::ON_DEVICE_POWER_MEASUREMENT,
+                                                    rail.subsysName.c_str(), rail.railName.c_str(),
+                                                    energyData.timestamp, energyData.energy);
 
                                             ALOGV("power.stat: %s.%s: %llu, %llu",
                                                   rail.subsysName.c_str(), rail.railName.c_str(),
