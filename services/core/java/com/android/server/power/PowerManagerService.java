@@ -895,19 +895,13 @@ public final class PowerManagerService extends SystemService
                 || def == INVALID_BRIGHTNESS_IN_CONFIG) {
             mScreenBrightnessMinimum = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessSettingMinimum),
-                    PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessSettingMinimum));
             mScreenBrightnessMaximum = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessSettingMaximum),
-                    PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessSettingMaximum));
             mScreenBrightnessDefault = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessSettingDefault),
-                    PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessSettingDefault));
         } else {
             mScreenBrightnessMinimum = min;
             mScreenBrightnessMaximum = max;
@@ -916,18 +910,14 @@ public final class PowerManagerService extends SystemService
         if (doze == INVALID_BRIGHTNESS_IN_CONFIG) {
             mScreenBrightnessDoze = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessDoze), PowerManager.BRIGHTNESS_OFF + 1,
-                    PowerManager.BRIGHTNESS_ON, PowerManager.BRIGHTNESS_MIN,
-                    PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessDoze));
         } else {
             mScreenBrightnessDoze = doze;
         }
         if (dim == INVALID_BRIGHTNESS_IN_CONFIG) {
             mScreenBrightnessDim = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessDim), PowerManager.BRIGHTNESS_OFF + 1,
-                    PowerManager.BRIGHTNESS_ON, PowerManager.BRIGHTNESS_MIN,
-                    PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessDim));
         } else {
             mScreenBrightnessDim = dim;
         }
@@ -942,19 +932,13 @@ public final class PowerManagerService extends SystemService
                 || vrDef == INVALID_BRIGHTNESS_IN_CONFIG) {
             mScreenBrightnessMinimumVr = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessForVrSettingMinimum),
-                    PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessForVrSettingMinimum));
             mScreenBrightnessMaximumVr = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessForVrSettingMaximum),
-                    PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessForVrSettingMaximum));
             mScreenBrightnessDefaultVr = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessForVrSettingDefault),
-                    PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+                            .config_screenBrightnessForVrSettingDefault));
         } else {
             mScreenBrightnessMinimumVr = vrMin;
             mScreenBrightnessMaximumVr = vrMax;
@@ -3600,8 +3584,7 @@ public final class PowerManagerService extends SystemService
                 mDozeScreenStateOverrideFromDreamManager = screenState;
                 mDozeScreenBrightnessOverrideFromDreamManager = screenBrightness;
                 mDozeScreenBrightnessOverrideFromDreamManagerFloat =
-                        BrightnessSynchronizer.brightnessIntToFloat(mContext,
-                                mDozeScreenBrightnessOverrideFromDreamManager);
+                        BrightnessSynchronizer.brightnessIntToFloat(mDozeScreenBrightnessOverrideFromDreamManager);
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }

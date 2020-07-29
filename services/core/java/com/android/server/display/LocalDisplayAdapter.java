@@ -718,16 +718,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         try {
                             if (isHalBrightnessRangeSpecified()) {
                                 brightness = displayBrightnessToHalBrightness(
-                                        BrightnessSynchronizer.brightnessFloatToIntRange(
-                                                getContext(), brightness));
+                                        BrightnessSynchronizer.brightnessFloatToIntRange(brightness));
                             }
                             if (mBacklight != null) {
                                 mBacklight.setBrightness(brightness);
                             }
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
-                                    BrightnessSynchronizer.brightnessFloatToInt(
-                                            getContext(), brightness));
+                                    BrightnessSynchronizer.brightnessFloatToInt(brightness));
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }

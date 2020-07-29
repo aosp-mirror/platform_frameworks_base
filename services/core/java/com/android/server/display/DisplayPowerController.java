@@ -699,13 +699,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Initialize screen state for battery stats.
         try {
             mBatteryStats.noteScreenState(mPowerState.getScreenState());
-            mBatteryStats.noteScreenBrightness(BrightnessSynchronizer.brightnessFloatToInt(mContext,
+            mBatteryStats.noteScreenBrightness(BrightnessSynchronizer.brightnessFloatToInt(
                     mPowerState.getScreenBrightness()));
         } catch (RemoteException ex) {
             // same process
         }
         // Initialize all of the brightness tracking state
-        final float brightness = convertToNits(BrightnessSynchronizer.brightnessFloatToInt(mContext,
+        final float brightness = convertToNits(BrightnessSynchronizer.brightnessFloatToInt(
                 mPowerState.getScreenBrightness()));
         if (brightness >= 0.0f) {
             mBrightnessTracker.start(brightness);
@@ -1093,7 +1093,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     userInitiatedChange = false;
                 }
                 notifyBrightnessChanged(
-                        BrightnessSynchronizer.brightnessFloatToInt(mContext, brightnessState),
+                        BrightnessSynchronizer.brightnessFloatToInt(brightnessState),
                         userInitiatedChange, hadUserBrightnessPoint);
             }
 
@@ -1341,8 +1341,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             try {
                 // TODO(brightnessfloat): change BatteryStats to use float
                 mBatteryStats.noteScreenBrightness(
-                        BrightnessSynchronizer.brightnessFloatToInt(
-                        mContext, target));
+                        BrightnessSynchronizer.brightnessFloatToInt(target));
             } catch (RemoteException ex) {
                 // same process
             }
