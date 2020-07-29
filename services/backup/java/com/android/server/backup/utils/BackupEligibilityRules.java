@@ -318,4 +318,8 @@ public class BackupEligibilityRules {
             return true;
         }
     }
+
+    public int getOperationType() {
+        return mOperationType;
+    }
 }

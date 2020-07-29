@@ -25,12 +25,15 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_HEA
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_VERSION;
 
 import android.app.backup.IFullBackupRestoreObserver;
+import android.content.pm.PackageManagerInternal;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
 import com.android.server.backup.utils.PasswordUtils;
 
@@ -102,7 +105,10 @@ public class PerformAdbRestoreTask implements Runnable {
             }
 
             FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService, null,
-                    mObserver, null, null, true, 0 /*unused*/, true);
+                    mObserver, null, null, true, 0 /*unused*/, true,
+                    BackupEligibilityRules.forBackup(mBackupManagerService.getPackageManager(),
+                                    LocalServices.getService(PackageManagerInternal.class),
+                                    mBackupManagerService.getUserId()));
             FullRestoreEngineThread mEngineThread = new FullRestoreEngineThread(mEngine,
                     tarInputStream);
             mEngineThread.run();

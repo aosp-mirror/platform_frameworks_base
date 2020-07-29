@@ -162,6 +162,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private final int mEphemeralOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+    private final BackupEligibilityRules mBackupEligibilityRules;
 
     @VisibleForTesting
     PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
@@ -171,6 +172,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mTransportManager = null;
         mEphemeralOpToken = 0;
         mUserId = 0;
+        mBackupEligibilityRules = null;
         this.backupManagerService = backupManagerService;
     }
 
@@ -208,6 +210,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
+        mBackupEligibilityRules = backupEligibilityRules;
 
         if (targetPackage != null) {
             // Single package restore
@@ -656,7 +659,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // Good to go!  Set up and bind the agent...
         mAgent = backupManagerService.bindToAgentSynchronous(
                 mCurrentPackage.applicationInfo,
-                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
+                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
+                mBackupEligibilityRules.getOperationType());
         if (mAgent == null) {
             Slog.w(TAG, "Can't find backup agent for " + packageName);
             mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -913,7 +917,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     mCurrentPackage.packageName);
 
             mEngine = new FullRestoreEngine(backupManagerService, this, null,
-                    mMonitor, mCurrentPackage, false, mEphemeralOpToken, false);
+                    mMonitor, mCurrentPackage, false, mEphemeralOpToken, false,
+                    mBackupEligibilityRules);
             mEngineThread = new FullRestoreEngineThread(mEngine, mEnginePipes[0]);
 
             ParcelFileDescriptor eWriteEnd = mEnginePipes[1];

@@ -1643,13 +1643,15 @@ public class UserBackupManagerService {
 
     /** Fires off a backup agent, blocking until it attaches or times out. */
     @Nullable
-    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode) {
+    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode,
+            @OperationType int operationType) {
         IBackupAgent agent = null;
         synchronized (mAgentConnectLock) {
             mConnecting = true;
             mConnectedAgent = null;
             try {
-                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId)) {
+                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId,
+                        operationType)) {
                     Slog.d(TAG, addUserIdToLogMessage(mUserId, "awaiting agent for " + app));
 
                     // success; wait for the agent to arrive
