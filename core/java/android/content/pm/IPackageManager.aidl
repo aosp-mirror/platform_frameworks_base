@@ -785,4 +785,6 @@ interface IPackageManager {
     List<String> getMimeGroup(String packageName, String group);
 
     boolean isAutoRevokeWhitelisted(String packageName);
+
+    void grantImplicitAccess(int queryingUid, String visibleAuthority);
 }

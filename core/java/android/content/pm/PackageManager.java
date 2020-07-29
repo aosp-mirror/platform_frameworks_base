@@ -8011,6 +8011,20 @@ public abstract class PackageManager {
                 "getMimeGroup not implemented in subclass");
     }
 
+    /**
+     * Grants implicit visibility of the package that provides an authority to a querying UID.
+     *
+     * @throws SecurityException when called by a package other than the contacts provider
+     * @hide
+     */
+    public void grantImplicitAccess(int queryingUid, String visibleAuthority) {
+        try {
+            ActivityThread.getPackageManager().grantImplicitAccess(queryingUid, visibleAuthority);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     // Some of the flags don't affect the query result, but let's be conservative and cache
     // each combination of flags separately.
 
