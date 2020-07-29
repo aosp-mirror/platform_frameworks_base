@@ -491,7 +491,14 @@ final class ColorFade {
 
                 mIsWideColor = SurfaceControl.getActiveColorMode(token)
                         == Display.COLOR_MODE_DISPLAY_P3;
-                SurfaceControl.screenshot(token, s);
+                SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                        mDisplayManagerInternal.systemScreenshot(mDisplayId);
+                s.attachAndQueueBufferWithColorSpace(screenshotBuffer.getHardwareBuffer(),
+                        screenshotBuffer.getColorSpace());
+
+                if (screenshotBuffer.containsSecureLayers()) {
+                    mTransaction.setSecure(mSurfaceControl, true).apply();
+                }
                 st.updateTexImage();
                 st.getTransformMatrix(mTexMatrix);
             } finally {
@@ -586,7 +593,6 @@ final class ColorFade {
         }
 
         if (mSurfaceControl == null) {
-            Transaction t = new Transaction();
             try {
                 final SurfaceControl.Builder builder = new SurfaceControl.Builder(mSurfaceSession)
                         .setName("ColorFade")
@@ -602,15 +608,16 @@ final class ColorFade {
                 return false;
             }
 
-            t.setLayerStack(mSurfaceControl, mDisplayLayerStack);
-            t.setWindowCrop(mSurfaceControl, mDisplayWidth, mDisplayHeight);
+            mTransaction.setLayerStack(mSurfaceControl, mDisplayLayerStack);
+            mTransaction.setWindowCrop(mSurfaceControl, mDisplayWidth, mDisplayHeight);
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
+                    mDisplayId, mSurfaceControl);
+            mSurfaceLayout.onDisplayTransaction(mTransaction);
+            mTransaction.apply();
+
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
 
-            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
-                    mDisplayId, mSurfaceControl);
-            mSurfaceLayout.onDisplayTransaction(t);
-            t.apply();
         }
         return true;
     }
@@ -652,7 +659,7 @@ final class ColorFade {
         if (mSurfaceControl != null) {
             mSurfaceLayout.dispose();
             mSurfaceLayout = null;
-            new Transaction().remove(mSurfaceControl).apply();
+            mTransaction.remove(mSurfaceControl).apply();
             mSurface.release();
             mSurfaceControl = null;
             mSurfaceVisible = false;
