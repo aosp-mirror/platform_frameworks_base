@@ -1478,26 +1478,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return true;
     }
 
-    /** Return a list of child sessions or null if the session is not multipackage
-     *
-     * <p> This method is handy to prevent potential deadlocks (b/123391593)
-     */
-    private @Nullable List<PackageInstallerSession> getChildSessionsNotLocked() {
-        if (Thread.holdsLock(mLock)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mLock", new Throwable());
-        }
-        List<PackageInstallerSession> childSessions = null;
-        if (isMultiPackage()) {
-            final int[] childSessionIds = getChildSessionIds();
-            childSessions = new ArrayList<>(childSessionIds.length);
-            for (int childSessionId : childSessionIds) {
-                childSessions.add(mSessionProvider.getSession(childSessionId));
-            }
-        }
-        return childSessions;
-    }
-
     @GuardedBy("mLock")
     private @Nullable List<PackageInstallerSession> getChildSessionsLocked() {
         List<PackageInstallerSession> childSessions = null;
@@ -3340,6 +3320,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** {@hide} */
     void setStagedSessionFailed(@StagedSessionErrorCode int errorCode, String errorMessage) {
+        List<PackageInstallerSession> childSessions;
         synchronized (mLock) {
             // Do not allow destroyed/failed staged session to change state
             if (mDestroyed || mStagedSessionFailed) return;
@@ -3349,13 +3330,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionErrorCode = errorCode;
             mStagedSessionErrorMessage = errorMessage;
             Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
+            childSessions = getChildSessionsLocked();
         }
-        cleanStageDirNotLocked();
+        cleanStageDir(childSessions);
         mCallback.onStagedSessionChanged(this);
     }
 
     /** {@hide} */
     void setStagedSessionApplied() {
+        List<PackageInstallerSession> childSessions;
         synchronized (mLock) {
             // Do not allow destroyed/failed staged session to change state
             if (mDestroyed || mStagedSessionFailed) return;
@@ -3365,8 +3348,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
             mStagedSessionErrorMessage = "";
             Slog.d(TAG, "Marking session " + sessionId + " as applied");
+            childSessions = getChildSessionsLocked();
         }
-        cleanStageDirNotLocked();
+        cleanStageDir(childSessions);
         mCallback.onStagedSessionChanged(this);
     }
 
@@ -3434,23 +3418,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    /**
-     * <b>must not hold {@link #mLock}</b>
-     */
-    private void cleanStageDirNotLocked() {
-        if (Thread.holdsLock(mLock)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mLock", new Throwable());
-        }
-        cleanStageDir(getChildSessionsNotLocked());
-    }
-
     private void cleanStageDir(List<PackageInstallerSession> childSessions) {
         if (childSessions != null) {
             for (PackageInstallerSession childSession : childSessions) {
-                if (childSession != null) {
-                    childSession.cleanStageDir();
-                }
+                childSession.cleanStageDir();
             }
         } else {
             cleanStageDir();
