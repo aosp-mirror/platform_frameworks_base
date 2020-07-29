@@ -128,7 +128,7 @@ void ConfigManager::Startup() {
 }
 
 void ConfigManager::StartupForTest() {
-    // Dummy function to avoid reading configs from disks for tests.
+    // No-op function to avoid reading configs from disks for tests.
 }
 
 void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
