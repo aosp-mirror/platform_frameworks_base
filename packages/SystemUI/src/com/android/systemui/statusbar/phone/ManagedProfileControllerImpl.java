@@ -24,6 +24,8 @@ import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import java.util.ArrayList;
@@ -57,7 +59,8 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         mProfiles = new LinkedList<UserInfo>();
     }
 
-    public void addCallback(Callback callback) {
+    @Override
+    public void addCallback(@NonNull Callback callback) {
         mCallbacks.add(callback);
         if (mCallbacks.size() == 1) {
             setListening(true);
@@ -65,7 +68,8 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         callback.onManagedProfileChanged();
     }
 
-    public void removeCallback(Callback callback) {
+    @Override
+    public void removeCallback(@NonNull Callback callback) {
         if (mCallbacks.remove(callback) && mCallbacks.size() == 0) {
             setListening(false);
         }

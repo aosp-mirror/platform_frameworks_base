@@ -66,6 +66,7 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -113,6 +114,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected DeviceProvisionedController mMockProvisionController;
     protected DeviceProvisionedListener mUserCallback;
     protected Instrumentation mInstrumentation;
+    protected DemoModeController mDemoModeController;
 
     protected int mSubId;
 
@@ -146,6 +148,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         res.addOverride(R.string.cell_data_off_content_description, NO_DATA_STRING);
         res.addOverride(R.string.not_default_data_content_description, NOT_DEFAULT_DATA_STRING);
 
+        mDemoModeController = mock(DemoModeController.class);
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
@@ -200,10 +203,21 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             return null;
         }).when(mMockProvisionController).addCallback(any());
 
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
-                mMockNsm, mMockSm, mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mMockProvisionController, mMockBd);
+        mNetworkController = new NetworkControllerImpl(mContext,
+                mMockCm,
+                mMockTm,
+                mMockWm,
+                mMockNsm,
+                mMockSm,
+                mConfig,
+                TestableLooper.get(this).getLooper(),
+                mCallbackHandler,
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class),
+                mMockSubDefaults,
+                mMockProvisionController,
+                mMockBd,
+                mDemoModeController);
         setupNetworkController();
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
@@ -254,7 +268,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
-                        mock(DeviceProvisionedController.class), mMockBd);
+                        mock(DeviceProvisionedController.class), mMockBd, mDemoModeController);
 
         setupNetworkController();
 

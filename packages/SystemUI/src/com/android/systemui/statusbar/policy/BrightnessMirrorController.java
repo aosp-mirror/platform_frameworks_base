@@ -123,13 +123,13 @@ public class BrightnessMirrorController
     }
 
     @Override
-    public void addCallback(BrightnessMirrorListener listener) {
+    public void addCallback(@NonNull BrightnessMirrorListener listener) {
         Objects.requireNonNull(listener);
         mBrightnessMirrorListeners.add(listener);
     }
 
     @Override
-    public void removeCallback(BrightnessMirrorListener listener) {
+    public void removeCallback(@NonNull BrightnessMirrorListener listener) {
         mBrightnessMirrorListeners.remove(listener);
     }
 

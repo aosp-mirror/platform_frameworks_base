@@ -24,6 +24,8 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -87,7 +89,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     }
 
     @Override
-    public void addCallback(DeviceProvisionedListener listener) {
+    public void addCallback(@NonNull DeviceProvisionedListener listener) {
         mListeners.add(listener);
         if (mListeners.size() == 1) {
             startListening(getCurrentUser());
@@ -97,7 +99,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     }
 
     @Override
-    public void removeCallback(DeviceProvisionedListener listener) {
+    public void removeCallback(@NonNull DeviceProvisionedListener listener) {
         mListeners.remove(listener);
         if (mListeners.size() == 0) {
             stopListening();

@@ -32,9 +32,9 @@ import android.widget.LinearLayout.LayoutParams;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
@@ -198,7 +198,7 @@ public interface StatusBarIconController {
     /**
      * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
      */
-    public static class IconManager implements DemoMode {
+    class IconManager implements DemoModeCommandReceiver {
         protected final ViewGroup mGroup;
         protected final Context mContext;
         protected final int mIconSize;
@@ -390,18 +390,24 @@ public interface StatusBarIconController {
                 return;
             }
 
-            if (command.equals(COMMAND_EXIT)) {
-                if (mDemoStatusIcons != null) {
-                    mDemoStatusIcons.dispatchDemoCommand(command, args);
-                    exitDemoMode();
-                }
+            mDemoStatusIcons.dispatchDemoCommand(command, args);
+        }
+
+        @Override
+        public void onDemoModeStarted() {
+            mIsInDemoMode = true;
+            if (mDemoStatusIcons == null) {
+                mDemoStatusIcons = createDemoStatusIcons();
+            }
+            mDemoStatusIcons.onDemoModeStarted();
+        }
+
+        @Override
+        public void onDemoModeFinished() {
+            if (mDemoStatusIcons != null) {
+                mDemoStatusIcons.onDemoModeFinished();
+                exitDemoMode();
                 mIsInDemoMode = false;
-            } else {
-                if (mDemoStatusIcons == null) {
-                    mIsInDemoMode = true;
-                    mDemoStatusIcons = createDemoStatusIcons();
-                }
-                mDemoStatusIcons.dispatchDemoCommand(command, args);
             }
         }
 

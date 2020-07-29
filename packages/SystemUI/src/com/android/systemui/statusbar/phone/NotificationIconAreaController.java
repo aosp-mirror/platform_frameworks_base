@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.demomode.DemoMode;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -35,6 +38,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -44,7 +48,8 @@ import java.util.function.Function;
  */
 public class NotificationIconAreaController implements DarkReceiver,
         StatusBarStateController.StateListener,
-        NotificationWakeUpCoordinator.WakeUpListener {
+        NotificationWakeUpCoordinator.WakeUpListener,
+        DemoMode {
 
     public static final String HIGH_PRIORITY = "high_priority";
     private static final long AOD_ICONS_APPEAR_DURATION = 200;
@@ -74,6 +79,8 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final Rect mTintArea = new Rect();
     private ViewGroup mNotificationScrollLayout;
     private Context mContext;
+    private final DemoModeController mDemoModeController;
+
     private int mAodIconAppearTranslation;
 
     private boolean mAnimationsEnabled;
@@ -104,7 +111,8 @@ public class NotificationIconAreaController implements DarkReceiver,
             NotificationMediaManager notificationMediaManager,
             NotificationListener notificationListener,
             DozeParameters dozeParameters,
-            BubbleController bubbleController) {
+            BubbleController bubbleController,
+            DemoModeController demoModeController) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
@@ -117,6 +125,8 @@ public class NotificationIconAreaController implements DarkReceiver,
         mBypassController = keyguardBypassController;
         mBubbleController = bubbleController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
+        mDemoModeController = demoModeController;
+        mDemoModeController.addCallback(this);
 
         initializeNotificationAreaViews(context);
         reloadAodColor();
@@ -664,6 +674,29 @@ public class NotificationIconAreaController implements DarkReceiver,
                 mAodIcons.setTranslationY(0);
                 mAodIcons.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
             }
+        }
+    }
+
+    @Override
+    public List<String> demoCommands() {
+        ArrayList<String> commands = new ArrayList<>();
+        commands.add(DemoMode.COMMAND_NOTIFICATIONS);
+        return commands;
+    }
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (mNotificationIconArea != null) {
+            String visible = args.getString("visible");
+            int vis = "false".equals(visible) ? View.INVISIBLE : View.VISIBLE;
+            mNotificationIconArea.setVisibility(vis);
+        }
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        if (mNotificationIconArea != null) {
+            mNotificationIconArea.setVisibility(View.VISIBLE);
         }
     }
 }

@@ -18,7 +18,6 @@ package com.android.systemui.tuner;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -33,9 +32,9 @@ import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.DemoMode;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -54,6 +53,7 @@ import javax.inject.Singleton;
 @Singleton
 public class TunerServiceImpl extends TunerService {
 
+    private static final String TAG = "TunerService";
     private static final String TUNER_VERSION = "sysui_tuner_version";
 
     private static final int CURRENT_TUNER_VERSION = 4;
@@ -76,6 +76,7 @@ public class TunerServiceImpl extends TunerService {
     private final HashSet<Tunable> mTunables = LeakDetector.ENABLED ? new HashSet<>() : null;
     private final Context mContext;
     private final LeakDetector mLeakDetector;
+    private final DemoModeController mDemoModeController;
 
     private ContentResolver mContentResolver;
     private int mCurrentUser;
@@ -84,11 +85,16 @@ public class TunerServiceImpl extends TunerService {
     /**
      */
     @Inject
-    public TunerServiceImpl(Context context, @Main Handler mainHandler,
-            LeakDetector leakDetector, BroadcastDispatcher broadcastDispatcher) {
+    public TunerServiceImpl(
+            Context context,
+            @Main Handler mainHandler,
+            LeakDetector leakDetector,
+            DemoModeController demoModeController,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mLeakDetector = leakDetector;
+        mDemoModeController = demoModeController;
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             mCurrentUser = user.getUserHandle().getIdentifier();
@@ -244,12 +250,11 @@ public class TunerServiceImpl extends TunerService {
     }
 
     public void clearAllFromUser(int user) {
-        // A couple special cases.
-        Settings.Global.putString(mContentResolver, DemoMode.DEMO_MODE_ALLOWED, null);
-        Intent intent = new Intent(DemoMode.ACTION_DEMO);
-        intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_EXIT);
-        mContext.sendBroadcast(intent);
+        // Turn off demo mode
+        mDemoModeController.requestFinishDemoMode();
+        mDemoModeController.requestSetDemoModeAllowed(false);
 
+        // A couple special cases.
         for (String key : mTunableLookup.keySet()) {
             if (ArrayUtils.contains(RESET_EXCEPTION_LIST, key)) {
                 continue;
