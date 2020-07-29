@@ -2307,7 +2307,7 @@ public class UserBackupManagerService {
     public void enqueueFullBackup(String packageName, long lastBackedUp) {
         FullBackupEntry newEntry = new FullBackupEntry(packageName, lastBackedUp);
         synchronized (mQueueLock) {
-            // First, sanity check that we aren't adding a duplicate.  Slow but
+            // First, check that we aren't adding a duplicate.  Slow but
             // straightforward; we'll have at most on the order of a few hundred
             // items in this list.
             dequeueFullBackupLocked(packageName);
