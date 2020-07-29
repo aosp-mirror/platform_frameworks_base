@@ -75,7 +75,8 @@ public class ForcedResizableInfoActivityController {
         }
     }
 
-    public ForcedResizableInfoActivityController(Context context, Divider divider) {
+    public ForcedResizableInfoActivityController(Context context,
+            DividerController dividerController) {
         mContext = context;
         ActivityManagerWrapper.getInstance().registerTaskStackListener(
                 new TaskStackChangeListener() {
@@ -95,7 +96,7 @@ public class ForcedResizableInfoActivityController {
                         activityLaunchOnSecondaryDisplayFailed();
                     }
                 });
-        divider.registerInSplitScreenListener(mDockedStackExistsListener);
+        dividerController.registerInSplitScreenListener(mDockedStackExistsListener);
     }
 
     public void onAppTransitionFinished() {
