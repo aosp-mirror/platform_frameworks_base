@@ -13394,7 +13394,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // XXX Commented out for now.  Trying to figure out a way to reproduce
         // the actual situation to identify what is actually going on.
         if (false) {
-            mCpHelper.cleanupLaunchingProviders();
+            mCpHelper.cleanupLaunchingProvidersLocked();
         }
 
         skipCurrentReceiverLocked(app);
