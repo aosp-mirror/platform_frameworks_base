@@ -142,7 +142,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
                 mWindowManager, mDeviceProvisionedController, new CommandQueue(mContext),
                 mAutoHideController, mButtonSelectionStateListener, mHandler, mUiBgExecutor,
                 mBarService, () -> mKeyguardStateController, () -> mIconPolicy,
-                () -> mIconController);
+                () -> mIconController, new SystemBarConfigs(mTestableResources.getResources()));
     }
 
     @Test
