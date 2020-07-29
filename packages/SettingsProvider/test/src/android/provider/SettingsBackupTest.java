@@ -503,7 +503,7 @@ public class SettingsBackupTest {
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
-                    Settings.Global.GLOBAL_SETTINGS_ANGLE_WHITELIST,
+                    Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST,
                     Settings.Global.GAME_DRIVER_ALL_APPS,
                     Settings.Global.GAME_DRIVER_OPT_IN_APPS,
                     Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS,

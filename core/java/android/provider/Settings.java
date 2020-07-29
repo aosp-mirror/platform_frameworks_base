@@ -12279,8 +12279,8 @@ public final class Settings {
          * List of package names that should check ANGLE rules
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_WHITELIST =
-                "angle_whitelist";
+        public static final String GLOBAL_SETTINGS_ANGLE_ALLOWLIST =
+                "angle_allowlist";
 
         /**
          * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
