@@ -554,13 +554,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
         synchronized (mLock) {
             final BasePermission bp = mSettings.getPermissionLocked(permName);
             if (bp == null) {
                 return null;
             }
             final int adjustedProtectionLevel = adjustPermissionProtectionFlagsLocked(
-                    bp.getProtectionLevel(), packageName, callingUid);
+                    bp.getProtectionLevel(), pkg, callingUid);
             return bp.generatePermissionInfo(adjustedProtectionLevel, flags);
         }
     }
@@ -2229,8 +2230,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private int adjustPermissionProtectionFlagsLocked(
-            int protectionLevel, String packageName, int uid) {
+    private int adjustPermissionProtectionFlagsLocked(int protectionLevel,
+            @Nullable AndroidPackage pkg, int uid) {
         // Signature permission flags area always reported
         final int protectionLevelMasked = protectionLevel
                 & (PermissionInfo.PROTECTION_NORMAL
@@ -2245,8 +2246,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 || appId == Process.SHELL_UID) {
             return protectionLevel;
         }
-        // Normalize package name to handle renamed packages and static libs
-        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
         if (pkg == null) {
             return protectionLevel;
         }
@@ -2254,14 +2253,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return protectionLevelMasked;
         }
         // Apps that target O see flags for all protection levels.
-        final PackageSetting ps = (PackageSetting) mPackageManagerInt.getPackageSetting(
-                pkg.getPackageName());
-        if (ps == null) {
-            return protectionLevel;
-        }
-        if (ps.getAppId() != appId) {
-            return protectionLevel;
-        }
         return protectionLevel;
     }
 
@@ -2586,8 +2577,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // changed runtime permissions here are promotion of an install to
                 // runtime and revocation of a runtime from a shared user.
                 synchronized (mLock) {
-                    updatedUserIds = revokeUnusedSharedUserPermissionsLocked(
-                            ps.getSharedUser(), UserManagerService.getInstance().getUserIds());
+                    updatedUserIds = revokeUnusedSharedUserPermissionsLocked(ps.getSharedUser(),
+                            currentUserIds);
                     if (!ArrayUtils.isEmpty(updatedUserIds)) {
                         runtimePermissionsRevoked = true;
                     }
@@ -2597,150 +2588,152 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         permissionsState.setGlobalGids(mGlobalGids);
 
-        synchronized (mLock) {
-            ArraySet<String> newImplicitPermissions = new ArraySet<>();
+        ArraySet<String> newImplicitPermissions = new ArraySet<>();
 
-            final int N = pkg.getRequestedPermissions().size();
-            for (int i = 0; i < N; i++) {
-                final String permName = pkg.getRequestedPermissions().get(i);
-                final BasePermission bp = mSettings.getPermissionLocked(permName);
-                final boolean appSupportsRuntimePermissions =
-                        pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
-                String upgradedActivityRecognitionPermission = null;
+        final int N = pkg.getRequestedPermissions().size();
+        for (int i = 0; i < N; i++) {
+            final String permName = pkg.getRequestedPermissions().get(i);
+            final BasePermission bp = mSettings.getPermission(permName);
+            final boolean appSupportsRuntimePermissions =
+                    pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
+            String upgradedActivityRecognitionPermission = null;
 
-                if (DEBUG_INSTALL && bp != null) {
-                    Log.i(TAG, "Package " + pkg.getPackageName()
-                            + " checking " + permName + ": " + bp);
-                }
+            if (DEBUG_INSTALL && bp != null) {
+                Log.i(TAG, "Package " + pkg.getPackageName()
+                        + " checking " + permName + ": " + bp);
+            }
 
-                if (bp == null || getSourcePackageSetting(bp) == null) {
-                    if (packageOfInterest == null || packageOfInterest.equals(
-                            pkg.getPackageName())) {
-                        if (DEBUG_PERMISSIONS) {
-                            Slog.i(TAG, "Unknown permission " + permName
-                                    + " in package " + pkg.getPackageName());
-                        }
-                    }
-                    continue;
-                }
-
-                // Cache newImplicitPermissions before modifing permissionsState as for the shared
-                // uids the original and new state are the same object
-                if (!origPermissions.hasRequestedPermission(permName)
-                        && (pkg.getImplicitPermissions().contains(permName)
-                                || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
-                    if (pkg.getImplicitPermissions().contains(permName)) {
-                        // If permName is an implicit permission, try to auto-grant
-                        newImplicitPermissions.add(permName);
-
-                        if (DEBUG_PERMISSIONS) {
-                            Slog.i(TAG, permName + " is newly added for " + pkg.getPackageName());
-                        }
-                    } else {
-                        // Special case for Activity Recognition permission. Even if AR permission
-                        // is not an implicit permission we want to add it to the list (try to
-                        // auto-grant it) if the app was installed on a device before AR permission
-                        // was split, regardless of if the app now requests the new AR permission
-                        // or has updated its target SDK and AR is no longer implicit to it.
-                        // This is a compatibility workaround for apps when AR permission was
-                        // split in Q.
-                        final List<SplitPermissionInfoParcelable> permissionList =
-                                getSplitPermissions();
-                        int numSplitPerms = permissionList.size();
-                        for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-                            SplitPermissionInfoParcelable sp = permissionList.get(splitPermNum);
-                            String splitPermName = sp.getSplitPermission();
-                            if (sp.getNewPermissions().contains(permName)
-                                    && origPermissions.hasInstallPermission(splitPermName)) {
-                                upgradedActivityRecognitionPermission = splitPermName;
-                                newImplicitPermissions.add(permName);
-
-                                if (DEBUG_PERMISSIONS) {
-                                    Slog.i(TAG, permName + " is newly added for "
-                                            + pkg.getPackageName());
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // TODO(b/140256621): The package instant app method has been removed
-                //  as part of work in b/135203078, so this has been commented out in the meantime
-                // Limit ephemeral apps to ephemeral allowed permissions.
-//                if (/*pkg.isInstantApp()*/ false && !bp.isInstant()) {
-//                    if (DEBUG_PERMISSIONS) {
-//                        Log.i(TAG, "Denying non-ephemeral permission " + bp.getName()
-//                                + " for package " + pkg.getPackageName());
-//                    }
-//                    continue;
-//                }
-
-                if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
+            if (bp == null || getSourcePackageSetting(bp) == null) {
+                if (packageOfInterest == null || packageOfInterest.equals(
+                        pkg.getPackageName())) {
                     if (DEBUG_PERMISSIONS) {
-                        Log.i(TAG, "Denying runtime-only permission " + bp.getName()
-                                + " for package " + pkg.getPackageName());
-                    }
-                    continue;
-                }
-
-                final String perm = bp.getName();
-                boolean allowedSig = false;
-                int grant = GRANT_DENIED;
-
-                // Keep track of app op permissions.
-                if (bp.isAppOp()) {
-                    mSettings.addAppOpPackage(perm, pkg.getPackageName());
-                }
-
-                if (bp.isNormal()) {
-                    // For all apps normal permissions are install time ones.
-                    grant = GRANT_INSTALL;
-                } else if (bp.isRuntime()) {
-                    if (origPermissions.hasInstallPermission(bp.getName())
-                            || upgradedActivityRecognitionPermission != null) {
-                        // Before Q we represented some runtime permissions as install permissions,
-                        // in Q we cannot do this anymore. Hence upgrade them all.
-                        grant = GRANT_UPGRADE;
-                    } else {
-                        // For modern apps keep runtime permissions unchanged.
-                        grant = GRANT_RUNTIME;
-                    }
-                } else if (bp.isSignature()) {
-                    // For all apps signature permissions are install time ones.
-                    allowedSig = grantSignaturePermission(perm, pkg, ps, bp, origPermissions);
-                    if (allowedSig) {
-                        grant = GRANT_INSTALL;
+                        Slog.i(TAG, "Unknown permission " + permName
+                                + " in package " + pkg.getPackageName());
                     }
                 }
+                continue;
+            }
 
-                if (DEBUG_PERMISSIONS) {
-                    Slog.i(TAG, "Considering granting permission " + perm + " to package "
-                            + pkg.getPackageName());
-                }
+            // Cache newImplicitPermissions before modifing permissionsState as for the shared
+            // uids the original and new state are the same object
+            if (!origPermissions.hasRequestedPermission(permName)
+                    && (pkg.getImplicitPermissions().contains(permName)
+                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
+                if (pkg.getImplicitPermissions().contains(permName)) {
+                    // If permName is an implicit permission, try to auto-grant
+                    newImplicitPermissions.add(permName);
 
-                if (grant != GRANT_DENIED) {
-                    if (!ps.isSystem() && ps.areInstallPermissionsFixed() && !bp.isRuntime()) {
-                        // If this is an existing, non-system package, then
-                        // we can't add any new permissions to it. Runtime
-                        // permissions can be added any time - they ad dynamic.
-                        if (!allowedSig && !origPermissions.hasInstallPermission(perm)) {
-                            // Except...  if this is a permission that was added
-                            // to the platform (note: need to only do this when
-                            // updating the platform).
-                            if (!isNewPlatformPermissionForPackage(perm, pkg)) {
-                                grant = GRANT_DENIED;
+                    if (DEBUG_PERMISSIONS) {
+                        Slog.i(TAG, permName + " is newly added for " + pkg.getPackageName());
+                    }
+                } else {
+                    // Special case for Activity Recognition permission. Even if AR permission
+                    // is not an implicit permission we want to add it to the list (try to
+                    // auto-grant it) if the app was installed on a device before AR permission
+                    // was split, regardless of if the app now requests the new AR permission
+                    // or has updated its target SDK and AR is no longer implicit to it.
+                    // This is a compatibility workaround for apps when AR permission was
+                    // split in Q.
+                    final List<SplitPermissionInfoParcelable> permissionList =
+                            getSplitPermissions();
+                    int numSplitPerms = permissionList.size();
+                    for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
+                        SplitPermissionInfoParcelable sp = permissionList.get(splitPermNum);
+                        String splitPermName = sp.getSplitPermission();
+                        if (sp.getNewPermissions().contains(permName)
+                                && origPermissions.hasInstallPermission(splitPermName)) {
+                            upgradedActivityRecognitionPermission = splitPermName;
+                            newImplicitPermissions.add(permName);
+
+                            if (DEBUG_PERMISSIONS) {
+                                Slog.i(TAG, permName + " is newly added for "
+                                        + pkg.getPackageName());
                             }
+                            break;
                         }
                     }
+                }
+            }
 
+            // TODO(b/140256621): The package instant app method has been removed
+            //  as part of work in b/135203078, so this has been commented out in the meantime
+            // Limit ephemeral apps to ephemeral allowed permissions.
+//            if (/*pkg.isInstantApp()*/ false && !bp.isInstant()) {
+//                if (DEBUG_PERMISSIONS) {
+//                    Log.i(TAG, "Denying non-ephemeral permission " + bp.getName()
+//                            + " for package " + pkg.getPackageName());
+//                }
+//                continue;
+//            }
+
+            if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
+                if (DEBUG_PERMISSIONS) {
+                    Log.i(TAG, "Denying runtime-only permission " + bp.getName()
+                            + " for package " + pkg.getPackageName());
+                }
+                continue;
+            }
+
+            final String perm = bp.getName();
+            boolean allowedSig = false;
+            int grant = GRANT_DENIED;
+
+            // Keep track of app op permissions.
+            if (bp.isAppOp()) {
+                mSettings.addAppOpPackage(perm, pkg.getPackageName());
+            }
+
+            if (bp.isNormal()) {
+                // For all apps normal permissions are install time ones.
+                grant = GRANT_INSTALL;
+            } else if (bp.isRuntime()) {
+                if (origPermissions.hasInstallPermission(bp.getName())
+                        || upgradedActivityRecognitionPermission != null) {
+                    // Before Q we represented some runtime permissions as install permissions,
+                    // in Q we cannot do this anymore. Hence upgrade them all.
+                    grant = GRANT_UPGRADE;
+                } else {
+                    // For modern apps keep runtime permissions unchanged.
+                    grant = GRANT_RUNTIME;
+                }
+            } else if (bp.isSignature()) {
+                // For all apps signature permissions are install time ones.
+                allowedSig = shouldGrantSignaturePermission(perm, pkg, ps, bp, origPermissions);
+                if (allowedSig) {
+                    grant = GRANT_INSTALL;
+                }
+            }
+
+            if (grant != GRANT_DENIED) {
+                if (!ps.isSystem() && ps.areInstallPermissionsFixed() && !bp.isRuntime()) {
+                    // If this is an existing, non-system package, then
+                    // we can't add any new permissions to it. Runtime
+                    // permissions can be added any time - they ad dynamic.
+                    if (!allowedSig && !origPermissions.hasInstallPermission(perm)) {
+                        // Except...  if this is a permission that was added
+                        // to the platform (note: need to only do this when
+                        // updating the platform).
+                        if (!isNewPlatformPermissionForPackage(perm, pkg)) {
+                            grant = GRANT_DENIED;
+                        }
+                    }
+                }
+            }
+
+            if (DEBUG_PERMISSIONS) {
+                Slog.i(TAG, "Considering granting permission " + perm + " to package "
+                        + pkg.getPackageName());
+            }
+
+            synchronized (mLock) {
+                if (grant != GRANT_DENIED) {
                     switch (grant) {
                         case GRANT_INSTALL: {
                             // Revoke this as runtime permission to handle the case of
                             // a runtime permission being downgraded to an install one.
                             // Also in permission review mode we keep dangerous permissions
                             // for legacy apps
-                            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                            for (int userId : currentUserIds) {
                                 if (origPermissions.getRuntimePermissionState(
                                         perm, userId) != null) {
                                     // Revoke the runtime permission and clear the flags.
@@ -3042,20 +3035,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 }
             }
+        }
 
-            if ((changedInstallPermission || replace) && !ps.areInstallPermissionsFixed() &&
-                    !ps.isSystem() || ps.getPkgState().isUpdatedSystemApp()) {
-                // This is the first that we have heard about this package, so the
-                // permissions we have now selected are fixed until explicitly
-                // changed.
-                ps.setInstallPermissionsFixed(true);
-            }
+        if ((changedInstallPermission || replace) && !ps.areInstallPermissionsFixed() &&
+                !ps.isSystem() || ps.getPkgState().isUpdatedSystemApp()) {
+            // This is the first that we have heard about this package, so the
+            // permissions we have now selected are fixed until explicitly
+            // changed.
+            ps.setInstallPermissionsFixed(true);
+        }
 
+        synchronized (mLock) {
             updatedUserIds = revokePermissionsNoLongerImplicitLocked(permissionsState, pkg,
-                    updatedUserIds);
+                    currentUserIds, updatedUserIds);
             updatedUserIds = setInitialGrantForNewImplicitPermissionsLocked(origPermissions,
-                    permissionsState, pkg, newImplicitPermissions, updatedUserIds);
-            updatedUserIds = checkIfLegacyStorageOpsNeedToBeUpdated(pkg, replace, updatedUserIds);
+                    permissionsState, pkg, newImplicitPermissions, currentUserIds, updatedUserIds);
+            updatedUserIds = checkIfLegacyStorageOpsNeedToBeUpdated(pkg, replace, currentUserIds,
+                    updatedUserIds);
         }
 
         // Persist the runtime permissions state for users with changes. If permissions
@@ -3076,23 +3072,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @param ps The state of the permissions of the package
      * @param pkg The package that is currently looked at
+     * @param userIds All user IDs in the system, must be passed in because this method is locked
      * @param updatedUserIds a list of user ids that needs to be amended if the permission state
      *                       for a user is changed.
      *
      * @return The updated value of the {@code updatedUserIds} parameter
      */
-    private @NonNull int[] revokePermissionsNoLongerImplicitLocked(
-            @NonNull PermissionsState ps, @NonNull AndroidPackage pkg,
-            @NonNull int[] updatedUserIds) {
+    private @NonNull int[] revokePermissionsNoLongerImplicitLocked(@NonNull PermissionsState ps,
+            @NonNull AndroidPackage pkg, @NonNull int[] userIds, @NonNull int[] updatedUserIds) {
         String pkgName = pkg.getPackageName();
         boolean supportsRuntimePermissions = pkg.getTargetSdkVersion()
                 >= Build.VERSION_CODES.M;
 
-        int[] users = UserManagerService.getInstance().getUserIds();
-        int numUsers = users.length;
-        for (int i = 0; i < numUsers; i++) {
-            int userId = users[i];
-
+        for (int userId : userIds) {
             for (String permission : ps.getPermissions(userId)) {
                 if (!pkg.getImplicitPermissions().contains(permission)) {
                     if (!ps.hasInstallPermission(permission)) {
@@ -3188,16 +3180,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @param pkg The package for which the permissions are updated
      * @param replace If the app is being replaced
+     * @param userIds All user IDs in the system, must be passed in because this method is locked
      * @param updatedUserIds The ids of the users that already changed.
      *
      * @return The ids of the users that are changed
      */
-    private @NonNull int[] checkIfLegacyStorageOpsNeedToBeUpdated(
-            @NonNull AndroidPackage pkg, boolean replace, @NonNull int[] updatedUserIds) {
+    private @NonNull int[] checkIfLegacyStorageOpsNeedToBeUpdated(@NonNull AndroidPackage pkg,
+            boolean replace, @NonNull int[] userIds, @NonNull int[] updatedUserIds) {
         if (replace && pkg.isRequestLegacyExternalStorage() && (
                 pkg.getRequestedPermissions().contains(READ_EXTERNAL_STORAGE)
                         || pkg.getRequestedPermissions().contains(WRITE_EXTERNAL_STORAGE))) {
-            return UserManagerService.getInstance().getUserIds();
+            return userIds.clone();
         }
 
         return updatedUserIds;
@@ -3209,15 +3202,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param origPs The permission state of the package before the split
      * @param ps The new permission state
      * @param pkg The package the permission belongs to
+     * @param userIds All user IDs in the system, must be passed in because this method is locked
      * @param updatedUserIds List of users for which the permission state has already been changed
      *
      * @return  List of users for which the permission state has been changed
      */
     private @NonNull int[] setInitialGrantForNewImplicitPermissionsLocked(
-            @NonNull PermissionsState origPs,
-            @NonNull PermissionsState ps, @NonNull AndroidPackage pkg,
-            @NonNull ArraySet<String> newImplicitPermissions,
-            @NonNull int[] updatedUserIds) {
+            @NonNull PermissionsState origPs, @NonNull PermissionsState ps,
+            @NonNull AndroidPackage pkg, @NonNull ArraySet<String> newImplicitPermissions,
+            @NonNull int[] userIds, @NonNull int[] updatedUserIds) {
         String pkgName = pkg.getPackageName();
         ArrayMap<String, ArraySet<String>> newToSplitPerms = new ArrayMap<>();
 
@@ -3251,11 +3244,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (!ps.hasInstallPermission(newPerm)) {
                     BasePermission bp = mSettings.getPermissionLocked(newPerm);
 
-                    int[] users = UserManagerService.getInstance().getUserIds();
-                    int numUsers = users.length;
-                    for (int userNum = 0; userNum < numUsers; userNum++) {
-                        int userId = users[userNum];
-
+                    for (int userId : userIds) {
                         if (!newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)) {
                             ps.updatePermissionFlags(bp, userId,
                                     FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
@@ -3413,7 +3402,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return wlPermissions != null && wlPermissions.contains(perm);
     }
 
-    private boolean grantSignaturePermission(String perm, AndroidPackage pkg,
+    private boolean shouldGrantSignaturePermission(String perm, AndroidPackage pkg,
             PackageSetting pkgSetting, BasePermission bp, PermissionsState origPermissions) {
         boolean oemPermission = bp.isOEM();
         boolean vendorPrivilegedPermission = bp.isVendorPrivileged();
@@ -4210,6 +4199,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // The target package is the source of the current permission
                 // Set to changed for either install or uninstall
                 changed = true;
+                if (needsUpdate == null) {
+                    needsUpdate = new ArraySet<>(mSettings.mPermissions.size());
+                }
+                needsUpdate.add(bp);
+            }
+        }
+        if (needsUpdate != null) {
+            for (final BasePermission bp : needsUpdate) {
                 // If the target package is being uninstalled, we need to revoke this permission
                 // From all other packages
                 if (pkg == null || !hasPermission(pkg, bp.getName())) {
@@ -4239,16 +4236,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             }
                         });
                     }
-                    it.remove();
+                    mSettings.removePermissionLocked(bp.getName());
+                    continue;
                 }
-                if (needsUpdate == null) {
-                    needsUpdate = new ArraySet<>(mSettings.mPermissions.size());
-                }
-                needsUpdate.add(bp);
-            }
-        }
-        if (needsUpdate != null) {
-            for (final BasePermission bp : needsUpdate) {
                 final AndroidPackage sourcePkg =
                         mPackageManagerInt.getPackage(bp.getSourcePackageName());
                 final PackageSetting sourcePs =
@@ -5007,11 +4997,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void onNewUserCreated(int userId) {
             mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
-            synchronized (mLock) {
-                // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
-                PermissionManagerService.this.updateAllPermissions(
-                        StorageManager.UUID_PRIVATE_INTERNAL, true, mDefaultPermissionCallback);
-            }
+            // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
+            PermissionManagerService.this.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL,
+                    true, mDefaultPermissionCallback);
         }
 
         @Override
