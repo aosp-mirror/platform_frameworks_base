@@ -493,9 +493,6 @@ public final class PowerManagerService extends SystemService
     private boolean mProximityPositive;
 
     // Screen brightness setting limits.
-    private float mScreenBrightnessSettingMinimum;
-    private float mScreenBrightnessSettingMaximum;
-    private float mScreenBrightnessSettingDefault;
     public final float mScreenBrightnessMinimum;
     public final float mScreenBrightnessMaximum;
     public final float mScreenBrightnessDefault;
@@ -1029,14 +1026,6 @@ public final class PowerManagerService extends SystemService
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
             mAttentionDetector.systemReady(mContext);
-
-            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-            mScreenBrightnessSettingMinimum = pm.getBrightnessConstraint(
-                    PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-            mScreenBrightnessSettingMaximum = pm.getBrightnessConstraint(
-                    PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-            mScreenBrightnessSettingDefault = pm.getBrightnessConstraint(
-                    PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT);
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
 
@@ -2818,7 +2807,7 @@ public final class PowerManagerService extends SystemService
                 // Keep the brightness steady during boot. This requires the
                 // bootloader brightness and the default brightness to be identical.
                 autoBrightness = false;
-                screenBrightnessOverride = mScreenBrightnessSettingDefault;
+                screenBrightnessOverride = mScreenBrightnessDefault;
             } else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
                 autoBrightness = false;
                 screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
@@ -3868,9 +3857,9 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDrawWakeLockOverrideFromSidekick=" + mDrawWakeLockOverrideFromSidekick);
             pw.println("  mDozeScreenBrightnessOverrideFromDreamManager="
                     + mDozeScreenBrightnessOverrideFromDreamManager);
-            pw.println("  mScreenBrightnessSettingMinimumFloat=" + mScreenBrightnessSettingMinimum);
-            pw.println("  mScreenBrightnessSettingMaximumFloat=" + mScreenBrightnessSettingMaximum);
-            pw.println("  mScreenBrightnessSettingDefaultFloat=" + mScreenBrightnessSettingDefault);
+            pw.println("  mScreenBrightnessMinimum=" + mScreenBrightnessMinimum);
+            pw.println("  mScreenBrightnessMaximum=" + mScreenBrightnessMaximum);
+            pw.println("  mScreenBrightnessDefault=" + mScreenBrightnessDefault);
             pw.println("  mDoubleTapWakeEnabled=" + mDoubleTapWakeEnabled);
             pw.println("  mIsVrModeEnabled=" + mIsVrModeEnabled);
             pw.println("  mForegroundProfile=" + mForegroundProfile);
@@ -4227,15 +4216,15 @@ public final class PowerManagerService extends SystemService
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
                             .SETTING_MINIMUM_FLOAT,
-                    mScreenBrightnessSettingMinimum);
+                    mScreenBrightnessMinimum);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
                             .SETTING_MAXIMUM_FLOAT,
-                    mScreenBrightnessSettingMaximum);
+                    mScreenBrightnessMaximum);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
                             .SETTING_DEFAULT_FLOAT,
-                    mScreenBrightnessSettingDefault);
+                    mScreenBrightnessDefault);
             proto.end(screenBrightnessSettingLimitsToken);
 
             proto.write(
