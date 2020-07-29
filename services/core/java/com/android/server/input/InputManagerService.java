@@ -17,6 +17,7 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -66,6 +67,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -181,8 +183,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // State for vibrator tokens.
     private Object mVibratorLock = new Object();
-    private HashMap<IBinder, VibratorToken> mVibratorTokens =
-            new HashMap<IBinder, VibratorToken>();
+    private Map<IBinder, VibratorToken> mVibratorTokens = new ArrayMap<IBinder, VibratorToken>();
     private int mNextVibratorTokenValue;
 
     // State for the currently installed input filter.
@@ -190,12 +191,16 @@ public class InputManagerService extends IInputManager.Stub
     IInputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
 
+    private final Object mGestureMonitorPidsLock = new Object();
+    @GuardedBy("mGestureMonitorPidsLock")
+    private final ArrayMap<IBinder, Integer> mGestureMonitorPidsByToken = new ArrayMap<>();
+
     // The associations of input devices to displays by port. Maps from input device port (String)
     // to display id (int). Currently only accessed by InputReader.
     private final Map<String, Integer> mStaticAssociations;
     private final Object mAssociationsLock = new Object();
     @GuardedBy("mAssociationLock")
-    private final Map<String, Integer> mRuntimeAssociations = new HashMap<String, Integer>();
+    private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<String, Integer>();
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -540,13 +545,17 @@ public class InputManagerService extends IInputManager.Stub
         if (displayId < Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("displayId must >= 0.");
         }
+        final int pid = Binder.getCallingPid();
 
         final long ident = Binder.clearCallingIdentity();
         try {
             InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
             InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
-            nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId,
-                    true /*isGestureMonitor*/);
+            nativeRegisterInputMonitor(
+                    mPtr, inputChannels[0], displayId, true /*isGestureMonitor*/);
+            synchronized (mGestureMonitorPidsLock) {
+                mGestureMonitorPidsByToken.put(inputChannels[1].getToken(), pid);
+            }
             return new InputMonitor(inputChannels[1], host);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -574,6 +583,9 @@ public class InputManagerService extends IInputManager.Stub
     public void unregisterInputChannel(InputChannel inputChannel) {
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
+        }
+        synchronized (mGestureMonitorPidsLock) {
+            mGestureMonitorPidsByToken.remove(inputChannel.getToken());
         }
 
         nativeUnregisterInputChannel(mPtr, inputChannel);
@@ -1838,6 +1850,7 @@ public class InputManagerService extends IInputManager.Stub
         if (dumpStr != null) {
             pw.println(dumpStr);
             dumpAssociations(pw);
+            dumpGestureMonitorPidsByToken(pw);
         }
     }
 
@@ -1857,6 +1870,19 @@ public class InputManagerService extends IInputManager.Stub
                     pw.print("  port: " + k);
                     pw.println("  display: " + v);
                 });
+            }
+        }
+    }
+
+    private void dumpGestureMonitorPidsByToken(PrintWriter pw) {
+        synchronized (mGestureMonitorPidsLock) {
+            if (!mGestureMonitorPidsByToken.isEmpty()) {
+                pw.println("Gesture monitor pids by token:");
+                for (int i = 0; i < mGestureMonitorPidsByToken.size(); i++) {
+                    pw.print("  " + i + ": ");
+                    pw.print(" token: " + mGestureMonitorPidsByToken.keyAt(i));
+                    pw.println(" pid: " + mGestureMonitorPidsByToken.valueAt(i));
+                }
             }
         }
     }
@@ -1883,6 +1909,7 @@ public class InputManagerService extends IInputManager.Stub
     public void monitor() {
         synchronized (mInputFilterLock) { }
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
+        synchronized (mGestureMonitorPidsLock) { /* Test if blocked by gesture monitor pids lock */}
         nativeMonitor(mPtr);
     }
 
@@ -1944,6 +1971,9 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private void notifyInputChannelBroken(IBinder token) {
+        synchronized (mGestureMonitorPidsLock) {
+            mGestureMonitorPidsByToken.remove(token);
+        }
         mWindowManagerCallbacks.notifyInputChannelBroken(token);
     }
 
@@ -1959,8 +1989,12 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     private long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
             String reason) {
-        return mWindowManagerCallbacks.notifyANR(inputApplicationHandle,
-                token, reason);
+        Integer gestureMonitorPid;
+        synchronized (mGestureMonitorPidsLock) {
+            gestureMonitorPid = mGestureMonitorPidsByToken.get(token);
+        }
+        return mWindowManagerCallbacks.notifyANR(inputApplicationHandle, token, gestureMonitorPid,
+                reason);
     }
 
     // Native callback.
@@ -2206,22 +2240,48 @@ public class InputManagerService extends IInputManager.Stub
      * Callback interface implemented by the Window Manager.
      */
     public interface WindowManagerCallbacks {
+        /**
+         * This callback is invoked when the confuguration changes.
+         */
         public void notifyConfigurationChanged();
 
+        /**
+         * This callback is invoked when the lid switch changes state.
+         * @param whenNanos the time when the change occurred
+         * @param lidOpen true if the lid is open
+         */
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
 
+        /**
+         * This callback is invoked when the camera lens cover switch changes state.
+         * @param whenNanos the time when the change occurred
+         * @param lensCovered true is the lens is covered
+         */
         public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
 
+        /**
+         * This callback is invoked when an input channel is closed unexpectedly.
+         * @param token the connection token of the broken channel
+         */
         public void notifyInputChannelBroken(IBinder token);
 
         /**
-         * Notifies the window manager about an application that is not responding.
-         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
+         * Notify the window manager about an application that is not responding.
+         * Return a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
          */
         long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
-                String reason);
+                @Nullable Integer pid, String reason);
 
-        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
+        /**
+         * This callback is invoked when an event first arrives to InputDispatcher and before it is
+         * placed onto InputDispatcher's queue. If this event is intercepted, it will never be
+         * processed by InputDispacher.
+         * @param event The key event that's arriving to InputDispatcher
+         * @param policyFlags The policy flags
+         * @return the flags that tell InputDispatcher how to handle the event (for example, whether
+         * to pass it to the user)
+         */
+        int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
         /**
          * Provides an opportunity for the window manager policy to intercept early motion event
@@ -2231,11 +2291,23 @@ public class InputManagerService extends IInputManager.Stub
         int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
                 int policyFlags);
 
-        public long interceptKeyBeforeDispatching(IBinder token,
-                KeyEvent event, int policyFlags);
+        /**
+         * This callback is invoked just before the key is about to be sent to an application.
+         * This allows the policy to make some last minute decisions on whether to intercept this
+         * key.
+         * @param token the window token that's about to receive this event
+         * @param event the key event that's being dispatched
+         * @param policyFlags the policy flags
+         * @return negative value if the key should be skipped (not sent to the app). 0 if the key
+         * should proceed getting dispatched to the app. positive value to indicate the additional
+         * time delay, in nanoseconds, to wait before sending this key to the app.
+         */
+        long interceptKeyBeforeDispatching(IBinder token, KeyEvent event, int policyFlags);
 
-        public KeyEvent dispatchUnhandledKey(IBinder token,
-                KeyEvent event, int policyFlags);
+        /**
+         * Dispatch unhandled key
+         */
+        KeyEvent dispatchUnhandledKey(IBinder token, KeyEvent event, int policyFlags);
 
         public int getPointerLayer();
 

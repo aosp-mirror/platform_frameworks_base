@@ -1,0 +1,12 @@
+android_test {
+    name: "InputTests",
+    srcs: ["src/**/*.kt"],
+    platform_apis: true,
+    certificate: "platform",
+    static_libs: [
+            "androidx.test.ext.junit",
+            "androidx.test.rules",
+            "android-support-test",
+            "ub-uiautomator",
+        ],
+}
