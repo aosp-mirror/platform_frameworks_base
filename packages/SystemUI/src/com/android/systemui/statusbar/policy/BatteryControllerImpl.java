@@ -200,31 +200,31 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         } else if (action.equals(ACTION_LEVEL_TEST)) {
             mTestMode = true;
             mMainHandler.post(new Runnable() {
-                int curLevel = 0;
-                int incr = 1;
-                int saveLevel = mLevel;
-                boolean savePlugged = mPluggedIn;
+                int mCurrentLevel = 0;
+                int mIncrement = 1;
+                int mSavedLevel = mLevel;
+                boolean mSavedPluggedIn = mPluggedIn;
                 Intent mTestIntent = new Intent(Intent.ACTION_BATTERY_CHANGED);
                 @Override
                 public void run() {
-                    if (curLevel < 0) {
+                    if (mCurrentLevel < 0) {
                         mTestMode = false;
-                        mTestIntent.putExtra("level", saveLevel);
-                        mTestIntent.putExtra("plugged", savePlugged);
+                        mTestIntent.putExtra("level", mSavedLevel);
+                        mTestIntent.putExtra("plugged", mSavedPluggedIn);
                         mTestIntent.putExtra("testmode", false);
                     } else {
-                        mTestIntent.putExtra("level", curLevel);
-                        mTestIntent.putExtra("plugged", incr > 0 ? BatteryManager.BATTERY_PLUGGED_AC
-                                : 0);
+                        mTestIntent.putExtra("level", mCurrentLevel);
+                        mTestIntent.putExtra("plugged",
+                                mIncrement > 0 ? BatteryManager.BATTERY_PLUGGED_AC : 0);
                         mTestIntent.putExtra("testmode", true);
                     }
                     context.sendBroadcast(mTestIntent);
 
                     if (!mTestMode) return;
 
-                    curLevel += incr;
-                    if (curLevel == 100) {
-                        incr *= -1;
+                    mCurrentLevel += mIncrement;
+                    if (mCurrentLevel == 100) {
+                        mIncrement *= -1;
                     }
                     mMainHandler.postDelayed(this, 200);
                 }
