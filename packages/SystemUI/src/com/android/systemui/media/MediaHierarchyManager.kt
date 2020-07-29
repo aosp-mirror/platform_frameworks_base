@@ -293,6 +293,13 @@ class MediaHierarchyManager @Inject constructor(
         return viewHost
     }
 
+    /**
+     * Close the guts in all players in [MediaCarouselController].
+     */
+    fun closeGuts() {
+        mediaCarouselController.closeGuts()
+    }
+
     private fun createUniqueObjectHost(): UniqueObjectHostView {
         val viewHost = UniqueObjectHostView(context)
         viewHost.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
