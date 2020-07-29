@@ -1211,6 +1211,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private void updateAccessibilityServicesState(AccessibilityManager accessibilityManager) {
+        if (mNavigationBarView == null) {
+            return;
+        }
         boolean[] feedbackEnabled = new boolean[1];
         int a11yFlags = getA11yButtonState(feedbackEnabled);
 
