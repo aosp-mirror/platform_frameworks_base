@@ -10770,17 +10770,6 @@ public final class Settings {
        public static final String MODE_RINGER = "mode_ringer";
 
         /**
-         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
-         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
-         * scenarios
-         * Type: int 1 is enabled, 0 is disabled
-         *
-         * @hide
-         */
-        public static final String ENHANCED_CONNECTIVITY_ENABLED =
-                "enhanced_connectivity_enable";
-
-        /**
          * Overlay display devices setting.
          * The associated value is a specially formatted string that describes the
          * size and density of simulated secondary display devices.
