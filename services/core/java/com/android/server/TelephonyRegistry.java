@@ -1800,7 +1800,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mPreciseDataConnectionStates.get(phoneId).put(
                         apnType,
                         new PreciseDataConnectionState.Builder()
-                                .setApnTypes(apnType)
+                                .setApnSetting(new ApnSetting.Builder()
+                                        .setApnTypeBitmask(apnType)
+                                        .build())
                                 .build());
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
@@ -1984,7 +1986,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mPreciseDataConnectionStates.get(phoneId).put(
                         apnType,
                         new PreciseDataConnectionState.Builder()
-                                .setApnTypes(apnType)
+                                .setApnSetting(new ApnSetting.Builder()
+                                        .setApnTypeBitmask(apnType)
+                                        .build())
                                 .setFailCause(failCause)
                                 .build());
                 for (Record r : mRecords) {
