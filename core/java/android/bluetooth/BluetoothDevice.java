@@ -1482,7 +1482,7 @@ public final class BluetoothDevice implements Parcelable {
      * present in the cache. Clients should use the {@link #getUuids} to get UUIDs
      * if service discovery is not to be performed.
      *
-     * @return False if the sanity check fails, True if the process of initiating an ACL connection
+     * @return False if the check fails, True if the process of initiating an ACL connection
      * to the remote device was started.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
@@ -1516,7 +1516,7 @@ public final class BluetoothDevice implements Parcelable {
      * The object type will match one of the SdpXxxRecord types, depending on the UUID searched
      * for.
      *
-     * @return False if the sanity check fails, True if the process
+     * @return False if the check fails, True if the process
      *               of initiating an ACL connection to the remote device
      *               was started.
      */
