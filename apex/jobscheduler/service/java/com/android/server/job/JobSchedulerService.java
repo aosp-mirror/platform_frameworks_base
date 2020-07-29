@@ -1193,7 +1193,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private void cancelJobsForNonExistentUsers() {
         UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
         synchronized (mLock) {
-            mJobs.removeJobsOfNonUsers(umi.getUserIds());
+            mJobs.removeJobsOfUnlistedUsers(umi.getUserIds());
         }
     }
 

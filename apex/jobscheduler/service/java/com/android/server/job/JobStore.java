@@ -254,11 +254,11 @@ public final class JobStore {
     }
 
     /**
-     * Remove the jobs of users not specified in the whitelist.
-     * @param whitelist Array of User IDs whose jobs are not to be removed.
+     * Remove the jobs of users not specified in the keepUserIds.
+     * @param keepUserIds Array of User IDs whose jobs should be kept and not removed.
      */
-    public void removeJobsOfNonUsers(int[] whitelist) {
-        mJobSet.removeJobsOfNonUsers(whitelist);
+    public void removeJobsOfUnlistedUsers(int[] keepUserIds) {
+        mJobSet.removeJobsOfUnlistedUsers(keepUserIds);
     }
 
     @VisibleForTesting
@@ -1151,15 +1151,14 @@ public final class JobStore {
         }
 
         /**
-         * Removes the jobs of all users not specified by the whitelist of user ids.
-         * This will remove jobs scheduled *by* non-existent users as well as jobs scheduled *for*
-         * non-existent users
+         * Removes the jobs of all users not specified by the keepUserIds of user ids.
+         * This will remove jobs scheduled *by* and *for* any unlisted users.
          */
-        public void removeJobsOfNonUsers(final int[] whitelist) {
+        public void removeJobsOfUnlistedUsers(final int[] keepUserIds) {
             final Predicate<JobStatus> noSourceUser =
-                    job -> !ArrayUtils.contains(whitelist, job.getSourceUserId());
+                    job -> !ArrayUtils.contains(keepUserIds, job.getSourceUserId());
             final Predicate<JobStatus> noCallingUser =
-                    job -> !ArrayUtils.contains(whitelist, job.getUserId());
+                    job -> !ArrayUtils.contains(keepUserIds, job.getUserId());
             removeAll(noSourceUser.or(noCallingUser));
         }
 
