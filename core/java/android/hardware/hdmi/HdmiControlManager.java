@@ -24,6 +24,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -39,6 +40,8 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ConcurrentUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -317,6 +320,37 @@ public final class HdmiControlManager {
     public static final int CONTROL_STATE_CHANGED_REASON_WAKEUP = 2;
     /** The HdmiControlService will be disabled to standby. */
     public static final int CONTROL_STATE_CHANGED_REASON_STANDBY = 3;
+
+    // -- Which devices the playback device can send a <Standby> message to upon going to sleep.
+    /**
+     * Send <Standby> to TV only.
+     *
+     * @hide
+     */
+    public static final String SEND_STANDBY_ON_SLEEP_TO_TV = "to_tv";
+    /**
+     * Broadcast <Standby> to all devices in the network.
+     *
+     * @hide
+     */
+    public static final String SEND_STANDBY_ON_SLEEP_BROADCAST = "broadcast";
+    /**
+     * Don't send any <Standby> message.
+     *
+     * @hide
+     */
+    public static final String SEND_STANDBY_ON_SLEEP_NONE = "none";
+    /**
+     * @hide
+     */
+    @StringDef({
+            SEND_STANDBY_ON_SLEEP_TO_TV,
+            SEND_STANDBY_ON_SLEEP_BROADCAST,
+            SEND_STANDBY_ON_SLEEP_NONE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StandbyBehavior {
+    }
 
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
