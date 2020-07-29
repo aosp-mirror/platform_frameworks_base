@@ -44,7 +44,7 @@ public:
     void Startup();
 
     /*
-     * Dummy initializer for tests.
+     * No-op initializer for tests.
      */
     void StartupForTest();
 
