@@ -31,6 +31,7 @@ import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
+import static android.app.NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
@@ -9155,6 +9156,17 @@ public class NotificationManagerService extends SystemService {
 
         public NotificationListeners(IPackageManager pm) {
             super(getContext(), mNotificationLock, mUserProfiles, pm);
+        }
+
+        @Override
+        protected void setPackageOrComponentEnabled(String pkgOrComponent, int userId,
+                boolean isPrimary, boolean enabled) {
+            super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled);
+
+            getContext().sendBroadcastAsUser(
+                    new Intent(ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED)
+                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                    UserHandle.ALL, null);
         }
 
         @Override
