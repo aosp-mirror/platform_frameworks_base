@@ -108,7 +108,8 @@ public class AttentionManagerService extends SystemService {
     private final PowerManager mPowerManager;
     private final Object mLock;
     @GuardedBy("mLock")
-    private IAttentionService mService;
+    @VisibleForTesting
+    protected IAttentionService mService;
     @GuardedBy("mLock")
     private AttentionCheckCacheBuffer mAttentionCheckCacheBuffer;
     @GuardedBy("mLock")
@@ -158,7 +159,8 @@ public class AttentionManagerService extends SystemService {
     }
 
     /** Resolves and sets up the attention service if it had not been done yet. */
-    private boolean isServiceAvailable() {
+    @VisibleForTesting
+    protected boolean isServiceAvailable() {
         if (mComponentName == null) {
             mComponentName = resolveAttentionService(mContext);
         }
@@ -168,12 +170,12 @@ public class AttentionManagerService extends SystemService {
     /**
      * Returns {@code true} if attention service is supported on this device.
      */
-    private boolean isAttentionServiceSupported() {
+    @VisibleForTesting
+    protected boolean isAttentionServiceSupported() {
         return isServiceEnabled() && isServiceConfigured(mContext);
     }
 
-    @VisibleForTesting
-    protected boolean isServiceEnabled() {
+    private boolean isServiceEnabled() {
         return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, KEY_SERVICE_ENABLED,
                 DEFAULT_SERVICE_ENABLED);
     }
