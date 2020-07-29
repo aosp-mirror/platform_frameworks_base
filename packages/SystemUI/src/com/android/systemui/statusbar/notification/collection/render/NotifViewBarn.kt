@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection
+package com.android.systemui.statusbar.notification.collection.render
 
 import android.view.textclassifier.Log
-import com.android.systemui.statusbar.notification.stack.NotificationListItem
-import java.lang.IllegalStateException
-
+import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * The ViewBarn is just a map from [ListEntry] to an instance of [NotificationListItem] which is
- * usually just an [ExpandableNotificationRow]
+ * The ViewBarn is just a map from [ListEntry] to an instance of an [ExpandableNotificationRow].
  */
 @Singleton
 class NotifViewBarn @Inject constructor() {
-    private val DEBUG = false
+    private val rowMap = mutableMapOf<String, ExpandableNotificationRow>()
 
-    private val rowMap = mutableMapOf<String, NotificationListItem>()
-
-    fun requireView(forEntry: ListEntry): NotificationListItem {
+    fun requireView(forEntry: ListEntry): ExpandableNotificationRow {
         if (DEBUG) {
             Log.d(TAG, "requireView: $forEntry.key")
         }
@@ -45,7 +41,7 @@ class NotifViewBarn @Inject constructor() {
         return li
     }
 
-    fun registerViewForEntry(entry: ListEntry, view: NotificationListItem) {
+    fun registerViewForEntry(entry: ListEntry, view: ExpandableNotificationRow) {
         if (DEBUG) {
             Log.d(TAG, "registerViewForEntry: $entry.key")
         }
@@ -61,3 +57,5 @@ class NotifViewBarn @Inject constructor() {
 }
 
 private const val TAG = "NotifViewBarn"
+
+private const val DEBUG = false

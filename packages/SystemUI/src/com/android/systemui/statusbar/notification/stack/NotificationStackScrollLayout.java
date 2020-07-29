@@ -3387,19 +3387,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @Override
-    public void notifyGroupChildRemoved(View child, ViewGroup parent) {
-        notifyGroupChildRemoved((ExpandableView) child, parent);
-    }
-
-    @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void notifyGroupChildAdded(ExpandableView row) {
         onViewAddedInternal(row);
-    }
-
-    @Override
-    public void notifyGroupChildAdded(View view) {
-        notifyGroupChildAdded((ExpandableView) view);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5246,20 +5236,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void removeListItem(NotificationListItem v) {
-        removeContainerView(v.getView());
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void addContainerView(View v) {
         Assert.isMainThread();
         addView(v);
     }
 
     @Override
-    public void addListItem(NotificationListItem v) {
-        addContainerView(v.getView());
+    public void addContainerViewAt(View v, int index) {
+        Assert.isMainThread();
+        addView(v, index);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
