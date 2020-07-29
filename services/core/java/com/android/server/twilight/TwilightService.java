@@ -22,7 +22,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.icu.impl.CalendarAstronomer;
 import android.icu.util.Calendar;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,6 +35,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
+
+import com.ibm.icu.impl.CalendarAstronomer;
 
 import java.util.Objects;
 
