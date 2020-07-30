@@ -1789,7 +1789,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             return createIntent(action, dataUri, extraData, query, actionKey, actionMsg);
         } catch (RuntimeException e ) {
             int rowNum;
-            try {                       // be really paranoid now
+            try {                       // be really defensive now
                 rowNum = c.getPosition();
             } catch (RuntimeException e2 ) {
                 rowNum = -1;
