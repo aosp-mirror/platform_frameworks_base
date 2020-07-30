@@ -44,10 +44,9 @@ abstract class OpenAppTestBase(
         enabled: Boolean = bugId == 0
     ) {
         all("appWindowReplacesLauncherAsTopWindow", enabled, bugId) {
-            this.showsAppWindowOnTop(
-                    "Launcher")
+            this.showsAppWindowOnTop("Launcher")
                     .then()
-                    .showsAppWindowOnTop(testApp.getPackage())
+                    .showsAppWindowOnTop("Snapshot", testApp.getPackage())
         }
     }
 

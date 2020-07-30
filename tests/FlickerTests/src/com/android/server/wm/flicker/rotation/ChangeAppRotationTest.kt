@@ -62,16 +62,20 @@ class ChangeAppRotationTest(
             }
             repeat { 1 }
             setup {
-                eachRun {
+                test {
                     device.wakeUpAndGoToHomeScreen()
                     testApp.open()
+                }
+                eachRun {
                     this.setRotation(beginRotation)
                 }
             }
             teardown {
                 eachRun {
-                    testApp.exit()
                     this.setRotation(Surface.ROTATION_0)
+                }
+                test {
+                    testApp.exit()
                 }
             }
             transitions {
@@ -79,8 +83,8 @@ class ChangeAppRotationTest(
             }
             assertions {
                 windowManagerTrace {
-                    navBarWindowIsAlwaysVisible(bugId = 140855415)
-                    statusBarWindowIsAlwaysVisible(bugId = 140855415)
+                    navBarWindowIsAlwaysVisible()
+                    statusBarWindowIsAlwaysVisible()
                 }
 
                 layersTrace {
@@ -103,21 +107,12 @@ class ChangeAppRotationTest(
                         this.hasVisibleRegion(testApp.getPackage(), endingPos)
                     }
 
-                    all("screenshotLayerBecomesInvisible", enabled = false) {
+                    all("screenshotLayerBecomesInvisible") {
                         this.showsLayer(testApp.getPackage())
                                 .then()
-                                .replaceVisibleLayer(
-                                        testApp.getPackage(),
-                                        SCREENSHOT_LAYER)
-                                .then()
-                                .showsLayer(testApp.getPackage())
-                                .and()
                                 .showsLayer(SCREENSHOT_LAYER)
                                 .then()
-                                .replaceVisibleLayer(
-                                        SCREENSHOT_LAYER,
-                                        testApp.getPackage()
-                                )
+                                showsLayer(testApp.getPackage())
                     }
                 }
 
