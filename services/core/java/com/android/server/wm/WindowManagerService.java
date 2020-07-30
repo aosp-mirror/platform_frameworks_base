@@ -395,24 +395,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
-    /**
-     * If set, new app transition framework which supports setting animation on any element
-     * in a surface is used.
-     * <p>
-     * Only set this to non-zero once the new app transition framework is productionalized.
-     * </p>
-     */
-    private static final String HIERARCHICAL_ANIMATIONS_PROPERTY =
-            "persist.wm.hierarchical_animations";
-
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
-
-    /**
-     * @see #HIERARCHICAL_ANIMATIONS_PROPERTY
-     */
-    static boolean sHierarchicalAnimations =
-            SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, true);
 
     static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
             DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
