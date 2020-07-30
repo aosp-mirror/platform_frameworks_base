@@ -17,5 +17,5 @@
 <resources>
   <!-- Width of volume bar -->
   <dimen name="volume_dialog_row_width">252dp</dimen>
-  <dimen name="volume_dialog_tap_target_size">36dp</dimen>
+  <dimen name="tv_volume_dialog_bubble_size">36dp</dimen>
 </resources>

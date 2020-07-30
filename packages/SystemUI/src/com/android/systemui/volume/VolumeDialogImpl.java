@@ -421,6 +421,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         row.dndIcon = row.view.findViewById(R.id.dnd_icon);
         row.slider = row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
+        row.number = row.view.findViewById(R.id.volume_number);
 
         row.anim = null;
 
@@ -1090,6 +1091,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
                 : row.ss.level;
         updateVolumeRowSliderH(row, enableSlider, vlevel);
+        if (row.number != null) row.number.setText(Integer.toString(vlevel));
     }
 
     private boolean isStreamMuted(final StreamState streamState) {
@@ -1115,6 +1117,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         row.icon.setImageTintList(tint);
         row.icon.setImageAlpha(alpha);
         row.cachedTint = tint;
+        if (row.number != null) {
+            row.number.setTextColor(tint);
+            row.number.setAlpha(alpha);
+        }
     }
 
     private void updateVolumeRowSliderH(VolumeRow row, boolean enable, int vlevel) {
@@ -1458,6 +1464,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         private TextView header;
         private ImageButton icon;
         private SeekBar slider;
+        private TextView number;
         private int stream;
         private StreamState ss;
         private long userAttempt;  // last user-driven slider change
