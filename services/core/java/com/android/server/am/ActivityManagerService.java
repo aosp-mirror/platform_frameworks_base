@@ -2443,7 +2443,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? Collections.emptyList()
                             : Arrays.asList(exemptions.split(","));
                 }
-                if (!ZYGOTE_PROCESS.setApiBlacklistExemptions(mExemptions)) {
+                if (!ZYGOTE_PROCESS.setApiDenylistExemptions(mExemptions)) {
                   Slog.e(TAG, "Failed to set API blacklist exemptions!");
                   // leave mExemptionsStr as is, so we don't try to send the same list again.
                   mExemptions = Collections.emptyList();
