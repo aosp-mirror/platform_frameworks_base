@@ -60,7 +60,7 @@ import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/wifi/enums.proto";
 
 /**
- * The master atom class. This message defines all of the available
+ * The primary atom class. This message defines all of the available
  * raw stats log events from the Android system, also known as "atoms."
  *
  * This field contains a single oneof with all of the available messages.
