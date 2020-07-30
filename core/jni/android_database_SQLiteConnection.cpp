@@ -210,7 +210,8 @@ static void sqliteCustomFunctionCallback(sqlite3_context *context,
 
     // Get the callback function object.
     // Create a new local reference to it in case the callback tries to do something
-    // dumb like unregister the function (thereby destroying the global ref) while it is running.
+    // unexpected like unregister the function (thereby destroying the global ref)
+    // while it is running.
     jobject functionObjGlobal = reinterpret_cast<jobject>(sqlite3_user_data(context));
     jobject functionObj = env->NewLocalRef(functionObjGlobal);
 

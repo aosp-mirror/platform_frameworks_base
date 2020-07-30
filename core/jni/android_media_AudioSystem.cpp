@@ -936,7 +936,7 @@ static jint convertAudioPortConfigFromNative(JNIEnv *env,
         if (jHandle == NULL) {
             return (jint)AUDIO_JAVA_ERROR;
         }
-        // create dummy port and port config objects with just the correct handle
+        // create placeholder port and port config objects with just the correct handle
         // and configuration data. The actual AudioPortConfig objects will be
         // constructed by java code with correct class type (device, mix etc...)
         // and reference to AudioPort instance in this client
