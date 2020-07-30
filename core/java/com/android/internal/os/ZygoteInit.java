@@ -589,7 +589,10 @@ public class ZygoteInit {
         VMRuntime.registerAppInfo(profilePath, codePaths);
     }
 
-    public static void setApiBlacklistExemptions(String[] exemptions) {
+    /**
+     * Sets the list of classes/methods for the hidden API
+     */
+    public static void setApiDenylistExemptions(String[] exemptions) {
         VMRuntime.getRuntime().setHiddenApiExemptions(exemptions);
     }
 
