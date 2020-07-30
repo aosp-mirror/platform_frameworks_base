@@ -5174,6 +5174,16 @@ public abstract class Context {
     public static final String DREAM_SERVICE = "dream";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.telephony.SmsManager} for accessing Sms functionality.
+     *
+     * @see #getSystemService(String)
+
+     * @hide
+     */
+    public static final String SMS_SERVICE = "sms";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

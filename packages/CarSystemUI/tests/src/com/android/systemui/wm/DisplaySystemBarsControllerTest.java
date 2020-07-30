@@ -64,13 +64,13 @@ public class DisplaySystemBarsControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mController = new DisplaySystemBarsController(
+        mController = new DisplaySystemBarsController.Builder(
                 mContext,
                 mIWindowManager,
                 mDisplayController,
                 mHandler,
                 mTransactionPool
-        );
+        ).build();
     }
 
     @Test

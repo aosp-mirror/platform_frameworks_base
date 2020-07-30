@@ -983,7 +983,7 @@
          with the modem or some other restricted hardware, add "/dev/bus/usb/001/"
          to this list.  If this is empty, no parts of the host USB bus will be excluded.
     -->
-    <string-array name="config_usbHostBlacklist" translatable="false">
+    <string-array name="config_usbHostDenylist" translatable="false">
     </string-array>
 
     <!-- List of paths to serial ports that are available to the serial manager.
@@ -2802,6 +2802,9 @@
              eutran : eutranSupportedRelease
              nfc : contactlessSupportedRelease
              crl : rspCrlSupportedVersion
+             nrepc : nrEpcSupportedRelease
+             nr5gc : nr5gcSupportedRelease
+             eutran5gc : eutran5gcSupportedRelease
     -->
     <string-array translatable="false" name="config_telephonyEuiccDeviceCapabilities">
         <!-- Example:
@@ -2813,6 +2816,9 @@
         <item>"eutran,11"</item>
         <item>"nfc,1"</item>
         <item>"crl,1"</item>
+        <item>"nrepc,15"</item>
+        <item>"nr5gc,15"</item>
+        <item>"eutran5gc,15"</item>
         -->
     </string-array>
 

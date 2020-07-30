@@ -222,12 +222,19 @@ public class AppStandbyController implements AppStandbyInternal {
     @GuardedBy("mPackageAccessListeners")
     private final ArrayList<AppIdleStateChangeListener> mPackageAccessListeners = new ArrayList<>();
 
+    /**
+     * Lock specifically for bookkeeping around the carrier-privileged app set.
+     * Do not acquire any other locks while holding this one.  Methods that
+     * require this lock to be held are named with a "CPL" suffix.
+     */
+    private final Object mCarrierPrivilegedLock = new Lock();
+
     /** Whether we've queried the list of carrier privileged apps. */
-    @GuardedBy("mAppIdleLock")
+    @GuardedBy("mCarrierPrivilegedLock")
     private boolean mHaveCarrierPrivilegedApps;
 
     /** List of carrier-privileged apps that should be excluded from standby */
-    @GuardedBy("mAppIdleLock")
+    @GuardedBy("mCarrierPrivilegedLock")
     private List<String> mCarrierPrivilegedApps;
 
     @GuardedBy("mActiveAdminApps")
@@ -1594,9 +1601,9 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     private boolean isCarrierApp(String packageName) {
-        synchronized (mAppIdleLock) {
+        synchronized (mCarrierPrivilegedLock) {
             if (!mHaveCarrierPrivilegedApps) {
-                fetchCarrierPrivilegedAppsLocked();
+                fetchCarrierPrivilegedAppsCPL();
             }
             if (mCarrierPrivilegedApps != null) {
                 return mCarrierPrivilegedApps.contains(packageName);
@@ -1610,14 +1617,14 @@ public class AppStandbyController implements AppStandbyInternal {
         if (DEBUG) {
             Slog.i(TAG, "Clearing carrier privileged apps list");
         }
-        synchronized (mAppIdleLock) {
+        synchronized (mCarrierPrivilegedLock) {
             mHaveCarrierPrivilegedApps = false;
             mCarrierPrivilegedApps = null; // Need to be refetched.
         }
     }
 
-    @GuardedBy("mAppIdleLock")
-    private void fetchCarrierPrivilegedAppsLocked() {
+    @GuardedBy("mCarrierPrivilegedLock")
+    private void fetchCarrierPrivilegedAppsCPL() {
         TelephonyManager telephonyManager =
                 mContext.getSystemService(TelephonyManager.class);
         mCarrierPrivilegedApps =
@@ -1858,7 +1865,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
     @Override
     public void dumpState(String[] args, PrintWriter pw) {
-        synchronized (mAppIdleLock) {
+        synchronized (mCarrierPrivilegedLock) {
             pw.println("Carrier privileged apps (have=" + mHaveCarrierPrivilegedApps
                     + "): " + mCarrierPrivilegedApps);
         }
