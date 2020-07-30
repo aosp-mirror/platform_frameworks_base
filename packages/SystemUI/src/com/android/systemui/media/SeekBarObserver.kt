@@ -55,15 +55,15 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
             holder.seekBar.maxHeight = seekBarDefaultMaxHeight
         }
 
-        data.elapsedTime?.let {
-            holder.seekBar.setProgress(it)
-            holder.elapsedTimeView.setText(DateUtils.formatElapsedTime(
-                    it / DateUtils.SECOND_IN_MILLIS))
-        }
-
         data.duration?.let {
             holder.seekBar.setMax(it)
             holder.totalTimeView.setText(DateUtils.formatElapsedTime(
+                    it / DateUtils.SECOND_IN_MILLIS))
+        }
+
+        data.elapsedTime?.let {
+            holder.seekBar.setProgress(it)
+            holder.elapsedTimeView.setText(DateUtils.formatElapsedTime(
                     it / DateUtils.SECOND_IN_MILLIS))
         }
     }
