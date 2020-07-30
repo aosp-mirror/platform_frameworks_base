@@ -38,7 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
@@ -56,7 +56,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     private final static String TAG = "OverviewProxyRecentsImpl";
     @Nullable
     private final Lazy<StatusBar> mStatusBarLazy;
-    private final Optional<Divider> mDividerOptional;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
 
     private Context mContext;
     private Handler mHandler;
@@ -66,9 +66,9 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy,
-            Optional<Divider> dividerOptional) {
+            Optional<SplitScreenController> splitScreenControllerOptional) {
         mStatusBarLazy = statusBarLazy.orElse(null);
-        mDividerOptional = dividerOptional;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
     }
 
     @Override
@@ -163,12 +163,12 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
             if (runningTask.supportsSplitScreenMultiWindow) {
                 if (ActivityManagerWrapper.getInstance().setTaskWindowingModeSplitScreenPrimary(
                         runningTask.id, stackCreateMode, initialBounds)) {
-                    mDividerOptional.ifPresent(Divider::onDockedTopTask);
-
-                    // The overview service is handling split screen, so just skip the wait for the
-                    // first draw and notify the divider to start animating now
-                    mDividerOptional.ifPresent(Divider::onRecentsDrawn);
-
+                    mSplitScreenControllerOptional.ifPresent(splitScreen -> {
+                        splitScreen.onDockedTopTask();
+                        // The overview service is handling split screen, so just skip the wait
+                        // for the first draw and notify the divider to start animating now
+                        splitScreen.onRecentsDrawn();
+                    });
                     return true;
                 }
             } else {

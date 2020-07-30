@@ -34,7 +34,6 @@ import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.shortcut.ShortcutKeyDispatcher;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -43,6 +42,7 @@ import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
+import com.android.systemui.wmshell.WMShell;
 
 import dagger.Binds;
 import dagger.Module;
@@ -60,12 +60,6 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(AuthController.class)
     public abstract SystemUI bindAuthController(AuthController service);
-
-    /** Inject into Divider. */
-    @Binds
-    @IntoMap
-    @ClassKey(Divider.class)
-    public abstract SystemUI bindDivider(Divider sysui);
 
     /** Inject into GarbageMonitor.Service. */
     @Binds
@@ -187,4 +181,10 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(WindowMagnification.class)
     public abstract SystemUI bindWindowMagnification(WindowMagnification sysui);
+
+    /** Inject into WMShell. */
+    @Binds
+    @IntoMap
+    @ClassKey(WMShell.class)
+    public abstract SystemUI bindWMShell(WMShell sysui);
 }

@@ -33,7 +33,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.dagger.SettingsModule;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
@@ -116,9 +115,6 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract CommandQueue optionalCommandQueue();
-
-    @BindsOptionalOf
-    abstract Divider optionalDivider();
 
     @BindsOptionalOf
     abstract HeadsUpManager optionalHeadsUpManager();
