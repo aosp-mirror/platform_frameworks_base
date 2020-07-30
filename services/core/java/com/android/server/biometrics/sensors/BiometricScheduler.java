@@ -194,19 +194,19 @@ public class BiometricScheduler {
                     return;
                 }
 
+                if (clientMonitor != mCurrentOperation.clientMonitor) {
+                    Slog.e(getTag(), "[Ignoring Finish] " + clientMonitor + " does not match"
+                            + " current: " + mCurrentOperation.clientMonitor);
+                    return;
+                }
+
+                Slog.d(getTag(), "[Finishing] " + clientMonitor + ", success: " + success);
                 mCurrentOperation.state = Operation.STATE_FINISHED;
 
                 if (mCurrentOperation.clientFinishCallback != null) {
                     mCurrentOperation.clientFinishCallback.onClientFinished(clientMonitor, success);
                 }
 
-                if (clientMonitor != mCurrentOperation.clientMonitor) {
-                    throw new IllegalStateException("Mismatched operation, "
-                            + " current: " + mCurrentOperation.clientMonitor
-                            + " received: " + clientMonitor);
-                }
-
-                Slog.d(getTag(), "[Finished] " + clientMonitor + ", success: " + success);
                 if (mGestureAvailabilityDispatcher != null) {
                     mGestureAvailabilityDispatcher.markSensorActive(
                             mCurrentOperation.clientMonitor.getSensorId(), false /* active */);
