@@ -51,6 +51,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
+import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -183,6 +184,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private BiometricUnlockController mBiometricUnlockController;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock
+    private KeyguardClockSwitchController mKeyguardClockSwitchController;
     private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -240,7 +243,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
                 mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
-                mBiometricUnlockController, mStatusBarKeyguardViewManager);
+                mBiometricUnlockController, mStatusBarKeyguardViewManager,
+                () -> mKeyguardClockSwitchController);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelf, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
