@@ -17,10 +17,13 @@ android_test {
         "apct-perftests-overlay-apps",
         "apct-perftests-resources-manager-apps",
         "apct-perftests-utils",
+        "collector-device-lib",
         "guava",
     ],
 
     libs: ["android.test.base"],
+
+    data: [":perfetto_artifacts"],
 
     platform_apis: true,
 
