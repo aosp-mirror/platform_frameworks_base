@@ -393,7 +393,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Indicates that this {@code Connection} can be transferred to another
      * number.
-     * Connection supports the blind and assured call transfer feature.
+     * Connection supports the confirmed and unconfirmed call transfer feature.
      * @hide
      */
     public static final int CAPABILITY_TRANSFER = 0x08000000;

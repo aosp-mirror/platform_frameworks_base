@@ -478,7 +478,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
         int subscription = simInited
-                ? 1/* mock subid=1 */ : SubscriptionManager.DUMMY_SUBSCRIPTION_ID_BASE;
+                ? 1/* mock subid=1 */ : SubscriptionManager.PLACEHOLDER_SUBSCRIPTION_ID_BASE;
         if (data != null) intent.putExtras(data);
 
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subscription);
