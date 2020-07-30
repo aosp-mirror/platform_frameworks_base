@@ -4861,7 +4861,6 @@ public class NotificationManagerService extends SystemService {
                             // calculate the final importance here
                             r.calculateImportance();
                             foundEnqueued = true;
-                            break;
                         }
                     }
                     if (!foundEnqueued) {

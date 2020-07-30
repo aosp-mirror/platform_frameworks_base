@@ -178,7 +178,6 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -3771,6 +3770,27 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
         assertEquals(USER_SENTIMENT_NEGATIVE, r.getUserSentiment());
+    }
+
+    @Test
+    public void testEnqueuedAdjustmentAppliesAdjustments_MultiNotifications() throws Exception {
+        final NotificationRecord r1 = generateNotificationRecord(mTestNotificationChannel);
+        final NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel);
+        mService.addEnqueuedNotification(r1);
+        mService.addEnqueuedNotification(r2);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_IMPORTANCE,
+                IMPORTANCE_HIGH);
+        Adjustment adjustment = new Adjustment(
+                r1.getSbn().getPackageName(), r1.getKey(), signals,
+                "", r1.getUser().getIdentifier());
+
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+
+        assertEquals(IMPORTANCE_HIGH, r1.getImportance());
+        assertEquals(IMPORTANCE_HIGH, r2.getImportance());
     }
 
     @Test
