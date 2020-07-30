@@ -435,10 +435,11 @@ public final class Settings {
     }
 
     Settings(File dataDir, PermissionSettings permission,
-            Object lock) {
+            RuntimePermissionsPersistence runtimePermissionsPersistence, Object lock) {
         mLock = lock;
         mPermissions = permission;
-        mRuntimePermissionsPersistence = new RuntimePermissionPersistence(mLock);
+        mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
+                runtimePermissionsPersistence, mLock);
 
         mSystemDir = new File(dataDir, "system");
         mSystemDir.mkdirs();
@@ -5381,8 +5382,7 @@ public final class Settings {
 
         private String mExtendedFingerprint;
 
-        private final RuntimePermissionsPersistence mPersistence =
-                RuntimePermissionsPersistence.createInstance();
+        private final RuntimePermissionsPersistence mPersistence;
 
         private final Handler mHandler = new MyHandler();
 
@@ -5407,7 +5407,9 @@ public final class Settings {
         // The mapping keys are user ids.
         private final SparseBooleanArray mPermissionUpgradeNeeded = new SparseBooleanArray();
 
-        public RuntimePermissionPersistence(Object persistenceLock) {
+        public RuntimePermissionPersistence(RuntimePermissionsPersistence persistence,
+                Object persistenceLock) {
+            mPersistence = persistence;
             mPersistenceLock = persistenceLock;
         }
 
