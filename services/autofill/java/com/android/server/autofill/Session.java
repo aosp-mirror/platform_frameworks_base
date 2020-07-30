@@ -1379,7 +1379,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if ((state & ViewState.STATE_AUTOFILLED_ONCE) != 0) {
                     final String datasetId = viewState.getDatasetId();
                     if (datasetId == null) {
-                        // Sanity check - should never happen.
+                        // Validation check - should never happen.
                         Slog.w(TAG, "logContextCommitted(): no dataset id on " + viewState);
                         continue;
                     }
@@ -1513,7 +1513,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ArrayMap<String, String> algorithms = userData.getFieldClassificationAlgorithms();
         final ArrayMap<String, Bundle> args = userData.getFieldClassificationArgs();
 
-        // Sanity check
+        // Validation check
         if (userValues == null || categoryIds == null || userValues.length != categoryIds.length) {
             final int valuesLength = userValues == null ? -1 : userValues.length;
             final int idsLength = categoryIds == null ? -1 : categoryIds.length;
@@ -2312,12 +2312,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     final String currentUrl = mUrlBar == null ? null
                             : mUrlBar.getText().toString().trim();
                     if (currentUrl == null) {
-                        // Sanity check - shouldn't happen.
+                        // Validation check - shouldn't happen.
                         wtf(null, "URL bar value changed, but current value is null");
                         return;
                     }
                     if (value == null || ! value.isText()) {
-                        // Sanity check - shouldn't happen.
+                        // Validation check - shouldn't happen.
                         wtf(null, "URL bar value changed to null or non-text: %s", value);
                         return;
                     }
