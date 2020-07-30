@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.collection.legacy;
 
 import android.os.Handler;
 import android.os.SystemClock;
@@ -24,7 +24,11 @@ import androidx.collection.ArraySet;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -65,24 +69,44 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
      */
     public VisualStabilityManager(
             NotificationEntryManager notificationEntryManager,
-            @Main Handler handler) {
+            @Main Handler handler,
+            StatusBarStateController statusBarStateController,
+            WakefulnessLifecycle wakefulnessLifecycle) {
 
         mHandler = handler;
 
-        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
-            @Override
-            public void onPreEntryUpdated(NotificationEntry entry) {
-                final boolean ambientStateHasChanged =
-                        entry.isAmbient() != entry.getRow().isLowPriority();
-                if (ambientStateHasChanged) {
-                    // note: entries are removed in onReorderingFinished
-                    mLowPriorityReorderingViews.add(entry);
+        if (notificationEntryManager != null) {
+            notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+                @Override
+                public void onPreEntryUpdated(NotificationEntry entry) {
+                    final boolean ambientStateHasChanged =
+                            entry.isAmbient() != entry.getRow().isLowPriority();
+                    if (ambientStateHasChanged) {
+                        // note: entries are removed in onReorderingFinished
+                        mLowPriorityReorderingViews.add(entry);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    public void setUpWithPresenter(NotificationPresenter presenter) {
+        if (statusBarStateController != null) {
+            setPulsing(statusBarStateController.isPulsing());
+            statusBarStateController.addCallback(new StatusBarStateController.StateListener() {
+                @Override
+                public void onPulsingChanged(boolean pulsing) {
+                    setPulsing(pulsing);
+                }
+
+                @Override
+                public void onExpandedChanged(boolean expanded) {
+                    setPanelExpanded(expanded);
+                }
+            });
+        }
+
+        if (wakefulnessLifecycle != null) {
+            wakefulnessLifecycle.addObserver(mWakefulnessObserver);
+        }
     }
 
     /**
@@ -120,25 +144,25 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     }
 
     /**
-     * Set the panel to be expanded.
+     * @param screenOn whether the screen is on
      */
-    public void setPanelExpanded(boolean expanded) {
-        mPanelExpanded = expanded;
+    private void setScreenOn(boolean screenOn) {
+        mScreenOn = screenOn;
         updateAllowedStates();
     }
 
     /**
-     * @param screenOn whether the screen is on
+     * Set the panel to be expanded.
      */
-    public void setScreenOn(boolean screenOn) {
-        mScreenOn = screenOn;
+    private void setPanelExpanded(boolean expanded) {
+        mPanelExpanded = expanded;
         updateAllowedStates();
     }
 
     /**
      * @param pulsing whether we are currently pulsing for ambient display.
      */
-    public void setPulsing(boolean pulsing) {
+    private void setPulsing(boolean pulsing) {
         if (mPulsing == pulsing) {
             return;
         }
@@ -215,6 +239,10 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
         mVisibilityLocationProvider = visibilityLocationProvider;
     }
 
+    /**
+     * Notifications have been reordered, so reset all the allowed list of views that are allowed
+     * to reorder.
+     */
     public void onReorderingFinished() {
         mAllowedReorderViews.clear();
         mAddedChildren.clear();
@@ -271,11 +299,27 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
         pw.println();
     }
 
+    final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
+        @Override
+        public void onFinishedGoingToSleep() {
+            setScreenOn(false);
+        }
+
+        @Override
+        public void onStartedWakingUp() {
+            setScreenOn(true);
+        }
+    };
+
+
+    /**
+     * See {@link Callback#onChangeAllowed()}
+     */
     public interface Callback {
+
         /**
          * Called when changing is allowed again.
          */
         void onChangeAllowed();
     }
-
 }

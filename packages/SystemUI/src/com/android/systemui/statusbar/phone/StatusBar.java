@@ -204,8 +204,8 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
@@ -1847,7 +1847,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPanelExpanded = isExpanded;
         updateHideIconsForBouncer(false /* animate */);
         mNotificationShadeWindowController.setPanelExpanded(isExpanded);
-        mVisualStabilityManager.setPanelExpanded(isExpanded);
+        mStatusBarStateController.setPanelExpanded(isExpanded);
         if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
             if (DEBUG) {
                 Log.v(TAG, "clearing notification effects from setExpandedHeight");
@@ -3785,7 +3785,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mDeviceInteractive = false;
             mWakeUpComingFromTouch = false;
             mWakeUpTouchLocation = null;
-            mVisualStabilityManager.setScreenOn(false);
             updateVisibleToUser();
 
             updateNotificationPanelTouchState();
@@ -3822,7 +3821,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (!mKeyguardBypassController.getBypassEnabled()) {
                 mHeadsUpManager.releaseAllImmediately();
             }
-            mVisualStabilityManager.setScreenOn(true);
             updateVisibleToUser();
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();

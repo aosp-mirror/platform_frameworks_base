@@ -57,6 +57,15 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
+    fun logReorderingAllowedInvalidated(name: String, pipelineState: Int) {
+        buffer.log(TAG, DEBUG, {
+            str1 = name
+            int1 = pipelineState
+        }, {
+            """ReorderingNowAllowed "$str1" invalidated; pipeline state is $int1"""
+        })
+    }
+
     fun logPromoterInvalidated(name: String, pipelineState: Int) {
         buffer.log(TAG, DEBUG, {
             str1 = name
@@ -156,6 +165,21 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
+    fun logParentChangeSuppressed(
+        buildId: Int,
+        suppressedParent: GroupEntry?,
+        keepingParent: GroupEntry?
+    ) {
+        buffer.log(TAG, INFO, {
+            int1 = buildId
+            str1 = suppressedParent?.key
+            str2 = keepingParent?.key
+        }, {
+            "(Build $long1)     Change of parent to '$str1' suppressed; " +
+                "keeping parent '$str2'"
+        })
+    }
+
     fun logFilterChanged(
         buildId: Int,
         prevFilter: NotifFilter?,
@@ -203,6 +227,23 @@ class ShadeListBuilderLogger @Inject constructor(
             } else {
                 "(Build $long1)     Section changed: '$str1' (#$int1) -> '$str2' (#$int2)"
             }
+        })
+    }
+
+    fun logSectionChangeSuppressed(
+        buildId: Int,
+        suppressedSection: NotifSection?,
+        suppressedSectionIndex: Int,
+        assignedSection: NotifSection?
+    ) {
+        buffer.log(TAG, INFO, {
+            long1 = buildId.toLong()
+            str1 = suppressedSection?.name
+            int1 = suppressedSectionIndex
+            str2 = assignedSection?.name
+        }, {
+            "(Build $long1)     Section change suppressed: '$str1' (#$int1). " +
+                "Keeping section: '$str2'"
         })
     }
 

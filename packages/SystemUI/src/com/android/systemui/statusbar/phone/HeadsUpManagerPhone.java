@@ -31,8 +31,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -58,6 +58,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private final NotificationGroupManager mGroupManager;
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
     private final int mAutoHeadsUpNotificationDecay;
+    // TODO (b/162832756): remove visual stability manager when migrating to new pipeline
     private VisualStabilityManager mVisualStabilityManager;
     private boolean mReleaseOnExpandFinish;
 

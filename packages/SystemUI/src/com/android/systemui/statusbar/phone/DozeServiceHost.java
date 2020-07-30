@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -83,7 +82,6 @@ public final class DozeServiceHost implements DozeHost {
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final DozeScrimController mDozeScrimController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final VisualStabilityManager mVisualStabilityManager;
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
@@ -108,7 +106,6 @@ public final class DozeServiceHost implements DozeHost {
             KeyguardViewMediator keyguardViewMediator,
             Lazy<AssistManager> assistManagerLazy,
             DozeScrimController dozeScrimController, KeyguardUpdateMonitor keyguardUpdateMonitor,
-            VisualStabilityManager visualStabilityManager,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
@@ -128,7 +125,6 @@ public final class DozeServiceHost implements DozeHost {
         mAssistManagerLazy = assistManagerLazy;
         mDozeScrimController = dozeScrimController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mVisualStabilityManager = visualStabilityManager;
         mPulseExpansionHandler = pulseExpansionHandler;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
@@ -259,11 +255,10 @@ public final class DozeServiceHost implements DozeHost {
             }
 
             private void setPulsing(boolean pulsing) {
-                mStatusBarStateController.setPulsing(pulsing);
                 mStatusBarKeyguardViewManager.setPulsing(pulsing);
                 mKeyguardViewMediator.setPulsing(pulsing);
                 mNotificationPanel.setPulsing(pulsing);
-                mVisualStabilityManager.setPulsing(pulsing);
+                mStatusBarStateController.setPulsing(pulsing);
                 mIgnoreTouchWhilePulsing = false;
                 if (mKeyguardUpdateMonitor != null && passiveAuthInterrupt) {
                     mKeyguardUpdateMonitor.onAuthInterruptDetected(pulsing /* active */);

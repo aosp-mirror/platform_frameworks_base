@@ -42,6 +42,7 @@ public class NotifCoordinators implements Dumpable {
     private static final String TAG = "NotifCoordinators";
     private final List<Coordinator> mCoordinators = new ArrayList<>();
     private final List<NotifSection> mOrderedSections = new ArrayList<>();
+
     /**
      * Creates all the coordinators.
      */
@@ -58,7 +59,8 @@ public class NotifCoordinators implements Dumpable {
             HeadsUpCoordinator headsUpCoordinator,
             ConversationCoordinator conversationCoordinator,
             PreparationCoordinator preparationCoordinator,
-            MediaCoordinator mediaCoordinator) {
+            MediaCoordinator mediaCoordinator,
+            VisualStabilityCoordinator visualStabilityCoordinator) {
         dumpManager.registerDumpable(TAG, this);
 
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
@@ -70,6 +72,7 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(bubbleCoordinator);
         mCoordinators.add(mediaCoordinator);
         mCoordinators.add(conversationCoordinator);
+        mCoordinators.add(visualStabilityCoordinator);
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
             mCoordinators.add(headsUpCoordinator);
             mCoordinators.add(preparationCoordinator);

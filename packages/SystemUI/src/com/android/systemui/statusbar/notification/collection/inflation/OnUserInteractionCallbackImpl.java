@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.inflation;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
@@ -26,35 +27,43 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.row.OnDismissCallback;
+import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
- * Callback used when a user:
- * 1. Manually dismisses a notification {@see ExpandableNotificationRow}.
- * 2. Clicks on a notification with flag {@link android.app.Notification#FLAG_AUTO_CANCEL}.
- * {@see StatusBarNotificationActivityStarter}
+ * Callback for when a user interacts with a {@see ExpandableNotificationRow}. Sends relevant
+ * information about the interaction to the notification pipeline.
  */
-public class OnDismissCallbackImpl implements OnDismissCallback {
+public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback {
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
+    private final VisualStabilityCoordinator mVisualStabilityCoordinator;
 
-    public OnDismissCallbackImpl(
+    public OnUserInteractionCallbackImpl(
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             HeadsUpManager headsUpManager,
-            StatusBarStateController statusBarStateController
+            StatusBarStateController statusBarStateController,
+            VisualStabilityCoordinator visualStabilityCoordinator
     ) {
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
+        mVisualStabilityCoordinator = visualStabilityCoordinator;
     }
 
+    /**
+     * Callback triggered when a user:
+     * 1. Manually dismisses a notification {@see ExpandableNotificationRow}.
+     * 2. Clicks on a notification with flag {@link android.app.Notification#FLAG_AUTO_CANCEL}.
+     * {@see StatusBarNotificationActivityStarter}
+     */
     @Override
     public void onDismiss(
             NotificationEntry entry,
@@ -79,5 +88,12 @@ public class OnDismissCallbackImpl implements OnDismissCallback {
                             true,
                             NotificationLogger.getNotificationLocation(entry)))
         );
+    }
+
+    @Override
+    public void onImportanceChanged(NotificationEntry entry) {
+        mVisualStabilityCoordinator.temporarilyAllowSectionChanges(
+                entry,
+                SystemClock.uptimeMillis());
     }
 }

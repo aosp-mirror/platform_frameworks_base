@@ -103,6 +103,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private boolean mIsDozing;
 
     /**
+     * If the status bar is currently expanded or not.
+     */
+    private boolean mIsExpanded;
+
+    /**
      * Current {@link #mDozeAmount} animator.
      */
     private ValueAnimator mDarkAnimator;
@@ -187,6 +192,26 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     @Override
     public float getDozeAmount() {
         return mDozeAmount;
+    }
+
+    @Override
+    public boolean isExpanded() {
+        return mIsExpanded;
+    }
+
+    @Override
+    public boolean setPanelExpanded(boolean expanded) {
+        if (mIsExpanded == expanded) {
+            return false;
+        }
+        mIsExpanded = expanded;
+        String tag = getClass().getSimpleName() + "#setIsExpanded";
+        DejankUtils.startDetectingBlockingIpcs(tag);
+        for (RankedListener rl : new ArrayList<>(mListeners)) {
+            rl.mListener.onExpandedChanged(mIsExpanded);
+        }
+        DejankUtils.stopDetectingBlockingIpcs(tag);
+        return true;
     }
 
     @Override

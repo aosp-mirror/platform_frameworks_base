@@ -27,30 +27,36 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.row.OnDismissCallback;
+import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
- * Callback used when a user:
- * 1. Manually dismisses a notification {@see ExpandableNotificationRow}.
- * 2. Clicks on a notification with flag {@link android.app.Notification#FLAG_AUTO_CANCEL}.
- * {@see StatusBarNotificationActivityStarter}
+ * Callback for when a user interacts with a {@see ExpandableNotificationRow}.
  */
-public class OnDismissCallbackImpl implements OnDismissCallback {
+public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCallback {
     private final NotificationEntryManager mNotificationEntryManager;
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
+    private final VisualStabilityManager mVisualStabilityManager;
 
-    public OnDismissCallbackImpl(
+    public OnUserInteractionCallbackImplLegacy(
             NotificationEntryManager notificationEntryManager,
             HeadsUpManager headsUpManager,
-            StatusBarStateController statusBarStateController
+            StatusBarStateController statusBarStateController,
+            VisualStabilityManager visualStabilityManager
     ) {
         mNotificationEntryManager = notificationEntryManager;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
+        mVisualStabilityManager = visualStabilityManager;
     }
 
+    /**
+     * Callback triggered when a user:
+     * 1. Manually dismisses a notification {@see ExpandableNotificationRow}.
+     * 2. Clicks on a notification with flag {@link android.app.Notification#FLAG_AUTO_CANCEL}.
+     * {@see StatusBarNotificationActivityStarter}
+     */
     @Override
     public void onDismiss(
             NotificationEntry entry,
@@ -76,6 +82,11 @@ public class OnDismissCallbackImpl implements OnDismissCallback {
                                 NotificationLogger.getNotificationLocation(entry))),
                 cancellationReason
         );
+    }
+
+    @Override
+    public void onImportanceChanged(NotificationEntry entry) {
+        mVisualStabilityManager.temporarilyAllowReordering();
     }
 }
 
