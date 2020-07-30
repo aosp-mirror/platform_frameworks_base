@@ -697,6 +697,9 @@ class Bubble implements BubbleViewProvider {
         pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
+        if (mExpandedView != null) {
+            mExpandedView.dump(fd, pw, args);
+        }
     }
 
     @Override
