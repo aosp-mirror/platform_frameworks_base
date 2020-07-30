@@ -1956,7 +1956,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
                     }
                     memInfo.readMemInfo();
-                    synchronized (ActivityManagerService.this) {
+                    synchronized (mProcessStats.mLock) {
                         if (DEBUG_PSS) Slog.d(TAG_PSS, "Collected native and kernel memory in "
                                 + (SystemClock.uptimeMillis()-start) + "ms");
                         final long cachedKb = memInfo.getCachedSizeKb();
@@ -7048,9 +7048,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUsageStatsService.prepareShutdown();
         }
         mBatteryStatsService.shutdown();
-        synchronized (this) {
-            mProcessStats.shutdownLocked();
-        }
+        mProcessStats.shutdown();
 
         return timedout;
     }
@@ -12352,7 +12350,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
             if (nativeProcTotalPss > 0) {
-                synchronized (this) {
+                synchronized (mProcessStats.mLock) {
                     final long cachedKb = memInfo.getCachedSizeKb();
                     final long freeKb = memInfo.getFreeSizeKb();
                     final long zramKb = memInfo.getZramTotalSizeKb();
@@ -12934,7 +12932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
             if (nativeProcTotalPss > 0) {
-                synchronized (this) {
+                synchronized (mProcessStats.mLock) {
                     final long cachedKb = memInfo.getCachedSizeKb();
                     final long freeKb = memInfo.getFreeSizeKb();
                     final long zramKb = memInfo.getZramTotalSizeKb();
@@ -16505,9 +16503,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override public void run() {
-            synchronized (mService) {
-                mProcessStats.writeStateAsyncLocked();
-            }
+            mProcessStats.writeStateAsync();
         }
     }
 
@@ -16557,9 +16553,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mProcessList.getLruSizeLocked();
-        boolean allChanged = mProcessStats.setMemFactorLocked(
-                memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
-        final int trackerMemFactor = mProcessStats.getMemFactorLocked();
+        boolean allChanged;
+        int trackerMemFactor;
+        synchronized (mProcessStats.mLock) {
+            allChanged = mProcessStats.setMemFactorLocked(
+                    memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
+            trackerMemFactor = mProcessStats.getMemFactorLocked();
+        }
         if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;

@@ -99,6 +99,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -165,7 +166,7 @@ public class MockingOomAdjusterTests {
         setFieldValue(ActivityManagerService.class, sService, "mHandler",
                 mock(ActivityManagerService.MainHandler.class));
         setFieldValue(ActivityManagerService.class, sService, "mProcessStats",
-                mock(ProcessStatsService.class));
+                new ProcessStatsService(sService, new File(sContext.getFilesDir(), "procstats")));
         setFieldValue(ActivityManagerService.class, sService, "mBackupTargets",
                 mock(SparseArray.class));
         setFieldValue(ActivityManagerService.class, sService, "mOomAdjProfiler",
