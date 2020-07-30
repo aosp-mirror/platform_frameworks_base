@@ -44,6 +44,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
     private static final int TEST_BOUNDS_HEIGHT = 1000;
 
     OneHandedAnimationController mOneHandedAnimationController;
+    OneHandedTutorialHandler mTutorialHandler;
 
     @Mock
     private SurfaceControl mMockLeash;
@@ -52,6 +53,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mTutorialHandler = new OneHandedTutorialHandler(mContext);
         mOneHandedAnimationController = new OneHandedAnimationController(
                 new OneHandedSurfaceTransactionHelper(mContext));
     }
