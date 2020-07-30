@@ -62,7 +62,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.KeyguardClockSwitch;
+import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -124,6 +124,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 @StatusBarComponent.StatusBarScope
 public class NotificationPanelViewController extends PanelViewController {
@@ -252,6 +253,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ConversationNotificationManager mConversationNotificationManager;
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final Provider<KeyguardClockSwitchController> mKeyguardClockSwitchControllerProvider;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -495,7 +497,8 @@ public class NotificationPanelViewController extends PanelViewController {
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
             BiometricUnlockController biometricUnlockController,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            Provider<KeyguardClockSwitchController> keyguardClockSwitchControllerProvider) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -507,6 +510,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mMediaHierarchyManager = mediaHierarchyManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mKeyguardClockSwitchControllerProvider = keyguardClockSwitchControllerProvider;
         mView.setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
@@ -579,9 +583,11 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
         mKeyguardStatusView = mView.findViewById(R.id.keyguard_status_view);
 
-        KeyguardClockSwitch keyguardClockSwitch = mView.findViewById(R.id.keyguard_clock_container);
+        KeyguardClockSwitchController keyguardClockSwitchController =
+                mKeyguardClockSwitchControllerProvider.get();
+        keyguardClockSwitchController.attach(mView.findViewById(R.id.keyguard_clock_container));
         mBigClockContainer = mView.findViewById(R.id.big_clock_container);
-        keyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        keyguardClockSwitchController.setBigClockContainer(mBigClockContainer);
 
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         mNotificationStackScroller = mView.findViewById(R.id.notification_stack_scroller);
@@ -703,8 +709,10 @@ public class NotificationPanelViewController extends PanelViewController {
 
         // Re-associate the clock container with the keyguard clock switch.
         mBigClockContainer.removeAllViews();
-        KeyguardClockSwitch keyguardClockSwitch = mView.findViewById(R.id.keyguard_clock_container);
-        keyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        KeyguardClockSwitchController keyguardClockSwitchController =
+                mKeyguardClockSwitchControllerProvider.get();
+        keyguardClockSwitchController.attach(mView.findViewById(R.id.keyguard_clock_container));
+        keyguardClockSwitchController.setBigClockContainer(mBigClockContainer);
 
         // Update keyguard bottom area
         index = mView.indexOfChild(mKeyguardBottomArea);
