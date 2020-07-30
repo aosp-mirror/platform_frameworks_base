@@ -404,7 +404,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             mContentDescriptionFormat = new SimpleDateFormat(format);
             /*
              * Search for an unquoted "a" in the format string, so we can
-             * add dummy characters around it to let us find it again after
+             * add marker characters around it to let us find it again after
              * formatting and change its size.
              */
             if (mAmPmStyle != AM_PM_STYLE_NORMAL) {

@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
@@ -97,7 +98,7 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             mWindowMagnificationController = new WindowMagnificationController(mContext,
                     mHandler,
                     new SfVsyncFrameCallbackProvider(),
-                    null,
+                    null, new SurfaceControl.Transaction(),
                     this);
         }
         mWindowMagnificationController.enableWindowMagnification(scale, centerX, centerY);
@@ -132,6 +133,13 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     public void onWindowMagnifierBoundsChanged(int displayId, Rect frame) {
         if (mWindowMagnificationConnectionImpl != null) {
             mWindowMagnificationConnectionImpl.onWindowMagnifierBoundsChanged(displayId, frame);
+        }
+    }
+
+    @Override
+    public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
+        if (mWindowMagnificationConnectionImpl != null) {
+            mWindowMagnificationConnectionImpl.onSourceBoundsChanged(displayId, sourceBounds);
         }
     }
 
@@ -222,6 +230,16 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
                     mConnectionCallback.onWindowMagnifierBoundsChanged(displayId, frame);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to inform bounds changed", e);
+                }
+            }
+        }
+
+        void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
+            if (mConnectionCallback != null) {
+                try {
+                    mConnectionCallback.onSourceBoundsChanged(displayId, sourceBounds);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to inform source bounds changed", e);
                 }
             }
         }

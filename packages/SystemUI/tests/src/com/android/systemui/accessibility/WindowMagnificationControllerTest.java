@@ -16,13 +16,19 @@
 
 package com.android.systemui.accessibility;
 
+import static android.view.Choreographer.FrameCallback;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.view.SurfaceControl;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -49,6 +55,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     MirrorWindowControl mMirrorWindowControl;
     @Mock
     WindowMagnifierCallback mWindowMagnifierCallback;
+    @Mock
+    SurfaceControl.Transaction mTransaction;
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
 
@@ -56,9 +64,19 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        doAnswer(invocation -> {
+            FrameCallback callback = invocation.getArgument(0);
+            callback.doFrame(0);
+            return null;
+        }).when(mSfVsyncFrameProvider).postFrameCallback(
+                any(FrameCallback.class));
+        when(mTransaction.remove(any())).thenReturn(mTransaction);
+        when(mTransaction.setGeometry(any(), any(), any(),
+                anyInt())).thenReturn(mTransaction);
+
         mWindowMagnificationController = new WindowMagnificationController(getContext(),
                 mHandler, mSfVsyncFrameProvider,
-                mMirrorWindowControl, mWindowMagnifierCallback);
+                mMirrorWindowControl, mTransaction, mWindowMagnifierCallback);
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
     }
@@ -71,7 +89,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void createWindowMagnification_showControl() {
+    public void enableWindowMagnification_showControl() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);

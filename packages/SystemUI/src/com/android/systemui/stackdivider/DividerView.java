@@ -76,11 +76,14 @@ import java.util.function.Consumer;
 public class DividerView extends FrameLayout implements OnTouchListener,
         OnComputeInternalInsetsListener {
     private static final String TAG = "DividerView";
-    private static final boolean DEBUG = Divider.DEBUG;
+    private static final boolean DEBUG = DividerController.DEBUG;
 
     public interface DividerCallbacks {
         void onDraggingStart();
         void onDraggingEnd();
+    }
+
+    interface RecentDrawnCallback {
         void growRecents();
     }
 
@@ -437,17 +440,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         releaseBackground();
     }
 
-    public void stopDragging(int position, SnapTarget target, long duration,
+    private void stopDragging(int position, SnapTarget target, long duration,
             Interpolator interpolator) {
         stopDragging(position, target, duration, 0 /* startDelay*/, 0 /* endDelay */, interpolator);
     }
 
-    public void stopDragging(int position, SnapTarget target, long duration,
+    private void stopDragging(int position, SnapTarget target, long duration,
             Interpolator interpolator, long endDelay) {
         stopDragging(position, target, duration, 0 /* startDelay*/, endDelay, interpolator);
     }
 
-    public void stopDragging(int position, SnapTarget target, long duration, long startDelay,
+    private void stopDragging(int position, SnapTarget target, long duration, long startDelay,
             long endDelay, Interpolator interpolator) {
         mHandle.setTouching(false, true /* animate */);
         flingTo(position, target, duration, startDelay, endDelay, interpolator);
@@ -1363,7 +1366,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 null /* transaction */);
     }
 
-    void onRecentsDrawn() {
+    void onRecentsDrawn(RecentDrawnCallback callback) {
         updateDockSide();
         final int position = calculatePositionForInsetBounds();
         if (mState.animateAfterRecentsDrawn) {
@@ -1380,8 +1383,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (mState.growAfterRecentsDrawn) {
             mState.growAfterRecentsDrawn = false;
             updateDockSide();
-            if (mCallback != null) {
-                mCallback.growRecents();
+            if (callback != null) {
+                callback.growRecents();
             }
             stopDragging(position, getSnapAlgorithm().getMiddleTarget(), 336,
                     Interpolators.FAST_OUT_SLOW_IN);

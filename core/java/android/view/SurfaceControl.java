@@ -595,6 +595,256 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * A common arguments class used for various screenshot requests. This contains arguments that
+     * are shared between {@link DisplayCaptureArgs} and {@link LayerCaptureArgs}
+     * @hide
+     */
+    public abstract static class CaptureArgs {
+        private final int mPixelFormat;
+        private final Rect mSourceCrop = new Rect();
+        private final float mFrameScale;
+        private final boolean mCaptureSecureLayers;
+
+        private CaptureArgs(Builder<? extends Builder<?>> builder) {
+            mPixelFormat = builder.mPixelFormat;
+            mSourceCrop.set(builder.mSourceCrop);
+            mFrameScale = builder.mFrameScale;
+            mCaptureSecureLayers = builder.mCaptureSecureLayers;
+        }
+
+        /**
+         * The Builder class used to construct {@link CaptureArgs}
+         *
+         * @param <T> A builder that extends {@link Builder}
+         */
+        public abstract static class Builder<T extends Builder<T>> {
+            private int mPixelFormat = PixelFormat.RGBA_8888;
+            private final Rect mSourceCrop = new Rect();
+            private float mFrameScale = 1;
+            private boolean mCaptureSecureLayers;
+
+            /**
+             * The desired pixel format of the returned buffer.
+             */
+            public T setPixelFormat(int pixelFormat) {
+                mPixelFormat = pixelFormat;
+                return getThis();
+            }
+
+            /**
+             * The portion of the screen to capture into the buffer. Caller may pass  in
+             * 'new Rect()' if no cropping is desired.
+             */
+            public T setSourceCrop(Rect sourceCrop) {
+                mSourceCrop.set(sourceCrop);
+                return getThis();
+            }
+
+            /**
+             * The desired scale of the returned buffer. The raw screen will be scaled up/down.
+             */
+            public T setFrameScale(float frameScale) {
+                mFrameScale = frameScale;
+                return getThis();
+            }
+
+            /**
+             * Whether to allow the screenshot of secure layers. Warning: This should only be done
+             * if the content will be placed in a secure SurfaceControl.
+             *
+             * @see ScreenshotHardwareBuffer#containsSecureLayers()
+             */
+            public T setCaptureSecureLayers(boolean captureSecureLayers) {
+                mCaptureSecureLayers = captureSecureLayers;
+                return getThis();
+            }
+
+            /**
+             * Each sub class should return itself to allow the builder to chain properly
+             */
+            public abstract T getThis();
+        }
+    }
+
+    /**
+     * The arguments class used to make display capture requests.
+     *
+     * @see #nativeScreenshot(IBinder, Rect, int, int, boolean, int, boolean)
+     * @hide
+     */
+    public static class DisplayCaptureArgs extends CaptureArgs {
+        private final IBinder mDisplayToken;
+        private final int mWidth;
+        private final int mHeight;
+        private final boolean mUseIdentityTransform;
+        private final int mRotation;
+
+        private DisplayCaptureArgs(Builder builder) {
+            super(builder);
+            mDisplayToken = builder.mDisplayToken;
+            mWidth = builder.mWidth;
+            mHeight = builder.mHeight;
+            mUseIdentityTransform = builder.mUseIdentityTransform;
+            mRotation = builder.mRotation;
+        }
+
+        /**
+         * The Builder class used to construct {@link DisplayCaptureArgs}
+         */
+        public static class Builder extends CaptureArgs.Builder<Builder> {
+            private IBinder mDisplayToken;
+            private int mWidth;
+            private int mHeight;
+            private boolean mUseIdentityTransform;
+            private @Surface.Rotation int mRotation = Surface.ROTATION_0;
+
+            /**
+             * Construct a new {@link LayerCaptureArgs} with the set parameters. The builder
+             * remains valid.
+             */
+            public DisplayCaptureArgs build() {
+                if (mDisplayToken == null) {
+                    throw new IllegalStateException(
+                            "Can't take screenshot with null display token");
+                }
+                return new DisplayCaptureArgs(this);
+            }
+
+            public Builder(IBinder displayToken) {
+                setDisplayToken(displayToken);
+            }
+
+            /**
+             * The display to take the screenshot of.
+             */
+            public Builder setDisplayToken(IBinder displayToken) {
+                mDisplayToken = displayToken;
+                return this;
+            }
+
+            /**
+             * Set the desired size of the returned buffer. The raw screen  will be  scaled down to
+             * this size
+             *
+             * @param width  The desired width of the returned buffer. Caller may pass in 0 if no
+             *               scaling is desired.
+             * @param height The desired height of the returned buffer. Caller may pass in 0 if no
+             *               scaling is desired.
+             */
+            public Builder setSize(int width, int height) {
+                mWidth = width;
+                mHeight = height;
+                return this;
+            }
+
+            /**
+             * Replace whatever transformation (rotation, scaling, translation) the surface
+             * layers are currently using with the identity transformation while taking the
+             * screenshot.
+             */
+            public Builder setUseIdentityTransform(boolean useIdentityTransform) {
+                mUseIdentityTransform = useIdentityTransform;
+                return this;
+            }
+
+            /**
+             * Apply a custom clockwise rotation to the screenshot, i.e.
+             * Surface.ROTATION_0,90,180,270. SurfaceFlinger will always take screenshots in its
+             * native portrait orientation by default, so this is useful for returning screenshots
+             * that are independent of device orientation.
+             */
+            public Builder setRotation(@Surface.Rotation int rotation) {
+                mRotation = rotation;
+                return this;
+            }
+
+            @Override
+            public Builder getThis() {
+                return this;
+            }
+        }
+    }
+
+    /**
+     * The arguments class used to make layer capture requests.
+     *
+     * @see #nativeCaptureLayers(IBinder, long, Rect, float, long[], int)
+     * @hide
+     */
+    public static class LayerCaptureArgs extends CaptureArgs {
+        private final long mNativeLayer;
+        private final long[] mNativeExcludeLayers;
+        private final boolean mChildrenOnly;
+
+        private LayerCaptureArgs(Builder builder) {
+            super(builder);
+            mChildrenOnly = builder.mChildrenOnly;
+            mNativeLayer = builder.mLayer.mNativeObject;
+            mNativeExcludeLayers = new long[builder.mExcludeLayers.length];
+            for (int i = 0; i < builder.mExcludeLayers.length; i++) {
+                mNativeExcludeLayers[i] = builder.mExcludeLayers[i].mNativeObject;
+            }
+        }
+
+        /**
+         * The Builder class used to construct {@link LayerCaptureArgs}
+         */
+        public static class Builder extends CaptureArgs.Builder<Builder> {
+            private SurfaceControl mLayer;
+            private SurfaceControl[] mExcludeLayers;
+            private boolean mChildrenOnly = true;
+
+            /**
+             * Construct a new {@link LayerCaptureArgs} with the set parameters. The builder
+             * remains valid.
+             */
+            public LayerCaptureArgs build() {
+                if (mLayer == null) {
+                    throw new IllegalStateException(
+                            "Can't take screenshot with null layer");
+                }
+                return new LayerCaptureArgs(this);
+            }
+
+            public Builder(SurfaceControl layer) {
+                setLayer(layer);
+            }
+
+            /**
+             * The root layer to capture.
+             */
+            public Builder setLayer(SurfaceControl layer) {
+                mLayer = layer;
+                return this;
+            }
+
+
+            /**
+             * An array of layer handles to exclude.
+             */
+            public Builder setExcludeLayers(@Nullable SurfaceControl[] excludeLayers) {
+                mExcludeLayers = excludeLayers;
+                return this;
+            }
+
+            /**
+             * Whether to include the layer itself in the screenshot or just the children and their
+             * descendants.
+             */
+            public Builder setChildrenOnly(boolean childrenOnly) {
+                mChildrenOnly = childrenOnly;
+                return this;
+            }
+
+            @Override
+            public Builder getThis() {
+                return this;
+            }
+
+        }
+    }
+
+    /**
      * Builder class for {@link SurfaceControl} objects.
      *
      * By default the surface will be hidden, and have "unset" bounds, meaning it can
@@ -1969,37 +2219,6 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @see SurfaceControl#screenshot(IBinder, Surface, Rect, int, int, boolean, int)
-     * @hide
-     */
-    public static void screenshot(IBinder display, Surface consumer) {
-        screenshot(display, consumer, new Rect(), 0, 0, false, 0);
-    }
-
-    /**
-     * Copy the current screen contents into the provided {@link Surface}
-     *
-     * @param consumer The {@link Surface} to take the screenshot into.
-     * @see SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)
-     * @hide
-     */
-    public static void screenshot(IBinder display, Surface consumer, Rect sourceCrop, int width,
-            int height, boolean useIdentityTransform, int rotation) {
-        if (consumer == null) {
-            throw new IllegalArgumentException("consumer must not be null");
-        }
-
-        final ScreenshotHardwareBuffer buffer = screenshotToBuffer(display, sourceCrop, width,
-                height, useIdentityTransform, rotation);
-        try {
-            consumer.attachAndQueueBufferWithColorSpace(buffer.getHardwareBuffer(),
-                    buffer.getColorSpace());
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Failed to take screenshot - " + e.getMessage());
-        }
-    }
-
-    /**
      * @see SurfaceControl#screenshot(Rect, int, int, boolean, int)}
      * @hide
      */
@@ -2014,8 +2233,7 @@ public final class SurfaceControl implements Parcelable {
      * a software Bitmap using {@link Bitmap#copy(Bitmap.Config, boolean)}
      *
      * CAVEAT: Versions of screenshot that return a {@link Bitmap} can be extremely slow; avoid use
-     * unless absolutely necessary; prefer the versions that use a {@link Surface} such as
-     * {@link SurfaceControl#screenshot(IBinder, Surface)} or {@link HardwareBuffer} such as
+     * unless absolutely necessary; prefer the versions that use a {@link HardwareBuffer} such as
      * {@link SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)}.
      *
      * @see SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)}

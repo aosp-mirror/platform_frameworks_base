@@ -9794,6 +9794,21 @@ public final class Settings {
                 "hdmi_control_auto_device_off_enabled";
 
         /**
+         * Property to decide which devices the playback device can send a <Standby> message to upon
+         * going to sleep. Supported values are:
+         * <ul>
+         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_TO_TV} to TV only.</li>
+         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_BROADCAST} to all devices in the
+         * network.</li>
+         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_NONE} no <Standby> message sent.</li>
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String HDMI_CONTROL_SEND_STANDBY_ON_SLEEP =
+                "hdmi_control_send_standby_on_sleep";
+
+        /**
          * Whether or not media is shown automatically when bypassing as a heads up.
          * @hide
          */
@@ -10838,17 +10853,6 @@ public final class Settings {
         * change the ringer mode. See AudioManager.
         */
        public static final String MODE_RINGER = "mode_ringer";
-
-        /**
-         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
-         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
-         * scenarios
-         * Type: int 1 is enabled, 0 is disabled
-         *
-         * @hide
-         */
-        public static final String ENHANCED_CONNECTIVITY_ENABLED =
-                "enhanced_connectivity_enable";
 
         /**
          * Overlay display devices setting.

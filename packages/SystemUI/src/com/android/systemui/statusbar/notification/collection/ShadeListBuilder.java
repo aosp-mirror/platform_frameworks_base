@@ -865,7 +865,7 @@ public class ShadeListBuilder implements Dumpable {
                 }
             };
 
-    private static final String TAG = "NotifListBuilderImpl";
+    private static final String TAG = "ShadeListBuilder";
 
     private static final int MIN_CHILDREN_FOR_GROUP = 2;
 }

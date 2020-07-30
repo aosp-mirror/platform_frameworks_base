@@ -23,11 +23,12 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.NetworkUtils.multiplySafeByRational;
 import static android.os.Process.myUid;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
-import static com.android.server.net.NetworkStatsCollection.multiplySafe;
+import static com.android.testutils.MiscAssertsKt.assertThrows;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -505,23 +506,25 @@ public class NetworkStatsCollectionTest {
     }
 
     @Test
-    public void testMultiplySafe() {
-        assertEquals(25, multiplySafe(50, 1, 2));
-        assertEquals(100, multiplySafe(50, 2, 1));
+    public void testMultiplySafeRational() {
+        assertEquals(25, multiplySafeByRational(50, 1, 2));
+        assertEquals(100, multiplySafeByRational(50, 2, 1));
 
-        assertEquals(-10, multiplySafe(30, -1, 3));
-        assertEquals(0, multiplySafe(30, 0, 3));
-        assertEquals(10, multiplySafe(30, 1, 3));
-        assertEquals(20, multiplySafe(30, 2, 3));
-        assertEquals(30, multiplySafe(30, 3, 3));
-        assertEquals(40, multiplySafe(30, 4, 3));
+        assertEquals(-10, multiplySafeByRational(30, -1, 3));
+        assertEquals(0, multiplySafeByRational(30, 0, 3));
+        assertEquals(10, multiplySafeByRational(30, 1, 3));
+        assertEquals(20, multiplySafeByRational(30, 2, 3));
+        assertEquals(30, multiplySafeByRational(30, 3, 3));
+        assertEquals(40, multiplySafeByRational(30, 4, 3));
 
         assertEquals(100_000_000_000L,
-                multiplySafe(300_000_000_000L, 10_000_000_000L, 30_000_000_000L));
+                multiplySafeByRational(300_000_000_000L, 10_000_000_000L, 30_000_000_000L));
         assertEquals(100_000_000_010L,
-                multiplySafe(300_000_000_000L, 10_000_000_001L, 30_000_000_000L));
+                multiplySafeByRational(300_000_000_000L, 10_000_000_001L, 30_000_000_000L));
         assertEquals(823_202_048L,
-                multiplySafe(4_939_212_288L, 2_121_815_528L, 12_730_893_165L));
+                multiplySafeByRational(4_939_212_288L, 2_121_815_528L, 12_730_893_165L));
+
+        assertThrows(ArithmeticException.class, () -> multiplySafeByRational(30, 3, 0));
     }
 
     /**

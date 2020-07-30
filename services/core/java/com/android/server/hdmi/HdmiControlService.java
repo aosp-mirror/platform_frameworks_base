@@ -772,6 +772,11 @@ public class HdmiControlService extends SystemService {
         return content;
     }
 
+    void writeStringSetting(String key, String value) {
+        ContentResolver cr = getContext().getContentResolver();
+        Global.putString(cr, key, value);
+    }
+
     private void initializeCec(int initiatedBy) {
         mAddressAllocated = false;
         mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, true);

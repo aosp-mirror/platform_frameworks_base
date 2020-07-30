@@ -88,12 +88,14 @@ public class PermissionSettings {
     }
 
     public void addAppOpPackage(String permName, String packageName) {
-        ArraySet<String> pkgs = mAppOpPermissionPackages.get(permName);
-        if (pkgs == null) {
-            pkgs = new ArraySet<>();
-            mAppOpPermissionPackages.put(permName, pkgs);
+        synchronized (mLock) {
+            ArraySet<String> pkgs = mAppOpPermissionPackages.get(permName);
+            if (pkgs == null) {
+                pkgs = new ArraySet<>();
+                mAppOpPermissionPackages.put(permName, pkgs);
+            }
+            pkgs.add(packageName);
         }
-        pkgs.add(packageName);
     }
 
     /**

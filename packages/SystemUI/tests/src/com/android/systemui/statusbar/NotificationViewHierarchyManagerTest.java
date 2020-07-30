@@ -55,7 +55,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.notification.stack.NotificationListItem;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
@@ -293,13 +292,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         public void notifyGroupChildAdded(ExpandableView row) {}
 
         @Override
-        public void notifyGroupChildAdded(View v) {}
-
-        @Override
         public void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer) {}
-
-        @Override
-        public void notifyGroupChildRemoved(View v, ViewGroup childrenContainer) {}
 
         @Override
         public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {}
@@ -327,11 +320,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void removeListItem(NotificationListItem li) {
-            removeContainerView(li.getView());
-        }
-
-        @Override
         public void setNotificationActivityStarter(
                 NotificationActivityStarter notificationActivityStarter) {}
 
@@ -342,8 +330,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void addListItem(NotificationListItem li) {
-            addContainerView(li.getView());
+        public void addContainerViewAt(View v, int index) {
+            mLayout.addView(v, index);
+            mRows.add(index, v);
         }
 
         @Override
