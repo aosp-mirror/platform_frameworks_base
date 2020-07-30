@@ -659,9 +659,6 @@
     <!-- Setting Checkbox title for enabling Bluetooth Gabeldorsche. [CHAR LIMIT=40] -->
     <string name="bluetooth_enable_gabeldorsche">Enable Gabeldorsche</string>
 
-    <!-- Setting Checkbox title for enabling Enhanced Connectivity [CHAR LIMIT=80] -->
-    <string name="enhanced_connectivity">Enhanced Connectivity</string>
-
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
