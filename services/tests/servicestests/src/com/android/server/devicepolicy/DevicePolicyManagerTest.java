@@ -2623,7 +2623,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         UserHandle.myUserId(), UserManager.RESTRICTION_SOURCE_DEVICE_OWNER))
         ).when(getServices().userManager).getUserRestrictionSources(
                 eq(UserManager.DISALLOW_ADJUST_VOLUME),
-                eq(UserHandle.getUserHandleForUid(UserHandle.myUserId())));
+                eq(UserHandle.of(UserHandle.myUserId())));
         intent = dpm.createAdminSupportIntent(UserManager.DISALLOW_ADJUST_VOLUME);
         assertNotNull(intent);
         assertEquals(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS, intent.getAction());
