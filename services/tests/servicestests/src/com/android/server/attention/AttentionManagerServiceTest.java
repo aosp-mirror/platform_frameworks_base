@@ -99,6 +99,7 @@ public class AttentionManagerServiceTest {
         AttentionCheck attentionCheck = new AttentionCheck(mMockAttentionCallbackInternal,
                 mSpyAttentionManager);
         mSpyAttentionManager.mCurrentAttentionCheck = attentionCheck;
+        mSpyAttentionManager.mService = new MockIAttentionService();
     }
 
     @Test
@@ -115,6 +116,7 @@ public class AttentionManagerServiceTest {
 
     @Test
     public void testCheckAttention_returnFalseWhenPowerManagerNotInteract() throws RemoteException {
+        doReturn(true).when(mSpyAttentionManager).isAttentionServiceSupported();
         doReturn(false).when(mMockIPowerManager).isInteractive();
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
         assertThat(mSpyAttentionManager.checkAttention(mTimeout, callback)).isFalse();
@@ -122,9 +124,11 @@ public class AttentionManagerServiceTest {
 
     @Test
     public void testCheckAttention_callOnSuccess() throws RemoteException {
-        doReturn(true).when(mSpyAttentionManager).isServiceEnabled();
+        doReturn(true).when(mSpyAttentionManager).isAttentionServiceSupported();
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
         doNothing().when(mSpyAttentionManager).freeIfInactiveLocked();
+        mSpyAttentionManager.mCurrentAttentionCheck = null;
 
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
         mSpyAttentionManager.checkAttention(mTimeout, callback);
