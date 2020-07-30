@@ -51,7 +51,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.logWithStack;
-import static com.android.server.wm.WindowManagerService.sHierarchicalAnimations;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
@@ -2366,10 +2365,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final Rect screenBounds = getAnimationBounds(appStackClipMode);
         mTmpRect.set(screenBounds);
         getAnimationPosition(mTmpPoint);
-        if (!sHierarchicalAnimations) {
-            // Non-hierarchical animation uses position in global coordinates.
-            mTmpPoint.set(mTmpRect.left, mTmpRect.top);
-        }
         mTmpRect.offsetTo(0, 0);
 
         final RemoteAnimationController controller =
