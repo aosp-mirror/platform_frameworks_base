@@ -168,8 +168,8 @@ bool NativeInputWindowHandle::updateInfo() {
     jobject inputApplicationHandleObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.inputApplicationHandle);
     if (inputApplicationHandleObj) {
-        sp<InputApplicationHandle> inputApplicationHandle =
-            android_view_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
+        std::shared_ptr<InputApplicationHandle> inputApplicationHandle =
+                android_view_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
         if (inputApplicationHandle != nullptr) {
             inputApplicationHandle->updateInfo();
             mInfo.applicationInfo = *(inputApplicationHandle->getInfo());
