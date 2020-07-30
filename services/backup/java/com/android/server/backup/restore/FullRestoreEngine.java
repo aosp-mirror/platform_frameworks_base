@@ -379,7 +379,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
                     }
 
-                    // Sanity check: make sure we never give data to the wrong app.  This
+                    // Make sure we never give data to the wrong app.  This
                     // should never happen but a little paranoia here won't go amiss.
                     if (okay && !pkg.equals(mAgentPackage)) {
                         Slog.e(TAG, "Restoring data for " + pkg
