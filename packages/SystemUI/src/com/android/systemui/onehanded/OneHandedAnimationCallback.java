@@ -42,4 +42,10 @@ public interface OneHandedAnimationCallback {
     default void onOneHandedAnimationCancel(
             OneHandedAnimationController.OneHandedTransitionAnimator animator) {
     }
+
+    /**
+     * Called when OneHanded animator is updating offset
+     */
+    default void onTutorialAnimationUpdate(int offset) {}
+
 }
