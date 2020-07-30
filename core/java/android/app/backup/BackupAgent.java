@@ -894,7 +894,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
     /**
      * Only specialized platform agents should overload this entry point to support
-     * restores to crazy non-app locations.
+     * restores to non-app locations.
      * @hide
      */
     protected void onRestoreFile(ParcelFileDescriptor data, long size,
