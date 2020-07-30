@@ -86,8 +86,6 @@ import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -115,8 +113,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIB
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_STACK_MSG;
-import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
-import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -743,111 +739,6 @@ class Task extends WindowContainer<WindowContainer> {
             }
             mBehindFullscreenActivity |= r.occludesParent();
             return false;
-        }
-    }
-
-    // TODO: Can we just loop through WindowProcessController#mActivities instead of doing this?
-    private final RemoveHistoryRecordsForApp mRemoveHistoryRecordsForApp =
-            new RemoveHistoryRecordsForApp();
-    private class RemoveHistoryRecordsForApp {
-        private boolean mHasVisibleActivities;
-        private boolean mIsProcessRemoved;
-        private WindowProcessController mApp;
-        private ArrayList<ActivityRecord> mToRemove = new ArrayList<>();
-
-        boolean process(WindowProcessController app) {
-            mToRemove.clear();
-            mHasVisibleActivities = false;
-            mApp = app;
-            mIsProcessRemoved = app.isRemoved();
-
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    RemoveHistoryRecordsForApp::addActivityToRemove, this,
-                    PooledLambda.__(ActivityRecord.class));
-            forAllActivities(c);
-            c.recycle();
-
-            while (!mToRemove.isEmpty()) {
-                processActivity(mToRemove.remove(0));
-            }
-
-            mApp = null;
-            return mHasVisibleActivities;
-        }
-
-        private void addActivityToRemove(ActivityRecord r) {
-            if (r.app == mApp) {
-                mToRemove.add(r);
-            }
-        }
-
-        private void processActivity(ActivityRecord r) {
-            if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "Record " + r + ": app=" + r.app);
-
-            if (r.app != mApp) {
-                return;
-            }
-            if (r.isVisible() || r.mVisibleRequested) {
-                // While an activity launches a new activity, it's possible that the old
-                // activity is already requested to be hidden (mVisibleRequested=false), but
-                // this visibility is not yet committed, so isVisible()=true.
-                mHasVisibleActivities = true;
-            }
-            final boolean remove;
-            if ((r.mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
-                    || r.mRelaunchReason == RELAUNCH_REASON_FREE_RESIZE)
-                    && r.launchCount < 3 && !r.finishing) {
-                // If the process crashed during a resize, always try to relaunch it, unless
-                // it has failed more than twice. Skip activities that's already finishing
-                // cleanly by itself.
-                remove = false;
-            } else if ((!r.hasSavedState() && !r.stateNotNeeded
-                    && !r.isState(ActivityState.RESTARTING_PROCESS)) || r.finishing) {
-                // Don't currently have state for the activity, or
-                // it is finishing -- always remove it.
-                remove = true;
-            } else if (!r.mVisibleRequested && r.launchCount > 2
-                    && r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
-                // We have launched this activity too many times since it was
-                // able to run, so give up and remove it.
-                // (Note if the activity is visible, we don't remove the record.
-                // We leave the dead window on the screen but the process will
-                // not be restarted unless user explicitly tap on it.)
-                remove = true;
-            } else {
-                // The process may be gone, but the activity lives on!
-                remove = false;
-            }
-            if (remove) {
-                if (DEBUG_ADD_REMOVE || DEBUG_CLEANUP) Slog.i(TAG_ADD_REMOVE,
-                        "Removing activity " + r + " from stack "
-                                + ": hasSavedState=" + r.hasSavedState()
-                                + " stateNotNeeded=" + r.stateNotNeeded
-                                + " finishing=" + r.finishing
-                                + " state=" + r.getState() + " callers=" + Debug.getCallers(5));
-                if (!r.finishing || mIsProcessRemoved) {
-                    Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
-                    EventLogTags.writeWmFinishActivity(r.mUserId,
-                            System.identityHashCode(r), r.getTask().mTaskId,
-                            r.shortComponentName, "proc died without state saved");
-                }
-            } else {
-                // We have the current state for this activity, so
-                // it can be restarted later when needed.
-                if (DEBUG_ALL) Slog.v(TAG, "Keeping entry, setting app to null");
-                if (DEBUG_APP) Slog.v(TAG_APP,
-                        "Clearing app during removeHistory for activity " + r);
-                r.app = null;
-                // Set nowVisible to previous visible state. If the app was visible while
-                // it died, we leave the dead window on screen so it's basically visible.
-                // This is needed when user later tap on the dead window, we need to stop
-                // other apps when user transfers focus to the restarted activity.
-                r.nowVisible = r.mVisibleRequested;
-            }
-            r.cleanUp(true /* cleanServices */, true /* setState */);
-            if (remove) {
-                r.removeFromHistory("appDied");
-            }
         }
     }
 
@@ -7167,9 +7058,8 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * Reset local parameters because an app's activity died.
      * @param app The app of the activity that died.
-     * @return result from removeHistoryRecordsForAppLocked.
      */
-    boolean handleAppDied(WindowProcessController app) {
+    void handleAppDied(WindowProcessController app) {
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG_PAUSE,
                     "App died while pausing: " + mPausingActivity);
@@ -7179,9 +7069,6 @@ class Task extends WindowContainer<WindowContainer> {
             mLastPausedActivity = null;
             mLastNoHistoryActivity = null;
         }
-
-        mStackSupervisor.removeHistoryRecords(app);
-        return mRemoveHistoryRecordsForApp.process(app);
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
