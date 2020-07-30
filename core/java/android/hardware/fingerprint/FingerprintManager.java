@@ -377,12 +377,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
-    public abstract static class GenerateChallengeCallback {
-        public abstract void onChallengeGenerated(long challenge);
+    public interface GenerateChallengeCallback {
+        void onChallengeGenerated(long challenge);
     }
 
     private abstract static class InternalGenerateChallengeCallback
-            extends GenerateChallengeCallback {}
+            implements GenerateChallengeCallback {}
 
     /**
      * Request authentication of a crypto object. This call warms up the fingerprint hardware
