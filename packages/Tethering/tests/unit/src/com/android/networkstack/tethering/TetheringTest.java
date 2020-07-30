@@ -337,11 +337,11 @@ public class TetheringTest {
     }
 
     public class MockTetheringDependencies extends TetheringDependencies {
-        StateMachine mUpstreamNetworkMonitorMasterSM;
+        StateMachine mUpstreamNetworkMonitorSM;
         ArrayList<IpServer> mIpv6CoordinatorNotifyList;
 
         public void reset() {
-            mUpstreamNetworkMonitorMasterSM = null;
+            mUpstreamNetworkMonitorSM = null;
             mIpv6CoordinatorNotifyList = null;
         }
 
@@ -368,7 +368,7 @@ public class TetheringTest {
         @Override
         public UpstreamNetworkMonitor getUpstreamNetworkMonitor(Context ctx,
                 StateMachine target, SharedLog log, int what) {
-            mUpstreamNetworkMonitorMasterSM = target;
+            mUpstreamNetworkMonitorSM = target;
             return mUpstreamNetworkMonitor;
         }
 
@@ -911,8 +911,8 @@ public class TetheringTest {
         initTetheringUpstream(upstreamState);
 
         // Upstream LinkProperties changed: UpstreamNetworkMonitor sends EVENT_ON_LINKPROPERTIES.
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamState);
@@ -1126,7 +1126,7 @@ public class TetheringTest {
         verify(mNetd, times(1)).ipfwdEnableForwarding(TETHERING_NAME);
         // This never gets called because of the exception thrown above.
         verify(mNetd, times(0)).tetherStartWithConfiguration(any());
-        // When the master state machine transitions to an error state it tells
+        // When the main state machine transitions to an error state it tells
         // downstream interfaces, which causes us to tell Wi-Fi about the error
         // so it can take down AP mode.
         verify(mNetd, times(1)).tetherApplyDnsInterfaces();
@@ -1753,8 +1753,8 @@ public class TetheringTest {
 
     @Test
     public void testUpstreamNetworkChanged() {
-        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
-                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final Tethering.TetherMainSM stateMachine = (Tethering.TetherMainSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
@@ -1765,8 +1765,8 @@ public class TetheringTest {
 
     @Test
     public void testUpstreamCapabilitiesChanged() {
-        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
-                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final Tethering.TetherMainSM stateMachine = (Tethering.TetherMainSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
@@ -1891,8 +1891,8 @@ public class TetheringTest {
                 any(), any());
         reset(mNetd, mUsbManager);
         upstreamNetwork = buildV4WifiUpstreamState(ipv4Address, 30, wifiNetwork);
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamNetwork);
@@ -1929,8 +1929,8 @@ public class TetheringTest {
 
         final UpstreamNetworkState upstreamNetwork = buildV4WifiUpstreamState(
                 upstreamAddress, 16, wifiNetwork);
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamNetwork);
