@@ -20,6 +20,7 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.expandPipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
@@ -93,6 +94,12 @@ class PipToAppTest(
                     navBarLayerRotatesAndScales(rotation)
                     statusBarLayerRotatesScales(rotation)
                     pipLayerBecomesVisible()
+                }
+
+                eventLog {
+                    focusChanges(
+                            "NexusLauncherActivity", testApp.launcherName, "NexusLauncherActivity",
+                            bugId = 151179149)
                 }
             }
         }
