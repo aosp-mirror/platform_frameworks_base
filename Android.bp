@@ -456,6 +456,7 @@ java_library {
 
         "com.android.sysprop.apex",
         "com.android.sysprop.init",
+        "com.android.sysprop.localization",
         "PlatformProperties",
     ],
     sdk_version: "core_platform",
