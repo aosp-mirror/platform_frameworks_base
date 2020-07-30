@@ -46,6 +46,8 @@ public:
 
     virtual ~MetricsManager();
 
+    bool updateConfig(const int64_t currentTimeNs, const StatsdConfig& config);
+
     // Return whether the configuration is valid.
     bool isConfigValid() const;
 
