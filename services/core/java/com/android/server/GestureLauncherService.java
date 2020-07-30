@@ -38,6 +38,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
@@ -457,6 +458,8 @@ public class GestureLauncherService extends SystemService {
             }
         } else if (launchPanic) {
             Slog.i(TAG, "Panic gesture detected, launching panic.");
+            launchPanic = handlePanicButtonGesture();
+            // TODO(b/160006048): Add logging
         }
         mMetricsLogger.histogram("power_consecutive_short_tap_count",
                 mPowerButtonSlowConsecutiveTaps);
@@ -495,6 +498,46 @@ public class GestureLauncherService extends SystemService {
             StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
             service.onCameraLaunchGestureDetected(source);
+            return true;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    /**
+     * @return true if panic ui was launched, false otherwise.
+     */
+    @VisibleForTesting
+    boolean handlePanicButtonGesture() {
+        // TODO(b/160006048): This is the wrong way to launch panic ui. Rewrite this to go
+        //  through SysUI
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "GestureLauncher:handlePanicButtonGesture");
+        try {
+            boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+            if (!userSetupComplete) {
+                if (DBG) {
+                    Slog.d(TAG, String.format(
+                            "userSetupComplete = %s, ignoring panic gesture.",
+                            userSetupComplete));
+                }
+                return false;
+            }
+            if (DBG) {
+                Slog.d(TAG, String.format(
+                        "userSetupComplete = %s, performing panic gesture.",
+                        userSetupComplete));
+            }
+            // TODO(b/160006048): Not all devices have telephony. Check system feature first.
+            TelecomManager telecomManager = (TelecomManager) mContext.getSystemService(
+                    Context.TELECOM_SERVICE);
+            mContext.startActivity(telecomManager.createLaunchEmergencyDialerIntent(null).addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                            | Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra(
+                    "com.android.phone.EmergencyDialer.extra.ENTRY_TYPE",
+                    2)); // 2 maps to power button, forcing into fast emergency dialer experience.
             return true;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
