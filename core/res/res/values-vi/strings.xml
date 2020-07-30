@@ -1122,8 +1122,8 @@
     <string name="capital_off" msgid="7443704171014626777">"TẮT"</string>
     <string name="checked" msgid="9179896827054513119">"đã chọn"</string>
     <string name="not_checked" msgid="7972320087569023342">"chưa chọn"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Hoàn tất tác vụ đang sử dụng"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"Hoàn tất tác vụ bằng %1$s"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Hoàn tất thao tác bằng"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"Hoàn tất thao tác bằng %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Hoàn thành tác vụ"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Mở bằng"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Mở bằng %1$s"</string>
