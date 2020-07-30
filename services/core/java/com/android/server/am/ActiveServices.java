@@ -2559,12 +2559,12 @@ public final class ActiveServices {
 
     private int getAllowMode(Intent service, @Nullable String callingPackage) {
         if (callingPackage == null || service.getComponent() == null) {
-            return ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+            return ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE_OR_FULL;
         }
         if (callingPackage.equals(service.getComponent().getPackageName())) {
-            return ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE;
+            return ActivityManagerInternal.ALLOW_ACROSS_PROFILES_IN_PROFILE_OR_FULL;
         } else {
-            return ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+            return ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE_OR_FULL;
         }
     }
 
