@@ -19,6 +19,7 @@ package com.android.server.location;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.location.Location;
 import android.location.util.identity.CallerIdentity;
@@ -32,10 +33,12 @@ import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.ServiceWatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * Proxy for ILocationProvider implementations.
@@ -65,6 +68,8 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     @GuardedBy("mLock")
     Proxy mProxy;
+    @GuardedBy("mLock")
+    @Nullable ComponentName mService;
 
     private volatile ProviderRequest mRequest;
 
@@ -86,11 +91,12 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         return mServiceWatcher.register();
     }
 
-    private void onBind(IBinder binder) throws RemoteException {
+    private void onBind(IBinder binder, ComponentName service) throws RemoteException {
         ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
 
         synchronized (mLock) {
             mProxy = new Proxy();
+            mService = service;
             provider.setLocationProviderManager(mProxy);
 
             ProviderRequest request = mRequest;
@@ -103,6 +109,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     private void onUnbind() {
         synchronized (mLock) {
             mProxy = null;
+            mService = null;
             setState(State.EMPTY_STATE);
         }
     }
@@ -111,16 +118,16 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     public void onSetRequest(ProviderRequest request) {
         mRequest = request;
         mServiceWatcher.runOnBinder(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            service.setRequest(request, request.workSource);
+            ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
+            provider.setRequest(request, request.workSource);
         });
     }
 
     @Override
     public void onExtraCommand(int uid, int pid, String command, Bundle extras) {
         mServiceWatcher.runOnBinder(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            service.sendExtraCommand(command, extras);
+            ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
+            provider.sendExtraCommand(command, extras);
         });
     }
 
@@ -129,12 +136,14 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         mServiceWatcher.dump(fd, pw, args);
     }
 
-    private static String guessPackageName(Context context, int uid) {
+    private static String guessPackageName(Context context, int uid, String packageName) {
         String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
         if (packageNames == null || packageNames.length == 0) {
             // illegal state exception will propagate back through binders
             throw new IllegalStateException(
                     "location provider from uid " + uid + " has no package information");
+        } else if (ArrayUtils.contains(packageNames, packageName)) {
+            return packageName;
         } else {
             return packageNames[0];
         }
@@ -154,7 +163,8 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
                 CallerIdentity identity;
                 if (packageName == null) {
-                    packageName = guessPackageName(mContext, Binder.getCallingUid());
+                    packageName = guessPackageName(mContext, Binder.getCallingUid(),
+                            Objects.requireNonNull(mService).getPackageName());
                     // unsafe is ok since the package is coming direct from the package manager here
                     identity = CallerIdentity.fromBinderUnsafe(packageName, attributionTag);
                 } else {
@@ -175,7 +185,8 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
                 // if no identity is set yet, set it now
                 if (getIdentity() == null) {
-                    String packageName = guessPackageName(mContext, Binder.getCallingUid());
+                    String packageName = guessPackageName(mContext, Binder.getCallingUid(),
+                            Objects.requireNonNull(mService).getPackageName());
                     // unsafe is ok since the package is coming direct from the package manager here
                     setIdentity(CallerIdentity.fromBinderUnsafe(packageName, null));
                 }
