@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.OnDismissCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -130,6 +131,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private PendingIntent mContentIntent;
     @Mock
     private Intent mContentIntentInner;
+    @Mock
+    private OnDismissCallback mOnDismissCallback;
     @Mock
     private NotificationActivityStarter mNotificationActivityStarter;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -207,7 +210,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
                         mFeatureFlags,
                         mock(MetricsLogger.class),
-                        mock(StatusBarNotificationActivityStarterLogger.class))
+                        mock(StatusBarNotificationActivityStarterLogger.class),
+                        mOnDismissCallback)
                 .setStatusBar(mStatusBar)
                 .setNotificationPresenter(mock(NotificationPresenter.class))
                 .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
@@ -266,8 +270,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mClickNotifier).onNotificationClick(
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
-        // Notification is removed due to FLAG_AUTO_CANCEL
-        verify(mEntryManager).performRemoveNotification(eq(sbn), eq(REASON_CLICK));
+        // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
+        verify(mOnDismissCallback).onDismiss(mNotificationRow.getEntry(), REASON_CLICK);
     }
 
     @Test
@@ -296,7 +300,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyZeroInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), anyInt());
+        verify(mOnDismissCallback, never()).onDismiss(eq(mNotificationRow.getEntry()), anyInt());
     }
 
     @Test
@@ -326,7 +330,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyZeroInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), anyInt());
+        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
     }
 
     @Test
@@ -358,6 +362,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyNoMoreInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), anyInt());
+        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
     }
 }

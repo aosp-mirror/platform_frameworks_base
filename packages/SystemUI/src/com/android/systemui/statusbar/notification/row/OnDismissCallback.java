@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row.dagger;
+package com.android.systemui.statusbar.notification.row;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import android.service.notification.NotificationListenerService;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
-import javax.inject.Qualifier;
+/**
+ * Callback when a user clicks on an auto-cancelled notification or manually swipes to dismiss the
+ * notification.
+ */
+public interface OnDismissCallback {
 
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface DismissRunnable {
+    /**
+     * Handle a user interaction that triggers a notification dismissal.
+     */
+    void onDismiss(
+            NotificationEntry entry,
+            @NotificationListenerService.NotificationCancelReason int cancellationReason);
 }

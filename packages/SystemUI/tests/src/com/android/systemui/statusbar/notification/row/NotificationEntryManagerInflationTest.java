@@ -40,6 +40,7 @@ import android.testing.TestableLooper;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -185,8 +186,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mRemoteInputManager,
                 mLeakDetector,
                 mock(ForegroundServiceDismissalFeatureController.class),
-                mock(HeadsUpManager.class),
-                mock(StatusBarStateController.class)
+                mock(IStatusBarService.class)
         );
 
         NotifRemoteViewCache cache = new NotifRemoteViewCacheImpl(mEntryManager);
@@ -252,7 +252,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 pipeline,
                 mRowContentBindStage,
-                mNotificationInterruptionStateProvider,
                 RowInflaterTask::new,
                 mExpandableNotificationRowComponentBuilder,
                 new IconManager(
