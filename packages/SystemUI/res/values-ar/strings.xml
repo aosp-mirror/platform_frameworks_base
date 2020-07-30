@@ -1005,6 +1005,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"حسنًا"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏تفريغ ذاكرة SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"الكاميرا"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"الموقع"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"الميكروفون"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"إيقاف أجهزة الاستشعار"</string>
     <string name="device_services" msgid="1549944177856658705">"خدمات الأجهزة"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بلا عنوان"</string>

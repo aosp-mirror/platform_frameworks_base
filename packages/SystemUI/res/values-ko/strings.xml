@@ -985,6 +985,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"설정"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"확인"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="TYPES_LIST">%2$s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"애플리케이션이 <xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 및 "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"카메라"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"위치"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"마이크"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"센서 사용 안함"</string>
     <string name="device_services" msgid="1549944177856658705">"기기 서비스"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"제목 없음"</string>

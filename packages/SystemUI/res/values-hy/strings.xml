@@ -916,7 +916,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Խմբագրել կարգավորումների հերթականությունը:"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Կողպէկրան"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել է տաքանալու պատճառով"</string>
+    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել էր տաքանալու պատճառով"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Հեռախոսն այժմ նորմալ է աշխատում։\nՀպեք՝ ավելին իմանալու համար։"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավարկման հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
@@ -985,6 +985,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Կարգավորումներ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Եղավ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> հավելվածն օգտագործում է ձեր <xliff:g id="TYPES_LIST">%2$s</xliff:g>:"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Հավելվածներն օգտագործում են ձեր <xliff:g id="TYPES_LIST">%s</xliff:g>:"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" և "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"տեսախցիկը"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"վայրը"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"խոսափողը"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Տվիչներն անջատած են"</string>
     <string name="device_services" msgid="1549944177856658705">"Սարքի ծառայություններ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Անանուն"</string>
