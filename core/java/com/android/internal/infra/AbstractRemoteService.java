@@ -437,7 +437,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         mBinding = true;
 
         final int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
-                | mBindingFlags;
+                | Context.BIND_INCLUDE_CAPABILITIES | mBindingFlags;
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                 mHandler, new UserHandle(mUserId));
