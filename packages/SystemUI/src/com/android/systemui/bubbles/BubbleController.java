@@ -25,6 +25,8 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
+import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.INVISIBLE;
@@ -100,8 +102,11 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.BubbleCoordinator;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -277,7 +282,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
          * This can happen when an app cancels a bubbled notification or when the user dismisses a
          * bubble.
          */
-        void removeNotification(@NonNull NotificationEntry entry, int reason);
+        void removeNotification(
+                @NonNull NotificationEntry entry,
+                @NonNull DismissedByUserStats stats,
+                int reason);
 
         /**
          * Called when a bubbled notification has changed whether it should be
@@ -543,6 +551,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
+        // The new pipeline takes care of this as a NotifDismissInterceptor BubbleCoordinator
         mNotificationEntryManager.addNotificationRemoveInterceptor(
                 new NotificationRemoveInterceptor() {
                     @Override
@@ -551,7 +560,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                             NotificationEntry entry,
                             int dismissReason) {
                         final boolean isClearAll = dismissReason == REASON_CANCEL_ALL;
-                        final boolean isUserDimiss = dismissReason == REASON_CANCEL
+                        final boolean isUserDismiss = dismissReason == REASON_CANCEL
                                 || dismissReason == REASON_CLICK;
                         final boolean isAppCancel = dismissReason == REASON_APP_CANCEL
                                 || dismissReason == REASON_APP_CANCEL_ALL;
@@ -562,7 +571,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         // previously been dismissed & entry.isRowDismissed would still be true
                         boolean userRemovedNotif =
                                 (entry != null && entry.isRowDismissed() && !isAppCancel)
-                                || isClearAll || isUserDimiss || isSummaryCancel;
+                                || isClearAll || isUserDismiss || isSummaryCancel;
 
                         if (userRemovedNotif) {
                             return handleDismissalInterception(entry);
@@ -591,8 +600,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         addNotifCallback(new NotifCallback() {
             @Override
-            public void removeNotification(NotificationEntry entry, int reason) {
-                mNotificationEntryManager.performRemoveNotification(entry.getSbn(), reason);
+            public void removeNotification(
+                    NotificationEntry entry,
+                    DismissedByUserStats dismissedByUserStats,
+                    int reason
+            ) {
+                mNotificationEntryManager.performRemoveNotification(entry.getSbn(),
+                        dismissedByUserStats, reason);
             }
 
             @Override
@@ -612,7 +626,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                             mNotificationEntryManager.getActiveNotificationUnfiltered(
                                     mBubbleData.getSummaryKey(groupKey));
                     if (summary != null) {
-                        mNotificationEntryManager.performRemoveNotification(summary.getSbn(),
+                        mNotificationEntryManager.performRemoveNotification(
+                                summary.getSbn(),
+                                getDismissedByUserStats(summary, false),
                                 UNDEFINED_DISMISS_REASON);
                     }
                 }
@@ -634,7 +650,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     boolean isSummaryThisNotif = summary.getKey().equals(entry.getKey());
                     if (!isSummaryThisNotif && (summaryChildren == null
                             || summaryChildren.isEmpty())) {
-                        mNotificationEntryManager.performRemoveNotification(summary.getSbn(),
+                        mNotificationEntryManager.performRemoveNotification(
+                                summary.getSbn(),
+                                getDismissedByUserStats(summary, false),
                                 UNDEFINED_DISMISS_REASON);
                     }
                 }
@@ -1331,7 +1349,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         // time to actually remove it
                         for (NotifCallback cb : mCallbacks) {
                             if (entry != null) {
-                                cb.removeNotification(entry, REASON_CANCEL);
+                                cb.removeNotification(
+                                        entry,
+                                        getDismissedByUserStats(entry, true),
+                                        REASON_CANCEL);
                             }
                         }
                     } else {
@@ -1487,7 +1508,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 } else {
                     // non-bubbled children can be removed
                     for (NotifCallback cb : mCallbacks) {
-                        cb.removeNotification(child, REASON_GROUP_SUMMARY_CANCELED);
+                        cb.removeNotification(
+                                child,
+                                getDismissedByUserStats(child, true),
+                                REASON_GROUP_SUMMARY_CANCELED);
                     }
                 }
             }
@@ -1499,6 +1523,25 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         // TODO: (b/145659174) remove references to mSuppressedGroupKeys once fully migrated
         mBubbleData.addSummaryToSuppress(summary.getSbn().getGroupKey(),
                 summary.getKey());
+    }
+
+    /**
+     * Gets the DismissedByUserStats used by {@link NotificationEntryManager}.
+     * Will not be necessary when using the new notification pipeline's {@link NotifCollection}.
+     * Instead, this is taken care of by {@link BubbleCoordinator}.
+     */
+    private DismissedByUserStats getDismissedByUserStats(
+            NotificationEntry entry,
+            boolean isVisible) {
+        return new DismissedByUserStats(
+                DISMISSAL_BUBBLE,
+                DISMISS_SENTIMENT_NEUTRAL,
+                NotificationVisibility.obtain(
+                        entry.getKey(),
+                        entry.getRanking().getRank(),
+                        mNotificationEntryManager.getActiveNotificationsCount(),
+                        isVisible,
+                        NotificationLogger.getNotificationLocation(entry)));
     }
 
     /**

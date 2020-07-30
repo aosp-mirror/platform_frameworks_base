@@ -321,7 +321,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         Bubble b = mBubbleData.getOverflowBubbleWithKey(mRow.getEntry().getKey());
         assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(b));
         verify(mNotificationEntryManager, never()).performRemoveNotification(
-                eq(mRow.getEntry().getSbn()), anyInt());
+                eq(mRow.getEntry().getSbn()), any(),  anyInt());
         assertThat(mRow.getEntry().isBubble()).isFalse();
 
         Bubble b2 = mBubbleData.getBubbleInStackWithKey(mRow2.getEntry().getKey());
@@ -352,7 +352,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.removeBubble(
                 mRow.getEntry().getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
-                eq(mRow.getEntry().getSbn()), anyInt());
+                eq(mRow.getEntry().getSbn()), any(), anyInt());
         assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
         assertFalse(mRow.getEntry().isBubble());
     }
@@ -365,7 +365,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.removeBubble(
                 mRow.getEntry().getKey(), BubbleController.DISMISS_USER_CHANGED);
         verify(mNotificationEntryManager, never()).performRemoveNotification(
-                eq(mRow.getEntry().getSbn()), anyInt());
+                eq(mRow.getEntry().getSbn()), any(), anyInt());
         assertFalse(mBubbleController.hasBubbles());
         assertFalse(mSysUiStateBubblesExpanded);
         assertTrue(mRow.getEntry().isBubble());
@@ -873,7 +873,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow2.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
         // Overflow max of 1 is reached; mRow is oldest, so it gets removed
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
-                mRow.getEntry().getSbn(), REASON_CANCEL);
+                eq(mRow.getEntry().getSbn()), any(), eq(REASON_CANCEL));
         assertEquals(mBubbleData.getBubbles().size(), 1);
         assertEquals(mBubbleData.getOverflowBubbles().size(), 1);
     }
@@ -985,11 +985,13 @@ public class BubbleControllerTest extends SysuiTestCase {
         // THEN only the NON-bubble children are dismissed
         List<ExpandableNotificationRow> childrenRows = groupSummary.getAttachedChildren();
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
-                childrenRows.get(0).getEntry().getSbn(), REASON_GROUP_SUMMARY_CANCELED);
+                eq(childrenRows.get(0).getEntry().getSbn()), any(),
+                eq(REASON_GROUP_SUMMARY_CANCELED));
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
-                childrenRows.get(1).getEntry().getSbn(), REASON_GROUP_SUMMARY_CANCELED);
+                eq(childrenRows.get(1).getEntry().getSbn()), any(),
+                eq(REASON_GROUP_SUMMARY_CANCELED));
         verify(mNotificationEntryManager, never()).performRemoveNotification(
-                eq(groupedBubble.getEntry().getSbn()), anyInt());
+                eq(groupedBubble.getEntry().getSbn()), any(), anyInt());
 
         // THEN the bubble child is suppressed from the shade
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(

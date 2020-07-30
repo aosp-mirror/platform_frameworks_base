@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -40,11 +41,13 @@ import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFea
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.inflation.OnDismissCallbackImpl;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -58,6 +61,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationPanelLogg
 import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.OnDismissCallback;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -92,8 +96,7 @@ public interface NotificationsModule {
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
             ForegroundServiceDismissalFeatureController fgsFeatureController,
-            HeadsUpManager headsUpManager,
-            StatusBarStateController statusBarStateController) {
+            IStatusBarService statusBarService) {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
@@ -104,8 +107,7 @@ public interface NotificationsModule {
                 notificationRemoteInputManagerLazy,
                 leakDetector,
                 fgsFeatureController,
-                headsUpManager,
-                statusBarStateController);
+                statusBarService);
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
@@ -217,6 +219,28 @@ public interface NotificationsModule {
             Lazy<NotifPipeline> pipeline,
             NotificationEntryManager entryManager) {
         return featureFlags.isNewNotifPipelineRenderingEnabled() ? pipeline.get() : entryManager;
+    }
+
+    /**
+     * Provide a dismissal callback that's triggered when a user manually dismissed a notification
+     * from the notification shade or it gets auto-cancelled by click.
+     */
+    @Provides
+    @Singleton
+    static OnDismissCallback provideOnDismissCallback(
+            FeatureFlags featureFlags,
+            HeadsUpManager headsUpManager,
+            StatusBarStateController statusBarStateController,
+            Lazy<NotifPipeline> pipeline,
+            Lazy<NotifCollection> notifCollection,
+            NotificationEntryManager entryManager) {
+        return featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? new OnDismissCallbackImpl(
+                        pipeline.get(), notifCollection.get(), headsUpManager,
+                        statusBarStateController)
+                : new com.android.systemui.statusbar.notification.collection
+                        .legacy.OnDismissCallbackImpl(
+                                entryManager, headsUpManager, statusBarStateController);
     }
 
     /** */
