@@ -50,7 +50,7 @@ import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_TYPE;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
-import static android.net.util.TetheringMessageBase.BASE_MASTER;
+import static android.net.util.TetheringMessageBase.BASE_MAIN_SM;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -159,7 +159,7 @@ public class Tethering {
     private static final boolean VDBG = false;
 
     private static final Class[] sMessageClasses = {
-            Tethering.class, TetherMasterSM.class, IpServer.class
+            Tethering.class, TetherMainSM.class, IpServer.class
     };
     private static final SparseArray<String> sMagicDecoderRing =
             MessageUtils.findMessageNames(sMessageClasses);
@@ -216,7 +216,7 @@ public class Tethering {
     private final ArrayMap<String, TetherState> mTetherStates;
     private final BroadcastReceiver mStateReceiver;
     private final Looper mLooper;
-    private final StateMachine mTetherMasterSM;
+    private final StateMachine mTetherMainSM;
     private final OffloadController mOffloadController;
     private final UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     // TODO: Figure out how to merge this and other downstream-tracking objects
@@ -273,10 +273,10 @@ public class Tethering {
         mTetherStates = new ArrayMap<>();
         mConnectedClientsTracker = new ConnectedClientsTracker();
 
-        mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper, deps);
-        mTetherMasterSM.start();
+        mTetherMainSM = new TetherMainSM("TetherMain", mLooper, deps);
+        mTetherMainSM.start();
 
-        mHandler = mTetherMasterSM.getHandler();
+        mHandler = mTetherMainSM.getHandler();
         mOffloadController = mDeps.getOffloadController(mHandler, mLog,
                 new OffloadController.Dependencies() {
 
@@ -285,8 +285,8 @@ public class Tethering {
                         return mConfig;
                     }
                 });
-        mUpstreamNetworkMonitor = mDeps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
-                TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
+        mUpstreamNetworkMonitor = mDeps.getUpstreamNetworkMonitor(mContext, mTetherMainSM, mLog,
+                TetherMainSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new LinkedHashSet<>();
 
         IntentFilter filter = new IntentFilter();
@@ -294,8 +294,8 @@ public class Tethering {
         // EntitlementManager will send EVENT_UPSTREAM_PERMISSION_CHANGED when cellular upstream
         // permission is changed according to entitlement check result.
         mEntitlementMgr = mDeps.getEntitlementManager(mContext, mHandler, mLog,
-                () -> mTetherMasterSM.sendMessage(
-                TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED));
+                () -> mTetherMainSM.sendMessage(
+                TetherMainSM.EVENT_UPSTREAM_PERMISSION_CHANGED));
         mEntitlementMgr.setOnUiEntitlementFailedListener((int downstream) -> {
             mLog.log("OBSERVED UiEnitlementFailed");
             stopTethering(downstream);
@@ -945,7 +945,7 @@ public class Tethering {
             }
 
             if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION: " + networkInfo.toString());
-            mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
+            mTetherMainSM.sendMessage(TetherMainSM.CMD_UPSTREAM_CHANGED);
         }
 
         private void handleUsbAction(Intent intent) {
@@ -1170,7 +1170,7 @@ public class Tethering {
     private void disableWifiP2pIpServingLockedIfNeeded(String ifname) {
         if (TextUtils.isEmpty(ifname)) return;
 
-        disableWifiIpServingLockedCommon(TETHERING_WIFI_P2P, ifname, /* dummy */ 0);
+        disableWifiIpServingLockedCommon(TETHERING_WIFI_P2P, ifname, /* fake */ 0);
     }
 
     private void enableWifiIpServingLocked(String ifname, int wifiIpMode) {
@@ -1381,23 +1381,23 @@ public class Tethering {
         return false;
     }
 
-    class TetherMasterSM extends StateMachine {
+    class TetherMainSM extends StateMachine {
         // an interface SM has requested Tethering/Local Hotspot
-        static final int EVENT_IFACE_SERVING_STATE_ACTIVE       = BASE_MASTER + 1;
+        static final int EVENT_IFACE_SERVING_STATE_ACTIVE       = BASE_MAIN_SM + 1;
         // an interface SM has unrequested Tethering/Local Hotspot
-        static final int EVENT_IFACE_SERVING_STATE_INACTIVE     = BASE_MASTER + 2;
+        static final int EVENT_IFACE_SERVING_STATE_INACTIVE     = BASE_MAIN_SM + 2;
         // upstream connection change - do the right thing
-        static final int CMD_UPSTREAM_CHANGED                   = BASE_MASTER + 3;
+        static final int CMD_UPSTREAM_CHANGED                   = BASE_MAIN_SM + 3;
         // we don't have a valid upstream conn, check again after a delay
-        static final int CMD_RETRY_UPSTREAM                     = BASE_MASTER + 4;
-        // Events from NetworkCallbacks that we process on the master state
+        static final int CMD_RETRY_UPSTREAM                     = BASE_MAIN_SM + 4;
+        // Events from NetworkCallbacks that we process on the main state
         // machine thread on behalf of the UpstreamNetworkMonitor.
-        static final int EVENT_UPSTREAM_CALLBACK                = BASE_MASTER + 5;
+        static final int EVENT_UPSTREAM_CALLBACK                = BASE_MAIN_SM + 5;
         // we treated the error and want now to clear it
-        static final int CMD_CLEAR_ERROR                        = BASE_MASTER + 6;
-        static final int EVENT_IFACE_UPDATE_LINKPROPERTIES      = BASE_MASTER + 7;
+        static final int CMD_CLEAR_ERROR                        = BASE_MAIN_SM + 6;
+        static final int EVENT_IFACE_UPDATE_LINKPROPERTIES      = BASE_MAIN_SM + 7;
         // Events from EntitlementManager to choose upstream again.
-        static final int EVENT_UPSTREAM_PERMISSION_CHANGED      = BASE_MASTER + 8;
+        static final int EVENT_UPSTREAM_PERMISSION_CHANGED      = BASE_MAIN_SM + 8;
         private final State mInitialState;
         private final State mTetherModeAliveState;
 
@@ -1425,7 +1425,7 @@ public class Tethering {
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
 
-        TetherMasterSM(String name, Looper looper, TetheringDependencies deps) {
+        TetherMainSM(String name, Looper looper, TetheringDependencies deps) {
             super(name, looper);
 
             mInitialState = new InitialState();
@@ -1479,7 +1479,7 @@ public class Tethering {
             }
         }
 
-        protected boolean turnOnMasterTetherSettings() {
+        protected boolean turnOnMainTetherSettings() {
             final TetheringConfiguration cfg = mConfig;
             try {
                 mNetd.ipfwdEnableForwarding(TAG);
@@ -1506,11 +1506,11 @@ public class Tethering {
                     return false;
                 }
             }
-            mLog.log("SET master tether settings: ON");
+            mLog.log("SET main tether settings: ON");
             return true;
         }
 
-        protected boolean turnOffMasterTetherSettings() {
+        protected boolean turnOffMainTetherSettings() {
             try {
                 mNetd.tetherStop();
             } catch (RemoteException | ServiceSpecificException e) {
@@ -1526,7 +1526,7 @@ public class Tethering {
                 return false;
             }
             transitionTo(mInitialState);
-            mLog.log("SET master tether settings: OFF");
+            mLog.log("SET main tether settings: OFF");
             return true;
         }
 
@@ -1730,7 +1730,7 @@ public class Tethering {
                     // TODO: Re-evaluate possible upstreams. Currently upstream
                     // reevaluation is triggered via received CONNECTIVITY_ACTION
                     // broadcasts that result in being passed a
-                    // TetherMasterSM.CMD_UPSTREAM_CHANGED.
+                    // TetherMainSM.CMD_UPSTREAM_CHANGED.
                     handleNewUpstreamNetworkState(null);
                     break;
                 default:
@@ -1745,9 +1745,9 @@ public class Tethering {
 
             @Override
             public void enter() {
-                // If turning on master tether settings fails, we have already
+                // If turning on main tether settings fails, we have already
                 // transitioned to an error state; exit early.
-                if (!turnOnMasterTetherSettings()) {
+                if (!turnOnMainTetherSettings()) {
                     return;
                 }
 
@@ -1819,7 +1819,7 @@ public class Tethering {
                         if (mNotifyList.isEmpty()) {
                             // This transitions us out of TetherModeAliveState,
                             // either to InitialState or an error state.
-                            turnOffMasterTetherSettings();
+                            turnOffMainTetherSettings();
                             break;
                         }
 
@@ -2329,7 +2329,7 @@ public class Tethering {
         };
     }
 
-    // TODO: Move into TetherMasterSM.
+    // TODO: Move into TetherMainSM.
     private void notifyInterfaceStateChange(IpServer who, int state, int error) {
         final String iface = who.interfaceName();
         synchronized (mPublicSync) {
@@ -2344,27 +2344,27 @@ public class Tethering {
 
         mLog.log(String.format("OBSERVED iface=%s state=%s error=%s", iface, state, error));
 
-        // If TetherMasterSM is in ErrorState, TetherMasterSM stays there.
-        // Thus we give a chance for TetherMasterSM to recover to InitialState
+        // If TetherMainSM is in ErrorState, TetherMainSM stays there.
+        // Thus we give a chance for TetherMainSM to recover to InitialState
         // by sending CMD_CLEAR_ERROR
         if (error == TETHER_ERROR_INTERNAL_ERROR) {
-            mTetherMasterSM.sendMessage(TetherMasterSM.CMD_CLEAR_ERROR, who);
+            mTetherMainSM.sendMessage(TetherMainSM.CMD_CLEAR_ERROR, who);
         }
         int which;
         switch (state) {
             case IpServer.STATE_UNAVAILABLE:
             case IpServer.STATE_AVAILABLE:
-                which = TetherMasterSM.EVENT_IFACE_SERVING_STATE_INACTIVE;
+                which = TetherMainSM.EVENT_IFACE_SERVING_STATE_INACTIVE;
                 break;
             case IpServer.STATE_TETHERED:
             case IpServer.STATE_LOCAL_ONLY:
-                which = TetherMasterSM.EVENT_IFACE_SERVING_STATE_ACTIVE;
+                which = TetherMainSM.EVENT_IFACE_SERVING_STATE_ACTIVE;
                 break;
             default:
                 Log.wtf(TAG, "Unknown interface state: " + state);
                 return;
         }
-        mTetherMasterSM.sendMessage(which, state, 0, who);
+        mTetherMainSM.sendMessage(which, state, 0, who);
         sendTetherStateChangedBroadcast();
     }
 
@@ -2384,8 +2384,8 @@ public class Tethering {
         mLog.log(String.format(
                 "OBSERVED LinkProperties update iface=%s state=%s lp=%s",
                 iface, IpServer.getStateString(state), newLp));
-        final int which = TetherMasterSM.EVENT_IFACE_UPDATE_LINKPROPERTIES;
-        mTetherMasterSM.sendMessage(which, state, 0, newLp);
+        final int which = TetherMainSM.EVENT_IFACE_UPDATE_LINKPROPERTIES;
+        mTetherMainSM.sendMessage(which, state, 0, newLp);
     }
 
     private void maybeTrackNewInterfaceLocked(final String iface) {
