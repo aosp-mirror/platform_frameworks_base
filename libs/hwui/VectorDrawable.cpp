@@ -23,7 +23,6 @@
 #include "PathParser.h"
 #include "SkColorFilter.h"
 #include "SkImageInfo.h"
-#include "SkShader.h"
 #include "hwui/Paint.h"
 
 #ifdef __ANDROID__
@@ -159,10 +158,10 @@ void FullPath::draw(SkCanvas* outCanvas, bool useStagingData) {
 
     // Draw path's fill, if fill color or gradient is valid
     bool needsFill = false;
-    SkPaint paint;
+    Paint paint;
     if (properties.getFillGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getFillAlpha()));
-        paint.setShader(sk_sp<SkShader>(SkSafeRef(properties.getFillGradient())));
+        paint.setShader(sk_sp<Shader>(SkSafeRef(properties.getFillGradient())));
         needsFill = true;
     } else if (properties.getFillColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getFillColor(), properties.getFillAlpha()));
@@ -179,7 +178,7 @@ void FullPath::draw(SkCanvas* outCanvas, bool useStagingData) {
     bool needsStroke = false;
     if (properties.getStrokeGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getStrokeAlpha()));
-        paint.setShader(sk_sp<SkShader>(SkSafeRef(properties.getStrokeGradient())));
+        paint.setShader(sk_sp<Shader>(SkSafeRef(properties.getStrokeGradient())));
         needsStroke = true;
     } else if (properties.getStrokeColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getStrokeColor(), properties.getStrokeAlpha()));

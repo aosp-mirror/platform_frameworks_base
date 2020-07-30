@@ -18,6 +18,7 @@
 #include "hwui/Paint.h"
 #include "TestSceneBase.h"
 #include "tests/common/BitmapAllocationTestUtils.h"
+#include <shader/BitmapShader.h>
 #include "utils/Color.h"
 
 class BitmapShaders;
@@ -45,15 +46,24 @@ public:
                 });
 
         Paint paint;
+        sk_sp<BitmapShader> bitmapShader = sk_make_sp<BitmapShader>(
+                    hwuiBitmap->makeImage(),
+                    SkTileMode::kRepeat,
+                    SkTileMode::kRepeat,
+                    nullptr
+                );
+
         sk_sp<SkImage> image = hwuiBitmap->makeImage();
-        sk_sp<SkShader> repeatShader =
-                image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat);
-        paint.setShader(std::move(repeatShader));
+        paint.setShader(std::move(bitmapShader));
         canvas.drawRoundRect(0, 0, 500, 500, 50.0f, 50.0f, paint);
 
-        sk_sp<SkShader> mirrorShader =
-                image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror);
-        paint.setShader(std::move(mirrorShader));
+        sk_sp<BitmapShader> mirrorBitmapShader = sk_make_sp<BitmapShader>(
+                    image,
+                    SkTileMode::kMirror,
+                    SkTileMode::kMirror,
+                    nullptr
+                );
+        paint.setShader(std::move(mirrorBitmapShader));
         canvas.drawRoundRect(0, 600, 500, 1100, 50.0f, 50.0f, paint);
     }
 
