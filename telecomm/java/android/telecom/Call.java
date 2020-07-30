@@ -470,7 +470,7 @@ public final class Call {
         /**
          * When set for a call, indicates that this {@code Call} can be transferred to another
          * number.
-         * Call supports the blind and assured call transfer feature.
+         * Call supports the confirmed and unconfirmed call transfer feature.
          *
          * @hide
          */
@@ -1596,8 +1596,8 @@ public final class Call {
      * Instructs this {@code Call} to be transferred to another number.
      *
      * @param targetNumber The address to which the call will be transferred.
-     * @param isConfirmationRequired if {@code true} it will initiate ASSURED transfer,
-     * if {@code false}, it will initiate BLIND transfer.
+     * @param isConfirmationRequired if {@code true} it will initiate a confirmed transfer,
+     * if {@code false}, it will initiate an unconfirmed transfer.
      *
      * @hide
      */

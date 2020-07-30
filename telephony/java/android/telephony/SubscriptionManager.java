@@ -94,10 +94,9 @@ public class SubscriptionManager {
     /** An invalid subscription identifier */
     public static final int INVALID_SUBSCRIPTION_ID = -1;
 
-    /** Base value for Dummy SUBSCRIPTION_ID's. */
-    /** FIXME: Remove DummySubId's, but for now have them map just below INVALID_SUBSCRIPTION_ID
-     /** @hide */
-    public static final int DUMMY_SUBSCRIPTION_ID_BASE = INVALID_SUBSCRIPTION_ID - 1;
+    /** Base value for placeholder SUBSCRIPTION_ID's. */
+    /** @hide */
+    public static final int PLACEHOLDER_SUBSCRIPTION_ID_BASE = INVALID_SUBSCRIPTION_ID - 1;
 
     /** An invalid phone identifier */
     /** @hide */

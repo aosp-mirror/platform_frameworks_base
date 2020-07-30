@@ -1880,6 +1880,7 @@ public abstract class ConnectionService extends Service {
 
         mConferenceById.put(callId, conference);
         mIdByConference.put(conference, callId);
+
         conference.addListener(mConferenceListener);
         ParcelableConference parcelableConference = new ParcelableConference.Builder(
                 request.getAccountHandle(), conference.getState())
