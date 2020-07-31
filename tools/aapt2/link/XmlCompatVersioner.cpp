@@ -143,8 +143,8 @@ std::vector<std::unique_ptr<xml::XmlResource>> XmlCompatVersioner::Process(
 
   // Iterate from smallest to largest API version.
   for (ApiVersion api : apis_referenced) {
-    std::set<ApiVersion> dummy;
-    versioned_docs.push_back(ProcessDoc(api, api_range.end, doc, &dummy));
+    std::set<ApiVersion> tmp;
+    versioned_docs.push_back(ProcessDoc(api, api_range.end, doc, &tmp));
   }
   return versioned_docs;
 }

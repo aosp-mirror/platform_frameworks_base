@@ -31,11 +31,11 @@ namespace aapt {
 
 TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
                          const TableMergerOptions& options)
-    : context_(context), master_table_(out_table), options_(options) {
+    : context_(context), main_table_(out_table), options_(options) {
   // Create the desired package that all tables will be merged into.
-  master_package_ =
-      master_table_->CreatePackage(context_->GetCompilationPackage(), context_->GetPackageId());
-  CHECK(master_package_ != nullptr) << "package name or ID already taken";
+  main_package_ =
+      main_table_->CreatePackage(context_->GetCompilationPackage(), context_->GetPackageId());
+  CHECK(main_package_ != nullptr) << "package name or ID already taken";
 }
 
 bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
@@ -235,7 +235,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
   bool error = false;
 
   for (auto& src_type : src_package->types) {
-    ResourceTableType* dst_type = master_package_->FindOrCreateType(src_type->type);
+    ResourceTableType* dst_type = main_package_->FindOrCreateType(src_type->type);
     if (!MergeType(context_, src, dst_type, src_type.get())) {
       error = true;
       continue;
@@ -279,7 +279,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
         if (dst_config_value) {
           CollisionResult collision_result = MergeConfigValue(
               context_, res_name, overlay, options_.override_styles_instead_of_overlaying,
-              dst_config_value, src_config_value.get(), &master_table_->string_pool);
+              dst_config_value, src_config_value.get(), &main_table_->string_pool);
           if (collision_result == CollisionResult::kConflict) {
             error = true;
             continue;
@@ -298,7 +298,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
           if (mangle_package) {
             new_file_ref = CloneAndMangleFile(src_package->name, *f);
           } else {
-            new_file_ref = std::unique_ptr<FileReference>(f->Clone(&master_table_->string_pool));
+            new_file_ref = std::unique_ptr<FileReference>(f->Clone(&main_table_->string_pool));
           }
           dst_config_value->value = std::move(new_file_ref);
 
@@ -307,7 +307,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
               ? dst_config_value->value->GetComment() : Maybe<std::string>();
 
           dst_config_value->value = std::unique_ptr<Value>(
-              src_config_value->value->Clone(&master_table_->string_pool));
+              src_config_value->value->Clone(&main_table_->string_pool));
 
           // Keep the comment from the original resource and ignore all comments from overlaying
           // resources
@@ -328,14 +328,14 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
     std::string mangled_entry = NameMangler::MangleEntry(package, entry.to_string());
     std::string newPath = prefix.to_string() + mangled_entry + suffix.to_string();
     std::unique_ptr<FileReference> new_file_ref =
-        util::make_unique<FileReference>(master_table_->string_pool.MakeRef(newPath));
+        util::make_unique<FileReference>(main_table_->string_pool.MakeRef(newPath));
     new_file_ref->SetComment(file_ref.GetComment());
     new_file_ref->SetSource(file_ref.GetSource());
     new_file_ref->type = file_ref.type;
     new_file_ref->file = file_ref.file;
     return new_file_ref;
   }
-  return std::unique_ptr<FileReference>(file_ref.Clone(&master_table_->string_pool));
+  return std::unique_ptr<FileReference>(file_ref.Clone(&main_table_->string_pool));
 }
 
 bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFile* file) {

@@ -1401,7 +1401,7 @@ class Linker {
     return MergeExportedSymbols(compiled_file.source, compiled_file.exported_symbols);
   }
 
-  // Takes a path to load as a ZIP file and merges the files within into the master ResourceTable.
+  // Takes a path to load as a ZIP file and merges the files within into the main ResourceTable.
   // If override is true, conflicting resources are allowed to override each other, in order of last
   // seen.
   // An io::IFileCollection is created from the ZIP file and added to the set of
@@ -1432,7 +1432,7 @@ class Linker {
     return !error;
   }
 
-  // Takes a path to load and merge into the master ResourceTable. If override is true,
+  // Takes a path to load and merge into the main ResourceTable. If override is true,
   // conflicting resources are allowed to override each other, in order of last seen.
   // If the file path ends with .flata, .jar, .jack, or .zip the file is treated
   // as ZIP archive and the files within are merged individually.
@@ -1449,7 +1449,7 @@ class Linker {
     return MergeFile(file, override);
   }
 
-  // Takes an AAPT Container file (.apc/.flat) to load and merge into the master ResourceTable.
+  // Takes an AAPT Container file (.apc/.flat) to load and merge into the main ResourceTable.
   // If override is true, conflicting resources are allowed to override each other, in order of last
   // seen.
   // All other file types are ignored. This is because these files could be coming from a zip,
