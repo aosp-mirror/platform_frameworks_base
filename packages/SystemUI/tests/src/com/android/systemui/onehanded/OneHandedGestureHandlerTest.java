@@ -48,6 +48,7 @@ import org.mockito.MockitoAnnotations;
 public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     Instrumentation mInstrumentation;
     OneHandedTouchHandler mTouchHandler;
+    OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
     OneHandedManagerImpl mOneHandedManagerImpl;
     @Mock
@@ -62,13 +63,15 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mTouchHandler = Mockito.spy(new OneHandedTouchHandler());
+        mTouchHandler = new OneHandedTouchHandler();
+        mTutorialHandler = new OneHandedTutorialHandler(mContext);
         mGestureHandler = Mockito.spy(new OneHandedGestureHandler(
                 mContext, mMockDisplayController, mMockNavigationModeController));
         mOneHandedManagerImpl = new OneHandedManagerImpl(mInstrumentation.getContext(),
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
+                mTutorialHandler,
                 mGestureHandler,
                 mMockSysUiState);
     }

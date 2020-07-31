@@ -4,7 +4,6 @@ android_app {
     srcs: ["src/**/*.java"],
 
     platform_apis: true,
-    certificate: "platform",
 
     static_libs: [
         "androidx.legacy_legacy-support-v4",

@@ -47,7 +47,7 @@ public final class LocationAccessPolicy {
         ALLOWED,
         /**
          * Indicates that the denial is due to a transient device state
-         * (e.g. app-ops, location master switch)
+         * (e.g. app-ops, location main switch)
          */
         DENIED_SOFT,
         /**
@@ -316,7 +316,7 @@ public final class LocationAccessPolicy {
             return LocationPermissionResult.ALLOWED;
         }
 
-        // Check the system-wide requirements. If the location master switch is off or
+        // Check the system-wide requirements. If the location main switch is off or
         // the app's profile isn't in foreground, return a soft denial.
         if (!checkSystemLocationAccess(context, query.callingUid, query.callingPid)) {
             return LocationPermissionResult.DENIED_SOFT;
@@ -340,7 +340,7 @@ public final class LocationAccessPolicy {
         }
 
         // At this point, we're out of location checks to do. If the app bypassed all the previous
-        // ones due to the SDK grandfathering schemes, allow it access.
+        // ones due to the SDK backwards compatibility schemes, allow it access.
         return LocationPermissionResult.ALLOWED;
     }
 

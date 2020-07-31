@@ -505,7 +505,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         public void reset() {
             count = 0;
 
-            // by default there is at least one dummy view type
+            // by default there is at least one placeholder view type
             viewTypeCount = 1;
             hasStableIds = true;
             loadingTemplate = null;
@@ -948,7 +948,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private void updateTemporaryMetaData(IRemoteViewsFactory factory) {
         try {
             // get the properties/first view (so that we can use it to
-            // measure our dummy views)
+            // measure our placeholder views)
             boolean hasStableIds = factory.hasStableIds();
             int viewTypeCount = factory.getViewTypeCount();
             int count = factory.getCount();

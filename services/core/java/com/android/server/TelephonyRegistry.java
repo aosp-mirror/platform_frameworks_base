@@ -111,11 +111,11 @@ import java.util.NoSuchElementException;
  * Change-Id: I450c968bda93767554b5188ee63e10c9f43c5aa4 fixes bugs 16148026
  * and 15973975 by saving the phoneId of the registrant and then using the
  * phoneId when deciding to to make a callback. This is necessary because
- * a subId changes from to a dummy value when a SIM is removed and thus won't
+ * a subId changes from to a placeholder value when a SIM is removed and thus won't
  * compare properly. Because getPhoneIdFromSubId(int subId) handles
- * the dummy value conversion we properly do the callbacks.
+ * the placeholder value conversion we properly do the callbacks.
  *
- * Eventually we may want to remove the notion of dummy value but for now this
+ * Eventually we may want to remove the notion of placeholder value but for now this
  * looks like the best approach.
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)

@@ -24,6 +24,7 @@
 
 #include "../FrameMetricsObserver.h"
 #include "../IContextFactory.h"
+#include "ColorMode.h"
 #include "DrawFrameTask.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
@@ -77,7 +78,7 @@ public:
     void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
-    void setWideGamut(bool wideGamut);
+    void setColorMode(ColorMode mode);
     int64_t* frameInfo();
     int syncAndDrawFrame();
     void destroy();

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
@@ -61,6 +62,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     @Mock
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MagnificationModeSwitch mMagnificationModeSwitch;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -108,6 +110,15 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         // First invocation is in showButton.
         verify(mViewPropertyAnimator, times(2)).cancel();
         verify(mWindowManager).removeView(mMockImageView);
+    }
+
+    @Test
+    public void onConfigurationChanged_setImageResource() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
+
+        verify(mMockImageView, times(2)).setImageResource(
+                getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
     }
 
     @Test

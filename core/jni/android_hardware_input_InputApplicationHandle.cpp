@@ -77,31 +77,27 @@ bool NativeInputApplicationHandle::updateInfo() {
     return mInfo.token.get() != nullptr;
 }
 
-
 // --- Global functions ---
 
-sp<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
+std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
         JNIEnv* env, jobject inputApplicationHandleObj) {
     if (!inputApplicationHandleObj) {
         return NULL;
     }
 
     AutoMutex _l(gHandleMutex);
-
     jlong ptr = env->GetLongField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr);
-    NativeInputApplicationHandle* handle;
+    std::shared_ptr<NativeInputApplicationHandle>* handle;
     if (ptr) {
-        handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
+        handle = reinterpret_cast<std::shared_ptr<NativeInputApplicationHandle>*>(ptr);
     } else {
         jweak objWeak = env->NewWeakGlobalRef(inputApplicationHandleObj);
-        handle = new NativeInputApplicationHandle(objWeak);
-        handle->incStrong((void*)android_view_InputApplicationHandle_getHandle);
+        handle = new std::shared_ptr(std::make_shared<NativeInputApplicationHandle>(objWeak));
         env->SetLongField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr,
                 reinterpret_cast<jlong>(handle));
     }
-    return handle;
+    return *handle;
 }
-
 
 // --- JNI ---
 
@@ -112,8 +108,9 @@ static void android_view_InputApplicationHandle_nativeDispose(JNIEnv* env, jobje
     if (ptr) {
         env->SetLongField(obj, gInputApplicationHandleClassInfo.ptr, 0);
 
-        NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
-        handle->decStrong((void*)android_view_InputApplicationHandle_getHandle);
+        std::shared_ptr<NativeInputApplicationHandle>* handle =
+                reinterpret_cast<std::shared_ptr<NativeInputApplicationHandle>*>(ptr);
+        delete handle;
     }
 }
 

@@ -239,9 +239,9 @@ public:
     void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
                       uint32_t policyFlags) override;
     void notifyConfigurationChanged(nsecs_t when) override;
-    std::chrono::nanoseconds notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
-                                       const sp<IBinder>& token,
-                                       const std::string& reason) override;
+    std::chrono::nanoseconds notifyAnr(
+            const std::shared_ptr<InputApplicationHandle>& inputApplicationHandle,
+            const sp<IBinder>& token, const std::string& reason) override;
     void notifyInputChannelBroken(const sp<IBinder>& token) override;
     void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
     bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
@@ -682,8 +682,8 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
     checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
-static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
-        const sp<InputApplicationHandle>& inputApplicationHandle) {
+static jobject getInputApplicationHandleObjLocalRef(
+        JNIEnv* env, const std::shared_ptr<InputApplicationHandle>& inputApplicationHandle) {
     if (inputApplicationHandle == nullptr) {
         return nullptr;
     }
@@ -694,8 +694,8 @@ static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
 }
 
 std::chrono::nanoseconds NativeInputManager::notifyAnr(
-        const sp<InputApplicationHandle>& inputApplicationHandle, const sp<IBinder>& token,
-        const std::string& reason) {
+        const std::shared_ptr<InputApplicationHandle>& inputApplicationHandle,
+        const sp<IBinder>& token, const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyANR");
 #endif
@@ -780,8 +780,12 @@ void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
 
 void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
         jobject applicationHandleObj) {
-    sp<InputApplicationHandle> applicationHandle =
+    if (!applicationHandleObj) {
+        return;
+    }
+    std::shared_ptr<InputApplicationHandle> applicationHandle =
             android_view_InputApplicationHandle_getHandle(env, applicationHandleObj);
+    applicationHandle->updateInfo();
     mInputManager->getDispatcher()->setFocusedApplication(displayId, applicationHandle);
 }
 

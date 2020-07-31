@@ -57,11 +57,11 @@ import android.util.ArraySet;
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -202,8 +203,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mRemoteInputManager,
                 mLeakDetector,
                 mock(ForegroundServiceDismissalFeatureController.class),
-                mock(HeadsUpManager.class),
-                mock(StatusBarStateController.class)
+                mock(IStatusBarService.class)
         );
         mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);
@@ -294,7 +294,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         assertTrue(entriesContainKey(mEntryManager.getAllNotifs(), mSbn.getKey()));
 
         // WHEN the uninflated entry is removed
-        mEntryManager.performRemoveNotification(mSbn, UNDEFINED_DISMISS_REASON);
+        mEntryManager.performRemoveNotification(mSbn, mock(DismissedByUserStats.class),
+                UNDEFINED_DISMISS_REASON);
 
         // THEN the entry is still removed from the allNotifications list
         assertFalse(entriesContainKey(mEntryManager.getAllNotifs(), mSbn.getKey()));
@@ -470,7 +471,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Test
     public void testPerformRemoveNotification_removedEntry() {
         mEntryManager.removeNotification(mSbn.getKey(), null, 0);
-        mEntryManager.performRemoveNotification(mSbn, REASON_CANCEL);
+        mEntryManager.performRemoveNotification(mSbn, mock(DismissedByUserStats.class),
+                REASON_CANCEL);
     }
 
     @Test

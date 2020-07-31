@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.provider.Settings;
 import android.view.Gravity;
@@ -102,6 +103,14 @@ class MagnificationModeSwitch {
                 .start();
     }
 
+    void onConfigurationChanged(int configDiff) {
+        if ((configDiff & ActivityInfo.CONFIG_DENSITY) == 0) {
+            return;
+        }
+        applyResourcesValues();
+        mImageView.setImageResource(getIconResId(mMagnificationMode));
+    }
+
     private void toggleMagnificationMode() {
         final int newMode =
                 mMagnificationMode ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
@@ -112,7 +121,7 @@ class MagnificationModeSwitch {
     }
 
     private static ImageView createView(Context context) {
-        ImageView imageView  = new ImageView(context);
+        ImageView imageView = new ImageView(context);
         imageView.setClickable(true);
         imageView.setFocusable(true);
         imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);

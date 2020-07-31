@@ -25,7 +25,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.testng.Assert.assertThrows
 
 @RunWith(Parameterized::class)
 class OverlayReferenceMapperTests {
@@ -160,9 +159,6 @@ class OverlayReferenceMapperTests {
         expected.forEach { (actorPkgName, expectedPkgNames) ->
             expectedPkgNames.forEach { expectedPkgName ->
                 if (deferRebuild) {
-                    assertThrows(IllegalStateException::class.java) {
-                        mapper.isValidActor(expectedPkgName, actorPkgName)
-                    }
                     mapper.rebuildIfDeferred()
                     deferRebuild = false
                 }
@@ -187,7 +183,7 @@ class OverlayReferenceMapperTests {
                 )
         )
     ) = OverlayReferenceMapper(deferRebuild, object : OverlayReferenceMapper.Provider {
-        override fun getActorPkg(actor: String?) =
+        override fun getActorPkg(actor: String) =
                 OverlayActorEnforcer.getPackageNameForActor(actor, namedActors).first
 
         override fun getTargetToOverlayables(pkg: AndroidPackage) =

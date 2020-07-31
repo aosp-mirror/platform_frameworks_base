@@ -985,6 +985,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Definições"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar pilha SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"A app <xliff:g id="APP">%1$s</xliff:g> está a utilizar o(a) <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"câmara"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"localização"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"microfone"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensores desativados"</string>
     <string name="device_services" msgid="1549944177856658705">"Serviços do dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sem título"</string>
@@ -1015,7 +1022,7 @@
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"As conversas prioritárias irão:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aparecer na parte superior da secção de conversas."</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar a imagem do perfil no ecrã de bloqueio."</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecem como balões flutuantes por cima de apps."</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecer como balões flutuantes por cima de apps."</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompem o modo Não incomodar."</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Definições"</string>

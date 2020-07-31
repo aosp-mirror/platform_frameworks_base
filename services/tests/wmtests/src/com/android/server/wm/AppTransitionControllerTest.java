@@ -129,36 +129,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testGetAnimationTargets_noHierarchicalAnimations() {
-        WindowManagerService.sHierarchicalAnimations = false;
-
-        // [DisplayContent] -+- [TaskStack1] - [Task1] - [ActivityRecord1] (opening, invisible)
-        //                   +- [TaskStack2] - [Task2] - [ActivityRecord2] (closing, visible)
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity1 = WindowTestUtils.createTestActivityRecord(stack1);
-        activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
-
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity2 = WindowTestUtils.createTestActivityRecord(stack2);
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity1);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity2);
-
-        // Don't promote when the flag is disabled.
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity1}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity2}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
     public void testGetAnimationTargets_visibilityAlreadyUpdated() {
         // [DisplayContent] -+- [TaskStack1] - [Task1] - [ActivityRecord1] (opening, visible)
         //                   +- [TaskStack2] - [Task2] - [ActivityRecord2] (closing, invisible)
@@ -177,17 +147,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // No animation, since visibility of the opening and closing apps are already updated
         // outside of AppTransition framework.
-        WindowManagerService.sHierarchicalAnimations = false;
-        assertEquals(
-                new ArraySet<>(),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(
-                new ArraySet<>(),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-
-        WindowManagerService.sHierarchicalAnimations = true;
         assertEquals(
                 new ArraySet<>(),
                 AppTransitionController.getAnimationTargets(
@@ -221,13 +180,12 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // The visibility are already updated, but since forced transition is requested, it will
         // be included.
-        WindowManagerService.sHierarchicalAnimations = false;
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity1}),
+                new ArraySet<>(new WindowContainer[]{activity1.getStack()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, true /* visible */));
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity2}),
+                new ArraySet<>(new WindowContainer[]{activity2.getStack()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
     }
@@ -247,13 +205,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Animate closing apps even if it's not visible when it is exiting before we had a chance
         // to play the transition animation.
-        WindowManagerService.sHierarchicalAnimations = false;
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity}),
-                AppTransitionController.getAnimationTargets(
-                        new ArraySet<>(), closing, false /* visible */));
-
-        WindowManagerService.sHierarchicalAnimations = true;
         assertEquals(
                 new ArraySet<>(new WindowContainer[]{stack}),
                 AppTransitionController.getAnimationTargets(
@@ -292,17 +243,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Animate opening apps even if it's already visible in case its windows are being replaced.
         // Don't animate closing apps if it's already invisible even though its windows are being
         // replaced.
-        WindowManagerService.sHierarchicalAnimations = false;
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity1}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-
-        WindowManagerService.sHierarchicalAnimations = true;
         assertEquals(
                 new ArraySet<>(new WindowContainer[]{stack1}),
                 AppTransitionController.getAnimationTargets(
@@ -315,8 +255,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_openingClosingInDifferentTask() {
-        WindowManagerService.sHierarchicalAnimations = true;
-
         // [DisplayContent] -+- [TaskStack1] - [Task1] -+- [ActivityRecord1] (opening, invisible)
         //                   |                          +- [ActivityRecord2] (invisible)
         //                   |
@@ -361,8 +299,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_openingClosingInSameTask() {
-        WindowManagerService.sHierarchicalAnimations = true;
-
         // [DisplayContent] - [TaskStack] - [Task] -+- [ActivityRecord1] (opening, invisible)
         //                                          +- [ActivityRecord2] (closing, visible)
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
@@ -393,8 +329,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_animateOnlyTranslucentApp() {
-        WindowManagerService.sHierarchicalAnimations = true;
-
         // [DisplayContent] -+- [TaskStack1] - [Task1] -+- [ActivityRecord1] (opening, invisible)
         //                   |                          +- [ActivityRecord2] (visible)
         //                   |
@@ -439,8 +373,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_animateTranslucentAndOpaqueApps() {
-        WindowManagerService.sHierarchicalAnimations = true;
-
         // [DisplayContent] -+- [TaskStack1] - [Task1] -+- [ActivityRecord1] (opening, invisible)
         //                   |                          +- [ActivityRecord2] (opening, invisible)
         //                   |
@@ -489,8 +421,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_stackContainsMultipleTasks() {
-        WindowManagerService.sHierarchicalAnimations = true;
-
         // [DisplayContent] - [TaskStack] -+- [Task1] - [ActivityRecord1] (opening, invisible)
         //                                 +- [Task2] - [ActivityRecord2] (closing, visible)
         final Task stack = createTaskStackOnDisplay(mDisplayContent);

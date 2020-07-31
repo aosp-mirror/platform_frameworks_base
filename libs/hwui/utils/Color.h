@@ -126,6 +126,7 @@ struct Lab {
 
 Lab sRGBToLab(SkColor color);
 SkColor LabToSRGB(const Lab& lab, SkAlpha alpha);
+skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level = 0.f);
 
 } /* namespace uirenderer */
 } /* namespace android */

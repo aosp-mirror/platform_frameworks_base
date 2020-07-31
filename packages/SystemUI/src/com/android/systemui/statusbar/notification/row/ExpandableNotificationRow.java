@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -321,7 +323,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private View mGroupParentWhenDismissed;
     private boolean mShelfIconVisible;
     private boolean mAboveShelf;
-    private Runnable mOnDismissRunnable;
+    private OnDismissCallback mOnDismissCallback;
     private boolean mIsLowPriority;
     private boolean mIsColorized;
     private boolean mUseIncreasedCollapsedHeight;
@@ -1444,10 +1446,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         dismiss(fromAccessibility);
         if (mEntry.isClearable()) {
-            // TODO: beverlyt, log dismissal
-            // TODO: track dismiss sentiment
-            if (mOnDismissRunnable != null) {
-                mOnDismissRunnable.run();
+            if (mOnDismissCallback != null) {
+                mOnDismissCallback.onDismiss(mEntry, REASON_CANCEL);
             }
         }
     }
@@ -1464,8 +1464,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mIsBlockingHelperShowing && mNotificationTranslationFinished;
     }
 
-    void setOnDismissRunnable(Runnable onDismissRunnable) {
-        mOnDismissRunnable = onDismissRunnable;
+    void setOnDismissCallback(OnDismissCallback onDismissCallback) {
+        mOnDismissCallback = onDismissCallback;
     }
 
     @Override

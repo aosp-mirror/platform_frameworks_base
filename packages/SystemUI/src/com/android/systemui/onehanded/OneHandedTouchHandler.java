@@ -58,6 +58,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
     OneHandedTouchEventCallback mTouchEventCallback;
 
     private boolean mIsEnabled;
+    private boolean mIsOnStopTransitioning;
     private boolean mIsInOutsideRegion;
 
     @Inject
@@ -96,8 +97,9 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
                 mTimeoutHandler.resetTimer();
-                if (mIsInOutsideRegion) {
+                if (mIsInOutsideRegion && !mIsOnStopTransitioning)  {
                     mTouchEventCallback.onStop();
+                    mIsOnStopTransitioning = true;
                 }
                 // Reset flag for next operation
                 mIsInOutsideRegion = false;
@@ -146,6 +148,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
     @Override
     public void onStopFinished(Rect bounds) {
         mLastUpdatedBounds.set(bounds);
+        mIsOnStopTransitioning = false;
     }
 
     @Override

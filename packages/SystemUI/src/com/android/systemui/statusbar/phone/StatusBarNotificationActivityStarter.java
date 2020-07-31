@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
-import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
 import static com.android.systemui.statusbar.phone.StatusBar.getActivityOptions;
 
@@ -37,7 +36,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
-import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -71,11 +69,11 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.OnDismissCallback;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -128,6 +126,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationPresenter mPresenter;
     private final NotificationPanelViewController mNotificationPanel;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final OnDismissCallback mOnDismissCallback;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
@@ -162,6 +161,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             FeatureFlags featureFlags,
             MetricsLogger metricsLogger,
             StatusBarNotificationActivityStarterLogger logger,
+            OnDismissCallback onDismissCallback,
 
             StatusBar statusBar,
             NotificationPresenter presenter,
@@ -197,6 +197,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mFeatureFlags = featureFlags;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
+        mOnDismissCallback = onDismissCallback;
 
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBar = statusBar;
@@ -574,13 +575,14 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private void removeNotification(NotificationEntry entry) {
         // We have to post it to the UI thread for synchronization
         mMainThreadHandler.post(() -> {
-            Runnable removeRunnable = createRemoveRunnable(entry);
             if (mPresenter.isCollapsing()) {
                 // To avoid lags we're only performing the remove
                 // after the shade was collapsed
-                mShadeController.addPostCollapseAction(removeRunnable);
+                mShadeController.addPostCollapseAction(
+                        () -> mOnDismissCallback.onDismiss(entry, REASON_CLICK)
+                );
             } else {
-                removeRunnable.run();
+                mOnDismissCallback.onDismiss(entry, REASON_CLICK);
             }
         });
     }
@@ -592,43 +594,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             return mNotifPipeline.getShadeListCount();
         } else {
             return mEntryManager.getActiveNotificationsCount();
-        }
-    }
-
-    private Runnable createRemoveRunnable(NotificationEntry entry) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    // see NotificationLogger#logNotificationClear
-                    int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
-                    if (mHeadsUpManager.isAlerting(entry.getKey())) {
-                        dismissalSurface = NotificationStats.DISMISSAL_PEEK;
-                    } else if (mNotificationPanel.hasPulsingNotifications()) {
-                        dismissalSurface = NotificationStats.DISMISSAL_AOD;
-                    }
-
-                    mNotifCollection.dismissNotification(
-                            entry,
-                            new DismissedByUserStats(
-                                    dismissalSurface,
-                                    DISMISS_SENTIMENT_NEUTRAL,
-                                    NotificationVisibility.obtain(
-                                            entry.getKey(),
-                                            entry.getRanking().getRank(),
-                                            mNotifPipeline.getShadeListCount(),
-                                            true,
-                                            NotificationLogger.getNotificationLocation(entry))
-                            ));
-                }
-            };
-        } else {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    mEntryManager.performRemoveNotification(entry.getSbn(), REASON_CLICK);
-                }
-            };
         }
     }
 
@@ -667,6 +632,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final FeatureFlags mFeatureFlags;
         private final MetricsLogger mMetricsLogger;
         private final StatusBarNotificationActivityStarterLogger mLogger;
+        private final OnDismissCallback mOnDismissCallback;
 
         private StatusBar mStatusBar;
         private NotificationPresenter mNotificationPresenter;
@@ -704,7 +670,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
                 FeatureFlags featureFlags,
                 MetricsLogger metricsLogger,
-                StatusBarNotificationActivityStarterLogger logger) {
+                StatusBarNotificationActivityStarterLogger logger,
+                OnDismissCallback onDismissCallback) {
 
             mContext = context;
             mCommandQueue = commandQueue;
@@ -736,6 +703,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mFeatureFlags = featureFlags;
             mMetricsLogger = metricsLogger;
             mLogger = logger;
+            mOnDismissCallback = onDismissCallback;
         }
 
         /** Sets the status bar to use as {@link StatusBar}. */
@@ -793,6 +761,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mFeatureFlags,
                     mMetricsLogger,
                     mLogger,
+                    mOnDismissCallback,
 
                     mStatusBar,
                     mNotificationPresenter,

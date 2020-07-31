@@ -439,8 +439,8 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * Transfer an established call to given number
      *
      * @param number number to transfer the call
-     * @param isConfirmationRequired if {@code True}, indicates Assured transfer,
-     * if {@code False} it indicates Blind transfer.
+     * @param isConfirmationRequired if {@code True}, indicates a confirmed transfer,
+     * if {@code False} it indicates an unconfirmed transfer.
      * @hide
      */
     public void transfer(@NonNull String number, boolean isConfirmationRequired) {
