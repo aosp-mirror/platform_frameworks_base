@@ -17,16 +17,16 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.testing.dummyime">
-    <application android:label="Dummy IME">
-        <service android:name="DummyIme"
+        package="com.android.testing.stubime">
+    <application android:label="Stub IME">
+        <service android:name="StubIme"
                 android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
             </intent-filter>
             <meta-data android:name="android.view.im" android:resource="@xml/method" />
         </service>
-        <activity android:name=".ImePreferences" android:label="Dummy IME Settings">
+        <activity android:name=".ImePreferences" android:label="Stub IME Settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
