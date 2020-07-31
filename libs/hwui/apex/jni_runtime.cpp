@@ -16,14 +16,14 @@
 
 #include "android/graphics/jni_runtime.h"
 
-#include <android/log.h>
-#include <nativehelper/JNIHelp.h>
-#include <sys/cdefs.h>
-
 #include <EGL/egl.h>
 #include <GraphicsJNI.h>
 #include <Properties.h>
 #include <SkGraphics.h>
+#include <android/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <sys/cdefs.h>
+#include <vulkan/vulkan.h>
 
 #undef LOG_TAG
 #define LOG_TAG "AndroidGraphicsJNI"
@@ -172,6 +172,11 @@ using android::uirenderer::RenderPipelineType;
 
 void zygote_preload_graphics() {
     if (Properties::peekRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        // Preload GL driver if HWUI renders with GL backend.
         eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    } else {
+        // Preload Vulkan driver if HWUI renders with Vulkan backend.
+        uint32_t apiVersion;
+        vkEnumerateInstanceVersion(&apiVersion);
     }
 }
