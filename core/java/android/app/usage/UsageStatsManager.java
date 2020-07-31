@@ -107,7 +107,7 @@ public final class UsageStatsManager {
 
 
     /**
-     * The app is whitelisted for some reason and the bucket cannot be changed.
+     * The app is exempted for some reason and the bucket cannot be changed.
      * {@hide}
      */
     @SystemApi
