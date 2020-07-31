@@ -157,6 +157,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
@@ -261,6 +262,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final AtomicInteger mActiveCount = new AtomicInteger();
 
     private final Object mLock = new Object();
+
+    /**
+     * Used to detect and reject concurrent access to this session object to ensure mutation
+     * to multiple objects like {@link #addChildSessionId} are done atomically.
+     */
+    private final AtomicBoolean mTransactionLock = new AtomicBoolean(false);
 
     /** Timestamp of the last time this session changed state  */
     @GuardedBy("mLock")
@@ -3162,39 +3169,85 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void acquireTransactionLock() {
+        if (!mTransactionLock.compareAndSet(false, true)) {
+            throw new UnsupportedOperationException("Concurrent access not supported");
+        }
+    }
+
+    private void releaseTransactionLock() {
+        mTransactionLock.compareAndSet(true, false);
+    }
+
     @Override
     public void addChildSessionId(int childSessionId) {
-        final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
-        if (childSession == null || !childSession.canBeAddedAsChild(sessionId)) {
-            throw new IllegalStateException("Unable to add child session " + childSessionId
-                            + " as it does not exist or is in an invalid state.");
+        if (!params.isMultiPackage) {
+            throw new IllegalStateException("Single-session " + sessionId + " can't have child.");
         }
-        synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
-            assertPreparedAndNotSealedLocked("addChildSessionId");
 
-            final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
-            if (indexOfSession >= 0) {
-                return;
+        final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
+        if (childSession == null) {
+            throw new IllegalStateException("Unable to add child session " + childSessionId
+                    + " as it does not exist.");
+        }
+        if (childSession.params.isMultiPackage) {
+            throw new IllegalStateException("Multi-session " + childSessionId
+                    + " can't be a child.");
+        }
+
+        try {
+            acquireTransactionLock();
+            childSession.acquireTransactionLock();
+
+            if (!childSession.canBeAddedAsChild(sessionId)) {
+                throw new IllegalStateException("Unable to add child session " + childSessionId
+                        + " as it is in an invalid state.");
             }
-            childSession.setParentSessionId(this.sessionId);
-            addChildSessionIdLocked(childSessionId);
+            synchronized (mLock) {
+                assertCallerIsOwnerOrRootLocked();
+                assertPreparedAndNotSealedLocked("addChildSessionId");
+
+                final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
+                if (indexOfSession >= 0) {
+                    return;
+                }
+                childSession.setParentSessionId(this.sessionId);
+                addChildSessionIdLocked(childSessionId);
+            }
+        } finally {
+            releaseTransactionLock();
+            childSession.releaseTransactionLock();
         }
     }
 
     @Override
     public void removeChildSessionId(int sessionId) {
         final PackageInstallerSession session = mSessionProvider.getSession(sessionId);
-        synchronized (mLock) {
-            final int indexOfSession = mChildSessionIds.indexOfKey(sessionId);
+        try {
+            acquireTransactionLock();
             if (session != null) {
-                session.setParentSessionId(SessionInfo.INVALID_ID);
+                session.acquireTransactionLock();
             }
-            if (indexOfSession < 0) {
-                // not added in the first place; no-op
-                return;
+
+            synchronized (mLock) {
+                assertCallerIsOwnerOrRootLocked();
+                assertPreparedAndNotSealedLocked("removeChildSessionId");
+
+                final int indexOfSession = mChildSessionIds.indexOfKey(sessionId);
+                if (indexOfSession < 0) {
+                    // not added in the first place; no-op
+                    return;
+                }
+                if (session != null) {
+                    session.setParentSessionId(SessionInfo.INVALID_ID);
+                }
+                mChildSessionIds.removeAt(indexOfSession);
             }
-            mChildSessionIds.removeAt(indexOfSession);
+        } finally {
+            releaseTransactionLock();
+            if (session != null) {
+                session.releaseTransactionLock();
+            }
         }
     }
 
