@@ -68,9 +68,9 @@ public class NetworkPolicyLogger {
 
     static final int NTWK_BLOCKED_POWER = 0;
     static final int NTWK_ALLOWED_NON_METERED = 1;
-    static final int NTWK_BLOCKED_BLACKLIST = 2;
-    static final int NTWK_ALLOWED_WHITELIST = 3;
-    static final int NTWK_ALLOWED_TMP_WHITELIST = 4;
+    static final int NTWK_BLOCKED_DENYLIST = 2;
+    static final int NTWK_ALLOWED_ALLOWLIST = 3;
+    static final int NTWK_ALLOWED_TMP_ALLOWLIST = 4;
     static final int NTWK_BLOCKED_BG_RESTRICT = 5;
     static final int NTWK_ALLOWED_DEFAULT = 6;
     static final int NTWK_ALLOWED_SYSTEM = 7;
@@ -226,12 +226,12 @@ public class NetworkPolicyLogger {
                 return "blocked by power restrictions";
             case NTWK_ALLOWED_NON_METERED:
                 return "allowed on unmetered network";
-            case NTWK_BLOCKED_BLACKLIST:
-                return "blacklisted on metered network";
-            case NTWK_ALLOWED_WHITELIST:
-                return "whitelisted on metered network";
-            case NTWK_ALLOWED_TMP_WHITELIST:
-                return "temporary whitelisted on metered network";
+            case NTWK_BLOCKED_DENYLIST:
+                return "denylisted on metered network";
+            case NTWK_ALLOWED_ALLOWLIST:
+                return "allowlisted on metered network";
+            case NTWK_ALLOWED_TMP_ALLOWLIST:
+                return "temporary allowlisted on metered network";
             case NTWK_BLOCKED_BG_RESTRICT:
                 return "blocked when background is restricted";
             case NTWK_ALLOWED_DEFAULT:
