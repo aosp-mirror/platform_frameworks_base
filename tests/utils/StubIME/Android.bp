@@ -15,7 +15,7 @@
 //
 
 android_test {
-    name: "DummyIME",
+    name: "StubIME",
     srcs: ["src/**/*.java"],
     sdk_version: "current",
 }
