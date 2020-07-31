@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
@@ -29,6 +31,7 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.sysprop.LocalizationProperties;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +47,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class LocalePicker extends ListFragment {
     private static final String TAG = "LocalePicker";
@@ -93,7 +99,38 @@ public class LocalePicker extends ListFragment {
     }
 
     public static String[] getSupportedLocales(Context context) {
-        return context.getResources().getStringArray(R.array.supported_locales);
+        String[] allLocales = context.getResources().getStringArray(R.array.supported_locales);
+
+        Predicate<String> localeFilter = getLocaleFilter();
+        if (localeFilter == null) {
+            return allLocales;
+        }
+
+        List<String> result = new ArrayList<>(allLocales.length);
+        for (String locale : allLocales) {
+            if (localeFilter.test(locale)) {
+                result.add(locale);
+            }
+        }
+
+        int localeCount = result.size();
+        return (localeCount == allLocales.length) ? allLocales
+                : result.toArray(new String[localeCount]);
+    }
+
+    @Nullable
+    private static Predicate<String> getLocaleFilter() {
+        try {
+            return LocalizationProperties.locale_filter()
+                    .map(filter -> Pattern.compile(filter).asPredicate())
+                    .orElse(null);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Failed to read locale filter.", e);
+        } catch (PatternSyntaxException e) {
+            Log.e(TAG, "Bad locale filter format (\"" + e.getPattern() + "\"), skipping.");
+        }
+
+        return null;
     }
 
     public static List<LocaleInfo> getAllAssetLocales(Context context, boolean isInDeveloperMode) {
@@ -266,6 +303,11 @@ public class LocalePicker extends ListFragment {
      */
     @UnsupportedAppUsage
     public static void updateLocales(LocaleList locales) {
+        if (locales != null) {
+            locales = removeExcludedLocales(locales);
+        }
+        // Note: the empty list case is covered by Configuration.setLocales().
+
         try {
             final IActivityManager am = ActivityManager.getService();
             final Configuration config = am.getConfiguration();
@@ -280,6 +322,26 @@ public class LocalePicker extends ListFragment {
         } catch (RemoteException e) {
             // Intentionally left blank
         }
+    }
+
+    @NonNull
+    private static LocaleList removeExcludedLocales(@NonNull LocaleList locales) {
+        Predicate<String> localeFilter = getLocaleFilter();
+        if (localeFilter == null) {
+            return locales;
+        }
+
+        int localeCount = locales.size();
+        ArrayList<Locale> filteredLocales = new ArrayList<>(localeCount);
+        for (int i = 0; i < localeCount; ++i) {
+            Locale locale = locales.get(i);
+            if (localeFilter.test(locale.toString())) {
+                filteredLocales.add(locale);
+            }
+        }
+
+        return (localeCount == filteredLocales.size()) ? locales
+                : new LocaleList(filteredLocales.toArray(new Locale[0]));
     }
 
     /**
