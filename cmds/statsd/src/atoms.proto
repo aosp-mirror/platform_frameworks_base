@@ -66,7 +66,7 @@ import "frameworks/base/core/proto/android/stats/textclassifier/textclassifier_e
 import "frameworks/base/core/proto/android/stats/otaupdate/updateengine_enums.proto";
 
 /**
- * The master atom class. This message defines all of the available
+ * The primary atom class. This message defines all of the available
  * raw stats log events from the Android system, also known as "atoms."
  *
  * This field contains a single oneof with all of the available messages.
