@@ -92,8 +92,8 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
         }
 
         /**
-         * Sets the originating number whitelist for the visual voicemail SMS filter. If the list is
-         * not null only the SMS messages from a number in the list can be considered as a visual
+         * Sets the originating number allow list for the visual voicemail SMS filter. If the list
+         * is not null only the SMS messages from a number in the list can be considered as a visual
          * voicemail SMS. Otherwise, messages from any address will be considered.
          */
         public Builder setOriginatingNumbers(List<String> originatingNumbers) {
@@ -133,7 +133,7 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
     public final String clientPrefix;
 
     /**
-     * The originating number whitelist for the visual voicemail SMS filter of a phone account. If
+     * The originating number allow list for the visual voicemail SMS filter of a phone account. If
      * the list is not null only the SMS messages from a number in the list can be considered as a
      * visual voicemail SMS. Otherwise, messages from any address will be considered.
      */
