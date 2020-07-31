@@ -1,0 +1,135 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.powerstats;
+
+import android.content.Context;
+import android.os.Binder;
+import android.os.Environment;
+import android.os.UserHandle;
+import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
+import com.android.server.SystemService;
+import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
+import com.android.server.powerstats.PowerStatsHALWrapper.PowerStatsHALWrapperImpl;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
+/**
+ * This class provides a system service that estimates system power usage
+ * per subsystem (modem, wifi, gps, display, etc) and provides those power
+ * estimates to subscribers.
+ */
+public class PowerStatsService extends SystemService {
+    private static final String TAG = PowerStatsService.class.getSimpleName();
+    private static final boolean DEBUG = false;
+    private static final String DATA_STORAGE_SUBDIR = "powerstats";
+    private static final int DATA_STORAGE_VERSION = 0;
+    private static final String DATA_STORAGE_FILENAME = "log.powerstats." + DATA_STORAGE_VERSION;
+
+    private final Injector mInjector;
+
+    private Context mContext;
+    private IPowerStatsHALWrapper mPowerStatsHALWrapper;
+    private PowerStatsLogger mPowerStatsLogger;
+    private BatteryTrigger mBatteryTrigger;
+    private TimerTrigger mTimerTrigger;
+
+    @VisibleForTesting
+    static class Injector {
+        File createDataStoragePath() {
+            return new File(Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM),
+                DATA_STORAGE_SUBDIR);
+        }
+
+        String createDataStorageFilename() {
+            return DATA_STORAGE_FILENAME;
+        }
+
+        IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
+            return new PowerStatsHALWrapperImpl();
+        }
+
+        PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
+                String dataStorageFilename, IPowerStatsHALWrapper powerStatsHALWrapper) {
+            return new PowerStatsLogger(context, dataStoragePath, dataStorageFilename,
+                powerStatsHALWrapper);
+        }
+
+        BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
+            return new BatteryTrigger(context, powerStatsLogger, true /* trigger enabled */);
+        }
+
+        TimerTrigger createTimerTrigger(Context context, PowerStatsLogger powerStatsLogger) {
+            return new TimerTrigger(context, powerStatsLogger, true /* trigger enabled */);
+        }
+    }
+
+    private final class BinderService extends Binder {
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                mPowerStatsLogger.writeToFile(fd);
+            }
+        }
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            onSystemServiceReady();
+        }
+    }
+
+    @Override
+    public void onStart() {
+        publishBinderService(Context.POWER_STATS_SERVICE, new BinderService());
+    }
+
+    private void onSystemServiceReady() {
+        mPowerStatsHALWrapper = mInjector.createPowerStatsHALWrapperImpl();
+
+        if (mPowerStatsHALWrapper.initialize()) {
+            if (DEBUG) Log.d(TAG, "Starting PowerStatsService");
+
+            // Only start logger and triggers if initialization is successful.
+            mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
+                mInjector.createDataStoragePath(), mInjector.createDataStorageFilename(),
+                mPowerStatsHALWrapper);
+            mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
+            mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
+        } else {
+            Log.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
+        }
+    }
+
+    public PowerStatsService(Context context) {
+        this(context, new Injector());
+    }
+
+    @VisibleForTesting
+    public PowerStatsService(Context context, Injector injector) {
+        super(context);
+        mContext = context;
+        mInjector = injector;
+    }
+}
