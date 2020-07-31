@@ -5623,18 +5623,18 @@ package android.window {
 
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static android.app.ActivityManager.RunningTaskInfo createRootTask(int, int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static android.window.WindowContainerToken getImeTarget(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static java.util.List<android.app.ActivityManager.RunningTaskInfo> getRootTasks(int, @NonNull int[]);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.app.ActivityManager.RunningTaskInfo createRootTask(int, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.window.WindowContainerToken getImeTarget(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getRootTasks(int, @NonNull int[]);
     method @BinderThread public void onBackPressedOnTaskRoot(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void registerOrganizer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void unregisterOrganizer();
   }
 
@@ -5671,7 +5671,7 @@ package android.window {
   public class WindowOrganizer {
     ctor public WindowOrganizer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static void applyTransaction(@NonNull android.window.WindowContainerTransaction);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
   }
 
 }

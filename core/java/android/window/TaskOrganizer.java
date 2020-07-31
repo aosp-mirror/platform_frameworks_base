@@ -23,8 +23,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.os.RemoteException;
-import android.util.Singleton;
 import android.view.SurfaceControl;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -35,13 +36,25 @@ import java.util.List;
 @TestApi
 public class TaskOrganizer extends WindowOrganizer {
 
+    private ITaskOrganizerController mTaskOrganizerController;
+
+    public TaskOrganizer() {
+        mTaskOrganizerController = getController();
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public TaskOrganizer(ITaskOrganizerController taskOrganizerController) {
+        mTaskOrganizerController = taskOrganizerController;
+    }
+
     /**
      * Register a TaskOrganizer to manage tasks as they enter a supported windowing mode.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public final void registerOrganizer() {
         try {
-            getController().registerTaskOrganizer(mInterface);
+            mTaskOrganizerController.registerTaskOrganizer(mInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -51,7 +64,7 @@ public class TaskOrganizer extends WindowOrganizer {
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public final void unregisterOrganizer() {
         try {
-            getController().unregisterTaskOrganizer(mInterface);
+            mTaskOrganizerController.unregisterTaskOrganizer(mInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -78,9 +91,9 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Creates a persistent root task in WM for a particular windowing-mode. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
-    public static ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode) {
+    public ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode) {
         try {
-            return getController().createRootTask(displayId, windowingMode);
+            return mTaskOrganizerController.createRootTask(displayId, windowingMode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -88,9 +101,9 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /** Deletes a persistent root task in WM */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public static boolean deleteRootTask(@NonNull WindowContainerToken task) {
+    public boolean deleteRootTask(@NonNull WindowContainerToken task) {
         try {
-            return getController().deleteRootTask(task);
+            return mTaskOrganizerController.deleteRootTask(task);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -99,10 +112,10 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Gets direct child tasks (ordered from top-to-bottom) */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
-    public static List<ActivityManager.RunningTaskInfo> getChildTasks(
+    public List<ActivityManager.RunningTaskInfo> getChildTasks(
             @NonNull WindowContainerToken parent, @NonNull int[] activityTypes) {
         try {
-            return getController().getChildTasks(parent, activityTypes);
+            return mTaskOrganizerController.getChildTasks(parent, activityTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -111,10 +124,10 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Gets all root tasks on a display (ordered from top-to-bottom) */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
-    public static List<ActivityManager.RunningTaskInfo> getRootTasks(
+    public List<ActivityManager.RunningTaskInfo> getRootTasks(
             int displayId, @NonNull int[] activityTypes) {
         try {
-            return getController().getRootTasks(displayId, activityTypes);
+            return mTaskOrganizerController.getRootTasks(displayId, activityTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -123,9 +136,9 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Get the root task which contains the current ime target */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
-    public static WindowContainerToken getImeTarget(int display) {
+    public WindowContainerToken getImeTarget(int display) {
         try {
-            return getController().getImeTarget(display);
+            return mTaskOrganizerController.getImeTarget(display);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -136,9 +149,9 @@ public class TaskOrganizer extends WindowOrganizer {
      * root and thus new tasks just end up directly on the display.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public static void setLaunchRoot(int displayId, @NonNull WindowContainerToken root) {
+    public void setLaunchRoot(int displayId, @NonNull WindowContainerToken root) {
         try {
-            getController().setLaunchRoot(displayId, root);
+            mTaskOrganizerController.setLaunchRoot(displayId, root);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -152,7 +165,7 @@ public class TaskOrganizer extends WindowOrganizer {
     public void setInterceptBackPressedOnTaskRoot(@NonNull WindowContainerToken task,
             boolean interceptBackPressed) {
         try {
-            getController().setInterceptBackPressedOnTaskRoot(task, interceptBackPressed);
+            mTaskOrganizerController.setInterceptBackPressedOnTaskRoot(task, interceptBackPressed);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -181,19 +194,11 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     };
 
-    private static ITaskOrganizerController getController() {
-        return ITaskOrganizerControllerSingleton.get();
+    private ITaskOrganizerController getController() {
+        try {
+            return getWindowOrganizerController().getTaskOrganizerController();
+        } catch (RemoteException e) {
+            return null;
+        }
     }
-
-    private static final Singleton<ITaskOrganizerController> ITaskOrganizerControllerSingleton =
-            new Singleton<ITaskOrganizerController>() {
-                @Override
-                protected ITaskOrganizerController create() {
-                    try {
-                        return getWindowOrganizerController().getTaskOrganizerController();
-                    } catch (RemoteException e) {
-                        return null;
-                    }
-                }
-            };
 }

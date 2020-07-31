@@ -38,7 +38,7 @@ public class WindowOrganizer {
      * @param t The transaction to apply.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public static void applyTransaction(@NonNull WindowContainerTransaction t) {
+    public void applyTransaction(@NonNull WindowContainerTransaction t) {
         try {
             getWindowOrganizerController().applyTransaction(t);
         } catch (RemoteException e) {
@@ -74,7 +74,7 @@ public class WindowOrganizer {
      */
     @Nullable
     @RequiresPermission(android.Manifest.permission.READ_FRAME_BUFFER)
-    public static SurfaceControl takeScreenshot(@NonNull WindowContainerToken token) {
+    public SurfaceControl takeScreenshot(@NonNull WindowContainerToken token) {
         try {
             SurfaceControl surfaceControl = new SurfaceControl();
             if (getWindowOrganizerController().takeScreenshot(token, surfaceControl)) {
@@ -88,7 +88,7 @@ public class WindowOrganizer {
     }
 
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    static IWindowOrganizerController getWindowOrganizerController() {
+    IWindowOrganizerController getWindowOrganizerController() {
         return IWindowOrganizerControllerSingleton.get();
     }
 
