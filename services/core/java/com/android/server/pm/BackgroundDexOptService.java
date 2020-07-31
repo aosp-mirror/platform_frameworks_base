@@ -337,6 +337,7 @@ public class BackgroundDexOptService extends JobService {
     private int idleOptimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
             long lowStorageThreshold) {
         ArraySet<String> updatedPackages = new ArraySet<>();
+        ArraySet<String> updatedPackagesDueToSecondaryDex = new ArraySet<>();
 
         try {
             final boolean supportSecondaryDex = supportSecondaryDex();
@@ -391,11 +392,14 @@ public class BackgroundDexOptService extends JobService {
             }
 
             int secondaryResult = optimizePackages(pm, pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex*/ false, updatedPackages);
+                    /*isForPrimaryDex*/ false, updatedPackagesDueToSecondaryDex);
             return secondaryResult;
         } finally {
             // Always let the pinner service know about changes.
             notifyPinService(updatedPackages);
+            // Only notify IORap the primary dex opt, because we don't want to
+            // invalidate traces unnecessary due to b/161633001 and that it's
+            // better to have a trace than no trace at all.
             notifyPackagesUpdated(updatedPackages);
         }
     }
