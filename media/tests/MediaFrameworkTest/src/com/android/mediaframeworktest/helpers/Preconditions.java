@@ -22,7 +22,7 @@ import java.util.Objects;
 /**
  * Helper set of methods to perform precondition checks before starting method execution.
  *
- * <p>Typically used to sanity check arguments or the current object state.</p>
+ * <p>Typically used to check arguments or the current object state.</p>
  */
 /**
  * (non-Javadoc)
