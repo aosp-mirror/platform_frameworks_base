@@ -58,6 +58,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
@@ -819,7 +820,13 @@ public final class ColorDisplayService extends SystemService {
         return LocalDateTime.MIN;
     }
 
-    private boolean setAppSaturationLevelInternal(String callingPackageName,
+    void setSaturationLevelInternal(int saturationLevel) {
+        final Message message = mHandler.obtainMessage(MSG_APPLY_GLOBAL_SATURATION);
+        message.arg1 = saturationLevel;
+        mHandler.sendMessage(message);
+    }
+
+    boolean setAppSaturationLevelInternal(String callingPackageName,
             String affectedPackageName, int saturationLevel) {
         return mAppSaturationController
                 .setSaturationLevel(callingPackageName, affectedPackageName, mCurrentUser,
@@ -1509,9 +1516,7 @@ public final class ColorDisplayService extends SystemService {
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                final Message message = mHandler.obtainMessage(MSG_APPLY_GLOBAL_SATURATION);
-                message.arg1 = level;
-                mHandler.sendMessage(message);
+                setSaturationLevelInternal(level);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1720,6 +1725,23 @@ public final class ColorDisplayService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public int handleShellCommand(ParcelFileDescriptor in,
+                ParcelFileDescriptor out, ParcelFileDescriptor err, String[] args) {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to use ADB color transform commands");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return new ColorDisplayShellCommand(ColorDisplayService.this)
+                    .exec(this, in.getFileDescriptor(), out.getFileDescriptor(),
+                        err.getFileDescriptor(),
+                        args);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
