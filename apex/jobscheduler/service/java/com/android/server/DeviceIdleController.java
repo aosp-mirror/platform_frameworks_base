@@ -3715,7 +3715,7 @@ public class DeviceIdleController extends SystemService
     }
 
     private void passWhiteListsToForceAppStandbyTrackerLocked() {
-        mAppStateTracker.setPowerSaveWhitelistAppIds(
+        mAppStateTracker.setPowerSaveExemptionListAppIds(
                 mPowerSaveWhitelistExceptIdleAppIdArray,
                 mPowerSaveWhitelistUserAppIdArray,
                 mTempWhitelistAppIdArray);

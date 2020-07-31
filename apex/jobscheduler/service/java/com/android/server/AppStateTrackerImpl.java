@@ -67,8 +67,8 @@ import java.util.Objects;
  * Class to keep track of the information related to "force app standby", which includes:
  * - OP_RUN_ANY_IN_BACKGROUND for each package
  * - UID foreground/active state
- * - User+system power save whitelist
- * - Temporary power save whitelist
+ * - User+system power save exemption list
+ * - Temporary power save exemption list
  * - Global "force all apps standby" mode enforced by battery saver.
  *
  * Test: atest com.android.server.AppStateTrackerTest
@@ -110,25 +110,25 @@ public class AppStateTrackerImpl implements AppStateTracker {
     final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
 
     /**
-     * System except-idle + user whitelist in the device idle controller.
+     * System except-idle + user exemption list in the device idle controller.
      */
     @GuardedBy("mLock")
-    private int[] mPowerWhitelistedAllAppIds = new int[0];
+    private int[] mPowerExemptAllAppIds = new int[0];
 
     /**
-     * User whitelisted apps in the device idle controller.
+     * User exempted apps in the device idle controller.
      */
     @GuardedBy("mLock")
-    private int[] mPowerWhitelistedUserAppIds = new int[0];
+    private int[] mPowerExemptUserAppIds = new int[0];
 
     @GuardedBy("mLock")
-    private int[] mTempWhitelistedAppIds = mPowerWhitelistedAllAppIds;
+    private int[] mTempExemptAppIds = mPowerExemptAllAppIds;
 
     /**
      * Per-user packages that are in the EXEMPT bucket.
      */
     @GuardedBy("mLock")
-    private final SparseSetArray<String> mExemptedPackages = new SparseSetArray<>();
+    private final SparseSetArray<String> mExemptBucketPackages = new SparseSetArray<>();
 
     @GuardedBy("mLock")
     final ArraySet<Listener> mListeners = new ArraySet<>();
@@ -177,10 +177,10 @@ public class AppStateTrackerImpl implements AppStateTracker {
         int UID_FG_STATE_CHANGED = 0;
         int UID_ACTIVE_STATE_CHANGED = 1;
         int RUN_ANY_CHANGED = 2;
-        int ALL_UNWHITELISTED = 3;
-        int ALL_WHITELIST_CHANGED = 4;
-        int TEMP_WHITELIST_CHANGED = 5;
-        int EXEMPT_CHANGED = 6;
+        int ALL_UNEXEMPTED = 3;
+        int ALL_EXEMPTION_LIST_CHANGED = 4;
+        int TEMP_EXEMPTION_LIST_CHANGED = 5;
+        int EXEMPT_BUCKET_CHANGED = 6;
         int FORCE_ALL_CHANGED = 7;
         int FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 8;
 
@@ -192,10 +192,10 @@ public class AppStateTrackerImpl implements AppStateTracker {
             "UID_FG_STATE_CHANGED",
             "UID_ACTIVE_STATE_CHANGED",
             "RUN_ANY_CHANGED",
-            "ALL_UNWHITELISTED",
-            "ALL_WHITELIST_CHANGED",
-            "TEMP_WHITELIST_CHANGED",
-            "EXEMPT_CHANGED",
+            "ALL_UNEXEMPTED",
+            "ALL_EXEMPTION_LIST_CHANGED",
+            "TEMP_EXEMPTION_LIST_CHANGED",
+            "EXEMPT_BUCKET_CHANGED",
             "FORCE_ALL_CHANGED",
             "FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED",
 
@@ -308,38 +308,39 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         /**
-         * This is called when an app-id(s) is removed from the power save whitelist.
+         * This is called when an app-id(s) is removed from the power save allow-list.
          */
-        private void onPowerSaveUnwhitelisted(AppStateTrackerImpl sender) {
+        private void onPowerSaveUnexempted(AppStateTrackerImpl sender) {
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
         }
 
         /**
-         * This is called when the power save whitelist changes, excluding the
-         * {@link #onPowerSaveUnwhitelisted} case.
+         * This is called when the power save exemption list changes, excluding the
+         * {@link #onPowerSaveUnexempted} case.
          */
-        private void onPowerSaveWhitelistedChanged(AppStateTrackerImpl sender) {
+        private void onPowerSaveExemptionListChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
         }
 
         /**
-         * This is called when the temp whitelist changes.
+         * This is called when the temp exemption list changes.
          */
-        private void onTempPowerSaveWhitelistChanged(AppStateTrackerImpl sender) {
+        private void onTempPowerSaveExemptionListChanged(AppStateTrackerImpl sender) {
 
             // TODO This case happens rather frequently; consider optimizing and update jobs
             // only for affected app-ids.
 
             updateAllJobs();
 
-            // Note when an app is just put in the temp whitelist, we do *not* drain pending alarms.
+            // Note when an app is just put in the temp exemption list, we do *not* drain pending
+            // alarms.
         }
 
         /**
          * This is called when the EXEMPT bucket is updated.
          */
-        private void onExemptChanged(AppStateTrackerImpl sender) {
+        private void onExemptBucketChanged(AppStateTrackerImpl sender) {
             // This doesn't happen very often, so just re-evaluate all jobs / alarms.
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
@@ -709,8 +710,8 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 final String pkgName = intent.getData().getSchemeSpecificPart();
-                if (mExemptedPackages.remove(userId, pkgName)) {
-                    mHandler.notifyExemptChanged();
+                if (mExemptBucketPackages.remove(userId, pkgName)) {
+                    mHandler.notifyExemptBucketChanged();
                 }
             }
         }
@@ -727,12 +728,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
             synchronized (mLock) {
                 final boolean changed;
                 if (bucket == UsageStatsManager.STANDBY_BUCKET_EXEMPTED) {
-                    changed = mExemptedPackages.add(userId, packageName);
+                    changed = mExemptBucketPackages.add(userId, packageName);
                 } else {
-                    changed = mExemptedPackages.remove(userId, packageName);
+                    changed = mExemptBucketPackages.remove(userId, packageName);
                 }
                 if (changed) {
-                    mHandler.notifyExemptChanged();
+                    mHandler.notifyExemptBucketChanged();
                 }
             }
         }
@@ -748,13 +749,13 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private static final int MSG_UID_ACTIVE_STATE_CHANGED = 0;
         private static final int MSG_UID_FG_STATE_CHANGED = 1;
         private static final int MSG_RUN_ANY_CHANGED = 3;
-        private static final int MSG_ALL_UNWHITELISTED = 4;
-        private static final int MSG_ALL_WHITELIST_CHANGED = 5;
-        private static final int MSG_TEMP_WHITELIST_CHANGED = 6;
+        private static final int MSG_ALL_UNEXEMPTED = 4;
+        private static final int MSG_ALL_EXEMPTION_LIST_CHANGED = 5;
+        private static final int MSG_TEMP_EXEMPTION_LIST_CHANGED = 6;
         private static final int MSG_FORCE_ALL_CHANGED = 7;
         private static final int MSG_USER_REMOVED = 8;
         private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 9;
-        private static final int MSG_EXEMPT_CHANGED = 10;
+        private static final int MSG_EXEMPT_BUCKET_CHANGED = 10;
 
         private static final int MSG_ON_UID_STATE_CHANGED = 11;
         private static final int MSG_ON_UID_ACTIVE = 12;
@@ -777,19 +778,19 @@ public class AppStateTrackerImpl implements AppStateTracker {
             obtainMessage(MSG_RUN_ANY_CHANGED, uid, 0, packageName).sendToTarget();
         }
 
-        public void notifyAllUnwhitelisted() {
-            removeMessages(MSG_ALL_UNWHITELISTED);
-            obtainMessage(MSG_ALL_UNWHITELISTED).sendToTarget();
+        public void notifyAllUnexempted() {
+            removeMessages(MSG_ALL_UNEXEMPTED);
+            obtainMessage(MSG_ALL_UNEXEMPTED).sendToTarget();
         }
 
-        public void notifyAllWhitelistChanged() {
-            removeMessages(MSG_ALL_WHITELIST_CHANGED);
-            obtainMessage(MSG_ALL_WHITELIST_CHANGED).sendToTarget();
+        public void notifyAllExemptionListChanged() {
+            removeMessages(MSG_ALL_EXEMPTION_LIST_CHANGED);
+            obtainMessage(MSG_ALL_EXEMPTION_LIST_CHANGED).sendToTarget();
         }
 
-        public void notifyTempWhitelistChanged() {
-            removeMessages(MSG_TEMP_WHITELIST_CHANGED);
-            obtainMessage(MSG_TEMP_WHITELIST_CHANGED).sendToTarget();
+        public void notifyTempExemptionListChanged() {
+            removeMessages(MSG_TEMP_EXEMPTION_LIST_CHANGED);
+            obtainMessage(MSG_TEMP_EXEMPTION_LIST_CHANGED).sendToTarget();
         }
 
         public void notifyForceAllAppsStandbyChanged() {
@@ -802,9 +803,9 @@ public class AppStateTrackerImpl implements AppStateTracker {
             obtainMessage(MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED).sendToTarget();
         }
 
-        public void notifyExemptChanged() {
-            removeMessages(MSG_EXEMPT_CHANGED);
-            obtainMessage(MSG_EXEMPT_CHANGED).sendToTarget();
+        public void notifyExemptBucketChanged() {
+            removeMessages(MSG_EXEMPT_BUCKET_CHANGED);
+            obtainMessage(MSG_EXEMPT_BUCKET_CHANGED).sendToTarget();
         }
 
         public void doUserRemoved(int userId) {
@@ -866,32 +867,32 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     mStatLogger.logDurationStat(Stats.RUN_ANY_CHANGED, start);
                     return;
 
-                case MSG_ALL_UNWHITELISTED:
+                case MSG_ALL_UNEXEMPTED:
                     for (Listener l : cloneListeners()) {
-                        l.onPowerSaveUnwhitelisted(sender);
+                        l.onPowerSaveUnexempted(sender);
                     }
-                    mStatLogger.logDurationStat(Stats.ALL_UNWHITELISTED, start);
+                    mStatLogger.logDurationStat(Stats.ALL_UNEXEMPTED, start);
                     return;
 
-                case MSG_ALL_WHITELIST_CHANGED:
+                case MSG_ALL_EXEMPTION_LIST_CHANGED:
                     for (Listener l : cloneListeners()) {
-                        l.onPowerSaveWhitelistedChanged(sender);
+                        l.onPowerSaveExemptionListChanged(sender);
                     }
-                    mStatLogger.logDurationStat(Stats.ALL_WHITELIST_CHANGED, start);
+                    mStatLogger.logDurationStat(Stats.ALL_EXEMPTION_LIST_CHANGED, start);
                     return;
 
-                case MSG_TEMP_WHITELIST_CHANGED:
+                case MSG_TEMP_EXEMPTION_LIST_CHANGED:
                     for (Listener l : cloneListeners()) {
-                        l.onTempPowerSaveWhitelistChanged(sender);
+                        l.onTempPowerSaveExemptionListChanged(sender);
                     }
-                    mStatLogger.logDurationStat(Stats.TEMP_WHITELIST_CHANGED, start);
+                    mStatLogger.logDurationStat(Stats.TEMP_EXEMPTION_LIST_CHANGED, start);
                     return;
 
-                case MSG_EXEMPT_CHANGED:
+                case MSG_EXEMPT_BUCKET_CHANGED:
                     for (Listener l : cloneListeners()) {
-                        l.onExemptChanged(sender);
+                        l.onExemptBucketChanged(sender);
                     }
-                    mStatLogger.logDurationStat(Stats.EXEMPT_CHANGED, start);
+                    mStatLogger.logDurationStat(Stats.EXEMPT_BUCKET_CHANGED, start);
                     return;
 
                 case MSG_FORCE_ALL_CHANGED:
@@ -1004,7 +1005,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             }
             cleanUpArrayForUser(mActiveUids, removedUserId);
             cleanUpArrayForUser(mForegroundUids, removedUserId);
-            mExemptedPackages.remove(removedUserId);
+            mExemptBucketPackages.remove(removedUserId);
         }
     }
 
@@ -1020,39 +1021,39 @@ public class AppStateTrackerImpl implements AppStateTracker {
     }
 
     /**
-     * Called by device idle controller to update the power save whitelists.
+     * Called by device idle controller to update the power save exemption lists.
      */
-    public void setPowerSaveWhitelistAppIds(
-            int[] powerSaveWhitelistExceptIdleAppIdArray,
-            int[] powerSaveWhitelistUserAppIdArray,
-            int[] tempWhitelistAppIdArray) {
+    public void setPowerSaveExemptionListAppIds(
+            int[] powerSaveExemptionListExceptIdleAppIdArray,
+            int[] powerSaveExemptionListUserAppIdArray,
+            int[] tempExemptionListAppIdArray) {
         synchronized (mLock) {
-            final int[] previousWhitelist = mPowerWhitelistedAllAppIds;
-            final int[] previousTempWhitelist = mTempWhitelistedAppIds;
+            final int[] previousExemptionList = mPowerExemptAllAppIds;
+            final int[] previousTempExemptionList = mTempExemptAppIds;
 
-            mPowerWhitelistedAllAppIds = powerSaveWhitelistExceptIdleAppIdArray;
-            mTempWhitelistedAppIds = tempWhitelistAppIdArray;
-            mPowerWhitelistedUserAppIds = powerSaveWhitelistUserAppIdArray;
+            mPowerExemptAllAppIds = powerSaveExemptionListExceptIdleAppIdArray;
+            mTempExemptAppIds = tempExemptionListAppIdArray;
+            mPowerExemptUserAppIds = powerSaveExemptionListUserAppIdArray;
 
-            if (isAnyAppIdUnwhitelisted(previousWhitelist, mPowerWhitelistedAllAppIds)) {
-                mHandler.notifyAllUnwhitelisted();
-            } else if (!Arrays.equals(previousWhitelist, mPowerWhitelistedAllAppIds)) {
-                mHandler.notifyAllWhitelistChanged();
+            if (isAnyAppIdUnexempt(previousExemptionList, mPowerExemptAllAppIds)) {
+                mHandler.notifyAllUnexempted();
+            } else if (!Arrays.equals(previousExemptionList, mPowerExemptAllAppIds)) {
+                mHandler.notifyAllExemptionListChanged();
             }
 
-            if (!Arrays.equals(previousTempWhitelist, mTempWhitelistedAppIds)) {
-                mHandler.notifyTempWhitelistChanged();
+            if (!Arrays.equals(previousTempExemptionList, mTempExemptAppIds)) {
+                mHandler.notifyTempExemptionListChanged();
             }
 
         }
     }
 
     /**
-     * @retunr true if a sorted app-id array {@code prevArray} has at least one element
+     * @return true if a sorted app-id array {@code prevArray} has at least one element
      * that's not in a sorted app-id array {@code newArray}.
      */
     @VisibleForTesting
-    static boolean isAnyAppIdUnwhitelisted(int[] prevArray, int[] newArray) {
+    static boolean isAnyAppIdUnexempt(int[] prevArray, int[] newArray) {
         int i1 = 0;
         int i2 = 0;
         boolean prevFinished;
@@ -1100,7 +1101,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
      */
     public boolean areAlarmsRestricted(int uid, @NonNull String packageName,
             boolean isExemptOnBatterySaver) {
-        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ false,
+        return isRestricted(uid, packageName, /*useTempExemptionListToo=*/ false,
                 isExemptOnBatterySaver);
     }
 
@@ -1109,7 +1110,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
      */
     public boolean areJobsRestricted(int uid, @NonNull String packageName,
             boolean hasForegroundExemption) {
-        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ true,
+        return isRestricted(uid, packageName, /*useTempExemptionListToo=*/ true,
                 hasForegroundExemption);
     }
 
@@ -1127,17 +1128,16 @@ public class AppStateTrackerImpl implements AppStateTracker {
      * @return whether force-app-standby is effective for a UID package-name.
      */
     private boolean isRestricted(int uid, @NonNull String packageName,
-            boolean useTempWhitelistToo, boolean exemptOnBatterySaver) {
+            boolean useTempExemptionListToo, boolean exemptOnBatterySaver) {
         if (isUidActive(uid)) {
             return false;
         }
         synchronized (mLock) {
-            // Whitelisted?
             final int appId = UserHandle.getAppId(uid);
-            if (ArrayUtils.contains(mPowerWhitelistedAllAppIds, appId)) {
+            if (ArrayUtils.contains(mPowerExemptAllAppIds, appId)) {
                 return false;
             }
-            if (useTempWhitelistToo && ArrayUtils.contains(mTempWhitelistedAppIds, appId)) {
+            if (useTempExemptionListToo && ArrayUtils.contains(mTempExemptAppIds, appId)) {
                 return false;
             }
             if (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName)) {
@@ -1148,7 +1148,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             }
             final int userId = UserHandle.getUserId(uid);
             if (mAppStandbyInternal.isAppIdleEnabled() && !mAppStandbyInternal.isInParole()
-                    && mExemptedPackages.contains(userId, packageName)) {
+                    && mExemptBucketPackages.contains(userId, packageName)) {
                 return false;
             }
             return mForceAllAppsStandby;
@@ -1225,34 +1225,34 @@ public class AppStateTrackerImpl implements AppStateTracker {
     }
 
     /**
-     * @return whether a UID is in the user / system defined power-save whitelist or not.
+     * @return whether a UID is in the user / system defined power-save exemption list or not.
      *
      * Note clients normally shouldn't need to access it. It's only for dumpsys.
      */
-    public boolean isUidPowerSaveWhitelisted(int uid) {
+    public boolean isUidPowerSaveExempt(int uid) {
         synchronized (mLock) {
-            return ArrayUtils.contains(mPowerWhitelistedAllAppIds, UserHandle.getAppId(uid));
+            return ArrayUtils.contains(mPowerExemptAllAppIds, UserHandle.getAppId(uid));
         }
     }
 
     /**
      * @param uid the uid to check for
-     * @return whether a UID is in the user defined power-save whitelist or not.
+     * @return whether a UID is in the user defined power-save exemption list or not.
      */
-    public boolean isUidPowerSaveUserWhitelisted(int uid) {
+    public boolean isUidPowerSaveUserExempt(int uid) {
         synchronized (mLock) {
-            return ArrayUtils.contains(mPowerWhitelistedUserAppIds, UserHandle.getAppId(uid));
+            return ArrayUtils.contains(mPowerExemptUserAppIds, UserHandle.getAppId(uid));
         }
     }
 
     /**
-     * @return whether a UID is in the temp power-save whitelist or not.
+     * @return whether a UID is in the temp power-save exemption list or not.
      *
      * Note clients normally shouldn't need to access it. It's only for dumpsys.
      */
-    public boolean isUidTempPowerSaveWhitelisted(int uid) {
+    public boolean isUidTempPowerSaveExempt(int uid) {
         synchronized (mLock) {
-            return ArrayUtils.contains(mTempWhitelistedAppIds, UserHandle.getAppId(uid));
+            return ArrayUtils.contains(mTempExemptAppIds, UserHandle.getAppId(uid));
         }
     }
 
@@ -1290,25 +1290,25 @@ public class AppStateTrackerImpl implements AppStateTracker {
             pw.print("Foreground uids: ");
             dumpUids(pw, mForegroundUids);
 
-            pw.print("Except-idle + user whitelist appids: ");
-            pw.println(Arrays.toString(mPowerWhitelistedAllAppIds));
+            pw.print("Except-idle + user exemption list appids: ");
+            pw.println(Arrays.toString(mPowerExemptAllAppIds));
 
-            pw.print("User whitelist appids: ");
-            pw.println(Arrays.toString(mPowerWhitelistedUserAppIds));
+            pw.print("User exemption list appids: ");
+            pw.println(Arrays.toString(mPowerExemptUserAppIds));
 
-            pw.print("Temp whitelist appids: ");
-            pw.println(Arrays.toString(mTempWhitelistedAppIds));
+            pw.print("Temp exemption list appids: ");
+            pw.println(Arrays.toString(mTempExemptAppIds));
 
-            pw.println("Exempted packages:");
+            pw.println("Exempted bucket packages:");
             pw.increaseIndent();
-            for (int i = 0; i < mExemptedPackages.size(); i++) {
+            for (int i = 0; i < mExemptBucketPackages.size(); i++) {
                 pw.print("User ");
-                pw.print(mExemptedPackages.keyAt(i));
+                pw.print(mExemptBucketPackages.keyAt(i));
                 pw.println();
 
                 pw.increaseIndent();
-                for (int j = 0; j < mExemptedPackages.sizeAt(i); j++) {
-                    pw.print(mExemptedPackages.valueAt(i, j));
+                for (int j = 0; j < mExemptBucketPackages.sizeAt(i); j++) {
+                    pw.print(mExemptBucketPackages.valueAt(i, j));
                     pw.println();
                 }
                 pw.decreaseIndent();
@@ -1372,24 +1372,24 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 }
             }
 
-            for (int appId : mPowerWhitelistedAllAppIds) {
-                proto.write(AppStateTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
+            for (int appId : mPowerExemptAllAppIds) {
+                proto.write(AppStateTrackerProto.POWER_SAVE_EXEMPT_APP_IDS, appId);
             }
 
-            for (int appId : mPowerWhitelistedUserAppIds) {
-                proto.write(AppStateTrackerProto.POWER_SAVE_USER_WHITELIST_APP_IDS, appId);
+            for (int appId : mPowerExemptUserAppIds) {
+                proto.write(AppStateTrackerProto.POWER_SAVE_USER_EXEMPT_APP_IDS, appId);
             }
 
-            for (int appId : mTempWhitelistedAppIds) {
-                proto.write(AppStateTrackerProto.TEMP_POWER_SAVE_WHITELIST_APP_IDS, appId);
+            for (int appId : mTempExemptAppIds) {
+                proto.write(AppStateTrackerProto.TEMP_POWER_SAVE_EXEMPT_APP_IDS, appId);
             }
 
-            for (int i = 0; i < mExemptedPackages.size(); i++) {
-                for (int j = 0; j < mExemptedPackages.sizeAt(i); j++) {
-                    final long token2 = proto.start(AppStateTrackerProto.EXEMPTED_PACKAGES);
+            for (int i = 0; i < mExemptBucketPackages.size(); i++) {
+                for (int j = 0; j < mExemptBucketPackages.sizeAt(i); j++) {
+                    final long token2 = proto.start(AppStateTrackerProto.EXEMPTED_BUCKET_PACKAGES);
 
-                    proto.write(ExemptedPackage.USER_ID, mExemptedPackages.keyAt(i));
-                    proto.write(ExemptedPackage.PACKAGE_NAME, mExemptedPackages.valueAt(i, j));
+                    proto.write(ExemptedPackage.USER_ID, mExemptBucketPackages.keyAt(i));
+                    proto.write(ExemptedPackage.PACKAGE_NAME, mExemptBucketPackages.valueAt(i, j));
 
                     proto.end(token2);
                 }
