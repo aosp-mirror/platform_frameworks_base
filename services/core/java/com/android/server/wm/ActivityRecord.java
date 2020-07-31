@@ -5919,10 +5919,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // stack, i.e. the hierarchy of the surfaces is unchanged.
         if (inPinnedWindowingMode()) {
             return getStack().getSurfaceControl();
-        } else if (WindowManagerService.sHierarchicalAnimations) {
-            return super.getAnimationLeashParent();
         } else {
-            return getAppAnimationLayer();
+            return super.getAnimationLeashParent();
         }
     }
 
@@ -6010,11 +6008,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mAnimationBoundsLayer = createAnimationBoundsLayer(t);
 
             // Crop to stack bounds.
-            if (!WindowManagerService.sHierarchicalAnimations) {
-                // For Hierarchical animation, we don't need to set window crop since the leash
-                // surface size has already same as the animating container.
-                t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
-            }
             t.setLayer(leash, 0);
             t.setLayer(mAnimationBoundsLayer, getAnimationLayer());
 

@@ -137,6 +137,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
@@ -921,6 +922,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         final int uid = UserHandle.getUid(userId, pkg.getUid());
+
+        try {
+            enforceCrossUserOrProfilePermission(Binder.getCallingUid(), UserHandle.getUserId(uid),
+                    false, false, "checkPermissionInternal");
+        } catch (Exception e) {
+            EventLog.writeEvent(0x534e4554, "153996875", "checkPermission", uid);
+
+            throw e;
+        }
+
         final PackageSetting ps = (PackageSetting) mPackageManagerInt.getPackageSetting(
                 pkg.getPackageName());
         if (ps == null) {
@@ -1928,10 +1939,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
         if (doGrant && packageName != null) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                        userId);
-            }
+            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                    userId);
         }
         return true;
     }
@@ -1941,10 +1950,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils
                 .enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps", callingUid);
-        synchronized (mLock) {
-            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                    .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId));
-        }
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId));
     }
 
     @Override
@@ -1952,10 +1959,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
                 "grantDefaultPermissionsToEnabledImsServices", callingUid);
-        synchronized (mLock) {
-            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                    .grantDefaultPermissionsToEnabledImsServices(packageNames, userId));
-        }
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .grantDefaultPermissionsToEnabledImsServices(packageNames, userId));
     }
 
     @Override
@@ -1964,11 +1969,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
                 "grantDefaultPermissionsToEnabledTelephonyDataServices", callingUid);
-        synchronized (mLock) {
-            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                    .grantDefaultPermissionsToEnabledTelephonyDataServices(
-                            packageNames, userId));
-        }
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .grantDefaultPermissionsToEnabledTelephonyDataServices(packageNames, userId));
     }
 
     @Override
@@ -1977,11 +1979,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
                 "revokeDefaultPermissionsFromDisabledTelephonyDataServices", callingUid);
-        synchronized (mLock) {
-            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                    .revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-                            packageNames, userId));
-        }
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .revokeDefaultPermissionsFromDisabledTelephonyDataServices(packageNames, userId));
     }
 
     @Override
@@ -1989,10 +1988,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils
                 .enforceSystemOrPhoneCaller("grantDefaultPermissionsToActiveLuiApp", callingUid);
-        synchronized (mLock) {
-            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                    .grantDefaultPermissionsToActiveLuiApp(packageName, userId));
-        }
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .grantDefaultPermissionsToActiveLuiApp(packageName, userId));
     }
 
     @Override
@@ -2000,10 +1997,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils
                 .enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromLuiApps", callingUid);
-        synchronized (mLock) {
-            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                    .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
-        }
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
     }
 
     @Override
@@ -4404,7 +4399,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (hasCrossUserPermission(
-                callingUid, callingUserId, userId, requireFullPermission,
+                Binder.getCallingPid(), callingUid, callingUserId, userId, requireFullPermission,
                 requirePermissionWhenSameUser)) {
             return;
         }
@@ -4431,37 +4426,54 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void enforceCrossUserOrProfilePermission(int callingUid, int userId,
             boolean requireFullPermission, boolean checkShell,
             String message) {
+        int callingPid = Binder.getCallingPid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
-        if (checkShell) {
-            PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
-                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
-        }
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        if (hasCrossUserPermission(callingUid, callingUserId, userId, requireFullPermission,
-                /*requirePermissionWhenSameUser= */ false)) {
+
+        if (callingUserId == userId) {
             return;
         }
-        final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
-        if (isSameProfileGroup && PermissionChecker.checkPermissionForPreflight(
-                mContext,
-                android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-                PermissionChecker.PID_UNKNOWN,
-                callingUid,
-                mPackageManagerInt.getPackage(callingUid).getPackageName())
-                == PermissionChecker.PERMISSION_GRANTED) {
+
+        // Prevent endless loop between when checking permission while checking a permission
+        if (callingPid == ActivityManagerService.MY_PID) {
             return;
         }
-        String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
-                message, requireFullPermission, isSameProfileGroup);
-        Slog.w(TAG, errorMessage);
-        throw new SecurityException(errorMessage);
+
+        long token = Binder.clearCallingIdentity();
+        try {
+            if (checkShell) {
+                PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
+                        UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
+            }
+            if (hasCrossUserPermission(callingPid, callingUid, callingUserId, userId,
+                    requireFullPermission, /*requirePermissionWhenSameUser= */ false)) {
+                return;
+            }
+            final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
+            if (isSameProfileGroup && PermissionChecker.checkPermissionForPreflight(
+                    mContext,
+                    android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+                    PermissionChecker.PID_UNKNOWN,
+                    callingUid,
+                    mPackageManagerInt.getPackage(callingUid).getPackageName())
+                    == PermissionChecker.PERMISSION_GRANTED) {
+                return;
+            }
+
+            String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
+                    message, requireFullPermission, isSameProfileGroup);
+            Slog.w(TAG, errorMessage);
+            throw new SecurityException(errorMessage);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
-    private boolean hasCrossUserPermission(
-            int callingUid, int callingUserId, int userId, boolean requireFullPermission,
-            boolean requirePermissionWhenSameUser) {
+    private boolean hasCrossUserPermission(int callingPid, int callingUid, int callingUserId,
+            int userId, boolean requireFullPermission, boolean requirePermissionWhenSameUser) {
         if (!requirePermissionWhenSameUser && userId == callingUserId) {
             return true;
         }
@@ -4469,15 +4481,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return true;
         }
         if (requireFullPermission) {
-            return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+            return mContext.checkPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
         }
-        return hasPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS);
-    }
-
-    private boolean hasPermission(String permission) {
-        return mContext.checkCallingOrSelfPermission(permission)
-                == PackageManager.PERMISSION_GRANTED;
+        return mContext.checkPermission(android.Manifest.permission.INTERACT_ACROSS_USERS,
+                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
@@ -4889,58 +4897,42 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void setDialerAppPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setDialerAppPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setDialerAppPackagesProvider(provider);
         }
 
         @Override
         public void setLocationExtraPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setLocationExtraPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setLocationExtraPackagesProvider(provider);
         }
 
         @Override
         public void setLocationPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setLocationPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setLocationPackagesProvider(provider);
         }
 
         @Override
         public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setSimCallManagerPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setSimCallManagerPackagesProvider(provider);
         }
 
         @Override
         public void setSmsAppPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setSmsAppPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setSmsAppPackagesProvider(provider);
         }
 
         @Override
         public void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setSyncAdapterPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setSyncAdapterPackagesProvider(provider);
         }
 
         @Override
         public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setUseOpenWifiAppPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setUseOpenWifiAppPackagesProvider(provider);
         }
 
         @Override
         public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.setVoiceInteractionPackagesProvider(provider);
-            }
+            mDefaultPermissionGrantPolicy.setVoiceInteractionPackagesProvider(provider);
         }
 
         @Override
@@ -4972,26 +4964,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy
-                        .grantDefaultPermissionsToDefaultSimCallManager(packageName, userId);
-            }
+            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultSimCallManager(
+                    packageName, userId);
         }
 
         @Override
         public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy
-                        .grantDefaultPermissionsToDefaultUseOpenWifiApp(packageName, userId);
-            }
+            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
+                    packageName, userId);
         }
 
         @Override
         public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
-            synchronized (mLock) {
-                mDefaultPermissionGrantPolicy
-                        .grantDefaultPermissionsToDefaultBrowser(packageName, userId);
-            }
+            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                    userId);
         }
 
         @Override

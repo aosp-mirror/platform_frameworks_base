@@ -53,8 +53,8 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class OneHandedGestureHandler implements OneHandedTransitionCallback,
-            NavigationModeController.ModeChangedListener,
-            DisplayChangeController.OnDisplayChangingListener {
+        NavigationModeController.ModeChangedListener,
+        DisplayChangeController.OnDisplayChangingListener {
     private static final String TAG = "OneHandedGestureHandler";
     private static final boolean DEBUG_GESTURE = false;
 
@@ -87,8 +87,8 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      * Constructor of OneHandedGestureHandler, we only handle the gesture of
      * {@link Display#DEFAULT_DISPLAY}
      *
-     * @param context           {@link Context}
-     * @param displayController {@link DisplayController}
+     * @param context                  {@link Context}
+     * @param displayController        {@link DisplayController}
      * @param navigationModeController {@link NavigationModeController}
      */
     @Inject
@@ -103,7 +103,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         mDragDistThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.gestures_onehanded_drag_threshold);
         final float slop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mSquaredSlop =  slop * slop;
+        mSquaredSlop = slop * slop;
         updateIsEnabled();
     }
 

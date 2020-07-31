@@ -82,6 +82,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     private OneHandedAnimationController mAnimationController;
     private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
+    private OneHandedTutorialHandler mTutorialHandler;
     private List<OneHandedTransitionCallback> mTransitionCallbacks = new ArrayList<>();
 
     @VisibleForTesting
@@ -148,7 +149,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     @Inject
     public OneHandedDisplayAreaOrganizer(Context context,
             DisplayController displayController,
-            OneHandedAnimationController animationController) {
+            OneHandedAnimationController animationController,
+            OneHandedTutorialHandler tutorialHandler) {
         mUpdateHandler = new Handler(OneHandedThread.get().getLooper(), mUpdateCallback);
         mAnimationController = animationController;
         mDisplayController = displayController;
@@ -157,6 +159,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         mEnterExitAnimationDurationMs = context.getResources().getInteger(
                 com.android.systemui.R.integer.config_one_handed_translate_animation_duration);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
+        mTutorialHandler = tutorialHandler;
     }
 
     @Override
@@ -272,7 +275,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
                     mAnimationController.getAnimator(leash, fromBounds, toBounds);
             if (animator != null) {
                 animator.setTransitionDirection(direction)
-                        .setOneHandedAnimationCallback(mOneHandedAnimationCallback)
+                        .setOneHandedAnimationCallbacks(mOneHandedAnimationCallback)
+                        .setOneHandedAnimationCallbacks(mTutorialHandler.getAnimationCallback())
                         .setDuration(durationMs)
                         .start();
             }

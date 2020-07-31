@@ -804,6 +804,7 @@ public class StagingManager {
             params.isStaged = false;
             if (preReboot) {
                 params.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
+                params.installFlags |= PackageManager.INSTALL_DRY_RUN;
             }
             final int apkParentSessionId = mPi.createSession(
                     params, session.getInstallerPackageName(), session.getInstallerAttributionTag(),

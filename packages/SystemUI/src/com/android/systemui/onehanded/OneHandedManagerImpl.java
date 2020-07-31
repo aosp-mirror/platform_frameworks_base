@@ -57,6 +57,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private final OneHandedGestureHandler mGestureHandler;
     private final OneHandedTimeoutHandler mTimeoutHandler;
     private final OneHandedTouchHandler mTouchHandler;
+    private final OneHandedTutorialHandler mTutorialHandler;
     private final SysUiState mSysUiFlagContainer;
 
     private Context mContext;
@@ -107,6 +108,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
             OneHandedTouchHandler touchHandler,
+            OneHandedTutorialHandler tutorialHandler,
             OneHandedGestureHandler gestureHandler,
             SysUiState sysUiState) {
         mContext = context;
@@ -120,6 +122,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
                 context.getContentResolver());
         mTimeoutHandler = OneHandedTimeoutHandler.get();
         mTouchHandler = touchHandler;
+        mTutorialHandler = tutorialHandler;
         mGestureHandler = gestureHandler;
         updateOneHandedEnabled();
         setupGestures();
@@ -230,6 +233,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
         mDisplayAreaOrganizer.registerTransitionCallback(mTransitionCallback);
         mDisplayAreaOrganizer.registerTransitionCallback(mTouchHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mGestureHandler);
+        mDisplayAreaOrganizer.registerTransitionCallback(mTutorialHandler);
     }
 
     /**

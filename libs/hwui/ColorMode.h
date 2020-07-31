@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row.dagger;
+#pragma once
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+namespace android::uirenderer {
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
+// Must match the constants in ActivityInfo.java
+enum class ColorMode {
+    // SRGB means HWUI will produce buffer in SRGB color space.
+    Default = 0,
+    // WideColorGamut selects the most optimal colorspace & format for the device's display
+    // Most commonly DisplayP3 + RGBA_8888 currently.
+    WideColorGamut = 1,
+    // HDR Rec2020 + F16
+    Hdr = 2,
+    // HDR Rec2020 + 1010102
+    Hdr10 = 3,
+};
 
-import javax.inject.Qualifier;
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface DismissRunnable {
-}
+} // namespace android::uirenderer

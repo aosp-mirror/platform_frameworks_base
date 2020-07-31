@@ -37,7 +37,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
 import com.android.server.backup.transport.TransportClient;
 
 import com.google.android.collect.Sets;
@@ -49,8 +48,8 @@ import java.util.Set;
  */
 public class BackupEligibilityRules {
     private static final boolean DEBUG = false;
-    // Whitelist of system packages that are eligible for backup in non-system users.
-    private static final Set<String> systemPackagesWhitelistedForAllUsers =
+    // List of system packages that are eligible for backup in non-system users.
+    private static final Set<String> systemPackagesAllowedForAllUsers =
             Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
 
     private final PackageManager mPackageManager;
@@ -97,9 +96,10 @@ public class BackupEligibilityRules {
 
         // 2. they run as a system-level uid
         if (UserHandle.isCore(app.uid)) {
-            // and the backup is happening for non-system user on a non-whitelisted package.
+            // and the backup is happening for a non-system user on a package that is not explicitly
+            // allowed.
             if (mUserId != UserHandle.USER_SYSTEM
-                    && !systemPackagesWhitelistedForAllUsers.contains(app.packageName)) {
+                    && !systemPackagesAllowedForAllUsers.contains(app.packageName)) {
                 return false;
             }
 

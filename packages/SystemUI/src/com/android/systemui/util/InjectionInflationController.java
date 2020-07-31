@@ -23,7 +23,6 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.dagger.SystemUIRootComponent;
@@ -130,11 +129,6 @@ public class InjectionInflationController {
          * Creates the Shelf.
          */
         NotificationShelf creatNotificationShelf();
-
-        /**
-         * Creates the KeyguardClockSwitch.
-         */
-        KeyguardClockSwitch createKeyguardClockSwitch();
 
         /**
          * Creates the KeyguardSliceView.

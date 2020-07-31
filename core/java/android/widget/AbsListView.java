@@ -1514,7 +1514,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mOnScrollListener != null) {
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
         }
-        onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
+        // placeholder values, View's implementation does not use these.
+        onScrollChanged(0, 0, 0, 0);
     }
 
     /**

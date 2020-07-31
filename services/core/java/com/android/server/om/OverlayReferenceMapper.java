@@ -18,14 +18,15 @@ package com.android.server.om;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.SystemConfig;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,6 +72,8 @@ import java.util.Set;
  * name, and "overlay" is overlay package name.
  */
 public class OverlayReferenceMapper {
+
+    private static final String TAG = "OverlayReferenceMapper";
 
     private final Object mLock = new Object();
 
@@ -144,7 +147,7 @@ public class OverlayReferenceMapper {
 
     public boolean isValidActor(@NonNull String targetName, @NonNull String actorPackageName) {
         synchronized (mLock) {
-            assertMapBuilt();
+            ensureMapBuilt();
             Set<String> validSet = mActorPkgToPkgs.get(actorPackageName);
             return validSet != null && validSet.contains(targetName);
         }
@@ -292,10 +295,11 @@ public class OverlayReferenceMapper {
         }
     }
 
-    private void assertMapBuilt() {
+    private void ensureMapBuilt() {
         if (mDeferRebuild) {
-            throw new IllegalStateException("The actor map must be built by calling "
-                    + "rebuildIfDeferred before it is queried");
+            rebuildIfDeferred();
+            Slog.w(TAG, "The actor map was queried before the system was ready, which may"
+                    + "result in decreased performance.");
         }
     }
 
@@ -360,7 +364,7 @@ public class OverlayReferenceMapper {
          * Given the actor string from an overlayable definition, return the actor's package name.
          */
         @Nullable
-        String getActorPkg(String actor);
+        String getActorPkg(@NonNull String actor);
 
         /**
          * Mock response of multiple overlay tags.

@@ -57,6 +57,8 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Mock
     OneHandedTouchHandler mMockTouchHandler;
     @Mock
+    OneHandedTutorialHandler mMockTutorialHandler;
+    @Mock
     OneHandedGestureHandler mMockGestureHandler;
     @Mock
     SysUiState mMockSysUiState;
@@ -69,6 +71,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
+                mMockTutorialHandler,
                 mMockGestureHandler,
                 mMockSysUiState);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
@@ -84,7 +87,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
                 transactionHelper);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
-                mContext, mMockDisplayController, animationController);
+                mContext, mMockDisplayController, animationController, mMockTutorialHandler);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }

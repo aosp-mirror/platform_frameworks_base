@@ -411,10 +411,6 @@ public class AppTransitionController {
             }
         }
 
-        if (!WindowManagerService.sHierarchicalAnimations) {
-            return new ArraySet<>(candidates);
-        }
-
         final ArraySet<ActivityRecord> otherApps = visible ? closingApps : openingApps;
         // Ancestors of closing apps while finding animation targets for opening apps, or ancestors
         // of opening apps while finding animation targets for closing apps.

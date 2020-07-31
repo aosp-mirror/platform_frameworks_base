@@ -19,7 +19,7 @@ package com.android.server.pm;
 import android.content.pm.PackageManager;
 import android.util.SparseBooleanArray;
 
-import com.android.server.pm.PackageManagerService.InstallParams;
+import com.android.server.pm.PackageManagerService.VerificationParams;
 
 /**
  * Tracks the package verification state for a particular package. Each package verification has a
@@ -28,7 +28,7 @@ import com.android.server.pm.PackageManagerService.InstallParams;
  * sufficient verifiers, then package verification is considered complete.
  */
 class PackageVerificationState {
-    private final InstallParams mParams;
+    private final VerificationParams mParams;
 
     private final SparseBooleanArray mSufficientVerifierUids;
 
@@ -50,13 +50,13 @@ class PackageVerificationState {
      * Create a new package verification state where {@code requiredVerifierUid} is the user ID for
      * the package that must reply affirmative before things can continue.
      */
-    PackageVerificationState(InstallParams params) {
+    PackageVerificationState(VerificationParams params) {
         mParams = params;
         mSufficientVerifierUids = new SparseBooleanArray();
         mExtendedTimeout = false;
     }
 
-    InstallParams getInstallParams() {
+    VerificationParams getVerificationParams() {
         return mParams;
     }
 

@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar.notification.stack;
@@ -6581,40 +6581,25 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             } else {
                 final List<Pair<NotificationEntry, DismissedByUserStats>>
                         entriesWithRowsDismissedFromShade = new ArrayList<>();
-                final List<DismissedByUserStats> dismissalUserStats = new ArrayList<>();
                 final int numVisibleEntries = mNotifPipeline.getShadeListCount();
                 for (int i = 0; i < viewsToRemove.size(); i++) {
                     final NotificationEntry entry = viewsToRemove.get(i).getEntry();
-                    final DismissedByUserStats stats =
-                            new DismissedByUserStats(
-                                    DISMISSAL_SHADE,
-                                    DISMISS_SENTIMENT_NEUTRAL,
-                                    NotificationVisibility.obtain(
-                                            entry.getKey(),
-                                            entry.getRanking().getRank(),
-                                            numVisibleEntries,
-                                            true,
-                                            NotificationLogger.getNotificationLocation(entry)));
                     entriesWithRowsDismissedFromShade.add(
-                            new Pair<NotificationEntry, DismissedByUserStats>(entry, stats));
+                            new Pair<NotificationEntry, DismissedByUserStats>(
+                                    entry,
+                                    getDismissedByUserStats(entry, numVisibleEntries)));
                 }
                 mNotifCollection.dismissNotifications(entriesWithRowsDismissedFromShade);
             }
         } else {
             for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
                 if (canChildBeDismissed(rowToRemove)) {
-                    if (selectedRows == ROWS_ALL) {
-                        // TODO: This is a listener method; we shouldn't be calling it. Can we just
-                        // call performRemoveNotification as below?
-                        mEntryManager.removeNotification(
-                                rowToRemove.getEntry().getKey(),
-                                null /* ranking */,
-                                NotificationListenerService.REASON_CANCEL_ALL);
-                    } else {
-                        mEntryManager.performRemoveNotification(
-                                rowToRemove.getEntry().getSbn(),
-                                NotificationListenerService.REASON_CANCEL_ALL);
-                    }
+                    mEntryManager.performRemoveNotification(
+                            rowToRemove.getEntry().getSbn(),
+                            getDismissedByUserStats(
+                                    rowToRemove.getEntry(),
+                                    mEntryManager.getActiveNotificationsCount()),
+                            NotificationListenerService.REASON_CANCEL_ALL);
                 } else {
                     rowToRemove.resetTranslation();
                 }
@@ -6626,6 +6611,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
             }
         }
+    }
+
+    private DismissedByUserStats getDismissedByUserStats(
+            NotificationEntry entry,
+            int numVisibleEntries
+    ) {
+        return new DismissedByUserStats(
+            DISMISSAL_SHADE,
+            DISMISS_SENTIMENT_NEUTRAL,
+            NotificationVisibility.obtain(
+                    entry.getKey(),
+                    entry.getRanking().getRank(),
+                    numVisibleEntries,
+                    true,
+                    NotificationLogger.getNotificationLocation(entry)));
     }
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------

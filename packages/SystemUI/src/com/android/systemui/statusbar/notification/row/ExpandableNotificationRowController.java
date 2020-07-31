@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
-import com.android.systemui.statusbar.notification.row.dagger.DismissRunnable;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -66,7 +65,7 @@ public class ExpandableNotificationRowController {
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnAppOpsClickListener;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
-    private Runnable mOnDismissRunnable;
+    private final OnDismissCallback mOnDismissCallback;
     private final FalsingManager mFalsingManager;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
@@ -84,7 +83,7 @@ public class ExpandableNotificationRowController {
             StatusBarStateController statusBarStateController,
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            @DismissRunnable Runnable onDismissRunnable, FalsingManager falsingManager,
+            OnDismissCallback onDismissCallback, FalsingManager falsingManager,
             PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mView = view;
         mActivatableNotificationViewController = activatableNotificationViewController;
@@ -101,7 +100,7 @@ public class ExpandableNotificationRowController {
         mOnExpandClickListener = onExpandClickListener;
         mStatusBarStateController = statusBarStateController;
         mNotificationGutsManager = notificationGutsManager;
-        mOnDismissRunnable = onDismissRunnable;
+        mOnDismissCallback = onDismissCallback;
         mOnAppOpsClickListener = mNotificationGutsManager::openGuts;
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
@@ -130,7 +129,7 @@ public class ExpandableNotificationRowController {
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier
         );
-        mView.setOnDismissRunnable(mOnDismissRunnable);
+        mView.setOnDismissCallback(mOnDismissCallback);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
             mView.setLongPressListener((v, x, y, item) -> {
@@ -162,11 +161,5 @@ public class ExpandableNotificationRowController {
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
         mNotificationLogger.onExpansionChanged(key, userAction, expanded);
-    }
-
-    /** */
-    public void setOnDismissRunnable(Runnable onDismissRunnable) {
-        mOnDismissRunnable = onDismissRunnable;
-        mView.setOnDismissRunnable(onDismissRunnable);
     }
 }

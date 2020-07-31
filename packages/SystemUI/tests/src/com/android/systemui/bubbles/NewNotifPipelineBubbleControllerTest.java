@@ -26,6 +26,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -301,7 +302,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleData.hasOverflowBubbleWithKey(mRow.getEntry().getKey()));
 
         // We don't remove the notification since the bubble is still in overflow.
-        verify(mNotifCallback, never()).removeNotification(eq(mRow.getEntry()), anyInt());
+        verify(mNotifCallback, never()).removeNotification(eq(mRow.getEntry()), any(), anyInt());
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -325,7 +326,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         // Since the notif is dismissed and not in overflow, once the bubble is removed,
         // removeNotification gets called to really remove the notif
-        verify(mNotifCallback, times(1)).removeNotification(eq(mRow.getEntry()), anyInt());
+        verify(mNotifCallback, times(1)).removeNotification(eq(mRow.getEntry()),
+                any(), anyInt());
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -831,10 +833,11 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         // THEN only the NON-bubble children are dismissed
         List<ExpandableNotificationRow> childrenRows = groupSummary.getAttachedChildren();
         verify(mNotifCallback, times(1)).removeNotification(
-                childrenRows.get(0).getEntry(), REASON_GROUP_SUMMARY_CANCELED);
+                eq(childrenRows.get(0).getEntry()), any(), eq(REASON_GROUP_SUMMARY_CANCELED));
         verify(mNotifCallback, times(1)).removeNotification(
-                childrenRows.get(1).getEntry(), REASON_GROUP_SUMMARY_CANCELED);
-        verify(mNotifCallback, never()).removeNotification(eq(groupedBubble.getEntry()), anyInt());
+                eq(childrenRows.get(1).getEntry()), any(), eq(REASON_GROUP_SUMMARY_CANCELED));
+        verify(mNotifCallback, never()).removeNotification(eq(groupedBubble.getEntry()),
+                any(), anyInt());
 
         // THEN the bubble child still exists as a bubble and is suppressed from the shade
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));

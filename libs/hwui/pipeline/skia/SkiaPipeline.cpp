@@ -35,6 +35,7 @@
 #include "VectorDrawable.h"
 #include "thread/CommonPool.h"
 #include "tools/SkSharingProc.h"
+#include "utils/Color.h"
 #include "utils/String8.h"
 #include "utils/TraceUtils.h"
 
@@ -587,14 +588,23 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
 
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
     mColorMode = colorMode;
-    if (colorMode == ColorMode::SRGB) {
-        mSurfaceColorType = SkColorType::kN32_SkColorType;
-        mSurfaceColorSpace = SkColorSpace::MakeSRGB();
-    } else if (colorMode == ColorMode::WideColorGamut) {
-        mSurfaceColorType = DeviceInfo::get()->getWideColorType();
-        mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
-    } else {
-        LOG_ALWAYS_FATAL("Unreachable: unsupported color mode.");
+    switch (colorMode) {
+        case ColorMode::Default:
+            mSurfaceColorType = SkColorType::kN32_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeSRGB();
+            break;
+        case ColorMode::WideColorGamut:
+            mSurfaceColorType = DeviceInfo::get()->getWideColorType();
+            mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
+            break;
+        case ColorMode::Hdr:
+            mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
+            break;
+        case ColorMode::Hdr10:
+            mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
+            break;
     }
 }
 
