@@ -740,7 +740,7 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
   if (type == ResourceType::kId) {
     if (res_value.dataType != android::Res_value::TYPE_REFERENCE &&
         res_value.dataType != android::Res_value::TYPE_DYNAMIC_REFERENCE) {
-      // plain "id" resources are actually encoded as dummy values (aapt1 uses an empty string,
+      // plain "id" resources are actually encoded as unused values (aapt1 uses an empty string,
       // while aapt2 uses a false boolean).
       return util::make_unique<Id>();
     }
