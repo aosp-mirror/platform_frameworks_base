@@ -408,7 +408,7 @@ public abstract class PanelViewController {
                 && !mKeyguardStateController.isKeyguardFadingAway()) {
             long timePassed = SystemClock.uptimeMillis() - mDownTime;
             if (timePassed < ViewConfiguration.getLongPressTimeout()) {
-                // Lets show the user that he can actually expand the panel
+                // Let's show the user that they can actually expand the panel
                 runPeekAnimation(
                         PEEK_ANIMATION_DURATION, getPeekHeight(), true /* collapseWhenFinished */);
             } else {
