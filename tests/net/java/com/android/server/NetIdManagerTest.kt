@@ -19,8 +19,8 @@ package com.android.server
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.server.NetIdManager.MIN_NET_ID
-import com.android.testutils.ExceptionUtils.ThrowingRunnable
 import com.android.testutils.assertThrows
+import com.android.testutils.ExceptionUtils.ThrowingRunnable
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
