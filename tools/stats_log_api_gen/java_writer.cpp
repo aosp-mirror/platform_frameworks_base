@@ -42,6 +42,7 @@ static int write_java_q_logger_class(FILE* out, const SignatureInfoMap& signatur
 static void write_java_annotation_constants(FILE* out) {
     fprintf(out, "    // Annotation constants.\n");
 
+    const map<AnnotationId, string>& ANNOTATION_ID_CONSTANTS = get_annotation_id_constants();
     for (const auto& [id, name] : ANNOTATION_ID_CONSTANTS) {
         fprintf(out, "    public static final byte %s = %hhu;\n", name.c_str(), id);
     }
@@ -56,6 +57,7 @@ static void write_annotations(FILE* out, int argIndex,
         return;
     }
     const AtomDeclSet& atomDeclSet = fieldNumberToAtomDeclSetIt->second;
+    const map<AnnotationId, string>& ANNOTATION_ID_CONSTANTS = get_annotation_id_constants();
     for (const shared_ptr<AtomDecl>& atomDecl : atomDeclSet) {
         const string atomConstant = make_constant_name(atomDecl->name);
         fprintf(out, "        if (%s == code) {\n", atomConstant.c_str());
@@ -102,7 +104,7 @@ static void write_method_signature(FILE* out, const vector<java_type_t>& signatu
     for (vector<java_type_t>::const_iterator arg = signature.begin(); arg != signature.end();
          arg++) {
         if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
+            for (const auto& chainField : attributionDecl.fields) {
                 fprintf(out, ", %s[] %s", java_type_name(chainField.javaType),
                         chainField.name.c_str());
             }
@@ -243,13 +245,15 @@ static int write_method_body(FILE* out, const vector<java_type_t>& signature,
     return 0;
 }
 
-static int write_java_methods(FILE* out, const SignatureInfoMap& signatureInfoMap,
+static int write_java_pushed_methods(FILE* out, const SignatureInfoMap& signatureInfoMap,
                               const AtomDecl& attributionDecl, const bool supportQ) {
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
          signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static void write(int code");
-        write_method_signature(out, signatureInfoMapIt->first, attributionDecl);
+        const vector<java_type_t>& signature = signatureInfoMapIt->first;
+        const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = signatureInfoMapIt->second;
+        write_method_signature(out, signature, attributionDecl);
         fprintf(out, ") {\n");
 
         // Print method body.
@@ -259,7 +263,7 @@ static int write_java_methods(FILE* out, const SignatureInfoMap& signatureInfoMa
             indent = "    ";
         }
 
-        int ret = write_method_body(out, signatureInfoMapIt->first, signatureInfoMapIt->second,
+        int ret = write_method_body(out, signature, fieldNumberToAtomDeclSet,
                                     attributionDecl, indent);
         if (ret != 0) {
             return ret;
@@ -274,8 +278,8 @@ static int write_java_methods(FILE* out, const SignatureInfoMap& signatureInfoMa
             fprintf(out, "        } else {\n");
             fprintf(out, "            QLogger.write(code");
             int argIndex = 1;
-            for (vector<java_type_t>::const_iterator arg = signatureInfoMapIt->first.begin();
-                 arg != signatureInfoMapIt->first.end(); arg++) {
+            for (vector<java_type_t>::const_iterator arg = signature.begin();
+                 arg != signature.end(); arg++) {
                 if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
                     const char* uidName = attributionDecl.fields.front().name.c_str();
                     const char* tagName = attributionDecl.fields.back().name.c_str();
@@ -299,18 +303,20 @@ static int write_java_methods(FILE* out, const SignatureInfoMap& signatureInfoMa
     return 0;
 }
 
-static int write_java_build_stats_event_methods(FILE* out, const SignatureInfoMap& signatureInfoMap,
+static int write_java_pulled_methods(FILE* out, const SignatureInfoMap& signatureInfoMap,
                               const AtomDecl& attributionDecl) {
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
          signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static StatsEvent buildStatsEvent(int code");
-        write_method_signature(out, signatureInfoMapIt->first, attributionDecl);
+        const vector<java_type_t>& signature = signatureInfoMapIt->first;
+        const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = signatureInfoMapIt->second;
+        write_method_signature(out, signature, attributionDecl);
         fprintf(out, ") {\n");
 
         // Print method body.
         string indent("");
-        int ret = write_method_body(out, signatureInfoMapIt->first, signatureInfoMapIt->second,
+        int ret = write_method_body(out, signature, fieldNumberToAtomDeclSet,
                                     attributionDecl, indent);
         if (ret != 0) {
             return ret;
@@ -357,9 +363,9 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl& attribut
 
     // Print write methods.
     fprintf(out, "    // Write methods\n");
-    errors += write_java_methods(out, atoms.signatureInfoMap, attributionDecl, supportQ);
+    errors += write_java_pushed_methods(out, atoms.signatureInfoMap, attributionDecl, supportQ);
     errors += write_java_non_chained_methods(out, atoms.nonChainedSignatureInfoMap);
-    errors += write_java_build_stats_event_methods(out, atoms.pulledAtomsSignatureInfoMap,
+    errors += write_java_pulled_methods(out, atoms.pulledAtomsSignatureInfoMap,
                                                    attributionDecl);
     if (supportWorkSource) {
         errors += write_java_work_source_methods(out, atoms.signatureInfoMap);

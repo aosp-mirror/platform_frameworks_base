@@ -72,7 +72,7 @@ static void print_error(const FieldDescriptor* field, const char* format, ...) {
 
     SourceLocation loc;
     if (field->GetSourceLocation(&loc)) {
-        // TODO: this will work if we can figure out how to pass
+        // TODO(b/162454173): this will work if we can figure out how to pass
         // --include_source_info to protoc
         fprintf(stderr, "%s:%d: ", file->name().c_str(), loc.start_line);
     } else {
@@ -111,7 +111,6 @@ static java_type_t java_type(const FieldDescriptor* field) {
         case FieldDescriptor::TYPE_GROUP:
             return JAVA_TYPE_UNKNOWN;
         case FieldDescriptor::TYPE_MESSAGE:
-            // TODO: not the final package name
             if (field->message_type()->full_name() == "android.os.statsd.AttributionNode") {
                 return JAVA_TYPE_ATTRIBUTION_CHAIN;
             } else if (field->message_type()->full_name() == "android.os.statsd.KeyValuePair") {
@@ -147,7 +146,7 @@ static java_type_t java_type(const FieldDescriptor* field) {
 void collate_enums(const EnumDescriptor& enumDescriptor, AtomField* atomField) {
     for (int i = 0; i < enumDescriptor.value_count(); i++) {
         atomField->enumValues[enumDescriptor.value(i)->number()] =
-                enumDescriptor.value(i)->name().c_str();
+                enumDescriptor.value(i)->name();
     }
 }
 
@@ -528,7 +527,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
 
         vector<java_type_t> signature;
         errorCount += collate_atom(atom, atomDecl.get(), &signature);
-        if (atomDecl->primaryFields.size() != 0 && atomDecl->exclusiveField == 0) {
+        if (!atomDecl->primaryFields.empty() && atomDecl->exclusiveField == 0) {
             print_error(atomField, "Cannot have a primary field without an exclusive field: %s\n",
                         atomField->name().c_str());
             errorCount++;
@@ -541,8 +540,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
                         atomField->name().c_str());
             errorCount++;
             continue;
-        }
-        else if ((oneofAtom->name() != ONEOF_PUSHED_ATOM_NAME) &&
+        } else if ((oneofAtom->name() != ONEOF_PUSHED_ATOM_NAME) &&
                  (oneofAtom->name() != ONEOF_PULLED_ATOM_NAME)) {
             print_error(atomField, "Atom is neither a pushed nor pulled atom: %s\n",
                         atomField->name().c_str());
@@ -578,7 +576,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
             printf("   ");
             for (vector<java_type_t>::const_iterator jt = it->first.begin(); jt != it->first.end();
                  jt++) {
-                printf(" %d", (int)*jt);
+                printf(" %d", static_cast<int>(*jt));
             }
             printf("\n");
         }
@@ -589,7 +587,7 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
             printf("   ");
             for (vector<java_type_t>::const_iterator jt = it->first.begin(); jt != it->first.end();
                  jt++) {
-                printf(" %d", (int)*jt);
+                printf(" %d", static_cast<int>(*jt));
             }
             printf("\n");
         }
