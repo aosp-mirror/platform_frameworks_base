@@ -21,7 +21,7 @@
 <!-- for the Search Manager. -->
 
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-        android:settingsActivity="com.android.testing.dummyime.ImePreferences">
+        android:settingsActivity="com.android.testing.stubime.ImePreferences">
     <subtype
         android:label="Generic"
         android:imeSubtypeLocale="en_US"
