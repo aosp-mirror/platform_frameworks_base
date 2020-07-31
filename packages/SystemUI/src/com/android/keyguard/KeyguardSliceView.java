@@ -17,10 +17,7 @@
 package com.android.keyguard;
 
 import static android.app.slice.Slice.HINT_LIST_ITEM;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
@@ -35,28 +32,22 @@ import android.graphics.drawable.Drawable;
 import android.graphics.text.LineBreaker;
 import android.net.Uri;
 import android.os.Trace;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.slice.Slice;
 import androidx.slice.SliceItem;
-import androidx.slice.SliceViewManager;
 import androidx.slice.core.SliceQuery;
 import androidx.slice.widget.ListContent;
 import androidx.slice.widget.RowContent;
 import androidx.slice.widget.SliceContent;
-import androidx.slice.widget.SliceLiveData;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
@@ -64,11 +55,9 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import java.io.FileDescriptor;
@@ -77,24 +66,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 /**
  * View visible under the clock on the lock screen and AoD.
  */
-public class KeyguardSliceView extends LinearLayout implements View.OnClickListener,
-        Observer<Slice>, TunerService.Tunable, ConfigurationController.ConfigurationListener {
+public class KeyguardSliceView extends LinearLayout implements View.OnClickListener {
 
     private static final String TAG = "KeyguardSliceView";
     public static final int DEFAULT_ANIM_DURATION = 550;
 
     private final HashMap<View, PendingIntent> mClickActions;
-    private final ActivityStarter mActivityStarter;
-    private final ConfigurationController mConfigurationController;
+    private ActivityStarter mActivityStarter;
     private final LayoutTransition mLayoutTransition;
-    private final TunerService mTunerService;
-    private Uri mKeyguardSliceUri;
     @VisibleForTesting
     TextView mTitle;
     private Row mRow;
@@ -109,25 +91,20 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
      * Runnable called whenever the view contents change.
      */
     private Runnable mContentChangeListener;
-    private Slice mSlice;
     private boolean mHasHeader;
     private final int mRowWithHeaderPadding;
     private final int mRowPadding;
     private float mRowTextSize;
     private float mRowWithHeaderTextSize;
+    private KeyguardSliceViewController mController;
 
-    @Inject
-    public KeyguardSliceView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ActivityStarter activityStarter, ConfigurationController configurationController,
-            TunerService tunerService, @Main Resources resources) {
+    public KeyguardSliceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mTunerService = tunerService;
+        Resources resources = context.getResources();
         mClickActions = new HashMap<>();
         mRowPadding = resources.getDimensionPixelSize(R.dimen.subtitle_clock_padding);
         mRowWithHeaderPadding = resources.getDimensionPixelSize(R.dimen.header_subtitle_padding);
-        mActivityStarter = activityStarter;
-        mConfigurationController = configurationController;
 
         mLayoutTransition = new LayoutTransition();
         mLayoutTransition.setStagger(LayoutTransition.CHANGE_APPEARING, DEFAULT_ANIM_DURATION / 2);
@@ -158,34 +135,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        Display display = getDisplay();
-        if (display != null) {
-            mDisplayId = display.getDisplayId();
-        }
-        mTunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
-        // Make sure we always have the most current slice
-        if (mDisplayId == DEFAULT_DISPLAY) {
-            mLiveData.observeForever(this);
-        }
-        mConfigurationController.addCallback(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        // TODO(b/117344873) Remove below work around after this issue be fixed.
-        if (mDisplayId == DEFAULT_DISPLAY) {
-            mLiveData.removeObserver(this);
-        }
-        mTunerService.removeTunable(this);
-        mConfigurationController.removeCallback(this);
-    }
-
-    @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
         setLayoutTransition(isVisible ? mLayoutTransition : null);
@@ -198,9 +147,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         return mHasHeader;
     }
 
-    private void showSlice() {
+    void showSlice(Slice slice) {
         Trace.beginSection("KeyguardSliceView#showSlice");
-        if (mSlice == null) {
+        if (slice == null) {
             mTitle.setVisibility(GONE);
             mRow.setVisibility(GONE);
             mHasHeader = false;
@@ -212,7 +161,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         }
         mClickActions.clear();
 
-        ListContent lc = new ListContent(getContext(), mSlice);
+        ListContent lc = new ListContent(getContext(), slice);
         SliceContent headerContent = lc.getHeader();
         mHasHeader = headerContent != null && !headerContent.getSliceItem().hasHint(HINT_LIST_ITEM);
         List<SliceContent> subItems = new ArrayList<>();
@@ -326,7 +275,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     public void onClick(View v) {
         final PendingIntent action = mClickActions.get(v);
-        if (action != null) {
+        if (action != null && mActivityStarter != null) {
             mActivityStarter.startPendingIntentDismissingKeyguard(action);
         }
     }
@@ -337,43 +286,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
      */
     public void setContentChangeListener(Runnable contentChangeListener) {
         mContentChangeListener = contentChangeListener;
-    }
-
-    /**
-     * LiveData observer lifecycle.
-     * @param slice the new slice content.
-     */
-    @Override
-    public void onChanged(Slice slice) {
-        mSlice = slice;
-        showSlice();
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        setupUri(newValue);
-    }
-
-    /**
-     * Sets the slice provider Uri.
-     */
-    public void setupUri(String uriString) {
-        if (uriString == null) {
-            uriString = KeyguardSliceProvider.KEYGUARD_SLICE_URI;
-        }
-
-        boolean wasObserving = false;
-        if (mLiveData != null && mLiveData.hasActiveObservers()) {
-            wasObserving = true;
-            mLiveData.removeObserver(this);
-        }
-
-        mKeyguardSliceUri = Uri.parse(uriString);
-        mLiveData = SliceLiveData.fromUri(mContext, mKeyguardSliceUri);
-
-        if (wasObserving) {
-            mLiveData.observeForever(this);
-        }
     }
 
     @VisibleForTesting
@@ -387,8 +299,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         updateTextColors();
     }
 
-    @Override
-    public void onDensityOrFontScaleChanged() {
+    void onDensityOrFontScaleChanged() {
         mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.widget_icon_size);
         mIconSizeWithHeader = (int) mContext.getResources().getDimension(R.dimen.header_icon_size);
         mRowTextSize = mContext.getResources().getDimensionPixelSize(
@@ -398,23 +309,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     public void refresh() {
-        Slice slice;
-        Trace.beginSection("KeyguardSliceView#refresh");
-        // We can optimize performance and avoid binder calls when we know that we're bound
-        // to a Slice on the same process.
-        if (KeyguardSliceProvider.KEYGUARD_SLICE_URI.equals(mKeyguardSliceUri.toString())) {
-            KeyguardSliceProvider instance = KeyguardSliceProvider.getAttachedInstance();
-            if (instance != null) {
-                slice = instance.onBindSlice(mKeyguardSliceUri);
-            } else {
-                Log.w(TAG, "Keyguard slice not bound yet?");
-                slice = null;
-            }
-        } else {
-            slice = SliceViewManager.getInstance(getContext()).bindSlice(mKeyguardSliceUri);
-        }
-        onChanged(slice);
-        Trace.endSection();
+        mController.refresh();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -424,8 +319,16 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         pw.println("  mRow: " + (mRow == null ? "null" : mRow.getVisibility() == VISIBLE));
         pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
         pw.println("  mDarkAmount: " + mDarkAmount);
-        pw.println("  mSlice: " + mSlice);
         pw.println("  mHasHeader: " + mHasHeader);
+    }
+
+    public void setActivityStarter(ActivityStarter activityStarter) {
+        mActivityStarter = activityStarter;
+    }
+
+    public void setController(KeyguardSliceViewController keyguardSliceViewController) {
+        // TODO: remove this method.
+        mController = keyguardSliceViewController;
     }
 
     public static class Row extends LinearLayout {

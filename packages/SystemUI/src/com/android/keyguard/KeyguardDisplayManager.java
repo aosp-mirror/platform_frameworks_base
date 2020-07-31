@@ -34,11 +34,14 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.util.InjectionInflationController;
+
+import javax.inject.Inject;
 
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
@@ -47,6 +50,7 @@ public class KeyguardDisplayManager {
     private final MediaRouter mMediaRouter;
     private final DisplayManager mDisplayService;
     private final InjectionInflationController mInjectableInflater;
+    private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final Context mContext;
 
     private boolean mShowing;
@@ -86,10 +90,13 @@ public class KeyguardDisplayManager {
         }
     };
 
+    @Inject
     public KeyguardDisplayManager(Context context,
-            InjectionInflationController injectableInflater) {
+            InjectionInflationController injectableInflater,
+            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
         mContext = context;
         mInjectableInflater = injectableInflater;
+        mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mMediaRouter = mContext.getSystemService(MediaRouter.class);
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
@@ -138,6 +145,9 @@ public class KeyguardDisplayManager {
                 presentation = null;
             }
             if (presentation != null) {
+                mKeyguardStatusViewComponentFactory
+                        .build(presentation.findViewById(R.id.clock))
+                        .getKeyguardClockSwitchController().init();
                 mPresentations.append(displayId, presentation);
                 return true;
             }
