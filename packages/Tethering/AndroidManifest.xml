@@ -24,7 +24,7 @@
     <!-- Permissions must be defined here, and not in the base manifest, as the tethering
          running in the system server process does not need any permission, and having
          privileged permissions added would cause crashes on startup unless they are also
-         added to the privileged permissions whitelist for that package. -->
+         added to the privileged permissions allowlist for that package. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
