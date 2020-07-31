@@ -79,13 +79,6 @@ public interface BatteryController extends DemoMode, Dumpable,
     default void setReverseState(boolean isReverse) {}
 
     /**
-     * Returns {@code true} if extreme battery saver is on.
-     */
-    default boolean isExtremeSaverOn() {
-        return false;
-    }
-
-    /**
      * A listener that will be notified whenever a change in battery level or power save mode has
      * occurred.
      */
@@ -98,9 +91,6 @@ public interface BatteryController extends DemoMode, Dumpable,
         }
 
         default void onReverseChanged(boolean isReverse, int level, String name) {
-        }
-
-        default void onExtremeBatterySaverChanged(boolean isExtreme) {
         }
     }
 
