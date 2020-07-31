@@ -16,7 +16,7 @@
 
 package android.net.dhcp;
 
-import static android.net.shared.Inet4AddressUtils.inet4AddressToIntHTH;
+import static com.android.net.module.util.Inet4AddressUtils.inet4AddressToIntHTH;
 
 import android.net.LinkAddress;
 import android.util.ArraySet;
