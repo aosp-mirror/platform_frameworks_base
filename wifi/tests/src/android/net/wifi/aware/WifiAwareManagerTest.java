@@ -1570,7 +1570,7 @@ public class WifiAwareManagerTest {
     public void testWifiAwareNetworkCapabilitiesParcel() throws UnknownHostException {
         final Inet6Address inet6 = MacAddress.fromString(
                 "11:22:33:44:55:66").getLinkLocalIpv6FromEui48Mac();
-        // note: dummy scope = 5
+        // note: placeholder scope = 5
         final Inet6Address inet6Scoped = Inet6Address.getByAddress(null, inet6.getAddress(), 5);
         final int port = 5;
         final int transportProtocol = 6;
