@@ -14051,13 +14051,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission, int userId,
             int flags) {
-        return registerReceiverWithFeature(caller, callerPackage, null, receiver, filter,
-                permission, userId, flags);
+        return registerReceiverWithFeature(caller, callerPackage, null, null,
+                receiver, filter, permission, userId, flags);
     }
 
     public Intent registerReceiverWithFeature(IApplicationThread caller, String callerPackage,
-            String callerFeatureId, IIntentReceiver receiver, IntentFilter filter,
-            String permission, int userId, int flags) {
+            String callerFeatureId, String receiverId, IIntentReceiver receiver,
+            IntentFilter filter, String permission, int userId, int flags) {
         enforceNotIsolatedCaller("registerReceiver");
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
@@ -14194,7 +14194,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " callerPackage is " + callerPackage);
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, callerFeatureId,
-                    permission, callingUid, userId, instantApp, visibleToInstantApps);
+                    receiverId, permission, callingUid, userId, instantApp, visibleToInstantApps);
             if (rl.containsFilter(filter)) {
                 Slog.w(TAG, "Receiver with filter " + filter
                         + " already registered for pid " + rl.pid
