@@ -45,7 +45,7 @@ public class WifiAwareAgentNetworkSpecifierTest {
 
         Set<WifiAwareNetworkSpecifier> nsSet = new HashSet<>();
         for (int i = 0; i < numNs; ++i) {
-            nsSet.add(getDummyNetworkSpecifier(10 + i));
+            nsSet.add(getMockNetworkSpecifier(10 + i));
         }
         WifiAwareAgentNetworkSpecifier dut = new WifiAwareAgentNetworkSpecifier(
                 nsSet.toArray(new WifiAwareNetworkSpecifier[numNs]));
@@ -78,7 +78,7 @@ public class WifiAwareAgentNetworkSpecifierTest {
     @Test
     public void testEmptyDoesntMatchAnything() {
         WifiAwareAgentNetworkSpecifier dut = new WifiAwareAgentNetworkSpecifier();
-        WifiAwareNetworkSpecifier ns = getDummyNetworkSpecifier(6);
+        WifiAwareNetworkSpecifier ns = getMockNetworkSpecifier(6);
         collector.checkThat("No match expected", ns.canBeSatisfiedBy(dut), equalTo(false));
     }
 
@@ -88,9 +88,9 @@ public class WifiAwareAgentNetworkSpecifierTest {
      */
     @Test
     public void testSingleMatch() {
-        WifiAwareNetworkSpecifier nsThis = getDummyNetworkSpecifier(6);
+        WifiAwareNetworkSpecifier nsThis = getMockNetworkSpecifier(6);
         WifiAwareAgentNetworkSpecifier dut = new WifiAwareAgentNetworkSpecifier(nsThis);
-        WifiAwareNetworkSpecifier nsOther = getDummyNetworkSpecifier(8);
+        WifiAwareNetworkSpecifier nsOther = getMockNetworkSpecifier(8);
         collector.checkThat("Match expected", nsThis.canBeSatisfiedBy(dut), equalTo(true));
         collector.checkThat("No match expected", nsOther.canBeSatisfiedBy(dut), equalTo(false));
     }
@@ -105,12 +105,12 @@ public class WifiAwareAgentNetworkSpecifierTest {
 
         Set<WifiAwareNetworkSpecifier> nsSet = new HashSet<>();
         for (int i = 0; i < numNs; ++i) {
-            nsSet.add(getDummyNetworkSpecifier(10 + i));
+            nsSet.add(getMockNetworkSpecifier(10 + i));
         }
 
         WifiAwareAgentNetworkSpecifier dut = new WifiAwareAgentNetworkSpecifier(
                 nsSet.toArray(new WifiAwareNetworkSpecifier[numNs]));
-        WifiAwareNetworkSpecifier nsOther = getDummyNetworkSpecifier(10000);
+        WifiAwareNetworkSpecifier nsOther = getMockNetworkSpecifier(10000);
 
         for (WifiAwareNetworkSpecifier nsThis: nsSet) {
             collector.checkThat("Match expected", nsThis.canBeSatisfiedBy(dut), equalTo(true));
@@ -127,13 +127,13 @@ public class WifiAwareAgentNetworkSpecifierTest {
 
         Set<WifiAwareNetworkSpecifier> nsSet = new HashSet<>();
         for (int i = 0; i < numNs; ++i) {
-            nsSet.add(getDummyNetworkSpecifier(10 + i));
+            nsSet.add(getMockNetworkSpecifier(10 + i));
         }
 
         WifiAwareAgentNetworkSpecifier oldNs = new WifiAwareAgentNetworkSpecifier(
                 nsSet.toArray(new WifiAwareNetworkSpecifier[nsSet.size()]));
 
-        nsSet.add(getDummyNetworkSpecifier(100 + numNs));
+        nsSet.add(getMockNetworkSpecifier(100 + numNs));
         WifiAwareAgentNetworkSpecifier newNs = new WifiAwareAgentNetworkSpecifier(
                 nsSet.toArray(new WifiAwareNetworkSpecifier[nsSet.size()]));
 
@@ -149,13 +149,13 @@ public class WifiAwareAgentNetworkSpecifierTest {
 
         Set<WifiAwareNetworkSpecifier> nsSet = new HashSet<>();
         for (int i = 0; i < numNs; ++i) {
-            nsSet.add(getDummyNetworkSpecifier(10 + i));
+            nsSet.add(getMockNetworkSpecifier(10 + i));
         }
 
         WifiAwareAgentNetworkSpecifier newNs = new WifiAwareAgentNetworkSpecifier(
                 nsSet.toArray(new WifiAwareNetworkSpecifier[nsSet.size()]));
 
-        nsSet.add(getDummyNetworkSpecifier(100 + numNs));
+        nsSet.add(getMockNetworkSpecifier(100 + numNs));
         WifiAwareAgentNetworkSpecifier oldNs = new WifiAwareAgentNetworkSpecifier(
                 nsSet.toArray(new WifiAwareNetworkSpecifier[nsSet.size()]));
 
@@ -165,10 +165,10 @@ public class WifiAwareAgentNetworkSpecifierTest {
     // utilities
 
     /**
-     * Returns a WifiAwareNetworkSpecifier with dummy (but valid) entries. Each can be
+     * Returns a WifiAwareNetworkSpecifier with mock (but valid) entries. Each can be
      * differentiated (made unique) by specifying a different client ID.
      */
-    WifiAwareNetworkSpecifier getDummyNetworkSpecifier(int clientId) {
+    WifiAwareNetworkSpecifier getMockNetworkSpecifier(int clientId) {
         return new WifiAwareNetworkSpecifier(WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_OOB,
                 WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR, clientId, 0, 0, new byte[6],
                 null, null, 10, 5);
