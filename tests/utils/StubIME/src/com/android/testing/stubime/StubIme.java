@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.testing.dummyime;
+package com.android.testing.stubime;
 
-import android.preference.PreferenceActivity;
+import android.inputmethodservice.InputMethodService;
 
 /**
- * Dummy IME preference activity
+ * Stub IME implementation that basically does nothing
  */
-public class ImePreferences extends PreferenceActivity {
+public class StubIme extends InputMethodService {
 
+    @Override
+    public boolean onEvaluateFullscreenMode() {
+        return false;
+    }
+
+    @Override
+    public boolean onEvaluateInputViewShown() {
+        return false;
+    }
 }
