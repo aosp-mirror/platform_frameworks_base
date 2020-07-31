@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef ANDROID_STATS_LOG_API_GEN_UTILS_H
+#define ANDROID_STATS_LOG_API_GEN_UTILS_H
 
 #include <stdio.h>
 #include <string.h>
@@ -28,23 +29,14 @@
 namespace android {
 namespace stats_log_api_gen {
 
-using namespace std;
-
-const string DEFAULT_CPP_NAMESPACE = "android,util";
-const string DEFAULT_CPP_HEADER_IMPORT = "statslog.h";
+const char DEFAULT_CPP_NAMESPACE[] = "android,util";
+const char DEFAULT_CPP_HEADER_IMPORT[] = "statslog.h";
 
 const int JAVA_MODULE_REQUIRES_FLOAT = 0x01;
 const int JAVA_MODULE_REQUIRES_ATTRIBUTION = 0x02;
 const int JAVA_MODULE_REQUIRES_KEY_VALUE_PAIRS = 0x04;
 
-const map<AnnotationId, string> ANNOTATION_ID_CONSTANTS = {
-        {ANNOTATION_ID_IS_UID, "ANNOTATION_ID_IS_UID"},
-        {ANNOTATION_ID_TRUNCATE_TIMESTAMP, "ANNOTATION_ID_TRUNCATE_TIMESTAMP"},
-        {ANNOTATION_ID_PRIMARY_FIELD, "ANNOTATION_ID_PRIMARY_FIELD"},
-        {ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID, "ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID"},
-        {ANNOTATION_ID_EXCLUSIVE_STATE, "ANNOTATION_ID_EXCLUSIVE_STATE"},
-        {ANNOTATION_ID_TRIGGER_STATE_RESET, "ANNOTATION_ID_TRIGGER_STATE_RESET"},
-        {ANNOTATION_ID_STATE_NESTED, "ANNOTATION_ID_STATE_NESTED"}};
+const map<AnnotationId, string>& get_annotation_id_constants();
 
 string make_constant_name(const string& str);
 
@@ -81,3 +73,5 @@ int write_java_work_source_methods(FILE* out, const SignatureInfoMap& signatureI
 
 }  // namespace stats_log_api_gen
 }  // namespace android
+
+#endif  // ANDROID_STATS_LOG_API_GEN_UTILS_H
