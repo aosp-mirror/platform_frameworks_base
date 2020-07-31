@@ -19,23 +19,23 @@ package android.net
 import android.app.Instrumentation
 import android.content.Context
 import android.net.NetworkCapabilities.TRANSPORT_TEST
+import android.net.NetworkProviderTest.TestNetworkCallback.CallbackEntry.OnUnavailable
+import android.net.NetworkProviderTest.TestNetworkProvider.CallbackEntry.OnNetworkRequestWithdrawn
+import android.net.NetworkProviderTest.TestNetworkProvider.CallbackEntry.OnNetworkRequested
 import android.os.Build
 import android.os.HandlerThread
 import android.os.Looper
-import android.net.NetworkProviderTest.TestNetworkCallback.CallbackEntry.OnUnavailable
-import android.net.NetworkProviderTest.TestNetworkProvider.CallbackEntry.OnNetworkRequested
-import android.net.NetworkProviderTest.TestNetworkProvider.CallbackEntry.OnNetworkRequestWithdrawn
 import androidx.test.InstrumentationRegistry
-import com.android.testutils.ArrayTrackRecord
+import com.android.net.module.util.ArrayTrackRecord
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.DevSdkIgnoreRunner
-import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 private const val DEFAULT_TIMEOUT_MS = 5000L
 private val instrumentation: Instrumentation
