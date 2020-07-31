@@ -162,7 +162,7 @@ public class AudioPolicyConfig implements Parcelable {
 
     public String toLogFriendlyString () {
         String textDump = new String("android.media.audiopolicy.AudioPolicyConfig:\n");
-        textDump += mMixes.size() + " AudioMix: "+ mRegistrationId + "\n";
+        textDump += mMixes.size() + " AudioMix, reg:" + mRegistrationId + "\n";
         for(AudioMix mix : mMixes) {
             // write mix route flags
             textDump += "* route flags=0x" + Integer.toHexString(mix.getRouteFlags()) + "\n";
@@ -218,6 +218,10 @@ public class AudioPolicyConfig implements Parcelable {
             }
         }
         return textDump;
+    }
+
+    protected void reset() {
+        mMixCounter = 0;
     }
 
     protected void setRegistration(String regId) {
