@@ -92,7 +92,7 @@ abstract class FlickerTestBase {
         app2: IAppHelper?,
         extraInfo: String
     ): String {
-        var testTag = "${testName}__$${app.launcherName}"
+        var testTag = "${testName}__${app.launcherName}"
         if (app2 != null) {
             testTag += "-${app2.launcherName}"
         }

@@ -71,18 +71,18 @@ class OpenAppColdTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    appWindowReplacesLauncherAsTopWindow(bugId = 141361128)
+                    appWindowReplacesLauncherAsTopWindow()
                     wallpaperWindowBecomesInvisible()
                 }
 
                 layersTrace {
-                    noUncoveredRegions(rotation, bugId = 141361128)
                     // During testing the launcher is always in portrait mode
+                    noUncoveredRegions(Surface.ROTATION_0, rotation, bugId = 141361128)
                     navBarLayerRotatesAndScales(Surface.ROTATION_0, rotation)
                     statusBarLayerRotatesScales(Surface.ROTATION_0, rotation)
-                    navBarLayerIsAlwaysVisible(bugId = 141361128)
-                    statusBarLayerIsAlwaysVisible(bugId = 141361128)
-                    wallpaperLayerBecomesInvisible(bugId = 141361128)
+                    navBarLayerIsAlwaysVisible()
+                    statusBarLayerIsAlwaysVisible(enabled = false)
+                    wallpaperLayerBecomesInvisible()
                 }
 
                 eventLog {
