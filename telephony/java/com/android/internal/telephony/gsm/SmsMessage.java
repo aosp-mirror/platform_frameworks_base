@@ -353,7 +353,7 @@ public class SmsMessage extends SmsMessageBase {
                 statusReportRequested, ret);
 
         // Skip encoding pdu if error occurs when create pdu head and the error will be handled
-        // properly later on encodedMessage sanity check.
+        // properly later on encodedMessage correctness check.
         if (bo == null) return ret;
 
         // User Data (and length)
@@ -535,7 +535,7 @@ public class SmsMessage extends SmsMessageBase {
                 scAddress, destinationAddress, (byte) 0x41, /* TP-MTI=SMS-SUBMIT, TP-UDHI=true */
                 statusReportRequested, ret);
         // Skip encoding pdu if error occurs when create pdu head and the error will be handled
-        // properly later on encodedMessage sanity check.
+        // properly later on encodedMessage correctness check.
         if (bo == null) return ret;
 
         // TP-Data-Coding-Scheme
