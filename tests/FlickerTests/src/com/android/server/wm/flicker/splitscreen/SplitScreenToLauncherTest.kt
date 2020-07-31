@@ -22,6 +22,7 @@ import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.FlickerTestBase
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -102,6 +103,10 @@ class SplitScreenToLauncherTest : FlickerTestBase() {
                             .then()
                             .hidesLayer(testApp.getPackage())
                     }
+                }
+
+                eventLog {
+                    focusDoesNotChange(bugId = 151179149)
                 }
             }
         }

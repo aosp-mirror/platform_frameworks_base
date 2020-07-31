@@ -20,6 +20,7 @@ import android.view.Surface
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
@@ -90,6 +91,10 @@ class OpenAppWarmTest(
                     navBarLayerIsAlwaysVisible(bugId = 141361128)
                     statusBarLayerIsAlwaysVisible(bugId = 141361128)
                     wallpaperLayerBecomesInvisible(bugId = 141361128)
+                }
+
+                eventLog {
+                    focusChanges("NexusLauncherActivity", testApp.`package`)
                 }
             }
         }

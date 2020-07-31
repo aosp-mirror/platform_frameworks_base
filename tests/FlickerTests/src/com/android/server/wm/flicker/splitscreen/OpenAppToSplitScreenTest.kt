@@ -22,6 +22,7 @@ import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.NonRotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
@@ -92,6 +93,11 @@ class OpenAppToSplitScreenTest(
                                 .then()
                                 .showsLayer(DOCKED_STACK_DIVIDER)
                     }
+                }
+
+                eventLog {
+                    focusChanges(testApp.`package`,
+                            "recents_animation_input_consumer", "NexusLauncherActivity")
                 }
             }
         }

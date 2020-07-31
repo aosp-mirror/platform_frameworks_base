@@ -20,6 +20,7 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
@@ -100,6 +101,10 @@ class PipToHomeTest(
                     navBarLayerRotatesAndScales(rotation)
                     statusBarLayerRotatesScales(rotation)
                     pipLayerBecomesVisible()
+                }
+
+                eventLog {
+                    focusChanges(testApp.launcherName, "NexusLauncherActivity", bugId = 151179149)
                 }
             }
         }
