@@ -22,6 +22,7 @@ import com.android.server.wm.flicker.NonRotationTestBase.Companion.SCREENSHOT_LA
 import com.android.server.wm.flicker.RotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -118,6 +119,10 @@ class ChangeAppRotationTest(
                                         testApp.getPackage()
                                 )
                     }
+                }
+
+                eventLog {
+                    focusDoesNotChange(bugId = 151179149)
                 }
             }
         }
