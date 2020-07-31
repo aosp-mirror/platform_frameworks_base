@@ -151,7 +151,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
     private RingerModeTracker mRingerModeTracker;
-    private boolean mPermissionsHubEnabled;
+    private boolean mAllIndicatorsEnabled;
+    private boolean mMicCameraIndicatorsEnabled;
 
     private PrivacyItemController mPrivacyItemController;
     private final UiEventLogger mUiEventLogger;
@@ -178,12 +179,25 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
 
         @Override
-        public void onFlagChanged(boolean flag) {
-            if (mPermissionsHubEnabled != flag) {
-                StatusIconContainer iconContainer = requireViewById(R.id.statusIcons);
-                iconContainer.setIgnoredSlots(getIgnoredIconSlots());
-                setChipVisibility(!mPrivacyChip.getPrivacyList().isEmpty());
+        public void onFlagAllChanged(boolean flag) {
+            if (mAllIndicatorsEnabled != flag) {
+                mAllIndicatorsEnabled = flag;
+                update();
             }
+        }
+
+        @Override
+        public void onFlagMicCameraChanged(boolean flag) {
+            if (mMicCameraIndicatorsEnabled != flag) {
+                mMicCameraIndicatorsEnabled = flag;
+                update();
+            }
+        }
+
+        private void update() {
+            StatusIconContainer iconContainer = requireViewById(R.id.statusIcons);
+            iconContainer.setIgnoredSlots(getIgnoredIconSlots());
+            setChipVisibility(!mPrivacyChip.getPrivacyList().isEmpty());
         }
     };
 
@@ -267,7 +281,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mRingerModeTextView.setSelected(true);
         mNextAlarmTextView.setSelected(true);
 
-        mPermissionsHubEnabled = mPrivacyItemController.getIndicatorsAvailable();
+        mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
+        mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
     }
 
     public QuickQSPanel getHeaderQsPanel() {
@@ -276,13 +291,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     private List<String> getIgnoredIconSlots() {
         ArrayList<String> ignored = new ArrayList<>();
-        ignored.add(mContext.getResources().getString(
-                com.android.internal.R.string.status_bar_camera));
-        ignored.add(mContext.getResources().getString(
-                com.android.internal.R.string.status_bar_microphone));
-        if (mPermissionsHubEnabled) {
+        if (getChipEnabled()) {
             ignored.add(mContext.getResources().getString(
-                    com.android.internal.R.string.status_bar_location));
+                    com.android.internal.R.string.status_bar_camera));
+            ignored.add(mContext.getResources().getString(
+                    com.android.internal.R.string.status_bar_microphone));
+            if (mAllIndicatorsEnabled) {
+                ignored.add(mContext.getResources().getString(
+                        com.android.internal.R.string.status_bar_location));
+            }
         }
 
         return ignored;
@@ -300,7 +317,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     }
 
     private void setChipVisibility(boolean chipVisible) {
-        if (chipVisible && mPermissionsHubEnabled) {
+        if (chipVisible && getChipEnabled()) {
             mPrivacyChip.setVisibility(View.VISIBLE);
             // Makes sure that the chip is logged as viewed at most once each time QS is opened
             // mListening makes sure that the callback didn't return after the user closed QS
@@ -607,7 +624,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mAlarmController.addCallback(this);
             mLifecycle.setCurrentState(Lifecycle.State.RESUMED);
             // Get the most up to date info
-            mPermissionsHubEnabled = mPrivacyItemController.getIndicatorsAvailable();
+            mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
+            mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
             mPrivacyItemController.addCallback(mPICCallback);
         } else {
             mZenController.removeCallback(this);
@@ -746,5 +764,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                     mKeyguardExpansionFraction));
             updateHeaderTextContainerAlphaAnimator();
         }
+    }
+
+    private boolean getChipEnabled() {
+        return mMicCameraIndicatorsEnabled || mAllIndicatorsEnabled;
     }
 }
