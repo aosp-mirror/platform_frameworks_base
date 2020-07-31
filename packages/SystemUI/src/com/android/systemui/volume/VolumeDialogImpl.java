@@ -166,7 +166,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     public VolumeDialogImpl(Context context) {
         mContext =
-                new ContextThemeWrapper(context, R.style.qs_theme);
+                new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -1352,7 +1352,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private final class CustomDialog extends Dialog implements DialogInterface {
         public CustomDialog(Context context) {
-            super(context, R.style.qs_theme);
+            super(context, R.style.volume_dialog_theme);
         }
 
         @Override
