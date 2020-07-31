@@ -342,7 +342,7 @@ bool ResourceParser::FlattenXmlSubtree(
     }
   }
 
-  // Sanity check to make sure we processed all the nodes.
+  // Validity check to make sure we processed all the nodes.
   CHECK(node_stack.size() == 1u);
   CHECK(node_stack.back() == &root);
 

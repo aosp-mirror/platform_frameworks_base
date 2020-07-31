@@ -37,12 +37,12 @@ enum class XmlActionExecutorPolicy {
   // The actions defined must match and run. If an element is found that does not match an action,
   // an error occurs.
   // Note: namespaced elements are always ignored.
-  kWhitelist,
+  kAllowList,
 
   // The actions defined should match and run. if an element is found that does not match an
   // action, a warning is printed.
   // Note: namespaced elements are always ignored.
-  kWhitelistWarning,
+  kAllowListWarning,
 };
 
 // Contains the actions to perform at this XML node. This is a recursive data structure that
