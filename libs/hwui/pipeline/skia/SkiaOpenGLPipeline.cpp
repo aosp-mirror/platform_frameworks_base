@@ -87,6 +87,8 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         // Note: The default preference of pixel format is RGBA_8888, when other
         // pixel format is available, we should branch out and do more check.
         fboInfo.fFormat = GL_RGBA8;
+    } else if (colorType == kRGBA_1010102_SkColorType) {
+        fboInfo.fFormat = GL_RGB10_A2;
     } else {
         LOG_ALWAYS_FATAL("Unsupported color type.");
     }

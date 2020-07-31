@@ -22,6 +22,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.ColorSpace;
@@ -1001,7 +1002,10 @@ public class Surface implements Parcelable {
             mHardwareRenderer = new HardwareRenderer();
             mHardwareRenderer.setContentRoot(mRenderNode);
             mHardwareRenderer.setSurface(Surface.this, true);
-            mHardwareRenderer.setWideGamut(isWideColorGamut);
+            mHardwareRenderer.setColorMode(
+                    isWideColorGamut
+                            ? ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT
+                            : ActivityInfo.COLOR_MODE_DEFAULT);
             mHardwareRenderer.setLightSourceAlpha(0.0f, 0.0f);
             mHardwareRenderer.setLightSourceGeometry(0.0f, 0.0f, 0.0f, 0.0f);
         }
