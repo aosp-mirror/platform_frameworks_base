@@ -20,18 +20,14 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
-import java.util.Optional;
-
 import javax.inject.Singleton;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -42,14 +38,12 @@ import dagger.Provides;
 public class DividerModule {
     @Singleton
     @Provides
-    static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy,
-            DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController imeController, @Main Handler handler,
+    static Divider provideDivider(Context context, DisplayController displayController,
+            SystemWindows systemWindows, DisplayImeController imeController, @Main Handler handler,
             KeyguardStateController keyguardStateController, TransactionPool transactionPool) {
         // TODO(b/161116823): fetch DividerProxy from WM shell lib.
         DividerController dividerController = new DividerController(context, displayController,
                 systemWindows, imeController, handler, transactionPool);
-        return new Divider(context, dividerController, keyguardStateController,
-                recentsOptionalLazy);
+        return new Divider(context, dividerController, keyguardStateController);
     }
 }
