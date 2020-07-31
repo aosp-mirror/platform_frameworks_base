@@ -162,7 +162,6 @@ void RenderThread::initializeChoreographer() {
 }
 
 void RenderThread::initThreadLocals() {
-    HardwareBitmapUploader::initialize();
     setupFrameInterval();
     initializeChoreographer();
     mEglManager = new EglManager();
@@ -391,12 +390,10 @@ void RenderThread::preload() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         std::thread eglInitThread([]() { eglGetDisplay(EGL_DEFAULT_DISPLAY); });
         eglInitThread.detach();
+    } else {
+        requireVkContext();
     }
-    // TODO: uncomment only after http://b/135536511 is fixed.
-    // else {
-    //    uint32_t apiVersion;
-    //    vkEnumerateInstanceVersion(&apiVersion);
-    //}
+    HardwareBitmapUploader::initialize();
 }
 
 } /* namespace renderthread */
