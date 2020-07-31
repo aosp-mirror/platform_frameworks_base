@@ -128,11 +128,11 @@ class SeamlessAppRotationTest(
                         val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
                         val endingBounds = WindowUtils.getDisplayBounds(endRotation)
                         if (startingBounds == endingBounds) {
-                            this.coversRegion(startingBounds)
+                            this.coversAtLeastRegion(startingBounds)
                         } else {
-                            this.coversRegion(startingBounds)
+                            this.coversAtLeastRegion(startingBounds)
                                     .then()
-                                    .coversRegion(endingBounds)
+                                    .coversAtLeastRegion(endingBounds)
                         }
                     }
                 }
