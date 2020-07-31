@@ -1122,7 +1122,7 @@
     <string name="capital_off" msgid="7443704171014626777">"MATI"</string>
     <string name="checked" msgid="9179896827054513119">"dicentang"</string>
     <string name="not_checked" msgid="7972320087569023342">"tidak dicentang"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Tindakan lengkap menggunakan"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Selesaikan tindakan menggunakan"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Selesaikan tindakan menggunakan %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Selesaikan tindakan"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Buka dengan"</string>
