@@ -216,7 +216,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * even a pathological LIKE or GLOB pattern of 50000 bytes relatively quickly.
      * The denial of service problem only comes into play when the pattern length gets
      * into millions of bytes. Nevertheless, since most useful LIKE or GLOB patterns
-     * are at most a few dozen bytes in length, paranoid application developers may
+     * are at most a few dozen bytes in length, cautious application developers may
      * want to reduce this parameter to something in the range of a few hundred
      * if they know that external users are able to generate arbitrary patterns.
      */
