@@ -58,16 +58,16 @@ public class BinderCallsStatsService extends Binder {
 
     /** Resolves the work source of an incoming binder transaction. */
     static class AuthorizedWorkSourceProvider implements BinderInternal.WorkSourceProvider {
-        private ArraySet<Integer> mAppIdWhitelist;
+        private ArraySet<Integer> mAppIdTrustlist;
 
         AuthorizedWorkSourceProvider() {
-            mAppIdWhitelist = new ArraySet<>();
+            mAppIdTrustlist = new ArraySet<>();
         }
 
         public int resolveWorkSourceUid(int untrustedWorkSourceUid) {
             final int callingUid = getCallingUid();
             final int appId = UserHandle.getAppId(callingUid);
-            if (mAppIdWhitelist.contains(appId)) {
+            if (mAppIdTrustlist.contains(appId)) {
                 final int workSource = untrustedWorkSourceUid;
                 final boolean isWorkSourceSet = workSource != Binder.UNSET_WORKSOURCE;
                 return isWorkSourceSet ?  workSource : callingUid;
@@ -76,13 +76,13 @@ public class BinderCallsStatsService extends Binder {
         }
 
         public void systemReady(Context context) {
-            mAppIdWhitelist = createAppidWhitelist(context);
+            mAppIdTrustlist = createAppidTrustlist(context);
         }
 
         public void dump(PrintWriter pw, AppIdToPackageMap packageMap) {
             pw.println("AppIds of apps that can set the work source:");
-            final ArraySet<Integer> whitelist = mAppIdWhitelist;
-            for (Integer appId : whitelist) {
+            final ArraySet<Integer> trustlist = mAppIdTrustlist;
+            for (Integer appId : trustlist) {
                 pw.println("\t- " + packageMap.mapAppId(appId));
             }
         }
@@ -91,12 +91,12 @@ public class BinderCallsStatsService extends Binder {
             return Binder.getCallingUid();
         }
 
-        private ArraySet<Integer> createAppidWhitelist(Context context) {
-            // Use a local copy instead of mAppIdWhitelist to prevent concurrent read access.
-            final ArraySet<Integer> whitelist = new ArraySet<>();
+        private ArraySet<Integer> createAppidTrustlist(Context context) {
+            // Use a local copy instead of mAppIdTrustlist to prevent concurrent read access.
+            final ArraySet<Integer> trustlist = new ArraySet<>();
 
             // We trust our own process.
-            whitelist.add(UserHandle.getAppId(Process.myUid()));
+            trustlist.add(UserHandle.getAppId(Process.myUid()));
             // We only need to initialize it once. UPDATE_DEVICE_STATS is a system permission.
             final PackageManager pm = context.getPackageManager();
             final String[] permissions = { android.Manifest.permission.UPDATE_DEVICE_STATS };
@@ -109,12 +109,12 @@ public class BinderCallsStatsService extends Binder {
                 try {
                     final int uid = pm.getPackageUid(pkgInfo.packageName, queryFlags);
                     final int appId = UserHandle.getAppId(uid);
-                    whitelist.add(appId);
+                    trustlist.add(appId);
                 } catch (NameNotFoundException e) {
                     Slog.e(TAG, "Cannot find uid for package name " + pkgInfo.packageName, e);
                 }
             }
-            return whitelist;
+            return trustlist;
         }
     }
 
