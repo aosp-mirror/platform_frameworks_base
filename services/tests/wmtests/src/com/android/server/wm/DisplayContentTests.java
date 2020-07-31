@@ -1354,7 +1354,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(displayRotation.updateRotationUnchecked(false));
 
         // Rotation can be updated if the recents animation is finished.
-        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation(false);
+        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
         assertTrue(displayRotation.updateRotationUnchecked(false));
 
         // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
