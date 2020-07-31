@@ -103,7 +103,7 @@ cc_library {
         },
     },
     sanitize: {
-        blacklist: "libandroidfw_blacklist.txt",
+        blocklist: "libandroidfw_blocklist.txt",
     },
 }
 
