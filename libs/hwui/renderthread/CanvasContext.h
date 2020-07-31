@@ -30,6 +30,7 @@
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 #include "utils/RingBuffer.h"
+#include "ColorMode.h"
 
 #include <SkBitmap.h>
 #include <SkRect.h>
@@ -119,7 +120,7 @@ public:
     void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
-    void setWideGamut(bool wideGamut);
+    void setColorMode(ColorMode mode);
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
     void draw();
@@ -211,6 +212,7 @@ private:
     bool isSwapChainStuffed();
     bool surfaceRequiresRedraw();
     void setPresentTime();
+    void setupPipelineSurface();
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 

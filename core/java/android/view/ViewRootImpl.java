@@ -1329,13 +1329,9 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean hasSurfaceInsets = insets.left != 0 || insets.right != 0
                         || insets.top != 0 || insets.bottom != 0;
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
-                final boolean wideGamut =
-                        mContext.getResources().getConfiguration().isScreenWideColorGamut()
-                        && attrs.getColorMode() == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT;
-
                 mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent,
                         attrs.getTitle().toString());
-                mAttachInfo.mThreadedRenderer.setWideGamut(wideGamut);
+                updateColorModeIfNeeded(attrs.getColorMode());
                 updateForceDarkMode();
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mHardwareAccelerated =
@@ -2648,7 +2644,7 @@ public final class ViewRootImpl implements ViewParent,
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
                 final boolean alwaysConsumeSystemBarsChanged =
                         mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars;
-                final boolean colorModeChanged = hasColorModeChanged(lp.getColorMode());
+                updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();
                 surfaceDestroyed = hadSurface && !mSurface.isValid();
                 surfaceReplaced = (surfaceGenerationId != mSurface.getGenerationId())
@@ -2676,10 +2672,6 @@ public final class ViewRootImpl implements ViewParent,
                     // We applied insets so force contentInsetsChanged to ensure the
                     // hierarchy is measured below.
                     dispatchApplyInsets = true;
-                }
-                if (colorModeChanged && mAttachInfo.mThreadedRenderer != null) {
-                    mAttachInfo.mThreadedRenderer.setWideGamut(
-                            lp.getColorMode() == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT);
                 }
 
                 if (surfaceCreated) {
@@ -2725,7 +2717,7 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
                 } else if ((surfaceReplaced
-                        || surfaceSizeChanged || windowRelayoutWasForced || colorModeChanged)
+                        || surfaceSizeChanged || windowRelayoutWasForced)
                         && mSurfaceHolder == null
                         && mAttachInfo.mThreadedRenderer != null
                         && mSurface.isValid()) {
@@ -4557,18 +4549,16 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private boolean hasColorModeChanged(int colorMode) {
+    private void updateColorModeIfNeeded(int colorMode) {
         if (mAttachInfo.mThreadedRenderer == null) {
-            return false;
+            return;
         }
-        final boolean isWideGamut = colorMode == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT;
-        if (mAttachInfo.mThreadedRenderer.isWideGamut() == isWideGamut) {
-            return false;
+        // TODO: Centralize this sanitization? Why do we let setting bad modes?
+        // Alternatively, can we just let HWUI figure it out? Do we need to care here?
+        if (!mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+            colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
-        if (isWideGamut && !mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
-            return false;
-        }
-        return true;
+        mAttachInfo.mThreadedRenderer.setColorMode(colorMode);
     }
 
     @Override
