@@ -38,7 +38,13 @@ import static org.mockito.ArgumentMatchers.eq;
 
 import android.app.WaitResult;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.ImageReader;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
+import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
 
@@ -172,5 +178,51 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 eq(false) /* focused */);
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskB.mTaskId) /* taskId */,
                 eq(true) /* focused */);
+    }
+
+    @Test
+    /** Ensures that a trusted virtual display can launch arbitrary activities. */
+    public void testTrustedVirtualDisplayCanLaunchActivities() {
+        final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        final Task stack = new StackBuilder(mRootWindowContainer)
+                .setDisplay(newDisplay).build();
+        final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
+        VirtualDisplay virtualDisplay = createVirtualDisplay(true);
+        final boolean allowed = mSupervisor.isCallerAllowedToLaunchOnDisplay(1234, 1234,
+                virtualDisplay.getDisplay().getDisplayId(), unresizableActivity.info);
+
+        assertThat(allowed).isTrue();
+    }
+
+    @Test
+    /** Ensures that an untrusted virtual display cannot launch arbitrary activities. */
+    public void testUntrustedVirtualDisplayCannotLaunchActivities() {
+        final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        final Task stack = new StackBuilder(mRootWindowContainer)
+                .setDisplay(newDisplay).build();
+        final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
+        VirtualDisplay virtualDisplay = createVirtualDisplay(false);
+        final boolean allowed = mSupervisor.isCallerAllowedToLaunchOnDisplay(1234, 1234,
+                virtualDisplay.getDisplay().getDisplayId(), unresizableActivity.info);
+
+        assertThat(allowed).isFalse();
+    }
+
+    private VirtualDisplay createVirtualDisplay(boolean trusted) {
+        final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+        final DisplayInfo displayInfo = new DisplayInfo();
+        final Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        defaultDisplay.getDisplayInfo(displayInfo);
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+        if (trusted) {
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+        }
+
+        final ImageReader imageReader = ImageReader.newInstance(
+                displayInfo.logicalWidth, displayInfo.logicalHeight, PixelFormat.RGBA_8888, 2);
+
+        return dm.createVirtualDisplay("virtualDisplay", displayInfo.logicalWidth,
+                displayInfo.logicalHeight,
+                displayInfo.logicalDensityDpi, imageReader.getSurface(), flags);
     }
 }
