@@ -20,7 +20,6 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.dsl.flicker
-import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.expandPipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
@@ -46,74 +45,77 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)
-class PipToAppTest(
+class EnterPipTest(
     rotationName: String,
     rotation: Int
 ) : PipTestBase(rotationName, rotation) {
     @Test
     fun test() {
         flicker(instrumentation) {
-            withTag { buildTestTag("exitPipModeToApp", testApp, rotation) }
+            withTag { buildTestTag("enterPip", testApp, rotation) }
             repeat { 1 }
             setup {
                 test {
                     device.wakeUpAndGoToHomeScreen()
-                    device.pressHome()
-                    testApp.open()
                 }
                 eachRun {
+                    device.pressHome()
+                    testApp.open()
                     this.setRotation(rotation)
-                    testApp.clickEnterPipButton(device)
-                    device.hasPipWindow()
                 }
             }
             teardown {
                 eachRun {
+                    if (device.hasPipWindow()) {
+                        device.closePipWindow()
+                    }
+                    testApp.exit()
                     this.setRotation(Surface.ROTATION_0)
                 }
                 test {
                     if (device.hasPipWindow()) {
                         device.closePipWindow()
                     }
-                    testApp.exit()
                 }
             }
             transitions {
+                testApp.clickEnterPipButton(device)
                 device.expandPipWindow()
-                device.waitForIdle()
             }
             assertions {
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-
-                    all("appReplacesPipWindow") {
-                        this.showsAppWindow(sPipWindowTitle)
+                    all("pipWindowBecomesVisible") {
+                        this.showsAppWindow(testApp.`package`)
                                 .then()
-                                .showsAppWindowOnTop(testApp.launcherName)
+                                .showsAppWindow(sPipWindowTitle)
                     }
                 }
 
                 layersTrace {
                     navBarLayerIsAlwaysVisible()
                     statusBarLayerIsAlwaysVisible()
-                    noUncoveredRegions(rotation)
-                    navBarLayerRotatesAndScales(rotation)
-                    statusBarLayerRotatesScales(rotation)
+                    noUncoveredRegions(rotation, Surface.ROTATION_0, allStates = false)
+                    navBarLayerRotatesAndScales(rotation, Surface.ROTATION_0)
+                    statusBarLayerRotatesScales(rotation, Surface.ROTATION_0)
 
-                    all("appReplacesPipLayer") {
-                        this.showsLayer(sPipWindowTitle)
+                    all("pipLayerBecomesVisible") {
+                        this.showsLayer(testApp.launcherName)
                                 .then()
-                                .showsLayer(testApp.launcherName)
+                                .showsLayer(sPipWindowTitle)
                     }
                 }
-
-                eventLog {
-                    focusChanges(
-                            "NexusLauncherActivity", testApp.launcherName, "NexusLauncherActivity",
-                            bugId = 151179149)
-                }
             }
+        }
+    }
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<Array<Any>> {
+            val supportedRotations = intArrayOf(Surface.ROTATION_0)
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }
