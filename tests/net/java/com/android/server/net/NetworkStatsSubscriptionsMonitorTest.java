@@ -130,7 +130,7 @@ public final class NetworkStatsSubscriptionsMonitorTest {
         mTestSubList.add(subId);
 
         final int[] subList = convertArrayListToIntArray(mTestSubList);
-        when(mSubscriptionManager.getActiveAndHiddenSubscriptionIdList()).thenReturn(subList);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionIdList()).thenReturn(subList);
         when(mTelephonyManager.getSubscriberId(subId)).thenReturn(subscriberId);
         mMonitor.onSubscriptionsChanged();
     }
@@ -139,7 +139,7 @@ public final class NetworkStatsSubscriptionsMonitorTest {
         // Remove subId from TestSubList.
         mTestSubList.removeIf(it -> it == subId);
         final int[] subList = convertArrayListToIntArray(mTestSubList);
-        when(mSubscriptionManager.getActiveAndHiddenSubscriptionIdList()).thenReturn(subList);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionIdList()).thenReturn(subList);
         mMonitor.onSubscriptionsChanged();
     }
 
