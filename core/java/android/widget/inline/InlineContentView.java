@@ -59,7 +59,7 @@ import java.util.function.Consumer;
  */
 public class InlineContentView extends ViewGroup {
 
-    private static final String TAG = "InlineContentView";
+    private static final String TAG = "InlineContentView_test2";
 
     private static final boolean DEBUG = false;
 
