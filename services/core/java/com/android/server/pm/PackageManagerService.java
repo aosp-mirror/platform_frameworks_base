@@ -2213,17 +2213,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
                 // Send to all running apps.
-                final SparseArray<int[]> newBroadcastWhitelist;
+                final SparseArray<int[]> newBroadcastAllowList;
 
                 synchronized (mLock) {
-                    newBroadcastWhitelist = mAppsFilter.getVisibilityWhitelist(
+                    newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
                             getPackageSettingInternal(res.name, Process.SYSTEM_UID),
                             updateUserIds, mSettings.mPackages);
                 }
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/,
                         null /*targetPackage*/, null /*finishedReceiver*/,
-                        updateUserIds, instantUserIds, newBroadcastWhitelist);
+                        updateUserIds, instantUserIds, newBroadcastAllowList);
                 if (installerPackageName != null) {
                     // Send to the installer, even if it's not running.
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
@@ -2255,7 +2255,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                             packageName, extras, 0 /*flags*/,
                             null /*targetPackage*/, null /*finishedReceiver*/,
-                            updateUserIds, instantUserIds, res.removedInfo.broadcastWhitelist);
+                            updateUserIds, instantUserIds, res.removedInfo.broadcastAllowList);
                     if (installerPackageName != null) {
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
@@ -12670,7 +12670,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void sendPackageBroadcast(final String action, final String pkg, final Bundle extras,
             final int flags, final String targetPkg, final IIntentReceiver finishedReceiver,
             final int[] userIds, int[] instantUserIds,
-            @Nullable SparseArray<int[]> broadcastWhitelist) {
+            @Nullable SparseArray<int[]> broadcastAllowList) {
         mHandler.post(() -> {
             try {
                 final IActivityManager am = ActivityManager.getService();
@@ -12682,7 +12682,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     resolvedUserIds = userIds;
                 }
                 doSendBroadcast(am, action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        resolvedUserIds, false, broadcastWhitelist);
+                        resolvedUserIds, false, broadcastAllowList);
                 if (instantUserIds != null && instantUserIds != EMPTY_INT_ARRAY) {
                     doSendBroadcast(am, action, pkg, extras, flags, targetPkg, finishedReceiver,
                             instantUserIds, true, null);
@@ -12755,7 +12755,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private void doSendBroadcast(IActivityManager am, String action, String pkg, Bundle extras,
             int flags, String targetPkg, IIntentReceiver finishedReceiver,
-            int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastWhitelist) {
+            int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastAllowList) {
         for (int id : userIds) {
             final Intent intent = new Intent(action,
                     pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
@@ -12785,7 +12785,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mInjector.getActivityManagerInternal().broadcastIntent(
                     intent, finishedReceiver, requiredPermissions,
                     finishedReceiver != null, id,
-                    broadcastWhitelist == null ? null : broadcastWhitelist.get(id));
+                    broadcastAllowList == null ? null : broadcastAllowList.get(id));
         }
     }
 
@@ -12925,7 +12925,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds, instantUserIds,
-                mAppsFilter.getVisibilityWhitelist(
+                mAppsFilter.getVisibilityAllowList(
                         getPackageSettingInternal(packageName, Process.SYSTEM_UID),
                         userIds, mSettings.mPackages));
         if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
@@ -16758,7 +16758,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 reconciledPkg.pkgSetting.firstInstallTime = deletedPkgSetting.firstInstallTime;
                 reconciledPkg.pkgSetting.lastUpdateTime = System.currentTimeMillis();
 
-                res.removedInfo.broadcastWhitelist = mAppsFilter.getVisibilityWhitelist(
+                res.removedInfo.broadcastAllowList = mAppsFilter.getVisibilityAllowList(
                                 reconciledPkg.pkgSetting, request.mAllUsers, mSettings.mPackages);
                 if (reconciledPkg.prepareResult.system) {
                     // Remove existing system package
@@ -18688,7 +18688,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean isStaticSharedLib;
         // a two dimensional array mapping userId to the set of appIds that can receive notice
         // of package changes
-        SparseArray<int[]> broadcastWhitelist;
+        SparseArray<int[]> broadcastAllowList;
         // Clean up resources deleted packages.
         InstallArgs args = null;
 
@@ -18711,9 +18711,9 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putInt(Intent.EXTRA_UID, removedAppId >= 0 ? removedAppId : uid);
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, removedPackage, extras,
-                    0, null /*targetPackage*/, null, null, null, broadcastWhitelist);
+                    0, null /*targetPackage*/, null, null, null, broadcastAllowList);
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, removedPackage,
-                    extras, 0, null /*targetPackage*/, null, null, null, broadcastWhitelist);
+                    extras, 0, null /*targetPackage*/, null, null, null, broadcastAllowList);
             packageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
                     removedPackage, null, null, null, null /* broadcastWhitelist */);
             if (installerPackageName != null) {
@@ -18745,7 +18745,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (removedPackage != null) {
                 packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
                     removedPackage, extras, 0, null /*targetPackage*/, null,
-                    broadcastUsers, instantUserIds, broadcastWhitelist);
+                    broadcastUsers, instantUserIds, broadcastAllowList);
                 if (installerPackageName != null) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
                             removedPackage, extras, 0 /*flags*/,
@@ -18754,7 +18754,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                             removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null,
-                            null, broadcastUsers, instantUserIds, broadcastWhitelist);
+                            null, broadcastUsers, instantUserIds, broadcastAllowList);
                     packageSender.notifyPackageRemoved(removedPackage, removedUid);
                 }
             }
@@ -18767,7 +18767,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 packageSender.sendPackageBroadcast(Intent.ACTION_UID_REMOVED,
                         null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
-                        null, null, broadcastUsers, instantUserIds, broadcastWhitelist);
+                        null, null, broadcastUsers, instantUserIds, broadcastAllowList);
             }
         }
 
@@ -21265,17 +21265,17 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean isInstantApp = isInstantApp(packageName, userId);
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-        final SparseArray<int[]> broadcastWhitelist;
+        final SparseArray<int[]> broadcastAllowList;
         synchronized (mLock) {
             PackageSetting setting = getPackageSettingInternal(packageName, Process.SYSTEM_UID);
             if (setting == null) {
                 return;
             }
-            broadcastWhitelist = isInstantApp ? null : mAppsFilter.getVisibilityWhitelist(setting,
+            broadcastAllowList = isInstantApp ? null : mAppsFilter.getVisibilityAllowList(setting,
                     userIds, mSettings.mPackages);
         }
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, flags, null, null,
-                userIds, instantUserIds, broadcastWhitelist);
+                userIds, instantUserIds, broadcastAllowList);
     }
 
     @Override
