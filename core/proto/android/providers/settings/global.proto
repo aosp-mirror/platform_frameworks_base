@@ -449,7 +449,7 @@ message GlobalSettingsProto {
         // Game Driver - List of Apps that are allowed to use Game Driver
         optional SettingProto game_driver_allowlist = 12;
         // ANGLE - List of Apps that can check ANGLE rules
-        optional SettingProto angle_whitelist = 13;
+        optional SettingProto angle_allowlist = 13;
         // Game Driver - List of denylists, each denylist is a denylist for
         // a specific Game Driver version
         optional SettingProto game_driver_denylists = 14;

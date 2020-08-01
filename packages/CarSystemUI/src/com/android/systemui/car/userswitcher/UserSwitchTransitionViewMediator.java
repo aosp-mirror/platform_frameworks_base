@@ -16,12 +16,12 @@
 
 package com.android.systemui.car.userswitcher;
 
-import android.app.ActivityManager;
 import android.car.Car;
 import android.car.user.CarUserManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.window.OverlayViewMediator;
 
@@ -36,13 +36,16 @@ public class UserSwitchTransitionViewMediator implements OverlayViewMediator,
     private static final String TAG = "UserSwitchTransitionViewMediator";
 
     private final CarServiceProvider mCarServiceProvider;
+    private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final UserSwitchTransitionViewController mUserSwitchTransitionViewController;
 
     @Inject
     public UserSwitchTransitionViewMediator(
             CarServiceProvider carServiceProvider,
+            CarDeviceProvisionedController carDeviceProvisionedController,
             UserSwitchTransitionViewController userSwitchTransitionViewController) {
         mCarServiceProvider = carServiceProvider;
+        mCarDeviceProvisionedController = carDeviceProvisionedController;
         mUserSwitchTransitionViewController = userSwitchTransitionViewController;
     }
 
@@ -74,7 +77,7 @@ public class UserSwitchTransitionViewMediator implements OverlayViewMediator,
     @VisibleForTesting
     void handleUserLifecycleEvent(CarUserManager.UserLifecycleEvent event) {
         if (event.getEventType() == CarUserManager.USER_LIFECYCLE_EVENT_TYPE_STARTING
-                && ActivityManager.getCurrentUser() == event.getUserId()) {
+                && mCarDeviceProvisionedController.getCurrentUser() == event.getUserId()) {
             mUserSwitchTransitionViewController.handleShow(event.getUserId());
         }
 

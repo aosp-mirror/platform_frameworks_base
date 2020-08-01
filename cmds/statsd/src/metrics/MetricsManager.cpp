@@ -195,6 +195,10 @@ MetricsManager::~MetricsManager() {
     VLOG("~MetricsManager()");
 }
 
+bool MetricsManager::updateConfig(const int64_t currentTimeNs, const StatsdConfig& config) {
+    return mConfigValid;
+}
+
 void MetricsManager::initLogSourceWhiteList() {
     std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
     mAllowedLogSources.clear();

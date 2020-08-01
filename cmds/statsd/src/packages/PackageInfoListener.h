@@ -17,6 +17,8 @@
 #ifndef STATSD_PACKAGE_INFO_LISTENER_H
 #define STATSD_PACKAGE_INFO_LISTENER_H
 
+#include <utils/RefBase.h>
+
 #include <string>
 
 namespace android {

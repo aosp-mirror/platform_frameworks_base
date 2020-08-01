@@ -14286,7 +14286,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
-            int callingUid, int[] users, int[] broadcastWhitelist) {
+            int callingUid, int[] users, int[] broadcastAllowList) {
         // TODO: come back and remove this assumption to triage all broadcasts
         int pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
 
@@ -14362,12 +14362,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException ex) {
             // pm is in same process, this will never happen.
         }
-        if (receivers != null && broadcastWhitelist != null) {
+        if (receivers != null && broadcastAllowList != null) {
             for (int i = receivers.size() - 1; i >= 0; i--) {
                 final int receiverAppId = UserHandle.getAppId(
                         receivers.get(i).activityInfo.applicationInfo.uid);
                 if (receiverAppId >= Process.FIRST_APPLICATION_UID
-                        && Arrays.binarySearch(broadcastWhitelist, receiverAppId) < 0) {
+                        && Arrays.binarySearch(broadcastAllowList, receiverAppId) < 0) {
                     receivers.remove(i);
                 }
             }
@@ -14477,7 +14477,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
             int realCallingPid, int userId, boolean allowBackgroundActivityStarts,
             @Nullable IBinder backgroundActivityStartsToken,
-            @Nullable int[] broadcastWhitelist) {
+            @Nullable int[] broadcastAllowList) {
         intent = new Intent(intent);
 
         final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
@@ -14486,10 +14486,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             intent.setFlags(intent.getFlags() & ~Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
         }
 
-        if (userId == UserHandle.USER_ALL && broadcastWhitelist != null) {
-                Slog.e(TAG, "broadcastWhitelist only applies when sending to individual users. "
+        if (userId == UserHandle.USER_ALL && broadcastAllowList != null) {
+                Slog.e(TAG, "broadcastAllowList only applies when sending to individual users. "
                         + "Assuming restrictive whitelist.");
-                broadcastWhitelist = new int[]{};
+                broadcastAllowList = new int[]{};
         }
 
         // By default broadcasts do not go to stopped apps.
@@ -14981,7 +14981,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                  == 0) {
             receivers = collectReceiverComponents(
-                    intent, resolvedType, callingUid, users, broadcastWhitelist);
+                    intent, resolvedType, callingUid, users, broadcastAllowList);
         }
         if (intent.getComponent() == null) {
             if (userId == UserHandle.USER_ALL && callingUid == SHELL_UID) {
@@ -15011,13 +15011,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing broadcast: " + intent.getAction()
                 + " replacePending=" + replacePending);
-        if (registeredReceivers != null && broadcastWhitelist != null) {
+        if (registeredReceivers != null && broadcastAllowList != null) {
             // if a uid whitelist was provided, remove anything in the application space that wasn't
             // in it.
             for (int i = registeredReceivers.size() - 1; i >= 0; i--) {
                 final int owningAppId = UserHandle.getAppId(registeredReceivers.get(i).owningUid);
                 if (owningAppId >= Process.FIRST_APPLICATION_UID
-                        && Arrays.binarySearch(broadcastWhitelist, owningAppId) < 0) {
+                        && Arrays.binarySearch(broadcastAllowList, owningAppId) < 0) {
                     registeredReceivers.remove(i);
                 }
             }
@@ -17996,7 +17996,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int broadcastIntent(Intent intent,
                 IIntentReceiver resultTo,
                 String[] requiredPermissions,
-                boolean serialized, int userId, int[] appIdWhitelist) {
+                boolean serialized, int userId, int[] appIdAllowList) {
             synchronized (ActivityManagerService.this) {
                 intent = verifyBroadcastLocked(intent);
 
@@ -18011,7 +18011,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             null /*options*/, serialized, false /*sticky*/, callingPid, callingUid,
                             callingUid, callingPid, userId, false /*allowBackgroundStarts*/,
                             null /*tokenNeededForBackgroundActivityStarts*/,
-                            appIdWhitelist);
+                            appIdAllowList);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
