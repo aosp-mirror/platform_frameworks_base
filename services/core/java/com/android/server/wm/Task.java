@@ -2477,7 +2477,6 @@ class Task extends WindowContainer<WindowContainer> {
     private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
         if (mWmService.mDisableTransitionAnimation
                 || !isVisible()
-                || getDisplayContent().mAppTransition.isTransitionSet()
                 || getSurfaceControl() == null
                 || !isLeafTask()) {
             return false;
