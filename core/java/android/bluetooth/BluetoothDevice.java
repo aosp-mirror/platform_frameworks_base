@@ -1033,6 +1033,18 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
+     * Returns the anonymized hardware address of this BluetoothDevice. The first three octets
+     * will be suppressed for anonymization.
+     * <p> For example, "XX:XX:XX:AA:BB:CC".
+     *
+     * @return Anonymized bluetooth hardware address as string
+     * @hide
+     */
+    public String getAnonymizedAddress() {
+        return "XX:XX:XX" + getAddress().substring(8);
+    }
+
+    /**
      * Get the friendly Bluetooth name of the remote device.
      *
      * <p>The local adapter will automatically retrieve remote names when
