@@ -198,7 +198,10 @@ public class ImageReader implements AutoCloseable {
      *   {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE}, or combined</td>
      * </tr>
      * </table>
-     * Using other combinations may result in {@link IllegalArgumentException}.
+     * Using other combinations may result in {@link IllegalArgumentException}. Additionally,
+     * specifying {@link HardwareBuffer#USAGE_CPU_WRITE_RARELY} or
+     * {@link HardwareBuffer#USAGE_CPU_WRITE_OFTEN} and writing to the ImageReader's buffers
+     * might break assumptions made by some producers, and should be used with caution.
      * </p>
      * <p>
      * If the {@link ImageReader} is used as an output target for a {@link
@@ -255,6 +258,7 @@ public class ImageReader implements AutoCloseable {
         mWidth = width;
         mHeight = height;
         mFormat = format;
+        mUsage = usage;
         mMaxImages = maxImages;
 
         if (width < 1 || height < 1) {
@@ -768,6 +772,7 @@ public class ImageReader implements AutoCloseable {
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
+    private final long mUsage;
     private final int mMaxImages;
     private final int mNumPlanes;
     private final Surface mSurface;
@@ -909,7 +914,8 @@ public class ImageReader implements AutoCloseable {
             throwISEIfImageIsInvalid();
 
             if (mPlanes == null) {
-                mPlanes = nativeCreatePlanes(ImageReader.this.mNumPlanes, ImageReader.this.mFormat);
+                mPlanes = nativeCreatePlanes(ImageReader.this.mNumPlanes, ImageReader.this.mFormat,
+                        ImageReader.this.mUsage);
             }
             // Shallow copy is fine.
             return mPlanes.clone();
@@ -1038,7 +1044,7 @@ public class ImageReader implements AutoCloseable {
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
         private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes,
-                int readerFormat);
+                int readerFormat, long readerUsage);
         private synchronized native int nativeGetWidth();
         private synchronized native int nativeGetHeight();
         private synchronized native int nativeGetFormat(int readerFormat);
