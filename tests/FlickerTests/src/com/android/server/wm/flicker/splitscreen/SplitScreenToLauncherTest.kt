@@ -17,11 +17,11 @@
 package com.android.server.wm.flicker.splitscreen
 
 import android.view.Surface
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.FlickerTestBase
+import com.android.server.wm.flicker.NonRotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -37,16 +37,19 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
+import org.junit.runners.Parameterized
 
 /**
  * Test open app to split screen.
  * To run this test: `atest FlickerTests:SplitScreenToLauncherTest`
  */
 @LargeTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SplitScreenToLauncherTest : FlickerTestBase() {
-    private val rotation: Int = Surface.ROTATION_0
+class SplitScreenToLauncherTest(
+    rotationName: String,
+    rotation: Int
+) : NonRotationTestBase(rotationName, rotation) {
     @Test
     fun test() {
         val testApp = StandardAppHelper(instrumentation,
@@ -56,8 +59,10 @@ class SplitScreenToLauncherTest : FlickerTestBase() {
             withTag { buildTestTag("splitScreenToLauncher", testApp, rotation) }
             repeat { 1 }
             setup {
-                eachRun {
+                test {
                     device.wakeUpAndGoToHomeScreen()
+                }
+                eachRun {
                     testApp.open()
                     this.setRotation(rotation)
                     device.launchSplitScreen()
@@ -103,7 +108,21 @@ class SplitScreenToLauncherTest : FlickerTestBase() {
                             .hidesLayer(testApp.getPackage())
                     }
                 }
+
+                eventLog {
+                    focusDoesNotChange(bugId = 151179149)
+                }
             }
+        }
+    }
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<Array<Any>> {
+            // b/161435597 causes the test not to work on 90 degrees
+            val supportedRotations = intArrayOf(Surface.ROTATION_0)
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }

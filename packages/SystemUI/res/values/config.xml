@@ -161,10 +161,6 @@
     <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
     <integer name="ambient_notification_extension_time">10000</integer>
 
-    <!-- In multi-window, determines whether the stack where recents lives should grow from
-         the smallest position when being launched. -->
-    <bool name="recents_grow_in_multiwindow">true</bool>
-
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 

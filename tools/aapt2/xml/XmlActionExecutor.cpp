@@ -74,11 +74,11 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPi
         for (const StringPiece& element : *bread_crumb) {
           error_msg << "<" << element << ">";
         }
-        if (policy == XmlActionExecutorPolicy::kWhitelistWarning) {
+        if (policy == XmlActionExecutorPolicy::kAllowListWarning) {
           // Treat the error only as a warning.
           diag->Warn(error_msg);
         } else {
-          // Policy is XmlActionExecutorPolicy::kWhitelist, we should fail.
+          // Policy is XmlActionExecutorPolicy::kAllowList, we should fail.
           diag->Error(error_msg);
           error = true;
         }
@@ -94,7 +94,7 @@ bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* di
 
   Element* el = doc->root.get();
   if (!el) {
-    if (policy == XmlActionExecutorPolicy::kWhitelist) {
+    if (policy == XmlActionExecutorPolicy::kAllowList) {
       source_diag.Error(DiagMessage() << "no root XML tag found");
       return false;
     }
@@ -109,7 +109,7 @@ bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* di
       return iter->second.Execute(policy, &bread_crumb, &source_diag, el);
     }
 
-    if (policy == XmlActionExecutorPolicy::kWhitelist) {
+    if (policy == XmlActionExecutorPolicy::kAllowList) {
       DiagMessage error_msg(el->line_number);
       error_msg << "unexpected root element ";
       PrintElementToDiagMessage(el, &error_msg);

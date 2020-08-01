@@ -247,7 +247,7 @@ public class AppStateTrackerTest {
                 .thenAnswer(inv -> getPowerSaveState());
         when(mMockAppOpsManager.getPackagesForOps(
                 any(int[].class)
-                )).thenAnswer(mGetPackagesForOps);
+        )).thenAnswer(mGetPackagesForOps);
 
         mMockContentResolver = new MockContentResolver();
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
@@ -447,7 +447,7 @@ public class AppStateTrackerTest {
         areRestricted(instance, UID_10_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
 
-        // Clear the app ops and update the whitelist.
+        // Clear the app ops and update the exemption list.
         setAppOps(UID_1, PACKAGE_1, false);
         setAppOps(UID_10_2, PACKAGE_2, false);
 
@@ -462,7 +462,8 @@ public class AppStateTrackerTest {
         areRestricted(instance, UID_10_3, PACKAGE_3, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1}, new int[] {}, new int[] {UID_2});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_1}, new int[] {},
+                new int[] {UID_2});
 
         areRestricted(instance, UID_1, PACKAGE_1, NONE);
         areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
@@ -487,24 +488,25 @@ public class AppStateTrackerTest {
         areRestricted(instance, UID_10_3, PACKAGE_3, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
 
-        assertTrue(instance.isUidPowerSaveWhitelisted(UID_1));
-        assertTrue(instance.isUidPowerSaveWhitelisted(UID_10_1));
-        assertFalse(instance.isUidPowerSaveWhitelisted(UID_2));
-        assertFalse(instance.isUidPowerSaveWhitelisted(UID_10_2));
+        assertTrue(instance.isUidPowerSaveExempt(UID_1));
+        assertTrue(instance.isUidPowerSaveExempt(UID_10_1));
+        assertFalse(instance.isUidPowerSaveExempt(UID_2));
+        assertFalse(instance.isUidPowerSaveExempt(UID_10_2));
 
-        assertFalse(instance.isUidTempPowerSaveWhitelisted(UID_1));
-        assertFalse(instance.isUidTempPowerSaveWhitelisted(UID_10_1));
-        assertTrue(instance.isUidTempPowerSaveWhitelisted(UID_2));
-        assertTrue(instance.isUidTempPowerSaveWhitelisted(UID_10_2));
+        assertFalse(instance.isUidTempPowerSaveExempt(UID_1));
+        assertFalse(instance.isUidTempPowerSaveExempt(UID_10_1));
+        assertTrue(instance.isUidTempPowerSaveExempt(UID_2));
+        assertTrue(instance.isUidTempPowerSaveExempt(UID_10_2));
     }
 
     @Test
-    public void testPowerSaveUserWhitelist() throws Exception {
+    public void testPowerSaveUserExemptionList() throws Exception {
         final AppStateTrackerTestable instance = newInstance();
-        instance.setPowerSaveWhitelistAppIds(new int[] {}, new int[] {UID_1, UID_2}, new int[] {});
-        assertTrue(instance.isUidPowerSaveUserWhitelisted(UID_1));
-        assertTrue(instance.isUidPowerSaveUserWhitelisted(UID_2));
-        assertFalse(instance.isUidPowerSaveUserWhitelisted(UID_3));
+        instance.setPowerSaveExemptionListAppIds(new int[] {}, new int[] {UID_1, UID_2},
+                new int[] {});
+        assertTrue(instance.isUidPowerSaveUserExempt(UID_1));
+        assertTrue(instance.isUidPowerSaveUserExempt(UID_2));
+        assertFalse(instance.isUidPowerSaveUserExempt(UID_3));
     }
 
     @Test
@@ -909,9 +911,10 @@ public class AppStateTrackerTest {
         reset(l);
 
         // -------------------------------------------------------------------------
-        // Tests with system/user/temp whitelist.
+        // Tests with system/user/temp exemption list.
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {}, new int[] {});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_1, UID_2}, new int[] {},
+                new int[] {});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -923,7 +926,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_2}, new int[] {}, new int[] {});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -935,8 +938,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        // Update temp whitelist.
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {},
+        // Update temp exemption list.
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_2}, new int[] {},
                 new int[] {UID_1, UID_3});
 
         waitUntilMainHandlerDrain();
@@ -949,7 +952,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {UID_3});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_2}, new int[] {},
+                new int[] {UID_3});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -975,10 +979,11 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {}, new int[] {});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_1, UID_2}, new int[] {},
+                new int[] {});
 
         waitUntilMainHandlerDrain();
-        // Called once for updating all whitelist and once for updating temp whitelist
+        // Called once for updating all exemption list and once for updating temp exemption list
         verify(l, times(2)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
@@ -988,7 +993,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_2}, new int[] {}, new int[] {});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -1000,8 +1005,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        // Update temp whitelist.
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {},
+        // Update temp exemption list.
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_2}, new int[] {},
                 new int[] {UID_1, UID_3});
 
         waitUntilMainHandlerDrain();
@@ -1014,7 +1019,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {UID_3});
+        instance.setPowerSaveExemptionListAppIds(new int[] {UID_2}, new int[] {},
+                new int[] {UID_3});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -1254,7 +1260,7 @@ public class AppStateTrackerTest {
                 .mapToInt(Integer::intValue).toArray();
     }
 
-    static boolean isAnyAppIdUnwhitelistedSlow(int[] prevArray, int[] newArray) {
+    static boolean isAnyAppIdUnexemptSlow(int[] prevArray, int[] newArray) {
         Arrays.sort(newArray); // Just in case...
         for (int p : prevArray) {
             if (Arrays.binarySearch(newArray, p) < 0) {
@@ -1264,31 +1270,31 @@ public class AppStateTrackerTest {
         return false;
     }
 
-    private void checkAnyAppIdUnwhitelisted(int[] prevArray, int[] newArray, boolean expected) {
+    private void checkAnyAppIdUnexempt(int[] prevArray, int[] newArray, boolean expected) {
         assertEquals("Input: " + Arrays.toString(prevArray) + " " + Arrays.toString(newArray),
-                expected, AppStateTrackerImpl.isAnyAppIdUnwhitelisted(prevArray, newArray));
+                expected, AppStateTrackerImpl.isAnyAppIdUnexempt(prevArray, newArray));
 
-        // Also test isAnyAppIdUnwhitelistedSlow.
+        // Also test isAnyAppIdUnexempt.
         assertEquals("Input: " + Arrays.toString(prevArray) + " " + Arrays.toString(newArray),
-                expected, isAnyAppIdUnwhitelistedSlow(prevArray, newArray));
+                expected, isAnyAppIdUnexemptSlow(prevArray, newArray));
     }
 
     @Test
-    public void isAnyAppIdUnwhitelisted() {
-        checkAnyAppIdUnwhitelisted(array(), array(), false);
+    public void isAnyAppIdUnexempt() {
+        checkAnyAppIdUnexempt(array(), array(), false);
 
-        checkAnyAppIdUnwhitelisted(array(1), array(), true);
-        checkAnyAppIdUnwhitelisted(array(1), array(1), false);
-        checkAnyAppIdUnwhitelisted(array(1), array(0, 1), false);
-        checkAnyAppIdUnwhitelisted(array(1), array(0, 1, 2), false);
-        checkAnyAppIdUnwhitelisted(array(1), array(0, 1, 2), false);
+        checkAnyAppIdUnexempt(array(1), array(), true);
+        checkAnyAppIdUnexempt(array(1), array(1), false);
+        checkAnyAppIdUnexempt(array(1), array(0, 1), false);
+        checkAnyAppIdUnexempt(array(1), array(0, 1, 2), false);
+        checkAnyAppIdUnexempt(array(1), array(0, 1, 2), false);
 
-        checkAnyAppIdUnwhitelisted(array(1, 2, 10), array(), true);
-        checkAnyAppIdUnwhitelisted(array(1, 2, 10), array(1, 2), true);
-        checkAnyAppIdUnwhitelisted(array(1, 2, 10), array(1, 2, 10), false);
-        checkAnyAppIdUnwhitelisted(array(1, 2, 10), array(2, 10), true);
-        checkAnyAppIdUnwhitelisted(array(1, 2, 10), array(0, 1, 2, 4, 3, 10), false);
-        checkAnyAppIdUnwhitelisted(array(1, 2, 10), array(0, 0, 1, 2, 10), false);
+        checkAnyAppIdUnexempt(array(1, 2, 10), array(), true);
+        checkAnyAppIdUnexempt(array(1, 2, 10), array(1, 2), true);
+        checkAnyAppIdUnexempt(array(1, 2, 10), array(1, 2, 10), false);
+        checkAnyAppIdUnexempt(array(1, 2, 10), array(2, 10), true);
+        checkAnyAppIdUnexempt(array(1, 2, 10), array(0, 1, 2, 4, 3, 10), false);
+        checkAnyAppIdUnexempt(array(1, 2, 10), array(0, 0, 1, 2, 10), false);
 
         // Random test
         int trueCount = 0;
@@ -1297,8 +1303,8 @@ public class AppStateTrackerTest {
             final int[] array1 = makeRandomArray();
             final int[] array2 = makeRandomArray();
 
-            final boolean expected = isAnyAppIdUnwhitelistedSlow(array1, array2);
-            final boolean actual = AppStateTrackerImpl.isAnyAppIdUnwhitelisted(array1, array2);
+            final boolean expected = isAnyAppIdUnexemptSlow(array1, array2);
+            final boolean actual = AppStateTrackerImpl.isAnyAppIdUnexempt(array1, array2);
 
             assertEquals("Input: " + Arrays.toString(array1) + " " + Arrays.toString(array2),
                     expected, actual);

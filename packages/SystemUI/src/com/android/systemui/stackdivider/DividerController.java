@@ -391,9 +391,9 @@ public class DividerController implements DividerView.DividerCallbacks,
      * subscriber, or DividerView, which has been removed and prevented from resizing. Instead,
      * register the event handler here and proxy the event to the current DividerView.
      */
-    public void onRecentsDrawn(DividerView.RecentDrawnCallback callback) {
+    public void onRecentsDrawn() {
         if (mView != null) {
-            mView.onRecentsDrawn(callback);
+            mView.onRecentsDrawn();
         }
     }
 

@@ -19,15 +19,16 @@ package com.android.server.wm.flicker.splitscreen
 import android.graphics.Region
 import android.util.Rational
 import android.view.Surface
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
 import com.android.server.wm.flicker.FlickerTestBase
 import com.android.server.wm.flicker.StandardAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -170,6 +171,10 @@ class ResizeSplitScreenTest : FlickerTestBase() {
                                 .and()
                                 .hasVisibleRegion(sImeActivity, bottomAppBounds)
                     }
+                }
+
+                eventLog {
+                    focusDoesNotChange()
                 }
             }
         }

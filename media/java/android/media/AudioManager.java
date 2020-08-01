@@ -3801,7 +3801,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.unregisterAudioPolicyAsync(policy.cb());
-            policy.setRegistration(null);
+            policy.reset();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3823,7 +3823,7 @@ public class AudioManager {
         try {
             policy.invalidateCaptorsAndInjectors();
             service.unregisterAudioPolicy(policy.cb());
-            policy.setRegistration(null);
+            policy.reset();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

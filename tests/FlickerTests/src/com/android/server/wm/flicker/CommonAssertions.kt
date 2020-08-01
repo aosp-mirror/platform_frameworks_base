@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker
 
+import com.android.server.wm.flicker.dsl.EventLogAssertion
 import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.dsl.WmAssertion
 import com.android.server.wm.flicker.helpers.WindowUtils
@@ -53,19 +54,19 @@ fun LayersAssertion.noUncoveredRegions(
     if (allStates) {
         all("noUncoveredRegions", enabled, bugId) {
             if (startingBounds == endingBounds) {
-                this.coversRegion(startingBounds)
+                this.coversAtLeastRegion(startingBounds)
             } else {
-                this.coversRegion(startingBounds)
+                this.coversAtLeastRegion(startingBounds)
                         .then()
-                        .coversRegion(endingBounds)
+                        .coversAtLeastRegion(endingBounds)
             }
         }
     } else {
         start("noUncoveredRegions_StartingPos") {
-            this.coversRegion(startingBounds)
+            this.coversAtLeastRegion(startingBounds)
         }
         end("noUncoveredRegions_EndingPos") {
-            this.coversRegion(endingBounds)
+            this.coversAtLeastRegion(endingBounds)
         }
     }
 }
@@ -129,5 +130,24 @@ fun LayersAssertion.statusBarLayerRotatesScales(
     }
     end("statusBarLayerRotatesScales_EndingPos", enabled, bugId) {
         this.hasVisibleRegion(FlickerTestBase.STATUS_BAR_WINDOW_TITLE, endingPos)
+    }
+}
+
+fun EventLogAssertion.focusChanges(
+    vararg windows: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all(enabled = enabled, bugId = bugId) {
+        this.focusChanges(windows)
+    }
+}
+
+fun EventLogAssertion.focusDoesNotChange(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all(enabled = enabled, bugId = bugId) {
+        this.focusDoesNotChange()
     }
 }

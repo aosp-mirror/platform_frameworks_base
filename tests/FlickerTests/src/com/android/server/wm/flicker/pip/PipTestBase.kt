@@ -16,9 +16,7 @@
 
 package com.android.server.wm.flicker.pip
 
-import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.dsl.WmAssertion
 import com.android.server.wm.flicker.helpers.PipAppHelper
 
 abstract class PipTestBase(
@@ -26,24 +24,6 @@ abstract class PipTestBase(
     rotation: Int
 ) : NonRotationTestBase(rotationName, rotation) {
     protected val testApp = PipAppHelper(instrumentation)
-
-    protected fun WmAssertion.pipWindowBecomesVisible() {
-        all("pipWindowBecomesVisible") {
-            this.skipUntilFirstAssertion()
-                    .showsAppWindowOnTop(sPipWindowTitle)
-                    .then()
-                    .hidesAppWindow(sPipWindowTitle)
-        }
-    }
-
-    protected fun LayersAssertion.pipLayerBecomesVisible() {
-        all("pipLayerBecomesVisible") {
-            this.skipUntilFirstAssertion()
-                    .showsLayer(sPipWindowTitle)
-                    .then()
-                    .hidesLayer(sPipWindowTitle)
-        }
-    }
 
     companion object {
         const val sPipWindowTitle = "PipMenuActivity"

@@ -16,10 +16,29 @@
 
 #include "utils.h"
 
-#include "android-base/strings.h"
-
 namespace android {
 namespace stats_log_api_gen {
+
+/**
+ * Inlining this method because "android-base/strings.h" is not available on
+ * google3.
+ */
+static vector<string> Split(const string& s, const string& delimiters) {
+    GOOGLE_CHECK_NE(delimiters.size(), 0U);
+
+    vector<string> result;
+
+    size_t base = 0;
+    size_t found;
+    while (true) {
+        found = s.find_first_of(delimiters, base);
+        result.push_back(s.substr(base, found - base));
+        if (found == s.npos) break;
+        base = found + 1;
+    }
+
+    return result;
+}
 
 static void build_non_chained_decl_map(const Atoms& atoms,
                                        std::map<int, AtomDeclSet::const_iterator>* decl_map) {
@@ -27,6 +46,20 @@ static void build_non_chained_decl_map(const Atoms& atoms,
          atomIt != atoms.non_chained_decls.end(); atomIt++) {
         decl_map->insert(std::make_pair((*atomIt)->code, atomIt));
     }
+}
+
+const map<AnnotationId, string>& get_annotation_id_constants() {
+    static const map<AnnotationId, string>* ANNOTATION_ID_CONSTANTS =
+        new map<AnnotationId, string>{
+            {ANNOTATION_ID_IS_UID, "ANNOTATION_ID_IS_UID"},
+            {ANNOTATION_ID_TRUNCATE_TIMESTAMP, "ANNOTATION_ID_TRUNCATE_TIMESTAMP"},
+            {ANNOTATION_ID_PRIMARY_FIELD, "ANNOTATION_ID_PRIMARY_FIELD"},
+            {ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID, "ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID"},
+            {ANNOTATION_ID_EXCLUSIVE_STATE, "ANNOTATION_ID_EXCLUSIVE_STATE"},
+            {ANNOTATION_ID_TRIGGER_STATE_RESET, "ANNOTATION_ID_TRIGGER_STATE_RESET"},
+            {ANNOTATION_ID_STATE_NESTED, "ANNOTATION_ID_STATE_NESTED"}};
+
+    return *ANNOTATION_ID_CONSTANTS;
 }
 
 /**
@@ -102,15 +135,15 @@ const char* java_type_name(java_type_t type) {
 // Writes namespaces for the cpp and header files, returning the number of
 // namespaces written.
 void write_namespace(FILE* out, const string& cppNamespaces) {
-    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
-    for (string cppNamespace : cppNamespaceVec) {
+    vector<string> cppNamespaceVec = Split(cppNamespaces, ",");
+    for (const string& cppNamespace : cppNamespaceVec) {
         fprintf(out, "namespace %s {\n", cppNamespace.c_str());
     }
 }
 
 // Writes namespace closing brackets for cpp and header files.
 void write_closing_namespace(FILE* out, const string& cppNamespaces) {
-    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
+    vector<string> cppNamespaceVec = Split(cppNamespaces, ",");
     for (auto it = cppNamespaceVec.rbegin(); it != cppNamespaceVec.rend(); ++it) {
         fprintf(out, "} // namespace %s\n", it->c_str());
     }
@@ -123,7 +156,7 @@ static void write_cpp_usage(FILE* out, const string& method_name, const string& 
     for (vector<AtomField>::const_iterator field = atom->fields.begin();
          field != atom->fields.end(); field++) {
         if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
+            for (const auto& chainField : attributionDecl.fields) {
                 if (chainField.javaType == JAVA_TYPE_STRING) {
                     fprintf(out, ", const std::vector<%s>& %s", cpp_type_name(chainField.javaType),
                             chainField.name.c_str());
@@ -190,7 +223,7 @@ void write_native_method_signature(FILE* out, const string& signaturePrefix,
     for (vector<java_type_t>::const_iterator arg = signature.begin(); arg != signature.end();
          arg++) {
         if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
+            for (const auto& chainField : attributionDecl.fields) {
                 if (chainField.javaType == JAVA_TYPE_STRING) {
                     fprintf(out, ", const std::vector<%s>& %s", cpp_type_name(chainField.javaType),
                             chainField.name.c_str());
@@ -222,7 +255,7 @@ void write_native_method_call(FILE* out, const string& methodName,
     for (vector<java_type_t>::const_iterator arg = signature.begin(); arg != signature.end();
          arg++) {
         if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
+            for (const auto& chainField : attributionDecl.fields) {
                 if (chainField.javaType == JAVA_TYPE_STRING) {
                     fprintf(out, ", %s", chainField.name.c_str());
                 } else {

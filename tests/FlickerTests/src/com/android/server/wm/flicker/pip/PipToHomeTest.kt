@@ -20,6 +20,7 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
@@ -54,54 +55,74 @@ class PipToHomeTest(
             withTag { buildTestTag("exitPipModeToApp", testApp, rotation) }
             repeat { 1 }
             setup {
-                eachRun {
+                test {
                     device.wakeUpAndGoToHomeScreen()
                     device.pressHome()
-                    this.setRotation(rotation)
+                }
+                eachRun {
                     testApp.open()
+                    this.setRotation(rotation)
+                    testApp.clickEnterPipButton(device)
+                    device.hasPipWindow()
                 }
             }
             teardown {
                 eachRun {
-                    testApp.exit()
                     this.setRotation(Surface.ROTATION_0)
+                    if (device.hasPipWindow()) {
+                        device.closePipWindow()
+                    }
                 }
                 test {
                     if (device.hasPipWindow()) {
                         device.closePipWindow()
                     }
+                    testApp.exit()
                 }
             }
             transitions {
-                testApp.clickEnterPipButton(device)
                 testApp.closePipWindow(device)
-                device.waitForIdle()
-                testApp.exit()
             }
             assertions {
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    pipWindowBecomesVisible()
 
-                    all {
-                        this.showsAppWindowOnTop(sPipWindowTitle)
-                                .and()
-                                .showsBelowAppWindow("Wallpaper")
+                    all("pipWindowBecomesInvisible") {
+                        this.showsAppWindow(sPipWindowTitle)
                                 .then()
-                                .showsAboveAppWindow("Wallpaper")
+                                .hidesAppWindow(sPipWindowTitle)
                     }
                 }
 
                 layersTrace {
                     navBarLayerIsAlwaysVisible()
                     statusBarLayerIsAlwaysVisible()
-                    noUncoveredRegions(rotation)
+                    // The final state is the launcher, so always in portrait mode
+                    noUncoveredRegions(rotation, Surface.ROTATION_0, allStates = false)
                     navBarLayerRotatesAndScales(rotation)
                     statusBarLayerRotatesScales(rotation)
-                    pipLayerBecomesVisible()
+
+                    all("pipLayerBecomesInvisible") {
+                        this.showsLayer(sPipWindowTitle)
+                                .then()
+                                .hidesLayer(sPipWindowTitle)
+                    }
+                }
+
+                eventLog {
+                    focusChanges(testApp.launcherName, "NexusLauncherActivity", bugId = 151179149)
                 }
             }
+        }
+    }
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<Array<Any>> {
+            val supportedRotations = intArrayOf(Surface.ROTATION_0)
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }

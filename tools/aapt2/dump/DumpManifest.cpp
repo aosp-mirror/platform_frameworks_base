@@ -188,7 +188,7 @@ class ManifestExtractor {
 
     /** Retrieves the resource assigned to the specified resource id if one exists. */
     Value* FindValueById(const ResourceTable* table, const ResourceId& res_id,
-                         const ConfigDescription& config = DummyConfig()) {
+                         const ConfigDescription& config = DefaultConfig()) {
       if (table) {
         for (auto& package : table->packages) {
           if (package->id && package->id.value() == res_id.package_id()) {
@@ -210,7 +210,7 @@ class ManifestExtractor {
     }
 
     /** Attempts to resolve the reference to a non-reference value. */
-    Value* ResolveReference(Reference* ref, const ConfigDescription& config = DummyConfig()) {
+    Value* ResolveReference(Reference* ref, const ConfigDescription& config = DefaultConfig()) {
       const int kMaxIterations = 40;
       int i = 0;
       while (ref && ref->id && i++ < kMaxIterations) {
@@ -231,10 +231,10 @@ class ManifestExtractor {
      * this will attempt to resolve the reference to an integer value.
      **/
     int32_t* GetAttributeInteger(xml::Attribute* attr,
-                                 const ConfigDescription& config = DummyConfig()) {
+                                 const ConfigDescription& config = DefaultConfig()) {
       if (attr != nullptr) {
         if (attr->compiled_value) {
-          // Resolve references using the dummy configuration
+          // Resolve references using the configuration
           Value* value = attr->compiled_value.get();
           if (ValueCast<Reference>(value)) {
             value = ResolveReference(ValueCast<Reference>(value), config);
@@ -257,7 +257,7 @@ class ManifestExtractor {
      * exist or cannot be resolved to an integer value.
      **/
     int32_t GetAttributeIntegerDefault(xml::Attribute* attr, int32_t def,
-                                       const ConfigDescription& config = DummyConfig()) {
+                                       const ConfigDescription& config = DefaultConfig()) {
       auto value = GetAttributeInteger(attr, config);
       if (value) {
         return *value;
@@ -270,10 +270,10 @@ class ManifestExtractor {
      * this will attempt to resolve the reference to a string value.
      **/
     const std::string* GetAttributeString(xml::Attribute* attr,
-                                          const ConfigDescription& config = DummyConfig()) {
+                                          const ConfigDescription& config = DefaultConfig()) {
       if (attr != nullptr) {
         if (attr->compiled_value) {
-          // Resolve references using the dummy configuration
+          // Resolve references using the configuration
           Value* value = attr->compiled_value.get();
           if (ValueCast<Reference>(value)) {
             value = ResolveReference(ValueCast<Reference>(value), config);
@@ -305,7 +305,7 @@ class ManifestExtractor {
      * exist or cannot be resolved to an string value.
      **/
     std::string GetAttributeStringDefault(xml::Attribute* attr, std::string def,
-                                          const ConfigDescription& config = DummyConfig()) {
+                                          const ConfigDescription& config = DefaultConfig()) {
       auto value = GetAttributeString(attr, config);
       if (value) {
         return *value;
@@ -322,7 +322,7 @@ class ManifestExtractor {
   friend Element;
 
   /** Creates a default configuration used to retrieve resources. */
-  static ConfigDescription DummyConfig() {
+  static ConfigDescription DefaultConfig() {
     ConfigDescription config;
     config.orientation = android::ResTable_config::ORIENTATION_PORT;
     config.density = android::ResTable_config::DENSITY_MEDIUM;
@@ -1871,7 +1871,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
 
             // Collect all the unique locales of the apk
             if (locales_.find(locale_str) == locales_.end()) {
-              ConfigDescription config = ManifestExtractor::DummyConfig();
+              ConfigDescription config = ManifestExtractor::DefaultConfig();
               config.setBcp47Locale(locale_str.data());
               locales_.insert(std::make_pair(locale_str, config));
             }
@@ -1880,7 +1880,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
             uint16_t density = (value->config.density == 0) ? (uint16_t) 160
                                                             : value->config.density;
             if (densities_.find(density) == densities_.end()) {
-              ConfigDescription config = ManifestExtractor::DummyConfig();
+              ConfigDescription config = ManifestExtractor::DefaultConfig();
               config.density = density;
               densities_.insert(std::make_pair(density, config));
             }

@@ -3249,7 +3249,6 @@ public class HdmiControlService extends SystemService {
             playback.setIsActiveSource(true);
             playback.wakeUpIfActiveSource();
             playback.maySendActiveSource(source);
-            setActiveSource(playback.mAddress, physicalAddress);
         }
 
         if (deviceType == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
@@ -3260,7 +3259,6 @@ public class HdmiControlService extends SystemService {
                 audioSystem.setIsActiveSource(true);
                 audioSystem.wakeUpIfActiveSource();
                 audioSystem.maySendActiveSource(source);
-                setActiveSource(audioSystem.mAddress, physicalAddress);
             }
         }
     }
@@ -3283,13 +3281,11 @@ public class HdmiControlService extends SystemService {
             if (audioSystem != null) {
                 audioSystem.setIsActiveSource(false);
             }
-            setActiveSource(playback.mAddress, physicalAddress);
         } else {
             if (audioSystem != null) {
                 audioSystem.setIsActiveSource(true);
                 audioSystem.wakeUpIfActiveSource();
                 audioSystem.maySendActiveSource(sourceAddress);
-                setActiveSource(audioSystem.mAddress, physicalAddress);
             }
         }
     }

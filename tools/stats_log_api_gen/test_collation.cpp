@@ -24,7 +24,6 @@ namespace android {
 namespace stats_log_api_gen {
 
 using std::map;
-using std::set;
 using std::vector;
 
 /**
@@ -32,11 +31,11 @@ using std::vector;
  */
 static bool map_contains_vector(const SignatureInfoMap& s, int count, ...) {
     va_list args;
-    vector<java_type_t> v;
+    vector<java_type_t> v(count);
 
     va_start(args, count);
     for (int i = 0; i < count; i++) {
-        v.push_back((java_type_t)va_arg(args, int));
+        v[i] = static_cast<java_type_t>(va_arg(args, int));
     }
     va_end(args);
 
@@ -222,7 +221,7 @@ TEST(CollationTest, FailOnBadBinaryFieldAtom) {
     Atoms atoms;
     int errorCount =
             collate_atoms(BadEventWithBinaryFieldAtom::descriptor(), DEFAULT_MODULE_NAME, &atoms);
-    EXPECT_TRUE(errorCount > 0);
+    EXPECT_GT(errorCount, 0);
 }
 
 TEST(CollationTest, PassOnLogFromModuleAtom) {

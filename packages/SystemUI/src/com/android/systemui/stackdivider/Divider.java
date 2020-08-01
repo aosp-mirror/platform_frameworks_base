@@ -23,19 +23,15 @@ import android.content.Context;
 import android.window.WindowContainerToken;
 
 import com.android.systemui.SystemUI;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  * Controls the docked stack divider.
@@ -44,15 +40,12 @@ import dagger.Lazy;
 public class Divider extends SystemUI {
     private final KeyguardStateController mKeyguardStateController;
     private final DividerController mDividerController;
-    private final Optional<Lazy<Recents>> mRecentsOptionalLazy;
 
     Divider(Context context, DividerController dividerController,
-            KeyguardStateController keyguardStateController,
-            Optional<Lazy<Recents>> recentsOptionalLazy) {
+            KeyguardStateController keyguardStateController) {
         super(context);
         mDividerController = dividerController;
         mKeyguardStateController = keyguardStateController;
-        mRecentsOptionalLazy = recentsOptionalLazy;
     }
 
     @Override
@@ -113,8 +106,7 @@ public class Divider extends SystemUI {
     }
 
     public void onRecentsDrawn() {
-        mDividerController.onRecentsDrawn(() -> mRecentsOptionalLazy.ifPresent(
-                recentsLazy -> recentsLazy.get().growRecents()));
+        mDividerController.onRecentsDrawn();
     }
 
     public void onDockedFirstAnimationFrame() {

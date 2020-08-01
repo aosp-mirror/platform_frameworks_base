@@ -83,10 +83,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         void onDraggingEnd();
     }
 
-    interface RecentDrawnCallback {
-        void growRecents();
-    }
-
     static final long TOUCH_ANIMATION_DURATION = 150;
     static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
@@ -151,7 +147,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private DividerCallbacks mCallback;
     private final AnimationHandler mAnimationHandler = new AnimationHandler();
 
-    private boolean mGrowRecents;
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
     private boolean mExitAnimationRunning;
@@ -307,7 +302,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 R.dimen.docked_stack_divider_lift_elevation);
         mLongPressEntraceAnimDuration = getResources().getInteger(
                 R.integer.long_press_dock_anim_duration);
-        mGrowRecents = getResources().getBoolean(R.bool.recents_grow_in_multiwindow);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mFlingAnimationUtils = new FlingAnimationUtils(getResources().getDisplayMetrics(), 0.3f);
         boolean landscape = getResources().getConfiguration().orientation
@@ -1322,39 +1316,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mBackground.getRight(), mBackground.getBottom(), Op.UNION);
     }
 
-    /**
-     * Checks whether recents will grow when invoked. This happens in multi-window when recents is
-     * very small. When invoking recents, we shrink the docked stack so recents has more space.
-     *
-     * @return the position of the divider when recents grows, or
-     *         {@link #INVALID_RECENTS_GROW_TARGET} if recents won't grow
-     */
-    public int growsRecents() {
-        boolean result = mGrowRecents
-                && mDockSide == WindowManager.DOCKED_TOP
-                && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position;
-        if (result) {
-            return getSnapAlgorithm().getMiddleTarget().position;
-        } else {
-            return INVALID_RECENTS_GROW_TARGET;
-        }
-    }
-
-    void onRecentsActivityStarting() {
-        if (mGrowRecents && mDockSide == WindowManager.DOCKED_TOP
-                && getSnapAlgorithm().getMiddleTarget() != getSnapAlgorithm().getLastSplitTarget()
-                && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position) {
-            mState.growAfterRecentsDrawn = true;
-            startDragging(false /* animate */, false /* touching */);
-        }
-    }
-
     void onDockedFirstAnimationFrame() {
         saveSnapTargetBeforeMinimized(mSplitLayout.getSnapAlgorithm().getMiddleTarget());
     }
 
     void onDockedTopTask() {
-        mState.growAfterRecentsDrawn = false;
         mState.animateAfterRecentsDrawn = true;
         startDragging(false /* animate */, false /* touching */);
         updateDockSide();
@@ -1366,7 +1332,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 null /* transaction */);
     }
 
-    void onRecentsDrawn(RecentDrawnCallback callback) {
+    void onRecentsDrawn() {
         updateDockSide();
         final int position = calculatePositionForInsetBounds();
         if (mState.animateAfterRecentsDrawn) {
@@ -1379,15 +1345,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                         mLongPressEntraceAnimDuration, Interpolators.FAST_OUT_SLOW_IN,
                         200 /* endDelay */);
             });
-        }
-        if (mState.growAfterRecentsDrawn) {
-            mState.growAfterRecentsDrawn = false;
-            updateDockSide();
-            if (callback != null) {
-                callback.growRecents();
-            }
-            stopDragging(position, getSnapAlgorithm().getMiddleTarget(), 336,
-                    Interpolators.FAST_OUT_SLOW_IN);
         }
     }
 

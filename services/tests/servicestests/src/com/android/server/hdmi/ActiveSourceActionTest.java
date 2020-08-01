@@ -144,6 +144,26 @@ public class ActiveSourceActionTest {
     }
 
     @Test
+    public void playbackDevice_updatesActiveSourceState() {
+        HdmiCecLocalDevicePlayback playbackDevice = new HdmiCecLocalDevicePlayback(
+                mHdmiControlService);
+        playbackDevice.init();
+        mLocalDevices.add(playbackDevice);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecFeatureAction action = new com.android.server.hdmi.ActiveSourceAction(
+                playbackDevice, ADDR_TV);
+        playbackDevice.addAndStartAction(action);
+        mTestLooper.dispatchAll();
+
+        assertThat(playbackDevice.getActiveSource().logicalAddress).isEqualTo(
+                playbackDevice.mAddress);
+        assertThat(playbackDevice.getActiveSource().physicalAddress).isEqualTo(mPhysicalAddress);
+        assertThat(playbackDevice.mIsActiveSource).isTrue();
+    }
+
+    @Test
     public void audioDevice_sendsActiveSource_noMenuStatus() {
         HdmiCecLocalDeviceAudioSystem audioDevice = new HdmiCecLocalDeviceAudioSystem(
                 mHdmiControlService);

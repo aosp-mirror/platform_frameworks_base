@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef ANDROID_STATS_LOG_API_GEN_NATIVE_WRITER_H
+#define ANDROID_STATS_LOG_API_GEN_NATIVE_WRITER_H
 
 #include <stdio.h>
 #include <string.h>
@@ -23,8 +24,6 @@
 
 namespace android {
 namespace stats_log_api_gen {
-
-using namespace std;
 
 int write_stats_log_cpp(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
                         const string& cppNamespace, const string& importHeader,
@@ -35,3 +34,5 @@ int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl& attrib
 
 }  // namespace stats_log_api_gen
 }  // namespace android
+
+#endif  // ANDROID_STATS_LOG_API_GEN_NATIVE_WRITER_H
