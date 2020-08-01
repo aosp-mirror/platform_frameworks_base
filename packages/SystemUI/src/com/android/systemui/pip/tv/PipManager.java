@@ -62,6 +62,7 @@ import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
 import java.util.ArrayList;
@@ -237,7 +238,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             ConfigurationController configController,
             DisplayController displayController,
             Divider divider,
-            @NonNull PipUiEventLogger pipUiEventLogger) {
+            @NonNull PipUiEventLogger pipUiEventLogger,
+            ShellTaskOrganizer shellTaskOrganizer) {
         if (mInitialized) {
             return;
         }
@@ -255,7 +257,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                mPipSurfaceTransactionHelper, divider, displayController, pipUiEventLogger);
+                mPipSurfaceTransactionHelper, divider, displayController, pipUiEventLogger,
+                shellTaskOrganizer);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
@@ -274,7 +277,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         try {
             WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
-            mPipTaskOrganizer.registerOrganizer(WINDOWING_MODE_PINNED);
         } catch (RemoteException | UnsupportedOperationException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }

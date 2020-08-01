@@ -35,6 +35,7 @@ import android.window.WindowOrganizer;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.R;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -91,7 +92,8 @@ public class DividerController implements DisplayController.OnDisplaysChangedLis
 
     public DividerController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController imeController, Handler handler, TransactionPool transactionPool) {
+            DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
+            ShellTaskOrganizer shellTaskOrganizer) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
@@ -100,7 +102,7 @@ public class DividerController implements DisplayController.OnDisplaysChangedLis
         mForcedResizableController = new ForcedResizableInfoActivityController(context, this);
         mTransactionPool = transactionPool;
         mWindowManagerProxy = new WindowManagerProxy(mTransactionPool, mHandler);
-        mSplits = new SplitScreenTaskOrganizer(this);
+        mSplits = new SplitScreenTaskOrganizer(this, shellTaskOrganizer);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler);
         mRotationController =
                 (display, fromRotation, toRotation, wct) -> {
