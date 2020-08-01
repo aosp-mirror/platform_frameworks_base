@@ -191,7 +191,7 @@ void ShellSubscriber::writePulledAtomsLocked(const vector<std::shared_ptr<LogEve
     mProto.clear();
     int count = 0;
     for (const auto& event : data) {
-        if (matchesSimple(*mUidMap, matcher, *event)) {
+        if (matchesSimple(mUidMap, matcher, *event)) {
             count++;
             uint64_t atomToken = mProto.start(util::FIELD_TYPE_MESSAGE |
                                               util::FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
@@ -209,7 +209,7 @@ void ShellSubscriber::onLogEvent(const LogEvent& event) {
 
     mProto.clear();
     for (const auto& matcher : mSubscriptionInfo->mPushedMatchers) {
-        if (matchesSimple(*mUidMap, matcher, event)) {
+        if (matchesSimple(mUidMap, matcher, event)) {
             uint64_t atomToken = mProto.start(util::FIELD_TYPE_MESSAGE |
                                               util::FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
             event.ToProto(mProto);

@@ -113,7 +113,7 @@ void makeBoolLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t ti
 }  // anonymous namespace
 
 TEST(AtomMatcherTest, TestSimpleMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
 
     // Set up the matcher
     AtomMatcher matcher;
@@ -132,7 +132,7 @@ TEST(AtomMatcherTest, TestSimpleMatcher) {
 }
 
 TEST(AtomMatcherTest, TestAttributionMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
     std::vector<int> attributionUids = {1111, 2222, 3333};
     std::vector<string> attributionTags = {"location1", "location2", "location3"};
 
@@ -207,7 +207,7 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
             "pkg0");
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
 
-    uidMap.updateMap(
+    uidMap->updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
             {android::String16("v1"), android::String16("v1"), android::String16("v2"),
              android::String16("v1"), android::String16("v2")},
@@ -359,8 +359,8 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
 }
 
 TEST(AtomMatcherTest, TestUidFieldMatcher) {
-    UidMap uidMap;
-    uidMap.updateMap(
+    sp<UidMap> uidMap = new UidMap();
+    uidMap->updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
             {android::String16("v1"), android::String16("v1"), android::String16("v2"),
              android::String16("v1"), android::String16("v2")},
@@ -395,8 +395,8 @@ TEST(AtomMatcherTest, TestUidFieldMatcher) {
 }
 
 TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
-    UidMap uidMap;
-    uidMap.updateMap(
+    sp<UidMap> uidMap = new UidMap();
+    uidMap->updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
             {android::String16("v1"), android::String16("v1"), android::String16("v2"),
              android::String16("v1"), android::String16("v2")},
@@ -456,8 +456,8 @@ TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
 }
 
 TEST(AtomMatcherTest, TestEqAnyStringMatcher) {
-    UidMap uidMap;
-    uidMap.updateMap(
+    sp<UidMap> uidMap = new UidMap();
+    uidMap->updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
             {android::String16("v1"), android::String16("v1"), android::String16("v2"),
              android::String16("v1"), android::String16("v2")},
@@ -520,7 +520,7 @@ TEST(AtomMatcherTest, TestEqAnyStringMatcher) {
 }
 
 TEST(AtomMatcherTest, TestBoolMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
     // Set up the matcher
     AtomMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_atom_matcher();
@@ -553,7 +553,7 @@ TEST(AtomMatcherTest, TestBoolMatcher) {
 }
 
 TEST(AtomMatcherTest, TestStringMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
     // Set up the matcher
     AtomMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_atom_matcher();
@@ -571,7 +571,7 @@ TEST(AtomMatcherTest, TestStringMatcher) {
 }
 
 TEST(AtomMatcherTest, TestMultiFieldsMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
     // Set up the matcher
     AtomMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_atom_matcher();
@@ -600,7 +600,7 @@ TEST(AtomMatcherTest, TestMultiFieldsMatcher) {
 }
 
 TEST(AtomMatcherTest, TestIntComparisonMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
     // Set up the matcher
     AtomMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_atom_matcher();
@@ -657,7 +657,7 @@ TEST(AtomMatcherTest, TestIntComparisonMatcher) {
 }
 
 TEST(AtomMatcherTest, TestFloatComparisonMatcher) {
-    UidMap uidMap;
+    sp<UidMap> uidMap = new UidMap();
     // Set up the matcher
     AtomMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_atom_matcher();
