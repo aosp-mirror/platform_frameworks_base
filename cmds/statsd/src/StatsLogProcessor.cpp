@@ -526,19 +526,34 @@ void StatsLogProcessor::OnConfigUpdated(const int64_t timestampNs, const ConfigK
     OnConfigUpdatedLocked(timestampNs, key, config);
 }
 
-void StatsLogProcessor::OnConfigUpdatedLocked(
-        const int64_t timestampNs, const ConfigKey& key, const StatsdConfig& config) {
+void StatsLogProcessor::OnConfigUpdatedLocked(const int64_t timestampNs, const ConfigKey& key,
+                                              const StatsdConfig& config, bool modularUpdate) {
     VLOG("Updated configuration for key %s", key.ToString().c_str());
-    sp<MetricsManager> newMetricsManager =
-            new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap, mPullerManager,
-                               mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
-    if (newMetricsManager->isConfigValid()) {
-        newMetricsManager->init();
-        mUidMap->OnConfigUpdated(key);
-        newMetricsManager->refreshTtl(timestampNs);
-        mMetricsManagers[key] = newMetricsManager;
-        VLOG("StatsdConfig valid");
+    // Create new config if this is not a modular update or if this is a new config.
+    const auto& it = mMetricsManagers.find(key);
+    bool configValid = false;
+    if (!modularUpdate || it == mMetricsManagers.end()) {
+        sp<MetricsManager> newMetricsManager =
+                new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap, mPullerManager,
+                                   mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
+        configValid = newMetricsManager->isConfigValid();
+        if (configValid) {
+            newMetricsManager->init();
+            mUidMap->OnConfigUpdated(key);
+            newMetricsManager->refreshTtl(timestampNs);
+            mMetricsManagers[key] = newMetricsManager;
+            VLOG("StatsdConfig valid");
+        }
     } else {
+        // Preserve the existing MetricsManager, update necessary components and metadata in place.
+        configValid = it->second->updateConfig(timestampNs, config);
+        if (configValid) {
+            // TODO(b/162323476): refresh TTL, ensure init() is handled properly.
+            mUidMap->OnConfigUpdated(key);
+
+        }
+    }
+    if (!configValid) {
         // If there is any error in the config, don't use it.
         // Remove any existing config with the same key.
         ALOGE("StatsdConfig NOT valid");

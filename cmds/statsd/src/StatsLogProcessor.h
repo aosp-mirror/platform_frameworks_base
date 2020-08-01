@@ -187,8 +187,8 @@ private:
 
     void resetIfConfigTtlExpiredLocked(const int64_t timestampNs);
 
-    void OnConfigUpdatedLocked(
-        const int64_t currentTimestampNs, const ConfigKey& key, const StatsdConfig& config);
+    void OnConfigUpdatedLocked(const int64_t currentTimestampNs, const ConfigKey& key,
+                               const StatsdConfig& config, bool modularUpdate = false);
 
     void GetActiveConfigsLocked(const int uid, vector<int64_t>& outActiveConfigs);
 
