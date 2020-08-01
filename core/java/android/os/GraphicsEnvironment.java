@@ -570,7 +570,7 @@ public class GraphicsEnvironment {
         final ContentResolver contentResolver = context.getContentResolver();
         final List<String> angleAllowlist =
                 getGlobalSettingsString(contentResolver, bundle,
-                    Settings.Global.GLOBAL_SETTINGS_ANGLE_WHITELIST);
+                    Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST);
 
         if (DEBUG) Log.v(TAG, "ANGLE allowlist: " + angleAllowlist);
 
