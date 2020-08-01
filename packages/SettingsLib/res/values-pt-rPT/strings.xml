@@ -140,8 +140,8 @@
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Rede aberta"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Rede segura"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"SO Android"</string>
-    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Aplicações removidas"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Aplicações e utilizadores removidos"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Apps removidas"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Apps e utilizadores removidos"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Atualizações do sistema"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"Ligação USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Hotspot portátil"</string>
@@ -365,7 +365,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração de animação"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular apresentações secundárias"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"Aplicações"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Não manter atividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destruir atividades assim que o utilizador sair"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Limite do processo em 2º plano"</string>
@@ -396,7 +396,7 @@
     <item msgid="4548987861791236754">"Cores naturais e realistas"</item>
     <item msgid="1282170165150762976">"Cores otimizadas para conteúdos digitais"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="5372523625297212320">"Aplicações em espera"</string>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"Apps em espera"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Inativo. Toque para ativar/desativar."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ativo. Toque para ativar/desativar."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado do Modo de espera das apps:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
