@@ -1214,12 +1214,16 @@ public class ApnSetting implements Parcelable {
         return false;
     }
 
-    // TODO - if we have this function we should also have hashCode.
-    // Also should handle changes in type order and perhaps case-insensitivity.
+    @Override
+    public int hashCode() {
+        return Objects.hash(mApnName, mProxyAddress, mProxyPort, mMmsc, mMmsProxyAddress,
+                mMmsProxyPort, mUser, mPassword, mAuthType, mApnTypeBitmask, mId, mOperatorNumeric,
+                mProtocol, mRoamingProtocol, mMtu, mCarrierEnabled, mNetworkTypeBitmask, mProfileId,
+                mPersistent, mMaxConns, mWaitTime, mMaxConnsTime, mMvnoType, mMvnoMatchData,
+                mApnSetId, mCarrierId, mSkip464Xlat);
+    }
 
-    /**
-     * @hide
-     */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ApnSetting == false) {
             return false;
