@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"የብሉቱዝ መሣሪያዎችን ያለ ስሞች አሳይ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ፍጹማዊ ድምፅን አሰናክል"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheን አንቃ"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"የተሻሻለ ተገናኝነት"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"የብሉቱዝ AVRCP ስሪት"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"የብሉቱዝ AVRCP ስሪት ይምረጡ"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"የብሉቱዝ MAP ስሪት"</string>
