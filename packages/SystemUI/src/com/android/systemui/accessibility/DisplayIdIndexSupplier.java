@@ -60,6 +60,20 @@ abstract class DisplayIdIndexSupplier<T> {
         return instance;
     }
 
+    /**
+     * Gets the object by the element index.
+     *
+     * <p> If the index is bigger than the array size, an {@link ArrayIndexOutOfBoundsException} is
+     * thrown for apps targeting {@link android.os.Build.VERSION_CODES#Q} and later </p>
+     *
+     * @param index the element index
+     * @return T
+     * @see SparseArray#valueAt(int)
+     */
+    public T valueAt(int index) {
+        return mSparseArray.valueAt(index);
+    }
+
     @NonNull
     protected abstract T createInstance(Display display);
 
@@ -77,5 +91,14 @@ abstract class DisplayIdIndexSupplier<T> {
      */
     public void clear() {
         mSparseArray.clear();
+    }
+
+    /**
+     * Gets the element size.
+     *
+     * @return size of all elements
+     */
+    public int getSize() {
+        return mSparseArray.size();
     }
 }

@@ -553,6 +553,12 @@ public class AudioPolicy {
         }
     }
 
+    /** @hide */
+    public void reset() {
+        setRegistration(null);
+        mConfig.reset();
+    }
+
     public void setRegistration(String regId) {
         synchronized (mLock) {
             mRegistrationId = regId;
@@ -564,6 +570,11 @@ public class AudioPolicy {
             }
         }
         sendMsg(MSG_POLICY_STATUS_CHANGE);
+    }
+
+    /**@hide*/
+    public String getRegistration() {
+        return mRegistrationId;
     }
 
     private boolean policyReadyToUse() {

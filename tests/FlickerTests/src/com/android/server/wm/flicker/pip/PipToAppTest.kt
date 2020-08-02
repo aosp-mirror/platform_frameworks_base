@@ -20,6 +20,7 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.expandPipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
@@ -55,35 +56,42 @@ class PipToAppTest(
             withTag { buildTestTag("exitPipModeToApp", testApp, rotation) }
             repeat { 1 }
             setup {
-                eachRun {
+                test {
                     device.wakeUpAndGoToHomeScreen()
+                    device.pressHome()
+                    testApp.open()
+                }
+                eachRun {
+                    this.setRotation(rotation)
+                    testApp.clickEnterPipButton(device)
+                    device.hasPipWindow()
                 }
             }
             teardown {
                 eachRun {
-                    testApp.exit()
                     this.setRotation(Surface.ROTATION_0)
                 }
                 test {
                     if (device.hasPipWindow()) {
                         device.closePipWindow()
                     }
+                    testApp.exit()
                 }
             }
             transitions {
-                device.pressHome()
-                this.setRotation(rotation)
-                testApp.open()
-                testApp.clickEnterPipButton(device)
                 device.expandPipWindow()
                 device.waitForIdle()
-                testApp.exit()
             }
             assertions {
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    pipWindowBecomesVisible()
+
+                    all("appReplacesPipWindow") {
+                        this.showsAppWindow(sPipWindowTitle)
+                                .then()
+                                .showsAppWindowOnTop(testApp.launcherName)
+                    }
                 }
 
                 layersTrace {
@@ -92,7 +100,18 @@ class PipToAppTest(
                     noUncoveredRegions(rotation)
                     navBarLayerRotatesAndScales(rotation)
                     statusBarLayerRotatesScales(rotation)
-                    pipLayerBecomesVisible()
+
+                    all("appReplacesPipLayer") {
+                        this.showsLayer(sPipWindowTitle)
+                                .then()
+                                .showsLayer(testApp.launcherName)
+                    }
+                }
+
+                eventLog {
+                    focusChanges(
+                            "NexusLauncherActivity", testApp.launcherName, "NexusLauncherActivity",
+                            bugId = 151179149)
                 }
             }
         }

@@ -2213,17 +2213,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
                 // Send to all running apps.
-                final SparseArray<int[]> newBroadcastWhitelist;
+                final SparseArray<int[]> newBroadcastAllowList;
 
                 synchronized (mLock) {
-                    newBroadcastWhitelist = mAppsFilter.getVisibilityWhitelist(
+                    newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
                             getPackageSettingInternal(res.name, Process.SYSTEM_UID),
                             updateUserIds, mSettings.mPackages);
                 }
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/,
                         null /*targetPackage*/, null /*finishedReceiver*/,
-                        updateUserIds, instantUserIds, newBroadcastWhitelist);
+                        updateUserIds, instantUserIds, newBroadcastAllowList);
                 if (installerPackageName != null) {
                     // Send to the installer, even if it's not running.
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
@@ -2255,7 +2255,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                             packageName, extras, 0 /*flags*/,
                             null /*targetPackage*/, null /*finishedReceiver*/,
-                            updateUserIds, instantUserIds, res.removedInfo.broadcastWhitelist);
+                            updateUserIds, instantUserIds, res.removedInfo.broadcastAllowList);
                     if (installerPackageName != null) {
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
@@ -4208,13 +4208,9 @@ public class PackageManagerService extends IPackageManager.Stub
         Iterator<ResolveInfo> iter = matches.iterator();
         while (iter.hasNext()) {
             final ResolveInfo rInfo = iter.next();
-            final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
-            if (ps != null) {
-                final PermissionsState permissionsState = ps.getPermissionsState();
-                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)
-                        || Build.IS_ENG) {
-                    continue;
-                }
+            if (checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                    rInfo.activityInfo.packageName, 0) == PERMISSION_GRANTED || Build.IS_ENG) {
+                continue;
             }
             iter.remove();
         }
@@ -8594,10 +8590,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageSetting ps,
             String[] permissions, boolean[] tmp, int flags, int userId) {
         int numMatch = 0;
-        final PermissionsState permissionsState = ps.getPermissionsState();
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
-            if (permissionsState.hasPermission(permission, userId)) {
+            if (checkPermission(permission, ps.name, userId) == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {
@@ -12675,7 +12670,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void sendPackageBroadcast(final String action, final String pkg, final Bundle extras,
             final int flags, final String targetPkg, final IIntentReceiver finishedReceiver,
             final int[] userIds, int[] instantUserIds,
-            @Nullable SparseArray<int[]> broadcastWhitelist) {
+            @Nullable SparseArray<int[]> broadcastAllowList) {
         mHandler.post(() -> {
             try {
                 final IActivityManager am = ActivityManager.getService();
@@ -12687,7 +12682,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     resolvedUserIds = userIds;
                 }
                 doSendBroadcast(am, action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        resolvedUserIds, false, broadcastWhitelist);
+                        resolvedUserIds, false, broadcastAllowList);
                 if (instantUserIds != null && instantUserIds != EMPTY_INT_ARRAY) {
                     doSendBroadcast(am, action, pkg, extras, flags, targetPkg, finishedReceiver,
                             instantUserIds, true, null);
@@ -12760,7 +12755,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private void doSendBroadcast(IActivityManager am, String action, String pkg, Bundle extras,
             int flags, String targetPkg, IIntentReceiver finishedReceiver,
-            int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastWhitelist) {
+            int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastAllowList) {
         for (int id : userIds) {
             final Intent intent = new Intent(action,
                     pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
@@ -12790,7 +12785,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mInjector.getActivityManagerInternal().broadcastIntent(
                     intent, finishedReceiver, requiredPermissions,
                     finishedReceiver != null, id,
-                    broadcastWhitelist == null ? null : broadcastWhitelist.get(id));
+                    broadcastAllowList == null ? null : broadcastAllowList.get(id));
         }
     }
 
@@ -12853,15 +12848,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return installReason;
     }
 
-    void installStage(ActiveInstallSession activeInstallSession) {
-        if (DEBUG_INSTANT) {
-            if ((activeInstallSession.getSessionParams().installFlags
-                    & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
-            }
-        }
+    void installStage(InstallParams params) {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        final InstallParams params = new InstallParams(activeInstallSession);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -12873,11 +12861,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
-    void installStage(ActiveInstallSession parent, List<ActiveInstallSession> children)
+    void installStage(InstallParams parent, List<InstallParams> children)
             throws PackageManagerException {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final MultiPackageInstallParams params =
-                new MultiPackageInstallParams(UserHandle.ALL, parent, children);
+                new MultiPackageInstallParams(parent, children);
         params.setTraceMethod("installStageMultiPackage")
                 .setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
@@ -12889,17 +12877,16 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
-    void verifyStage(ActiveInstallSession activeInstallSession) {
-        final VerificationParams params = new VerificationParams(activeInstallSession);
+    void verifyStage(VerificationParams params) {
         mHandler.post(()-> {
             params.startCopy();
         });
     }
 
-    void verifyStage(ActiveInstallSession parent, List<ActiveInstallSession> children)
+    void verifyStage(VerificationParams parent, List<VerificationParams> children)
             throws PackageManagerException {
         final MultiPackageVerificationParams params =
-                new MultiPackageVerificationParams(UserHandle.ALL, parent, children);
+                new MultiPackageVerificationParams(parent, children);
         mHandler.post(()-> {
             params.startCopy();
         });
@@ -12938,7 +12925,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds, instantUserIds,
-                mAppsFilter.getVisibilityWhitelist(
+                mAppsFilter.getVisibilityAllowList(
                         getPackageSettingInternal(packageName, Process.SYSTEM_UID),
                         userIds, mSettings.mPackages));
         if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
@@ -14765,23 +14752,19 @@ public class PackageManagerService extends IPackageManager.Stub
      * committed together.
      */
     class MultiPackageInstallParams extends HandlerParams {
-        private final ArrayList<InstallParams> mChildParams;
+        private final List<InstallParams> mChildParams;
         private final Map<InstallArgs, Integer> mCurrentState;
 
-        MultiPackageInstallParams(
-                @NonNull UserHandle user,
-                @NonNull ActiveInstallSession parent,
-                @NonNull List<ActiveInstallSession> activeInstallSessions)
+        MultiPackageInstallParams(InstallParams parent, List<InstallParams> childParams)
                 throws PackageManagerException {
-            super(user);
-            if (activeInstallSessions.size() == 0) {
+            super(parent.getUser());
+            if (childParams.size() == 0) {
                 throw new PackageManagerException("No child sessions found!");
             }
-            mChildParams = new ArrayList<>(activeInstallSessions.size());
-            for (int i = 0; i < activeInstallSessions.size(); i++) {
-                final InstallParams childParams = new InstallParams(activeInstallSessions.get(i));
-                childParams.mParentInstallParams = this;
-                this.mChildParams.add(childParams);
+            mChildParams = childParams;
+            for (int i = 0; i < childParams.size(); i++) {
+                final InstallParams childParam = childParams.get(i);
+                childParam.mParentInstallParams = this;
             }
             this.mCurrentState = new ArrayMap<>(mChildParams.size());
         }
@@ -14826,7 +14809,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     class InstallParams extends HandlerParams {
-        // TODO: see if we can collapse this into ActiveInstallSession
         final OriginInfo origin;
         final MoveInfo move;
         final IPackageInstallObserver2 observer;
@@ -14846,10 +14828,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
-                UserHandle user, String packageAbiOverride,
-                String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
-                int autoRevokePermissionsMode,
-                SigningDetails signingDetails, int installReason, int dataLoaderType) {
+                UserHandle user, String packageAbiOverride) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -14858,40 +14837,33 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
             this.packageAbiOverride = packageAbiOverride;
-            this.grantedRuntimePermissions = grantedPermissions;
-            this.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
-            this.autoRevokePermissionsMode = autoRevokePermissionsMode;
-            this.signingDetails = signingDetails;
-            this.installReason = installReason;
+
+            this.grantedRuntimePermissions = null;
+            this.whitelistedRestrictedPermissions = null;
+            this.autoRevokePermissionsMode = MODE_DEFAULT;
+            this.signingDetails = PackageParser.SigningDetails.UNKNOWN;
+            this.installReason = PackageManager.INSTALL_REASON_UNKNOWN;
             this.forceQueryableOverride = false;
-            this.mDataLoaderType = dataLoaderType;
+            this.mDataLoaderType = DataLoaderType.NONE;
         }
 
-        InstallParams(ActiveInstallSession activeInstallSession) {
-            super(activeInstallSession.getUser());
-            final PackageInstaller.SessionParams sessionParams =
-                    activeInstallSession.getSessionParams();
-            if (DEBUG_INSTANT) {
-                if ((sessionParams.installFlags
-                        & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                    Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
-                }
-            }
-            origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
+        InstallParams(File stagedDir, IPackageInstallObserver2 observer,
+                PackageInstaller.SessionParams sessionParams, InstallSource installSource,
+                UserHandle user, SigningDetails signingDetails, int installerUid) {
+            super(user);
+            origin = OriginInfo.fromStagedFile(stagedDir);
             move = null;
             installReason = fixUpInstallReason(
-                    activeInstallSession.getInstallSource().installerPackageName,
-                    activeInstallSession.getInstallerUid(),
-                    sessionParams.installReason);
-            observer = activeInstallSession.getObserver();
+                    installSource.installerPackageName, installerUid, sessionParams.installReason);
+            this.observer = observer;
             installFlags = sessionParams.installFlags;
-            installSource = activeInstallSession.getInstallSource();
+            this.installSource = installSource;
             volumeUuid = sessionParams.volumeUuid;
             packageAbiOverride = sessionParams.abiOverride;
             grantedRuntimePermissions = sessionParams.grantedRuntimePermissions;
             whitelistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
             autoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
-            signingDetails = activeInstallSession.getSigningDetails();
+            this.signingDetails = signingDetails;
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
@@ -15072,27 +15044,25 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     class MultiPackageVerificationParams extends HandlerParams {
         private final IPackageInstallObserver2 mObserver;
-        private final ArrayList<VerificationParams> mChildParams;
+        private final List<VerificationParams> mChildParams;
         private final Map<VerificationParams, Integer> mVerificationState;
 
         MultiPackageVerificationParams(
-                @NonNull UserHandle user,
-                @NonNull ActiveInstallSession parent,
-                @NonNull List<ActiveInstallSession> activeInstallSessions)
+                VerificationParams parent,
+                List<VerificationParams> children)
                 throws PackageManagerException {
-            super(user);
-            if (activeInstallSessions.size() == 0) {
+            super(parent.getUser());
+            if (children.size() == 0) {
                 throw new PackageManagerException("No child sessions found!");
             }
-            mChildParams = new ArrayList<>(activeInstallSessions.size());
-            for (int i = 0; i < activeInstallSessions.size(); i++) {
-                final VerificationParams childParams =
-                        new VerificationParams(activeInstallSessions.get(i));
+            mChildParams = children;
+            // Provide every child with reference to this object as parent
+            for (int i = 0; i < children.size(); i++) {
+                final VerificationParams childParams = children.get(i);
                 childParams.mParentVerificationParams = this;
-                this.mChildParams.add(childParams);
             }
             this.mVerificationState = new ArrayMap<>(mChildParams.size());
-            mObserver = parent.getObserver();
+            mObserver = parent.observer;
         }
 
         @Override
@@ -15150,31 +15120,26 @@ public class PackageManagerService extends IPackageManager.Stub
         private boolean mWaitForEnableRollbackToComplete;
         private int mRet;
 
-        VerificationParams(ActiveInstallSession activeInstallSession) {
-            super(activeInstallSession.getUser());
-            final PackageInstaller.SessionParams sessionParams =
-                    activeInstallSession.getSessionParams();
-            if (DEBUG_INSTANT) {
-                if ((sessionParams.installFlags
-                        & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                    Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
-                }
-            }
+        VerificationParams(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
+                PackageInstaller.SessionParams sessionParams, InstallSource installSource,
+                int installerUid, SigningDetails signingDetails, int sessionId) {
+            super(user);
+            origin = OriginInfo.fromStagedFile(stagedDir);
+            this.observer = observer;
+            installFlags = sessionParams.installFlags;
+            this.installSource = installSource;
+            packageAbiOverride = sessionParams.abiOverride;
             verificationInfo = new VerificationInfo(
                     sessionParams.originatingUri,
                     sessionParams.referrerUri,
                     sessionParams.originatingUid,
-                    activeInstallSession.getInstallerUid());
-            origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
-            observer = activeInstallSession.getObserver();
-            installFlags = sessionParams.installFlags;
-            installSource = activeInstallSession.getInstallSource();
-            packageAbiOverride = sessionParams.abiOverride;
-            signingDetails = activeInstallSession.getSigningDetails();
+                    installerUid
+            );
+            this.signingDetails = signingDetails;
             requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
-            mSessionId = activeInstallSession.getSessionId();
+            mSessionId = sessionId;
         }
 
         @Override
@@ -16793,7 +16758,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 reconciledPkg.pkgSetting.firstInstallTime = deletedPkgSetting.firstInstallTime;
                 reconciledPkg.pkgSetting.lastUpdateTime = System.currentTimeMillis();
 
-                res.removedInfo.broadcastWhitelist = mAppsFilter.getVisibilityWhitelist(
+                res.removedInfo.broadcastAllowList = mAppsFilter.getVisibilityAllowList(
                                 reconciledPkg.pkgSetting, request.mAllUsers, mSettings.mPackages);
                 if (reconciledPkg.prepareResult.system) {
                     // Remove existing system package
@@ -18723,7 +18688,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean isStaticSharedLib;
         // a two dimensional array mapping userId to the set of appIds that can receive notice
         // of package changes
-        SparseArray<int[]> broadcastWhitelist;
+        SparseArray<int[]> broadcastAllowList;
         // Clean up resources deleted packages.
         InstallArgs args = null;
 
@@ -18746,9 +18711,9 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putInt(Intent.EXTRA_UID, removedAppId >= 0 ? removedAppId : uid);
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, removedPackage, extras,
-                    0, null /*targetPackage*/, null, null, null, broadcastWhitelist);
+                    0, null /*targetPackage*/, null, null, null, broadcastAllowList);
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, removedPackage,
-                    extras, 0, null /*targetPackage*/, null, null, null, broadcastWhitelist);
+                    extras, 0, null /*targetPackage*/, null, null, null, broadcastAllowList);
             packageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
                     removedPackage, null, null, null, null /* broadcastWhitelist */);
             if (installerPackageName != null) {
@@ -18780,7 +18745,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (removedPackage != null) {
                 packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
                     removedPackage, extras, 0, null /*targetPackage*/, null,
-                    broadcastUsers, instantUserIds, broadcastWhitelist);
+                    broadcastUsers, instantUserIds, broadcastAllowList);
                 if (installerPackageName != null) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
                             removedPackage, extras, 0 /*flags*/,
@@ -18789,7 +18754,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                             removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null,
-                            null, broadcastUsers, instantUserIds, broadcastWhitelist);
+                            null, broadcastUsers, instantUserIds, broadcastAllowList);
                     packageSender.notifyPackageRemoved(removedPackage, removedUid);
                 }
             }
@@ -18802,7 +18767,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 packageSender.sendPackageBroadcast(Intent.ACTION_UID_REMOVED,
                         null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
-                        null, null, broadcastUsers, instantUserIds, broadcastWhitelist);
+                        null, null, broadcastUsers, instantUserIds, broadcastAllowList);
             }
         }
 
@@ -19301,6 +19266,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
 
+        // We need to get the permission state before package state is (potentially) destroyed.
+        final SparseBooleanArray hadSuspendAppsPermission = new SparseBooleanArray();
+        for (int userId : allUserHandles) {
+            hadSuspendAppsPermission.put(userId, checkPermission(Manifest.permission.SUSPEND_APPS,
+                    packageName, userId) == PERMISSION_GRANTED);
+        }
+
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
 
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
@@ -19367,8 +19339,7 @@ public class PackageManagerService extends IPackageManager.Stub
             affectedUserIds = resolveUserIds(userId);
         }
         for (final int affectedUserId : affectedUserIds) {
-            if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS,
-                    affectedUserId)) {
+            if (hadSuspendAppsPermission.get(affectedUserId)) {
                 unsuspendForSuspendingPackage(packageName, affectedUserId);
                 removeAllDistractingPackageRestrictions(affectedUserId);
             }
@@ -21141,8 +21112,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgSetting.setEnabled(newState, userId, callingPackage);
                 if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                         || newState == COMPONENT_ENABLED_STATE_DISABLED)
-                        && pkgSetting.getPermissionsState().hasPermission(
-                                Manifest.permission.SUSPEND_APPS, userId)) {
+                        && checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                        == PERMISSION_GRANTED) {
                     // This app should not generally be allowed to get disabled by the UI, but if it
                     // ever does, we don't want to end up with some of the user's apps permanently
                     // suspended.
@@ -21294,17 +21265,17 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean isInstantApp = isInstantApp(packageName, userId);
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-        final SparseArray<int[]> broadcastWhitelist;
+        final SparseArray<int[]> broadcastAllowList;
         synchronized (mLock) {
             PackageSetting setting = getPackageSettingInternal(packageName, Process.SYSTEM_UID);
             if (setting == null) {
                 return;
             }
-            broadcastWhitelist = isInstantApp ? null : mAppsFilter.getVisibilityWhitelist(setting,
+            broadcastAllowList = isInstantApp ? null : mAppsFilter.getVisibilityAllowList(setting,
                     userIds, mSettings.mPackages);
         }
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, flags, null, null,
-                userIds, instantUserIds, broadcastWhitelist);
+                userIds, instantUserIds, broadcastAllowList);
     }
 
     @Override
@@ -23457,11 +23428,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, user,
-                packageAbiOverride, null /*grantedPermissions*/,
-                null /*whitelistedRestrictedPermissions*/, MODE_DEFAULT /* autoRevokePermissions */,
-                PackageParser.SigningDetails.UNKNOWN,
-                PackageManager.INSTALL_REASON_UNKNOWN, DataLoaderType.NONE);
+                installSource, volumeUuid, user, packageAbiOverride);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -25706,71 +25673,6 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
         return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
-    }
-
-    // TODO(samiul): Get rid of this class. The callers can create InstallParams and
-    //  VerificationParams directly.
-    static class ActiveInstallSession {
-        private final String mPackageName;
-        private final File mStagedDir;
-        private final IPackageInstallObserver2 mObserver;
-        private final int mSessionId;
-        private final PackageInstaller.SessionParams mSessionParams;
-        private final int mInstallerUid;
-        @NonNull private final InstallSource mInstallSource;
-        private final UserHandle mUser;
-        private final SigningDetails mSigningDetails;
-
-        ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
-                int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
-                InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
-            mPackageName = packageName;
-            mStagedDir = stagedDir;
-            mObserver = observer;
-            mSessionId = sessionId;
-            mSessionParams = sessionParams;
-            mInstallerUid = installerUid;
-            mInstallSource = Preconditions.checkNotNull(installSource);
-            mUser = user;
-            mSigningDetails = signingDetails;
-        }
-
-        public String getPackageName() {
-            return mPackageName;
-        }
-
-        public File getStagedDir() {
-            return mStagedDir;
-        }
-
-        public IPackageInstallObserver2 getObserver() {
-            return mObserver;
-        }
-
-        public int getSessionId() {
-            return mSessionId;
-        }
-
-        public PackageInstaller.SessionParams getSessionParams() {
-            return mSessionParams;
-        }
-
-        public int getInstallerUid() {
-            return mInstallerUid;
-        }
-
-        @NonNull
-        public InstallSource getInstallSource() {
-            return mInstallSource;
-        }
-
-        public UserHandle getUser() {
-            return mUser;
-        }
-
-        public SigningDetails getSigningDetails() {
-            return mSigningDetails;
-        }
     }
 }
 

@@ -19,12 +19,10 @@ package com.android.systemui.settings.dagger;
 import android.content.Context;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.settings.CurrentUserContentResolverProvider;
 import com.android.systemui.settings.CurrentUserContextTracker;
 
 import javax.inject.Singleton;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -32,7 +30,7 @@ import dagger.Provides;
  * Dagger Module for classes found within the com.android.systemui.settings package.
  */
 @Module
-public abstract class SettingsModule {
+public interface SettingsModule {
 
     /**
      * Provides and initializes a CurrentUserContextTracker
@@ -47,9 +45,4 @@ public abstract class SettingsModule {
         tracker.initialize();
         return tracker;
     }
-
-    @Binds
-    @Singleton
-    abstract CurrentUserContentResolverProvider bindCurrentUserContentResolverTracker(
-            CurrentUserContextTracker tracker);
 }

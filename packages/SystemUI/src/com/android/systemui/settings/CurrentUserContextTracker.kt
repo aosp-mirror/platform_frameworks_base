@@ -16,7 +16,6 @@
 
 package com.android.systemui.settings
 
-import android.content.ContentResolver
 import android.content.Context
 import android.os.UserHandle
 import androidx.annotation.VisibleForTesting
@@ -32,7 +31,7 @@ import java.lang.IllegalStateException
 class CurrentUserContextTracker internal constructor(
     private val sysuiContext: Context,
     broadcastDispatcher: BroadcastDispatcher
-) : CurrentUserContentResolverProvider {
+) {
     private val userTracker: CurrentUserTracker
     private var initialized = false
 
@@ -45,9 +44,6 @@ class CurrentUserContextTracker internal constructor(
             return _curUserContext!!
         }
 
-    override val currentUserContentResolver: ContentResolver
-        get() = currentUserContext.contentResolver
-
     init {
         userTracker = object : CurrentUserTracker(broadcastDispatcher) {
             override fun onUserSwitched(newUserId: Int) {
@@ -58,8 +54,8 @@ class CurrentUserContextTracker internal constructor(
 
     fun initialize() {
         initialized = true
-        userTracker.startTracking()
         _curUserContext = makeUserContext(userTracker.currentUserId)
+        userTracker.startTracking()
     }
 
     @VisibleForTesting

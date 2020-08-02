@@ -16,13 +16,14 @@
 
 package com.android.server.wm.flicker.splitscreen
 
-import android.os.SystemClock
 import android.view.Surface
 import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.NonRotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.exitSplitScreen
+import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -58,16 +59,21 @@ class OpenAppToSplitScreenTest(
             withTag { buildTestTag("appToSplitScreen", testApp, rotation) }
             repeat { 1 }
             setup {
-                eachRun {
+                test {
                     device.wakeUpAndGoToHomeScreen()
-                    this.setRotation(rotation)
+                }
+                eachRun {
                     testApp.open()
-                    SystemClock.sleep(500)
+                    this.setRotation(rotation)
                 }
             }
             teardown {
                 eachRun {
-                    device.exitSplitScreen()
+                    if (device.isInSplitScreen()) {
+                        device.exitSplitScreen()
+                    }
+                }
+                test {
                     testApp.exit()
                 }
             }
@@ -92,6 +98,11 @@ class OpenAppToSplitScreenTest(
                                 .then()
                                 .showsLayer(DOCKED_STACK_DIVIDER)
                     }
+                }
+
+                eventLog {
+                    focusChanges(testApp.`package`,
+                            "recents_animation_input_consumer", "NexusLauncherActivity")
                 }
             }
         }

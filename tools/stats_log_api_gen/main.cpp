@@ -16,7 +16,6 @@
 #include "utils.h"
 
 using namespace google::protobuf;
-using namespace std;
 
 namespace android {
 namespace stats_log_api_gen {
@@ -145,7 +144,7 @@ static int run(int argc, char const* const* argv) {
         index++;
     }
 
-    if (cppFilename.size() == 0 && headerFilename.size() == 0 && javaFilename.size() == 0) {
+    if (cppFilename.empty() && headerFilename.empty() && javaFilename.empty()) {
         print_usage();
         return 1;
     }
@@ -175,9 +174,9 @@ static int run(int argc, char const* const* argv) {
                  &attributionSignature);
 
     // Write the .cpp file
-    if (cppFilename.size() != 0) {
+    if (!cppFilename.empty()) {
         FILE* out = fopen(cppFilename.c_str(), "w");
-        if (out == NULL) {
+        if (out == nullptr) {
             fprintf(stderr, "Unable to open file for write: %s\n", cppFilename.c_str());
             return 1;
         }
@@ -198,9 +197,9 @@ static int run(int argc, char const* const* argv) {
     }
 
     // Write the .h file
-    if (headerFilename.size() != 0) {
+    if (!headerFilename.empty()) {
         FILE* out = fopen(headerFilename.c_str(), "w");
-        if (out == NULL) {
+        if (out == nullptr) {
             fprintf(stderr, "Unable to open file for write: %s\n", headerFilename.c_str());
             return 1;
         }
@@ -214,24 +213,24 @@ static int run(int argc, char const* const* argv) {
     }
 
     // Write the .java file
-    if (javaFilename.size() != 0) {
-        if (javaClass.size() == 0) {
+    if (!javaFilename.empty()) {
+        if (javaClass.empty()) {
             fprintf(stderr, "Must supply --javaClass if supplying a Java filename");
             return 1;
         }
 
-        if (javaPackage.size() == 0) {
+        if (javaPackage.empty()) {
             fprintf(stderr, "Must supply --javaPackage if supplying a Java filename");
             return 1;
         }
 
-        if (moduleName.size() == 0) {
+        if (moduleName.empty()) {
             fprintf(stderr, "Must supply --module if supplying a Java filename");
             return 1;
         }
 
         FILE* out = fopen(javaFilename.c_str(), "w");
-        if (out == NULL) {
+        if (out == nullptr) {
             fprintf(stderr, "Unable to open file for write: %s\n", javaFilename.c_str());
             return 1;
         }

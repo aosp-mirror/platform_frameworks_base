@@ -458,15 +458,6 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerView.setBackground(mPointerDrawable);
     }
 
-    /**
-     * Hides the IME if it's showing. This is currently done by dispatching a back press to the AV.
-     */
-    void hideImeIfVisible() {
-        if (mKeyboardVisible) {
-            performBackPressIfNeeded();
-        }
-    }
-
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();

@@ -47,8 +47,8 @@ const int FIRST_UID_IN_CHAIN_ID = 0;
  *
  * `OneofDescriptor::name()` returns the name of the oneof.
  */
-const string ONEOF_PUSHED_ATOM_NAME = "pushed";
-const string ONEOF_PULLED_ATOM_NAME = "pulled";
+const char ONEOF_PUSHED_ATOM_NAME[] = "pushed";
+const char ONEOF_PULLED_ATOM_NAME[] = "pulled";
 
 enum AnnotationId : uint8_t {
     ANNOTATION_ID_IS_UID = 1,
@@ -63,7 +63,7 @@ enum AnnotationId : uint8_t {
 
 const int ATOM_ID_FIELD_NUMBER = -1;
 
-const string DEFAULT_MODULE_NAME = "DEFAULT";
+const char DEFAULT_MODULE_NAME[] = "DEFAULT";
 
 /**
  * The types for atom parameters.
@@ -95,9 +95,9 @@ union AnnotationValue {
     int intValue;
     bool boolValue;
 
-    AnnotationValue(const int value) : intValue(value) {
+    explicit AnnotationValue(const int value) : intValue(value) {
     }
-    AnnotationValue(const bool value) : boolValue(value) {
+    explicit AnnotationValue(const bool value) : boolValue(value) {
     }
 };
 

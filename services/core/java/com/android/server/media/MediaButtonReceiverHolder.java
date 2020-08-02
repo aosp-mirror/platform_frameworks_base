@@ -221,8 +221,8 @@ final class MediaButtonReceiverHolder {
                         context.startActivityAsUser(mediaButtonIntent, userHandle);
                         break;
                     case COMPONENT_TYPE_SERVICE:
-                        context.startForegroundServiceAsUser(mediaButtonIntent,
-                                userHandle);
+                        context.createContextAsUser(userHandle, 0).startForegroundService(
+                                mediaButtonIntent);
                         break;
                     default:
                         // Legacy behavior for other cases.

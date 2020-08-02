@@ -675,7 +675,8 @@ static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
     return android_view_Surface_createFromIGraphicBufferProducer(env, gbp);
 }
 
-static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) {
+static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image,
+        uint64_t ndkReaderUsage) {
     ALOGV("%s", __FUNCTION__);
     BufferItem* buffer = Image_getBufferItem(env, thiz);
     if (buffer == NULL) {
@@ -684,8 +685,16 @@ static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) 
         return;
     }
 
-    status_t res = lockImageFromBuffer(buffer,
-            GRALLOC_USAGE_SW_READ_OFTEN, buffer->mFence->dup(), image);
+    uint32_t lockUsage;
+    if ((ndkReaderUsage & (AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY
+            | AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN)) != 0) {
+        lockUsage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
+    } else {
+        lockUsage = GRALLOC_USAGE_SW_READ_OFTEN;
+    }
+
+    status_t res = lockImageFromBuffer(buffer, lockUsage, buffer->mFence->dup(), image);
+
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
                 "lock buffer failed for format 0x%x",
@@ -721,7 +730,7 @@ static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
 }
 
 static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
-        int numPlanes, int readerFormat)
+        int numPlanes, int readerFormat, uint64_t ndkReaderUsage)
 {
     ALOGV("%s: create SurfacePlane array with size %d", __FUNCTION__, numPlanes);
     int rowStride = 0;
@@ -754,7 +763,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     }
 
     LockedImage lockedImg = LockedImage();
-    Image_getLockedImage(env, thiz, &lockedImg);
+    Image_getLockedImage(env, thiz, &lockedImg, ndkReaderUsage);
     if (env->ExceptionCheck()) {
         return NULL;
     }
@@ -839,7 +848,7 @@ static const JNINativeMethod gImageReaderMethods[] = {
 };
 
 static const JNINativeMethod gImageMethods[] = {
-    {"nativeCreatePlanes",      "(II)[Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
+    {"nativeCreatePlanes",      "(IIJ)[Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
                                                              (void*)Image_createSurfacePlanes },
     {"nativeGetWidth",          "()I",                       (void*)Image_getWidth },
     {"nativeGetHeight",         "()I",                       (void*)Image_getHeight },

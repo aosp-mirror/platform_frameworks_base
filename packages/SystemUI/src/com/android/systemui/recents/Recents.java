@@ -65,10 +65,6 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
         }
     }
 
-    public void growRecents() {
-        mImpl.growRecents();
-    }
-
     @Override
     public void showRecentApps(boolean triggeredFromAltTab) {
         // Ensure the device has been provisioned before allowing the user to interact with

@@ -487,6 +487,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         }
     }
 
+    /** @hide */
+    public AudioAttributes getAudioAttributes() {
+        return mAudioAttributes;
+    }
+
     /**
      * Builder class for {@link AudioRecord} objects.
      * Use this class to configure and create an <code>AudioRecord</code> instance. By setting the

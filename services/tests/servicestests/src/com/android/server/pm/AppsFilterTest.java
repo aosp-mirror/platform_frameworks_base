@@ -19,7 +19,6 @@ package com.android.server.pm;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,8 +69,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 
 @Presubmit
 @RunWith(JUnit4.class)
@@ -805,24 +802,24 @@ public class AppsFilterTest {
                 queriesProviderAppId);
 
         final SparseArray<int[]> systemFilter =
-                appsFilter.getVisibilityWhitelist(system, USER_ARRAY, mExisting);
+                appsFilter.getVisibilityAllowList(system, USER_ARRAY, mExisting);
         assertThat(toList(systemFilter.get(SYSTEM_USER)),
                 contains(seesNothingAppId, hasProviderAppId, queriesProviderAppId));
 
         final SparseArray<int[]> seesNothingFilter =
-                appsFilter.getVisibilityWhitelist(seesNothing, USER_ARRAY, mExisting);
+                appsFilter.getVisibilityAllowList(seesNothing, USER_ARRAY, mExisting);
         assertThat(toList(seesNothingFilter.get(SYSTEM_USER)),
                 contains(seesNothingAppId));
         assertThat(toList(seesNothingFilter.get(SECONDARY_USER)),
                 contains(seesNothingAppId));
 
         final SparseArray<int[]> hasProviderFilter =
-                appsFilter.getVisibilityWhitelist(hasProvider, USER_ARRAY, mExisting);
+                appsFilter.getVisibilityAllowList(hasProvider, USER_ARRAY, mExisting);
         assertThat(toList(hasProviderFilter.get(SYSTEM_USER)),
                 contains(hasProviderAppId, queriesProviderAppId));
 
         SparseArray<int[]> queriesProviderFilter =
-                appsFilter.getVisibilityWhitelist(queriesProvider, USER_ARRAY, mExisting);
+                appsFilter.getVisibilityAllowList(queriesProvider, USER_ARRAY, mExisting);
         assertThat(toList(queriesProviderFilter.get(SYSTEM_USER)),
                 contains(queriesProviderAppId));
 
@@ -831,7 +828,7 @@ public class AppsFilterTest {
 
         // ensure implicit access is included in the filter
         queriesProviderFilter =
-                appsFilter.getVisibilityWhitelist(queriesProvider, USER_ARRAY, mExisting);
+                appsFilter.getVisibilityAllowList(queriesProvider, USER_ARRAY, mExisting);
         assertThat(toList(queriesProviderFilter.get(SYSTEM_USER)),
                 contains(hasProviderAppId, queriesProviderAppId));
     }

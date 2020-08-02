@@ -84,6 +84,9 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         if (mWindowMagnificationController != null) {
             mWindowMagnificationController.onConfigurationChanged(configDiff);
         }
+        if (mModeSwitchesController != null) {
+            mModeSwitchesController.onConfigurationChanged(configDiff);
+        }
     }
 
     @Override

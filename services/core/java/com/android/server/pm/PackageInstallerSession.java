@@ -157,6 +157,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
@@ -261,6 +262,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final AtomicInteger mActiveCount = new AtomicInteger();
 
     private final Object mLock = new Object();
+
+    /**
+     * Used to detect and reject concurrent access to this session object to ensure mutation
+     * to multiple objects like {@link #addChildSessionId} are done atomically.
+     */
+    private final AtomicBoolean mTransactionLock = new AtomicBoolean(false);
 
     /** Timestamp of the last time this session changed state  */
     @GuardedBy("mLock")
@@ -1757,21 +1764,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void verifyNonStaged(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
-        final PackageManagerService.ActiveInstallSession verifyingSession =
-                makeSessionActiveForVerification();
+        final PackageManagerService.VerificationParams verifyingSession =
+                makeVerificationParams();
         if (verifyingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            List<PackageManagerService.ActiveInstallSession> verifyingChildSessions =
+            List<PackageManagerService.VerificationParams> verifyingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.ActiveInstallSession verifyingChildSession =
-                            session.makeSessionActiveForVerification();
+                    final PackageManagerService.VerificationParams verifyingChildSession =
+                            session.makeVerificationParams();
                     if (verifyingChildSession != null) {
                         verifyingChildSessions.add(verifyingChildSession);
                     }
@@ -1798,21 +1805,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void installNonStaged(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
-        final PackageManagerService.ActiveInstallSession installingSession =
-                makeSessionActiveForInstall();
+        final PackageManagerService.InstallParams installingSession =
+                makeInstallParams();
         if (installingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            List<PackageManagerService.ActiveInstallSession> installingChildSessions =
+            List<PackageManagerService.InstallParams> installingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.ActiveInstallSession installingChildSession =
-                            session.makeSessionActiveForInstall();
+                    final PackageManagerService.InstallParams installingChildSession =
+                            session.makeInstallParams();
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
                     }
@@ -1839,10 +1846,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Stages this session for verification and returns a
-     * {@link PackageManagerService.ActiveInstallSession} representing this new staged state or null
+     * {@link PackageManagerService.VerificationParams} representing this new staged state or null
      * in case permissions need to be requested before verification can proceed.
      */
-    private PackageManagerService.ActiveInstallSession makeSessionActiveForVerification()
+    @Nullable
+    private PackageManagerService.VerificationParams makeVerificationParams()
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
@@ -1883,12 +1891,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return makeSessionActiveForVerificationLocked();
+            return makeVerificationParamsLocked();
         }
     }
 
     @GuardedBy("mLock")
-    private PackageManagerService.ActiveInstallSession makeSessionActiveForVerificationLocked()
+    private PackageManagerService.VerificationParams makeVerificationParamsLocked()
             throws PackageManagerException {
         if (!params.isMultiPackage) {
             Objects.requireNonNull(mPackageName);
@@ -1984,11 +1992,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mRelinquished = true;
-        // TODO(159331446): create VerificationParams directly by passing information that is
-        //  required for verification only
-        return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
-                localObserver, sessionId, params, mInstallerUid, mInstallSource, user,
-                mSigningDetails);
+
+        return mPm.new VerificationParams(user, stageDir, localObserver, params,
+                mInstallSource, mInstallerUid, mSigningDetails, sessionId);
     }
 
     private void onVerificationComplete() {
@@ -2011,9 +2017,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Stages this session for install and returns a
-     * {@link PackageManagerService.ActiveInstallSession} representing this new staged state.
+     * {@link PackageManagerService.InstallParams} representing this new staged state.
      */
-    private PackageManagerService.ActiveInstallSession makeSessionActiveForInstall()
+    private PackageManagerService.InstallParams makeInstallParams()
             throws PackageManagerException {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -2050,9 +2056,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
-                    localObserver, sessionId, params, mInstallerUid, mInstallSource, user,
-                    mSigningDetails);
+            return mPm.new InstallParams(stageDir, localObserver, params, mInstallSource, user,
+                    mSigningDetails, mInstallerUid);
         }
     }
 
@@ -3162,39 +3167,85 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void acquireTransactionLock() {
+        if (!mTransactionLock.compareAndSet(false, true)) {
+            throw new UnsupportedOperationException("Concurrent access not supported");
+        }
+    }
+
+    private void releaseTransactionLock() {
+        mTransactionLock.compareAndSet(true, false);
+    }
+
     @Override
     public void addChildSessionId(int childSessionId) {
-        final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
-        if (childSession == null || !childSession.canBeAddedAsChild(sessionId)) {
-            throw new IllegalStateException("Unable to add child session " + childSessionId
-                            + " as it does not exist or is in an invalid state.");
+        if (!params.isMultiPackage) {
+            throw new IllegalStateException("Single-session " + sessionId + " can't have child.");
         }
-        synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
-            assertPreparedAndNotSealedLocked("addChildSessionId");
 
-            final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
-            if (indexOfSession >= 0) {
-                return;
+        final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
+        if (childSession == null) {
+            throw new IllegalStateException("Unable to add child session " + childSessionId
+                    + " as it does not exist.");
+        }
+        if (childSession.params.isMultiPackage) {
+            throw new IllegalStateException("Multi-session " + childSessionId
+                    + " can't be a child.");
+        }
+
+        try {
+            acquireTransactionLock();
+            childSession.acquireTransactionLock();
+
+            if (!childSession.canBeAddedAsChild(sessionId)) {
+                throw new IllegalStateException("Unable to add child session " + childSessionId
+                        + " as it is in an invalid state.");
             }
-            childSession.setParentSessionId(this.sessionId);
-            addChildSessionIdLocked(childSessionId);
+            synchronized (mLock) {
+                assertCallerIsOwnerOrRootLocked();
+                assertPreparedAndNotSealedLocked("addChildSessionId");
+
+                final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
+                if (indexOfSession >= 0) {
+                    return;
+                }
+                childSession.setParentSessionId(this.sessionId);
+                addChildSessionIdLocked(childSessionId);
+            }
+        } finally {
+            releaseTransactionLock();
+            childSession.releaseTransactionLock();
         }
     }
 
     @Override
     public void removeChildSessionId(int sessionId) {
         final PackageInstallerSession session = mSessionProvider.getSession(sessionId);
-        synchronized (mLock) {
-            final int indexOfSession = mChildSessionIds.indexOfKey(sessionId);
+        try {
+            acquireTransactionLock();
             if (session != null) {
-                session.setParentSessionId(SessionInfo.INVALID_ID);
+                session.acquireTransactionLock();
             }
-            if (indexOfSession < 0) {
-                // not added in the first place; no-op
-                return;
+
+            synchronized (mLock) {
+                assertCallerIsOwnerOrRootLocked();
+                assertPreparedAndNotSealedLocked("removeChildSessionId");
+
+                final int indexOfSession = mChildSessionIds.indexOfKey(sessionId);
+                if (indexOfSession < 0) {
+                    // not added in the first place; no-op
+                    return;
+                }
+                if (session != null) {
+                    session.setParentSessionId(SessionInfo.INVALID_ID);
+                }
+                mChildSessionIds.removeAt(indexOfSession);
             }
-            mChildSessionIds.removeAt(indexOfSession);
+        } finally {
+            releaseTransactionLock();
+            if (session != null) {
+                session.releaseTransactionLock();
+            }
         }
     }
 
