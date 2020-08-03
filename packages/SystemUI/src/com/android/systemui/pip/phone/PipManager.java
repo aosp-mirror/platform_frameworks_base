@@ -181,7 +181,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                     != WINDOWING_MODE_PINNED) {
                 return;
             }
-            mTouchHandler.getMotionHelper().expandPipToFullscreen(clearedTask /* skipAnimation */);
+            mTouchHandler.getMotionHelper().expandLeavePip(clearedTask /* skipAnimation */);
         }
     };
 
@@ -318,7 +318,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      */
     @Override
     public void expandPip() {
-        mTouchHandler.getMotionHelper().expandPipToFullscreen(false /* skipAnimation */);
+        mTouchHandler.getMotionHelper().expandLeavePip(false /* skipAnimation */);
     }
 
     /**

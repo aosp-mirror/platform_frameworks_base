@@ -23,12 +23,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.systemui.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.systemui.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
+import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
+import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_NONE;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
-import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_FULLSCREEN;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
-import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_SPLIT_SCREEN;
 import static com.android.systemui.pip.PipAnimationController.isInPipDirection;
 import static com.android.systemui.pip.PipAnimationController.isOutPipDirection;
 
@@ -285,8 +285,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds)
-                ? TRANSITION_DIRECTION_TO_SPLIT_SCREEN
-                : TRANSITION_DIRECTION_TO_FULLSCREEN;
+                ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
+                : TRANSITION_DIRECTION_LEAVE_PIP;
         if (orientationDiffers) {
             // Send started callback though animation is ignored.
             sendOnPipTransitionStarted(direction);
@@ -303,7 +303,10 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             mSurfaceTransactionHelper.scale(tx, mLeash, destinationBounds,
                     mLastReportedBounds);
             tx.setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
-            wct.setActivityWindowingMode(mToken, direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN
+            // We set to fullscreen here for now, but later it will be set to UNDEFINED for
+            // the proper windowing mode to take place. See #applyWindowingModeChangeOnExit.
+            wct.setActivityWindowingMode(mToken,
+                    direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
                     ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                     : WINDOWING_MODE_FULLSCREEN);
             wct.setBounds(mToken, destinationBounds);
@@ -327,7 +330,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         wct.setWindowingMode(mToken, getOutPipWindowingMode());
         // Simply reset the activity mode set prior to the animation running.
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-        if (mSplitDivider != null && direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN) {
+        if (mSplitDivider != null && direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
             wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
         }
     }
@@ -842,7 +845,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         } else if (isOutPipDirection(direction)) {
             // If we are animating to fullscreen, then we need to reset the override bounds
             // on the task to ensure that the task "matches" the parent's bounds.
-            taskBounds = (direction == TRANSITION_DIRECTION_TO_FULLSCREEN)
+            taskBounds = (direction == TRANSITION_DIRECTION_LEAVE_PIP)
                     ? null : destinationBounds;
             applyWindowingModeChangeOnExit(wct, direction);
         } else {

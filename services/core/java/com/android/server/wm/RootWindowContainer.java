@@ -2155,6 +2155,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.
                 stack.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
+                stack.setBounds(task.getBounds());
 
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.

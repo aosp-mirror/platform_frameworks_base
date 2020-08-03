@@ -54,7 +54,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private static final int SHRINK_STACK_FROM_MENU_DURATION = 250;
     private static final int EXPAND_STACK_TO_MENU_DURATION = 250;
-    private static final int EXPAND_STACK_TO_FULLSCREEN_DURATION = 300;
+    private static final int LEAVE_PIP_DURATION = 300;
     private static final int SHIFT_DURATION = 300;
 
     /** Friction to use for PIP when it moves via physics fling animations. */
@@ -304,16 +304,18 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     /**
-     * Resizes the pinned stack back to fullscreen.
+     * Resizes the pinned stack back to unknown windowing mode, which could be freeform or
+     *      * fullscreen depending on the display area's windowing mode.
      */
-    void expandPipToFullscreen() {
-        expandPipToFullscreen(false /* skipAnimation */);
+    void expandLeavePip() {
+        expandLeavePip(false /* skipAnimation */);
     }
 
     /**
-     * Resizes the pinned stack back to fullscreen.
+     * Resizes the pinned stack back to unknown windowing mode, which could be freeform or
+     * fullscreen depending on the display area's windowing mode.
      */
-    void expandPipToFullscreen(boolean skipAnimation) {
+    void expandLeavePip(boolean skipAnimation) {
         if (DEBUG) {
             Log.d(TAG, "exitPip: skipAnimation=" + skipAnimation
                     + " callers=\n" + Debug.getCallers(5, "    "));
@@ -323,7 +325,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipTaskOrganizer.getUpdateHandler().post(() -> {
             mPipTaskOrganizer.exitPip(skipAnimation
                     ? 0
-                    : EXPAND_STACK_TO_FULLSCREEN_DURATION);
+                    : LEAVE_PIP_DURATION);
         });
     }
 
