@@ -49,6 +49,11 @@ import java.util.function.Consumer;
 public class StagedInstallInternalTest {
 
     private static final String TAG = StagedInstallInternalTest.class.getSimpleName();
+    private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
+    private static final TestApp TEST_APEX_WITH_APK_V1 = new TestApp("TestApexWithApkV1",
+            APK_IN_APEX_TESTAPEX_NAME, 1, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
+    private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
+            APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -79,6 +84,24 @@ public class StagedInstallInternalTest {
     @Test
     public void cleanUp() throws Exception {
         Files.deleteIfExists(mTestStateFile.toPath());
+    }
+
+    @Test
+    public void testDuplicateApkInApexShouldFail_Commit() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        // Duplicate packages(TestApp.A) in TEST_APEX_WITH_APK_V2(apk-in-apex) and TestApp.A2(apk)
+        // should fail to install.
+        int sessionId = Install.multi(TEST_APEX_WITH_APK_V2, TestApp.A2).setStaged().commit();
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testDuplicateApkInApexShouldFail_Verify() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        int sessionId = retrieveLastSessionId();
+        PackageInstaller.SessionInfo info =
+                InstallUtils.getPackageInstaller().getSessionInfo(sessionId);
+        assertThat(info.isStagedSessionFailed()).isTrue();
     }
 
     @Test

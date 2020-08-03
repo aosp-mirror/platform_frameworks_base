@@ -56,6 +56,7 @@ import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -84,6 +85,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -650,6 +652,7 @@ public class StagingManager {
         try {
             if (hasApex) {
                 checkInstallationOfApkInApexSuccessful(session);
+                checkDuplicateApkInApex(session);
                 snapshotAndRestoreForApexSession(session);
                 Slog.i(TAG, "APEX packages in session " + session.sessionId
                         + " were successfully activated. Proceeding with APK packages, if any");
@@ -827,6 +830,40 @@ public class StagingManager {
             return apkParentSession;
         }
         return null;
+    }
+
+    /**
+     * Throws a PackageManagerException if there are duplicate packages in apk and apk-in-apex.
+     */
+    private void checkDuplicateApkInApex(@NonNull PackageInstallerSession session)
+            throws PackageManagerException {
+        if (!session.isMultiPackage()) {
+            return;
+        }
+        final int[] childSessionIds = session.getChildSessionIds();
+        final Set<String> apkNames = new ArraySet<>();
+        synchronized (mStagedSessions) {
+            for (int id : childSessionIds) {
+                final PackageInstallerSession s = mStagedSessions.get(id);
+                if (!isApexSession(s)) {
+                    apkNames.add(s.getPackageName());
+                }
+            }
+        }
+        final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
+        for (PackageInstallerSession apexSession : apexSessions) {
+            String packageName = apexSession.getPackageName();
+            for (String apkInApex : mApexManager.getApksInApex(packageName)) {
+                if (!apkNames.add(apkInApex)) {
+                    throw new PackageManagerException(
+                            SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                            "Package: " + packageName + " in session: "
+                                    + apexSession.sessionId + " has duplicate apk-in-apex: "
+                                    + apkInApex, null);
+
+                }
+            }
+        }
     }
 
     private void installApksInSession(@NonNull PackageInstallerSession session)

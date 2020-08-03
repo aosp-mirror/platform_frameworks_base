@@ -18,6 +18,9 @@ android_test_helper_app {
     srcs: ["app/src/**/*.java"],
     static_libs: ["androidx.test.rules", "cts-install-lib"],
     test_suites: ["general-tests"],
+    java_resources: [
+        ":com.android.apex.apkrollback.test_v2",
+    ],
 }
 
 java_test_host {
