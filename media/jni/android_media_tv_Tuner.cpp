@@ -291,8 +291,9 @@ MQ& Dvr::getDvrMQ() {
 C2DataIdInfo::C2DataIdInfo(uint32_t index, uint64_t value) : C2Param(kParamSize, index) {
     CHECK(isGlobal());
     CHECK_EQ(C2Param::INFO, kind());
-    DummyInfo info{value};
-    memcpy(this + 1, static_cast<C2Param *>(&info) + 1, kParamSize - sizeof(C2Param));
+    mInfo = StubInfo(value);
+    memcpy(static_cast<C2Param *>(this) + 1, static_cast<C2Param *>(&mInfo) + 1,
+            kParamSize - sizeof(C2Param));
 }
 
 /////////////// MediaEvent ///////////////////////
