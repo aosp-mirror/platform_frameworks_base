@@ -275,7 +275,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/120845532")
     public void handleSetSystemAudioModeOn_audioSystemBroadcast() {
         mHdmiControlService.setSystemAudioActivated(false);
         assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isFalse();
@@ -287,7 +286,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/120845532")
     public void handleSetSystemAudioModeOff_audioSystemToPlayback() {
         mHdmiCecLocalDevicePlayback.mService.setSystemAudioActivated(true);
         assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isTrue();
@@ -301,8 +299,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/120845532")
-    public void handleSystemAudioModeStatusOn_DirectltToLocalDeviceFromAudioSystem() {
+    public void handleSystemAudioModeStatusOn_DirectlyToLocalDeviceFromAudioSystem() {
         mHdmiControlService.setSystemAudioActivated(false);
         assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isFalse();
         HdmiCecMessage message =
