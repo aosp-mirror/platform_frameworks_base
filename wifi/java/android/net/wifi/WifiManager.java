@@ -2802,7 +2802,7 @@ public class WifiManager {
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void setScanAlwaysAvailable(boolean isAvailable) {
         try {
-            mService.setScanAlwaysAvailable(isAvailable);
+            mService.setScanAlwaysAvailable(isAvailable, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3035,7 +3035,7 @@ public class WifiManager {
     })
     public boolean startSoftAp(@Nullable WifiConfiguration wifiConfig) {
         try {
-            return mService.startSoftAp(wifiConfig);
+            return mService.startSoftAp(wifiConfig, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3059,7 +3059,7 @@ public class WifiManager {
     })
     public boolean startTetheredHotspot(@Nullable SoftApConfiguration softApConfig) {
         try {
-            return mService.startTetheredHotspot(softApConfig);
+            return mService.startTetheredHotspot(softApConfig, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

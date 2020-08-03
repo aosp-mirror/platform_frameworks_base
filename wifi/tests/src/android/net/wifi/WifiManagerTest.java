@@ -218,10 +218,10 @@ public class WifiManagerTest {
      */
     @Test
     public void testStartSoftApCallsServiceWithWifiConfig() throws Exception {
-        when(mWifiService.startSoftAp(eq(mApConfig))).thenReturn(true);
+        when(mWifiService.startSoftAp(mApConfig, TEST_PACKAGE_NAME)).thenReturn(true);
         assertTrue(mWifiManager.startSoftAp(mApConfig));
 
-        when(mWifiService.startSoftAp(eq(mApConfig))).thenReturn(false);
+        when(mWifiService.startSoftAp(mApConfig, TEST_PACKAGE_NAME)).thenReturn(false);
         assertFalse(mWifiManager.startSoftAp(mApConfig));
     }
 
@@ -231,10 +231,10 @@ public class WifiManagerTest {
      */
     @Test
     public void testStartSoftApCallsServiceWithNullConfig() throws Exception {
-        when(mWifiService.startSoftAp(eq(null))).thenReturn(true);
+        when(mWifiService.startSoftAp(null, TEST_PACKAGE_NAME)).thenReturn(true);
         assertTrue(mWifiManager.startSoftAp(null));
 
-        when(mWifiService.startSoftAp(eq(null))).thenReturn(false);
+        when(mWifiService.startSoftAp(null, TEST_PACKAGE_NAME)).thenReturn(false);
         assertFalse(mWifiManager.startSoftAp(null));
     }
 
@@ -257,10 +257,12 @@ public class WifiManagerTest {
     @Test
     public void testStartTetheredHotspotCallsServiceWithSoftApConfig() throws Exception {
         SoftApConfiguration softApConfig = generatorTestSoftApConfig();
-        when(mWifiService.startTetheredHotspot(eq(softApConfig))).thenReturn(true);
+        when(mWifiService.startTetheredHotspot(softApConfig, TEST_PACKAGE_NAME))
+                .thenReturn(true);
         assertTrue(mWifiManager.startTetheredHotspot(softApConfig));
 
-        when(mWifiService.startTetheredHotspot(eq(softApConfig))).thenReturn(false);
+        when(mWifiService.startTetheredHotspot(softApConfig, TEST_PACKAGE_NAME))
+                .thenReturn(false);
         assertFalse(mWifiManager.startTetheredHotspot(softApConfig));
     }
 
@@ -270,10 +272,10 @@ public class WifiManagerTest {
      */
     @Test
     public void testStartTetheredHotspotCallsServiceWithNullConfig() throws Exception {
-        when(mWifiService.startTetheredHotspot(eq(null))).thenReturn(true);
+        when(mWifiService.startTetheredHotspot(null, TEST_PACKAGE_NAME)).thenReturn(true);
         assertTrue(mWifiManager.startTetheredHotspot(null));
 
-        when(mWifiService.startTetheredHotspot(eq(null))).thenReturn(false);
+        when(mWifiService.startTetheredHotspot(null, TEST_PACKAGE_NAME)).thenReturn(false);
         assertFalse(mWifiManager.startTetheredHotspot(null));
     }
 
@@ -2375,7 +2377,7 @@ public class WifiManagerTest {
     @Test
     public void testScanAvailable() throws Exception {
         mWifiManager.setScanAlwaysAvailable(true);
-        verify(mWifiService).setScanAlwaysAvailable(true);
+        verify(mWifiService).setScanAlwaysAvailable(true, TEST_PACKAGE_NAME);
 
         when(mWifiService.isScanAlwaysAvailable()).thenReturn(false);
         assertFalse(mWifiManager.isScanAlwaysAvailable());
