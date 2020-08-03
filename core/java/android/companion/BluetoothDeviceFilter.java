@@ -142,6 +142,16 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
     }
 
     @Override
+    public String toString() {
+        return "BluetoothDeviceFilter{"
+                + "mNamePattern=" + mNamePattern
+                + ", mAddress='" + mAddress + '\''
+                + ", mServiceUuids=" + mServiceUuids
+                + ", mServiceUuidMasks=" + mServiceUuidMasks
+                + '}';
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
