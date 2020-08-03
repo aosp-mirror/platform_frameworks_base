@@ -857,6 +857,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * @return {@code true} when an application can override an app transition animation on this
+     * container.
+     */
+    boolean canCustomizeAppTransition() {
+        return !WindowManagerService.sDisableCustomTaskAnimationProperty;
+    }
+
+    /**
      * @return {@code true} when this container or its related containers are running an
      * animation, {@code false} otherwise.
      *

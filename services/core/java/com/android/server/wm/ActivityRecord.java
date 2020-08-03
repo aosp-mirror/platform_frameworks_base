@@ -7632,6 +7632,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    boolean canCustomizeAppTransition() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         if (stringName != null) {
             return stringName + " t" + (task == null ? INVALID_TASK_ID : task.mTaskId) +
