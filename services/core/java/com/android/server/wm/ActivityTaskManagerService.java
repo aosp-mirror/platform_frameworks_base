@@ -6789,11 +6789,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void handleAppDied(WindowProcessController wpc, boolean restarting,
                 Runnable finishInstrumentationCallback) {
             synchronized (mGlobalLockWithoutBoost) {
-                // Remove this application's activities from active lists.
-                boolean hasVisibleActivities = mRootWindowContainer.handleAppDied(wpc);
-
-                wpc.clearRecentTasks();
-                wpc.clearActivities();
+                mStackSupervisor.beginDeferResume();
+                final boolean hasVisibleActivities;
+                try {
+                    // Remove this application's activities from active lists.
+                    hasVisibleActivities = wpc.handleAppDied();
+                } finally {
+                    mStackSupervisor.endDeferResume();
+                }
 
                 if (wpc.isInstrumenting()) {
                     finishInstrumentationCallback.run();
