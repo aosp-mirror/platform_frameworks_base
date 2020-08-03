@@ -189,10 +189,10 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     @Override
-    public void onSwitchUser(@NonNull UserInfo from, @NonNull UserInfo to) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         if (DEBUG_USER) Slog.d(TAG, "onSwitchUser(" + from + " > " + to + ")");
 
-        mServiceStub.switchUser(to.id);
+        mServiceStub.switchUser(to.getUserIdentifier());
     }
 
     class LocalService extends VoiceInteractionManagerInternal {

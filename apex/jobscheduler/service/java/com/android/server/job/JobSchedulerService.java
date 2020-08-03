@@ -89,6 +89,7 @@ import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.controllers.BackgroundJobsController;
@@ -975,24 +976,24 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     @Override
-    public void onStartUser(int userHandle) {
+    public void onUserStarting(@NonNull TargetUser user) {
         synchronized (mLock) {
-            mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);
+            mStartedUsers = ArrayUtils.appendInt(mStartedUsers, user.getUserIdentifier());
         }
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
     @Override
-    public void onUnlockUser(int userHandle) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
     @Override
-    public void onStopUser(int userHandle) {
+    public void onUserStopping(@NonNull TargetUser user) {
         synchronized (mLock) {
-            mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
+            mStartedUsers = ArrayUtils.removeInt(mStartedUsers, user.getUserIdentifier());
         }
     }
 

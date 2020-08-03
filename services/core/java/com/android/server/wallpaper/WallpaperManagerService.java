@@ -105,6 +105,7 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -166,9 +167,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
+        public void onUserUnlocking(@NonNull TargetUser user) {
             if (mService != null) {
-                mService.onUnlockUser(userHandle);
+                mService.onUnlockUser(user.getUserIdentifier());
             }
         }
     }

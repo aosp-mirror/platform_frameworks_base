@@ -290,6 +290,7 @@ import com.android.server.LockGuard;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -775,18 +776,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
-        public void onStartUser(int userHandle) {
-            mService.handleStartUser(userHandle);
+        public void onUserStarting(@NonNull TargetUser user) {
+            mService.handleStartUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mService.handleUnlockUser(userHandle);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.handleUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mService.handleStopUser(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            mService.handleStopUser(user.getUserIdentifier());
         }
     }
 

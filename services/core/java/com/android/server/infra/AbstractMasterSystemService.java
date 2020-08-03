@@ -43,6 +43,7 @@ import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -299,16 +300,16 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     @Override // from SystemService
-    public void onUnlockUser(int userId) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
         synchronized (mLock) {
-            updateCachedServiceLocked(userId);
+            updateCachedServiceLocked(user.getUserIdentifier());
         }
     }
 
     @Override // from SystemService
-    public void onCleanupUser(int userId) {
+    public void onUserStopped(@NonNull TargetUser user) {
         synchronized (mLock) {
-            removeCachedServiceLocked(userId);
+            removeCachedServiceLocked(user.getUserIdentifier());
         }
     }
 
