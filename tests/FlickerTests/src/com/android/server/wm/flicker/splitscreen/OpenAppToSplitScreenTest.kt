@@ -102,7 +102,8 @@ class OpenAppToSplitScreenTest(
 
                 eventLog {
                     focusChanges(testApp.`package`,
-                            "recents_animation_input_consumer", "NexusLauncherActivity")
+                            "recents_animation_input_consumer", "NexusLauncherActivity",
+                            bugId = 151179149)
                 }
             }
         }
