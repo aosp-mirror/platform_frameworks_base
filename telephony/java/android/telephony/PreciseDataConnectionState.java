@@ -36,6 +36,8 @@ import android.telephony.Annotation.NetworkType;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.DataCallResponse;
 
+import com.android.internal.telephony.util.TelephonyUtils;
+
 import java.util.Objects;
 
 
@@ -82,6 +84,7 @@ public final class PreciseDataConnectionState implements Parcelable {
                 linkProperties, failCause, new ApnSetting.Builder()
                         .setApnTypeBitmask(apnTypes)
                         .setApnName(apn)
+                        .setEntryName(apn)
                         .build());
     }
 
@@ -254,7 +257,9 @@ public final class PreciseDataConnectionState implements Parcelable {
     /**
      * Return the APN Settings for this data connection.
      *
-     * @return the ApnSetting that was used to configure this data connection.
+     * @return the ApnSetting that was used to configure this data connection. Note that a data
+     * connection cannot be established without a valid {@link ApnSetting}. The return value would
+     * never be {@code null} even though it has {@link Nullable} annotation.
      */
     public @Nullable ApnSetting getApnSetting() {
         return mApnSetting;
@@ -314,17 +319,14 @@ public final class PreciseDataConnectionState implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("Data Connection state: " + mState);
-        sb.append(", Transport type: "
+        sb.append(" state: " + TelephonyUtils.dataStateToString(mState));
+        sb.append(", transport: "
                 + AccessNetworkConstants.transportTypeToString(mTransportType));
-        sb.append(", Id: " + mId);
-        sb.append(", Network type: " + mNetworkType);
-        sb.append(", APN types: " + ApnSetting.getApnTypesStringFromBitmask(
-                getDataConnectionApnTypeBitMask()));
-        sb.append(", APN: " + getDataConnectionApn());
-        sb.append(", Link properties: " + mLinkProperties);
-        sb.append(", Fail cause: " + DataFailCause.toString(mFailCause));
-        sb.append(", Apn Setting: " + mApnSetting);
+        sb.append(", id: " + mId);
+        sb.append(", network type: " + TelephonyManager.getNetworkTypeName(mNetworkType));
+        sb.append(", APN Setting: " + mApnSetting);
+        sb.append(", link properties: " + mLinkProperties);
+        sb.append(", fail cause: " + DataFailCause.toString(mFailCause));
 
         return sb.toString();
     }
