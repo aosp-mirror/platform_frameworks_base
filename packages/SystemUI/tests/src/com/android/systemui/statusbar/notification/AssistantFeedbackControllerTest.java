@@ -57,8 +57,8 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        switchSetting(ON);
         mAssistantFeedbackController = new AssistantFeedbackController(mContext);
+        switchSetting(ON);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
                 0, null, TEST_UID, 0, new Notification(),
                 UserHandle.CURRENT, null, 0);
@@ -72,7 +72,6 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
 
     @Test
     public void testUserControls_settingEnabled() {
-        switchSetting(ON);
         assertTrue(mAssistantFeedbackController.isFeedbackEnabled());
     }
 
@@ -113,7 +112,8 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
     }
 
     private void switchSetting(int setting) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_FEEDBACK_ENABLED, setting, UserHandle.USER_CURRENT);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.NOTIFICATION_FEEDBACK_ENABLED, setting);
+        mAssistantFeedbackController.update(null);
     }
 }
