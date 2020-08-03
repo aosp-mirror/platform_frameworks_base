@@ -121,9 +121,7 @@ import com.android.server.inputmethod.MultiClientInputMethodManagerService;
 import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
 import com.android.server.location.LocationManagerService;
-import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
-import com.android.server.media.MediaSessionService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -311,6 +309,10 @@ public final class SystemServer {
             "com.android.server.rollback.RollbackManagerService";
     private static final String ALARM_MANAGER_SERVICE_CLASS =
             "com.android.server.alarm.AlarmManagerService";
+    private static final String MEDIA_SESSION_SERVICE_CLASS =
+            "com.android.server.media.MediaSessionService";
+    private static final String MEDIA_RESOURCE_MONITOR_SERVICE_CLASS =
+            "com.android.server.media.MediaResourceMonitorService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1886,7 +1888,7 @@ public final class SystemServer {
             t.traceEnd();
 
             t.traceBegin("StartMediaSessionService");
-            mSystemServiceManager.startService(MediaSessionService.class);
+            mSystemServiceManager.startService(MEDIA_SESSION_SERVICE_CLASS);
             t.traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
@@ -1910,7 +1912,7 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
                 t.traceBegin("StartMediaResourceMonitor");
-                mSystemServiceManager.startService(MediaResourceMonitorService.class);
+                mSystemServiceManager.startService(MEDIA_RESOURCE_MONITOR_SERVICE_CLASS);
                 t.traceEnd();
             }
 
