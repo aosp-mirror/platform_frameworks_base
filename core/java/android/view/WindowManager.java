@@ -347,6 +347,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
