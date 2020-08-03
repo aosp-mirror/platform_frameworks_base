@@ -564,6 +564,7 @@ public class AudioManager {
      * request is from a hardware key press. (e.g. {@link MediaController}).
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_FROM_KEY = 1 << 12;
 
     // The iterator of TreeMap#entrySet() returns the entries in ascending key order.
