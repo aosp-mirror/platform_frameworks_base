@@ -50,8 +50,7 @@ import java.util.function.Consumer;
 /**
  * Controls the docked stack divider.
  */
-public class DividerController implements DividerView.DividerCallbacks,
-        DisplayController.OnDisplaysChangedListener {
+public class DividerController implements DisplayController.OnDisplaysChangedListener {
     static final boolean DEBUG = false;
     private static final String TAG = "Divider";
 
@@ -257,8 +256,8 @@ public class DividerController implements DividerView.DividerCallbacks,
         mView = (DividerView)
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
         DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
-        mView.injectDependencies(mWindowManager, mDividerState, this, mSplits, mSplitLayout,
-                mImePositionProcessor, mWindowManagerProxy);
+        mView.injectDependencies(mWindowManager, mDividerState, mForcedResizableController, mSplits,
+                mSplitLayout, mImePositionProcessor, mWindowManagerProxy);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
         mView.setMinimizedDockStack(mMinimized, mHomeStackResizable, null /* transaction */);
         final int size = dctx.getResources().getDimensionPixelSize(
@@ -397,7 +396,22 @@ public class DividerController implements DividerView.DividerCallbacks,
         }
     }
 
-    /** Called when there's a task undocking.  */
+    /** Called when there's an activity forced resizable. */
+    public void onActivityForcedResizable(String packageName, int taskId, int reason) {
+        mForcedResizableController.activityForcedResizable(packageName, taskId, reason);
+    }
+
+    /** Called when there's an activity dismissing split screen. */
+    public void onActivityDismissingSplitScreen() {
+        mForcedResizableController.activityDismissingSplitScreen();
+    }
+
+    /** Called when there's an activity launch on secondary display failed. */
+    public void onActivityLaunchOnSecondaryDisplayFailed() {
+        mForcedResizableController.activityLaunchOnSecondaryDisplayFailed();
+    }
+
+    /** Called when there's a task undocking. */
     public void onUndockingTask() {
         if (mView != null) {
             mView.onUndockingTask();
@@ -426,17 +440,7 @@ public class DividerController implements DividerView.DividerCallbacks,
         mForcedResizableController.onAppTransitionFinished();
     }
 
-    @Override
-    public void onDraggingStart() {
-        mForcedResizableController.onDraggingStart();
-    }
-
-    @Override
-    public void onDraggingEnd() {
-        mForcedResizableController.onDraggingEnd();
-    }
-
-    /** Dumps current status of Divider.*/
+    /** Dumps current status of Split Screen. */
     public void dump(PrintWriter pw) {
         pw.print("  mVisible="); pw.println(mVisible);
         pw.print("  mMinimized="); pw.println(mMinimized);
