@@ -7,9 +7,6 @@
             "name": "CtsAppOps2TestCases"
         },
         {
-            "name": "CtsAppOpHostTestCases"
-        },
-        {
             "name": "FrameworksServicesTests",
             "options": [
                 {
