@@ -325,6 +325,9 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
   if (overlayable_item.policies & PolicyFlags::ACTOR_SIGNATURE) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::ACTOR);
   }
+  if (overlayable_item.policies & PolicyFlags::CONFIG_SIGNATURE) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::CONFIG_SIGNATURE);
+  }
 
   if (source_pool != nullptr) {
     SerializeSourceToPb(overlayable_item.source, source_pool,
