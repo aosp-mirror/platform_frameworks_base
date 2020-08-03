@@ -957,7 +957,7 @@ static jlong android_os_Binder_clearCallingIdentity()
 
 static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz, jlong token)
 {
-    // XXX temporary sanity check to debug crashes.
+    // XXX temporary validation check to debug crashes.
     int uid = (int)(token>>32);
     if (uid > 0 && uid < 999) {
         // In Android currently there are no uids in this range.
