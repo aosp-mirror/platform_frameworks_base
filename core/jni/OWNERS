@@ -17,4 +17,4 @@ per-file android_view_*MotionEvent.* = michaelwr@google.com, svv@google.com
 per-file android_view_PointerIcon.* = michaelwr@google.com, svv@google.com
 
 # Zygote
-per-file com_android_internal_os_Zygote.*,fd_utils.* = chriswailes@google.com, ngeoffray@google.com, sehr@google.com, narayan@google.com, maco@google.com
+per-file com_android_internal_os_Zygote.*,fd_utils.* = calin@google.com, chriswailes@google.com, maco@google.com, narayan@google.com, ngeoffray@google.com
