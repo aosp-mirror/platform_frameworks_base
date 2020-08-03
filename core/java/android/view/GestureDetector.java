@@ -25,6 +25,7 @@ import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFI
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 
+import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -393,7 +394,7 @@ public class GestureDetector {
      *
      * @throws NullPointerException if {@code listener} is null.
      */
-    public GestureDetector(Context context, OnGestureListener listener) {
+    public GestureDetector(@UiContext Context context, OnGestureListener listener) {
         this(context, listener, null);
     }
 
@@ -412,7 +413,8 @@ public class GestureDetector {
      *
      * @throws NullPointerException if {@code listener} is null.
      */
-    public GestureDetector(Context context, OnGestureListener listener, Handler handler) {
+    public GestureDetector(@UiContext Context context, OnGestureListener listener,
+            Handler handler) {
         if (handler != null) {
             mHandler = new GestureHandler(handler);
         } else {
@@ -442,12 +444,12 @@ public class GestureDetector {
      *
      * @throws NullPointerException if {@code listener} is null.
      */
-    public GestureDetector(Context context, OnGestureListener listener, Handler handler,
+    public GestureDetector(@UiContext Context context, OnGestureListener listener, Handler handler,
             boolean unused) {
         this(context, listener, handler);
     }
 
-    private void init(Context context) {
+    private void init(@UiContext Context context) {
         if (mListener == null) {
             throw new NullPointerException("OnGestureListener must not be null");
         }
