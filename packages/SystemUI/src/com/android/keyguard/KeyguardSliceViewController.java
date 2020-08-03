@@ -16,8 +16,10 @@
 
 package com.android.keyguard;
 
+import static android.app.slice.Slice.HINT_LIST_ITEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Trace;
 import android.provider.Settings;
@@ -30,6 +32,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.slice.Slice;
 import androidx.slice.SliceViewManager;
+import androidx.slice.widget.ListContent;
+import androidx.slice.widget.RowContent;
+import androidx.slice.widget.SliceContent;
 import androidx.slice.widget.SliceLiveData;
 
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
@@ -42,15 +47,19 @@ import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 /** Controller for a {@link KeyguardSliceView}. */
 @KeyguardStatusViewScope
 public class KeyguardSliceViewController implements Dumpable {
-    private static final String TAG = "KeyguardSliceViewController";
+    private static final String TAG = "KeyguardSliceViewCtrl";
 
     private final KeyguardSliceView mView;
+    private final KeyguardStatusView mKeyguardStatusView;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
@@ -59,6 +68,7 @@ public class KeyguardSliceViewController implements Dumpable {
     private LiveData<Slice> mLiveData;
     private Uri mKeyguardSliceUri;
     private Slice mSlice;
+    private Map<View, PendingIntent> mClickActions;
 
     private final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
             new View.OnAttachStateChangeListener() {
@@ -106,15 +116,27 @@ public class KeyguardSliceViewController implements Dumpable {
         @Override
         public void onChanged(Slice slice) {
             mSlice = slice;
-            mView.showSlice(slice);
+            showSlice(slice);
+        }
+    };
+
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final PendingIntent action = mClickActions.get(v);
+            if (action != null && mActivityStarter != null) {
+                mActivityStarter.startPendingIntentDismissingKeyguard(action);
+            }
         }
     };
 
     @Inject
     public KeyguardSliceViewController(KeyguardSliceView keyguardSliceView,
-            ActivityStarter activityStarter, ConfigurationController configurationController,
-            TunerService tunerService, DumpManager dumpManager) {
+            KeyguardStatusView keyguardStatusView, ActivityStarter activityStarter,
+            ConfigurationController configurationController, TunerService tunerService,
+            DumpManager dumpManager) {
         mView = keyguardSliceView;
+        mKeyguardStatusView = keyguardStatusView;
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
         mTunerService = tunerService;
@@ -127,8 +149,9 @@ public class KeyguardSliceViewController implements Dumpable {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mView.setActivityStarter(mActivityStarter);
-        mView.setController(this);  // TODO: remove this.
+        mView.setOnClickListener(mOnClickListener);
+        // TODO: remove the line below.
+        mKeyguardStatusView.setKeyguardSliceViewController(this);
     }
 
     /**
@@ -177,8 +200,35 @@ public class KeyguardSliceViewController implements Dumpable {
         Trace.endSection();
     }
 
+    void showSlice(Slice slice) {
+        Trace.beginSection("KeyguardSliceViewController#showSlice");
+        if (slice == null) {
+            mView.hideSlice();
+            Trace.endSection();
+            return;
+        }
+
+        ListContent lc = new ListContent(slice);
+        RowContent headerContent = lc.getHeader();
+        boolean hasHeader =
+                headerContent != null && !headerContent.getSliceItem().hasHint(HINT_LIST_ITEM);
+
+        List<SliceContent> subItems = lc.getRowItems().stream().filter(sliceContent -> {
+            String itemUri = sliceContent.getSliceItem().getSlice().getUri().toString();
+            // Filter out the action row
+            return !KeyguardSliceProvider.KEYGUARD_ACTION_URI.equals(itemUri);
+        }).collect(Collectors.toList());
+
+
+        mClickActions = mView.showSlice(hasHeader ? headerContent : null, subItems);
+
+        Trace.endSection();
+    }
+
+
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
+        pw.println("  mClickActions: " + mClickActions);
     }
 }

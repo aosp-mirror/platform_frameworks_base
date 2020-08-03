@@ -22,9 +22,11 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 
+import androidx.slice.Slice;
 import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
+import androidx.slice.widget.RowContent;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -34,7 +36,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
@@ -47,8 +48,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KeyguardSliceViewTest extends SysuiTestCase {
     private KeyguardSliceView mKeyguardSliceView;
     private Uri mSliceUri;
-    @Mock
-    private KeyguardSliceViewController mKeyguardSliceViewController;
 
     @Before
     public void setUp() throws Exception {
@@ -56,7 +55,6 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         mKeyguardSliceView = (KeyguardSliceView) layoutInflater
                 .inflate(R.layout.keyguard_status_area, null);
-        mKeyguardSliceView.setController(mKeyguardSliceViewController);
         mSliceUri = Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
         SliceProvider.setSpecs(new HashSet<>(Collections.singletonList(SliceSpecs.LIST)));
     }
@@ -64,9 +62,13 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void showSlice_notifiesListener() {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
+        builder.setHeader(new ListBuilder.HeaderBuilder().setTitle("header title!"));
+        Slice slice = builder.build();
+        RowContent rowContent = new RowContent(slice.getItemArray()[0], 0);
+
         AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
-        mKeyguardSliceView.showSlice(builder.build());
+        mKeyguardSliceView.showSlice(rowContent, Collections.EMPTY_LIST);
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());
     }
@@ -75,7 +77,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     public void showSlice_emptySliceNotifiesListener() {
         AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
-        mKeyguardSliceView.showSlice(null);
+        mKeyguardSliceView.showSlice(null, Collections.EMPTY_LIST);
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());
     }
@@ -83,11 +85,13 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void hasHeader_readsSliceData() {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
-        mKeyguardSliceView.showSlice(builder.build());
+        mKeyguardSliceView.showSlice(null, Collections.EMPTY_LIST);
         Assert.assertFalse("View should not have a header", mKeyguardSliceView.hasHeader());
 
         builder.setHeader(new ListBuilder.HeaderBuilder().setTitle("header title!"));
-        mKeyguardSliceView.showSlice(builder.build());
+        Slice slice = builder.build();
+        RowContent rowContent = new RowContent(slice.getItemArray()[0], 0);
+        mKeyguardSliceView.showSlice(rowContent, Collections.EMPTY_LIST);
         Assert.assertTrue("View should have a header", mKeyguardSliceView.hasHeader());
     }
 

@@ -44,7 +44,9 @@ import org.mockito.MockitoAnnotations;
 @RunWithLooper(setAsMainLooper = true)
 public class KeyguardSliceViewControllerTest extends SysuiTestCase {
     @Mock
-    private KeyguardSliceView mView;
+    private KeyguardSliceView mView;;
+    @Mock
+    private KeyguardStatusView mKeyguardStatusView;
     @Mock
     private TunerService mTunerService;
     @Mock
@@ -61,15 +63,15 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mView.getContext()).thenReturn(mContext);
         mController = new KeyguardSliceViewController(
-                mView, mActivityStarter, mConfigurationController, mTunerService, mDumpManager);
+                mView, mKeyguardStatusView, mActivityStarter, mConfigurationController,
+                mTunerService, mDumpManager);
         mController.setupUri(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
     }
-
 
     @Test
     public void refresh_replacesSliceContentAndNotifiesListener() {
         mController.refresh();
-        verify(mView).showSlice(null);
+        verify(mView).hideSlice();
     }
 
     @Test

@@ -131,6 +131,7 @@ public class KeyguardDisplayManager {
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
             final Presentation newPresentation = new KeyguardPresentation(mContext, display,
+                    mKeyguardStatusViewComponentFactory,
                     mInjectableInflater.injectable(LayoutInflater.from(mContext)));
             newPresentation.setOnDismissListener(dialog -> {
                 if (newPresentation.equals(mPresentations.get(displayId))) {
@@ -145,9 +146,6 @@ public class KeyguardDisplayManager {
                 presentation = null;
             }
             if (presentation != null) {
-                mKeyguardStatusViewComponentFactory
-                        .build(presentation.findViewById(R.id.clock))
-                        .getKeyguardClockSwitchController().init();
                 mPresentations.append(displayId, presentation);
                 return true;
             }
@@ -251,7 +249,9 @@ public class KeyguardDisplayManager {
     static final class KeyguardPresentation extends Presentation {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
+        private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
         private final LayoutInflater mInjectableLayoutInflater;
+        private KeyguardClockSwitchController mKeyguardClockSwitchController;
         private View mClock;
         private int mUsableWidth;
         private int mUsableHeight;
@@ -269,8 +269,10 @@ public class KeyguardDisplayManager {
         };
 
         KeyguardPresentation(Context context, Display display,
+                KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
                 LayoutInflater injectionLayoutInflater) {
             super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
+            mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
             mInjectableLayoutInflater = injectionLayoutInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
@@ -312,6 +314,12 @@ public class KeyguardDisplayManager {
 
             // Avoid screen burn in
             mClock.post(mMoveTextRunnable);
+
+            mKeyguardClockSwitchController = mKeyguardStatusViewComponentFactory
+                    .build(findViewById(R.id.clock))
+                    .getKeyguardClockSwitchController();
+
+            mKeyguardClockSwitchController.init();
         }
     }
 }

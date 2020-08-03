@@ -16,9 +16,6 @@
 
 package com.android.keyguard;
 
-import static android.app.slice.Slice.HINT_LIST_ITEM;
-import static android.view.Display.INVALID_DISPLAY;
-
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -41,11 +38,8 @@ import android.view.animation.Animation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.lifecycle.LiveData;
-import androidx.slice.Slice;
 import androidx.slice.SliceItem;
 import androidx.slice.core.SliceQuery;
-import androidx.slice.widget.ListContent;
 import androidx.slice.widget.RowContent;
 import androidx.slice.widget.SliceContent;
 
@@ -55,27 +49,23 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.keyguard.KeyguardSliceProvider;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * View visible under the clock on the lock screen and AoD.
  */
-public class KeyguardSliceView extends LinearLayout implements View.OnClickListener {
+public class KeyguardSliceView extends LinearLayout {
 
     private static final String TAG = "KeyguardSliceView";
     public static final int DEFAULT_ANIM_DURATION = 550;
 
-    private final HashMap<View, PendingIntent> mClickActions;
-    private ActivityStarter mActivityStarter;
     private final LayoutTransition mLayoutTransition;
     @VisibleForTesting
     TextView mTitle;
@@ -83,8 +73,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private int mTextColor;
     private float mDarkAmount = 0;
 
-    private LiveData<Slice> mLiveData;
-    private int mDisplayId = INVALID_DISPLAY;
     private int mIconSize;
     private int mIconSizeWithHeader;
     /**
@@ -96,13 +84,12 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private final int mRowPadding;
     private float mRowTextSize;
     private float mRowWithHeaderTextSize;
-    private KeyguardSliceViewController mController;
+    private View.OnClickListener mOnClickListener;
 
     public KeyguardSliceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         Resources resources = context.getResources();
-        mClickActions = new HashMap<>();
         mRowPadding = resources.getDimensionPixelSize(R.dimen.subtitle_clock_padding);
         mRowWithHeaderPadding = resources.getDimensionPixelSize(R.dimen.header_subtitle_padding);
 
@@ -130,7 +117,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 R.dimen.widget_label_font_size);
         mRowWithHeaderTextSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.header_row_font_size);
-        mTitle.setOnClickListener(this);
         mTitle.setBreakStrategy(LineBreaker.BREAK_STRATEGY_BALANCED);
     }
 
@@ -147,44 +133,31 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         return mHasHeader;
     }
 
-    void showSlice(Slice slice) {
-        Trace.beginSection("KeyguardSliceView#showSlice");
-        if (slice == null) {
-            mTitle.setVisibility(GONE);
-            mRow.setVisibility(GONE);
-            mHasHeader = false;
-            if (mContentChangeListener != null) {
-                mContentChangeListener.run();
-            }
-            Trace.endSection();
-            return;
+    void hideSlice() {
+        mTitle.setVisibility(GONE);
+        mRow.setVisibility(GONE);
+        mHasHeader = false;
+        if (mContentChangeListener != null) {
+            mContentChangeListener.run();
         }
-        mClickActions.clear();
+    }
 
-        ListContent lc = new ListContent(getContext(), slice);
-        SliceContent headerContent = lc.getHeader();
-        mHasHeader = headerContent != null && !headerContent.getSliceItem().hasHint(HINT_LIST_ITEM);
-        List<SliceContent> subItems = new ArrayList<>();
-        for (int i = 0; i < lc.getRowItems().size(); i++) {
-            SliceContent subItem = lc.getRowItems().get(i);
-            String itemUri = subItem.getSliceItem().getSlice().getUri().toString();
-            // Filter out the action row
-            if (!KeyguardSliceProvider.KEYGUARD_ACTION_URI.equals(itemUri)) {
-                subItems.add(subItem);
-            }
-        }
+    Map<View, PendingIntent> showSlice(RowContent header, List<SliceContent> subItems) {
+        Trace.beginSection("KeyguardSliceView#showSlice");
+        mHasHeader = header != null;
+        Map<View, PendingIntent> clickActions = new HashMap<>();
+
         if (!mHasHeader) {
             mTitle.setVisibility(GONE);
         } else {
             mTitle.setVisibility(VISIBLE);
 
-            RowContent header = lc.getHeader();
             SliceItem mainTitle = header.getTitleItem();
             CharSequence title = mainTitle != null ? mainTitle.getText() : null;
             mTitle.setText(title);
             if (header.getPrimaryAction() != null
                     && header.getPrimaryAction().getAction() != null) {
-                mClickActions.put(mTitle, header.getPrimaryAction().getAction());
+                clickActions.put(mTitle, header.getPrimaryAction().getAction());
             }
         }
 
@@ -214,7 +187,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             if (rc.getPrimaryAction() != null) {
                 pendingIntent = rc.getPrimaryAction().getAction();
             }
-            mClickActions.put(button, pendingIntent);
+            clickActions.put(button, pendingIntent);
 
             final SliceItem titleItem = rc.getTitleItem();
             button.setText(titleItem == null ? null : titleItem.getText());
@@ -235,14 +208,14 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 }
             }
             button.setCompoundDrawables(iconDrawable, null, null, null);
-            button.setOnClickListener(this);
+            button.setOnClickListener(mOnClickListener);
             button.setClickable(pendingIntent != null);
         }
 
         // Removing old views
         for (int i = 0; i < mRow.getChildCount(); i++) {
             View child = mRow.getChildAt(i);
-            if (!mClickActions.containsKey(child)) {
+            if (!clickActions.containsKey(child)) {
                 mRow.removeView(child);
                 i--;
             }
@@ -252,6 +225,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             mContentChangeListener.run();
         }
         Trace.endSection();
+
+        return clickActions;
     }
 
     public void setDarkAmount(float darkAmount) {
@@ -269,14 +244,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             if (v instanceof TextView) {
                 ((TextView) v).setTextColor(blendedColor);
             }
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        final PendingIntent action = mClickActions.get(v);
-        if (action != null && mActivityStarter != null) {
-            mActivityStarter.startPendingIntentDismissingKeyguard(action);
         }
     }
 
@@ -308,13 +275,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 R.dimen.header_row_font_size);
     }
 
-    public void refresh() {
-        mController.refresh();
-    }
-
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardSliceView:");
-        pw.println("  mClickActions: " + mClickActions);
         pw.println("  mTitle: " + (mTitle == null ? "null" : mTitle.getVisibility() == VISIBLE));
         pw.println("  mRow: " + (mRow == null ? "null" : mRow.getVisibility() == VISIBLE));
         pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
@@ -322,13 +284,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         pw.println("  mHasHeader: " + mHasHeader);
     }
 
-    public void setActivityStarter(ActivityStarter activityStarter) {
-        mActivityStarter = activityStarter;
-    }
-
-    public void setController(KeyguardSliceViewController keyguardSliceViewController) {
-        // TODO: remove this method.
-        mController = keyguardSliceViewController;
+    @Override
+    public void setOnClickListener(View.OnClickListener onClickListener) {
+        mOnClickListener = onClickListener;
+        mTitle.setOnClickListener(onClickListener);
     }
 
     public static class Row extends LinearLayout {

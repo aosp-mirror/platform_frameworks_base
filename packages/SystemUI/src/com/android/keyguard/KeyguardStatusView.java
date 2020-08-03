@@ -32,7 +32,6 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.GridLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.graphics.ColorUtils;
@@ -56,7 +55,6 @@ public class KeyguardStatusView extends GridLayout implements
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
 
-    private LinearLayout mStatusViewContainer;
     private TextView mLogoutView;
     private KeyguardClockSwitch mClockView;
     private TextView mOwnerInfo;
@@ -64,6 +62,7 @@ public class KeyguardStatusView extends GridLayout implements
     private View mNotificationIcons;
     private Runnable mPendingMarqueeStart;
     private Handler mHandler;
+    private KeyguardSliceViewController mKeyguardSliceViewController;
 
     private boolean mPulsing;
     private float mDarkAmount = 0;
@@ -179,7 +178,6 @@ public class KeyguardStatusView extends GridLayout implements
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mStatusViewContainer = findViewById(R.id.status_view_container);
         mLogoutView = findViewById(R.id.logout);
         mNotificationIcons = findViewById(R.id.clock_notification_icon_container);
         if (mLogoutView != null) {
@@ -250,7 +248,7 @@ public class KeyguardStatusView extends GridLayout implements
 
     public void dozeTimeTick() {
         refreshTime();
-        mKeyguardSlice.refresh();
+        mKeyguardSliceViewController.refresh();
     }
 
     private void refreshTime() {
@@ -455,5 +453,10 @@ public class KeyguardStatusView extends GridLayout implements
         } catch (RemoteException re) {
             Log.e(TAG, "Failed to logout user", re);
         }
+    }
+
+    // TODO: remove this method when a controller is available.
+    void setKeyguardSliceViewController(KeyguardSliceViewController keyguardSliceViewController) {
+        mKeyguardSliceViewController = keyguardSliceViewController;
     }
 }
