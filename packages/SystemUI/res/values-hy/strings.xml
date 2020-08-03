@@ -921,7 +921,7 @@
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Անցնել հաջորդին"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Վերադառնալ նախորդին"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Փոխել չափը"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել է տաքանալու պատճառով"</string>
+    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել էր տաքանալու պատճառով"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Հեռախոսն այժմ նորմալ աշխատում է"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավարկման հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Հեռախոսը տաքանում է"</string>
