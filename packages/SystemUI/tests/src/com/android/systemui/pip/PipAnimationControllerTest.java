@@ -16,7 +16,7 @@
 
 package com.android.systemui.pip;
 
-import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_FULLSCREEN;
+import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 
 import static org.junit.Assert.assertEquals;
@@ -116,9 +116,9 @@ public class PipAnimationControllerTest extends SysuiTestCase {
 
         animator = mPipAnimationController
                 .getAnimator(mLeash, new Rect(), 0f, 1f)
-                .setTransitionDirection(TRANSITION_DIRECTION_TO_FULLSCREEN);
+                .setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP);
         assertEquals("Transition to fullscreen mode",
-                animator.getTransitionDirection(), TRANSITION_DIRECTION_TO_FULLSCREEN);
+                animator.getTransitionDirection(), TRANSITION_DIRECTION_LEAVE_PIP);
     }
 
     @Test
