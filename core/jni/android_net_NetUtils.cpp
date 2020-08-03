@@ -93,9 +93,10 @@ static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz,
 
 static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
-    int dummy = 0;
+    int optval_ignored = 0;
     int fd = jniGetFDFromFileDescriptor(env, javaFd);
-    if (setsockopt(fd, SOL_SOCKET, SO_DETACH_FILTER, &dummy, sizeof(dummy)) != 0) {
+    if (setsockopt(
+            fd, SOL_SOCKET, SO_DETACH_FILTER, &optval_ignored, sizeof(optval_ignored)) != 0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
                 "setsockopt(SO_DETACH_FILTER): %s", strerror(errno));
     }

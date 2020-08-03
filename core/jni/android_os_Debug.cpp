@@ -913,7 +913,7 @@ int register_android_os_Debug(JNIEnv *env)
 {
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
-    // Sanity check the number of other statistics expected in Java matches here.
+    // Check the number of other statistics expected in Java matches here.
     jfieldID numOtherStats_field = env->GetStaticFieldID(clazz, "NUM_OTHER_STATS", "I");
     jint numOtherStats = env->GetStaticIntField(clazz, numOtherStats_field);
     jfieldID numDvkStats_field = env->GetStaticFieldID(clazz, "NUM_DVK_STATS", "I");
