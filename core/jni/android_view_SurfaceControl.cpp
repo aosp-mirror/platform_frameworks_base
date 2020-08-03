@@ -116,7 +116,6 @@ static struct {
     jfieldID width;
     jfieldID height;
     jfieldID useIdentityTransform;
-    jfieldID rotation;
 } gDisplayCaptureArgsClassInfo;
 
 static struct {
@@ -325,8 +324,6 @@ static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
     captureArgs.useIdentityTransform =
             env->GetBooleanField(displayCaptureArgsObject,
                                  gDisplayCaptureArgsClassInfo.useIdentityTransform);
-    captureArgs.rotation = ui::toRotation(
-            env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.rotation));
     return captureArgs;
 }
 
@@ -1848,8 +1845,6 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mHeight", "I");
     gDisplayCaptureArgsClassInfo.useIdentityTransform =
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mUseIdentityTransform", "Z");
-    gDisplayCaptureArgsClassInfo.rotation =
-            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mRotation", "I");
 
     jclass layerCaptureArgsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$LayerCaptureArgs");

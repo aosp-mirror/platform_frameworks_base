@@ -30,8 +30,6 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUST
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -46,7 +44,6 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
@@ -104,7 +101,6 @@ import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.UiThread;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
@@ -1394,9 +1390,13 @@ public final class DisplayManagerService extends SystemService {
             }
 
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, new Rect(),
-                    displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
-                    false /* useIdentityTransform */, 0 /* rotation */);
+            final SurfaceControl.DisplayCaptureArgs captureArgs =
+                    new SurfaceControl.DisplayCaptureArgs.Builder(token)
+                            .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
+                            .setUseIdentityTransform(true)
+                            .setCaptureSecureLayers(true)
+                            .build();
+            return SurfaceControl.captureDisplay(captureArgs);
         }
     }
 
@@ -1406,30 +1406,11 @@ public final class DisplayManagerService extends SystemService {
             if (token == null) {
                 return null;
             }
-            final LogicalDisplay logicalDisplay = mLogicalDisplays.get(displayId);
-            if (logicalDisplay == null) {
-                return null;
-            }
 
-            final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            // Takes screenshot based on current device orientation.
-            final Display display = DisplayManagerGlobal.getInstance()
-                    .getRealDisplay(displayId);
-            if (display == null) {
-                return null;
-            }
-            final Point displaySize = new Point();
-            display.getRealSize(displaySize);
-
-            int rotation = displayInfo.rotation;
-            // TODO (b/153382624) : This workaround solution would be removed after
-            // SurfaceFlinger fixes the inconsistency with rotation direction issue.
-            if (rotation == ROTATION_90 || rotation == ROTATION_270) {
-                rotation = (rotation == ROTATION_90) ? ROTATION_270 : ROTATION_90;
-            }
-
-            return SurfaceControl.screenshotToBuffer(token, new Rect(), displaySize.x,
-                    displaySize.y, false /* useIdentityTransform */, rotation /* rotation */);
+            final SurfaceControl.DisplayCaptureArgs captureArgs =
+                    new SurfaceControl.DisplayCaptureArgs.Builder(token)
+                            .build();
+            return SurfaceControl.captureDisplay(captureArgs);
         }
     }
 

@@ -22,8 +22,6 @@ import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
 import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.NAME;
 
@@ -590,6 +588,26 @@ public final class SurfaceControl implements Parcelable {
         public boolean containsSecureLayers() {
             return mContainsSecureLayers;
         }
+
+        /**
+         * Copy content of ScreenshotHardwareBuffer into a hardware bitmap and return it.
+         * Note: If you want to modify the Bitmap in software, you will need to copy the Bitmap
+         * into
+         * a software Bitmap using {@link Bitmap#copy(Bitmap.Config, boolean)}
+         *
+         * CAVEAT: This can be extremely slow; avoid use unless absolutely necessary; prefer to
+         * directly
+         * use the {@link HardwareBuffer} directly.
+         *
+         * @return Bitmap generated from the {@link HardwareBuffer}
+         */
+        public Bitmap asBitmap() {
+            if (mHardwareBuffer == null) {
+                Log.w(TAG, "Failed to take screenshot. Null screenshot object");
+                return null;
+            }
+            return Bitmap.wrapHardwareBuffer(mHardwareBuffer, mColorSpace);
+        }
     }
 
     /**
@@ -597,7 +615,7 @@ public final class SurfaceControl implements Parcelable {
      * are shared between {@link DisplayCaptureArgs} and {@link LayerCaptureArgs}
      * @hide
      */
-    public abstract static class CaptureArgs {
+    private abstract static class CaptureArgs {
         private final int mPixelFormat;
         private final Rect mSourceCrop = new Rect();
         private final float mFrameScale;
@@ -615,7 +633,7 @@ public final class SurfaceControl implements Parcelable {
          *
          * @param <T> A builder that extends {@link Builder}
          */
-        public abstract static class Builder<T extends Builder<T>> {
+        abstract static class Builder<T extends Builder<T>> {
             private int mPixelFormat = PixelFormat.RGBA_8888;
             private final Rect mSourceCrop = new Rect();
             private float mFrameScale = 1;
@@ -675,7 +693,6 @@ public final class SurfaceControl implements Parcelable {
         private final int mWidth;
         private final int mHeight;
         private final boolean mUseIdentityTransform;
-        private final int mRotation;
 
         private DisplayCaptureArgs(Builder builder) {
             super(builder);
@@ -683,7 +700,6 @@ public final class SurfaceControl implements Parcelable {
             mWidth = builder.mWidth;
             mHeight = builder.mHeight;
             mUseIdentityTransform = builder.mUseIdentityTransform;
-            mRotation = builder.mRotation;
         }
 
         /**
@@ -694,7 +710,6 @@ public final class SurfaceControl implements Parcelable {
             private int mWidth;
             private int mHeight;
             private boolean mUseIdentityTransform;
-            private @Surface.Rotation int mRotation = Surface.ROTATION_0;
 
             /**
              * Construct a new {@link LayerCaptureArgs} with the set parameters. The builder
@@ -736,23 +751,13 @@ public final class SurfaceControl implements Parcelable {
             }
 
             /**
-             * Replace whatever transformation (rotation, scaling, translation) the surface
-             * layers are currently using with the identity transformation while taking the
-             * screenshot.
+             * Replace the rotation transform of the display with the identity transformation while
+             * taking the screenshot. This ensures the screenshot is taken in the ROTATION_0
+             * orientation. Set this value to false if the screenshot should be taken in the
+             * current screen orientation.
              */
             public Builder setUseIdentityTransform(boolean useIdentityTransform) {
                 mUseIdentityTransform = useIdentityTransform;
-                return this;
-            }
-
-            /**
-             * Apply a custom clockwise rotation to the screenshot, i.e.
-             * Surface.ROTATION_0,90,180,270. SurfaceFlinger will always take screenshots in its
-             * native portrait orientation by default, so this is useful for returning screenshots
-             * that are independent of device orientation.
-             */
-            public Builder setRotation(@Surface.Rotation int rotation) {
-                mRotation = rotation;
                 return this;
             }
 
@@ -2221,127 +2226,13 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @see SurfaceControl#screenshot(Rect, int, int, boolean, int)}
+     * Captures all the surfaces in a display and returns a {@link ScreenshotHardwareBuffer} with
+     * the content.
+     *
      * @hide
      */
-    @UnsupportedAppUsage
-    public static Bitmap screenshot(Rect sourceCrop, int width, int height, int rotation) {
-        return screenshot(sourceCrop, width, height, false, rotation);
-    }
-
-    /**
-     * Copy the current screen contents into a hardware bitmap and return it.
-     * Note: If you want to modify the Bitmap in software, you will need to copy the Bitmap into
-     * a software Bitmap using {@link Bitmap#copy(Bitmap.Config, boolean)}
-     *
-     * CAVEAT: Versions of screenshot that return a {@link Bitmap} can be extremely slow; avoid use
-     * unless absolutely necessary; prefer the versions that use a {@link HardwareBuffer} such as
-     * {@link SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)}.
-     *
-     * @see SurfaceControl#screenshotToBuffer(IBinder, Rect, int, int, boolean, int)}
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static Bitmap screenshot(Rect sourceCrop, int width, int height,
-            boolean useIdentityTransform, int rotation) {
-        // TODO: should take the display as a parameter
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        if (displayToken == null) {
-            Log.w(TAG, "Failed to take screenshot because internal display is disconnected");
-            return null;
-        }
-
-        if (rotation == ROTATION_90 || rotation == ROTATION_270) {
-            rotation = (rotation == ROTATION_90) ? ROTATION_270 : ROTATION_90;
-        }
-
-        SurfaceControl.rotateCropForSF(sourceCrop, rotation);
-        final ScreenshotHardwareBuffer buffer = screenshotToBuffer(displayToken, sourceCrop, width,
-                height, useIdentityTransform, rotation);
-
-        if (buffer == null) {
-            Log.w(TAG, "Failed to take screenshot");
-            return null;
-        }
-        return Bitmap.wrapHardwareBuffer(buffer.getHardwareBuffer(), buffer.getColorSpace());
-    }
-
-    /**
-     * Captures all the surfaces in a display and returns a {@link HardwareBuffer} with the content.
-     *
-     * @param display              The display to take the screenshot of.
-     * @param sourceCrop           The portion of the screen to capture into the Bitmap; caller may
-     *                             pass in 'new Rect()' if no cropping is desired.
-     * @param width                The desired width of the returned bitmap; the raw screen will be
-     *                             scaled down to this size; caller may pass in 0 if no scaling is
-     *                             desired.
-     * @param height               The desired height of the returned bitmap; the raw screen will
-     *                             be scaled down to this size; caller may pass in 0 if no scaling
-     *                             is desired.
-     * @param useIdentityTransform Replace whatever transformation (rotation, scaling, translation)
-     *                             the surface layers are currently using with the identity
-     *                             transformation while taking the screenshot.
-     * @param rotation             Apply a custom clockwise rotation to the screenshot, i.e.
-     *                             Surface.ROTATION_0,90,180,270. SurfaceFlinger will always take
-     *                             screenshots in its native portrait orientation by default, so
-     *                             this is useful for returning screenshots that are independent of
-     *                             device orientation.
-     * @return Returns a HardwareBuffer that contains the captured content.
-     * @hide
-     */
-    public static ScreenshotHardwareBuffer screenshotToBuffer(IBinder display, Rect sourceCrop,
-            int width, int height, boolean useIdentityTransform, int rotation) {
-        if (display == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-
-        DisplayCaptureArgs captureArgs = new DisplayCaptureArgs.Builder(display)
-                .setSourceCrop(sourceCrop)
-                .setSize(width, height)
-                .setUseIdentityTransform(useIdentityTransform)
-                .setRotation(rotation)
-                .build();
-
+    public static ScreenshotHardwareBuffer captureDisplay(DisplayCaptureArgs captureArgs) {
         return nativeCaptureDisplay(captureArgs);
-    }
-
-    /**
-     * Like screenshotToBuffer, but if the caller is AID_SYSTEM, allows
-     * for the capture of secure layers. This is used for the screen rotation
-     * animation where the system server takes screenshots but does
-     * not persist them or allow them to leave the server. However in other
-     * cases in the system server, we mostly want to omit secure layers
-     * like when we take a screenshot on behalf of the assistant.
-     *
-     * @hide
-     */
-    public static ScreenshotHardwareBuffer screenshotToBufferWithSecureLayersUnsafe(IBinder display,
-            Rect sourceCrop, int width, int height, boolean useIdentityTransform,
-            int rotation) {
-        if (display == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-
-        DisplayCaptureArgs captureArgs = new DisplayCaptureArgs.Builder(display)
-                .setSourceCrop(sourceCrop)
-                .setSize(width, height)
-                .setUseIdentityTransform(useIdentityTransform)
-                .setRotation(rotation)
-                .setCaptureSecureLayers(true)
-                .build();
-
-        return nativeCaptureDisplay(captureArgs);
-    }
-
-    private static void rotateCropForSF(Rect crop, int rot) {
-        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-            int tmp = crop.top;
-            crop.top = crop.left;
-            crop.left = tmp;
-            tmp = crop.right;
-            crop.right = crop.bottom;
-            crop.bottom = tmp;
-        }
     }
 
     /**

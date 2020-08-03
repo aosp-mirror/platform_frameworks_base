@@ -4063,9 +4063,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");
 
         // Send invalid rect and no width and height since it will screenshot the entire display.
-        Rect frame = new Rect(0, 0, -1, -1);
-        final Bitmap bitmap = SurfaceControl.screenshot(frame, 0, 0, inRotation,
-                mDisplay.getRotation());
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        final SurfaceControl.DisplayCaptureArgs captureArgs =
+                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                        .setUseIdentityTransform(inRotation)
+                        .build();
+        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                SurfaceControl.captureDisplay(captureArgs);
+        final Bitmap bitmap = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
             return null;
