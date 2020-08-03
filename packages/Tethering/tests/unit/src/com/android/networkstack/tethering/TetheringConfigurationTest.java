@@ -128,6 +128,8 @@ public class TetheringConfigurationTest {
                 .thenReturn(new String[0]);
         when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
                 false);
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_wifi_p2p_dedicated_ip))
+                .thenReturn(false);
         initializeBpfOffloadConfiguration(true, null /* unset */);
 
         mHasTelephonyManager = true;
@@ -412,5 +414,18 @@ public class TetheringConfigurationTest {
         when(mResourcesForSubId.getString(
                 R.string.config_mobile_hotspot_provision_response)).thenReturn(
                 PROVISIONING_APP_RESPONSE);
+    }
+
+    @Test
+    public void testEnableLegacyWifiP2PAddress() throws Exception {
+        final TetheringConfiguration defaultCfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        assertFalse(defaultCfg.shouldEnableWifiP2pDedicatedIp());
+
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_wifi_p2p_dedicated_ip))
+                .thenReturn(true);
+        final TetheringConfiguration testCfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        assertTrue(testCfg.shouldEnableWifiP2pDedicatedIp());
     }
 }
