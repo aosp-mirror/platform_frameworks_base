@@ -19,9 +19,9 @@ package com.android.settingslib.drawer;
 import android.os.Bundle;
 
 /**
- * A controller that manages event for master switch.
+ * A controller that manages event for Primary switch.
  */
-public abstract class MasterSwitchController extends SwitchController {
+public abstract class PrimarySwitchController extends SwitchController {
 
     @Override
     protected final MetaData getMetaData() {
