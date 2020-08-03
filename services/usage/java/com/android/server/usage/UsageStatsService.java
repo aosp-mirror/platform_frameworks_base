@@ -92,6 +92,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.BufferedReader;
@@ -291,27 +292,26 @@ public class UsageStatsService extends SystemService implements
     }
 
     @Override
-    public void onStartUser(UserInfo userInfo) {
+    public void onUserStarting(@NonNull TargetUser user) {
         // Create an entry in the user state map to indicate that the user has been started but
         // not necessarily unlocked. This will ensure that reported events are flushed to disk
         // event if the user is never unlocked (following the logic in #flushToDiskLocked)
-        mUserState.put(userInfo.id, null);
-        super.onStartUser(userInfo);
+        mUserState.put(user.getUserIdentifier(), null);
     }
 
     @Override
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
-        mHandler.obtainMessage(MSG_UNLOCKED_USER, userInfo.id, 0).sendToTarget();
-        super.onUnlockUser(userInfo);
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        mHandler.obtainMessage(MSG_UNLOCKED_USER, user.getUserIdentifier(), 0).sendToTarget();
     }
 
     @Override
-    public void onStopUser(@NonNull UserInfo userInfo) {
+    public void onUserStopping(@NonNull TargetUser user) {
+        final UserInfo userInfo = user.getUserInfo();
+
         synchronized (mLock) {
             // User was started but never unlocked so no need to report a user stopped event
             if (!mUserUnlockedStates.get(userInfo.id)) {
                 persistPendingEventsLocked(userInfo.id);
-                super.onStopUser(userInfo);
                 return;
             }
 
@@ -326,7 +326,6 @@ public class UsageStatsService extends SystemService implements
             mUserUnlockedStates.put(userInfo.id, false);
             mUserState.put(userInfo.id, null); // release the service (mainly for GC)
         }
-        super.onStopUser(userInfo);
     }
 
     private void onUserUnlocked(int userId) {

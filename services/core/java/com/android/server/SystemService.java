@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
-import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -263,26 +262,6 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onUserStarting(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStartUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStarting(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStartUser(@NonNull UserInfo userInfo) {
-        onStartUser(userInfo.id);
-    }
-
-    /**
      * Called when a new user is starting, for system services to initialize any per-user
      * state they maintain for running users.
      *
@@ -292,27 +271,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStarting(@NonNull TargetUser user) {
-        onStartUser(user.getUserInfo());
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserUnlocking(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onUnlockUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserUnlocking(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
-        onUnlockUser(userInfo.id);
     }
 
     /**
@@ -333,7 +291,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserUnlocking(@NonNull TargetUser user) {
-        onUnlockUser(user.getUserInfo());
     }
 
     /**
@@ -345,26 +302,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserUnlocked(@NonNull TargetUser user) {
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserSwitching(TargetUser, TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onSwitchUser(@UserIdInt int toUserId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserSwitching(TargetUser, TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onSwitchUser(@Nullable UserInfo from, @NonNull UserInfo to) {
-        onSwitchUser(to.id);
     }
 
     /**
@@ -382,28 +319,6 @@ public abstract class SystemService {
      * @param to the user switching to
      */
     public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
-        onSwitchUser((from == null ? null : from.getUserInfo()), to.getUserInfo());
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopping(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStopUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopping(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStopUser(@NonNull UserInfo user) {
-        onStopUser(user.id);
-
     }
 
     /**
@@ -420,27 +335,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStopping(@NonNull TargetUser user) {
-        onStopUser(user.getUserInfo());
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopped(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onCleanupUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopped(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onCleanupUser(@NonNull UserInfo user) {
-        onCleanupUser(user.id);
     }
 
     /**
@@ -454,7 +348,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStopped(@NonNull TargetUser user) {
-        onCleanupUser(user.getUserInfo());
     }
 
     /**

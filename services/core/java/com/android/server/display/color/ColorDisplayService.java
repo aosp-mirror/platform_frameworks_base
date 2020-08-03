@@ -77,6 +77,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -206,30 +207,24 @@ public final class ColorDisplayService extends SystemService {
     }
 
     @Override
-    public void onStartUser(int userHandle) {
-        super.onStartUser(userHandle);
-
+    public void onUserStarting(@NonNull TargetUser user) {
         if (mCurrentUser == UserHandle.USER_NULL) {
             final Message message = mHandler.obtainMessage(MSG_USER_CHANGED);
-            message.arg1 = userHandle;
+            message.arg1 = user.getUserIdentifier();
             mHandler.sendMessage(message);
         }
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
-        super.onSwitchUser(userHandle);
-
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         final Message message = mHandler.obtainMessage(MSG_USER_CHANGED);
-        message.arg1 = userHandle;
+        message.arg1 = to.getUserIdentifier();
         mHandler.sendMessage(message);
     }
 
     @Override
-    public void onStopUser(int userHandle) {
-        super.onStopUser(userHandle);
-
-        if (mCurrentUser == userHandle) {
+    public void onUserStopping(@NonNull TargetUser user) {
+        if (mCurrentUser == user.getUserIdentifier()) {
             final Message message = mHandler.obtainMessage(MSG_USER_CHANGED);
             message.arg1 = UserHandle.USER_NULL;
             mHandler.sendMessage(message);

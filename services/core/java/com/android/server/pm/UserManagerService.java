@@ -110,6 +110,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -553,9 +554,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void onStartUser(@UserIdInt int userId) {
+        public void onUserStarting(@NonNull TargetUser targetUser) {
             synchronized (mUms.mUsersLock) {
-                final UserData user = mUms.getUserDataLU(userId);
+                final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.startRealtime = SystemClock.elapsedRealtime();
                 }
@@ -563,9 +564,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(@UserIdInt int userId) {
+        public void onUserUnlocking(@NonNull TargetUser targetUser) {
             synchronized (mUms.mUsersLock) {
-                final UserData user = mUms.getUserDataLU(userId);
+                final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.unlockRealtime = SystemClock.elapsedRealtime();
                 }
@@ -573,9 +574,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void onStopUser(@UserIdInt int userId) {
+        public void onUserStopping(@NonNull TargetUser targetUser) {
             synchronized (mUms.mUsersLock) {
-                final UserData user = mUms.getUserDataLU(userId);
+                final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.startRealtime = 0;
                     user.unlockRealtime = 0;

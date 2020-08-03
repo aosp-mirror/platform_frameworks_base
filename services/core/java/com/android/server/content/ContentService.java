@@ -20,6 +20,7 @@ import static android.content.PermissionChecker.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.accounts.Account;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
@@ -75,6 +76,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.FileDescriptor;
@@ -124,26 +126,25 @@ public final class ContentService extends IContentService.Stub {
             mService.onBootPhase(phase);
         }
 
-
         @Override
-        public void onStartUser(int userHandle) {
-            mService.onStartUser(userHandle);
+        public void onUserStarting(@NonNull TargetUser user) {
+            mService.onStartUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mService.onUnlockUser(userHandle);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mService.onStopUser(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            mService.onStopUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onCleanupUser(int userHandle) {
+        public void onUserStopped(@NonNull TargetUser user) {
             synchronized (mService.mCache) {
-                mService.mCache.remove(userHandle);
+                mService.mCache.remove(user.getUserIdentifier());
             }
         }
     }

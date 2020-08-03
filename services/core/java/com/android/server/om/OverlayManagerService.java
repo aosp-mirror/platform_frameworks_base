@@ -31,6 +31,7 @@ import static android.os.Trace.traceEnd;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
@@ -68,6 +69,7 @@ import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.UserManagerService;
 
 import libcore.util.EmptyArray;
@@ -303,7 +305,11 @@ public final class OverlayManagerService extends SystemService {
     }
 
     @Override
-    public void onSwitchUser(final int newUserId) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        onSwitchUser(to.getUserIdentifier());
+    }
+
+    private void onSwitchUser(@UserIdInt int newUserId) {
         try {
             traceBegin(TRACE_TAG_RRO, "OMS#onSwitchUser " + newUserId);
             // ensure overlays in the settings are up-to-date, and propagate

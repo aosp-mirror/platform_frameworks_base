@@ -28,6 +28,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.annotation.CheckResult;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -84,6 +85,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -189,7 +191,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     @Override
-    public void onUnlockUser(int userHandle) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        int userHandle = user.getUserIdentifier();
         Set<Association> associations = readAllAssociations(userHandle);
         if (associations == null || associations.isEmpty()) {
             return;

@@ -15,6 +15,8 @@
  */
 package com.android.server.camera;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +45,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.ArrayList;
@@ -252,20 +255,20 @@ public class CameraServiceProxy extends SystemService
     }
 
     @Override
-    public void onStartUser(int userHandle) {
+    public void onUserStarting(@NonNull TargetUser user) {
         synchronized(mLock) {
             if (mEnabledCameraUsers == null) {
                 // Initialize cameraserver, or update cameraserver if we are recovering
                 // from a crash.
-                switchUserLocked(userHandle);
+                switchUserLocked(user.getUserIdentifier());
             }
         }
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         synchronized(mLock) {
-            switchUserLocked(userHandle);
+            switchUserLocked(to.getUserIdentifier());
         }
     }
 
