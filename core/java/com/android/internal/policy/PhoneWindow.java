@@ -35,6 +35,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BA
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -342,7 +343,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     static final RotationWatcher sRotationWatcher = new RotationWatcher();
 
     @UnsupportedAppUsage
-    public PhoneWindow(Context context) {
+    public PhoneWindow(@UiContext Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
@@ -352,7 +353,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /**
      * Constructor for main window of an activity.
      */
-    public PhoneWindow(Context context, Window preservedWindow,
+    public PhoneWindow(@UiContext Context context, Window preservedWindow,
             ActivityConfigCallback activityConfigCallback) {
         this(context);
         // Only main activity windows use decor context, all the other windows depend on whatever

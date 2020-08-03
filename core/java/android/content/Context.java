@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
+import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -33,6 +34,7 @@ import android.annotation.StyleableRes;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
@@ -3750,6 +3752,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @see android.view.WindowManager
      */
+    @UiContext
     public static final String WINDOW_SERVICE = "window";
 
     /**
@@ -3760,6 +3763,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @see android.view.LayoutInflater
      */
+    @UiContext
     public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
 
     /**
@@ -3932,6 +3936,7 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      */
+    @UiContext
     public static final String WALLPAPER_SERVICE = "wallpaper";
 
     /**
@@ -5789,6 +5794,7 @@ public abstract class Context {
      *
      * @return A {@link Context} for the display.
      */
+    @DisplayContext
     public abstract Context createDisplayContext(@NonNull Display display);
 
     /**
@@ -5853,7 +5859,9 @@ public abstract class Context {
      * the current number of window contexts without adding any view by
      * {@link WindowManager#addView} <b>exceeds five</b>.
      */
-    public @NonNull Context createWindowContext(@WindowType int type, @Nullable Bundle options)  {
+    @UiContext
+    @NonNull
+    public Context createWindowContext(@WindowType int type, @Nullable Bundle options)  {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

@@ -32,6 +32,7 @@ import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -258,6 +259,7 @@ import java.util.Collections;
  * @attr ref android.R.styleable#InputMethodService_imeExtractEnterAnimation
  * @attr ref android.R.styleable#InputMethodService_imeExtractExitAnimation
  */
+@UiContext
 public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
     static final boolean DEBUG = false;

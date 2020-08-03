@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -94,6 +95,7 @@ public abstract class LayoutInflater {
      * {@hide}
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UiContext
     protected final Context mContext;
 
     // these are optional, set by the caller
@@ -277,7 +279,7 @@ public abstract class LayoutInflater {
     /**
      * Obtains the LayoutInflater from the given context.
      */
-    public static LayoutInflater from(Context context) {
+    public static LayoutInflater from(@UiContext Context context) {
         LayoutInflater LayoutInflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (LayoutInflater == null) {
