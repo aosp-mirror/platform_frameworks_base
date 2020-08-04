@@ -345,10 +345,10 @@ key 377   TV
 # key 395 "KEY_LIST"
 # key 396 "KEY_MEMO"
 key 397   CALENDAR
-# key 398 "KEY_RED"
-# key 399 "KEY_GREEN"
-# key 400 "KEY_YELLOW"
-# key 401 "KEY_BLUE"
+key 398   PROG_RED
+key 399   PROG_GREEN
+key 400   PROG_YELLOW
+key 401   PROG_BLUE
 key 402   CHANNEL_UP
 key 403   CHANNEL_DOWN
 # key 404 "KEY_FIRST"
