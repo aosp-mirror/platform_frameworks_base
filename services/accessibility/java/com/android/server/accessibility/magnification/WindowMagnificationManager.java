@@ -90,7 +90,7 @@ public class WindowMagnificationManager implements
      */
     public void setConnection(@Nullable IWindowMagnificationConnection connection) {
         synchronized (mLock) {
-            //Reset connectionWrapper.
+            // Reset connectionWrapper.
             if (mConnectionWrapper != null) {
                 mConnectionWrapper.setConnectionCallback(null);
                 if (mConnectionCallback != null) {
@@ -302,7 +302,8 @@ public class WindowMagnificationManager implements
      * @param displayId The logical display id.
      * @return {@code true} if the window magnification is enabled.
      */
-    boolean isWindowMagnifierEnabled(int displayId) {
+    @VisibleForTesting
+    public boolean isWindowMagnifierEnabled(int displayId) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
@@ -398,6 +399,38 @@ public class WindowMagnificationManager implements
     }
 
     /**
+     * Returns the screen-relative X coordinate of the center of the magnified bounds.
+     *
+     * @param displayId The logical display id
+     * @return the X coordinate. {@link Float#NaN} if the window magnification is not enabled.
+     */
+    float getCenterX(int displayId) {
+        synchronized (mLock) {
+            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                return Float.NaN;
+            }
+            return magnifier.getCenterX();
+        }
+    }
+
+    /**
+     * Returns the screen-relative Y coordinate of the center of the magnified bounds.
+     *
+     * @param displayId The logical display id
+     * @return the Y coordinate. {@link Float#NaN} if the window magnification is not enabled.
+     */
+    float getCenterY(int displayId) {
+        synchronized (mLock) {
+            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                return Float.NaN;
+            }
+            return magnifier.getCenterY();
+        }
+    }
+
+    /**
      * Creates the windowMagnifier based on the specified display and stores it.
      *
      * @param displayId logical display id.
@@ -436,11 +469,13 @@ public class WindowMagnificationManager implements
 
         @Override
         public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
-            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
-            if (magnifier == null) {
-                magnifier = createWindowMagnifier(displayId);
+            synchronized (mLock) {
+                WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+                if (magnifier == null) {
+                    magnifier = createWindowMagnifier(displayId);
+                }
+                magnifier.onSourceBoundsChanged(sourceBounds);
             }
-            magnifier.onSourceBoundsChanged(sourceBounds);
         }
 
         @Override
@@ -469,9 +504,9 @@ public class WindowMagnificationManager implements
         private boolean mEnabled;
 
         private final WindowMagnificationManager mWindowMagnificationManager;
-        //Records the bounds of window magnification.
+        // Records the bounds of window magnification.
         private final Rect mBounds = new Rect();
-        //The magnified bounds on the screen.
+        // The magnified bounds on the screen.
         private final Rect mSourceBounds = new Rect();
 
         WindowMagnifier(int displayId, WindowMagnificationManager windowMagnificationManager) {
@@ -553,8 +588,19 @@ public class WindowMagnificationManager implements
             mEnabled = false;
         }
 
+        @GuardedBy("mLock")
         public void onSourceBoundsChanged(Rect sourceBounds) {
             mSourceBounds.set(sourceBounds);
+        }
+
+        @GuardedBy("mLock")
+        float getCenterX() {
+            return mEnabled ? mSourceBounds.exactCenterX() : Float.NaN;
+        }
+
+        @GuardedBy("mLock")
+        float getCenterY() {
+            return mEnabled ? mSourceBounds.exactCenterY() : Float.NaN;
         }
     }
 

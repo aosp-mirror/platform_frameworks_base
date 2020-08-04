@@ -25,6 +25,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -43,11 +44,23 @@ class MockWindowMagnificationConnection {
     public static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     private final IWindowMagnificationConnection mConnection;
     private final Binder mBinder;
+    private final boolean mSuspendCallback;
+    private boolean mHasPendingCallback = false;
+    private boolean mWindowMagnificationEnabled = false;
     private IBinder.DeathRecipient mDeathRecipient;
     private IWindowMagnificationConnectionCallback mIMirrorWindowCallback;
+
     private Rect mMirrorWindowFrame = new Rect(0, 0, 500, 500);
+    private float mScale = 2.0f;
+    private Rect mSourceBounds = new Rect();
+    private IRemoteMagnificationAnimationCallback mAnimationCallback;
 
     MockWindowMagnificationConnection() throws RemoteException {
+        this(false);
+    }
+
+    MockWindowMagnificationConnection(boolean suspendCallback) throws RemoteException {
+        mSuspendCallback = suspendCallback;
         mConnection = mock(IWindowMagnificationConnection.class);
         mBinder = mock(Binder.class);
         when(mConnection.asBinder()).thenReturn(mBinder);
@@ -66,36 +79,55 @@ class MockWindowMagnificationConnection {
     }
 
     private void stubConnection() throws RemoteException {
+        stubEnableWindowMagnification();
+        stubDisableWindowMagnification();
+    }
+
+    private void stubEnableWindowMagnification() throws RemoteException {
         doAnswer((invocation) -> {
             final int displayId = invocation.getArgument(0);
             if (displayId != TEST_DISPLAY) {
                 throw new IllegalArgumentException("only support default display :" + displayId);
             }
+            mWindowMagnificationEnabled = true;
+            final float scale = invocation.getArgument(1);
+            mScale = Float.isNaN(scale) ? mScale : scale;
             computeMirrorWindowFrame(invocation.getArgument(2), invocation.getArgument(3));
-            final IRemoteMagnificationAnimationCallback callback = invocation.getArgument(4);
-            if (callback != null) {
-                callback.onResult(true);
-            }
-            if (mIMirrorWindowCallback != null) {
-                mIMirrorWindowCallback.onWindowMagnifierBoundsChanged(TEST_DISPLAY,
-                        mMirrorWindowFrame);
+            setAnimationCallback(invocation.getArgument(4));
+            computeSourceBounds();
+            mHasPendingCallback = true;
+            if (!mSuspendCallback) {
+                invokeCallbacksInternal(true);
             }
             return null;
         }).when(mConnection).enableWindowMagnification(anyInt(), anyFloat(), anyFloat(), anyFloat(),
                 nullable(IRemoteMagnificationAnimationCallback.class));
+    }
 
+    private void stubDisableWindowMagnification() throws RemoteException {
         doAnswer((invocation) -> {
             final int displayId = invocation.getArgument(0);
             if (displayId != TEST_DISPLAY) {
                 throw new IllegalArgumentException("only support default display :" + displayId);
             }
-            final IRemoteMagnificationAnimationCallback callback = invocation.getArgument(1);
-            if (callback != null) {
-                callback.onResult(true);
+            setAnimationCallback(invocation.getArgument(1));
+            mHasPendingCallback = true;
+            if (!mSuspendCallback) {
+                invokeCallbacksInternal(true);
             }
             return null;
         }).when(mConnection).disableWindowMagnification(anyInt(),
                 nullable(IRemoteMagnificationAnimationCallback.class));
+    }
+
+    private void computeSourceBounds() {
+        final int halfWidth = mMirrorWindowFrame.width() / 2;
+        final int halfHeight = mMirrorWindowFrame.height() / 2;
+        final int left = mMirrorWindowFrame.left + (halfWidth - (int) (halfWidth / mScale));
+        final int right = mMirrorWindowFrame.right - (halfWidth - (int) (halfWidth / mScale));
+        final int top = mMirrorWindowFrame.top + (halfHeight - (int) (halfHeight / mScale));
+        final int bottom = mMirrorWindowFrame.bottom - (halfHeight - (int) (halfHeight / mScale));
+        mSourceBounds.set(left, top, right, bottom);
     }
 
     private void computeMirrorWindowFrame(float centerX, float centerY) {
@@ -104,6 +136,13 @@ class MockWindowMagnificationConnection {
         final float offsetY = Float.isNaN(centerY) ? 0
                 : centerY - mMirrorWindowFrame.exactCenterY();
         mMirrorWindowFrame.offset((int) offsetX, (int) offsetY);
+    }
+
+    private void sendAnimationEndCallbackIfNeeded(boolean success) throws RemoteException {
+        if (mAnimationCallback != null) {
+            mAnimationCallback.onResult(success);
+            mAnimationCallback = null;
+        }
     }
 
     IWindowMagnificationConnection getConnection() {
@@ -122,8 +161,38 @@ class MockWindowMagnificationConnection {
         return mIMirrorWindowCallback;
     }
 
-    public Rect getMirrorWindowFrame() {
+    Rect getMirrorWindowFrame() {
         return new Rect(mMirrorWindowFrame);
+    }
+
+    void invokeCallbacks() throws RemoteException {
+        if (!mSuspendCallback) {
+            throw new IllegalStateException("Invoke callbacks automatically");
+        }
+        invokeCallbacksInternal(true);
+    }
+
+    private void invokeCallbacksInternal(boolean success) throws RemoteException {
+        if (!mHasPendingCallback) {
+            throw new IllegalStateException("There is no any pending callbacks");
+        }
+        if (mWindowMagnificationEnabled && mIMirrorWindowCallback != null) {
+            mIMirrorWindowCallback.onWindowMagnifierBoundsChanged(TEST_DISPLAY,
+                    mMirrorWindowFrame);
+            mIMirrorWindowCallback.onSourceBoundsChanged(TEST_DISPLAY,
+                    mSourceBounds);
+        }
+        sendAnimationEndCallbackIfNeeded(success);
+        mHasPendingCallback = false;
+    }
+
+    private void setAnimationCallback(
+            @Nullable IRemoteMagnificationAnimationCallback animationCallback)
+            throws RemoteException {
+        if (mAnimationCallback != null) {
+            invokeCallbacksInternal(false);
+        }
+        mAnimationCallback = animationCallback;
     }
 }
 
