@@ -1284,10 +1284,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             int N = mSessions.size();
             for (int i = 0; i < N; i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                if (session.isStagedAndInTerminalState()) {
+
+                // Do not print finalized staged session as active install sessions
+                final PackageInstallerSession rootSession = session.hasParentSessionId()
+                        ? getSession(session.getParentSessionId())
+                        : session;
+                if (rootSession.isStagedAndInTerminalState()) {
                     finalizedSessions.add(session);
                     continue;
                 }
+
                 session.dump(pw);
                 pw.println();
             }
