@@ -39,7 +39,7 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
     protected RemovableListenerRegistration(String tag, @Nullable TRequest request,
             CallerIdentity callerIdentity, TListener listener) {
         super(request, callerIdentity, listener);
-        mTag = tag;
+        mTag = Objects.requireNonNull(tag);
     }
 
     /**

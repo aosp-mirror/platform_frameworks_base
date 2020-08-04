@@ -16,17 +16,21 @@
 
 package com.android.server.location.gnss;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.location.LocationManagerInternal;
+import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
 import android.util.ArraySet;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.listeners.BinderListenerRegistration;
 import com.android.server.location.listeners.ListenerMultiplexer;
@@ -161,8 +165,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     protected final LocationManagerInternal mLocationManagerInternal;
 
     private final UserListener mUserChangedListener = this::onUserChanged;
-    private final SettingsHelper.UserSettingChangedListener mLocationEnabledChangedListener =
-            this::onLocationEnabledChanged;
+    private final ProviderEnabledListener mProviderEnabledChangedListener =
+            this::onProviderEnabledChanged;
     private final SettingsHelper.GlobalSettingChangedListener
             mBackgroundThrottlePackageWhitelistChangedListener =
             this::onBackgroundThrottlePackageWhitelistChanged;
@@ -233,12 +237,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         CallerIdentity identity = registration.getIdentity();
-        // TODO: this should be checking if the gps provider is enabled, not if location is enabled,
-        //  but this is the same for now.
         return registration.isPermitted()
                 && (registration.isForeground() || isBackgroundRestrictionExempt(identity))
                 && mUserInfoHelper.isCurrentUserId(identity.getUserId())
-                && mSettingsHelper.isLocationEnabled(identity.getUserId())
+                && mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
+                identity.getUserId())
                 && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
                 identity.getPackageName());
     }
@@ -263,7 +266,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         mUserInfoHelper.addListener(mUserChangedListener);
-        mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
+        mLocationManagerInternal.addProviderEnabledListener(GPS_PROVIDER,
+                mProviderEnabledChangedListener);
         mSettingsHelper.addOnBackgroundThrottlePackageWhitelistChangedListener(
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
@@ -279,7 +283,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         mUserInfoHelper.removeListener(mUserChangedListener);
-        mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
+        mLocationManagerInternal.removeProviderEnabledListener(GPS_PROVIDER,
+                mProviderEnabledChangedListener);
         mSettingsHelper.removeOnBackgroundThrottlePackageWhitelistChangedListener(
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
@@ -294,7 +299,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
     }
 
-    private void onLocationEnabledChanged(int userId) {
+    private void onProviderEnabledChanged(String provider, int userId, boolean enabled) {
+        Preconditions.checkState(GPS_PROVIDER.equals(provider));
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 

@@ -241,7 +241,6 @@ public class MockableLocationProvider extends AbstractLocationProvider {
             if (getState().properties != null) {
                 pw.println("properties=" + getState().properties);
             }
-            pw.println("request=" + mRequest);
         }
 
         if (provider != null) {
