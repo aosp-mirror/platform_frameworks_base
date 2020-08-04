@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.sensors;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -80,6 +81,8 @@ public class ProximityCheckTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
 
         assertFalse(mFakeProximitySensor.isRegistered());
+        assertEquals(1, mTestableCallback.mNumCalls);
+        assertNull(mTestableCallback.mLastResult);
     }
 
     @Test
@@ -110,9 +113,12 @@ public class ProximityCheckTest extends SysuiTestCase {
 
     private static class TestableCallback implements Consumer<Boolean> {
         Boolean mLastResult;
+        int mNumCalls = 0;
+
         @Override
         public void accept(Boolean result) {
             mLastResult = result;
+            mNumCalls++;
         }
     }
 }
