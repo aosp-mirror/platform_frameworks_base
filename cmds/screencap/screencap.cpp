@@ -182,16 +182,17 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
-    ui::Dataspace outDataspace;
-    sp<GraphicBuffer> outBuffer;
-
-    status_t result = ScreenshotClient::capture(*displayId, &outDataspace, &outBuffer);
+    ScreenCaptureResults captureResults;
+    status_t result = ScreenshotClient::captureDisplay(*displayId, captureResults);
     if (result != NO_ERROR) {
         close(fd);
         return 1;
     }
 
-    result = outBuffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
+    ui::Dataspace dataspace = captureResults.capturedDataspace;
+    sp<GraphicBuffer> buffer = captureResults.buffer;
+
+    result = buffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
     if (base == nullptr || result != NO_ERROR) {
         String8 reason;
@@ -207,13 +208,13 @@ int main(int argc, char** argv)
 
     if (png) {
         AndroidBitmapInfo info;
-        info.format = flinger2bitmapFormat(outBuffer->getPixelFormat());
+        info.format = flinger2bitmapFormat(buffer->getPixelFormat());
         info.flags = ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
-        info.width = outBuffer->getWidth();
-        info.height = outBuffer->getHeight();
-        info.stride = outBuffer->getStride() * bytesPerPixel(outBuffer->getPixelFormat());
+        info.width = buffer->getWidth();
+        info.height = buffer->getHeight();
+        info.stride = buffer->getStride() * bytesPerPixel(buffer->getPixelFormat());
 
-        int result = AndroidBitmap_compress(&info, static_cast<int32_t>(outDataspace), base,
+        int result = AndroidBitmap_compress(&info, static_cast<int32_t>(dataspace), base,
                                             ANDROID_BITMAP_COMPRESS_FORMAT_PNG, 100, &fd,
                                             [](void* fdPtr, const void* data, size_t size) -> bool {
                                                 int bytesWritten = write(*static_cast<int*>(fdPtr),
@@ -229,11 +230,11 @@ int main(int argc, char** argv)
             notifyMediaScanner(fn);
         }
     } else {
-        uint32_t w = outBuffer->getWidth();
-        uint32_t h = outBuffer->getHeight();
-        uint32_t s = outBuffer->getStride();
-        uint32_t f = outBuffer->getPixelFormat();
-        uint32_t c = dataSpaceToInt(outDataspace);
+        uint32_t w = buffer->getWidth();
+        uint32_t h = buffer->getHeight();
+        uint32_t s = buffer->getStride();
+        uint32_t f = buffer->getPixelFormat();
+        uint32_t c = dataSpaceToInt(dataspace);
 
         write(fd, &w, 4);
         write(fd, &h, 4);

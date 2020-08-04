@@ -53,7 +53,7 @@ public final class GnssAntennaInfo implements Parcelable {
      * Class containing information about the antenna phase center offset (PCO). PCO is defined with
      * respect to the origin of the Android sensor coordinate system, e.g., center of primary screen
      * for mobiles - see sensor or form factor documents for details. Uncertainties are reported
-     *  to 1-sigma.
+     * to 1-sigma.
      */
     public static final class PhaseCenterOffset implements Parcelable {
         private final double mOffsetXMm;
@@ -95,31 +95,55 @@ public final class GnssAntennaInfo implements Parcelable {
                     }
                 };
 
+        /**
+         * Returns the x-axis offset of the phase center from the origin of the Android sensor
+         * coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getXOffsetMm() {
             return mOffsetXMm;
         }
 
+        /**
+         * Returns the 1-sigma uncertainty of the x-axis offset of the phase center from the origin
+         * of the Android sensor coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getXOffsetUncertaintyMm() {
             return mOffsetXUncertaintyMm;
         }
 
+        /**
+         * Returns the y-axis offset of the phase center from the origin of the Android sensor
+         * coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getYOffsetMm() {
             return mOffsetYMm;
         }
 
+        /**
+         * Returns the 1-sigma uncertainty of the y-axis offset of the phase center from the origin
+         * of the Android sensor coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getYOffsetUncertaintyMm() {
             return mOffsetYUncertaintyMm;
         }
 
+        /**
+         * Returns the z-axis offset of the phase center from the origin of the Android sensor
+         * coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getZOffsetMm() {
             return mOffsetZMm;
         }
 
+        /**
+         * Returns the 1-sigma uncertainty of the z-axis offset of the phase center from the origin
+         * of the Android sensor coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getZOffsetUncertaintyMm() {
             return mOffsetZUncertaintyMm;
@@ -165,7 +189,7 @@ public final class GnssAntennaInfo implements Parcelable {
      * at 180 degrees. They are separated by deltaPhi, the regular spacing between zenith angles,
      * i.e., deltaPhi = 180 / (number of columns - 1).
      */
-    public static final class SphericalCorrections implements Parcelable{
+    public static final class SphericalCorrections implements Parcelable {
         private final double[][] mCorrections;
         private final double[][] mCorrectionUncertainties;
         private final double mDeltaTheta;
@@ -296,10 +320,10 @@ public final class GnssAntennaInfo implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mNumRows);
             dest.writeInt(mNumColumns);
-            for (double[] row: mCorrections) {
+            for (double[] row : mCorrections) {
                 dest.writeDoubleArray(row);
             }
-            for (double[] row: mCorrectionUncertainties) {
+            for (double[] row : mCorrectionUncertainties) {
                 dest.writeDoubleArray(row);
             }
         }
@@ -340,6 +364,7 @@ public final class GnssAntennaInfo implements Parcelable {
 
         /**
          * Set antenna carrier frequency (MHz).
+         *
          * @param carrierFrequencyMHz antenna carrier frequency (MHz)
          * @return Builder builder object
          */
@@ -351,6 +376,7 @@ public final class GnssAntennaInfo implements Parcelable {
 
         /**
          * Set antenna phase center offset.
+         *
          * @param phaseCenterOffset phase center offset object
          * @return Builder builder object
          */
@@ -362,6 +388,7 @@ public final class GnssAntennaInfo implements Parcelable {
 
         /**
          * Set phase center variation corrections.
+         *
          * @param phaseCenterVariationCorrections phase center variation corrections object
          * @return Builder builder object
          */
@@ -374,6 +401,7 @@ public final class GnssAntennaInfo implements Parcelable {
 
         /**
          * Set signal gain corrections.
+         *
          * @param signalGainCorrections signal gain corrections object
          * @return Builder builder object
          */
@@ -386,6 +414,7 @@ public final class GnssAntennaInfo implements Parcelable {
 
         /**
          * Build GnssAntennaInfo object.
+         *
          * @return instance of GnssAntennaInfo
          */
         @NonNull
@@ -400,47 +429,65 @@ public final class GnssAntennaInfo implements Parcelable {
         return mCarrierFrequencyMHz;
     }
 
+    /**
+     * Returns a {@link PhaseCenterOffset} object encapsulating the phase center offset and
+     * corresponding uncertainties in millimeters.
+     *
+     * @return {@link PhaseCenterOffset}
+     */
     @NonNull
     public PhaseCenterOffset getPhaseCenterOffset() {
         return mPhaseCenterOffset;
     }
 
+    /**
+     * Returns a {@link SphericalCorrections} object encapsulating the phase center variation
+     * corrections and corresponding uncertainties in millimeters.
+     *
+     * @return phase center variation corrections as {@link SphericalCorrections}
+     */
     @Nullable
     public SphericalCorrections getPhaseCenterVariationCorrections() {
         return mPhaseCenterVariationCorrections;
     }
 
+    /**
+     * Returns a {@link SphericalCorrections} object encapsulating the signal gain
+     * corrections and corresponding uncertainties in dBi.
+     *
+     * @return signal gain corrections as {@link SphericalCorrections}
+     */
     @Nullable
     public SphericalCorrections getSignalGainCorrections() {
         return mSignalGainCorrections;
     }
 
-    public static final @android.annotation.NonNull
-                    Creator<GnssAntennaInfo> CREATOR = new Creator<GnssAntennaInfo>() {
-                            @Override
-                            public GnssAntennaInfo createFromParcel(Parcel in) {
-                                double carrierFrequencyMHz = in.readDouble();
+    public static final @android.annotation.NonNull Creator<GnssAntennaInfo> CREATOR =
+            new Creator<GnssAntennaInfo>() {
+                @Override
+                public GnssAntennaInfo createFromParcel(Parcel in) {
+                    double carrierFrequencyMHz = in.readDouble();
 
-                                ClassLoader classLoader = getClass().getClassLoader();
-                                PhaseCenterOffset phaseCenterOffset =
-                                        in.readParcelable(classLoader);
-                                SphericalCorrections phaseCenterVariationCorrections =
-                                        in.readParcelable(classLoader);
-                                SphericalCorrections signalGainCorrections =
-                                        in.readParcelable(classLoader);
+                    ClassLoader classLoader = getClass().getClassLoader();
+                    PhaseCenterOffset phaseCenterOffset =
+                            in.readParcelable(classLoader);
+                    SphericalCorrections phaseCenterVariationCorrections =
+                            in.readParcelable(classLoader);
+                    SphericalCorrections signalGainCorrections =
+                            in.readParcelable(classLoader);
 
-                                return new GnssAntennaInfo(
-                                            carrierFrequencyMHz,
-                                            phaseCenterOffset,
-                                            phaseCenterVariationCorrections,
-                                            signalGainCorrections);
-                            }
+                    return new GnssAntennaInfo(
+                            carrierFrequencyMHz,
+                            phaseCenterOffset,
+                            phaseCenterVariationCorrections,
+                            signalGainCorrections);
+                }
 
-                            @Override
-                            public GnssAntennaInfo[] newArray(int size) {
-                                return new GnssAntennaInfo[size];
-                            }
-                    };
+                @Override
+                public GnssAntennaInfo[] newArray(int size) {
+                    return new GnssAntennaInfo[size];
+                }
+            };
 
     @Override
     public int describeContents() {

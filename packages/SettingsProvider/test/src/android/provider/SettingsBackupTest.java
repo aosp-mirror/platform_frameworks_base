@@ -389,6 +389,7 @@ public class SettingsBackupTest {
                     Settings.Global.NITZ_UPDATE_DIFF,
                     Settings.Global.NITZ_UPDATE_SPACING,
                     Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
+                    Settings.Global.NOTIFICATION_FEEDBACK_ENABLED,
                     Settings.Global.NR_NSA_TRACKING_SCREEN_OFF_MODE,
                     Settings.Global.NSD_ON,
                     Settings.Global.NTP_SERVER,

@@ -20,6 +20,7 @@ import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import java.lang.ref.Reference;
  * @see Context#createWindowContext(int, Bundle)
  * @hide
  */
+@UiContext
 public class WindowContext extends ContextWrapper {
     private final WindowManagerImpl mWindowManager;
     private final IWindowManager mWms;

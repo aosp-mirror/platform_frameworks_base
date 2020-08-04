@@ -193,7 +193,7 @@ public class PipTouchHandler {
 
         @Override
         public void onPipExpand() {
-            mMotionHelper.expandPipToFullscreen();
+            mMotionHelper.expandLeavePip();
         }
 
         @Override
@@ -991,7 +991,7 @@ public class PipTouchHandler {
                 // Expand to fullscreen if this is a double tap
                 // the PiP should be frozen until the transition ends
                 setTouchEnabled(false);
-                mMotionHelper.expandPipToFullscreen();
+                mMotionHelper.expandLeavePip();
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
                     // User has stalled long enough for this not to be a drag or a double tap, just

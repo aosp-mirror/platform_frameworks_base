@@ -8728,16 +8728,6 @@ public final class Settings {
                 = "bubble_important_conversations";
 
         /**
-         * When enabled, notifications the notification assistant service has modified will show an
-         * indicator. When tapped, this indicator will describe the adjustment made and solicit
-         * feedback. This flag will also add a "automatic" option to the long press menu.
-         *
-         * The value 1 - enable, 0 - disable
-         * @hide
-         */
-        public static final String NOTIFICATION_FEEDBACK_ENABLED = "notification_feedback_enabled";
-
-        /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
          * swipe).
          *
@@ -14045,6 +14035,16 @@ public final class Settings {
          */
         public static final String NOTIFICATION_SNOOZE_OPTIONS =
                 "notification_snooze_options";
+
+        /**
+         * When enabled, notifications the notification assistant service has modified will show an
+         * indicator. When tapped, this indicator will describe the adjustment made and solicit
+         * feedback. This flag will also add a "automatic" option to the long press menu.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String NOTIFICATION_FEEDBACK_ENABLED = "notification_feedback_enabled";
 
         /**
          * Settings key for the ratio of notification dismissals to notification views - one of the

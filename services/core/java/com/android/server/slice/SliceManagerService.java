@@ -26,6 +26,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 
 import android.Manifest.permission;
+import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceSpec;
@@ -59,10 +60,10 @@ import android.util.Xml.Encoding;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -615,13 +616,13 @@ public class SliceManagerService extends ISliceManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mService.onUnlockUser(userHandle);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mService.onStopUser(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            mService.onStopUser(user.getUserIdentifier());
         }
     }
 

@@ -66,6 +66,7 @@ import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -118,14 +119,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         }
 
         @Override
-        public void onStartUser(int userId) {
-            processAnyPendingWork(userId);
+        public void onUserStarting(@NonNull TargetUser user) {
+            processAnyPendingWork(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(int userId) {
+        public void onUserUnlocking(@NonNull TargetUser user) {
             // Rebind if we failed earlier due to locked encrypted user
-            processAnyPendingWork(userId);
+            processAnyPendingWork(user.getUserIdentifier());
         }
 
         private void processAnyPendingWork(int userId) {
@@ -135,7 +136,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         }
 
         @Override
-        public void onStopUser(int userId) {
+        public void onUserStopping(@NonNull TargetUser user) {
+            int userId = user.getUserIdentifier();
+
             synchronized (mManagerService.mLock) {
                 UserState userState = mManagerService.peekUserStateLocked(userId);
                 if (userState != null) {

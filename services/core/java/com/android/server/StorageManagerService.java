@@ -55,6 +55,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -152,6 +153,7 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.Installer;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
@@ -259,23 +261,23 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void onSwitchUser(int userHandle) {
-            mStorageManagerService.mCurrentUserId = userHandle;
+        public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+            mStorageManagerService.mCurrentUserId = to.getUserIdentifier();
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mStorageManagerService.onUnlockUser(userHandle);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mStorageManagerService.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onCleanupUser(int userHandle) {
-            mStorageManagerService.onCleanupUser(userHandle);
+        public void onUserStopped(@NonNull TargetUser user) {
+            mStorageManagerService.onCleanupUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mStorageManagerService.onStopUser(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            mStorageManagerService.onStopUser(user.getUserIdentifier());
         }
 
         @Override

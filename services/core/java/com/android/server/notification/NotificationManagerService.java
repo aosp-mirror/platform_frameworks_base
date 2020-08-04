@@ -261,6 +261,7 @@ import com.android.server.EventLogTags;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.UiThread;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -322,7 +323,7 @@ public class NotificationManagerService extends SystemService {
     static final boolean DEBUG_INTERRUPTIVENESS = SystemProperties.getBoolean(
             "debug.notification.interruptiveness", false);
 
-    static final int MAX_PACKAGE_NOTIFICATIONS = 25;
+    static final int MAX_PACKAGE_NOTIFICATIONS = 50;
     static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 5f;
 
     // message codes
@@ -2351,11 +2352,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @Override
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
         mHandler.post(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryUnlockUser");
             try {
-                mHistoryManager.onUserUnlocked(userInfo.id);
+                mHistoryManager.onUserUnlocked(user.getUserIdentifier());
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
@@ -2363,11 +2364,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @Override
-    public void onStopUser(@NonNull UserInfo userInfo) {
+    public void onUserStopping(@NonNull TargetUser user) {
         mHandler.post(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryStopUser");
             try {
-                mHistoryManager.onUserStopped(userInfo.id);
+                mHistoryManager.onUserStopped(user.getUserIdentifier());
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }

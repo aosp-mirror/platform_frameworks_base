@@ -89,13 +89,10 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
-
-    private static native ScreenshotHardwareBuffer nativeScreenshot(IBinder displayToken,
-            Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
-            boolean captureSecureLayers);
-    private static native ScreenshotHardwareBuffer nativeCaptureLayers(IBinder displayToken,
-            long layerObject, Rect sourceCrop, float frameScale, long[] excludeLayerObjects,
-            int format);
+    private static native ScreenshotHardwareBuffer nativeCaptureDisplay(
+            DisplayCaptureArgs captureArgs);
+    private static native ScreenshotHardwareBuffer nativeCaptureLayers(
+            LayerCaptureArgs captureArgs);
     private static native long nativeMirrorSurface(long mirrorOfObject);
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -572,7 +569,8 @@ public final class SurfaceControl implements Parcelable {
         * Create ScreenshotHardwareBuffer from an existing HardwareBuffer object.
         * @param hardwareBuffer The existing HardwareBuffer object
         * @param namedColorSpace Integer value of a named color space {@link ColorSpace.Named}
-        * @param containsSecureLayer Indicates whether this graphic buffer contains captured contents
+        * @param containsSecureLayers Indicates whether this graphic buffer contains captured
+        *                             contents
         *        of secure layers, in which case the screenshot should not be persisted.
         */
         private static ScreenshotHardwareBuffer createFromNative(HardwareBuffer hardwareBuffer,
@@ -662,14 +660,14 @@ public final class SurfaceControl implements Parcelable {
             /**
              * Each sub class should return itself to allow the builder to chain properly
              */
-            public abstract T getThis();
+            abstract T getThis();
         }
     }
 
     /**
      * The arguments class used to make display capture requests.
      *
-     * @see #nativeScreenshot(IBinder, Rect, int, int, boolean, int, boolean)
+     * @see #nativeCaptureDisplay(DisplayCaptureArgs)
      * @hide
      */
     public static class DisplayCaptureArgs extends CaptureArgs {
@@ -759,7 +757,7 @@ public final class SurfaceControl implements Parcelable {
             }
 
             @Override
-            public Builder getThis() {
+            Builder getThis() {
                 return this;
             }
         }
@@ -768,7 +766,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * The arguments class used to make layer capture requests.
      *
-     * @see #nativeCaptureLayers(IBinder, long, Rect, float, long[], int)
+     * @see #nativeCaptureLayers(LayerCaptureArgs)
      * @hide
      */
     public static class LayerCaptureArgs extends CaptureArgs {
@@ -780,9 +778,13 @@ public final class SurfaceControl implements Parcelable {
             super(builder);
             mChildrenOnly = builder.mChildrenOnly;
             mNativeLayer = builder.mLayer.mNativeObject;
-            mNativeExcludeLayers = new long[builder.mExcludeLayers.length];
-            for (int i = 0; i < builder.mExcludeLayers.length; i++) {
-                mNativeExcludeLayers[i] = builder.mExcludeLayers[i].mNativeObject;
+            if (builder.mExcludeLayers != null) {
+                mNativeExcludeLayers = new long[builder.mExcludeLayers.length];
+                for (int i = 0; i < builder.mExcludeLayers.length; i++) {
+                    mNativeExcludeLayers[i] = builder.mExcludeLayers[i].mNativeObject;
+                }
+            } else {
+                mNativeExcludeLayers = null;
             }
         }
 
@@ -837,7 +839,7 @@ public final class SurfaceControl implements Parcelable {
             }
 
             @Override
-            public Builder getThis() {
+            Builder getThis() {
                 return this;
             }
 
@@ -2293,8 +2295,14 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("displayToken must not be null");
         }
 
-        return nativeScreenshot(display, sourceCrop, width, height, useIdentityTransform, rotation,
-                false /* captureSecureLayers */);
+        DisplayCaptureArgs captureArgs = new DisplayCaptureArgs.Builder(display)
+                .setSourceCrop(sourceCrop)
+                .setSize(width, height)
+                .setUseIdentityTransform(useIdentityTransform)
+                .setRotation(rotation)
+                .build();
+
+        return nativeCaptureDisplay(captureArgs);
     }
 
     /**
@@ -2314,8 +2322,15 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("displayToken must not be null");
         }
 
-        return nativeScreenshot(display, sourceCrop, width, height, useIdentityTransform, rotation,
-                true /* captureSecureLayers */);
+        DisplayCaptureArgs captureArgs = new DisplayCaptureArgs.Builder(display)
+                .setSourceCrop(sourceCrop)
+                .setSize(width, height)
+                .setUseIdentityTransform(useIdentityTransform)
+                .setRotation(rotation)
+                .setCaptureSecureLayers(true)
+                .build();
+
+        return nativeCaptureDisplay(captureArgs);
     }
 
     private static void rotateCropForSF(Rect crop, int rot) {
@@ -2365,24 +2380,30 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotHardwareBuffer captureLayers(SurfaceControl layer, Rect sourceCrop,
             float frameScale, int format) {
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale, null,
-                format);
+        LayerCaptureArgs captureArgs = new LayerCaptureArgs.Builder(layer)
+                .setSourceCrop(sourceCrop)
+                .setFrameScale(frameScale)
+                .setPixelFormat(format)
+                .build();
+
+        return nativeCaptureLayers(captureArgs);
     }
 
     /**
-     * Like {@link captureLayers} but with an array of layer handles to exclude.
+     * Like {@link #captureLayers(SurfaceControl, Rect, float, int)} but with an array of layer
+     * handles to exclude.
      * @hide
      */
     public static ScreenshotHardwareBuffer captureLayersExcluding(SurfaceControl layer,
             Rect sourceCrop, float frameScale, int format, SurfaceControl[] exclude) {
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        long[] nativeExcludeObjects = new long[exclude.length];
-        for (int i = 0; i < exclude.length; i++) {
-            nativeExcludeObjects[i] = exclude[i].mNativeObject;
-        }
-        return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale,
-                nativeExcludeObjects, PixelFormat.RGBA_8888);
+        LayerCaptureArgs captureArgs = new LayerCaptureArgs.Builder(layer)
+                .setSourceCrop(sourceCrop)
+                .setFrameScale(frameScale)
+                .setPixelFormat(format)
+                .setExcludeLayers(exclude)
+                .build();
+
+        return nativeCaptureLayers(captureArgs);
     }
 
     /**

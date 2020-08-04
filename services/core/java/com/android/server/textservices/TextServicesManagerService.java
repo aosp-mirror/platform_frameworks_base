@@ -58,6 +58,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -287,21 +288,21 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         @Override
-        public void onStopUser(@UserIdInt int userHandle) {
+        public void onUserStopping(@NonNull TargetUser user) {
             if (DBG) {
-                Slog.d(TAG, "onStopUser userId: " + userHandle);
+                Slog.d(TAG, "onStopUser user: " + user);
             }
-            mService.onStopUser(userHandle);
+            mService.onStopUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(@UserIdInt int userHandle) {
+        public void onUserUnlocking(@NonNull TargetUser user) {
             if(DBG) {
-                Slog.d(TAG, "onUnlockUser userId: " + userHandle);
+                Slog.d(TAG, "onUnlockUser userId: " + user);
             }
             // Called on the system server's main looper thread.
             // TODO: Dispatch this to a worker thread as needed.
-            mService.onUnlockUser(userHandle);
+            mService.onUnlockUser(user.getUserIdentifier());
         }
     }
 

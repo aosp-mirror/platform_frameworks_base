@@ -177,8 +177,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
     private volatile boolean mHasImeService;
 
-    // all activities running in the process
+    /** All activities running in the process (exclude destroying). */
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
+    /** The activities will be removed but still belong to this process. */
+    private ArrayList<ActivityRecord> mInactiveActivities;
     // any tasks this process had run root activities in
     private final ArrayList<Task> mRecentTasks = new ArrayList<>();
     // The most recent top-most activity that was resumed in the process for pre-Q app.
@@ -635,21 +637,39 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         mActivities.add(r);
+        if (mInactiveActivities != null) {
+            mInactiveActivities.remove(r);
+        }
         updateActivityConfigurationListener();
     }
 
-    void removeActivity(ActivityRecord r) {
+    /**
+     * Indicates that the given activity is no longer active in this process.
+     *
+     * @param r The running activity to be removed.
+     * @param keepAssociation {@code true} if the activity still belongs to this process but will
+     *                        be removed soon, e.g. destroying. From the perspective of process
+     *                        priority, the process is not important if it only contains activities
+     *                        that are being destroyed. But the association is still needed to
+     *                        ensure all activities are reachable from this process.
+     */
+    void removeActivity(ActivityRecord r, boolean keepAssociation) {
+        if (keepAssociation) {
+            if (mInactiveActivities == null) {
+                mInactiveActivities = new ArrayList<>();
+                mInactiveActivities.add(r);
+            } else if (!mInactiveActivities.contains(r)) {
+                mInactiveActivities.add(r);
+            }
+        } else if (mInactiveActivities != null) {
+            mInactiveActivities.remove(r);
+        }
         mActivities.remove(r);
         updateActivityConfigurationListener();
     }
 
-    void makeFinishingForProcessRemoved() {
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            mActivities.get(i).makeFinishingLocked();
-        }
-    }
-
     void clearActivities() {
+        mInactiveActivities = null;
         mActivities.clear();
         updateActivityConfigurationListener();
     }
@@ -1140,6 +1160,47 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::appDied, mListener, reason);
         mAtm.mH.sendMessage(m);
+    }
+
+    /**
+     * Clean up the activities belonging to this process.
+     *
+     * @return {@code true} if the process has any visible activity.
+     */
+    boolean handleAppDied() {
+        mAtm.mStackSupervisor.removeHistoryRecords(this);
+
+        final boolean isRemoved = isRemoved();
+        boolean hasVisibleActivities = false;
+        if (mInactiveActivities != null && !mInactiveActivities.isEmpty()) {
+            // Make sure that all activities in this process are handled.
+            mActivities.addAll(mInactiveActivities);
+        }
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.mVisibleRequested || r.isVisible()) {
+                // While an activity launches a new activity, it's possible that the old activity
+                // is already requested to be hidden (mVisibleRequested=false), but this visibility
+                // is not yet committed, so isVisible()=true.
+                hasVisibleActivities = true;
+            }
+            if (isRemoved) {
+                // The package of the died process should be force-stopped, so make its activities
+                // as finishing to prevent the process from being started again if the next top (or
+                // being visible) activity also resides in the same process.
+                r.makeFinishingLocked();
+            }
+
+            final Task rootTask = r.getRootTask();
+            if (rootTask != null) {
+                rootTask.handleAppDied(this);
+            }
+            r.handleAppDied();
+        }
+        clearRecentTasks();
+        clearActivities();
+
+        return hasVisibleActivities;
     }
 
     void registerDisplayConfigurationListener(DisplayContent displayContent) {
