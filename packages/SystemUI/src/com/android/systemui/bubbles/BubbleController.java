@@ -82,6 +82,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
+import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
@@ -167,6 +168,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private ScrimView mBubbleScrim;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
+
+    /**
+     * The relative position of the stack when we removed it and nulled it out. If the stack is
+     * re-created, it will re-appear at this position.
+     */
+    @Nullable private BubbleStackView.RelativeStackPosition mPositionFromRemovedStack;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
@@ -718,6 +725,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
                     mSysUiState, this::onAllBubblesAnimatedOut, this::onImeVisibilityChanged,
                     this::hideCurrentInputMethod);
+            mStackView.setStackStartPosition(mPositionFromRemovedStack);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -787,6 +795,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         try {
             mAddedToWindowManager = false;
             if (mStackView != null) {
+                mPositionFromRemovedStack = mStackView.getRelativeStackPosition();
                 mWindowManager.removeView(mStackView);
                 mStackView.removeView(mBubbleScrim);
                 mStackView = null;
