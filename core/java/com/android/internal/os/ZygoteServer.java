@@ -451,7 +451,7 @@ class ZygoteServer {
              * For reasons of correctness the USAP pool pipe and event FDs
              * must be processed before the session and server sockets.  This
              * is to ensure that the USAP pool accounting information is
-             * accurate when handling other requests like API blacklist
+             * accurate when handling other requests like API deny list
              * exemptions.
              */
 
