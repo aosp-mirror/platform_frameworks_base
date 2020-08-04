@@ -1018,7 +1018,7 @@
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"As conversas prioritárias irão:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aparecer na parte superior da secção de conversas."</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar a imagem do perfil no ecrã de bloqueio."</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecem como balões flutuantes por cima de apps."</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecer como balões flutuantes por cima de apps."</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompem o modo Não incomodar."</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Definições"</string>

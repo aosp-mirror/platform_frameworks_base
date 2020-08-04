@@ -911,7 +911,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Закрыць хуткія налады."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Будзільнік пастаўлены."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Вы ўвайшлі як <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="data_connection_no_internet" msgid="691058178914184544">"Не падключана да інтэрнэту"</string>
+    <string name="data_connection_no_internet" msgid="691058178914184544">"Няма падключэння да інтэрнэту"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Паказаць падрабязную інфармацыю."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Прычына недаступнасці: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Адкрыць налады <xliff:g id="ID_1">%s</xliff:g>."</string>
