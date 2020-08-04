@@ -103,11 +103,12 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
     @Override
     protected void onPostExecute(BubbleViewInfo viewInfo) {
-        if (viewInfo != null) {
-            mBubble.setViewInfo(viewInfo);
-            if (mCallback != null && !isCancelled()) {
-                mCallback.onBubbleViewsReady(mBubble);
-            }
+        if (isCancelled() || viewInfo == null) {
+            return;
+        }
+        mBubble.setViewInfo(viewInfo);
+        if (mCallback != null) {
+            mCallback.onBubbleViewsReady(mBubble);
         }
     }
 
