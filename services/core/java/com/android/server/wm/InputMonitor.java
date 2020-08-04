@@ -269,7 +269,7 @@ final class InputMonitor {
         flags = child.getSurfaceTouchableRegion(inputWindowHandle, flags);
         inputWindowHandle.layoutParamsFlags = flags;
         inputWindowHandle.layoutParamsType = type;
-        inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
+        inputWindowHandle.dispatchingTimeoutMillis = child.getInputDispatchingTimeoutMillis();
         inputWindowHandle.visible = isVisible;
         inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
         inputWindowHandle.hasFocus = hasFocus;
@@ -385,7 +385,7 @@ final class InputMonitor {
         } else {
             final InputApplicationHandle handle = newApp.mInputApplicationHandle;
             handle.name = newApp.toString();
-            handle.dispatchingTimeoutNanos = newApp.mInputDispatchingTimeoutNanos;
+            handle.dispatchingTimeoutMillis = newApp.mInputDispatchingTimeoutMillis;
 
             mService.mInputManager.setFocusedApplication(mDisplayId, handle);
         }
@@ -570,8 +570,7 @@ final class InputMonitor {
             final String name, final int type, final boolean isVisible) {
         inputWindowHandle.name = name;
         inputWindowHandle.layoutParamsType = type;
-        inputWindowHandle.dispatchingTimeoutNanos =
-                WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        inputWindowHandle.dispatchingTimeoutMillis = 0; // it should never receive input
         inputWindowHandle.visible = isVisible;
         inputWindowHandle.canReceiveKeys = false;
         inputWindowHandle.hasFocus = false;

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -30,8 +31,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEA
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
-import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
-import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
@@ -40,6 +40,7 @@ import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
+
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1064,10 +1065,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return RELAUNCH_REASON_NONE;
     }
 
-    public long getInputDispatchingTimeout() {
+    /**
+     * Get the current dispatching timeout. If instrumentation is currently taking place, return
+     * a longer value. Shorter timeout is returned otherwise.
+     * @return The timeout in milliseconds
+     */
+    public long getInputDispatchingTimeoutMillis() {
         synchronized (mAtm.mGlobalLock) {
             return isInstrumenting() || isUsingWrapper()
-                    ? INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS : KEY_DISPATCHING_TIMEOUT_MS;
+                    ? INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS :
+                    DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         }
     }
 
