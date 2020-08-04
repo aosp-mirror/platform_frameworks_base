@@ -1327,12 +1327,15 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testRemoveFromHistory() {
         final Task stack = mActivity.getRootTask();
         final Task task = mActivity.getTask();
+        final WindowProcessController wpc = mActivity.app;
+        assertTrue(wpc.hasActivities());
 
         mActivity.removeFromHistory("test");
 
         assertEquals(DESTROYED, mActivity.getState());
         assertNull(mActivity.app);
         assertNull(mActivity.getTask());
+        assertFalse(wpc.hasActivities());
         assertEquals(0, task.getChildCount());
         assertEquals(task.getRootTask(), task);
         assertEquals(0, stack.getChildCount());

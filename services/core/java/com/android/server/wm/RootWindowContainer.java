@@ -2155,6 +2155,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.
                 stack.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
+                stack.setBounds(task.getBounds());
 
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
@@ -2751,7 +2752,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (r.app != app) return;
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
-        r.app = null;
+        r.detachFromProcess();
         r.getDisplay().mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         r.destroyIfPossible("handleAppCrashed");
@@ -3102,22 +3103,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         return null;
-    }
-
-    boolean handleAppDied(WindowProcessController app) {
-        if (app.isRemoved()) {
-            // The package of the died process should be force-stopped, so make its activities as
-            // finishing to prevent the process from being started again if the next top (or being
-            // visible) activity also resides in the same process.
-            app.makeFinishingForProcessRemoved();
-        }
-        return reduceOnAllTaskDisplayAreas((taskDisplayArea, result) -> {
-            for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                final Task stack = taskDisplayArea.getStackAt(sNdx);
-                result |= stack.handleAppDied(app);
-            }
-            return result;
-        }, false /* initValue */);
     }
 
     void closeSystemDialogActivities(String reason) {

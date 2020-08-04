@@ -19,6 +19,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -65,6 +66,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 import com.android.server.utils.ManagedApplicationService.LogEvent;
@@ -817,14 +819,14 @@ public class VrManagerService extends SystemService
     }
 
     @Override
-    public void onStartUser(int userHandle) {
+    public void onUserStarting(@NonNull TargetUser user) {
         synchronized (mLock) {
             mComponentObserver.onUsersChanged();
         }
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         FgThread.getHandler().post(() -> {
             synchronized (mLock) {
                 mComponentObserver.onUsersChanged();
@@ -834,7 +836,7 @@ public class VrManagerService extends SystemService
     }
 
     @Override
-    public void onStopUser(int userHandle) {
+    public void onUserStopping(@NonNull TargetUser user) {
         synchronized (mLock) {
             mComponentObserver.onUsersChanged();
         }
@@ -842,7 +844,7 @@ public class VrManagerService extends SystemService
     }
 
     @Override
-    public void onCleanupUser(int userHandle) {
+    public void onUserStopped(@NonNull TargetUser user) {
         synchronized (mLock) {
             mComponentObserver.onUsersChanged();
         }

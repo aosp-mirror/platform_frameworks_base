@@ -106,6 +106,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
@@ -161,14 +162,14 @@ public class AccountManagerService
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mService.onUnlockUser(userHandle);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            Slog.i(TAG, "onStopUser " + userHandle);
-            mService.purgeUserData(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            Slog.i(TAG, "onStopUser " + user);
+            mService.purgeUserData(user.getUserIdentifier());
         }
     }
 

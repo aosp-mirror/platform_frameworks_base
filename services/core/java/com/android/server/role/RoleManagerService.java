@@ -34,14 +34,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
-import android.database.CursorWindow;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -74,6 +71,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
@@ -217,8 +215,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     }
 
     @Override
-    public void onStartUser(@UserIdInt int userId) {
-        maybeGrantDefaultRolesSync(userId);
+    public void onUserStarting(@NonNull TargetUser user) {
+        maybeGrantDefaultRolesSync(user.getUserIdentifier());
     }
 
     @MainThread

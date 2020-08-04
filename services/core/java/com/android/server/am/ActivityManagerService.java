@@ -341,6 +341,7 @@ import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
@@ -2333,8 +2334,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onCleanupUser(int userId) {
-            mService.mBatteryStatsService.onCleanupUser(userId);
+        public void onUserStopped(@NonNull TargetUser user) {
+            mService.mBatteryStatsService.onCleanupUser(user.getUserIdentifier());
         }
 
         public ActivityManagerService getService() {
@@ -2443,7 +2444,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? Collections.emptyList()
                             : Arrays.asList(exemptions.split(","));
                 }
-                if (!ZYGOTE_PROCESS.setApiBlacklistExemptions(mExemptions)) {
+                if (!ZYGOTE_PROCESS.setApiDenylistExemptions(mExemptions)) {
                   Slog.e(TAG, "Failed to set API blacklist exemptions!");
                   // leave mExemptionsStr as is, so we don't try to send the same list again.
                   mExemptions = Collections.emptyList();

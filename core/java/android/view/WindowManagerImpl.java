@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
 import android.annotation.NonNull;
+import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -69,6 +70,7 @@ import java.util.List;
 public final class WindowManagerImpl implements WindowManager {
     @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
+    @UiContext
     @VisibleForTesting
     public final Context mContext;
     private final Window mParentWindow;

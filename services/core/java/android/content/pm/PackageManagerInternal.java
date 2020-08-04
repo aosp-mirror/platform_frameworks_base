@@ -69,6 +69,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_WIFI = 13;
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
+    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 16;
 
     @IntDef(flag = true, prefix = "RESOLVE_", value = {
             RESOLVE_NON_BROWSER_ONLY,

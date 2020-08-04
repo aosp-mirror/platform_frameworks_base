@@ -25,6 +25,8 @@ import static com.android.server.media.MediaKeyDispatcher.isLongPressOverridden;
 import static com.android.server.media.MediaKeyDispatcher.isSingleTapOverridden;
 import static com.android.server.media.MediaKeyDispatcher.isTripleTapOverridden;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
@@ -85,6 +87,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
 
@@ -333,19 +336,21 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     @Override
-    public void onStartUser(int userId) {
-        if (DEBUG) Log.d(TAG, "onStartUser: " + userId);
+    public void onUserStarting(@NonNull TargetUser user) {
+        if (DEBUG) Log.d(TAG, "onStartUser: " + user);
         updateUser();
     }
 
     @Override
-    public void onSwitchUser(int userId) {
-        if (DEBUG) Log.d(TAG, "onSwitchUser: " + userId);
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        if (DEBUG) Log.d(TAG, "onSwitchUser: " + to);
         updateUser();
     }
 
     @Override
-    public void onCleanupUser(int userId) {
+    public void onUserStopped(@NonNull TargetUser targetUser) {
+        int userId = targetUser.getUserIdentifier();
+
         if (DEBUG) Log.d(TAG, "onCleanupUser: " + userId);
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(userId);

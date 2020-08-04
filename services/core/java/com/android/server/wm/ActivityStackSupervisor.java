@@ -891,7 +891,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // This is the first time we failed -- restart process and
                 // retry.
                 r.launchFailed = true;
-                proc.removeActivity(r);
+                proc.removeActivity(r, true /* keepAssociation */);
                 throw e;
             }
         } finally {

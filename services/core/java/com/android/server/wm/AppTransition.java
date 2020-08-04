@@ -203,6 +203,7 @@ public class AppTransition implements Dump {
     private static final int NEXT_TRANSIT_TYPE_REMOTE = 10;
 
     private int mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
+    private boolean mNextAppTransitionOverrideRequested;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
     private static final int THUMBNAIL_TRANSITION_ENTER_SCALE_UP = 0;
@@ -337,6 +338,11 @@ public class AppTransition implements Dump {
         mNextAppTransitionFlags |= flags;
         setLastAppTransition(TRANSIT_UNSET, null, null, null);
         updateBooster();
+        if (isTransitionSet()) {
+            removeAppTransitionTimeoutCallbacks();
+            mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable,
+                    APP_TRANSITION_TIMEOUT_MS);
+        }
     }
 
     void setLastAppTransition(int transit, ActivityRecord openingApp, ActivityRecord closingApp,
@@ -454,6 +460,7 @@ public class AppTransition implements Dump {
 
     void clear() {
         mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
+        mNextAppTransitionOverrideRequested = false;
         mNextAppTransitionPackage = null;
         mNextAppTransitionAnimationsSpecs.clear();
         mRemoteAnimationController = null;
@@ -1574,6 +1581,7 @@ public class AppTransition implements Dump {
      */
     boolean canSkipFirstFrame() {
         return mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM
+                && !mNextAppTransitionOverrideRequested
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CLIP_REVEAL
                 && mNextAppTransition != TRANSIT_KEYGUARD_GOING_AWAY;
@@ -1608,6 +1616,11 @@ public class AppTransition implements Dump {
             int orientation, Rect frame, Rect displayFrame, Rect insets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
             boolean freeform, WindowContainer container) {
+
+        if (mNextAppTransitionOverrideRequested && container.canCustomizeAppTransition()) {
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
+        }
+
         Animation a;
         if (isKeyguardGoingAwayTransit(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
@@ -1648,7 +1661,6 @@ public class AppTransition implements Dump {
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s "
                             + "isEntrance=%b Callers=%s",
                     a, appTransitionToString(transit), enter, Debug.getCallers(3));
-            setAppTransitionFinishedCallbackIfNeeded(a);
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE) {
             a = loadAnimationRes(mNextAppTransitionPackage, mNextAppTransitionInPlace);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
@@ -1775,6 +1787,7 @@ public class AppTransition implements Dump {
                     a, animAttr, appTransitionToString(transit), enter,
                     Debug.getCallers(3));
         }
+        setAppTransitionFinishedCallbackIfNeeded(a);
         return a;
     }
 
@@ -1816,7 +1829,7 @@ public class AppTransition implements Dump {
             IRemoteCallback startedCallback, IRemoteCallback endedCallback) {
         if (canOverridePendingAppTransition()) {
             clear();
-            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
+            mNextAppTransitionOverrideRequested = true;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionEnter = enterAnim;
             mNextAppTransitionExit = exitAnim;
@@ -2134,15 +2147,16 @@ public class AppTransition implements Dump {
             pw.print(prefix); pw.print("mNextAppTransitionType=");
                     pw.println(transitTypeToString());
         }
+        if (mNextAppTransitionOverrideRequested
+                || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
+            pw.print(prefix); pw.print("mNextAppTransitionPackage=");
+            pw.println(mNextAppTransitionPackage);
+            pw.print(prefix); pw.print("mNextAppTransitionEnter=0x");
+            pw.print(Integer.toHexString(mNextAppTransitionEnter));
+            pw.print(" mNextAppTransitionExit=0x");
+            pw.println(Integer.toHexString(mNextAppTransitionExit));
+        }
         switch (mNextAppTransitionType) {
-            case NEXT_TRANSIT_TYPE_CUSTOM:
-                pw.print(prefix); pw.print("mNextAppTransitionPackage=");
-                        pw.println(mNextAppTransitionPackage);
-                pw.print(prefix); pw.print("mNextAppTransitionEnter=0x");
-                        pw.print(Integer.toHexString(mNextAppTransitionEnter));
-                        pw.print(" mNextAppTransitionExit=0x");
-                        pw.println(Integer.toHexString(mNextAppTransitionExit));
-                break;
             case NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE:
                 pw.print(prefix); pw.print("mNextAppTransitionPackage=");
                         pw.println(mNextAppTransitionPackage);
@@ -2229,12 +2243,7 @@ public class AppTransition implements Dump {
                 setAppTransition(transit, flags);
             }
         }
-        boolean prepared = prepare();
-        if (isTransitionSet()) {
-            removeAppTransitionTimeoutCallbacks();
-            mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable, APP_TRANSITION_TIMEOUT_MS);
-        }
-        return prepared;
+        return prepare();
     }
 
     /**

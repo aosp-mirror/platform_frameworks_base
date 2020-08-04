@@ -84,6 +84,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -363,7 +364,7 @@ public final class AutofillManagerService
     }
 
     @Override // from SystemService
-    public void onSwitchUser(int userHandle) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         if (sDebug) Slog.d(TAG, "Hiding UI when user switched");
         mUi.hideAll(null);
     }

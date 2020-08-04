@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -280,6 +281,7 @@ public abstract class Window {
     public static final int DECOR_CAPTION_SHADE_DARK = 2;
 
     @UnsupportedAppUsage
+    @UiContext
     private final Context mContext;
 
     @UnsupportedAppUsage
@@ -722,7 +724,7 @@ public abstract class Window {
     }
 
 
-    public Window(Context context) {
+    public Window(@UiContext Context context) {
         mContext = context;
         mFeatures = mLocalFeatures = getDefaultFeatures(context);
     }
@@ -733,6 +735,7 @@ public abstract class Window {
      *
      * @return Context The Context that was supplied to the constructor.
      */
+    @UiContext
     public final Context getContext() {
         return mContext;
     }

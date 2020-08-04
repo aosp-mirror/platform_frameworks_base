@@ -16,6 +16,7 @@
 
 package com.android.server.midi;
 
+import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,8 +48,8 @@ import android.util.Log;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.XmlUtils;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -75,8 +76,8 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            if (userHandle == UserHandle.USER_SYSTEM) {
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            if (user.getUserIdentifier()  == UserHandle.USER_SYSTEM) {
                 mMidiService.onUnlockUser();
             }
         }

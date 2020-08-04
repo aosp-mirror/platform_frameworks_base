@@ -237,7 +237,7 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsPolicySystemPublicInvalidIgnore
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
-  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 10U);
+  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 11U);
   ASSERT_RESULT(MappingExists(res, R::target::string::not_overlayable, Res_value::TYPE_REFERENCE,
                               R::system_overlay_invalid::string::not_overlayable,
                               false /* rewrite */));
@@ -255,6 +255,10 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsPolicySystemPublicInvalidIgnore
                               false /* rewrite */));
   ASSERT_RESULT(MappingExists(res, R::target::string::policy_public, Res_value::TYPE_REFERENCE,
                               R::system_overlay_invalid::string::policy_public,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_config_signature,
+                              Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_config_signature,
                               false /* rewrite */));
   ASSERT_RESULT(MappingExists(res, R::target::string::policy_signature, Res_value::TYPE_REFERENCE,
                               R::system_overlay_invalid::string::policy_signature,
@@ -298,8 +302,9 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPoliciesPublicFail) {
   ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 0U);
 }
 
-// Overlays that are pre-installed or are signed with the same signature as the target can overlay
-// packages that have not defined overlayable resources.
+// Overlays that are pre-installed or are signed with the same signature as the target  or are signed
+// with the same signature as the reference package can overlay packages that have not defined
+// overlayable resources.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPolicies) {
   auto CheckEntries = [&](const PolicyBitmask& fulfilled_policies) -> void {
     auto resources = TestGetResourceMapping("/target/target-no-overlayable.apk",
@@ -309,7 +314,7 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPolicies) {
 
     ASSERT_TRUE(resources) << resources.GetErrorMessage();
     auto& res = *resources;
-    ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 10U);
+    ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 11U);
     ASSERT_RESULT(MappingExists(res, R::target::string::not_overlayable, Res_value::TYPE_REFERENCE,
                                 R::system_overlay_invalid::string::not_overlayable,
                                 false /* rewrite */));
@@ -330,6 +335,10 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPolicies) {
     ASSERT_RESULT(MappingExists(res, R::target::string::policy_public, Res_value::TYPE_REFERENCE,
                                 R::system_overlay_invalid::string::policy_public,
                                 false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_config_signature,
+                                Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_config_signature,
+                                false /* rewrite */));
     ASSERT_RESULT(MappingExists(res, R::target::string::policy_signature, Res_value::TYPE_REFERENCE,
                                 R::system_overlay_invalid::string::policy_signature,
                                 false /* rewrite */));
@@ -342,6 +351,7 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPolicies) {
   };
 
   CheckEntries(PolicyFlags::SIGNATURE);
+  CheckEntries(PolicyFlags::CONFIG_SIGNATURE);
   CheckEntries(PolicyFlags::PRODUCT_PARTITION);
   CheckEntries(PolicyFlags::SYSTEM_PARTITION);
   CheckEntries(PolicyFlags::VENDOR_PARTITION);

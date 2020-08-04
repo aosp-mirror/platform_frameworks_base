@@ -254,6 +254,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
@@ -1027,16 +1028,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(int userId) {
+        public void onUserUnlocking(@NonNull TargetUser user) {
             synchronized (mService.getGlobalLock()) {
-                mService.mStackSupervisor.onUserUnlocked(userId);
+                mService.mStackSupervisor.onUserUnlocked(user.getUserIdentifier());
             }
         }
 
         @Override
-        public void onCleanupUser(int userId) {
+        public void onUserStopped(@NonNull TargetUser user) {
             synchronized (mService.getGlobalLock()) {
-                mService.mStackSupervisor.mLaunchParamsPersister.onCleanupUser(userId);
+                mService.mStackSupervisor.mLaunchParamsPersister
+                        .onCleanupUser(user.getUserIdentifier());
             }
         }
 
@@ -6789,11 +6791,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void handleAppDied(WindowProcessController wpc, boolean restarting,
                 Runnable finishInstrumentationCallback) {
             synchronized (mGlobalLockWithoutBoost) {
-                // Remove this application's activities from active lists.
-                boolean hasVisibleActivities = mRootWindowContainer.handleAppDied(wpc);
-
-                wpc.clearRecentTasks();
-                wpc.clearActivities();
+                mStackSupervisor.beginDeferResume();
+                final boolean hasVisibleActivities;
+                try {
+                    // Remove this application's activities from active lists.
+                    hasVisibleActivities = wpc.handleAppDied();
+                } finally {
+                    mStackSupervisor.endDeferResume();
+                }
 
                 if (wpc.isInstrumenting()) {
                     finishInstrumentationCallback.run();

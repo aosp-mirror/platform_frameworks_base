@@ -123,6 +123,7 @@ import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
@@ -275,18 +276,18 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void onStartUser(int userHandle) {
-            mLockSettingsService.onStartUser(userHandle);
+        public void onUserStarting(@NonNull TargetUser user) {
+            mLockSettingsService.onStartUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mLockSettingsService.onUnlockUser(userHandle);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mLockSettingsService.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onCleanupUser(int userHandle) {
-            mLockSettingsService.onCleanupUser(userHandle);
+        public void onUserStopped(@NonNull TargetUser user) {
+            mLockSettingsService.onCleanupUser(user.getUserIdentifier());
         }
     }
 

@@ -19,6 +19,7 @@ package com.android.server.clipboard;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
@@ -59,6 +60,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -218,9 +220,9 @@ public class ClipboardService extends SystemService {
     }
 
     @Override
-    public void onCleanupUser(int userId) {
+    public void onUserStopped(@NonNull TargetUser user) {
         synchronized (mClipboards) {
-            mClipboards.remove(userId);
+            mClipboards.remove(user.getUserIdentifier());
         }
     }
 

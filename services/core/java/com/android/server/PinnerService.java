@@ -20,6 +20,7 @@ import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -60,6 +61,7 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.DexFile;
@@ -236,16 +238,18 @@ public final class PinnerService extends SystemService {
      * individual apps. Make sure that user's preference is pinned into memory.
      */
     @Override
-    public void onSwitchUser(int userHandle) {
-        if (!mUserManager.isManagedProfile(userHandle)) {
-            sendPinAppsMessage(userHandle);
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        int userId = to.getUserIdentifier();
+        if (!mUserManager.isManagedProfile(userId)) {
+            sendPinAppsMessage(userId);
         }
     }
 
     @Override
-    public void onUnlockUser(int userHandle) {
-        if (!mUserManager.isManagedProfile(userHandle)) {
-            sendPinAppsMessage(userHandle);
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        int userId = user.getUserIdentifier();
+        if (!mUserManager.isManagedProfile(userId)) {
+            sendPinAppsMessage(userId);
         }
     }
 

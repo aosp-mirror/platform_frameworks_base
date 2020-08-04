@@ -53,16 +53,16 @@ public class PipAnimationController {
     public static final int TRANSITION_DIRECTION_NONE = 0;
     public static final int TRANSITION_DIRECTION_SAME = 1;
     public static final int TRANSITION_DIRECTION_TO_PIP = 2;
-    public static final int TRANSITION_DIRECTION_TO_FULLSCREEN = 3;
-    public static final int TRANSITION_DIRECTION_TO_SPLIT_SCREEN = 4;
+    public static final int TRANSITION_DIRECTION_LEAVE_PIP = 3;
+    public static final int TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN = 4;
     public static final int TRANSITION_DIRECTION_REMOVE_STACK = 5;
 
     @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
             TRANSITION_DIRECTION_NONE,
             TRANSITION_DIRECTION_SAME,
             TRANSITION_DIRECTION_TO_PIP,
-            TRANSITION_DIRECTION_TO_FULLSCREEN,
-            TRANSITION_DIRECTION_TO_SPLIT_SCREEN,
+            TRANSITION_DIRECTION_LEAVE_PIP,
+            TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN,
             TRANSITION_DIRECTION_REMOVE_STACK
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -73,8 +73,8 @@ public class PipAnimationController {
     }
 
     public static boolean isOutPipDirection(@TransitionDirection int direction) {
-        return direction == TRANSITION_DIRECTION_TO_FULLSCREEN
-                || direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN;
+        return direction == TRANSITION_DIRECTION_LEAVE_PIP
+                || direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
     }
 
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;

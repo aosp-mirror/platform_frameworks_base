@@ -131,7 +131,7 @@ public class PipAccessibilityInteractionConnection
                         result = true;
                         break;
                     case AccessibilityNodeInfo.ACTION_EXPAND:
-                        mMotionHelper.expandPipToFullscreen();
+                        mMotionHelper.expandLeavePip();
                         result = true;
                         break;
                     default:

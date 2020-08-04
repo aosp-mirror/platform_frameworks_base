@@ -26,6 +26,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -213,7 +214,6 @@ public class WallpaperManager {
     private static final Object sSync = new Object[0];
     @UnsupportedAppUsage
     private static Globals sGlobals;
-
     private final Context mContext;
     private final boolean mWcgEnabled;
     private final ColorManagementProxy mCmProxy;
@@ -539,7 +539,8 @@ public class WallpaperManager {
         }
     }
 
-    /*package*/ WallpaperManager(IWallpaperManager service, Context context, Handler handler) {
+    /*package*/ WallpaperManager(IWallpaperManager service, @UiContext Context context,
+            Handler handler) {
         mContext = context;
         if (service != null) {
             initGlobals(service, context.getMainLooper());

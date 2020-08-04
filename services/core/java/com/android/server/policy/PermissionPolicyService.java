@@ -67,6 +67,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
@@ -347,7 +348,11 @@ public final class PermissionPolicyService extends SystemService {
     }
 
     @Override
-    public void onStartUser(@UserIdInt int userId) {
+    public void onUserStarting(@NonNull TargetUser user) {
+        onStartUser(user.getUserIdentifier());
+    }
+
+    private void onStartUser(@UserIdInt int userId) {
         if (DEBUG) Slog.i(LOG_TAG, "onStartUser(" + userId + ")");
 
         if (isStarted(userId)) {
@@ -373,11 +378,11 @@ public final class PermissionPolicyService extends SystemService {
     }
 
     @Override
-    public void onStopUser(@UserIdInt int userId) {
-        if (DEBUG) Slog.i(LOG_TAG, "onStopUser(" + userId + ")");
+    public void onUserStopping(@NonNull TargetUser user) {
+        if (DEBUG) Slog.i(LOG_TAG, "onStopUser(" + user + ")");
 
         synchronized (mLock) {
-            mIsStarted.delete(userId);
+            mIsStarted.delete(user.getUserIdentifier());
         }
     }
 

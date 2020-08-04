@@ -19,6 +19,7 @@ package com.android.server.backup;
 import static java.util.Collections.emptySet;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -60,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import java.io.File;
@@ -1605,13 +1607,13 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(int userId) {
-            sInstance.onUnlockUser(userId);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            sInstance.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userId) {
-            sInstance.onStopUser(userId);
+        public void onUserStopping(@NonNull TargetUser user) {
+            sInstance.onStopUser(user.getUserIdentifier());
         }
 
         @VisibleForTesting

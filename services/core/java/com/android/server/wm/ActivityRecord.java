@@ -2865,7 +2865,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (hasProcess()) {
             if (removeFromApp) {
-                app.removeActivity(this);
+                app.removeActivity(this, true /* keepAssociation */);
                 if (!app.hasActivities()) {
                     mAtmService.clearHeavyWeightProcessIfEquals(app);
                     // Update any services we are bound to that might care about whether
@@ -2914,7 +2914,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 setState(DESTROYED,
                         "destroyActivityLocked. not finishing or skipping destroy");
                 if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during destroy for activity " + this);
-                app = null;
+                detachFromProcess();
             }
         } else {
             // Remove this record from the history.
@@ -2963,11 +2963,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         setState(DESTROYED, "removeFromHistory");
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + this);
-        app = null;
+        detachFromProcess();
         removeAppTokenFromDisplay();
 
         cleanUpActivityServices();
         removeUriPermissionsLocked();
+    }
+
+    void detachFromProcess() {
+        if (app != null) {
+            app.removeActivity(this, false /* keepAssociation */);
+        }
+        app = null;
     }
 
     void makeFinishingLocked() {
@@ -3019,7 +3026,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (setState) {
             setState(DESTROYED, "cleanUp");
             if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during cleanUp for activity " + this);
-            app = null;
+            detachFromProcess();
         }
 
         // Inform supervisor the activity has been removed.
@@ -3158,6 +3165,64 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mServiceConnectionsHolder.disconnectActivityFromServices();
         // This activity record is removing, make sure not to disconnect twice.
         mServiceConnectionsHolder = null;
+    }
+
+    /**
+     * Detach this activity from process and clear the references to it. If the activity is
+     * finishing or has no saved state or crashed many times, it will also be removed from history.
+     */
+    void handleAppDied() {
+        final boolean remove;
+        if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
+                || mRelaunchReason == RELAUNCH_REASON_FREE_RESIZE)
+                && launchCount < 3 && !finishing) {
+            // If the process crashed during a resize, always try to relaunch it, unless it has
+            // failed more than twice. Skip activities that's already finishing cleanly by itself.
+            remove = false;
+        } else if ((!mHaveState && !stateNotNeeded
+                && !isState(ActivityState.RESTARTING_PROCESS)) || finishing) {
+            // Don't currently have state for the activity, or it is finishing -- always remove it.
+            remove = true;
+        } else if (!mVisibleRequested && launchCount > 2
+                && lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
+            // We have launched this activity too many times since it was able to run, so give up
+            // and remove it. (Note if the activity is visible, we don't remove the record. We leave
+            // the dead window on the screen but the process will not be restarted unless user
+            // explicitly tap on it.)
+            remove = true;
+        } else {
+            // The process may be gone, but the activity lives on!
+            remove = false;
+        }
+        if (remove) {
+            if (ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
+                Slog.i(TAG_ADD_REMOVE, "Removing activity " + this
+                        + " hasSavedState=" + mHaveState + " stateNotNeeded=" + stateNotNeeded
+                        + " finishing=" + finishing + " state=" + mState
+                        + " callers=" + Debug.getCallers(5));
+            }
+            if (!finishing || (app != null && app.isRemoved())) {
+                Slog.w(TAG, "Force removing " + this + ": app died, no saved state");
+                EventLogTags.writeWmFinishActivity(mUserId, System.identityHashCode(this),
+                        task != null ? task.mTaskId : -1, shortComponentName,
+                        "proc died without state saved");
+            }
+        } else {
+            // We have the current state for this activity, so it can be restarted later
+            // when needed.
+            if (DEBUG_APP) {
+                Slog.v(TAG_APP, "Keeping entry during removeHistory for activity " + this);
+            }
+            // Set nowVisible to previous visible state. If the app was visible while it died, we
+            // leave the dead window on screen so it's basically visible. This is needed when user
+            // later tap on the dead window, we need to stop other apps when user transfers focus
+            // to the restarted activity.
+            nowVisible = mVisibleRequested;
+        }
+        cleanUp(true /* cleanServices */, true /* setState */);
+        if (remove) {
+            removeFromHistory("appDied");
+        }
     }
 
     @Override
@@ -4114,6 +4179,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Now that the app is going invisible, we can remove it. It will be restarted
             // if made visible again.
             removeDeadWindows();
+            // If this activity is about to finish/stopped and now becomes invisible, remove it
+            // from the unknownApp list in case the activity does not want to draw anything, which
+            // keep the user waiting for the next transition to start.
+            if (finishing || isState(STOPPED)) {
+                displayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+            }
         } else {
             if (!appTransition.isTransitionSet()
                     && appTransition.isReady()) {
@@ -7558,6 +7629,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean showToCurrentUser() {
         return mShowForAllUsers || mWmService.isCurrentProfile(mUserId);
+    }
+
+    @Override
+    boolean canCustomizeAppTransition() {
+        return true;
     }
 
     @Override

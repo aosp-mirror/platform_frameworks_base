@@ -16,7 +16,15 @@
 
 package com.android.server;
 
+import static android.app.UiModeManager.DEFAULT_PRIORITY;
+import static android.app.UiModeManager.MODE_NIGHT_AUTO;
+import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
+import static android.app.UiModeManager.MODE_NIGHT_YES;
+import static android.os.UserHandle.USER_SYSTEM;
+import static android.util.TimeUtils.isTimeBetween;
+
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -64,6 +72,7 @@ import com.android.internal.app.DisableCarModeActivity;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.DumpUtils;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -80,13 +89,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static android.app.UiModeManager.DEFAULT_PRIORITY;
-import static android.app.UiModeManager.MODE_NIGHT_AUTO;
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
-import static android.app.UiModeManager.MODE_NIGHT_YES;
-import static android.os.UserHandle.USER_SYSTEM;
-import static android.util.TimeUtils.isTimeBetween;
 
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
@@ -322,8 +324,7 @@ final class UiModeManagerService extends SystemService {
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
-        super.onSwitchUser(userHandle);
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
         verifySetupWizardCompleted();
     }

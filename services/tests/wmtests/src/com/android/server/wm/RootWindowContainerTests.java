@@ -175,23 +175,30 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testForceStopPackage() {
         final Task task = new ActivityTestsBase.StackBuilder(mWm.mRoot).build();
-        final ActivityRecord activity1 = task.getTopMostActivity();
-        final ActivityRecord activity2 =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService).setStack(task).build();
-        final WindowProcessController wpc = activity1.app;
+        final ActivityRecord activity = task.getTopMostActivity();
+        final WindowProcessController wpc = activity.app;
+        final ActivityRecord[] activities = {
+                activity,
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(task).setUseProcess(wpc).build(),
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(task).setUseProcess(wpc).build()
+        };
+        activities[0].detachFromProcess();
+        activities[1].finishing = true;
+        activities[1].destroyImmediately(true /* removeFromApp */, "test");
         spyOn(wpc);
-        activity1.app = null;
-        activity2.setProcess(wpc);
         doReturn(true).when(wpc).isRemoved();
 
         mWm.mAtmService.mInternal.onForceStopPackage(wpc.mInfo.packageName, true /* doit */,
                 false /* evenPersistent */, wpc.mUserId);
         // The activity without process should be removed.
-        assertEquals(1, task.getChildCount());
+        assertEquals(2, task.getChildCount());
 
-        mWm.mRoot.handleAppDied(wpc);
-        // The activity with process should be removed because WindowProcessController#isRemoved.
+        wpc.handleAppDied();
+        // The activities with process should be removed because WindowProcessController#isRemoved.
         assertFalse(task.hasChild());
+        assertFalse(wpc.hasActivities());
     }
 }
 

@@ -43,6 +43,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.StyleRes;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.annotation.UiThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
@@ -4909,6 +4910,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(deepExport = true)
     @UnsupportedAppUsage
+    @UiContext
     protected Context mContext;
 
     @UnsupportedAppUsage
@@ -15070,6 +15072,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The view's Context.
      */
     @ViewDebug.CapturedViewProperty
+    @UiContext
     public final Context getContext() {
         return mContext;
     }
