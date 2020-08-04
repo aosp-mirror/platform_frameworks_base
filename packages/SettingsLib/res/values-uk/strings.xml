@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показувати пристрої Bluetooth без назв"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Вимкнути абсолютну гучність"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Увімкнути Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Покращене з\'єднання"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Версія Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Виберіть версію Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Версія Bluetooth MAP"</string>

@@ -973,7 +973,7 @@
     <string name="save_password_remember" msgid="6490888932657708341">"Запомніць"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Ніколі"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"У вас няма дазволу на адкрыццё гэтай старонкі."</string>
-    <string name="text_copied" msgid="2531420577879738860">"Тэкст скапіяваны ў буфер абмену."</string>
+    <string name="text_copied" msgid="2531420577879738860">"Тэкст скапіраваны ў буфер абмену."</string>
     <string name="copied" msgid="4675902854553014676">"Скапіравана"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Больш"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Меню+"</string>

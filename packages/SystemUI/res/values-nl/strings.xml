@@ -433,7 +433,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppen"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Apparaat"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Veeg omhoog om te schakelen tussen apps"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Swipe omhoog om te schakelen tussen apps"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Sleep naar rechts om snel tussen apps te schakelen"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Overzicht in-/uitschakelen"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Opgeladen"</string>
@@ -452,12 +452,12 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Minder urgente meldingen onderaan"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Tik nog eens om te openen"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Veeg omhoog om te openen"</string>
-    <string name="keyguard_retry" msgid="886802522584053523">"Veeg omhoog om het opnieuw te proberen"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Swipe omhoog om te openen"</string>
+    <string name="keyguard_retry" msgid="886802522584053523">"Swipe omhoog om het opnieuw te proberen"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dit apparaat is eigendom van je organisatie"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="phone_hint" msgid="6682125338461375925">"Vegen voor telefoon"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"Vegen vanaf pictogram voor spraakassistent"</string>
+    <string name="phone_hint" msgid="6682125338461375925">"Swipen voor telefoon"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"Swipen vanaf icoon voor spraakassistent"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Vegen voor camera"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Helemaal stil. Hiermee worden schermlezers ook op stil gezet."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Helemaal stil"</string>
@@ -566,7 +566,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Vertrouwde gegevens openen"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Je beheerder heeft netwerkregistratie ingeschakeld, waarmee verkeer op je apparaat wordt bijgehouden.\n\nNeem contact op met je beheerder voor meer informatie."</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Je hebt een app toestemming gegeven voor het instellen van een VPN-verbinding.\n\nMet deze app kan je apparaat- en netwerkactiviteit worden gecontroleerd, inclusief e-mails, apps en websites."</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Je hebt een app rechten gegeven voor het instellen van een VPN-verbinding.\n\nMet deze app kan je apparaat- en netwerkactiviteit worden gecontroleerd, inclusief e-mails, apps en websites."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan je netwerkactiviteit controleren, inclusief e-mails, apps en websites.\n\nNeem contact op met je beheerder voor meer informatie.\n\nJe bent ook verbonden met een VPN, waarmee je netwerkactiviteit kan worden gecontroleerd."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Je bent verbonden met <xliff:g id="APPLICATION">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden."</string>
@@ -644,7 +644,7 @@
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth en wifi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Systeem-UI-tuner"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Percentage ingebouwde batterij weergeven"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Accupercentage weergeven in het pictogram op de statusbalk wanneer er niet wordt opgeladen"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Accupercentage weergeven in het icoon op de statusbalk wanneer er niet wordt opgeladen"</string>
     <string name="quick_settings" msgid="6211774484997470203">"Snelle instellingen"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusbalk"</string>
     <string name="overview" msgid="3522318590458536816">"Overzicht"</string>
@@ -853,8 +853,8 @@
     <string name="accessibility_key" msgid="3471162841552818281">"Aangepaste navigatieknop"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Toetscode links"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Toetscode rechts"</string>
-    <string name="left_icon" msgid="5036278531966897006">"Pictogram links"</string>
-    <string name="right_icon" msgid="1103955040645237425">"Pictogram rechts"</string>
+    <string name="left_icon" msgid="5036278531966897006">"Icoon links"</string>
+    <string name="right_icon" msgid="1103955040645237425">"Icoon rechts"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Houd vast en sleep om tegels toe te voegen"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Houd vast en sleep om tegels opnieuw in te delen"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Sleep hier naartoe om te verwijderen"</string>
@@ -864,12 +864,12 @@
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"Uren, minuten en seconden weergeven"</item>
     <item msgid="1271006222031257266">"Uren en minuten weergeven (standaard)"</item>
-    <item msgid="6135970080453877218">"Dit pictogram niet weergeven"</item>
+    <item msgid="6135970080453877218">"Dit icoon niet weergeven"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"Percentage altijd weergeven"</item>
     <item msgid="3805744470661798712">"Percentage weergeven tijdens opladen (standaard)"</item>
-    <item msgid="8619482474544321778">"Dit pictogram niet weergeven"</item>
+    <item msgid="8619482474544321778">"Dit icoon niet weergeven"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Pictogrammen voor meldingen met lage prioriteit weergeven"</string>
     <string name="other" msgid="429768510980739978">"Overig"</string>
@@ -973,7 +973,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Mobiele data uitzetten?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Je hebt dan geen toegang meer tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen nog beschikbaar via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"je provider"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een rechtenverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> toestaan om segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weer te geven?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Deze kan informatie lezen van <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Deze kan acties uitvoeren in <xliff:g id="APP">%1$s</xliff:g>"</string>

@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ കാണിക്കുക"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"അബ്‌സൊല്യൂട്ട് വോളിയം പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche പ്രവർത്തനക്ഷമമാക്കുക"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"മെച്ചപ്പെടുത്തിയ കണക്റ്റിവിറ്റി"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP പതിപ്പ്"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP പതിപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP പതിപ്പ്"</string>
@@ -553,5 +552,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ഈ മാറ്റം ബാധകമാകുന്നതിന് നിങ്ങളുടെ ഉപകരണം റീബൂട്ട് ചെയ്യേണ്ടതുണ്ട്. ഇപ്പോൾ റീബൂട്ട് ചെയ്യുകയോ റദ്ദാക്കുകയോ ചെയ്യുക."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"വയർ മുഖേന ബന്ധിപ്പിച്ച ഹെഡ്ഫോൺ"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"വയേർഡ് ഹെഡ്ഫോൺ"</string>
 </resources>
