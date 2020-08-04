@@ -54,7 +54,6 @@ droiddoc {
     ],
     installable: false,
     custom_template: "droiddoc-templates-sdk",
-    create_stubs: false,
 }
 
 java_library_static {
