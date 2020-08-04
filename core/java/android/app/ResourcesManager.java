@@ -228,7 +228,8 @@ public class ResourcesManager {
         }
     }
 
-    DisplayMetrics getDisplayMetrics() {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public DisplayMetrics getDisplayMetrics() {
         return getDisplayMetrics(Display.DEFAULT_DISPLAY,
                 DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
