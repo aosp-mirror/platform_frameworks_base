@@ -850,13 +850,13 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
         final Task stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
+                new StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc)
                         .build();
         doReturn(true).when(stack).isVisible();
 
         final Task freeformStack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
+                new StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc)
                         .setWindowingMode(WINDOWING_MODE_FREEFORM)
                         .build();
@@ -881,9 +881,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
         final int newOrientation = getRotatedOrientation(dc);
 
-        final Task stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
-                        .setDisplay(dc).build();
+        final Task stack = new StackBuilder(mWm.mAtmService.mRootWindowContainer)
+                .setDisplay(dc).build();
         final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
 
         activity.setRequestedOrientation(newOrientation);
@@ -901,9 +900,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         final int newOrientation = getRotatedOrientation(dc);
 
-        final Task stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
-                        .setDisplay(dc).build();
+        final Task stack = new StackBuilder(mWm.mAtmService.mRootWindowContainer)
+                .setDisplay(dc).build();
         final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
 
         activity.setRequestedOrientation(newOrientation);
@@ -1213,7 +1211,7 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(t, never()).setPosition(any(), eq(0), eq(0));
 
         // Launch another activity before the transition is finished.
-        final ActivityRecord app2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+        final ActivityRecord app2 = new StackBuilder(mWm.mRoot)
                 .setDisplay(mDisplayContent).build().getTopMostActivity();
         app2.setVisible(false);
         mDisplayContent.mOpeningApps.add(app2);
@@ -1247,8 +1245,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final ActivityRecord app = createActivityRecord(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD);
         final Task task = app.getTask();
-        final ActivityRecord app2 = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                .setTask(task).build();
+        final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
         mDisplayContent.setFixedRotationLaunchingApp(app2, (mDisplayContent.getRotation() + 1) % 4);
         doReturn(true).when(task).isAppTransitioning();
         // If the task is animating transition, this should be no-op.
@@ -1513,8 +1510,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testSetWindowingModeAtomicallyUpdatesWindoingModeAndDisplayWindowingMode() {
         final DisplayContent dc = createNewDisplay();
-        final Task stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
+        final Task stack = new StackBuilder(mWm.mAtmService.mRootWindowContainer)
                 .setDisplay(dc)
                 .build();
         doAnswer(invocation -> {

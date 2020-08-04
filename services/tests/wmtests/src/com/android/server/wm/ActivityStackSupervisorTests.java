@@ -55,7 +55,7 @@ import org.junit.runner.RunWith;
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class ActivityStackSupervisorTests extends ActivityTestsBase {
+public class ActivityStackSupervisorTests extends WindowTestsBase {
     private Task mFullscreenStack;
 
     @Before
@@ -69,7 +69,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testStoppingActivityRemovedWhenResumed() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
         mSupervisor.mStoppingActivities.add(firstActivity);
 
@@ -83,7 +83,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testReportWaitingActivityLaunchedIfNeeded() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
 
         final WaitResult taskToFrontWait = new WaitResult();
@@ -121,7 +121,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         task.setResizeMode(unresizableActivity.info.resizeMode);
 
         final TaskChangeNotificationController taskChangeNotifier =
-                mService.getTaskChangeNotificationController();
+                mAtm.getTaskChangeNotificationController();
         spyOn(taskChangeNotifier);
 
         mSupervisor.handleNonResizableTaskIfNeeded(task, newDisplay.getWindowingMode(),
@@ -133,7 +133,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         reset(taskChangeNotifier);
 
         // Put a resizable activity on top of the unresizable task.
-        final ActivityRecord resizableActivity = new ActivityBuilder(mService)
+        final ActivityRecord resizableActivity = new ActivityBuilder(mAtm)
                 .setTask(task).build();
         resizableActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
@@ -150,24 +150,24 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testNotifyTaskFocusChanged() {
-        final ActivityRecord fullScreenActivityA = new ActivityBuilder(mService).setCreateTask(true)
+        final ActivityRecord fullScreenActivityA = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
         final Task taskA = fullScreenActivityA.getTask();
 
         final TaskChangeNotificationController taskChangeNotifier =
-                mService.getTaskChangeNotificationController();
+                mAtm.getTaskChangeNotificationController();
         spyOn(taskChangeNotifier);
 
-        mService.setResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
+        mAtm.setResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
                 eq(true) /* focused */);
         reset(taskChangeNotifier);
 
-        final ActivityRecord fullScreenActivityB = new ActivityBuilder(mService).setCreateTask(true)
+        final ActivityRecord fullScreenActivityB = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
         final Task taskB = fullScreenActivityB.getTask();
 
-        mService.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
+        mAtm.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
                 eq(false) /* focused */);
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskB.mTaskId) /* taskId */,

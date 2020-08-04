@@ -67,7 +67,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -122,7 +121,7 @@ import org.mockito.invocation.InvocationOnMock;
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class ActivityRecordTests extends ActivityTestsBase {
+public class ActivityRecordTests extends WindowTestsBase {
     private Task mStack;
     private Task mTask;
     private ActivityRecord mActivity;
@@ -133,7 +132,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mTask = mStack.getBottomMostTask();
         mActivity = mTask.getTopNonFinishingActivity();
 
-        setBooted(mService);
+        setBooted(mAtm);
     }
 
     @Test
@@ -152,16 +151,16 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testStackCleanupOnTaskRemoval() {
         mStack.removeChild(mTask, null /*reason*/);
         // Stack should be gone on task removal.
-        assertNull(mService.mRootWindowContainer.getStack(mStack.mTaskId));
+        assertNull(mAtm.mRootWindowContainer.getStack(mStack.mTaskId));
     }
 
     @Test
     public void testRemoveChildWithOverlayActivity() {
         final ActivityRecord overlayActivity =
-                new ActivityBuilder(mService).setTask(mTask).build();
+                new ActivityBuilder(mAtm).setTask(mTask).build();
         overlayActivity.setTaskOverlay(true);
         final ActivityRecord overlayActivity2 =
-                new ActivityBuilder(mService).setTask(mTask).build();
+                new ActivityBuilder(mAtm).setTask(mTask).build();
         overlayActivity2.setTaskOverlay(true);
 
         mTask.removeChild(overlayActivity2, "test");
@@ -170,7 +169,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() {
-        final Task newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        final Task newTask = new TaskBuilder(mAtm.mStackSupervisor).setStack(mStack).build();
         mActivity.reparent(newTask, 0, null /*reason*/);
         verify(mStack, times(0)).cleanUpActivityReferences(any());
     }
@@ -213,7 +212,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Make sure the state does not change if we are not the current top activity.
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped behind");
 
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         mStack.mTranslucentActivityWaiting = topActivity;
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
         assertTrue(mActivity.isState(STARTED));
@@ -231,8 +230,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testCanBeLaunchedOnDisplay() {
-        mService.mSupportsMultiWindow = true;
-        final ActivityRecord activity = new ActivityBuilder(mService).build();
+        mAtm.mSupportsMultiWindow = true;
+        final ActivityRecord activity = new ActivityBuilder(mAtm).build();
 
         // An activity can be launched on default display.
         assertTrue(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY));
@@ -251,7 +250,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Set options for two ActivityRecords in same Task. Apply one ActivityRecord options.
         // Pending options should be cleared for both ActivityRecords
-        ActivityRecord activity2 = new ActivityBuilder(mService).setTask(mTask).build();
+        ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(mTask).build();
         activity2.updateOptionsLocked(activityOptions);
         mActivity.updateOptionsLocked(activityOptions);
         mActivity.applyOptionsLocked();
@@ -260,8 +259,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Set options for two ActivityRecords in separate Tasks. Apply one ActivityRecord options.
         // Pending options should be cleared for only ActivityRecord that was applied
-        Task task2 = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
-        activity2 = new ActivityBuilder(mService).setTask(task2).build();
+        Task task2 = new TaskBuilder(mAtm.mStackSupervisor).setStack(mStack).build();
+        activity2 = new ActivityBuilder(mAtm).setTask(task2).build();
         activity2.updateOptionsLocked(activityOptions);
         mActivity.updateOptionsLocked(activityOptions);
         mActivity.applyOptionsLocked();
@@ -362,7 +361,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
-        mActivity = new ActivityBuilder(mService)
+        mActivity = new ActivityBuilder(mAtm)
                 .setTask(mTask)
                 .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
                 .build();
@@ -405,7 +404,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(newConfig);
-        verify(mService.getLifecycleManager()).scheduleTransaction(eq(mActivity.app.getThread()),
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(mActivity.app.getThread()),
                 eq(mActivity.appToken), eq(expected));
     }
 
@@ -500,9 +499,9 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testShouldMakeActive_nonTopVisible() {
-        ActivityRecord finishingActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        ActivityRecord finishingActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         finishingActivity.finishing = true;
-        ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         mActivity.setState(Task.ActivityState.STOPPED, "Testing");
 
         assertEquals(false, mActivity.shouldMakeActive(null /* activeActivity */));
@@ -528,7 +527,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setState(Task.ActivityState.STOPPED, "Testing");
         spyOn(mStack);
 
-        ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         mActivity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent());
         topActivity.finishing = true;
 
@@ -539,7 +538,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testPushConfigurationWhenLaunchTaskBehind() throws Exception {
-        mActivity = new ActivityBuilder(mService)
+        mActivity = new ActivityBuilder(mAtm)
                 .setTask(mTask)
                 .setLaunchTaskBehind(true)
                 .setConfigChanges(CONFIG_ORIENTATION)
@@ -574,7 +573,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(newConfig);
-            verify(mService.getLifecycleManager()).scheduleTransaction(
+            verify(mAtm.getLifecycleManager()).scheduleTransaction(
                     eq(mActivity.app.getThread()), eq(mActivity.appToken), eq(expected));
         } finally {
             stack.getDisplayArea().removeChild(stack);
@@ -583,7 +582,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testShouldStartWhenMakeClientActive() {
-        ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.setOccludesParent(false);
         mActivity.setState(Task.ActivityState.STOPPED, "Testing");
         mActivity.setVisibility(true);
@@ -621,7 +620,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testCanLaunchHomeActivityFromChooser() {
         ComponentName chooserComponent = ComponentName.unflattenFromString(
                 Resources.getSystem().getString(R.string.config_chooserActivity));
-        ActivityRecord chooserActivity = new ActivityBuilder(mService).setComponent(
+        ActivityRecord chooserActivity = new ActivityBuilder(mAtm).setComponent(
                 chooserComponent).build();
         assertThat(mActivity.canLaunchHomeActivity(NOBODY_UID, chooserActivity)).isTrue();
     }
@@ -736,7 +735,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Put a visible activity on top, so the finishing activity doesn't have to wait until the
         // next activity reports idle to destroy it.
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "test");
@@ -914,7 +913,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testFinishActivityIfPossible_nonVisibleNoAppTransition() {
         // Put an activity on top of test activity to make it invisible and prevent us from
         // accidentally resuming the topmost one again.
-        new ActivityBuilder(mService).build();
+        new ActivityBuilder(mAtm).build();
         mActivity.mVisibleRequested = false;
         mActivity.setState(STOPPED, "test");
 
@@ -992,7 +991,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      */
     @Test
     public void testCompleteFinishing_waitForNextVisible() {
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.finishing = true;
@@ -1017,7 +1016,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      */
     @Test
     public void testCompleteFinishing_noWaitForNextVisible_alreadyInvisible() {
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = false;
         topActivity.nowVisible = false;
         topActivity.finishing = true;
@@ -1039,7 +1038,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      */
     @Test
     public void testCompleteFinishing_waitForIdle() {
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.finishing = true;
@@ -1060,7 +1059,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      */
     @Test
     public void testCompleteFinishing_noWaitForNextVisible_stopped() {
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = false;
         topActivity.nowVisible = false;
         topActivity.finishing = true;
@@ -1081,7 +1080,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      */
     @Test
     public void testCompleteFinishing_noWaitForNextVisible_nonFocusedStack() {
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.finishing = true;
@@ -1114,7 +1113,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Make keyguard locked and set the top activity show-when-locked.
         KeyguardController keyguardController = mActivity.mStackSupervisor.getKeyguardController();
         doReturn(true).when(keyguardController).isKeyguardLocked();
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "true");
@@ -1143,18 +1142,18 @@ public class ActivityRecordTests extends ActivityTestsBase {
      */
     @Test
     public void testCompleteFinishing_ensureActivitiesVisible() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         firstActivity.mVisibleRequested = false;
         firstActivity.nowVisible = false;
         firstActivity.setState(STOPPED, "true");
 
-        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         secondActivity.mVisibleRequested = true;
         secondActivity.nowVisible = true;
         secondActivity.setState(PAUSED, "true");
 
         final ActivityRecord translucentActivity =
-                new ActivityBuilder(mService).setTask(mTask).build();
+                new ActivityBuilder(mAtm).setTask(mTask).build();
         translucentActivity.mVisibleRequested = true;
         translucentActivity.nowVisible = true;
         translucentActivity.setState(RESUMED, "true");
@@ -1396,7 +1395,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         final Task firstTaskRecord = mActivity.getTask();
         final ActivityRecord secondActivityRecord =
-                new ActivityBuilder(mService).setTask(firstTaskRecord).setUseProcess(wpc).build();
+                new ActivityBuilder(mAtm).setTask(firstTaskRecord).setUseProcess(wpc).build();
 
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
@@ -1409,7 +1408,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
 
         final ActivityRecord secondActivityRecord =
-                new ActivityBuilder(mService).setTask(mTask).setUseProcess(wpc).build();
+                new ActivityBuilder(mAtm).setTask(mTask).setUseProcess(wpc).build();
 
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
@@ -1505,7 +1504,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
         params.width = params.height = WindowManager.LayoutParams.MATCH_PARENT;
         final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
-                mService.mWindowManager, mock(Session.class), new TestIWindow(), params, mActivity);
+                mAtm.mWindowManager, mock(Session.class), new TestIWindow(), params, mActivity);
         mActivity.addWindow(w);
 
         // Assume the activity is launching in different rotation, and there was an available
@@ -1526,7 +1525,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                     any() /* outContentInsets */, any() /* outStableInsets */,
                     any() /* outDisplayCutout */, any() /* outInputChannel */,
                     any() /* outInsetsState */, any() /* outActiveControls */);
-            TaskSnapshotSurface.create(mService.mWindowManager, mActivity, snapshot);
+            TaskSnapshotSurface.create(mAtm.mWindowManager, mActivity, snapshot);
         } catch (RemoteException ignored) {
         } finally {
             reset(session);
@@ -1602,7 +1601,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final Configuration initialConf =
                 new Configuration(mActivity.getMergedOverrideConfiguration());
         final Task initialTask = mActivity.getTask();
-        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(initialTask)
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(initialTask)
                 .setUseProcess(wpc).build();
 
         assertTrue(wpc.registeredForActivityConfigChanges());
@@ -1696,12 +1695,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
         if (defaultDisplay) {
             display = mRootWindowContainer.getDefaultDisplay();
         } else {
-            display = new TestDisplayContent.Builder(mService, 2000, 1000).setDensityDpi(300)
+            display = new TestDisplayContent.Builder(mAtm, 2000, 1000).setDensityDpi(300)
                     .setPosition(DisplayContent.POSITION_TOP).build();
         }
         final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
-        return new ActivityBuilder(mService).setTask(task).setUseProcess(process).build();
+        return new ActivityBuilder(mAtm).setTask(task).setUseProcess(process).build();
     }
 }

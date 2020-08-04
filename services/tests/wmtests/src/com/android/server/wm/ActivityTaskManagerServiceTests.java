@@ -60,14 +60,14 @@ import java.util.ArrayList;
 @Presubmit
 @MediumTest
 @RunWith(WindowTestRunner.class)
-public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
+public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
             ArgumentCaptor.forClass(ClientTransaction.class);
 
     @Before
     public void setUp() throws Exception {
-        setBooted(mService);
+        setBooted(mAtm);
     }
 
     /** Verify that activity is finished correctly upon request. */
@@ -75,13 +75,13 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     public void testActivityFinish() {
         final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        assertTrue("Activity must be finished", mService.finishActivity(activity.appToken,
+        assertTrue("Activity must be finished", mAtm.finishActivity(activity.appToken,
                 0 /* resultCode */, null /* resultData */,
                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
         assertTrue(activity.finishing);
 
         assertTrue("Duplicate activity finish request must also return 'true'",
-                mService.finishActivity(activity.appToken, 0 /* resultCode */,
+                mAtm.finishActivity(activity.appToken, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
     }
 
@@ -90,10 +90,10 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         final ClientLifecycleManager mockLifecycleManager = mock(ClientLifecycleManager.class);
-        doReturn(mockLifecycleManager).when(mService).getLifecycleManager();
+        doReturn(mockLifecycleManager).when(mAtm).getLifecycleManager();
         doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
-        mService.requestPictureInPictureMode(activity.token);
+        mAtm.requestPictureInPictureMode(activity.token);
 
         verify(mockLifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
         final ClientTransaction transaction = mClientTransactionCaptor.getValue();
@@ -108,11 +108,11 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
-        mService.requestPictureInPictureMode(activity.token);
+        mAtm.requestPictureInPictureMode(activity.token);
 
         // Check enter no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
@@ -122,10 +122,10 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();
 
-        mService.requestPictureInPictureMode(activity.token);
+        mAtm.requestPictureInPictureMode(activity.token);
 
         // Check that no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
@@ -158,14 +158,14 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
             @Override
             public void onFixedRotationFinished(int displayId) {}
         };
-        mService.mWindowManager.registerDisplayWindowListener(listener);
+        mAtm.mWindowManager.registerDisplayWindowListener(listener);
         // Check that existing displays call added
         assertEquals(1, added.size());
         assertEquals(0, changed.size());
         assertEquals(0, removed.size());
         added.clear();
         // Check adding a display
-        DisplayContent newDisp1 = new TestDisplayContent.Builder(mService, 600, 800).build();
+        DisplayContent newDisp1 = new TestDisplayContent.Builder(mAtm, 600, 800).build();
         assertEquals(1, added.size());
         assertEquals(0, changed.size());
         assertEquals(0, removed.size());
@@ -174,7 +174,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
         newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mService.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
+        mAtm.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                 newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
                 false /* deferResume */);
         assertEquals(0, added.size());
@@ -214,13 +214,13 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         //mock other operations
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
-        doReturn(false).when(mService).isInPictureInPictureMode(any());
-        doReturn(false).when(mService).isKeyguardLocked();
+        doReturn(false).when(mAtm).isInPictureInPictureMode(any());
+        doReturn(false).when(mAtm).isKeyguardLocked();
 
         //to simulate NPE
         doReturn(null).when(record).getParent();
 
-        mService.enterPictureInPictureMode(token, params);
+        mAtm.enterPictureInPictureMode(token, params);
         //if record's null parent is not handled gracefully, test will fail with NPE
 
         mockSession.finishMocking();

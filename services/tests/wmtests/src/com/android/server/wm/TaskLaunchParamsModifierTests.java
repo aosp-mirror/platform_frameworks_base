@@ -67,7 +67,7 @@ import java.util.Locale;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
+public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     private static final Rect DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
             /* right */ 1920, /* bottom */ 1080);
     private static final Rect DISPLAY_STABLE_BOUNDS = new Rect(/* left */ 100,
@@ -82,7 +82,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mActivity = new ActivityBuilder(mService).build();
+        mActivity = new ActivityBuilder(mAtm).build();
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
         mActivity.info.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
 
@@ -449,7 +449,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Test
     public void testForceMaximizesUnresizeableApp() {
-        mService.mSizeCompatFreeform = false;
+        mAtm.mSizeCompatFreeform = false;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -472,7 +472,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Test
     public void testLaunchesAppInWindowOnFreeformDisplay() {
-        mService.mSizeCompatFreeform = true;
+        mAtm.mSizeCompatFreeform = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -1318,18 +1318,18 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Test
     public void testNoMultiDisplaySupports() {
-        final boolean orgValue = mService.mSupportsMultiDisplay;
+        final boolean orgValue = mAtm.mSupportsMultiDisplay;
         final TestDisplayContent display = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
         mCurrent.mPreferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
 
         try {
-            mService.mSupportsMultiDisplay = false;
+            mAtm.mSupportsMultiDisplay = false;
             assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                     mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
             assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
                     mResult.mPreferredTaskDisplayArea);
         } finally {
-            mService.mSupportsMultiDisplay = orgValue;
+            mAtm.mSupportsMultiDisplay = orgValue;
         }
     }
 
@@ -1351,7 +1351,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
         final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
-        return new ActivityBuilder(mService).setStack(stack).setCreateTask(true).build();
+        return new ActivityBuilder(mAtm).setStack(stack).setCreateTask(true).build();
     }
 
     private void addFreeformTaskTo(TestDisplayContent display, Rect bounds) {

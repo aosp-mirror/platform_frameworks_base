@@ -830,7 +830,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
         doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
-        final ActivityRecord r = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+        final ActivityRecord r = new StackBuilder(mWm.mRoot)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
         createWindow(null, TYPE_BASE_APPLICATION, r, "win");
