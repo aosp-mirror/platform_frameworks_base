@@ -477,7 +477,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     private ActivityRecord createHomeActivity() {
-        final ActivityRecord homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+        final ActivityRecord homeActivity = new ActivityBuilder(mWm.mAtmService)
                 .setStack(mRootHomeTask)
                 .setCreateTask(true)
                 .build();

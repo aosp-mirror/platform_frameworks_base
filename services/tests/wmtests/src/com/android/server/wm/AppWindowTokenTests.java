@@ -431,7 +431,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         doCallRealMethod().when(mStack).startActivityLocked(
                 any(), any(), anyBoolean(), anyBoolean(), any());
         // Make mVisibleSetFromTransferredStartingWindow true.
-        final ActivityRecord middle = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+        final ActivityRecord middle = new ActivityBuilder(mWm.mAtmService)
                 .setTask(mTask).build();
         mStack.startActivityLocked(middle, null /* focusedTopActivity */,
                 false /* newTask */, false /* keepCurTransition */, null /* options */);
@@ -440,7 +440,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertNull(mActivity.startingWindow);
         assertHasStartingWindow(middle);
 
-        final ActivityRecord top = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+        final ActivityRecord top = new ActivityBuilder(mWm.mAtmService)
                 .setTask(mTask).build();
         // Expect the visibility should be updated to true when transferring starting window from
         // a visible activity.
