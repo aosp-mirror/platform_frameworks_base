@@ -373,10 +373,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     }
 
     @Override
-    public void onPipTransitionStarted(ComponentName activity, int direction) {
+    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
             // Exiting PIP, save the reentry bounds to restore to when re-entering.
-            updateReentryBounds();
+            updateReentryBounds(pipBounds);
             mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
         }
         // Disable touches while the animation is running
@@ -393,15 +393,13 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     /**
      * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
      */
-    public void updateReentryBounds() {
+    public void updateReentryBounds(Rect bounds) {
         // On phones, the expansion animation that happens on pip tap before restoring
         // to fullscreen makes it so that the last reported bounds are the expanded
         // bounds. We want to restore to the unexpanded bounds when re-entering pip,
         // so we use the bounds before expansion (normal) instead of the reported
         // bounds.
         Rect reentryBounds = mTouchHandler.getNormalBounds();
-        // Apply the snap fraction of the current bounds to the normal bounds.
-        final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
         float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
         mPipBoundsHandler.applySnapFraction(reentryBounds, snapFraction);
         mReentryBounds.set(reentryBounds);

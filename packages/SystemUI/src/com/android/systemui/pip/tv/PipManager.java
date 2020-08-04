@@ -663,7 +663,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     };
 
     @Override
-    public void onPipTransitionStarted(ComponentName activity, int direction) { }
+    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) { }
 
     @Override
     public void onPipTransitionFinished(ComponentName activity, int direction) {
