@@ -23643,8 +23643,20 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void onNewUserCreated(final int userId) {
-        mPermissionManager.onNewUserCreated(userId);
+    void onNewUserCreated(@UserIdInt int userId, boolean convertedFromPreCreated) {
+        if (DEBUG_PERMISSIONS) {
+            Slog.d(TAG, "onNewUserCreated(id=" + userId
+                    + ", convertedFromPreCreated=" + convertedFromPreCreated + ")");
+        }
+        if (!convertedFromPreCreated) {
+            mPermissionManager.onNewUserCreated(userId);
+            return;
+        }
+        if (!readPermissionStateForUser(userId)) {
+            // Could not read the existing permissions, re-grant them.
+            Slog.i(TAG, "re-granting permissions for pre-created user " + userId);
+            mPermissionManager.onNewUserCreated(userId);
+        }
     }
 
     boolean readPermissionStateForUser(@UserIdInt int userId) {
