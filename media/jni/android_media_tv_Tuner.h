@@ -250,8 +250,9 @@ class C2DataIdInfo : public C2Param {
 public:
     C2DataIdInfo(uint32_t index, uint64_t value);
 private:
-    typedef C2GlobalParam<C2Info, C2Int64Value, 0> DummyInfo;
-    static const size_t kParamSize = sizeof(DummyInfo);
+    typedef C2GlobalParam<C2Info, C2Int64Value, 0> StubInfo;
+    StubInfo mInfo;
+    static const size_t kParamSize = sizeof(StubInfo);
 };
 
 }  // namespace android
