@@ -2465,6 +2465,36 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
+    @NonNull
+    private Set<String> getGrantedPermissions(@NonNull String packageName,
+            @UserIdInt int userId) {
+        final PackageSetting ps = mPackageManagerInt.getPackageSetting(packageName);
+        if (ps == null) {
+            return null;
+        }
+        final PermissionsState permissionsState = ps.getPermissionsState();
+        return permissionsState.getPermissions(userId);
+    }
+
+    @Nullable
+    private int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
+        BasePermission permission = mSettings.getPermission(permissionName);
+        if (permission == null) {
+            return null;
+        }
+        return permission.computeGids(userId);
+    }
+
+    @Nullable
+    private int[] getPackageGids(@NonNull String packageName, @UserIdInt int userId) {
+        final PackageSetting ps = mPackageManagerInt.getPackageSetting(packageName);
+        if (ps == null) {
+            return null;
+        }
+        final PermissionsState permissionsState = ps.getPermissionsState();
+        return permissionsState.computeGids(userId);
+    }
+
     /**
      * Restore the permission state for a package.
      *
@@ -4673,6 +4703,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void removeAllPermissions(AndroidPackage pkg, boolean chatty) {
             PermissionManagerService.this.removeAllPermissions(pkg, chatty);
+        }
+        @NonNull
+        @Override
+        public Set<String> getGrantedPermissions(@NonNull String packageName,
+                @UserIdInt int userId) {
+            return PermissionManagerService.this.getGrantedPermissions(packageName, userId);
+        }
+        @Nullable
+        @Override
+        public int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
+            return PermissionManagerService.this.getPermissionGids(permissionName, userId);
+        }
+        @Nullable
+        @Override
+        public int[] getPackageGids(@NonNull String packageName, @UserIdInt int userId) {
+            return PermissionManagerService.this.getPackageGids(packageName, userId);
         }
         @Override
         public void grantRequestedRuntimePermissions(AndroidPackage pkg, int[] userIds,

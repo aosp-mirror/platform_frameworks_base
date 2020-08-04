@@ -2966,7 +2966,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mHandler = new PackageHandler(mHandlerThread.getLooper());
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
-            mInstantAppRegistry = new InstantAppRegistry(this);
+            mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager);
 
             ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
                     = systemConfig.getSharedLibraries();
@@ -4380,14 +4380,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageUserState state = ps.readUserState(userId);
         AndroidPackage p = ps.pkg;
         if (p != null) {
-            final PermissionsState permissionsState = ps.getPermissionsState();
-
             // Compute GIDs only if requested
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0
-                    ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
+                    ? EMPTY_INT_ARRAY : mPermissionManager.getPackageGids(ps.name, userId);
             // Compute granted permissions only if package has requested permissions
             final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
-                    ? Collections.emptySet() : permissionsState.getPermissions(userId);
+                    ? Collections.emptySet()
+                    : mPermissionManager.getGrantedPermissions(ps.name, userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
                     ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
@@ -4858,13 +4857,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // TODO: Shouldn't this be checking for package installed state for userId and
                 // return null?
-                return ps.getPermissionsState().computeGids(userId);
+                return mPermissionManager.getPackageGids(packageName, userId);
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return ps.getPermissionsState().computeGids(userId);
+                    return mPermissionManager.getPackageGids(packageName, userId);
                 }
             }
         }
@@ -24917,9 +24916,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public int[] getPermissionGids(String permissionName, int userId) {
-            synchronized (mLock) {
-                return getPermissionGidsLocked(permissionName, userId);
-            }
+            return mPermissionManager.getPermissionGids(permissionName, userId);
         }
 
         @Override
@@ -25236,16 +25233,6 @@ public class PackageManagerService extends IPackageManager.Stub
         } else if (obj instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) obj;
             return PackageInfoUtils.generateProcessInfo(ps.pkg.getProcesses(), 0);
-        }
-        return null;
-    }
-
-    @GuardedBy("mLock")
-    public int[] getPermissionGidsLocked(String permissionName, int userId) {
-        BasePermission perm
-                = mPermissionManager.getPermissionSettings().getPermission(permissionName);
-        if (perm != null) {
-            return perm.computeGids(userId);
         }
         return null;
     }
