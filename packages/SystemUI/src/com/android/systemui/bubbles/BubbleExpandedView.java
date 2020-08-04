@@ -34,6 +34,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPAND
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -76,6 +77,9 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Container for the expanded bubble view, handles rendering the caret and settings icon.
@@ -593,14 +597,17 @@ public class BubbleExpandedView extends LinearLayout {
      */
     void update(Bubble bubble) {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "update: bubble=" + (bubble != null ? bubble.getKey() : "null"));
+            Log.d(TAG, "update: bubble=" + bubble);
+        }
+        if (mStackView == null) {
+            Log.w(TAG, "Stack is null for bubble: " + bubble);
+            return;
         }
         boolean isNew = mBubble == null || didBackingContentChange(bubble);
         if (isNew || bubble != null && bubble.getKey().equals(mBubble.getKey())) {
             mBubble = bubble;
             mSettingsIcon.setContentDescription(getResources().getString(
                     R.string.bubbles_settings_button_description, bubble.getAppName()));
-
             mSettingsIcon.setAccessibilityDelegate(
                     new AccessibilityDelegate() {
                         @Override
@@ -807,5 +814,16 @@ public class BubbleExpandedView extends LinearLayout {
             return mActivityView.getVirtualDisplay();
         }
         return null;
+    }
+
+    /**
+     * Description of current expanded view state.
+     */
+    public void dump(
+            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.print("BubbleExpandedView");
+        pw.print("  taskId:               "); pw.println(mTaskId);
+        pw.print("  activityViewStatus:   "); pw.println(mActivityViewStatus);
+        pw.print("  stackView:            "); pw.println(mStackView);
     }
 }
