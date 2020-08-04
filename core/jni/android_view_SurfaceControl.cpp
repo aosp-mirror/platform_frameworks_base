@@ -119,6 +119,12 @@ static struct {
     jfieldID rotation;
 } gDisplayCaptureArgsClassInfo;
 
+static struct {
+    jfieldID layer;
+    jfieldID excludeLayers;
+    jfieldID childrenOnly;
+} gLayerCaptureArgsClassInfo;
+
 // Implements SkMallocPixelRef::ReleaseProc, to delete the screenshot on unref.
 void DeleteScreenshot(void* addr, void* context) {
     delete ((ScreenshotClient*) context);
@@ -347,24 +353,23 @@ static jobject nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCa
                                        namedColorSpace, captureResults.capturedSecureLayers);
 }
 
-static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTokenObj,
-        jlong layerObject, jobject sourceCropObj, jfloat frameScale,
-        jlongArray excludeObjectArray, jint format) {
-
-    auto layer = reinterpret_cast<SurfaceControl *>(layerObject);
-    if (layer == NULL) {
-        return NULL;
+static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureArgsObject) {
+    LayerCaptureArgs captureArgs;
+    getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
+    SurfaceControl* layer = reinterpret_cast<SurfaceControl*>(
+            env->GetLongField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.layer));
+    if (layer == nullptr) {
+        return nullptr;
     }
 
-    Rect sourceCrop;
-    if (sourceCropObj != NULL) {
-        sourceCrop = rectFromObj(env, sourceCropObj);
-    }
-
-    std::unordered_set<sp<IBinder>,ISurfaceComposer::SpHash<IBinder>> excludeHandles;
+    captureArgs.layerHandle = layer->getHandle();
+    captureArgs.childrenOnly =
+            env->GetBooleanField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.childrenOnly);
+    jlongArray excludeObjectArray = reinterpret_cast<jlongArray>(
+            env->GetObjectField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.excludeLayers));
     if (excludeObjectArray != NULL) {
         const jsize len = env->GetArrayLength(excludeObjectArray);
-        excludeHandles.reserve(len);
+        captureArgs.excludeHandles.reserve(len);
 
         const jlong* objects = env->GetLongArrayElements(excludeObjectArray, nullptr);
         for (jsize i = 0; i < len; i++) {
@@ -373,33 +378,24 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTok
                 jniThrowNullPointerException(env, "Exclude layer is null");
                 return NULL;
             }
-            excludeHandles.emplace(excludeObject->getHandle());
+            captureArgs.excludeHandles.emplace(excludeObject->getHandle());
         }
         env->ReleaseLongArrayElements(excludeObjectArray, const_cast<jlong*>(objects), JNI_ABORT);
     }
 
-    sp<GraphicBuffer> buffer;
-    ui::Dataspace dataspace = ui::Dataspace::V0_SRGB;
-    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
-    if (displayToken != nullptr) {
-        const ui::ColorMode colorMode = SurfaceComposerClient::getActiveColorMode(displayToken);
-        dataspace = pickDataspaceFromColorMode(colorMode);
-    }
-    status_t res = ScreenshotClient::captureChildLayers(layer->getHandle(), dataspace,
-                                                        static_cast<ui::PixelFormat>(format),
-                                                        sourceCrop, excludeHandles, frameScale,
-                                                        &buffer);
+    ScreenCaptureResults captureResults;
+    status_t res = ScreenshotClient::captureLayers(captureArgs, captureResults);
     if (res != NO_ERROR) {
         return NULL;
     }
 
-    jobject jhardwareBuffer =
-            android_hardware_HardwareBuffer_createFromAHardwareBuffer(env,
-                                                                      buffer->toAHardwareBuffer());
-    const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
+    jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
+            env, captureResults.buffer->toAHardwareBuffer());
+    const jint namedColorSpace =
+            fromDataspaceToNamedColorSpaceValue(captureResults.capturedDataspace);
     return env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                        gScreenshotHardwareBufferClassInfo.builder, jhardwareBuffer,
-                                       namedColorSpace, false /* capturedSecureLayers */);
+                                       namedColorSpace, captureResults.capturedSecureLayers);
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
@@ -1659,8 +1655,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             "Landroid/view/SurfaceControl$ScreenshotHardwareBuffer;",
             (void*)nativeCaptureDisplay },
     {"nativeCaptureLayers",
-            "(Landroid/os/IBinder;JLandroid/graphics/Rect;"
-            "F[JI)"
+            "(Landroid/view/SurfaceControl$LayerCaptureArgs;)"
             "Landroid/view/SurfaceControl$ScreenshotHardwareBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
@@ -1855,6 +1850,15 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mUseIdentityTransform", "Z");
     gDisplayCaptureArgsClassInfo.rotation =
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mRotation", "I");
+
+    jclass layerCaptureArgsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$LayerCaptureArgs");
+    gLayerCaptureArgsClassInfo.layer =
+            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mNativeLayer", "J");
+    gLayerCaptureArgsClassInfo.excludeLayers =
+            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mNativeExcludeLayers", "[J");
+    gLayerCaptureArgsClassInfo.childrenOnly =
+            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mChildrenOnly", "Z");
 
     return err;
 }
