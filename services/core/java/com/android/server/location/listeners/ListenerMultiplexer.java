@@ -104,18 +104,18 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      * should return true if a matching call to {@link #unregisterWithService()} is required to
      * unregister (ie, if registration succeeds).
      *
-     * @see #reregisterWithService(Object)
+     * @see #reregisterWithService(Object, Object)
      */
-    protected abstract boolean registerWithService(TMergedRequest mergedRequest);
+    protected abstract boolean registerWithService(TMergedRequest newRequest);
 
     /**
      * Invoked when the service already has a request, and it is being replaced with a new request.
      * The default implementation unregisters first, then registers with the new merged request, but
      * this may be overridden by subclasses in order to reregister more efficiently.
      */
-    protected boolean reregisterWithService(TMergedRequest mergedRequest) {
+    protected boolean reregisterWithService(TMergedRequest oldRequest, TMergedRequest newRequest) {
         unregisterWithService();
-        return registerWithService(mergedRequest);
+        return registerWithService(newRequest);
     }
 
     /**
@@ -368,6 +368,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                     mCurrentRequest = null;
                     if (mServiceRegistered) {
                         mServiceRegistered = false;
+                        mCurrentRequest = null;
                         unregisterWithService();
                     }
                     return;
@@ -376,37 +377,18 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                 TMergedRequest merged = mergeRequests(actives);
                 if (!mServiceRegistered || !Objects.equals(merged, mCurrentRequest)) {
                     if (mServiceRegistered) {
-                        mServiceRegistered = reregisterWithService(merged);
+                        mServiceRegistered = reregisterWithService(mCurrentRequest, merged);
                     } else {
                         mServiceRegistered = registerWithService(merged);
                     }
-                    mCurrentRequest = merged;
+                    if (mServiceRegistered) {
+                        mCurrentRequest = merged;
+                    } else {
+                        mCurrentRequest = null;
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    /**
-     * Evaluates the given predicate for all registrations, and forces an {@link #updateService()}
-     * if any predicate returns true for an active registration. The predicate will always be
-     * evaluated for all registrations, even inactive registrations, or if it has already returned
-     * true for a prior registration.
-     */
-    protected final void updateService(Predicate<TRegistration> predicate) {
-        synchronized (mRegistrations) {
-            boolean updateService = false;
-            final int size = mRegistrations.size();
-            for (int i = 0; i < size; i++) {
-                TRegistration registration = mRegistrations.valueAt(i);
-                if (predicate.test(registration) && registration.isActive()) {
-                    updateService = true;
-                }
-            }
-
-            if (updateService) {
-                updateService();
             }
         }
     }
