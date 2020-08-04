@@ -1091,9 +1091,11 @@ public class BackupManagerServiceRoboTest {
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
-        backupManagerService.beginRestoreSession(mUserOneId, TEST_PACKAGE, TEST_TRANSPORT);
+        backupManagerService.beginRestoreSession(mUserOneId, TEST_PACKAGE, TEST_TRANSPORT,
+                OperationType.BACKUP);
 
-        verify(mUserOneService).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
+        verify(mUserOneService).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT,
+                OperationType.BACKUP);
     }
 
     /** Test that the backup service does not route methods for non-registered users. */
@@ -1103,9 +1105,11 @@ public class BackupManagerServiceRoboTest {
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
-        backupManagerService.beginRestoreSession(mUserTwoId, TEST_PACKAGE, TEST_TRANSPORT);
+        backupManagerService.beginRestoreSession(mUserTwoId, TEST_PACKAGE, TEST_TRANSPORT,
+                OperationType.BACKUP);
 
-        verify(mUserOneService, never()).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
+        verify(mUserOneService, never()).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT,
+                OperationType.BACKUP);
     }
 
     /** Test that the backup service routes methods correctly to the user that requests it. */
