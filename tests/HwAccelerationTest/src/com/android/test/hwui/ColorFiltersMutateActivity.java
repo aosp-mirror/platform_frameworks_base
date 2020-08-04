@@ -60,7 +60,7 @@ public class ColorFiltersMutateActivity extends Activity {
 
         static final String sSkSL =
                 "uniform float param1;\n"
-                + "void main(float x, float y, inout half4 color) {\n"
+                + "void main(float2 xy, inout half4 color) {\n"
                 + "color = half4(color.r, half(param1), color.b, 1.0);\n"
                 + "}\n";
 
