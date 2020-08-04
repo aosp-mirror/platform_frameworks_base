@@ -694,12 +694,8 @@ public final class ActiveServices {
         }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
 
-        if (!r.mAllowWhileInUsePermissionInFgs) {
-            r.mAllowWhileInUsePermissionInFgs =
-                    shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingPid,
-                            callingUid, service, r, allowBackgroundActivityStarts);
-        }
-
+        setFgsRestrictionLocked(callingPackage, callingPid,
+                callingUid, service, r, allowBackgroundActivityStarts);
         return cmp;
     }
 
@@ -1369,6 +1365,7 @@ public final class ActiveServices {
                                     + r.shortInstanceName);
                 }
             }
+
             boolean alreadyStartedOp = false;
             boolean stopProcStatsOp = false;
             if (r.fgRequired) {
@@ -1413,6 +1410,24 @@ public final class ActiveServices {
                     // just turned down its fg request.
                     updateServiceForegroundLocked(r.app, false);
                     ignoreForeground = true;
+                }
+
+                if (!ignoreForeground) {
+                    if (!r.mAllowStartForeground) {
+                        if (!r.mLoggedInfoAllowStartForeground) {
+                            Slog.wtf(TAG, "Background started FGS "
+                                    + r.mInfoAllowStartForeground);
+                            r.mLoggedInfoAllowStartForeground = true;
+                        }
+                        if (mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
+                            Slog.w(TAG,
+                                    "Service.startForeground() not allowed due to "
+                                    + " mAllowStartForeground false: service "
+                                    + r.shortInstanceName);
+                            updateServiceForegroundLocked(r.app, true);
+                            ignoreForeground = true;
+                        }
+                    }
                 }
 
                 // Apps under strict background restrictions simply don't get to have foreground
@@ -2067,12 +2082,7 @@ public final class ActiveServices {
                 }
             }
 
-            if (!s.mAllowWhileInUsePermissionInFgs) {
-                s.mAllowWhileInUsePermissionInFgs =
-                        shouldAllowWhileInUsePermissionInFgsLocked(callingPackage,
-                                callingPid, callingUid,
-                                service, s, false);
-            }
+            setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, s, false);
 
             if (s.app != null) {
                 if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -4840,21 +4850,48 @@ public final class ActiveServices {
     }
 
     /**
-     * Should allow while-in-use permissions in foreground service or not.
-     * while-in-use permissions in FGS started from background might be restricted.
+     * There are two FGS restrictions:
+     * In R, mAllowWhileInUsePermissionInFgs is to allow while-in-use permissions in foreground
+     *  service or not. while-in-use permissions in FGS started from background might be restricted.
+     * In S, mAllowStartForeground is to allow FGS to startForeground or not. Service started
+     * from background may not become a FGS.
      * @param callingPackage caller app's package name.
      * @param callingUid caller app's uid.
      * @param intent intent to start/bind service.
      * @param r the service to start.
      * @return true if allow, false otherwise.
      */
-    private boolean shouldAllowWhileInUsePermissionInFgsLocked(String callingPackage,
+    private void setFgsRestrictionLocked(String callingPackage,
             int callingPid, int callingUid, Intent intent, ServiceRecord r,
             boolean allowBackgroundActivityStarts) {
-        // Is the background FGS start restriction turned on?
+        // Check DeviceConfig flag.
         if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
-            return true;
+            r.mAllowWhileInUsePermissionInFgs = true;
         }
+
+        if (!r.mAllowWhileInUsePermissionInFgs || !r.mAllowStartForeground) {
+            final boolean temp = shouldAllowFgsFeatureLocked(callingPackage, callingPid,
+                    callingUid, intent, r, allowBackgroundActivityStarts);
+            if (!r.mAllowWhileInUsePermissionInFgs) {
+                r.mAllowWhileInUsePermissionInFgs = temp;
+            }
+            if (!r.mAllowStartForeground) {
+                r.mAllowStartForeground = temp;
+            }
+        }
+    }
+
+    /**
+     * Should allow FGS feature or not.
+     * @param callingPackage caller app's package name.
+     * @param callingUid caller app's uid.
+     * @param intent intent to start/bind service.
+     * @param r the service to start.
+     * @return true if allow, false otherwise.
+     */
+    private boolean shouldAllowFgsFeatureLocked(String callingPackage,
+            int callingPid, int callingUid, Intent intent, ServiceRecord r,
+            boolean allowBackgroundActivityStarts) {
         // Is the allow activity background start flag on?
         if (allowBackgroundActivityStarts) {
             return true;
@@ -4894,10 +4931,11 @@ public final class ActiveServices {
         }
 
         // Is the calling UID at PROCESS_STATE_TOP or above?
-        final boolean isCallingUidTopApp = appIsTopLocked(callingUid);
-        if (isCallingUidTopApp) {
+        final int uidState = mAm.getUidState(callingUid);
+        if (uidState <= ActivityManager.PROCESS_STATE_TOP) {
             return true;
         }
+
         // Does the calling UID have any visible activity?
         final boolean isCallingUidVisible = mAm.mAtmInternal.isUidForeground(callingUid);
         if (isCallingUidVisible) {
@@ -4915,6 +4953,19 @@ public final class ActiveServices {
         if (isDeviceOwner) {
             return true;
         }
+
+        final String info =
+                "[callingPackage: " + callingPackage
+                        + "; callingUid: " + callingUid
+                        + "; uidState: " + ProcessList.makeProcStateString(uidState)
+                        + "; intent: " + intent
+                        + "; targetSdkVersion:" + r.appInfo.targetSdkVersion
+                        + "]";
+        if (!info.equals(r.mInfoAllowStartForeground)) {
+            r.mLoggedInfoAllowStartForeground = false;
+            r.mInfoAllowStartForeground = info;
+        }
+
         return false;
     }
 }
