@@ -134,6 +134,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -4787,7 +4788,7 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                 }
             }
-            pw.println();
+
             pw.println("Device properties:");
             pw.println("  Device owner id:" + mDeviceOwnerUserId);
             pw.println();
@@ -4804,8 +4805,26 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             synchronized (mUserStates) {
-                pw.println("  Started users state: " + mUserStates);
+                pw.print("  Started users state: [");
+                final int size = mUserStates.states.size();
+                for (int i = 0; i < size; i++) {
+                    final int userId = mUserStates.states.keyAt(i);
+                    final int state = mUserStates.states.valueAt(i);
+                    pw.print(userId);
+                    pw.print('=');
+                    pw.print(UserState.stateToString(state));
+                    if (i != size - 1) pw.print(", ");
+                }
+                pw.println(']');
             }
+
+            synchronized (mUsersLock) {
+                pw.println();
+                pw.print("Cached user IDs: ");
+                pw.println(Arrays.toString(mUserIds));
+                pw.println();
+            }
+
         } // synchronized (mPackagesLock)
 
         // Dump some capabilities
