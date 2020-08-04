@@ -34,7 +34,7 @@ public final class InputApplicationHandle {
     public String name;
 
     // Dispatching timeout.
-    public long dispatchingTimeoutNanos;
+    public long dispatchingTimeoutMillis;
 
     public final IBinder token;
 
@@ -46,7 +46,7 @@ public final class InputApplicationHandle {
 
     public InputApplicationHandle(InputApplicationHandle handle) {
         this.token = handle.token;
-        this.dispatchingTimeoutNanos = handle.dispatchingTimeoutNanos;
+        this.dispatchingTimeoutMillis = handle.dispatchingTimeoutMillis;
         this.name = handle.name;
     }
 

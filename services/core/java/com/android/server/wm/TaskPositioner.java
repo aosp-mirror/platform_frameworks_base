@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_BOTTOM;
@@ -230,8 +231,8 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
         mDragApplicationHandle = new InputApplicationHandle(new Binder());
         mDragApplicationHandle.name = TAG;
-        mDragApplicationHandle.dispatchingTimeoutNanos =
-                WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        mDragApplicationHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+
 
         mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle,
                 displayContent.getDisplayId());
@@ -239,8 +240,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDragWindowHandle.token = mServerChannel.getToken();
         mDragWindowHandle.layoutParamsFlags = 0;
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
-        mDragWindowHandle.dispatchingTimeoutNanos =
-                WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         mDragWindowHandle.visible = true;
         mDragWindowHandle.canReceiveKeys = false;
         mDragWindowHandle.hasFocus = true;

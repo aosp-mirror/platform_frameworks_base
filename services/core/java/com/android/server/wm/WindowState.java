@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
@@ -1635,10 +1636,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public long getInputDispatchingTimeoutNanos() {
+    public long getInputDispatchingTimeoutMillis() {
         return mActivityRecord != null
-                ? mActivityRecord.mInputDispatchingTimeoutNanos
-                : WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+                ? mActivityRecord.mInputDispatchingTimeoutMillis
+                : DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
     }
 
     @Override

@@ -1522,8 +1522,8 @@ class ProcessRecord implements WindowProcessListener {
         }
     }
 
-    public long getInputDispatchingTimeout() {
-        return mWindowProcessController.getInputDispatchingTimeout();
+    public long getInputDispatchingTimeoutMillis() {
+        return mWindowProcessController.getInputDispatchingTimeoutMillis();
     }
 
     public int getProcessClassEnum() {
