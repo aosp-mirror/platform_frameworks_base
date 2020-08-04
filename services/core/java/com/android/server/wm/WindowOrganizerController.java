@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -45,6 +46,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -127,6 +129,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (callback != null) {
                     syncId = startSyncWithOrganizer(callback);
                 }
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d",
+                        syncId);
                 mService.deferWindowLayout();
                 try {
                     ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
@@ -427,6 +431,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     @VisibleForTesting
     void setSyncReady(int id) {
+        ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Set sync ready, syncId=%d", id);
         mBLASTSyncEngine.setReady(id);
     }
 
@@ -436,9 +441,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     @Override
-    public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
+    public void onTransactionReady(int syncId, Set<WindowContainer> windowContainersReady) {
+        ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Transaction ready, syncId=%d", syncId);
         final IWindowContainerTransactionCallback callback =
-                mTransactionCallbacksByPendingSyncId.get(mSyncId);
+                mTransactionCallbacksByPendingSyncId.get(syncId);
 
         SurfaceControl.Transaction mergedTransaction = new SurfaceControl.Transaction();
         for (WindowContainer container : windowContainersReady) {
@@ -446,14 +452,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         try {
-            callback.onTransactionReady(mSyncId, mergedTransaction);
+            callback.onTransactionReady(syncId, mergedTransaction);
         } catch (RemoteException e) {
             // If there's an exception when trying to send the mergedTransaction to the client, we
             // should immediately apply it here so the transactions aren't lost.
             mergedTransaction.apply();
         }
 
-        mTransactionCallbacksByPendingSyncId.remove(mSyncId);
+        mTransactionCallbacksByPendingSyncId.remove(syncId);
     }
 
     @Override

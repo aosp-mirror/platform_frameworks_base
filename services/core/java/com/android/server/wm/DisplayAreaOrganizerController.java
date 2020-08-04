@@ -18,12 +18,17 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 
+
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizer;
 import android.window.IDisplayAreaOrganizerController;
+
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.HashMap;
 
@@ -67,9 +72,12 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     @Override
     public void registerOrganizer(IDisplayAreaOrganizer organizer, int feature) {
         enforceStackPermission("registerOrganizer()");
+        final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register display organizer=%s uid=%d",
+                        organizer.asBinder(), uid);
                 if (mOrganizersByFeatureIds.get(feature) != null) {
                     throw new IllegalStateException(
                             "Replacing existing organizer currently unsupported");
@@ -96,9 +104,12 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     @Override
     public void unregisterOrganizer(IDisplayAreaOrganizer organizer) {
         enforceStackPermission("unregisterTaskOrganizer()");
+        final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Unregister display organizer=%s uid=%d",
+                        organizer.asBinder(), uid);
                 mOrganizersByFeatureIds.entrySet().removeIf(
                         entry -> entry.getValue().asBinder() == organizer.asBinder());
 
@@ -113,6 +124,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     }
 
     void onDisplayAreaAppeared(IDisplayAreaOrganizer organizer, DisplayArea da) {
+        ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "DisplayArea appeared name=%s", da.getName());
         try {
             SurfaceControl outSurfaceControl = new SurfaceControl(da.getSurfaceControl(),
                     "DisplayAreaOrganizerController.onDisplayAreaAppeared");
@@ -123,6 +135,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     }
 
     void onDisplayAreaVanished(IDisplayAreaOrganizer organizer, DisplayArea da) {
+        ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "DisplayArea vanished name=%s", da.getName());
         try {
             organizer.onDisplayAreaVanished(da.getDisplayAreaInfo());
         } catch (RemoteException e) {
@@ -131,6 +144,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     }
 
     void onDisplayAreaInfoChanged(IDisplayAreaOrganizer organizer, DisplayArea da) {
+        ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "DisplayArea info changed name=%s", da.getName());
         try {
             organizer.onDisplayAreaInfoChanged(da.getDisplayAreaInfo());
         } catch (RemoteException e) {

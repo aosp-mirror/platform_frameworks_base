@@ -17,17 +17,20 @@
 package com.android.wm.shell;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.WindowConfiguration;
+import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.protolog.ShellProtoLogImpl;
+
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Arrays;
 
 /**
  * Unified task organizer for all components in the shell.
@@ -57,6 +60,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      * Adds a listener for tasks in a specific windowing mode.
      */
     public void addListener(TaskListener listener, int... windowingModes) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Add listener for modes=%s listener=%s",
+                Arrays.toString(windowingModes), listener);
         for (int winMode : windowingModes) {
             ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(winMode);
             if (listeners == null) {
@@ -84,6 +89,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      * Removes a registered listener.
      */
     public void removeListener(TaskListener listener) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Remove listener=%s", listener);
         for (int i = 0; i < mListenersByWindowingMode.size(); i++) {
             mListenersByWindowingMode.valueAt(i).remove(listener);
         }
@@ -91,6 +97,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task appeared taskId=%d",
+                taskInfo.taskId);
         mTasks.put(taskInfo.taskId, new Pair<>(taskInfo, leash));
         ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(
                 getWindowingMode(taskInfo));
@@ -103,6 +111,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task info changed taskId=%d",
+                taskInfo.taskId);
         Pair<RunningTaskInfo, SurfaceControl> data = mTasks.get(taskInfo.taskId);
         int winMode = getWindowingMode(taskInfo);
         int prevWinMode = getWindowingMode(data.first);
@@ -134,6 +144,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task root back pressed taskId=%d",
+                taskInfo.taskId);
         ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(
                 getWindowingMode(taskInfo));
         if (listeners != null) {
@@ -145,6 +157,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onTaskVanished(RunningTaskInfo taskInfo) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task vanished taskId=%d",
+                taskInfo.taskId);
         int prevWinMode = getWindowingMode(mTasks.get(taskInfo.taskId).first);
         mTasks.remove(taskInfo.taskId);
         ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(prevWinMode);

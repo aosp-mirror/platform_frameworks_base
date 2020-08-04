@@ -14,27 +14,40 @@
  * limitations under the License.
  */
 
-package com.android.internal.protolog;
+package com.android.wm.shell.protolog;
 
 import android.annotation.Nullable;
+import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.BaseProtoLogImpl;
+import com.android.internal.protolog.ProtoLogViewerConfigReader;
 import com.android.internal.protolog.common.IProtoLogGroup;
+import com.android.wm.shell.R;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import org.json.JSONException;
+
 
 /**
  * A service for the ProtoLog logging system.
  */
-public class ProtoLogImpl extends BaseProtoLogImpl {
+public class ShellProtoLogImpl extends BaseProtoLogImpl {
+    private static final String TAG = "ProtoLogImpl";
     private static final int BUFFER_CAPACITY = 1024 * 1024;
-    private static final String LOG_FILENAME = "/data/misc/wmtrace/wm_log.pb";
-    private static final String VIEWER_CONFIG_FILENAME = "/system/etc/protolog.conf.json.gz";
+    // TODO: Get the right path for the proto log file when we initialize the shell components
+    private static final String LOG_FILENAME = new File("wm_shell_log.pb").getAbsolutePath();
 
-    private static ProtoLogImpl sServiceInstance = null;
+    private static ShellProtoLogImpl sServiceInstance = null;
+
+    private final PrintWriter mSystemOutWriter;
 
     static {
-        addLogGroupEnum(ProtoLogGroup.values());
+        addLogGroupEnum(ShellProtoLogGroup.values());
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
@@ -91,22 +104,35 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     /**
      * Returns the single instance of the ProtoLogImpl singleton class.
      */
-    public static synchronized ProtoLogImpl getSingleInstance() {
+    public static synchronized ShellProtoLogImpl getSingleInstance() {
         if (sServiceInstance == null) {
-            sServiceInstance = new ProtoLogImpl(
-                    new File(LOG_FILENAME), BUFFER_CAPACITY, new ProtoLogViewerConfigReader());
+            sServiceInstance = new ShellProtoLogImpl();
         }
         return sServiceInstance;
     }
 
-    @VisibleForTesting
-    public static synchronized void setSingleInstance(@Nullable ProtoLogImpl instance) {
-        sServiceInstance = instance;
+    public void startTextLogging(Context context, String... groups) {
+        try {
+            mViewerConfig.loadViewerConfig(
+                    context.getResources().openRawResource(R.raw.wm_shell_protolog));
+            setLogging(true /* setTextLogging */, true, mSystemOutWriter, groups);
+        } catch (IOException e) {
+            Log.i(TAG, "Unable to load log definitions: IOException while reading "
+                    + "wm_shell_protolog. " + e);
+        } catch (JSONException e) {
+            Log.i(TAG, "Unable to load log definitions: JSON parsing exception while reading "
+                    + "wm_shell_protolog. " + e);
+        }
     }
 
-    public ProtoLogImpl(File logFile, int bufferCapacity,
-            ProtoLogViewerConfigReader viewConfigReader) {
-        super(logFile, VIEWER_CONFIG_FILENAME, bufferCapacity, viewConfigReader);
+    public void stopTextLogging(String... groups) {
+        setLogging(true /* setTextLogging */, false, mSystemOutWriter, groups);
+    }
+
+    private ShellProtoLogImpl() {
+        super(new File(LOG_FILENAME), null, BUFFER_CAPACITY,
+                new ProtoLogViewerConfigReader());
+        mSystemOutWriter = new PrintWriter(System.out, true);
     }
 }
 
