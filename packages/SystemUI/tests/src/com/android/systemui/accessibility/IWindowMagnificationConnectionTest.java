@@ -18,10 +18,12 @@ package com.android.systemui.accessibility;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -39,6 +41,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -62,6 +65,9 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
     @Mock
     private ModeSwitchesController mModeSwitchesController;
+    @Mock
+    private RemoteCallback mRemoteCallback;
+    private ArgumentCaptor<Runnable> mRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
     private IWindowMagnificationConnection mIWindowMagnificationConnection;
     private WindowMagnification mWindowMagnification;
 
@@ -84,25 +90,24 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     }
 
     @Test
-    public void enableWindowMagnification() throws RemoteException {
+    public void enableWindowMagnification_passThrough() throws RemoteException {
         mIWindowMagnificationConnection.enableWindowMagnification(TEST_DISPLAY, 3.0f, Float.NaN,
-                Float.NaN);
+                Float.NaN, mRemoteCallback);
         waitForIdleSync();
 
-        verify(mWindowMagnificationAnimationController).enableWindowMagnification(3.0f, Float.NaN,
-                Float.NaN);
+        verify(mWindowMagnificationAnimationController).enableWindowMagnification(eq(3.0f),
+                eq(Float.NaN), eq(Float.NaN), mRunnableCaptor.capture());
+        verifyRunnableWrapsRemoteCallback(mRunnableCaptor.getValue());
     }
 
     @Test
     public void disableWindowMagnification_deleteWindowMagnification() throws RemoteException {
-        mIWindowMagnificationConnection.enableWindowMagnification(TEST_DISPLAY, 3.0f, Float.NaN,
-                Float.NaN);
+        mIWindowMagnificationConnection.disableWindowMagnification(TEST_DISPLAY, mRemoteCallback);
         waitForIdleSync();
 
-        mIWindowMagnificationConnection.disableWindowMagnification(TEST_DISPLAY);
-        waitForIdleSync();
-
-        verify(mWindowMagnificationAnimationController).deleteWindowMagnification();
+        verify(mWindowMagnificationAnimationController).deleteWindowMagnification(
+                mRunnableCaptor.capture());
+        verifyRunnableWrapsRemoteCallback(mRunnableCaptor.getValue());
     }
 
     @Test
@@ -137,6 +142,11 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mModeSwitchesController).removeButton(TEST_DISPLAY);
+    }
+
+    private void verifyRunnableWrapsRemoteCallback(Runnable runnable) {
+        runnable.run();
+        verify(mRemoteCallback).sendResult(null);
     }
 }
 

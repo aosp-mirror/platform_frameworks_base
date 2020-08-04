@@ -19,6 +19,8 @@ package com.android.server.accessibility.magnification;
 import static android.os.IBinder.DeathRecipient;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.accessibility.IWindowMagnificationConnection;
@@ -47,9 +49,10 @@ class WindowMagnificationConnectionWrapper {
         mConnection.asBinder().linkToDeath(deathRecipient, 0);
     }
 
-    boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY) {
+    boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+            @Nullable RemoteCallback endCallback) {
         try {
-            mConnection.enableWindowMagnification(displayId, scale, centerX, centerY);
+            mConnection.enableWindowMagnification(displayId, scale, centerX, centerY, endCallback);
         } catch (RemoteException e) {
             if (DBG) {
                 Slog.e(TAG, "Error calling enableWindowMagnification()", e);
@@ -71,9 +74,9 @@ class WindowMagnificationConnectionWrapper {
         return true;
     }
 
-    boolean disableWindowMagnification(int displayId) {
+    boolean disableWindowMagnification(int displayId, @Nullable RemoteCallback endCallback) {
         try {
-            mConnection.disableWindowMagnification(displayId);
+            mConnection.disableWindowMagnification(displayId, endCallback);
         } catch (RemoteException e) {
             if (DBG) {
                 Slog.e(TAG, "Error calling disableWindowMagnification()", e);
