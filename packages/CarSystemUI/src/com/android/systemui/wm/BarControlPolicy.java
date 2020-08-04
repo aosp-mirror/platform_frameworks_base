@@ -172,32 +172,32 @@ public class BarControlPolicy {
     private static class Filter {
         private static final String ALL = "*";
 
-        private final ArraySet<String> mWhitelist;
-        private final ArraySet<String> mBlacklist;
+        private final ArraySet<String> mToInclude;
+        private final ArraySet<String> mToExclude;
 
-        private Filter(ArraySet<String> whitelist, ArraySet<String> blacklist) {
-            mWhitelist = whitelist;
-            mBlacklist = blacklist;
+        private Filter(ArraySet<String> toInclude, ArraySet<String> toExclude) {
+            mToInclude = toInclude;
+            mToExclude = toExclude;
         }
 
         boolean matches(String packageName) {
             if (packageName == null) return false;
-            if (onBlacklist(packageName)) return false;
-            return onWhitelist(packageName);
+            if (toExclude(packageName)) return false;
+            return toInclude(packageName);
         }
 
-        private boolean onBlacklist(String packageName) {
-            return mBlacklist.contains(packageName) || mBlacklist.contains(ALL);
+        private boolean toExclude(String packageName) {
+            return mToExclude.contains(packageName) || mToExclude.contains(ALL);
         }
 
-        private boolean onWhitelist(String packageName) {
-            return mWhitelist.contains(ALL) || mWhitelist.contains(packageName);
+        private boolean toInclude(String packageName) {
+            return mToInclude.contains(ALL) || mToInclude.contains(packageName);
         }
 
         void dump(PrintWriter pw) {
             pw.print("Filter[");
-            dump("whitelist", mWhitelist, pw); pw.print(',');
-            dump("blacklist", mBlacklist, pw); pw.print(']');
+            dump("toInclude", mToInclude, pw); pw.print(',');
+            dump("toExclude", mToExclude, pw); pw.print(']');
         }
 
         private void dump(String name, ArraySet<String> set, PrintWriter pw) {
@@ -221,18 +221,18 @@ public class BarControlPolicy {
         // e.g. "com.package1", or "com.android.systemui, com.android.keyguard" or "*"
         static Filter parse(String value) {
             if (value == null) return null;
-            ArraySet<String> whitelist = new ArraySet<String>();
-            ArraySet<String> blacklist = new ArraySet<String>();
+            ArraySet<String> toInclude = new ArraySet<String>();
+            ArraySet<String> toExclude = new ArraySet<String>();
             for (String token : value.split(",")) {
                 token = token.trim();
                 if (token.startsWith("-") && token.length() > 1) {
                     token = token.substring(1);
-                    blacklist.add(token);
+                    toExclude.add(token);
                 } else {
-                    whitelist.add(token);
+                    toInclude.add(token);
                 }
             }
-            return new Filter(whitelist, blacklist);
+            return new Filter(toInclude, toExclude);
         }
     }
 
