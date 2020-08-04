@@ -130,7 +130,9 @@ public class AppOpsServiceTest {
     }
 
     @After
-    public void resetStaticMocks() {
+    public void tearDown() {
+        mAppOpsService.shutdown();
+
         mMockingSession.finishMocking();
     }
 
@@ -216,9 +218,8 @@ public class AppOpsServiceTest {
                 false);
         mAppOpsService.writeState();
 
-        // Create a new app ops service, and initialize its state from XML.
+        // Create a new app ops service which will initialize its state from XML.
         setupAppOpsService();
-        mAppOpsService.readState();
 
         // Query the state of the 2nd service.
         List<PackageOps> loggedOps = getLoggedOps();
@@ -233,9 +234,8 @@ public class AppOpsServiceTest {
         mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
         mAppOpsService.shutdown();
 
-        // Create a new app ops service, and initialize its state from XML.
+        // Create a new app ops service which will initialize its state from XML.
         setupAppOpsService();
-        mAppOpsService.readState();
 
         // Query the state of the 2nd service.
         List<PackageOps> loggedOps = getLoggedOps();
