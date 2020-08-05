@@ -3497,7 +3497,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             t.traceBegin("PM.onNewUserCreated-" + userId);
-            mPm.onNewUserCreated(userId);
+            mPm.onNewUserCreated(userId, /* convertedFromPreCreated= */ false);
             t.traceEnd();
             if (preCreate) {
                 // Must start user (which will be stopped right away, through
@@ -3570,10 +3570,7 @@ public class UserManagerService extends IUserManager.Stub {
             writeUserListLP();
         }
         updateUserIds();
-        if (!mPm.readPermissionStateForUser(preCreatedUser.id)) {
-            // Could not read the existing permissions, re-grant them.
-            mPm.onNewUserCreated(preCreatedUser.id);
-        }
+        mPm.onNewUserCreated(preCreatedUser.id, /* convertedFromPreCreated= */ true);
         dispatchUserAdded(preCreatedUser);
         return preCreatedUser;
     }
