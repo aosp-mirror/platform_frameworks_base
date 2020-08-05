@@ -30,6 +30,8 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
+import com.android.systemui.dagger.SysUIComponent;
+import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -54,6 +56,8 @@ public class SystemUIFactory {
 
     static SystemUIFactory mFactory;
     private GlobalRootComponent mRootComponent;
+    private WMComponent mWMComponent;
+    private SysUIComponent mSysUIComponent;
 
     public static <T extends SystemUIFactory> T getInstance() {
         return (T) mFactory;
@@ -89,6 +93,9 @@ public class SystemUIFactory {
 
     private void init(Context context) {
         mRootComponent = buildGlobalRootComponent(context);
+        mWMComponent = mRootComponent.getWMComponentBuilder().build();
+        // TODO: use WMComponent to pass APIs into the SysUIComponent.
+        mSysUIComponent = mRootComponent.getSysUIComponent().build();
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
