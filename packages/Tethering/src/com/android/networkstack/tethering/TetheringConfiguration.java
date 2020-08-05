@@ -84,6 +84,9 @@ public class TetheringConfiguration {
     public static final String TETHER_ENABLE_LEGACY_DHCP_SERVER =
             "tether_enable_legacy_dhcp_server";
 
+    public static final String USE_LEGACY_WIFI_P2P_DEDICATED_IP =
+            "use_legacy_wifi_p2p_dedicated_ip";
+
     /**
      * Default value that used to periodic polls tether offload stats from tethering offload HAL
      * to make the data warnings work.
@@ -113,6 +116,7 @@ public class TetheringConfiguration {
     private final int mOffloadPollInterval;
     // TODO: Add to TetheringConfigurationParcel if required.
     private final boolean mEnableBpfOffload;
+    private final boolean mEnableWifiP2pDedicatedIp;
 
     public TetheringConfiguration(Context ctx, SharedLog log, int id) {
         final SharedLog configLog = log.forSubComponent("config");
@@ -155,6 +159,10 @@ public class TetheringConfiguration {
         mOffloadPollInterval = getResourceInteger(res,
                 R.integer.config_tether_offload_poll_interval,
                 DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
+
+        mEnableWifiP2pDedicatedIp = getResourceBoolean(res,
+                R.bool.config_tether_enable_legacy_wifi_p2p_dedicated_ip,
+                false /* defaultValue */);
 
         configLog.log(toString());
     }
@@ -199,6 +207,11 @@ public class TetheringConfiguration {
         return !TextUtils.isEmpty(provisioningAppNoUi);
     }
 
+    /** Check whether dedicated wifi p2p address is enabled. */
+    public boolean shouldEnableWifiP2pDedicatedIp() {
+        return mEnableWifiP2pDedicatedIp;
+    }
+
     /** Does the dumping.*/
     public void dump(PrintWriter pw) {
         pw.print("activeDataSubId: ");
@@ -233,6 +246,9 @@ public class TetheringConfiguration {
 
         pw.print("enableLegacyDhcpServer: ");
         pw.println(enableLegacyDhcpServer);
+
+        pw.print("enableWifiP2pDedicatedIp: ");
+        pw.println(mEnableWifiP2pDedicatedIp);
     }
 
     /** Returns the string representation of this object.*/
