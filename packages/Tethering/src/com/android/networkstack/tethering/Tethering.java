@@ -320,10 +320,13 @@ public class Tethering {
         mExecutor = new TetheringThreadExecutor(mHandler);
         mActiveDataSubIdListener = new ActiveDataSubIdListener(mExecutor);
         mNetdCallback = new NetdCallback();
-        mPrivateAddressCoordinator = new PrivateAddressCoordinator(mContext);
 
         // Load tethering configuration.
         updateConfiguration();
+        // It is OK for the configuration to be passed to the PrivateAddressCoordinator at
+        // construction time because the only part of the configuration it uses is
+        // shouldEnableWifiP2pDedicatedIp(), and currently do not support changing that.
+        mPrivateAddressCoordinator = new PrivateAddressCoordinator(mContext, mConfig);
 
         // Must be initialized after tethering configuration is loaded because BpfCoordinator
         // constructor needs to use the configuration.
@@ -1751,6 +1754,7 @@ public class Tethering {
                     return;
                 }
 
+                mPrivateAddressCoordinator.maybeRemoveDeprecatedUpstreams();
                 mUpstreamNetworkMonitor.startObserveAllNetworks();
 
                 // TODO: De-duplicate with updateUpstreamWanted() below.
