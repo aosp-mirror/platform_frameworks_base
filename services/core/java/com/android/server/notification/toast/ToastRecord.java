@@ -85,4 +85,14 @@ public abstract class ToastRecord {
         }
         pw.println(prefix + this);
     }
+
+    /**
+     * Returns whether it's necessary to bump the process state to keep it alive in order to show
+     * the toast.
+     */
+    public boolean keepProcessAlive() {
+        // By default we assume the toast is rendered by the systemUI. Any toast rendered by the app
+        // should override this method.
+        return false;
+    }
 }
