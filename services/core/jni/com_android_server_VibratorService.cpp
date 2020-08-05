@@ -33,6 +33,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include <vibratorservice/VibratorHalController.h>
+
 using android::hardware::Return;
 using android::hardware::Void;
 using android::hardware::vibrator::V1_0::EffectStrength;
@@ -226,8 +228,24 @@ bool isValidEffect(jlong effect) {
     return val >= *iter.begin() && val <= *std::prev(iter.end());
 }
 
-static void vibratorInit(JNIEnv *env, jclass clazz)
-{
+static aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
+    aidl::CompositeEffect effect;
+    effect.primitive = static_cast<aidl::CompositePrimitive>(
+            env->GetIntField(primitive, gPrimitiveClassInfo.id));
+    effect.scale = static_cast<float>(env->GetFloatField(primitive, gPrimitiveClassInfo.scale));
+    effect.delayMs = static_cast<int32_t>(env->GetIntField(primitive, gPrimitiveClassInfo.delay));
+    return effect;
+}
+
+static void destroyVibratorController(void* rawVibratorController) {
+    vibrator::HalController* vibratorController =
+            reinterpret_cast<vibrator::HalController*>(rawVibratorController);
+    if (vibratorController) {
+        delete vibratorController;
+    }
+}
+
+static jlong vibratorInit(JNIEnv* /* env */, jclass /* clazz */) {
     if (auto hal = getHal<aidl::IVibrator>()) {
         // IBinder::pingBinder isn't accessible as a pointer function
         // but getCapabilities can serve the same purpose
@@ -236,25 +254,26 @@ static void vibratorInit(JNIEnv *env, jclass clazz)
     } else {
         halCall(&V1_0::IVibrator::ping).isOk();
     }
+    std::unique_ptr<vibrator::HalController> controller =
+            std::make_unique<vibrator::HalController>();
+    controller->init();
+    return reinterpret_cast<jlong>(controller.release());
 }
 
-static jboolean vibratorExists(JNIEnv* /* env */, jclass /* clazz */)
-{
-    bool ok;
+static jlong vibratorGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyVibratorController));
+}
 
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        // IBinder::pingBinder isn't accessible as a pointer function
-        // but getCapabilities can serve the same purpose
-        int32_t cap;
-        ok = hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk();
-    } else {
-        ok = halCall(&V1_0::IVibrator::ping).isOk();
+static jboolean vibratorExists(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorExists failed because controller was not initialized");
+        return JNI_FALSE;
     }
-    return ok ? JNI_TRUE : JNI_FALSE;
+    return controller->ping().isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms)
-{
+static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms) {
     if (auto hal = getHal<aidl::IVibrator>()) {
         auto status = hal->call(&aidl::IVibrator::on, timeout_ms, nullptr);
         if (!status.isOk()) {
@@ -268,93 +287,53 @@ static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms)
     }
 }
 
-static void vibratorOff(JNIEnv* /* env */, jclass /* clazz */)
-{
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        auto status = hal->call(&aidl::IVibrator::off);
-        if (!status.isOk()) {
-            ALOGE("vibratorOff command failed: %s", status.toString8().string());
-        }
-    } else {
-        Status retStatus = halCall(&V1_0::IVibrator::off).withDefault(Status::UNKNOWN_ERROR);
-        if (retStatus != Status::OK) {
-            ALOGE("vibratorOff command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
-        }
+static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorOff failed because controller was not initialized");
+        return;
     }
+    controller->off();
 }
 
-static jlong vibratorSupportsAmplitudeControl(JNIEnv*, jclass) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        int32_t cap = 0;
-        if (!hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk()) {
-            return false;
-        }
-        return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
-    } else {
-        return halCall(&V1_0::IVibrator::supportsAmplitudeControl).withDefault(false);
+static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
+                                 jint amplitude) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorSetAmplitude failed because controller was not initialized");
+        return;
     }
+    controller->setAmplitude(static_cast<int32_t>(amplitude));
 }
 
-static void vibratorSetAmplitude(JNIEnv*, jclass, jint amplitude) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        auto status = hal->call(&aidl::IVibrator::IVibrator::setAmplitude, static_cast<float>(amplitude) / UINT8_MAX);
-        if (!status.isOk()) {
-            ALOGE("Failed to set vibrator amplitude: %s", status.toString8().string());
-        }
-    } else {
-        Status status = halCall(&V1_0::IVibrator::setAmplitude, static_cast<uint32_t>(amplitude))
-            .withDefault(Status::UNKNOWN_ERROR);
-        if (status != Status::OK) {
-            ALOGE("Failed to set vibrator amplitude (%" PRIu32 ").",
-                  static_cast<uint32_t>(status));
-        }
+static void vibratorSetExternalControl(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
+                                       jboolean enabled) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorSetExternalControl failed because controller was not initialized");
+        return;
     }
+    controller->setExternalControl(enabled);
 }
 
-static jboolean vibratorSupportsExternalControl(JNIEnv*, jclass) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        int32_t cap = 0;
-        if (!hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk()) {
-            return false;
-        }
-        return (cap & aidl::IVibrator::CAP_EXTERNAL_CONTROL) > 0;
-    } else {
-        return halCall(&V1_3::IVibrator::supportsExternalControl).withDefault(false);
-    }
-}
-
-static void vibratorSetExternalControl(JNIEnv*, jclass, jboolean enabled) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        auto status = hal->call(&aidl::IVibrator::IVibrator::setExternalControl, enabled);
-        if (!status.isOk()) {
-            ALOGE("Failed to set vibrator external control: %s", status.toString8().string());
-        }
-    } else {
-        Status status = halCall(&V1_3::IVibrator::setExternalControl, static_cast<uint32_t>(enabled))
-            .withDefault(Status::UNKNOWN_ERROR);
-        if (status != Status::OK) {
-            ALOGE("Failed to set vibrator external control (%" PRIu32 ").",
-                static_cast<uint32_t>(status));
-        }
-    }
-}
-
-static jintArray vibratorGetSupportedEffects(JNIEnv *env, jclass) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        std::vector<aidl::Effect> supportedEffects;
-        if (!hal->call(&aidl::IVibrator::getSupportedEffects, &supportedEffects).isOk()) {
-            return nullptr;
-        }
-        jintArray arr = env->NewIntArray(supportedEffects.size());
-        env->SetIntArrayRegion(arr, 0, supportedEffects.size(),
-                reinterpret_cast<jint*>(supportedEffects.data()));
-        return arr;
-    } else {
+static jintArray vibratorGetSupportedEffects(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorGetSupportedEffects failed because controller was not initialized");
         return nullptr;
     }
+    auto result = controller->getSupportedEffects();
+    if (!result.isOk()) {
+        return nullptr;
+    }
+    std::vector<aidl::Effect> supportedEffects = result.value();
+    jintArray effects = env->NewIntArray(supportedEffects.size());
+    env->SetIntArrayRegion(effects, 0, supportedEffects.size(),
+                           reinterpret_cast<jint*>(supportedEffects.data()));
+    return effects;
 }
 
-static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong strength,
+static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong effect, jlong strength,
                                    jobject vibration, jboolean withCallback) {
     if (auto hal = getHal<aidl::IVibrator>()) {
         int32_t lengthMs;
@@ -420,17 +399,8 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong stre
     return -1;
 }
 
-static aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
-    aidl::CompositeEffect effect;
-    effect.primitive = static_cast<aidl::CompositePrimitive>(
-            env->GetIntField(primitive, gPrimitiveClassInfo.id));
-    effect.scale = static_cast<float>(env->GetFloatField(primitive, gPrimitiveClassInfo.scale));
-    effect.delayMs = static_cast<int>(env->GetIntField(primitive, gPrimitiveClassInfo.delay));
-    return effect;
-}
-
-static void vibratorPerformComposedEffect(JNIEnv* env, jclass, jobjectArray composition,
-                                   jobject vibration) {
+static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jobjectArray composition,
+                                          jobject vibration) {
     auto hal = getHal<aidl::IVibrator>();
     if (!hal) {
         return;
@@ -451,65 +421,71 @@ static void vibratorPerformComposedEffect(JNIEnv* env, jclass, jobjectArray comp
     }
 }
 
-static jlong vibratorGetCapabilities(JNIEnv*, jclass) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        int32_t cap = 0;
-        if (!hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk()) {
-            return 0;
-        }
-        return cap;
+static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorGetCapabilities failed because controller was not initialized");
+        return 0;
     }
-
-    return 0;
+    auto result = controller->getCapabilities();
+    return result.isOk() ? static_cast<jlong>(result.value()) : 0;
 }
 
-static void vibratorAlwaysOnEnable(JNIEnv* env, jclass, jlong id, jlong effect, jlong strength) {
-    auto status = halCall(&aidl::IVibrator::alwaysOnEnable, id,
-            static_cast<aidl::Effect>(effect), static_cast<aidl::EffectStrength>(strength));
-    if (!status.isOk()) {
-        ALOGE("vibratortAlwaysOnEnable command failed (%s).", status.toString8().string());
+static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong controllerPtr, jlong id,
+                                   jlong effect, jlong strength) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorAlwaysOnEnable failed because controller was not initialized");
+        return;
     }
+    controller->alwaysOnEnable(static_cast<int32_t>(id), static_cast<aidl::Effect>(effect),
+                               static_cast<aidl::EffectStrength>(strength));
 }
 
-static void vibratorAlwaysOnDisable(JNIEnv* env, jclass, jlong id) {
-    auto status = halCall(&aidl::IVibrator::alwaysOnDisable, id);
-    if (!status.isOk()) {
-        ALOGE("vibratorAlwaysOnDisable command failed (%s).", status.toString8().string());
+static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
+                                    jlong id) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorAlwaysOnDisable failed because controller was not initialized");
+        return;
     }
+    controller->alwaysOnDisable(static_cast<int32_t>(id));
 }
 
 static const JNINativeMethod method_table[] = {
-        {"vibratorExists", "()Z", (void*)vibratorExists},
-        {"vibratorInit", "()V", (void*)vibratorInit},
+        {"vibratorInit", "()J", (void*)vibratorInit},
+        {"vibratorGetFinalizer", "()J", (void*)vibratorGetFinalizer},
+        {"vibratorExists", "(J)Z", (void*)vibratorExists},
         {"vibratorOn", "(J)V", (void*)vibratorOn},
-        {"vibratorOff", "()V", (void*)vibratorOff},
-        {"vibratorSupportsAmplitudeControl", "()Z", (void*)vibratorSupportsAmplitudeControl},
-        {"vibratorSetAmplitude", "(I)V", (void*)vibratorSetAmplitude},
+        {"vibratorOff", "(J)V", (void*)vibratorOff},
+        {"vibratorSetAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
         {"vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;Z)J",
          (void*)vibratorPerformEffect},
         {"vibratorPerformComposedEffect",
          "([Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/"
          "VibratorService$Vibration;)V",
          (void*)vibratorPerformComposedEffect},
-        {"vibratorGetSupportedEffects", "()[I", (void*)vibratorGetSupportedEffects},
-        {"vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
-        {"vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
-        {"vibratorGetCapabilities", "()J", (void*)vibratorGetCapabilities},
-        {"vibratorAlwaysOnEnable", "(JJJ)V", (void*)vibratorAlwaysOnEnable},
-        {"vibratorAlwaysOnDisable", "(J)V", (void*)vibratorAlwaysOnDisable},
+        {"vibratorGetSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
+        {"vibratorSetExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
+        {"vibratorGetCapabilities", "(J)J", (void*)vibratorGetCapabilities},
+        {"vibratorAlwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
+        {"vibratorAlwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
 };
 
 int register_android_server_VibratorService(JNIEnv *env) {
-    sMethodIdOnComplete = GetMethodIDOrDie(env,
-            FindClassOrDie(env, "com/android/server/VibratorService$Vibration"),
-            "onComplete", "()V");
-    jclass primitiveClass = FindClassOrDie(env,
-            "android/os/VibrationEffect$Composition$PrimitiveEffect");
+    sMethodIdOnComplete =
+            GetMethodIDOrDie(env,
+                             FindClassOrDie(env, "com/android/server/VibratorService$Vibration"),
+                             "onComplete", "()V");
+
+    jclass primitiveClass =
+            FindClassOrDie(env, "android/os/VibrationEffect$Composition$PrimitiveEffect");
     gPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "id", "I");
     gPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "scale", "F");
     gPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "delay", "I");
-    return jniRegisterNativeMethods(env, "com/android/server/VibratorService",
-            method_table, NELEM(method_table));
+
+    return jniRegisterNativeMethods(env, "com/android/server/VibratorService", method_table,
+                                    NELEM(method_table));
 }
 
-};
+}; // namespace android
