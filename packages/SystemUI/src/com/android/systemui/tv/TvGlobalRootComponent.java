@@ -22,7 +22,6 @@ import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SystemServicesModule;
 import com.android.systemui.dagger.SystemUIBinder;
-import com.android.systemui.dagger.SystemUIDefaultModule;
 import com.android.systemui.dagger.SystemUIModule;
 import com.android.systemui.onehanded.dagger.OneHandedModule;
 
@@ -42,7 +41,7 @@ import dagger.Component;
         SystemServicesModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
-        SystemUIDefaultModule.class,
+        TvSystemUIModule.class,
         TvSystemUIBinder.class})
 public interface TvGlobalRootComponent extends GlobalRootComponent {
     /**
@@ -52,4 +51,7 @@ public interface TvGlobalRootComponent extends GlobalRootComponent {
     interface Builder extends GlobalRootComponent.Builder {
         TvGlobalRootComponent build();
     }
+
+    @Override
+    TvSysUIComponent.Builder getSysUIComponent();
 }

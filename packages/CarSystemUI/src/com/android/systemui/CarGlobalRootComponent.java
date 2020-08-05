@@ -50,4 +50,7 @@ public interface CarGlobalRootComponent extends GlobalRootComponent {
     interface Builder extends GlobalRootComponent.Builder {
         CarGlobalRootComponent build();
     }
+
+    @Override
+    CarSysUIComponent.Builder getSysUIComponent();
 }
