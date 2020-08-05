@@ -1230,7 +1230,7 @@
          with the modem or some other restricted hardware, add "/dev/bus/usb/001/"
          to this list.  If this is empty, no parts of the host USB bus will be excluded.
     -->
-    <string-array name="config_usbHostBlacklist" translatable="false">
+    <string-array name="config_usbHostDenylist" translatable="false">
     </string-array>
 
     <!-- List of paths to serial ports that are available to the serial manager.

@@ -190,22 +190,22 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private String[] mAccessoryStrings;
     private final UEventObserver mUEventObserver;
 
-    private static Set<Integer> sBlackListedInterfaces;
+    private static Set<Integer> sDenyInterfaces;
     private HashMap<Long, FileDescriptor> mControlFds;
 
     static {
-        sBlackListedInterfaces = new HashSet<>();
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_AUDIO);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_COMM);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_HID);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_PRINTER);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_MASS_STORAGE);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_HUB);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CDC_DATA);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CSCID);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CONTENT_SEC);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_VIDEO);
-        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_WIRELESS_CONTROLLER);
+        sDenyInterfaces = new HashSet<>();
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_AUDIO);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_COMM);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_HID);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_PRINTER);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_MASS_STORAGE);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_HUB);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_CDC_DATA);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_CSCID);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_CONTENT_SEC);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_VIDEO);
+        sDenyInterfaces.add(UsbConstants.USB_CLASS_WIRELESS_CONTROLLER);
     }
 
     /*
@@ -884,7 +884,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             while (interfaceCount >= 0) {
                                 UsbInterface intrface = config.getInterface(interfaceCount);
                                 interfaceCount--;
-                                if (sBlackListedInterfaces.contains(intrface.getInterfaceClass())) {
+                                if (sDenyInterfaces.contains(intrface.getInterfaceClass())) {
                                     mHideUsbNotification = true;
                                     break;
                                 }
