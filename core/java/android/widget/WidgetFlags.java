@@ -41,6 +41,28 @@ public final class WidgetFlags {
     public static final boolean ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT = true;
 
     /**
+     * Threshold for the direction of a swipe gesture in order for it to be handled as a cursor drag
+     * rather than a scroll. The direction angle of the swipe gesture must exceed this value in
+     * order to trigger cursor drag; otherwise, the swipe will be assumed to be a scroll gesture.
+     * The value units for this flag is degrees and the valid range is [0,90] inclusive. If a value
+     * < 0 is set, 0 will be used instead; if a value > 90 is set, 90 will be used instead.
+     */
+    public static final String CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL =
+            "CursorControlFeature__min_angle_from_vertical_to_start_cursor_drag";
+
+    /**
+     * The key used in app core settings for the flag
+     * {@link #CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL}.
+     */
+    public static final String KEY_CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL =
+            "widget__min_angle_from_vertical_to_start_cursor_drag";
+
+    /**
+     * Default value for the flag {@link #CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL}.
+     */
+    public static final int CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL_DEFAULT = 45;
+
+    /**
      * The flag of finger-to-cursor distance in DP for cursor dragging.
      * The value unit is DP and the range is {0..100}. If the value is out of range, the legacy
      * value, which is based on handle size, will be used.
