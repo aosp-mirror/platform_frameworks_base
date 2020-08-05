@@ -210,7 +210,6 @@ import android.window.ITaskOrganizer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
@@ -7372,8 +7371,6 @@ class Task extends WindowContainer<WindowContainer> {
             getDisplayArea().positionChildAt(POSITION_TOP, this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
-            MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,
-                    task.effectiveUid, task.realActivity.flattenToString());
         });
     }
 
