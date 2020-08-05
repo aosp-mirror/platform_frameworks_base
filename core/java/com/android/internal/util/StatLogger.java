@@ -84,7 +84,7 @@ public class StatLogger {
      * give it back to the {@link #logDurationStat(int, long)}} after the event.
      */
     public long getTime() {
-        return SystemClock.elapsedRealtimeNanos() / 1000;
+        return SystemClock.uptimeNanos() / 1000;
     }
 
     /**
