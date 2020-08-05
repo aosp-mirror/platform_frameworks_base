@@ -23,6 +23,8 @@ import com.google.common.truth.Expect
 
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.Timeout
+import java.util.concurrent.TimeUnit
 
 /**
  * Collects APKs from the device and verifies that the new parsing behavior outputs
@@ -30,6 +32,9 @@ import org.junit.Test
  */
 @Presubmit
 class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
+
+    @get:Rule
+    val timeout = Timeout(4, TimeUnit.MINUTES)
 
     @get:Rule
     val expect = Expect.create()
