@@ -25,17 +25,28 @@ java_test_host {
     ],
     test_suites: ["general-tests"],
     java_resources: [
-        ":PackageManagerDummyAppVersion1",
-        ":PackageManagerDummyAppVersion2",
-        ":PackageManagerDummyAppVersion3",
-        ":PackageManagerDummyAppVersion4",
-        ":PackageManagerDummyAppOriginalOverride",
-        ":PackageManagerServiceHostTestsResources",
-    ]
+        ":PackageManagerTestAppStub",
+        ":PackageManagerTestAppVersion1",
+        ":PackageManagerTestAppVersion2",
+        ":PackageManagerTestAppVersion3",
+        ":PackageManagerTestAppVersion3Invalid",
+        ":PackageManagerTestAppVersion4",
+        ":PackageManagerTestAppOriginalOverride",
+    ],
 }
 
-filegroup {
-    name: "PackageManagerServiceHostTestsResources",
-    srcs: [ "resources/*" ],
-    path: "resources/"
+genrule {
+    name: "PackageManagerTestAppVersion3Invalid",
+    tools: [
+        "soong_zip",
+        "zipalign",
+    ],
+    srcs: [
+        ":PackageManagerTestAppVersion3",
+    ],
+    out: ["PackageManagerTestAppVersion3Invalid.apk"],
+    cmd: "mkdir -p $(genDir)/apk && unzip $(in) -d $(genDir)/apk" +
+        " && truncate -s 800 $(genDir)/apk/META-INF/CERT.RSA" +
+        " && $(location soong_zip) -o $(genDir)/temp.apk -L 0 -C $(genDir)/apk -D $(genDir)/apk" +
+        " && $(location zipalign) -f 4 $(genDir)/temp.apk $(out)",
 }

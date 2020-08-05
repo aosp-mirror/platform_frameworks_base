@@ -71,13 +71,13 @@ public class PackageSetting extends PackageSettingBase {
     private PackageStateUnserialized pkgState = new PackageStateUnserialized();
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public PackageSetting(String name, String realName, File codePath, File resourcePath,
+    public PackageSetting(String name, String realName, @NonNull File codePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             long pVersionCode, int pkgFlags, int privateFlags,
             int sharedUserId, String[] usesStaticLibraries,
             long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups) {
-        super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
+        super(name, realName, codePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                 pVersionCode, pkgFlags, privateFlags,
                 usesStaticLibraries, usesStaticLibrariesVersions);

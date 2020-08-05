@@ -13,26 +13,32 @@
 // limitations under the License.
 
 android_test_helper_app {
-    name: "PackageManagerDummyAppVersion1",
+    name: "PackageManagerTestAppStub",
+    manifest: "AndroidManifestVersion1.xml",
+    srcs: []
+}
+
+android_test_helper_app {
+    name: "PackageManagerTestAppVersion1",
     manifest: "AndroidManifestVersion1.xml"
 }
 
 android_test_helper_app {
-    name: "PackageManagerDummyAppVersion2",
+    name: "PackageManagerTestAppVersion2",
     manifest: "AndroidManifestVersion2.xml"
 }
 
 android_test_helper_app {
-    name: "PackageManagerDummyAppVersion3",
+    name: "PackageManagerTestAppVersion3",
     manifest: "AndroidManifestVersion3.xml"
 }
 
 android_test_helper_app {
-    name: "PackageManagerDummyAppVersion4",
+    name: "PackageManagerTestAppVersion4",
     manifest: "AndroidManifestVersion4.xml"
 }
 
 android_test_helper_app {
-    name: "PackageManagerDummyAppOriginalOverride",
+    name: "PackageManagerTestAppOriginalOverride",
     manifest: "AndroidManifestOriginalOverride.xml"
 }

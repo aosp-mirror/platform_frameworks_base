@@ -439,7 +439,6 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME,
                 REAL_PACKAGE_NAME,
                 INITIAL_CODE_PATH /*codePath*/,
-                INITIAL_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPathString*/,
                 "x86_64" /*primaryCpuAbiString*/,
                 "x86" /*secondaryCpuAbiString*/,
@@ -461,7 +460,6 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
                 INITIAL_CODE_PATH /*codePath*/,
-                INITIAL_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPathString*/,
                 "x86_64" /*primaryCpuAbiString*/,
                 "x86" /*secondaryCpuAbiString*/,
@@ -477,7 +475,6 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPathString*/,
                 null /*primaryCpuAbiString*/,
                 null /*secondaryCpuAbiString*/,
@@ -507,7 +504,6 @@ public class PackageManagerSettingsTests {
                 null /*disabledPkg*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "arm64-v8a" /*primaryCpuAbi*/,
                 "armeabi" /*secondaryCpuAbi*/,
@@ -541,7 +537,6 @@ public class PackageManagerSettingsTests {
                 null /*disabledPkg*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "arm64-v8a" /*primaryCpuAbi*/,
                 "armeabi" /*secondaryCpuAbi*/,
@@ -581,7 +576,6 @@ public class PackageManagerSettingsTests {
                     null /*disabledPkg*/,
                     testUserSetting01 /*sharedUser*/,
                     UPDATED_CODE_PATH /*codePath*/,
-                    null /*resourcePath*/,
                     null /*legacyNativeLibraryPath*/,
                     "arm64-v8a" /*primaryCpuAbi*/,
                     "armeabi" /*secondaryCpuAbi*/,
@@ -609,7 +603,6 @@ public class PackageManagerSettingsTests {
                 null /*realPkgName*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "arm64-v8a" /*primaryCpuAbi*/,
                 "armeabi" /*secondaryCpuAbi*/,
@@ -624,12 +617,11 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
-        assertThat(testPkgSetting01.codePath, is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getCodePath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
-        assertThat(testPkgSetting01.resourcePath, is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         // signatures object must be different
         assertNotSame(testPkgSetting01.signatures, originalSignatures);
@@ -649,7 +641,6 @@ public class PackageManagerSettingsTests {
                 null /*realPkgName*/,
                 null /*sharedUser*/,
                 INITIAL_CODE_PATH /*codePath*/,
-                INITIAL_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "x86_64" /*primaryCpuAbiString*/,
                 "x86" /*secondaryCpuAbiString*/,
@@ -665,12 +656,11 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
         assertThat(testPkgSetting01.appId, is(0));
-        assertThat(testPkgSetting01.codePath, is(INITIAL_CODE_PATH));
+        assertThat(testPkgSetting01.getCodePath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(0));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
         assertThat(testPkgSetting01.primaryCpuAbiString, is("x86_64"));
-        assertThat(testPkgSetting01.resourcePath, is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("x86"));
         assertThat(testPkgSetting01.versionCode, is(INITIAL_VERSION_CODE));
         // by default, the package is considered stopped
@@ -695,7 +685,6 @@ public class PackageManagerSettingsTests {
                 null /*realPkgName*/,
                 testUserSetting01 /*sharedUser*/,
                 INITIAL_CODE_PATH /*codePath*/,
-                INITIAL_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "x86_64" /*primaryCpuAbiString*/,
                 "x86" /*secondaryCpuAbiString*/,
@@ -711,12 +700,11 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
         assertThat(testPkgSetting01.appId, is(10064));
-        assertThat(testPkgSetting01.codePath, is(INITIAL_CODE_PATH));
+        assertThat(testPkgSetting01.getCodePath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(0));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
         assertThat(testPkgSetting01.primaryCpuAbiString, is("x86_64"));
-        assertThat(testPkgSetting01.resourcePath, is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("x86"));
         assertThat(testPkgSetting01.versionCode, is(INITIAL_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
@@ -738,7 +726,6 @@ public class PackageManagerSettingsTests {
                 null /*realPkgName*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "arm64-v8a" /*primaryCpuAbi*/,
                 "armeabi" /*secondaryCpuAbi*/,
@@ -754,12 +741,11 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
         assertThat(testPkgSetting01.appId, is(10064));
-        assertThat(testPkgSetting01.codePath, is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getCodePath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(0));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
-        assertThat(testPkgSetting01.resourcePath, is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertNotSame(testPkgSetting01.signatures, disabledSignatures);
         assertThat(testPkgSetting01.versionCode, is(UPDATED_VERSION_CODE));
@@ -806,10 +792,10 @@ public class PackageManagerSettingsTests {
     private void verifySettingCopy(PackageSetting origPkgSetting, PackageSetting testPkgSetting) {
         assertThat(origPkgSetting, is(not(testPkgSetting)));
         assertThat(origPkgSetting.appId, is(testPkgSetting.appId));
-        assertSame(origPkgSetting.codePath, testPkgSetting.codePath);
-        assertThat(origPkgSetting.codePath, is(testPkgSetting.codePath));
-        assertSame(origPkgSetting.codePathString, testPkgSetting.codePathString);
-        assertThat(origPkgSetting.codePathString, is(testPkgSetting.codePathString));
+        assertSame(origPkgSetting.getCodePath(), testPkgSetting.getCodePath());
+        assertThat(origPkgSetting.getCodePath(), is(testPkgSetting.getCodePath()));
+        assertSame(origPkgSetting.getCodePathString(), testPkgSetting.getCodePathString());
+        assertThat(origPkgSetting.getCodePathString(), is(testPkgSetting.getCodePathString()));
         assertSame(origPkgSetting.cpuAbiOverrideString, testPkgSetting.cpuAbiOverrideString);
         assertThat(origPkgSetting.cpuAbiOverrideString, is(testPkgSetting.cpuAbiOverrideString));
         assertThat(origPkgSetting.firstInstallTime, is(testPkgSetting.firstInstallTime));
@@ -823,7 +809,9 @@ public class PackageManagerSettingsTests {
                 testPkgSetting.legacyNativeLibraryPathString);
         assertThat(origPkgSetting.legacyNativeLibraryPathString,
                 is(testPkgSetting.legacyNativeLibraryPathString));
-        assertNotSame(origPkgSetting.mimeGroups, testPkgSetting.mimeGroups);
+        if (origPkgSetting.mimeGroups != null) {
+            assertNotSame(origPkgSetting.mimeGroups, testPkgSetting.mimeGroups);
+        }
         assertThat(origPkgSetting.mimeGroups, is(testPkgSetting.mimeGroups));
         assertNotSame(origPkgSetting.mPermissionsState, testPkgSetting.mPermissionsState);
         assertThat(origPkgSetting.mPermissionsState, is(testPkgSetting.mPermissionsState));
@@ -839,10 +827,6 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.primaryCpuAbiString, testPkgSetting.primaryCpuAbiString);
         assertThat(origPkgSetting.primaryCpuAbiString, is(testPkgSetting.primaryCpuAbiString));
         assertThat(origPkgSetting.realName, is(testPkgSetting.realName));
-        assertSame(origPkgSetting.resourcePath, testPkgSetting.resourcePath);
-        assertThat(origPkgSetting.resourcePath, is(testPkgSetting.resourcePath));
-        assertSame(origPkgSetting.resourcePathString, testPkgSetting.resourcePathString);
-        assertThat(origPkgSetting.resourcePathString, is(testPkgSetting.resourcePathString));
         assertSame(origPkgSetting.secondaryCpuAbiString, testPkgSetting.secondaryCpuAbiString);
         assertThat(origPkgSetting.secondaryCpuAbiString, is(testPkgSetting.secondaryCpuAbiString));
         assertSame(origPkgSetting.sharedUser, testPkgSetting.sharedUser);
@@ -874,7 +858,6 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME,
                 REAL_PACKAGE_NAME,
                 INITIAL_CODE_PATH /*codePath*/,
-                INITIAL_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPathString*/,
                 "x86_64" /*primaryCpuAbiString*/,
                 "x86" /*secondaryCpuAbiString*/,
@@ -893,7 +876,6 @@ public class PackageManagerSettingsTests {
                 packageName,
                 packageName,
                 INITIAL_CODE_PATH /*codePath*/,
-                INITIAL_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPathString*/,
                 "x86_64" /*primaryCpuAbiString*/,
                 "x86" /*secondaryCpuAbiString*/,
