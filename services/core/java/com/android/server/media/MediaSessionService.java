@@ -1937,7 +1937,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // Context#getPackageName() for getting package name that matches with the PID/UID,
                 // but it doesn't tell which package has created the MediaController, so useless.
                 return hasMediaControlPermission(controllerPid, controllerUid)
-                        || hasEnabledNotificationListener(userId, controllerPackageName, uid);
+                        || hasEnabledNotificationListener(
+                                userId, controllerPackageName, controllerUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2001,21 +2002,21 @@ public class MediaSessionService extends SystemService implements Monitor {
             return resolvedUserId;
         }
 
-        private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName,
-                int uid) {
-            // TODO: revisit this checking code
-            // You may not access another user's content as an enabled listener.
-            final int userId = UserHandle.getUserHandleForUid(resolvedUserId).getIdentifier();
-            if (resolvedUserId != userId) {
+        private boolean hasEnabledNotificationListener(int callingUserId,
+                String controllerPackageName, int controllerUid) {
+            int controllerUserId = UserHandle.getUserHandleForUid(controllerUid).getIdentifier();
+            if (callingUserId != controllerUserId) {
+                // Enabled notification listener only works within the same user.
                 return false;
             }
-            if (mNotificationManager.hasEnabledNotificationListener(packageName,
-                    UserHandle.getUserHandleForUid(uid))) {
+
+            if (mNotificationManager.hasEnabledNotificationListener(controllerPackageName,
+                    UserHandle.getUserHandleForUid(controllerUid))) {
                 return true;
             }
             if (DEBUG) {
-                Log.d(TAG, packageName + " (uid=" + uid + ") doesn't have an enabled "
-                        + "notification listener");
+                Log.d(TAG, controllerPackageName + " (uid=" + controllerUid
+                        + ") doesn't have an enabled notification listener");
             }
             return false;
         }
