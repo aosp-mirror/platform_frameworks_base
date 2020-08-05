@@ -86,7 +86,7 @@ public interface StatusBarIconController {
     static ArraySet<String> getIconHideList(Context context, String hideListStr) {
         ArraySet<String> ret = new ArraySet<>();
         String[] hideList = hideListStr == null
-            ? context.getResources().getStringArray(R.array.config_statusBarIconBlackList)
+            ? context.getResources().getStringArray(R.array.config_statusBarIconsToExclude)
             : hideListStr.split(",");
         for (String slot : hideList) {
             if (!TextUtils.isEmpty(slot)) {
