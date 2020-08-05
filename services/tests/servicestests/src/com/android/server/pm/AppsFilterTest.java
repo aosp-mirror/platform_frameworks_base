@@ -550,7 +550,6 @@ public class AppsFilterTest {
                 .setAppId(DUMMY_TARGET_APPID)
                 .setName("com.some.package")
                 .setCodePath("/")
-                .setResourcePath("/")
                 .setPVersionCode(1L)
                 .build();
         PackageSetting calling = simulateAddPackage(appsFilter,
@@ -874,7 +873,6 @@ public class AppsFilterTest {
                 .setAppId(appId)
                 .setName(newPkg.getPackageName())
                 .setCodePath("/")
-                .setResourcePath("/")
                 .setPVersionCode(1L);
         final PackageSetting setting =
                 (action == null ? settingBuilder : action.withBuilder(settingBuilder)).build();

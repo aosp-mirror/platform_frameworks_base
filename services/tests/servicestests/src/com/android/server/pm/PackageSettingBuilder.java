@@ -30,7 +30,6 @@ public class PackageSettingBuilder {
     private String mName;
     private String mRealName;
     private String mCodePath;
-    private String mResourcePath;
     private String mLegacyNativeLibraryPathString;
     private String mPrimaryCpuAbiString;
     private String mSecondaryCpuAbiString;
@@ -71,11 +70,6 @@ public class PackageSettingBuilder {
 
     public PackageSettingBuilder setCodePath(String codePath) {
         this.mCodePath = codePath;
-        return this;
-    }
-
-    public PackageSettingBuilder setResourcePath(String resourcePath) {
-        this.mResourcePath = resourcePath;
         return this;
     }
 
@@ -162,10 +156,10 @@ public class PackageSettingBuilder {
 
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
-                new File(mCodePath), new File(mResourcePath),
-                mLegacyNativeLibraryPathString, mPrimaryCpuAbiString, mSecondaryCpuAbiString,
-                mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mSharedUserId,
-                mUsesStaticLibraries, mUsesStaticLibrariesVersions, mMimeGroups);
+                new File(mCodePath), mLegacyNativeLibraryPathString, mPrimaryCpuAbiString,
+                mSecondaryCpuAbiString, mCpuAbiOverrideString, mPVersionCode, mPkgFlags,
+                mPrivateFlags, mSharedUserId, mUsesStaticLibraries, mUsesStaticLibrariesVersions,
+                mMimeGroups);
         packageSetting.signatures = mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
                 : new PackageSignatures();

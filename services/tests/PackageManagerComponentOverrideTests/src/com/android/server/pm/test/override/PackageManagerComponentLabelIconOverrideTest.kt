@@ -33,7 +33,6 @@ import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
-import com.android.server.pm.test.override.R
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.mockThrowOnUnmocked
@@ -266,7 +265,7 @@ class PackageManagerComponentLabelIconOverrideTest {
                     .hideAsFinal()
 
     private fun makePkgSetting(pkgName: String) = spy(PackageSetting(pkgName, null, File("/test"),
-            File("/test"), null, null, null, null, 0, 0, 0, 0, null, null, null)) {
+            null, null, null, null, 0, 0, 0, 0, null, null, null)) {
         this.pkgState.isUpdatedSystemApp = params.isUpdatedSystemApp
     }
 
