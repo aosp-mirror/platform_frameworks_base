@@ -22858,7 +22858,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            displaying, else return the result of calling through to the
      *            super class.
      *
-     * @return boolean If true than the Drawable is being displayed in the
+     * @return boolean If true then the Drawable is being displayed in the
      *         view; else false and it is not allowed to animate.
      *
      * @see #unscheduleDrawable(android.graphics.drawable.Drawable)
