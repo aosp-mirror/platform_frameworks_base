@@ -150,6 +150,8 @@ public class VolumeDialogImpl implements VolumeDialog,
     private boolean mShowing;
     private boolean mShowA11yStream;
 
+    private final boolean mShowLowMediaVolumeIcon;
+
     private int mActiveStream;
     private int mPrevActiveStream;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
@@ -175,6 +177,8 @@ public class VolumeDialogImpl implements VolumeDialog,
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
+        mShowLowMediaVolumeIcon =
+            mContext.getResources().getBoolean(R.bool.config_showLowMediaVolumeIcon);
     }
 
     @Override
@@ -1025,19 +1029,28 @@ public class VolumeDialogImpl implements VolumeDialog,
         final boolean iconEnabled = (mAutomute || ss.muteSupported) && !zenMuted;
         row.icon.setEnabled(iconEnabled);
         row.icon.setAlpha(iconEnabled ? 1 : 0.5f);
-        final int iconRes =
-                isRingVibrate ? R.drawable.ic_volume_ringer_vibrate
-                        : isRingSilent || zenMuted ? row.iconMuteRes
-                                : ss.routedToBluetooth
-                                        ? isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
-                                                : R.drawable.ic_volume_media_bt
-                                        : isStreamMuted(ss) ? row.iconMuteRes : row.iconRes;
+        final int iconRes;
+        if (isRingVibrate) {
+            iconRes = R.drawable.ic_volume_ringer_vibrate;
+        } else if (isRingSilent || zenMuted) {
+            iconRes = row.iconMuteRes;
+        } else if (ss.routedToBluetooth) {
+            iconRes = isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
+                                        : R.drawable.ic_volume_media_bt;
+        } else if (isStreamMuted(ss)) {
+            iconRes = row.iconMuteRes;
+        } else {
+            iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
+                      ? R.drawable.ic_volume_media_low : row.iconRes;
+        }
+
         row.icon.setImageResource(iconRes);
         row.iconState =
                 iconRes == R.drawable.ic_volume_ringer_vibrate ? Events.ICON_STATE_VIBRATE
                 : (iconRes == R.drawable.ic_volume_media_bt_mute || iconRes == row.iconMuteRes)
                         ? Events.ICON_STATE_MUTE
-                : (iconRes == R.drawable.ic_volume_media_bt || iconRes == row.iconRes)
+                : (iconRes == R.drawable.ic_volume_media_bt || iconRes == row.iconRes
+                        || iconRes == R.drawable.ic_volume_media_low)
                         ? Events.ICON_STATE_UNMUTE
                 : Events.ICON_STATE_UNKNOWN;
         if (iconEnabled) {
