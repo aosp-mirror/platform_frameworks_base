@@ -133,9 +133,6 @@ public class PipTouchHandler {
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
-    // The current resized bounds, changed by user resize.
-    // This is used during expand/un-expand to save/restore the user's resized size.
-    @VisibleForTesting Rect mResizedBounds = new Rect();
 
     // The reference inset bounds, used to determine the dismiss fraction
     private Rect mInsetBounds = new Rect();
@@ -380,7 +377,6 @@ public class PipTouchHandler {
 
             mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
         }
-        mResizedBounds.setEmpty();
         mPipResizeGestureHandler.onActivityUnpinned();
     }
 
@@ -390,9 +386,8 @@ public class PipTouchHandler {
         mMotionHelper.synchronizePinnedStackBounds();
         updateMovementBounds();
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
-            // updates mResizedBounds only if it's an entering PiP animation
-            // mResized should be otherwise updated in setMenuState.
-            mResizedBounds.set(mMotionHelper.getBounds());
+            // Set the initial bounds as the user resize bounds.
+            mPipResizeGestureHandler.setUserResizeBounds(mMotionHelper.getBounds());
         }
 
         if (mShowPipMenuOnAnimationEnd) {
@@ -805,9 +800,7 @@ public class PipTouchHandler {
             // Save the current snap fraction and if we do not drag or move the PiP, then
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
             // fraction and snap to the closest edge.
-            // Also save the current resized bounds so when the menu disappears, we can restore it.
             if (resize) {
-                mResizedBounds.set(mMotionHelper.getBounds());
                 Rect expandedBounds = new Rect(mExpandedBounds);
                 mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                         mMovementBounds, mExpandedMovementBounds, callback);
@@ -836,7 +829,7 @@ public class PipTouchHandler {
                 }
 
                 if (mDeferResizeToNormalBoundsUntilRotation == -1) {
-                    Rect restoreBounds = new Rect(mResizedBounds);
+                    Rect restoreBounds = new Rect(getUserResizeBounds());
                     Rect restoredMovementBounds = new Rect();
                     mSnapAlgorithm.getMovementBounds(restoreBounds, mInsetBounds,
                             restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
@@ -887,6 +880,10 @@ public class PipTouchHandler {
      */
     public Rect getNormalBounds() {
         return mNormalBounds;
+    }
+
+    Rect getUserResizeBounds() {
+        return mPipResizeGestureHandler.getUserResizeBounds();
     }
 
     /**
