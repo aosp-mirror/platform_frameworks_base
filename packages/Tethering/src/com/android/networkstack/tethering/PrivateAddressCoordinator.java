@@ -15,6 +15,8 @@
  */
 package com.android.networkstack.tethering;
 
+import static android.net.TetheringManager.TETHERING_WIFI_P2P;
+
 import static java.util.Arrays.asList;
 
 import android.content.Context;
@@ -58,6 +60,7 @@ public class PrivateAddressCoordinator {
     private static final int BYTE_MASK = 0xff;
     // reserved for bluetooth tethering.
     private static final int BLUETOOTH_RESERVED = 44;
+    private static final int WIFI_P2P_RESERVED = 49;
     private static final byte DEFAULT_ID = (byte) 42;
 
     // Upstream monitor would be stopped when tethering is down. When tethering restart, downstream
@@ -71,15 +74,18 @@ public class PrivateAddressCoordinator {
     // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
     // Tethering use 192.168.0.0/16 that has 256 contiguous class C network numbers.
     private static final String DEFAULT_TETHERING_PREFIX = "192.168.0.0/16";
+    private static final String LEGACY_WIFI_P2P_IFACE_ADDRESS = "192.168.49.1/24";
     private final IpPrefix mTetheringPrefix;
     private final ConnectivityManager mConnectivityMgr;
+    private final TetheringConfiguration mConfig;
 
-    public PrivateAddressCoordinator(Context context) {
+    public PrivateAddressCoordinator(Context context, TetheringConfiguration config) {
         mDownstreams = new ArraySet<>();
         mUpstreamPrefixMap = new ArrayMap<>();
         mTetheringPrefix = new IpPrefix(DEFAULT_TETHERING_PREFIX);
         mConnectivityMgr = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
+        mConfig = config;
     }
 
     /**
@@ -141,12 +147,21 @@ public class PrivateAddressCoordinator {
         mUpstreamPrefixMap.removeAll(toBeRemoved);
     }
 
+    private boolean isReservedSubnet(final int subnet) {
+        return subnet == BLUETOOTH_RESERVED || subnet == WIFI_P2P_RESERVED;
+    }
+
     /**
      * Pick a random available address and mark its prefix as in use for the provided IpServer,
      * returns null if there is no available address.
      */
     @Nullable
     public LinkAddress requestDownstreamAddress(final IpServer ipServer) {
+        if (mConfig.shouldEnableWifiP2pDedicatedIp()
+                && ipServer.interfaceType() == TETHERING_WIFI_P2P) {
+            return new LinkAddress(LEGACY_WIFI_P2P_IFACE_ADDRESS);
+        }
+
         // Address would be 192.168.[subAddress]/24.
         final byte[] bytes = mTetheringPrefix.getRawAddress();
         final int subAddress = getRandomSubAddr();
@@ -154,7 +169,7 @@ public class PrivateAddressCoordinator {
         bytes[3] = getSanitizedAddressSuffix(subAddress, (byte) 0, (byte) 1, (byte) 0xff);
         for (int i = 0; i < MAX_UBYTE; i++) {
             final int newSubNet = (subNet + i) & BYTE_MASK;
-            if (newSubNet == BLUETOOTH_RESERVED) continue;
+            if (isReservedSubnet(newSubNet)) continue;
 
             bytes[2] = (byte) newSubNet;
             final InetAddress addr;
