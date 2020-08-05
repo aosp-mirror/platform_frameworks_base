@@ -768,8 +768,8 @@ public class BinderCallsStatsTest {
 
         final ArrayList<BinderCallsStats.CallStat> callStatsList = new ArrayList<>();
         bcs.setCallStatsObserver(
-                (workSourceUid, incrementalCallCount, callStats) -> callStatsList.addAll(
-                        callStats));
+                (workSourceUid, incrementalCallCount, callStats, binderThreadIds) ->
+                        callStatsList.addAll(callStats));
 
         Binder binder = new Binder();
 

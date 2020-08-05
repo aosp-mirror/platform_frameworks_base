@@ -38,7 +38,8 @@ import java.util.Collection;
 @SmallTest
 public class BatteryStatsBinderCallStatsTest extends TestCase {
 
-    private static final int TRANSACTION_CODE = 100;
+    private static final int TRANSACTION_CODE1 = 100;
+    private static final int TRANSACTION_CODE2 = 101;
 
     /**
      * Test BatteryStatsImpl.Uid.noteBinderCallStats.
@@ -53,23 +54,23 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
 
         Collection<BinderCallsStats.CallStat> callStats = new ArrayList<>();
         BinderCallsStats.CallStat stat1 = new BinderCallsStats.CallStat(callingUid,
-                MockBinder.class, TRANSACTION_CODE, true /*screenInteractive */);
+                MockBinder.class, TRANSACTION_CODE1, true /*screenInteractive */);
         stat1.incrementalCallCount = 21;
         stat1.recordedCallCount = 5;
         stat1.cpuTimeMicros = 1000;
         callStats.add(stat1);
 
-        bi.noteBinderCallStats(workSourceUid, 42, callStats);
+        bi.noteBinderCallStats(workSourceUid, 42, callStats, null);
 
         callStats.clear();
         BinderCallsStats.CallStat stat2 = new BinderCallsStats.CallStat(callingUid,
-                MockBinder.class, TRANSACTION_CODE, true /*screenInteractive */);
+                MockBinder.class, TRANSACTION_CODE1, true /*screenInteractive */);
         stat2.incrementalCallCount = 9;
         stat2.recordedCallCount = 8;
         stat2.cpuTimeMicros = 500;
         callStats.add(stat2);
 
-        bi.noteBinderCallStats(workSourceUid, 8, callStats);
+        bi.noteBinderCallStats(workSourceUid, 8, callStats, null);
 
         BatteryStatsImpl.Uid uid = bi.getUidStatsLocked(workSourceUid);
         assertEquals(42 + 8, uid.getBinderCallCount());
@@ -85,9 +86,62 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
         assertEquals(500, value.recordedCpuTimeMicros);
     }
 
+
+    @Test
+    public void testProportionalSystemServiceUsage_noStatsForSomeMethods() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        int callingUid = Process.FIRST_APPLICATION_UID + 1;
+        int workSourceUid1 = Process.FIRST_APPLICATION_UID + 1;
+        int workSourceUid2 = Process.FIRST_APPLICATION_UID + 2;
+        int workSourceUid3 = Process.FIRST_APPLICATION_UID + 3;
+
+        Collection<BinderCallsStats.CallStat> callStats = new ArrayList<>();
+        BinderCallsStats.CallStat stat1a = new BinderCallsStats.CallStat(callingUid,
+                MockBinder.class, TRANSACTION_CODE1, true /*screenInteractive */);
+        stat1a.incrementalCallCount = 10;
+        stat1a.recordedCallCount = 5;
+        stat1a.cpuTimeMicros = 1000;
+        callStats.add(stat1a);
+
+        BinderCallsStats.CallStat stat1b = new BinderCallsStats.CallStat(callingUid,
+                MockBinder.class, TRANSACTION_CODE2, true /*screenInteractive */);
+        stat1b.incrementalCallCount = 30;
+        stat1b.recordedCallCount = 15;
+        stat1b.cpuTimeMicros = 1500;
+        callStats.add(stat1b);
+
+        bi.noteBinderCallStats(workSourceUid1, 65, callStats, null);
+
+        // No recorded stats for some methods. Must use the global average.
+        callStats.clear();
+        BinderCallsStats.CallStat stat2 = new BinderCallsStats.CallStat(callingUid,
+                MockBinder.class, TRANSACTION_CODE1, true /*screenInteractive */);
+        stat2.incrementalCallCount = 10;
+        callStats.add(stat2);
+
+        bi.noteBinderCallStats(workSourceUid2, 40, callStats, null);
+
+        // No stats for any calls. Must use the global average
+        callStats.clear();
+        bi.noteBinderCallStats(workSourceUid3, 50, callStats, null);
+
+        bi.updateSystemServiceCallStats();
+
+        double prop1 = bi.getUidStatsLocked(workSourceUid1).getProportionalSystemServiceUsage();
+        double prop2 = bi.getUidStatsLocked(workSourceUid2).getProportionalSystemServiceUsage();
+        double prop3 = bi.getUidStatsLocked(workSourceUid3).getProportionalSystemServiceUsage();
+
+        assertEquals(0.419, prop1, 0.01);
+        assertEquals(0.258, prop2, 0.01);
+        assertEquals(0.323, prop3, 0.01);
+        assertEquals(1.000, prop1 + prop2 + prop3, 0.01);
+    }
+
     private static class MockBinder extends Binder {
         public static String getDefaultTransactionName(int txCode) {
-            return txCode == TRANSACTION_CODE ? "testMethod" : "unknown";
+            return txCode == TRANSACTION_CODE1 ? "testMethod" : "unknown";
         }
     }
 }
