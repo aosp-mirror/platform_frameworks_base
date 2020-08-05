@@ -232,11 +232,12 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         mAutoTvOff = enabled;
     }
 
+    @Override
     @ServiceThreadOnly
     @VisibleForTesting
     void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
-        mIsActiveSource = on;
+        super.setIsActiveSource(on);
         if (on) {
             getWakeLock().acquire();
         } else {
@@ -274,19 +275,15 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleActiveSource(HdmiCecMessage message) {
-        super.handleActiveSource(message);
-        if (mIsActiveSource) {
-            return true;
-        }
+    protected void onActiveSourceLost() {
+        assertRunOnServiceThread();
         switch (mPowerStateChangeOnActiveSourceLost) {
             case STANDBY_NOW:
                 mService.standby();
-                return true;
+                return;
             case NONE:
-                return true;
+                return;
         }
-        return true;
     }
 
     @ServiceThreadOnly
@@ -398,9 +395,12 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @Override
+    @ServiceThreadOnly
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
+        assertRunOnServiceThread();
         if (physicalAddress != mService.getPhysicalAddress()) {
-            return; // Do nothing.
+            setActiveSource(physicalAddress);
+            return;
         }
         switch (mPlaybackDeviceActionOnRoutingControl) {
             case WAKE_UP_AND_SEND_ACTIVE_SOURCE:
