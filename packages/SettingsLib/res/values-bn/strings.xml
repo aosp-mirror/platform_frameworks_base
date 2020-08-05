@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ফিচার চালু করুন"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"কানেক্টিভিটি উন্নত করা হয়েছে"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ব্লুটুথ AVRCP ভার্সন"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ব্লুটুথ AVRCP ভার্সন বেছে নিন"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ব্লুটুথ MAP ভার্সন"</string>
