@@ -19,6 +19,8 @@ package com.android.systemui.car.voicerecognition;
 import static com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier.INVALID_VALUE;
 import static com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier.VOICE_RECOGNITION_STARTED;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -40,11 +42,13 @@ import com.android.systemui.car.CarSystemUiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 @CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
+// TODO(b/162866441): Refactor to use the Executor pattern instead.
 public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
@@ -52,13 +56,15 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
     private ConnectedDeviceVoiceRecognitionNotifier mVoiceRecognitionNotifier;
     private TestableLooper mTestableLooper;
+    private Handler mHandler;
     private Handler mTestHandler;
     private BluetoothDevice mBluetoothDevice;
 
     @Before
     public void setUp() throws Exception {
         mTestableLooper = TestableLooper.get(this);
-        mTestHandler = spy(new Handler(mTestableLooper.getLooper()));
+        mHandler = new Handler(mTestableLooper.getLooper());
+        mTestHandler = spy(mHandler);
         mBluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
                 BLUETOOTH_REMOTE_ADDRESS);
         mVoiceRecognitionNotifier = new ConnectedDeviceVoiceRecognitionNotifier(
@@ -74,8 +80,14 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
-        verify(mTestHandler).post(any());
+        mHandler.post(() -> {
+            ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+            verify(mTestHandler).post(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue()).isNotNull();
+            assertThat(argumentCaptor.getValue()).isNotEqualTo(this);
+        });
     }
 
     @Test
@@ -86,8 +98,11 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
-        verify(mTestHandler, never()).post(any());
+        mHandler.post(() -> {
+            verify(mTestHandler, never()).post(any());
+        });
     }
 
     @Test
@@ -97,8 +112,11 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
-        verify(mTestHandler, never()).post(any());
+        mHandler.post(() -> {
+            verify(mTestHandler, never()).post(any());
+        });
     }
 
     @Test
@@ -108,7 +126,10 @@ public class ConnectedDeviceVoiceRecognitionNotifierTest extends SysuiTestCase {
 
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
-        verify(mTestHandler, never()).post(any());
+        mHandler.post(() -> {
+            verify(mTestHandler, never()).post(any());
+        });
     }
 }
