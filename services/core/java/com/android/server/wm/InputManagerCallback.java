@@ -10,6 +10,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSIDE_FOCUS;
 
+import android.annotation.Nullable;
 import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
@@ -173,23 +174,23 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
-            String reason) {
+            @Nullable Integer pid, String reason) {
         final long startTime = SystemClock.uptimeMillis();
         try {
-            return notifyANRInner(inputApplicationHandle, token, reason);
+            return notifyANRInner(inputApplicationHandle, token, pid, reason);
         } finally {
             // Log the time because the method is called from InputDispatcher thread. It shouldn't
-            // take too long that may affect input response time.
+            // take too long because it blocks input while executing.
             Slog.d(TAG_WM, "notifyANR took " + (SystemClock.uptimeMillis() - startTime) + "ms");
         }
     }
 
     private long notifyANRInner(InputApplicationHandle inputApplicationHandle, IBinder token,
-            String reason) {
+            @Nullable Integer pid, String reason) {
         ActivityRecord activity = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
-        int windowPid = INVALID_PID;
+        int windowPid = pid != null ? pid : INVALID_PID;
 
         preDumpIfLockTooSlow();
 
