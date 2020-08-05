@@ -3321,7 +3321,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** {@hide} */
     void setStagedSessionReady() {
         synchronized (mLock) {
-            if (mDestroyed) return; // Do not allow destroyed staged session to change state
+            // Do not allow destroyed/failed staged session to change state
+            if (mDestroyed || mStagedSessionFailed) return;
             mStagedSessionReady = true;
             mStagedSessionApplied = false;
             mStagedSessionFailed = false;
@@ -3332,10 +3333,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /** {@hide} */
-    void setStagedSessionFailed(@StagedSessionErrorCode int errorCode,
-                                String errorMessage) {
+    void setStagedSessionFailed(@StagedSessionErrorCode int errorCode, String errorMessage) {
         synchronized (mLock) {
-            if (mDestroyed) return; // Do not allow destroyed staged session to change state
+            // Do not allow destroyed/failed staged session to change state
+            if (mDestroyed || mStagedSessionFailed) return;
             mStagedSessionReady = false;
             mStagedSessionApplied = false;
             mStagedSessionFailed = true;
@@ -3350,7 +3351,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** {@hide} */
     void setStagedSessionApplied() {
         synchronized (mLock) {
-            if (mDestroyed) return; // Do not allow destroyed staged session to change state
+            // Do not allow destroyed/failed staged session to change state
+            if (mDestroyed || mStagedSessionFailed) return;
             mStagedSessionReady = false;
             mStagedSessionApplied = true;
             mStagedSessionFailed = false;

@@ -270,11 +270,12 @@ public abstract class ApexManager {
     abstract boolean revertActiveSessions();
 
     /**
-     * Abandons the staged session with the given sessionId.
+     * Abandons the staged session with the given sessionId. Client should handle {@code false}
+     * return value carefully as failure here can leave device in inconsistent state.
      *
-     * @return {@code true} upon success, {@code false} if any remote exception occurs
+     * @return {@code true} upon success, {@code false} if any exception occurs
      */
-    abstract boolean abortStagedSession(int sessionId) throws PackageManagerException;
+    abstract boolean abortStagedSession(int sessionId);
 
     /**
      * Uninstalls given {@code apexPackage}.
@@ -753,17 +754,13 @@ public abstract class ApexManager {
         }
 
         @Override
-        boolean abortStagedSession(int sessionId) throws PackageManagerException {
+        boolean abortStagedSession(int sessionId) {
             try {
                 waitForApexService().abortStagedSession(sessionId);
                 return true;
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Unable to contact apexservice", re);
-                return false;
             } catch (Exception e) {
-                throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Failed to abort staged session : " + e.getMessage());
+                Slog.e(TAG, e.getMessage(), e);
+                return false;
             }
         }
 
@@ -1122,7 +1119,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        boolean abortStagedSession(int sessionId) throws PackageManagerException {
+        boolean abortStagedSession(int sessionId) {
             throw new UnsupportedOperationException();
         }
 
