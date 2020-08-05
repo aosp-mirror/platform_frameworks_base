@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+
 import static com.android.server.wm.DragDropController.MSG_ANIMATION_END;
 import static com.android.server.wm.DragDropController.MSG_DRAG_END_TIMEOUT;
 import static com.android.server.wm.DragDropController.MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT;
@@ -271,8 +273,7 @@ class DragState {
 
             mDragApplicationHandle = new InputApplicationHandle(new Binder());
             mDragApplicationHandle.name = "drag";
-            mDragApplicationHandle.dispatchingTimeoutNanos =
-                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+            mDragApplicationHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
             mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle,
                     display.getDisplayId());
@@ -280,8 +281,7 @@ class DragState {
             mDragWindowHandle.token = mServerChannel.getToken();
             mDragWindowHandle.layoutParamsFlags = 0;
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
-            mDragWindowHandle.dispatchingTimeoutNanos =
-                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+            mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
             mDragWindowHandle.visible = true;
             mDragWindowHandle.canReceiveKeys = false;
             mDragWindowHandle.hasFocus = true;

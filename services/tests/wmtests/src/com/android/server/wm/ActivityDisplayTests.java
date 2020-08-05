@@ -59,7 +59,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 // TODO(b/144248496): Merge to DisplayContentTests
-public class ActivityDisplayTests extends ActivityTestsBase {
+public class ActivityDisplayTests extends WindowTestsBase {
 
     @Test
     public void testLastFocusedStackIsUpdatedWhenMovingStack() {
@@ -89,9 +89,9 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         // Create a pinned stack and move to front.
         final Task pinnedStack = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task pinnedTask = new TaskBuilder(mService.mStackSupervisor)
+        final Task pinnedTask = new TaskBuilder(mAtm.mStackSupervisor)
                 .setStack(pinnedStack).build();
-        new ActivityBuilder(mService).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
+        new ActivityBuilder(mAtm).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
                 .setTask(pinnedTask).build();
         pinnedStack.moveToFront("movePinnedStackToFront");
 
@@ -140,7 +140,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         // Create a display which supports system decoration and allows reparenting stacks to
         // another display when the display is removed.
         final DisplayContent display = new TestDisplayContent.Builder(
-                mService, 1000, 1500).setSystemDecorations(true).build();
+                mAtm, 1000, 1500).setSystemDecorations(true).build();
         doReturn(false).when(display).shouldDestroyContentOnRemove();
 
         // Put home stack on the display.
@@ -162,9 +162,9 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     private Task createFullscreenStackWithSimpleActivityAt(DisplayContent display) {
         final Task fullscreenStack = display.getDefaultTaskDisplayArea().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task fullscreenTask = new TaskBuilder(mService.mStackSupervisor)
+        final Task fullscreenTask = new TaskBuilder(mAtm.mStackSupervisor)
                 .setStack(fullscreenStack).build();
-        new ActivityBuilder(mService).setTask(fullscreenTask).build();
+        new ActivityBuilder(mAtm).setTask(fullscreenTask).build();
         return fullscreenStack;
     }
 
@@ -197,7 +197,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         assertNull(display.topRunningActivity(true /* considerKeyguardState */));
 
         // Add activity that should be shown on the keyguard.
-        final ActivityRecord showWhenLockedActivity = new ActivityBuilder(mService)
+        final ActivityRecord showWhenLockedActivity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setStack(stack)
                 .setActivityFlags(FLAG_SHOW_WHEN_LOCKED)
@@ -226,7 +226,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task alwaysOnTopStack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setStack(alwaysOnTopStack).build();
         alwaysOnTopStack.setAlwaysOnTop(true);
         taskDisplayArea.positionChildAt(POSITION_TOP, alwaysOnTopStack,
@@ -322,10 +322,10 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task stack4 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task task1 = new TaskBuilder(mService.mStackSupervisor).setStack(stack1).build();
-        final Task task2 = new TaskBuilder(mService.mStackSupervisor).setStack(stack2).build();
-        final Task task3 = new TaskBuilder(mService.mStackSupervisor).setStack(stack3).build();
-        final Task task4 = new TaskBuilder(mService.mStackSupervisor).setStack(stack4).build();
+        final Task task1 = new TaskBuilder(mAtm.mStackSupervisor).setStack(stack1).build();
+        final Task task2 = new TaskBuilder(mAtm.mStackSupervisor).setStack(stack2).build();
+        final Task task3 = new TaskBuilder(mAtm.mStackSupervisor).setStack(stack3).build();
+        final Task task4 = new TaskBuilder(mAtm.mStackSupervisor).setStack(stack4).build();
 
         // Reordering stacks while removing stacks.
         doAnswer(invocation -> {

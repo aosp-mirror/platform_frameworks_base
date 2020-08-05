@@ -133,10 +133,10 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testFindActivityByTargetComponent() {
         final ComponentName aliasComponent = ComponentName.createRelative(
-                ActivityTestsBase.DEFAULT_COMPONENT_PACKAGE_NAME, ".AliasActivity");
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".AliasActivity");
         final ComponentName targetComponent = ComponentName.createRelative(
                 aliasComponent.getPackageName(), ".TargetActivity");
-        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
                 .setComponent(aliasComponent)
                 .setTargetActivity(targetComponent.getClassName())
                 .setLaunchMode(ActivityInfo.LAUNCH_SINGLE_INSTANCE)
@@ -174,15 +174,13 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testForceStopPackage() {
-        final Task task = new ActivityTestsBase.StackBuilder(mWm.mRoot).build();
+        final Task task = new StackBuilder(mWm.mRoot).build();
         final ActivityRecord activity = task.getTopMostActivity();
         final WindowProcessController wpc = activity.app;
         final ActivityRecord[] activities = {
                 activity,
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(task).setUseProcess(wpc).build(),
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(task).setUseProcess(wpc).build()
+                new ActivityBuilder(mWm.mAtmService).setStack(task).setUseProcess(wpc).build(),
+                new ActivityBuilder(mWm.mAtmService).setStack(task).setUseProcess(wpc).build()
         };
         activities[0].detachFromProcess();
         activities[1].finishing = true;

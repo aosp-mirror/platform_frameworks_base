@@ -42,7 +42,7 @@ import java.util.ArrayList;
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class RunningTasksTest extends ActivityTestsBase {
+public class RunningTasksTest extends WindowTestsBase {
 
     private static final ArraySet<Integer> PROFILE_IDS = new ArraySet<>();
 
@@ -57,7 +57,7 @@ public class RunningTasksTest extends ActivityTestsBase {
     public void testCollectTasksByLastActiveTime() {
         // Create a number of stacks with tasks (of incrementing active time)
         final ArrayList<DisplayContent> displays = new ArrayList<>();
-        final DisplayContent display = new TestDisplayContent.Builder(mService, 1000, 2500).build();
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
         displays.add(display);
 
         final int numStacks = 2;
@@ -101,7 +101,7 @@ public class RunningTasksTest extends ActivityTestsBase {
 
     @Test
     public void testTaskInfo_expectNoExtras() {
-        final DisplayContent display = new TestDisplayContent.Builder(mService, 1000, 2500).build();
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
         final int numTasks = 10;
         for (int i = 0; i < numTasks; i++) {
             final Task stack = new StackBuilder(mRootWindowContainer)
@@ -132,13 +132,13 @@ public class RunningTasksTest extends ActivityTestsBase {
      */
     private Task createTask(Task stack, String className, int taskId,
             int lastActiveTime, Bundle extras) {
-        final Task task = new TaskBuilder(mService.mStackSupervisor)
+        final Task task = new TaskBuilder(mAtm.mStackSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
                 .setStack(stack)
                 .build();
         task.lastActiveTime = lastActiveTime;
-        final ActivityRecord activity = new ActivityBuilder(mService)
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setTask(task)
                 .setComponent(new ComponentName(mContext.getPackageName(), ".TaskActivity"))
                 .setIntentExtras(extras)

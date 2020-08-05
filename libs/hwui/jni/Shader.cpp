@@ -228,9 +228,12 @@ static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlo
 
 static jlong RuntimeShader_createShaderFactory(JNIEnv* env, jobject, jstring sksl) {
     ScopedUtfChars strSksl(env, sksl);
-    sk_sp<SkRuntimeEffect> effect = std::get<0>(SkRuntimeEffect::Make(SkString(strSksl.c_str())));
-    ThrowIAE_IfNull(env, effect);
-
+    auto result = SkRuntimeEffect::Make(SkString(strSksl.c_str()));
+    sk_sp<SkRuntimeEffect> effect = std::get<0>(result);
+    if (!effect) {
+        const auto& err = std::get<1>(result);
+        doThrowIAE(env, err.c_str());
+    }
     return reinterpret_cast<jlong>(effect.release());
 }
 

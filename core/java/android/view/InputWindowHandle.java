@@ -50,7 +50,7 @@ public final class InputWindowHandle {
     public int layoutParamsType;
 
     // Dispatching timeout.
-    public long dispatchingTimeoutNanos;
+    public long dispatchingTimeoutMillis;
 
     // Window frame.
     public int frameLeft;

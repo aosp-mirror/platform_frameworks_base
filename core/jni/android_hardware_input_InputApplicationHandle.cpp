@@ -30,7 +30,7 @@ namespace android {
 static struct {
     jfieldID ptr;
     jfieldID name;
-    jfieldID dispatchingTimeoutNanos;
+    jfieldID dispatchingTimeoutMillis;
     jfieldID token;
 } gInputApplicationHandleClassInfo;
 
@@ -61,8 +61,8 @@ bool NativeInputApplicationHandle::updateInfo() {
 
     mInfo.name = getStringField(env, obj, gInputApplicationHandleClassInfo.name, "<null>");
 
-    mInfo.dispatchingTimeoutNanos =
-            env->GetLongField(obj, gInputApplicationHandleClassInfo.dispatchingTimeoutNanos);
+    mInfo.dispatchingTimeoutMillis =
+            env->GetLongField(obj, gInputApplicationHandleClassInfo.dispatchingTimeoutMillis);
 
     jobject tokenObj = env->GetObjectField(obj,
             gInputApplicationHandleClassInfo.token);
@@ -144,9 +144,8 @@ int register_android_view_InputApplicationHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputApplicationHandleClassInfo.name, clazz,
             "name", "Ljava/lang/String;");
 
-    GET_FIELD_ID(gInputApplicationHandleClassInfo.dispatchingTimeoutNanos,
-            clazz,
-            "dispatchingTimeoutNanos", "J");
+    GET_FIELD_ID(gInputApplicationHandleClassInfo.dispatchingTimeoutMillis, clazz,
+                 "dispatchingTimeoutMillis", "J");
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.token, clazz,
             "token", "Landroid/os/IBinder;");
