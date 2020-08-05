@@ -34,7 +34,7 @@ public class UidCheckerTest {
     }
 
     @Test
-    public void testTypical() {
+    public void testTypical_methodInvocation() {
         compilationHelper
                 .addSourceLines("Example.java",
                         "public abstract class Example {",
@@ -57,7 +57,30 @@ public class UidCheckerTest {
     }
 
     @Test
-    public void testCallingUid() {
+    public void testTypical_newClass() {
+        compilationHelper
+                .addSourceLines("Example.java",
+                        "public abstract class Example {",
+                        "  class Bar { Bar(int pid, int uid, int userId) {} }",
+                        "  abstract int getUserId();",
+                        "  void foo(int pid, int uid, int userId, int unrelated) {",
+                        "    new Bar(0, 0, 0);",
+                        "    new Bar(pid, uid, userId);",
+                        "    new Bar(pid, uid, getUserId());",
+                        "    new Bar(unrelated, unrelated, unrelated);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Bar(uid, pid, userId);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Bar(pid, userId, uid);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Bar(getUserId(), 0, 0);",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testCallingUid_methodInvocation() {
         compilationHelper
                 .addSourceFile("/android/os/Binder.java")
                 .addSourceFile("/android/os/UserHandle.java")
@@ -94,6 +117,50 @@ public class UidCheckerTest {
                         "  void doInner() {",
                         "    // BUG: Diagnostic contains:",
                         "    setCallingUserId(UserHandle.getUserId(callingUserId));",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+
+    @Test
+    public void testCallingUid_newClass() {
+        compilationHelper
+                .addSourceFile("/android/os/Binder.java")
+                .addSourceFile("/android/os/UserHandle.java")
+                .addSourceLines("Example.java",
+                        "import android.os.Binder;",
+                        "import android.os.UserHandle;",
+                        "public abstract class Example {",
+                        "  int callingUserId;",
+                        "  int callingUid;",
+                        "  class Foo { Foo(int callingUserId) {} }",
+                        "  class Bar { Bar(int callingUid) {} }",
+                        "  void doUserId(int callingUserId) {",
+                        "    new Foo(UserHandle.getUserId(Binder.getCallingUid()));",
+                        "    new Foo(this.callingUserId);",
+                        "    new Foo(callingUserId);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Foo(Binder.getCallingUid());",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Foo(this.callingUid);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Foo(callingUid);",
+                        "  }",
+                        "  void doUid(int callingUserId) {",
+                        "    new Bar(Binder.getCallingUid());",
+                        "    new Bar(this.callingUid);",
+                        "    new Bar(callingUid);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Bar(UserHandle.getUserId(Binder.getCallingUid()));",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Bar(this.callingUserId);",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Bar(callingUserId);",
+                        "  }",
+                        "  void doInner() {",
+                        "    // BUG: Diagnostic contains:",
+                        "    new Foo(UserHandle.getUserId(callingUserId));",
                         "  }",
                         "}")
                 .doTest();

@@ -23,12 +23,15 @@ import com.google.errorprone.BugPattern;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
+import com.google.errorprone.bugpatterns.BugChecker.NewClassTreeMatcher;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 
 import java.util.List;
@@ -44,11 +47,20 @@ import java.util.regex.Pattern;
     name = "AndroidFrameworkUid",
     summary = "Verifies that PID, UID and user ID arguments aren't crossed",
     severity = WARNING)
-public final class UidChecker extends BugChecker implements MethodInvocationTreeMatcher {
+public final class UidChecker extends BugChecker implements MethodInvocationTreeMatcher,
+        NewClassTreeMatcher {
     @Override
     public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
-        final List<VarSymbol> vars = ASTHelpers.getSymbol(tree).params();
-        final List<? extends ExpressionTree> args = tree.getArguments();
+        return matchArguments(ASTHelpers.getSymbol(tree).params(), tree.getArguments(), tree);
+    }
+
+    @Override
+    public Description matchNewClass(NewClassTree tree, VisitorState state) {
+        return matchArguments(ASTHelpers.getSymbol(tree).params(), tree.getArguments(), tree);
+    }
+
+    private Description matchArguments(List<VarSymbol> vars,
+            List<? extends ExpressionTree> args, Tree tree) {
         for (int i = 0; i < Math.min(vars.size(), args.size()); i++) {
             final Flavor varFlavor = getFlavor(vars.get(i));
             final Flavor argFlavor = getFlavor(args.get(i));
