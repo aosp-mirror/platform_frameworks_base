@@ -417,7 +417,7 @@ status_t BootAnimation::readyToRun() {
     // this guest property specifies multi-display IDs to show the boot animation
     // multiple ids can be set with comma (,) as separator, for example:
     // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
-    Vector<uint64_t> physicalDisplayIds;
+    Vector<PhysicalDisplayId> physicalDisplayIds;
     char displayValue[PROPERTY_VALUE_MAX] = "";
     property_get(DISPLAYS_PROP_NAME, displayValue, "");
     bool isValid = displayValue[0] != '\0';
@@ -435,7 +435,7 @@ status_t BootAnimation::readyToRun() {
     }
     if (isValid) {
         std::istringstream stream(displayValue);
-        for (PhysicalDisplayId id; stream >> id; ) {
+        for (PhysicalDisplayId id; stream >> id.value; ) {
             physicalDisplayIds.add(id);
             if (stream.peek() == ',')
                 stream.ignore();

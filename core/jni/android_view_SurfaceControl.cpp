@@ -703,7 +703,7 @@ static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
 
     jlong* values = env->GetLongArrayElements(array, 0);
     for (size_t i = 0; i < displayIds.size(); ++i) {
-        values[i] = static_cast<jlong>(displayIds[i]);
+        values[i] = static_cast<jlong>(displayIds[i].value);
     }
 
     env->ReleaseLongArrayElements(array, values, 0);
@@ -711,7 +711,8 @@ static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
 }
 
 static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
-    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(physicalDisplayId);
+    sp<IBinder> token =
+            SurfaceComposerClient::getPhysicalDisplayToken(PhysicalDisplayId(physicalDisplayId));
     return javaObjectForIBinder(env, token);
 }
 
