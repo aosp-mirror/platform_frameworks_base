@@ -196,40 +196,40 @@ class PolicyControl {
         private static final String ALL = "*";
         private static final String APPS = "apps";
 
-        private final ArraySet<String> mWhitelist;
-        private final ArraySet<String> mBlacklist;
+        private final ArraySet<String> mAllowlist;
+        private final ArraySet<String> mDenylist;
 
-        private Filter(ArraySet<String> whitelist, ArraySet<String> blacklist) {
-            mWhitelist = whitelist;
-            mBlacklist = blacklist;
+        private Filter(ArraySet<String> allowlist, ArraySet<String> denylist) {
+            mAllowlist = allowlist;
+            mDenylist = denylist;
         }
 
         boolean matches(LayoutParams attrs) {
             if (attrs == null) return false;
             boolean isApp = attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                     && attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-            if (isApp && mBlacklist.contains(APPS)) return false;
-            if (onBlacklist(attrs.packageName)) return false;
-            if (isApp && mWhitelist.contains(APPS)) return true;
-            return onWhitelist(attrs.packageName);
+            if (isApp && mDenylist.contains(APPS)) return false;
+            if (onDenylist(attrs.packageName)) return false;
+            if (isApp && mAllowlist.contains(APPS)) return true;
+            return onAllowlist(attrs.packageName);
         }
 
         boolean matches(String packageName) {
-            return !onBlacklist(packageName) && onWhitelist(packageName);
+            return !onDenylist(packageName) && onAllowlist(packageName);
         }
 
-        private boolean onBlacklist(String packageName) {
-            return mBlacklist.contains(packageName) || mBlacklist.contains(ALL);
+        private boolean onDenylist(String packageName) {
+            return mDenylist.contains(packageName) || mDenylist.contains(ALL);
         }
 
-        private boolean onWhitelist(String packageName) {
-            return mWhitelist.contains(ALL) || mWhitelist.contains(packageName);
+        private boolean onAllowlist(String packageName) {
+            return mAllowlist.contains(ALL) || mAllowlist.contains(packageName);
         }
 
         void dump(PrintWriter pw) {
             pw.print("Filter[");
-            dump("whitelist", mWhitelist, pw); pw.print(',');
-            dump("blacklist", mBlacklist, pw); pw.print(']');
+            dump("allowlist", mAllowlist, pw); pw.print(',');
+            dump("denylist", mDenylist, pw); pw.print(']');
         }
 
         private void dump(String name, ArraySet<String> set, PrintWriter pw) {
@@ -253,18 +253,18 @@ class PolicyControl {
         // e.g. "com.package1", or "apps, com.android.keyguard" or "*"
         static Filter parse(String value) {
             if (value == null) return null;
-            ArraySet<String> whitelist = new ArraySet<String>();
-            ArraySet<String> blacklist = new ArraySet<String>();
+            ArraySet<String> allowlist = new ArraySet<String>();
+            ArraySet<String> denylist = new ArraySet<String>();
             for (String token : value.split(",")) {
                 token = token.trim();
                 if (token.startsWith("-") && token.length() > 1) {
                     token = token.substring(1);
-                    blacklist.add(token);
+                    denylist.add(token);
                 } else {
-                    whitelist.add(token);
+                    allowlist.add(token);
                 }
             }
-            return new Filter(whitelist, blacklist);
+            return new Filter(allowlist, denylist);
         }
     }
 }
