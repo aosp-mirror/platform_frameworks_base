@@ -155,41 +155,6 @@ public class FusedLocationServiceTest {
         assertThat(mManager.getNextLocation(TIMEOUT_MS)).isEqualTo(location);
     }
 
-    @Test
-    public void testBypassRequest() throws Exception {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(FUSED_PROVIDER, 1000,
-                0, false).setQuality(LocationRequest.POWER_HIGH).setLocationSettingsIgnored(true);
-
-        mProvider.setRequest(
-                new ProviderRequest.Builder()
-                        .setInterval(1000)
-                        .setLocationSettingsIgnored(true)
-                        .setLocationRequests(Collections.singletonList(request))
-                        .build(),
-                new WorkSource());
-
-        boolean containsNetworkBypass = false;
-        for (LocationRequest iRequest : mLocationManager.getTestProviderCurrentRequests(
-                NETWORK_PROVIDER)) {
-            if (iRequest.isLocationSettingsIgnored()) {
-                containsNetworkBypass = true;
-                break;
-            }
-        }
-
-        boolean containsGpsBypass = false;
-        for (LocationRequest iRequest : mLocationManager.getTestProviderCurrentRequests(
-                GPS_PROVIDER)) {
-            if (iRequest.isLocationSettingsIgnored()) {
-                containsGpsBypass = true;
-                break;
-            }
-        }
-
-        assertThat(containsNetworkBypass).isTrue();
-        assertThat(containsGpsBypass).isTrue();
-    }
-
     private static class LocationProviderManagerCapture extends ILocationProviderManager.Stub {
 
         private final LinkedBlockingQueue<Location> mLocations;

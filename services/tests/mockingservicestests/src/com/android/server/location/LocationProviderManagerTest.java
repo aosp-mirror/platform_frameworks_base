@@ -25,6 +25,7 @@ import static android.location.Criteria.ACCURACY_COARSE;
 import static android.location.Criteria.ACCURACY_FINE;
 import static android.location.Criteria.POWER_HIGH;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
+import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
 import static androidx.test.ext.truth.location.LocationSubject.assertThat;
 
@@ -905,6 +906,21 @@ public class LocationProviderManagerTest {
 
         mInjector.getAppForegroundHelper().setAppForeground(IDENTITY.getUid(), false);
         assertThat(mProvider.getRequest().interval).isEqualTo(5);
+    }
+
+    @Test
+    public void testProviderRequest_BatterySaver_ScreenOnOff() {
+        mInjector.getLocationPowerSaveModeHelper().setLocationPowerSaveMode(
+                LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF);
+
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0, false);
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        assertThat(mProvider.getRequest().reportLocation).isTrue();
+
+        mInjector.getScreenInteractiveHelper().setScreenInteractive(false);
+        assertThat(mProvider.getRequest().reportLocation).isFalse();
     }
 
     private ILocationListener createMockLocationListener() {

@@ -1615,7 +1615,7 @@ class LocationProviderManager extends
                 case LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF:
                     // fall through
                 case LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF:
-                    updateService();
+                    updateRegistrations(registration -> true);
                     break;
                 default:
                     break;
