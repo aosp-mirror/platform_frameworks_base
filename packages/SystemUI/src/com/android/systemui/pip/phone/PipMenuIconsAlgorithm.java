@@ -24,8 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import javax.inject.Inject;
-
 /**
  * Helper class to calculate and place the menu icons on the PIP Menu.
  */
@@ -40,8 +38,7 @@ public class PipMenuIconsAlgorithm {
     protected View mSettingsButton;
     protected View mDismissButton;
 
-    @Inject
-    public PipMenuIconsAlgorithm(Context context) {
+    protected PipMenuIconsAlgorithm(Context context) {
     }
 
     /**
@@ -55,7 +52,6 @@ public class PipMenuIconsAlgorithm {
         mSettingsButton = settingsButton;
         mDismissButton = dismissButton;
     }
-
 
     /**
      * Updates the position of the drag handle based on where the PIP window is on the screen.

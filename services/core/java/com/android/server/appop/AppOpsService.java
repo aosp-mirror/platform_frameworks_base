@@ -1889,6 +1889,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             if (mWriteScheduled) {
                 mWriteScheduled = false;
+                mHandler.removeCallbacks(mWriteRunner);
                 doWrite = true;
             }
         }

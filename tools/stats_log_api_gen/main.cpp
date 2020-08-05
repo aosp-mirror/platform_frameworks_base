@@ -15,8 +15,6 @@
 #include "native_writer.h"
 #include "utils.h"
 
-using namespace google::protobuf;
-
 namespace android {
 namespace stats_log_api_gen {
 

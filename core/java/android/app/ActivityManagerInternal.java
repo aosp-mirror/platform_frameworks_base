@@ -341,7 +341,8 @@ public abstract class ActivityManagerInternal {
     /** @see com.android.server.am.ActivityManagerService#monitor */
     public abstract void monitor();
 
-    /** Input dispatch timeout to a window, start the ANR process. */
+    /** Input dispatch timeout to a window, start the ANR process. Return the timeout extension,
+     * in milliseconds, or 0 to abort dispatch. */
     public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,

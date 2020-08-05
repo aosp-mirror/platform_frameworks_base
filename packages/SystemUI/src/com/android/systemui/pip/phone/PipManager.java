@@ -47,6 +47,7 @@ import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
@@ -250,6 +251,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
+            @PipMenuActivityClass Class<?> pipMenuActivityClass,
             DisplayController displayController,
             FloatingContentCoordinator floatingContentCoordinator,
             DeviceConfigProxy deviceConfig,
@@ -274,8 +276,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
-        mMenuController = new PipMenuActivityController(context, mMediaController,
-                mInputConsumerController);
+        mMenuController = new PipMenuActivityController(context, pipMenuActivityClass,
+                mMediaController, mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
                 floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState);

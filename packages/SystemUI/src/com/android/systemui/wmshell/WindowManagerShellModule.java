@@ -21,6 +21,8 @@ import android.os.Handler;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.pip.phone.PipMenuActivity;
+import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
@@ -64,5 +66,13 @@ public class WindowManagerShellModule {
             TransactionPool transactionPool) {
         return new DisplayImeController.Builder(wmService, displayController, mainHandler,
                 transactionPool).build();
+    }
+
+    /** TODO(b/150319024): PipMenuActivity will move to a Window */
+    @Singleton
+    @PipMenuActivityClass
+    @Provides
+    static Class<?> providePipMenuActivityClass() {
+        return PipMenuActivity.class;
     }
 }

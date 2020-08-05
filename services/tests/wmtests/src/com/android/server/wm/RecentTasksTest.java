@@ -94,7 +94,7 @@ import java.util.function.Function;
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class RecentTasksTest extends ActivityTestsBase {
+public class RecentTasksTest extends WindowTestsBase {
     private static final int TEST_USER_0_ID = 0;
     private static final int TEST_USER_1_ID = 10;
     private static final int TEST_QUIET_USER_ID = 20;
@@ -122,14 +122,14 @@ public class RecentTasksTest extends ActivityTestsBase {
         mTaskContainer = mRootWindowContainer.getDefaultTaskDisplayArea();
 
         // Set the recent tasks we should use for testing in this class.
-        mRecentTasks = new TestRecentTasks(mService, mTaskPersister);
+        mRecentTasks = new TestRecentTasks(mAtm, mTaskPersister);
         spyOn(mRecentTasks);
-        mService.setRecentTasks(mRecentTasks);
+        mAtm.setRecentTasks(mRecentTasks);
         mRecentTasks.loadParametersFromResources(mContext.getResources());
 
         // Set the running tasks we should use for testing in this class.
         mRunningTasks = new TestRunningTasks();
-        mService.mStackSupervisor.setRunningTasks(mRunningTasks);
+        mAtm.mStackSupervisor.setRunningTasks(mRunningTasks);
 
         mStack = mTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -455,7 +455,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         final Function<Boolean, Task> taskBuilder = visible -> {
             final Task task = createTaskBuilder(className).build();
             // Make the task non-empty.
-            final ActivityRecord r = new ActivityBuilder(mService).setTask(task).build();
+            final ActivityRecord r = new ActivityBuilder(mAtm).setTask(task).build();
             r.setVisibility(visible);
             return task;
         };
@@ -831,7 +831,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         Task stack = mTasks.get(2).getRootTask();
         stack.moveToFront("", mTasks.get(2));
-        doReturn(stack).when(mService.mRootWindowContainer).getTopDisplayFocusedStack();
+        doReturn(stack).when(mAtm.mRootWindowContainer).getTopDisplayFocusedStack();
 
         // Simulate the reset from the timeout
         mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
@@ -994,16 +994,16 @@ public class RecentTasksTest extends ActivityTestsBase {
         mStack.removeIfPossible();
 
         // The following APIs should not restore task from recents to the active list.
-        assertNotRestoreTask(() -> mService.setFocusedTask(taskId));
-        assertNotRestoreTask(() -> mService.startSystemLockTaskMode(taskId));
-        assertNotRestoreTask(() -> mService.cancelTaskWindowTransition(taskId));
+        assertNotRestoreTask(() -> mAtm.setFocusedTask(taskId));
+        assertNotRestoreTask(() -> mAtm.startSystemLockTaskMode(taskId));
+        assertNotRestoreTask(() -> mAtm.cancelTaskWindowTransition(taskId));
         assertNotRestoreTask(
-                () -> mService.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
+                () -> mAtm.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
         assertNotRestoreTask(
-                () -> mService.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
+                () -> mAtm.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
                         false/* toTop */));
         assertNotRestoreTask(
-                () -> mService.setTaskWindowingModeSplitScreenPrimary(taskId, false /* toTop */));
+                () -> mAtm.setTaskWindowingModeSplitScreenPrimary(taskId, false /* toTop */));
     }
 
     @Test
@@ -1014,7 +1014,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.remove(task);
 
         TaskChangeNotificationController controller =
-                mService.getTaskChangeNotificationController();
+                mAtm.getTaskChangeNotificationController();
         verify(controller, times(2)).notifyTaskListUpdated();
     }
 
@@ -1027,7 +1027,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         // 2 calls - Once for add and once for remove
         TaskChangeNotificationController controller =
-                mService.getTaskChangeNotificationController();
+                mAtm.getTaskChangeNotificationController();
         verify(controller, times(2)).notifyTaskListUpdated();
     }
 
@@ -1042,7 +1042,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         // 4 calls - Twice for add and twice for remove
         TaskChangeNotificationController controller =
-                mService.getTaskChangeNotificationController();
+                mAtm.getTaskChangeNotificationController();
         verify(controller, times(4)).notifyTaskListUpdated();
     }
 
@@ -1054,7 +1054,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         final Bundle data = new Bundle();
         data.putInt("key", 100);
         final Task task1 = createTaskBuilder(".Task").build();
-        final ActivityRecord r1 = new ActivityBuilder(mService)
+        final ActivityRecord r1 = new ActivityBuilder(mAtm)
                 .setTask(task1)
                 .setIntentExtras(data)
                 .build();
@@ -1106,7 +1106,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testNotRecentsComponent_denyApiAccess() throws Exception {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
+        doReturn(PackageManager.PERMISSION_DENIED).when(mAtm)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
         // Expect the following methods to fail due to recents component not being set
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.DENY_THROW_SECURITY_EXCEPTION);
@@ -1118,7 +1118,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testRecentsComponent_allowApiAccessWithoutPermissions() {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
+        doReturn(PackageManager.PERMISSION_DENIED).when(mAtm)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
         // Set the recents component and ensure that the following calls do not fail
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.GRANT);
@@ -1127,50 +1127,50 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private void doTestRecentTasksApis(boolean expectCallable) {
-        assertSecurityException(expectCallable, () -> mService.removeStack(INVALID_STACK_ID));
+        assertSecurityException(expectCallable, () -> mAtm.removeStack(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
-                () -> mService.removeStacksInWindowingModes(
+                () -> mAtm.removeStacksInWindowingModes(
                         new int[]{WINDOWING_MODE_UNDEFINED}));
         assertSecurityException(expectCallable,
-                () -> mService.removeStacksWithActivityTypes(
+                () -> mAtm.removeStacksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
-        assertSecurityException(expectCallable, () -> mService.removeTask(0));
+        assertSecurityException(expectCallable, () -> mAtm.removeTask(0));
         assertSecurityException(expectCallable,
-                () -> mService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
+                () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
-                () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
+                () -> mAtm.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mService.setTaskWindowingModeSplitScreenPrimary(0, true));
+                () -> mAtm.setTaskWindowingModeSplitScreenPrimary(0, true));
         assertSecurityException(expectCallable,
-                () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
-        assertSecurityException(expectCallable, () -> mService.getAllStackInfos());
+                () -> mAtm.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+        assertSecurityException(expectCallable, () -> mAtm.getAllStackInfos());
         assertSecurityException(expectCallable,
-                () -> mService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
+                () -> mAtm.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
         assertSecurityException(expectCallable, () -> {
             try {
-                mService.getFocusedStackInfo();
+                mAtm.getFocusedStackInfo();
             } catch (RemoteException e) {
                 // Ignore
             }
         });
         assertSecurityException(expectCallable,
-                () -> mService.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mService.getTaskSnapshot(0, true));
-        assertSecurityException(expectCallable, () -> mService.registerTaskStackListener(null));
+                () -> mAtm.startActivityFromRecents(0, new Bundle()));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
-                () -> mService.unregisterTaskStackListener(null));
-        assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
-        assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
+                () -> mAtm.unregisterTaskStackListener(null));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskDescription(0));
+        assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
+        assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, null,
                 null));
-        assertSecurityException(expectCallable, () -> mService.cancelRecentsAnimation(true));
-        assertSecurityException(expectCallable, () -> mService.stopAppSwitches());
-        assertSecurityException(expectCallable, () -> mService.resumeAppSwitches());
+        assertSecurityException(expectCallable, () -> mAtm.cancelRecentsAnimation(true));
+        assertSecurityException(expectCallable, () -> mAtm.stopAppSwitches());
+        assertSecurityException(expectCallable, () -> mAtm.resumeAppSwitches());
     }
 
     private void testGetTasksApis(boolean expectCallable) {
-        mService.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
-        mService.getTasks(MAX_VALUE);
+        mAtm.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
+        mAtm.getTasks(MAX_VALUE);
         if (expectCallable) {
             assertTrue(mRecentTasks.mLastAllowed);
             assertTrue(mRunningTasks.mLastAllowed);
@@ -1185,7 +1185,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private TaskBuilder createTaskBuilder(String packageName, String className) {
-        return new TaskBuilder(mService.mStackSupervisor)
+        return new TaskBuilder(mAtm.mStackSupervisor)
                 .setComponent(new ComponentName(packageName, className))
                 .setStack(mStack)
                 .setUserId(TEST_USER_0_ID);

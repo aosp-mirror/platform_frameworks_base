@@ -77,7 +77,7 @@ public class TaskPositionerTests extends WindowTestsBase {
         removeGlobalMinSizeRestriction();
 
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
+        final ActivityRecord activity = new ActivityBuilder(stack.mAtmService)
                 .setStack(stack)
                 // In real case, there is no additional level for freeform mode.
                 .setCreateTask(false)

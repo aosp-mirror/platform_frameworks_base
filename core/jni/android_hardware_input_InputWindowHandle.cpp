@@ -47,7 +47,7 @@ static struct {
     jfieldID name;
     jfieldID layoutParamsFlags;
     jfieldID layoutParamsType;
-    jfieldID dispatchingTimeoutNanos;
+    jfieldID dispatchingTimeoutMillis;
     jfieldID frameLeft;
     jfieldID frameTop;
     jfieldID frameRight;
@@ -118,8 +118,8 @@ bool NativeInputWindowHandle::updateInfo() {
             env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
     mInfo.type = static_cast<InputWindowInfo::Type>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
-    mInfo.dispatchingTimeout = decltype(mInfo.dispatchingTimeout)(
-            env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutNanos));
+    mInfo.dispatchingTimeout = std::chrono::milliseconds(
+            env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutMillis));
     mInfo.frameLeft = env->GetIntField(obj,
             gInputWindowHandleClassInfo.frameLeft);
     mInfo.frameTop = env->GetIntField(obj,
@@ -293,8 +293,8 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsType, clazz,
             "layoutParamsType", "I");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.dispatchingTimeoutNanos, clazz,
-            "dispatchingTimeoutNanos", "J");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.dispatchingTimeoutMillis, clazz,
+                 "dispatchingTimeoutMillis", "J");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.frameLeft, clazz,
             "frameLeft", "I");
