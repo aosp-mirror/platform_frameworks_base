@@ -710,9 +710,8 @@ std::chrono::nanoseconds NativeInputManager::notifyAnr(
     jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
 
-    jlong newTimeout = env->CallLongMethod(mServiceObj,
-            gServiceClassInfo.notifyANR, inputApplicationHandleObj, tokenObj,
-                 reasonObj);
+    jlong newTimeout = env->CallLongMethod(mServiceObj, gServiceClassInfo.notifyANR,
+                                           inputApplicationHandleObj, tokenObj, reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
     } else {
