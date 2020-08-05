@@ -454,10 +454,11 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     private void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
+        final Rect pipBounds = new Rect(mLastReportedBounds);
         runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction);
+                callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction, pipBounds);
             }
         });
     }
@@ -973,7 +974,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         /**
          * Callback when the pip transition is started.
          */
-        void onPipTransitionStarted(ComponentName activity, int direction);
+        void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds);
 
         /**
          * Callback when the pip transition is finished.

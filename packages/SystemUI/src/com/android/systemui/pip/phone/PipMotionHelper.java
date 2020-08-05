@@ -154,7 +154,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private final PipTaskOrganizer.PipTransitionCallback mPipTransitionCallback =
             new PipTaskOrganizer.PipTransitionCallback() {
         @Override
-        public void onPipTransitionStarted(ComponentName activity, int direction) {}
+        public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {}
 
         @Override
         public void onPipTransitionFinished(ComponentName activity, int direction) {
