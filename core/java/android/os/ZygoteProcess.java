@@ -249,11 +249,11 @@ public class ZygoteProcess {
     private final Object mLock = new Object();
 
     /**
-     * List of exemptions to the API blacklist. These are prefix matches on the runtime format
+     * List of exemptions to the API deny list. These are prefix matches on the runtime format
      * symbol signature. Any matching symbol is treated by the runtime as being on the light grey
      * list.
      */
-    private List<String> mApiBlacklistExemptions = Collections.emptyList();
+    private List<String> mApiDenylistExemptions = Collections.emptyList();
 
     /**
      * Proportion of hidden API accesses that should be logged to the event log; 0 - 0x10000.
@@ -545,7 +545,7 @@ public class ZygoteProcess {
         "--preload-package",
         "--preload-app",
         "--start-child-zygote",
-        "--set-api-blacklist-exemptions",
+        "--set-api-denylist-exemptions",
         "--hidden-api-log-sampling-rate",
         "--hidden-api-statslog-sampling-rate",
         "--invoke-with"
@@ -857,20 +857,20 @@ public class ZygoteProcess {
     }
 
     /**
-     * Push hidden API blacklisting exemptions into the zygote process(es).
+     * Push hidden API denylisting exemptions into the zygote process(es).
      *
      * <p>The list of exemptions will take affect for all new processes forked from the zygote after
      * this call.
      *
      * @param exemptions List of hidden API exemption prefixes. Any matching members are treated as
-     *        whitelisted/public APIs (i.e. allowed, no logging of usage).
+     *        allowlisted/public APIs (i.e. allowed, no logging of usage).
      */
-    public boolean setApiBlacklistExemptions(List<String> exemptions) {
+    public boolean setApiDenylistExemptions(List<String> exemptions) {
         synchronized (mLock) {
-            mApiBlacklistExemptions = exemptions;
-            boolean ok = maybeSetApiBlacklistExemptions(primaryZygoteState, true);
+            mApiDenylistExemptions = exemptions;
+            boolean ok = maybeSetApiDenylistExemptions(primaryZygoteState, true);
             if (ok) {
-                ok = maybeSetApiBlacklistExemptions(secondaryZygoteState, true);
+                ok = maybeSetApiDenylistExemptions(secondaryZygoteState, true);
             }
             return ok;
         }
@@ -907,32 +907,32 @@ public class ZygoteProcess {
     }
 
     @GuardedBy("mLock")
-    private boolean maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
+    private boolean maybeSetApiDenylistExemptions(ZygoteState state, boolean sendIfEmpty) {
         if (state == null || state.isClosed()) {
-            Slog.e(LOG_TAG, "Can't set API blacklist exemptions: no zygote connection");
+            Slog.e(LOG_TAG, "Can't set API denylist exemptions: no zygote connection");
             return false;
-        } else if (!sendIfEmpty && mApiBlacklistExemptions.isEmpty()) {
+        } else if (!sendIfEmpty && mApiDenylistExemptions.isEmpty()) {
             return true;
         }
 
         try {
-            state.mZygoteOutputWriter.write(Integer.toString(mApiBlacklistExemptions.size() + 1));
+            state.mZygoteOutputWriter.write(Integer.toString(mApiDenylistExemptions.size() + 1));
             state.mZygoteOutputWriter.newLine();
-            state.mZygoteOutputWriter.write("--set-api-blacklist-exemptions");
+            state.mZygoteOutputWriter.write("--set-api-denylist-exemptions");
             state.mZygoteOutputWriter.newLine();
-            for (int i = 0; i < mApiBlacklistExemptions.size(); ++i) {
-                state.mZygoteOutputWriter.write(mApiBlacklistExemptions.get(i));
+            for (int i = 0; i < mApiDenylistExemptions.size(); ++i) {
+                state.mZygoteOutputWriter.write(mApiDenylistExemptions.get(i));
                 state.mZygoteOutputWriter.newLine();
             }
             state.mZygoteOutputWriter.flush();
             int status = state.mZygoteInputStream.readInt();
             if (status != 0) {
-                Slog.e(LOG_TAG, "Failed to set API blacklist exemptions; status " + status);
+                Slog.e(LOG_TAG, "Failed to set API denylist exemptions; status " + status);
             }
             return true;
         } catch (IOException ioe) {
-            Slog.e(LOG_TAG, "Failed to set API blacklist exemptions", ioe);
-            mApiBlacklistExemptions = Collections.emptyList();
+            Slog.e(LOG_TAG, "Failed to set API denylist exemptions", ioe);
+            mApiDenylistExemptions = Collections.emptyList();
             return false;
         }
     }
@@ -989,7 +989,7 @@ public class ZygoteProcess {
             primaryZygoteState =
                     ZygoteState.connect(mZygoteSocketAddress, mUsapPoolSocketAddress);
 
-            maybeSetApiBlacklistExemptions(primaryZygoteState, false);
+            maybeSetApiDenylistExemptions(primaryZygoteState, false);
             maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
             maybeSetHiddenApiAccessStatslogSampleRate(primaryZygoteState);
         }
@@ -1005,7 +1005,7 @@ public class ZygoteProcess {
                     ZygoteState.connect(mZygoteSecondarySocketAddress,
                             mUsapPoolSecondarySocketAddress);
 
-            maybeSetApiBlacklistExemptions(secondaryZygoteState, false);
+            maybeSetApiDenylistExemptions(secondaryZygoteState, false);
             maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
             maybeSetHiddenApiAccessStatslogSampleRate(secondaryZygoteState);
         }

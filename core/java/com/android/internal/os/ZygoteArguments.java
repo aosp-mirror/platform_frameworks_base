@@ -192,10 +192,10 @@ class ZygoteArguments {
     boolean mBootCompleted;
 
     /**
-     * Exemptions from API blacklisting. These are sent to the pre-forked zygote at boot time, or
-     * when they change, via --set-api-blacklist-exemptions.
+     * Exemptions from API deny-listing. These are sent to the pre-forked zygote at boot time, or
+     * when they change, via --set-api-denylist-exemptions.
      */
-    String[] mApiBlacklistExemptions;
+    String[] mApiDenylistExemptions;
 
     /**
      * Sampling rate for logging hidden API accesses to the event log. This is sent to the
@@ -394,10 +394,10 @@ class ZygoteArguments {
                 expectRuntimeArgs = false;
             } else if (arg.equals("--start-child-zygote")) {
                 mStartChildZygote = true;
-            } else if (arg.equals("--set-api-blacklist-exemptions")) {
+            } else if (arg.equals("--set-api-denylist-exemptions")) {
                 // consume all remaining args; this is a stand-alone command, never included
                 // with the regular fork command.
-                mApiBlacklistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
+                mApiDenylistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
                 curArg = args.length;
                 expectRuntimeArgs = false;
             } else if (arg.startsWith("--hidden-api-log-sampling-rate=")) {
