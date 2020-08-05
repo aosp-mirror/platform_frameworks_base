@@ -451,15 +451,17 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         if (listening) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "handleSetListening true");
-                mLifecycle.setCurrentState(RESUMED);
                 handleSetListening(listening);
-                refreshState(); // Ensure we get at least one refresh after listening.
+                mUiHandler.post(() -> {
+                    mLifecycle.setCurrentState(RESUMED);
+                    refreshState(); // Ensure we get at least one refresh after listening.
+                });
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 if (DEBUG) Log.d(TAG, "handleSetListening false");
-                mLifecycle.setCurrentState(STARTED);
                 handleSetListening(listening);
+                mUiHandler.post(() -> mLifecycle.setCurrentState(STARTED));
             }
         }
         updateIsFullQs();
