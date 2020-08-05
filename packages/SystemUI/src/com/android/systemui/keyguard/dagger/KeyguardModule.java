@@ -32,6 +32,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.InjectionInflationController;
 
 import java.util.concurrent.Executor;
 
@@ -64,7 +65,8 @@ public class KeyguardModule {
             TrustManager trustManager,
             @UiBackground Executor uiBgExecutor,
             DeviceConfigProxy deviceConfig,
-            NavigationModeController navigationModeController) {
+            NavigationModeController navigationModeController,
+            InjectionInflationController injectionInflationController) {
         return new KeyguardViewMediator(
                 context,
                 falsingManager,
@@ -78,6 +80,7 @@ public class KeyguardModule {
                 powerManager,
                 trustManager,
                 deviceConfig,
-                navigationModeController);
+                navigationModeController,
+                injectionInflationController);
     }
 }

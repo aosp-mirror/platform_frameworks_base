@@ -150,7 +150,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class),
                         commandQueue),
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
+                new InjectionInflationController(
+                        SystemUIFactory.getInstance()
+                                .getRootComponent()
+                                .createViewInstanceCreatorFactory()),
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,
