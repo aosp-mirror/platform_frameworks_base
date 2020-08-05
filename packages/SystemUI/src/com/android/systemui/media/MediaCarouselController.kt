@@ -3,7 +3,6 @@ package com.android.systemui.media
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
 import android.util.MathUtils
@@ -151,7 +150,7 @@ class MediaCarouselController @Inject constructor(
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
         mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
                 executor, mediaManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
-                falsingManager)
+                this::closeGuts, falsingManager)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -467,6 +466,12 @@ class MediaCarouselController @Inject constructor(
                 }
             }
             updateCarouselSize()
+        }
+    }
+
+    fun closeGuts() {
+        mediaPlayers.values.forEach {
+            it.closeGuts(true)
         }
     }
 
