@@ -183,13 +183,12 @@ public class VibratorServiceTest {
 
     @Test
     public void hasAmplitudeControl_withAmplitudeControlSupport_returnsTrue() {
-        when(mNativeWrapperMock.vibratorSupportsAmplitudeControl()).thenReturn(true);
+        mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         assertTrue(createService().hasAmplitudeControl());
     }
 
     @Test
     public void hasAmplitudeControl_withNoAmplitudeControlSupport_returnsFalse() {
-        when(mNativeWrapperMock.vibratorSupportsAmplitudeControl()).thenReturn(false);
         assertFalse(createService().hasAmplitudeControl());
     }
 
@@ -270,7 +269,7 @@ public class VibratorServiceTest {
 
     @Test
     public void vibrate_withOneShotAndAmplitudeControl_turnsVibratorOnAndSetsAmplitude() {
-        when(mNativeWrapperMock.vibratorSupportsAmplitudeControl()).thenReturn(true);
+        mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         VibratorService service = createService();
         Mockito.clearInvocations(mNativeWrapperMock);
 
@@ -340,7 +339,7 @@ public class VibratorServiceTest {
     @Test
     public void vibrate_withWaveform_controlsVibratorAmplitudeDuringTotalVibrationTime()
             throws Exception {
-        when(mNativeWrapperMock.vibratorSupportsAmplitudeControl()).thenReturn(true);
+        mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         VibratorService service = createService();
         Mockito.clearInvocations(mNativeWrapperMock);
 
@@ -511,7 +510,7 @@ public class VibratorServiceTest {
         setVibrationIntensityUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_OFF);
 
-        when(mNativeWrapperMock.vibratorSupportsAmplitudeControl()).thenReturn(true);
+        mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         VibratorService service = createService();
         service.systemReady();
 
