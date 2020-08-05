@@ -45,7 +45,6 @@ import javax.inject.Singleton
 
 @Singleton
 class PrivacyItemController @Inject constructor(
-    context: Context,
     private val appOpsController: AppOpsController,
     @Main uiExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
@@ -57,16 +56,21 @@ class PrivacyItemController @Inject constructor(
 
     @VisibleForTesting
     internal companion object {
-        val OPS = intArrayOf(AppOpsManager.OP_CAMERA,
-                AppOpsManager.OP_RECORD_AUDIO,
+        val OPS_MIC_CAMERA = intArrayOf(AppOpsManager.OP_CAMERA,
+                AppOpsManager.OP_RECORD_AUDIO)
+        val OPS_LOCATION = intArrayOf(
                 AppOpsManager.OP_COARSE_LOCATION,
                 AppOpsManager.OP_FINE_LOCATION)
+        val OPS = OPS_MIC_CAMERA + OPS_LOCATION
         val intentFilter = IntentFilter().apply {
             addAction(Intent.ACTION_USER_SWITCHED)
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
             addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
         }
         const val TAG = "PrivacyItemController"
+        private const val ALL_INDICATORS =
+                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
+        private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
     }
 
     @VisibleForTesting
@@ -74,9 +78,14 @@ class PrivacyItemController @Inject constructor(
         @Synchronized get() = field.toList() // Returns a shallow copy of the list
         @Synchronized set
 
-    private fun isPermissionsHubEnabled(): Boolean {
+    private fun isAllIndicatorsEnabled(): Boolean {
         return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false)
+                ALL_INDICATORS, false)
+    }
+
+    private fun isMicCameraEnabled(): Boolean {
+        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                MIC_CAMERA, false)
     }
 
     private var currentUserIds = emptyList<Int>()
@@ -94,23 +103,28 @@ class PrivacyItemController @Inject constructor(
         uiExecutor.execute(notifyChanges)
     }
 
-    var indicatorsAvailable = isPermissionsHubEnabled()
+    var allIndicatorsAvailable = isAllIndicatorsEnabled()
         private set
-    @VisibleForTesting
-    internal val devicePropertiesChangedListener =
+    var micCameraAvailable = isMicCameraEnabled()
+        private set
+
+    private val devicePropertiesChangedListener =
             object : DeviceConfig.OnPropertiesChangedListener {
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
             if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace()) &&
-                    properties.getKeyset().contains(
-                    SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED)) {
-                val flag = properties.getBoolean(
-                        SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false)
-                if (indicatorsAvailable != flag) {
-                    // This is happening already in the UI executor, so we can iterate in the
-                    indicatorsAvailable = flag
-                    callbacks.forEach { it.get()?.onFlagChanged(flag) }
+                    (properties.keyset.contains(ALL_INDICATORS) ||
+                    properties.keyset.contains(MIC_CAMERA))) {
+
+                // Running on the ui executor so can iterate on callbacks
+                if (properties.keyset.contains(ALL_INDICATORS)) {
+                    allIndicatorsAvailable = properties.getBoolean(ALL_INDICATORS, false)
+                    callbacks.forEach { it.get()?.onFlagAllChanged(allIndicatorsAvailable) }
                 }
 
+                if (properties.keyset.contains(MIC_CAMERA)) {
+                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, false)
+                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
+                }
                 internalUiExecutor.updateListeningState()
             }
         }
@@ -123,6 +137,10 @@ class PrivacyItemController @Inject constructor(
             packageName: String,
             active: Boolean
         ) {
+            // Check if we care about this code right now
+            if (!allIndicatorsAvailable && code in OPS_LOCATION) {
+                return
+            }
             val userId = UserHandle.getUserId(uid)
             if (userId in currentUserIds) {
                 update(false)
@@ -166,13 +184,16 @@ class PrivacyItemController @Inject constructor(
     }
 
     /**
-     * Updates listening status based on whether there are callbacks and the indicators are enabled
+     * Updates listening status based on whether there are callbacks and the indicators are enabled.
+     *
+     * Always listen to all OPS so we don't have to figure out what we should be listening to. We
+     * still have to filter anyway. Updates are filtered in the callback.
      *
      * This is only called from private (add/remove)Callback and from the config listener, all in
      * main thread.
      */
     private fun setListeningState() {
-        val listen = !callbacks.isEmpty() and indicatorsAvailable
+        val listen = !callbacks.isEmpty() and (allIndicatorsAvailable || micCameraAvailable)
         if (listening == listen) return
         listening = listen
         if (listening) {
@@ -233,14 +254,19 @@ class PrivacyItemController @Inject constructor(
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }
+        if (type == PrivacyType.TYPE_LOCATION && !allIndicatorsAvailable) return null
         val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid)
         return PrivacyItem(type, app)
     }
 
     interface Callback {
         fun onPrivacyItemsChanged(privacyItems: List<PrivacyItem>)
+
         @JvmDefault
-        fun onFlagChanged(flag: Boolean) {}
+        fun onFlagAllChanged(flag: Boolean) {}
+
+        @JvmDefault
+        fun onFlagMicCameraChanged(flag: Boolean) {}
     }
 
     internal inner class Receiver : BroadcastReceiver() {
