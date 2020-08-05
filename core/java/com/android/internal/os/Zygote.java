@@ -743,9 +743,9 @@ public final class Zygote {
             throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-app");
         } else if (args.mStartChildZygote) {
             throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--start-child-zygote");
-        } else if (args.mApiBlacklistExemptions != null) {
+        } else if (args.mApiDenylistExemptions != null) {
             throw new IllegalArgumentException(
-                    USAP_ERROR_PREFIX + "--set-api-blacklist-exemptions");
+                    USAP_ERROR_PREFIX + "--set-api-denylist-exemptions");
         } else if (args.mHiddenApiAccessLogSampleRate != -1) {
             throw new IllegalArgumentException(
                     USAP_ERROR_PREFIX + "--hidden-api-log-sampling-rate=");
