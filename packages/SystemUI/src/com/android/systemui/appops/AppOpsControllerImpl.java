@@ -281,9 +281,11 @@ public class AppOpsControllerImpl implements AppOpsController,
      * @return {@code true} iff the app-op for should be shown to the user
      */
     private boolean isUserVisible(int appOpCode, int uid, String packageName) {
-        // currently OP_SYSTEM_ALERT_WINDOW does not correspond to a platform permission
-        // which may be user senstive, so for now always show it to the user.
-        if (appOpCode == AppOpsManager.OP_SYSTEM_ALERT_WINDOW) {
+        // currently OP_SYSTEM_ALERT_WINDOW and OP_MONITOR_HIGH_POWER_LOCATION
+        // does not correspond to a platform permission
+        // which may be user sensitive, so for now always show it to the user.
+        if (appOpCode == AppOpsManager.OP_SYSTEM_ALERT_WINDOW
+                || appOpCode == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION) {
             return true;
         }
 
