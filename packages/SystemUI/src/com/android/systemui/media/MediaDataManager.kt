@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
+import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.IOException
 import java.io.PrintWriter
@@ -90,7 +91,7 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 class MediaDataManager(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExecutor: Executor,
+    @Main private val foregroundExecutor: DelayableExecutor,
     private val mediaControllerFactory: MediaControllerFactory,
     private val broadcastDispatcher: BroadcastDispatcher,
     dumpManager: DumpManager,
@@ -107,7 +108,7 @@ class MediaDataManager(
     constructor(
         context: Context,
         @Background backgroundExecutor: Executor,
-        @Main foregroundExecutor: Executor,
+        @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
         dumpManager: DumpManager,
         broadcastDispatcher: BroadcastDispatcher,
@@ -183,10 +184,7 @@ class MediaDataManager(
         val listenersCopy = listeners.toSet()
         val toRemove = mediaEntries.filter { it.value.packageName == packageName }
         toRemove.forEach {
-            mediaEntries.remove(it.key)
-            listenersCopy.forEach { listener ->
-                listener.onMediaDataRemoved(it.key)
-            }
+            removeEntry(it.key, listenersCopy)
         }
     }
 
@@ -267,6 +265,18 @@ class MediaDataManager(
             if (DEBUG) Log.d(TAG, "Updating $token timedOut: $timedOut")
             onMediaDataLoaded(token, token, it)
         }
+    }
+
+    private fun removeEntry(key: String, listenersCopy: Set<Listener>) {
+        mediaEntries.remove(key)
+        listenersCopy.forEach {
+            it.onMediaDataRemoved(key)
+        }
+    }
+
+    fun dismissMediaData(key: String, delay: Long) {
+        val listenersCopy = listeners.toSet()
+        foregroundExecutor.executeDelayed({ removeEntry(key, listenersCopy) }, delay)
     }
 
     private fun loadMediaDataInBgForResumption(
