@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class CallbackControllerTest extends SysuiTestCase {
