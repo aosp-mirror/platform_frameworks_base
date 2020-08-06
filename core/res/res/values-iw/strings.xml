@@ -1199,7 +1199,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"האפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> נעצרת שוב ושוב"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"האפליקציה <xliff:g id="PROCESS">%1$s</xliff:g> נעצרת שוב ושוב"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"פתח שוב את האפליקציה"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"משוב"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"שליחת משוב"</string>
     <string name="aerr_close" msgid="3398336821267021852">"סגירה"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"השתק עד הפעלה מחדש של המכשיר"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"המתן"</string>
