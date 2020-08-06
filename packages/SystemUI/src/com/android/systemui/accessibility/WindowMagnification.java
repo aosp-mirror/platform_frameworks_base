@@ -53,8 +53,8 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_ORIENTATION;
 
     @VisibleForTesting
-    protected WindowMagnificationAnimationController mWindowMagnificationAnimationController;
-    private final ModeSwitchesController mModeSwitchesController;
+    protected WindowMagnificationController mWindowMagnificationController;
+    protected final ModeSwitchesController mModeSwitchesController;
     private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
@@ -72,11 +72,6 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
                 Context.ACCESSIBILITY_SERVICE);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
-        final WindowMagnificationController controller = new WindowMagnificationController(mContext,
-                mHandler, new SfVsyncFrameCallbackProvider(), null,
-                new SurfaceControl.Transaction(), this);
-        mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
-                mContext, controller);
     }
 
     @Override
@@ -86,7 +81,9 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             return;
         }
         mLastConfiguration.setTo(newConfig);
-        mWindowMagnificationAnimationController.onConfigurationChanged(configDiff);
+        if (mWindowMagnificationController != null) {
+            mWindowMagnificationController.onConfigurationChanged(configDiff);
+        }
         if (mModeSwitchesController != null) {
             mModeSwitchesController.onConfigurationChanged(configDiff);
         }
@@ -100,25 +97,39 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     @MainThread
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY) {
         //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.enableWindowMagnification(scale, centerX, centerY);
+        if (mWindowMagnificationController == null) {
+            mWindowMagnificationController = new WindowMagnificationController(mContext,
+                    mHandler,
+                    new SfVsyncFrameCallbackProvider(),
+                    null, new SurfaceControl.Transaction(),
+                    this);
+        }
+        mWindowMagnificationController.enableWindowMagnification(scale, centerX, centerY);
     }
 
     @MainThread
     void setScale(int displayId, float scale) {
         //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.setScale(scale);
+        if (mWindowMagnificationController != null) {
+            mWindowMagnificationController.setScale(scale);
+        }
     }
 
     @MainThread
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
         //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.moveWindowMagnifier(offsetX, offsetY);
+        if (mWindowMagnificationController != null) {
+            mWindowMagnificationController.moveWindowMagnifier(offsetX, offsetY);
+        }
     }
 
     @MainThread
     void disableWindowMagnification(int displayId) {
         //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.deleteWindowMagnification();
+        if (mWindowMagnificationController != null) {
+            mWindowMagnificationController.deleteWindowMagnification();
+        }
+        mWindowMagnificationController = null;
     }
 
     @Override
