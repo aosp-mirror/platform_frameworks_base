@@ -743,6 +743,12 @@ public abstract class BatteryStats implements Parcelable {
         @UnsupportedAppUsage
         public abstract ArrayMap<String, ? extends Pkg> getPackageStats();
 
+        /**
+         * Returns the proportion of power consumed by the System Service
+         * calls made by this UID.
+         */
+        public abstract double getProportionalSystemServiceUsage();
+
         public abstract ControllerActivityCounter getWifiControllerActivity();
         public abstract ControllerActivityCounter getBluetoothControllerActivity();
         public abstract ControllerActivityCounter getModemControllerActivity();
@@ -2880,6 +2886,17 @@ public abstract class BatteryStats implements Parcelable {
      * since the last time the device was charged.
      */
     public abstract int getDischargeAmountScreenDozeSinceCharge();
+
+    /**
+     * Returns the approximate CPU time (in microseconds) spent by the system server handling
+     * incoming service calls from apps.
+     *
+     * @param cluster the index of the CPU cluster.
+     * @param step the index of the CPU speed. This is not the actual speed of the CPU.
+     * @see com.android.internal.os.PowerProfile#getNumCpuClusters()
+     * @see com.android.internal.os.PowerProfile#getNumSpeedStepsInCpuCluster(int)
+     */
+    public abstract long getSystemServiceTimeAtCpuSpeed(int cluster, int step);
 
     /**
      * Returns the total, last, or current battery uptime in microseconds.

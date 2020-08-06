@@ -129,6 +129,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double videoPowerMah;
     public double wakeLockPowerMah;
     public double wifiPowerMah;
+    public double systemServiceCpuPowerMah;
 
     //                           ****************
     // This list must be kept current with atoms.proto (frameworks/base/cmds/statsd/src/atoms.proto)
@@ -242,6 +243,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
         videoPowerMah += other.videoPowerMah;
         proportionalSmearMah += other.proportionalSmearMah;
         totalSmearedPowerMah += other.totalSmearedPowerMah;
+        systemServiceCpuPowerMah += other.systemServiceCpuPowerMah;
     }
 
     /**
@@ -253,7 +255,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double sumPower() {
         totalPowerMah = usagePowerMah + wifiPowerMah + gpsPowerMah + cpuPowerMah +
                 sensorPowerMah + mobileRadioPowerMah + wakeLockPowerMah + cameraPowerMah +
-                flashlightPowerMah + bluetoothPowerMah + audioPowerMah + videoPowerMah;
+                flashlightPowerMah + bluetoothPowerMah + audioPowerMah + videoPowerMah
+                + systemServiceCpuPowerMah;
         totalSmearedPowerMah = totalPowerMah + screenPowerMah + proportionalSmearMah;
 
         return totalPowerMah;

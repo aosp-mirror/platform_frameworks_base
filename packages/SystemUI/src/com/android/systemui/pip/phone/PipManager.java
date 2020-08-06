@@ -47,6 +47,7 @@ import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -259,7 +260,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             PipSnapAlgorithm pipSnapAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
             SysUiState sysUiState,
-            ConfigurationController configController) {
+            ConfigurationController configController,
+            PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -280,7 +282,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mMediaController, mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState);
+                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState,
+                pipUiEventLogger);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
@@ -373,10 +376,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     }
 
     @Override
-    public void onPipTransitionStarted(ComponentName activity, int direction) {
+    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
             // Exiting PIP, save the reentry bounds to restore to when re-entering.
-            updateReentryBounds();
+            updateReentryBounds(pipBounds);
             mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
         }
         // Disable touches while the animation is running
@@ -393,15 +396,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     /**
      * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
      */
-    public void updateReentryBounds() {
-        // On phones, the expansion animation that happens on pip tap before restoring
-        // to fullscreen makes it so that the last reported bounds are the expanded
-        // bounds. We want to restore to the unexpanded bounds when re-entering pip,
-        // so we use the bounds before expansion (normal) instead of the reported
-        // bounds.
-        Rect reentryBounds = mTouchHandler.getNormalBounds();
-        // Apply the snap fraction of the current bounds to the normal bounds.
-        final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
+    public void updateReentryBounds(Rect bounds) {
+        final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
         float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
         mPipBoundsHandler.applySnapFraction(reentryBounds, snapFraction);
         mReentryBounds.set(reentryBounds);

@@ -183,7 +183,6 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -238,12 +237,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
@@ -384,7 +380,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     private final MirrorActiveUids mActiveUids = new MirrorActiveUids();
-    private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
+    private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid and uid */
@@ -1110,7 +1106,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public int startActivityIntentSender(IApplicationThread caller, IIntentSender target,
-            IBinder whitelistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
+            IBinder allowlistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle bOptions) {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
@@ -1133,7 +1129,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppSwitchesAllowedTime = 0;
             }
         }
-        return pir.sendInner(0, fillInIntent, resolvedType, whitelistToken, null, null,
+        return pir.sendInner(0, fillInIntent, resolvedType, allowlistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions);
     }
 
@@ -3037,7 +3033,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // system or a specific app.
         // * System-initiated requests will only start the pinned mode (screen pinning)
         // * App-initiated requests
-        //   - will put the device in fully locked mode (LockTask), if the app is whitelisted
+        //   - will put the device in fully locked mode (LockTask), if the app is allowlisted
         //   - will start the pinned mode, otherwise
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
@@ -3077,7 +3073,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     "updateLockTaskPackages()");
         }
         synchronized (mGlobalLock) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":"
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowlisting " + userId + ":"
                     + Arrays.toString(packages));
             getLockTaskController().updateLockTaskPackages(userId, packages);
         }
@@ -4095,10 +4091,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         final Task stack = r.getRootTask();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);
-                        MetricsLoggerWrapper.logPictureInPictureEnter(mContext,
-                                r.info.applicationInfo.uid, r.shortComponentName,
-                                r.supportsEnterPipOnTaskSwitch);
-                        logPictureInPictureArgs(params);
                     }
                 };
 
@@ -4142,7 +4134,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             r.pictureInPictureArgs.getAspectRatio());
                     stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
-                logPictureInPictureArgs(params);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4154,18 +4145,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Currently, this is a static constant, but later, we may change this to be dependent on
         // the context of the activity
         return 3;
-    }
-
-    private void logPictureInPictureArgs(PictureInPictureParams params) {
-        if (params.hasSetActions()) {
-            MetricsLogger.histogram(mContext, "tron_varz_picture_in_picture_actions_count",
-                    params.getActions().size());
-        }
-        if (params.hasSetAspectRatio()) {
-            LogMaker lm = new LogMaker(MetricsEvent.ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED);
-            lm.addTaggedData(MetricsEvent.PICTURE_IN_PICTURE_ASPECT_RATIO, params.getAspectRatio());
-            MetricsLogger.action(lm);
-        }
     }
 
     /**
@@ -5979,11 +5958,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
-     * the whitelist
+     * @return allowlist tag for a uid from mPendingTempAllowlist, null if not currently on
+     * the allowlist
      */
-    String getPendingTempWhitelistTagForUidLocked(int uid) {
-        return mPendingTempWhitelist.get(uid);
+    String getPendingTempAllowlistTagForUidLocked(int uid) {
+        return mPendingTempAllowlist.get(uid);
     }
 
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
@@ -7325,16 +7304,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onUidAddedToPendingTempWhitelist(int uid, String tag) {
+        public void onUidAddedToPendingTempAllowlist(int uid, String tag) {
             synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempWhitelist.put(uid, tag);
+                mPendingTempAllowlist.put(uid, tag);
             }
         }
 
         @Override
-        public void onUidRemovedFromPendingTempWhitelist(int uid) {
+        public void onUidRemovedFromPendingTempAllowlist(int uid) {
             synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempWhitelist.remove(uid);
+                mPendingTempAllowlist.remove(uid);
             }
         }
 

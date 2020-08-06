@@ -99,6 +99,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     private final Handler mUpdateHandler;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipAnimationController mPipAnimationController;
+    private final PipUiEventLogger mPipUiEventLoggerLogger;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
     private final Rect mLastReportedBounds = new Rect();
     private final int mEnterExitAnimationDuration;
@@ -209,7 +210,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @Nullable Divider divider,
             @NonNull DisplayController displayController,
-            @NonNull PipAnimationController pipAnimationController) {
+            @NonNull PipAnimationController pipAnimationController,
+            @NonNull PipUiEventLogger pipUiEventLogger) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
@@ -217,6 +219,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
         mPipAnimationController = pipAnimationController;
+        mPipUiEventLoggerLogger = pipUiEventLogger;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitDivider = divider;
         displayController.addDisplayWindowListener(this);
@@ -279,6 +282,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             return;
         }
 
+        mPipUiEventLoggerLogger.log(
+                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
         final Configuration initialConfig = mInitialState.remove(mToken.asBinder());
         final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
                 != mPipBoundsHandler.getDisplayRotation();
@@ -381,6 +386,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
 
+        mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
+        mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
+
         if (mShouldDeferEnteringPip) {
             if (DEBUG) Log.d(TAG, "Defer entering PiP animation, fixed rotation is ongoing");
             // if deferred, hide the surface till fixed rotation is completed
@@ -454,10 +462,11 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     private void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
+        final Rect pipBounds = new Rect(mLastReportedBounds);
         runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction);
+                callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction, pipBounds);
             }
         });
     }
@@ -513,6 +522,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mPictureInPictureParams = null;
         mInPip = false;
         mExitingPip = false;
+        mPipUiEventLoggerLogger.setTaskInfo(null);
     }
 
     @Override
@@ -628,7 +638,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      * {@link PictureInPictureParams} would affect the bounds.
      */
     private boolean applyPictureInPictureParams(@NonNull PictureInPictureParams params) {
-        final boolean changed = (mPictureInPictureParams == null) ? true : !Objects.equals(
+        final boolean changed = (mPictureInPictureParams == null) || !Objects.equals(
                 mPictureInPictureParams.getAspectRatioRational(), params.getAspectRatioRational());
         if (changed) {
             mPictureInPictureParams = params;
@@ -973,7 +983,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         /**
          * Callback when the pip transition is started.
          */
-        void onPipTransitionStarted(ComponentName activity, int direction);
+        void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds);
 
         /**
          * Callback when the pip transition is finished.

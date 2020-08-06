@@ -423,13 +423,15 @@ class PackageManagerShellCommand extends ShellCommand {
             final List<ApplicationInfo> list;
             if (packageName == null) {
                 final ParceledListSlice<ApplicationInfo> packages =
-                        mInterface.getInstalledApplications(
-                                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
+                        mInterface.getInstalledApplications(PackageManager.MATCH_SYSTEM_ONLY
+                                        | PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                                UserHandle.USER_SYSTEM);
                 list = packages.getList();
             } else {
                 list = new ArrayList<>(1);
-                list.add(mInterface.getApplicationInfo(packageName,
-                        PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM));
+                list.add(mInterface.getApplicationInfo(packageName, PackageManager.MATCH_SYSTEM_ONLY
+                                | PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                        UserHandle.USER_SYSTEM));
             }
             for (ApplicationInfo info : list) {
                 if (info.isUpdatedSystemApp()) {
