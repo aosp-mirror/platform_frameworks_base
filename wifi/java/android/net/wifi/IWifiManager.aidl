@@ -122,7 +122,7 @@ interface IWifiManager
 
     DhcpInfo getDhcpInfo();
 
-    void setScanAlwaysAvailable(boolean isAvailable);
+    void setScanAlwaysAvailable(boolean isAvailable, String packageName);
 
     boolean isScanAlwaysAvailable();
 
@@ -142,9 +142,9 @@ interface IWifiManager
 
     void updateInterfaceIpState(String ifaceName, int mode);
 
-    boolean startSoftAp(in WifiConfiguration wifiConfig);
+    boolean startSoftAp(in WifiConfiguration wifiConfig, String packageName);
 
-    boolean startTetheredHotspot(in SoftApConfiguration softApConfig);
+    boolean startTetheredHotspot(in SoftApConfiguration softApConfig, String packageName);
 
     boolean stopSoftAp();
 
