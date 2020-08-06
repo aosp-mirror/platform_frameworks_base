@@ -40,6 +40,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
@@ -168,6 +169,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
+import android.content.pm.FileChecksum;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageDataObserver;
@@ -254,6 +256,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelableException;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -394,6 +397,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -404,7 +408,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2441,6 +2448,83 @@ public class PackageManagerService extends IPackageManager.Stub
         mNoKillInstallObservers.put(packageName, Pair.create(info, observer));
         Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_INSTALL_OBSERVER, packageName);
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
+    }
+
+    @Override
+    public void getChecksums(@NonNull String packageName, boolean includeSplits,
+            @PackageManager.FileChecksumKind int optional,
+            @PackageManager.FileChecksumKind int required, @Nullable List trustedInstallers,
+            @NonNull IntentSender statusReceiver, int userId) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(statusReceiver);
+
+        final ApplicationInfo applicationInfo = getApplicationInfoInternal(packageName, 0,
+                Binder.getCallingUid(), userId);
+        if (applicationInfo == null) {
+            throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
+        }
+
+        List<Pair<String, File>> filesToChecksum = new ArrayList<>();
+
+        // Adding base split.
+        filesToChecksum.add(Pair.create(null, new File(applicationInfo.sourceDir)));
+
+        // Adding other splits.
+        if (includeSplits && applicationInfo.splitNames != null) {
+            for (int i = 0, size = applicationInfo.splitNames.length; i < size; ++i) {
+                filesToChecksum.add(Pair.create(applicationInfo.splitNames[i],
+                        new File(applicationInfo.splitSourceDirs[i])));
+            }
+        }
+
+        for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
+            final File file = filesToChecksum.get(i).second;
+            if (!file.exists()) {
+                throw new IllegalStateException("File not found: " + file.getPath());
+            }
+        }
+
+        final Certificate[] trustedCerts = (trustedInstallers != null) ? decodeCertificates(
+                trustedInstallers) : null;
+        final Context context = mContext;
+
+        mInjector.getBackgroundExecutor().execute(() -> {
+            final Intent intent = new Intent();
+            List<FileChecksum> result = new ArrayList<>();
+            for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
+                final String split = filesToChecksum.get(i).first;
+                final File file = filesToChecksum.get(i).second;
+                try {
+                    result.addAll(ApkChecksums.getFileChecksums(split, file, optional, required,
+                            trustedCerts));
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Checksum calculation error", e);
+                }
+            }
+            intent.putExtra(EXTRA_CHECKSUMS,
+                    result.toArray(new FileChecksum[result.size()]));
+
+            try {
+                statusReceiver.sendIntent(context, 1, intent, null, null);
+            } catch (SendIntentException e) {
+                Slog.w(TAG, e);
+            }
+        });
+    }
+
+    private static @NonNull Certificate[] decodeCertificates(@NonNull List certs) {
+        try {
+            final CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            final Certificate[] result = new Certificate[certs.size()];
+            for (int i = 0, size = certs.size(); i < size; ++i) {
+                final InputStream is = new ByteArrayInputStream((byte[]) certs.get(i));
+                final X509Certificate cert = (X509Certificate) cf.generateCertificate(is);
+                result[i] = cert;
+            }
+            return result;
+        } catch (CertificateException e) {
+            throw ExceptionUtils.propagate(e);
+        }
     }
 
     /**

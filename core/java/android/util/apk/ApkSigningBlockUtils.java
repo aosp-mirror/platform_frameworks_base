@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @hide for internal use only.
  */
-final class ApkSigningBlockUtils {
+public final class ApkSigningBlockUtils {
 
     private ApkSigningBlockUtils() {
     }
@@ -146,6 +146,37 @@ final class ApkSigningBlockUtils {
             Map<Integer, byte[]> expectedDigests,
             FileDescriptor apkFileDescriptor,
             SignatureInfo signatureInfo) throws SecurityException {
+        int[] digestAlgorithms = new int[expectedDigests.size()];
+        int digestAlgorithmCount = 0;
+        for (int digestAlgorithm : expectedDigests.keySet()) {
+            digestAlgorithms[digestAlgorithmCount] = digestAlgorithm;
+            digestAlgorithmCount++;
+        }
+        byte[][] actualDigests;
+        try {
+            actualDigests = computeContentDigestsPer1MbChunk(digestAlgorithms, apkFileDescriptor,
+                    signatureInfo);
+        } catch (DigestException e) {
+            throw new SecurityException("Failed to compute digest(s) of contents", e);
+        }
+        for (int i = 0; i < digestAlgorithms.length; i++) {
+            int digestAlgorithm = digestAlgorithms[i];
+            byte[] expectedDigest = expectedDigests.get(digestAlgorithm);
+            byte[] actualDigest = actualDigests[i];
+            if (!MessageDigest.isEqual(expectedDigest, actualDigest)) {
+                throw new SecurityException(
+                        getContentDigestAlgorithmJcaDigestAlgorithm(digestAlgorithm)
+                                + " digest of contents did not verify");
+            }
+        }
+    }
+
+    /**
+     * Calculate digests using digestAlgorithms for apkFileDescriptor.
+     * This will skip signature block described by signatureInfo.
+     */
+    public static byte[][] computeContentDigestsPer1MbChunk(int[] digestAlgorithms,
+            FileDescriptor apkFileDescriptor, SignatureInfo signatureInfo) throws DigestException {
         // We need to verify the integrity of the following three sections of the file:
         // 1. Everything up to the start of the APK Signing Block.
         // 2. ZIP Central Directory.
@@ -156,6 +187,7 @@ final class ApkSigningBlockUtils {
         // avoid wasting physical memory. In most APK verification scenarios, the contents of the
         // APK are already there in the OS's page cache and thus mmap does not use additional
         // physical memory.
+
         DataSource beforeApkSigningBlock =
                 new MemoryMappedFileDataSource(apkFileDescriptor, 0,
                         signatureInfo.apkSigningBlockOffset);
@@ -171,31 +203,8 @@ final class ApkSigningBlockUtils {
         ZipUtils.setZipEocdCentralDirectoryOffset(eocdBuf, signatureInfo.apkSigningBlockOffset);
         DataSource eocd = new ByteBufferDataSource(eocdBuf);
 
-        int[] digestAlgorithms = new int[expectedDigests.size()];
-        int digestAlgorithmCount = 0;
-        for (int digestAlgorithm : expectedDigests.keySet()) {
-            digestAlgorithms[digestAlgorithmCount] = digestAlgorithm;
-            digestAlgorithmCount++;
-        }
-        byte[][] actualDigests;
-        try {
-            actualDigests =
-                    computeContentDigestsPer1MbChunk(
-                            digestAlgorithms,
-                            new DataSource[] {beforeApkSigningBlock, centralDir, eocd});
-        } catch (DigestException e) {
-            throw new SecurityException("Failed to compute digest(s) of contents", e);
-        }
-        for (int i = 0; i < digestAlgorithms.length; i++) {
-            int digestAlgorithm = digestAlgorithms[i];
-            byte[] expectedDigest = expectedDigests.get(digestAlgorithm);
-            byte[] actualDigest = actualDigests[i];
-            if (!MessageDigest.isEqual(expectedDigest, actualDigest)) {
-                throw new SecurityException(
-                        getContentDigestAlgorithmJcaDigestAlgorithm(digestAlgorithm)
-                                + " digest of contents did not verify");
-            }
-        }
+        return computeContentDigestsPer1MbChunk(digestAlgorithms,
+                new DataSource[]{beforeApkSigningBlock, centralDir, eocd});
     }
 
     private static byte[][] computeContentDigestsPer1MbChunk(
@@ -417,14 +426,10 @@ final class ApkSigningBlockUtils {
     static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0423;
     static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0425;
 
-    static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
-    static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
-    static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
-    static final int CONTENT_DIGEST_SHA256 = 4;
-
-    private static final int[] V4_CONTENT_DIGEST_ALGORITHMS =
-            {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
-                    CONTENT_DIGEST_CHUNKED_SHA256};
+    public static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
+    public static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
+    public static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
+    public static final int CONTENT_DIGEST_SHA256 = 4;
 
     static int compareSignatureAlgorithm(int sigAlgorithm1, int sigAlgorithm2) {
         int digestAlgorithm1 = getSignatureAlgorithmContentDigestAlgorithm(sigAlgorithm1);
