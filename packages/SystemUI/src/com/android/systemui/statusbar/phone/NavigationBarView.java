@@ -131,6 +131,7 @@ public class NavigationBarView extends FrameLayout implements
     private boolean mDeadZoneConsuming = false;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
+    private AutoHideController mAutoHideController;
 
     // performs manual animation in sync with layout transitions
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
@@ -276,6 +277,15 @@ public class NavigationBarView extends FrameLayout implements
         info.touchableRegion.setEmpty();
     };
 
+    private final Consumer<Boolean> mRotationButtonListener = (visible) -> {
+        if (visible) {
+            // If the button will actually become visible and the navbar is about to hide,
+            // tell the statusbar to keep it around for longer
+            mAutoHideController.touchAutoHide();
+        }
+        notifyActiveTouchRegions();
+    };
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -312,7 +322,8 @@ public class NavigationBarView extends FrameLayout implements
         mFloatingRotationButton = new FloatingRotationButton(context);
         mRotationButtonController = new RotationButtonController(mLightContext,
                 mLightIconColor, mDarkIconColor,
-                isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton);
+                isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton,
+                mRotationButtonListener);
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -358,6 +369,10 @@ public class NavigationBarView extends FrameLayout implements
                         return isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode);
                     }
                 });
+    }
+
+    public void setAutoHideController(AutoHideController autoHideController) {
+        mAutoHideController = autoHideController;
     }
 
     public NavigationBarTransitions getBarTransitions() {
@@ -938,7 +953,15 @@ public class NavigationBarView extends FrameLayout implements
         updateButtonLocation(getBackButton());
         updateButtonLocation(getHomeButton());
         updateButtonLocation(getRecentsButton());
-        updateButtonLocation(getRotateSuggestionButton());
+        updateButtonLocation(getImeSwitchButton());
+        updateButtonLocation(getAccessibilityButton());
+        if (mFloatingRotationButton.isVisible()) {
+            View floatingRotationView = mFloatingRotationButton.getCurrentView();
+            floatingRotationView.getBoundsOnScreen(mTmpBounds);
+            mActiveRegion.op(mTmpBounds, Op.UNION);
+        } else {
+            updateButtonLocation(getRotateSuggestionButton());
+        }
         mOverviewProxyService.onActiveNavBarRegionChanges(mActiveRegion);
     }
 
@@ -1210,6 +1233,7 @@ public class NavigationBarView extends FrameLayout implements
         dumpButton(pw, "rcnt", getRecentsButton());
         dumpButton(pw, "rota", getRotateSuggestionButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
+        dumpButton(pw, "ime", getImeSwitchButton());
 
         pw.println("    }");
         pw.println("    mScreenOn: " + mScreenOn);

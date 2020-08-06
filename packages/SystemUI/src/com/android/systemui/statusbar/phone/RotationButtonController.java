@@ -124,7 +124,8 @@ public class RotationButtonController {
     }
 
     RotationButtonController(Context context, @ColorInt int lightIconColor,
-            @ColorInt int darkIconColor, RotationButton rotationButton) {
+            @ColorInt int darkIconColor, RotationButton rotationButton,
+            Consumer<Boolean> visibilityChangedCallback) {
         mContext = context;
         mLightIconColor = lightIconColor;
         mDarkIconColor = darkIconColor;
@@ -139,6 +140,7 @@ public class RotationButtonController {
         mTaskStackListener = new TaskStackListenerImpl();
         mRotationButton.setOnClickListener(this::onRotateSuggestionClick);
         mRotationButton.setOnHoverListener(this::onRotateSuggestionHover);
+        mRotationButton.setVisibilityChangedCallback(visibilityChangedCallback);
     }
 
     void registerListeners() {
