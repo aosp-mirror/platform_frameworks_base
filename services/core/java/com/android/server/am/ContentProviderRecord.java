@@ -85,12 +85,11 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         noReleaseNeeded = cpr.noReleaseNeeded;
     }
 
-    public ContentProviderHolder newHolder(ContentProviderConnection conn, boolean local) {
+    public ContentProviderHolder newHolder(ContentProviderConnection conn) {
         ContentProviderHolder holder = new ContentProviderHolder(info);
         holder.provider = provider;
         holder.noReleaseNeeded = noReleaseNeeded;
         holder.connection = conn;
-        holder.mLocal = local;
         return holder;
     }
 
@@ -178,50 +177,6 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
 
     public boolean hasConnectionOrHandle() {
         return !connections.isEmpty() || hasExternalProcessHandles();
-    }
-
-    /**
-     * Notify all clients that the provider has been published and ready to use,
-     * or timed out.
-     *
-     * @param status true: successfully published; false: timed out
-     */
-    void onProviderPublishStatusLocked(boolean status) {
-        final int numOfConns = connections.size();
-        final int userId = UserHandle.getUserId(appInfo.uid);
-        for (int i = 0; i < numOfConns; i++) {
-            final ContentProviderConnection conn = connections.get(i);
-            if (conn.waiting && conn.client != null) {
-                final ProcessRecord client = conn.client;
-                if (!status) {
-                    if (launchingApp == null) {
-                        Slog.w(TAG_AM, "Unable to launch app "
-                                + appInfo.packageName + "/"
-                                + appInfo.uid + " for provider "
-                                + info.authority + ": launching app became null");
-                        EventLogTags.writeAmProviderLostProcess(
-                                userId,
-                                appInfo.packageName,
-                                appInfo.uid, info.authority);
-                    } else {
-                        Slog.wtf(TAG_AM, "Timeout waiting for provider "
-                                + appInfo.packageName + "/"
-                                + appInfo.uid + " for provider "
-                                + info.authority
-                                + " caller=" + client);
-                    }
-                }
-                if (client.thread != null) {
-                    try {
-                        client.thread.notifyContentProviderPublishStatus(
-                                newHolder(status ? conn : null, false),
-                                info.authority, userId, status);
-                    } catch (RemoteException e) {
-                    }
-                }
-            }
-            conn.waiting = false;
-        }
     }
 
     void dump(PrintWriter pw, String prefix, boolean full) {
