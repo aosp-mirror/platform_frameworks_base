@@ -25,7 +25,9 @@ public class AppOpItem {
     private int mUid;
     private String mPackageName;
     private long mTimeStarted;
-    private String mState;
+    private StringBuilder mState;
+    // This is only used for items with mCode == AppOpsManager.OP_RECORD_AUDIO
+    private boolean mSilenced;
 
     public AppOpItem(int code, int uid, String packageName, long timeStarted) {
         this.mCode = code;
@@ -36,9 +38,8 @@ public class AppOpItem {
                 .append("AppOpItem(")
                 .append("Op code=").append(code).append(", ")
                 .append("UID=").append(uid).append(", ")
-                .append("Package name=").append(packageName)
-                .append(")")
-                .toString();
+                .append("Package name=").append(packageName).append(", ")
+                .append("Paused=");
     }
 
     public int getCode() {
@@ -57,8 +58,16 @@ public class AppOpItem {
         return mTimeStarted;
     }
 
+    public void setSilenced(boolean silenced) {
+        mSilenced = silenced;
+    }
+
+    public boolean isSilenced() {
+        return mSilenced;
+    }
+
     @Override
     public String toString() {
-        return mState;
+        return mState.append(mSilenced).append(")").toString();
     }
 }
