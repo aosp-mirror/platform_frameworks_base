@@ -22,7 +22,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
 import android.content.Context;
@@ -94,8 +93,6 @@ public class AudioRecordingDisclosureBar implements
 
     private static final int ANIMATION_DURATION = 600;
     private static final int MAXIMIZED_DURATION = 3000;
-    private static final int PULSE_BIT_DURATION = 1000;
-    private static final float PULSE_SCALE = 1.25f;
 
     private final Context mContext;
     private boolean mIsEnabledInSettings;
@@ -366,7 +363,6 @@ public class AudioRecordingDisclosureBar implements
 
                                             @Override
                                             public void onAnimationEnd(Animator animation) {
-                                                startPulsatingAnimation();
                                                 if (mRevealRecordingPackages) {
                                                     onExpanded();
                                                 } else {
@@ -527,20 +523,6 @@ public class AudioRecordingDisclosureBar implements
         mTextsContainers = null;
         mTextView = null;
         mBgEnd = null;
-    }
-
-    @UiThread
-    private void startPulsatingAnimation() {
-        final View pulsatingView = mIconTextsContainer.findViewById(R.id.pulsating_circle);
-        final ObjectAnimator animator =
-                ObjectAnimator.ofPropertyValuesHolder(
-                        pulsatingView,
-                        PropertyValuesHolder.ofFloat(View.SCALE_X, PULSE_SCALE),
-                        PropertyValuesHolder.ofFloat(View.SCALE_Y, PULSE_SCALE));
-        animator.setDuration(PULSE_BIT_DURATION);
-        animator.setRepeatCount(ObjectAnimator.INFINITE);
-        animator.setRepeatMode(ObjectAnimator.REVERSE);
-        animator.start();
     }
 
     private String[] getGlobalStringArray(String setting) {
