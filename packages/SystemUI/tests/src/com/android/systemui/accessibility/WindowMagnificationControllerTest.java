@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import static android.view.Choreographer.FrameCallback;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
@@ -83,9 +84,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.deleteWindowMagnification();
-        });
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification());
     }
 
     @Test
@@ -120,5 +120,19 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
+    }
+
+    @Test
+    public void setScale_expectedValue() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.setScale(3.0f);
+        });
+
+        assertEquals(3.0f, mWindowMagnificationController.getScale(), 0);
     }
 }
