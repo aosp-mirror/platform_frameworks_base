@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
@@ -142,6 +143,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private final Handler mHandler;
     private boolean mSizeMismatch;
     private final Paint mBackgroundPaint = new Paint();
+    private final int mActivityType;
     private final int mStatusBarColor;
     @VisibleForTesting final SystemBarBackgroundPainter mSystemBarBackgroundPainter;
     private final int mOrientationOnCreation;
@@ -173,6 +175,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final int windowFlags;
         final int windowPrivateFlags;
         final int currentOrientation;
+        final int activityType;
         final InsetsState insetsState;
         synchronized (service.mGlobalLock) {
             final WindowState mainWindow = activity.findMainWindow();
@@ -241,6 +244,7 @@ class TaskSnapshotSurface implements StartingSurface {
             taskBounds = new Rect();
             task.getBounds(taskBounds);
             currentOrientation = topFullscreenOpaqueWindow.getConfiguration().orientation;
+            activityType = activity.getActivityType();
 
             final InsetsPolicy insetsPolicy = topFullscreenOpaqueWindow.getDisplayContent()
                     .getInsetsPolicy();
@@ -261,7 +265,8 @@ class TaskSnapshotSurface implements StartingSurface {
         }
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
-                windowFlags, windowPrivateFlags, taskBounds, currentOrientation, insetsState);
+                windowFlags, windowPrivateFlags, taskBounds, currentOrientation, activityType,
+                insetsState);
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
@@ -282,7 +287,7 @@ class TaskSnapshotSurface implements StartingSurface {
     TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int sysUiVis, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, InsetsState insetsState) {
+            int currentOrientation, int activityType, InsetsState insetsState) {
         mService = service;
         mSurface = service.mSurfaceFactory.get();
         mHandler = new Handler(mService.mH.getLooper());
@@ -298,6 +303,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 windowPrivateFlags, sysUiVis, taskDescription, 1f, insetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
+        mActivityType = activityType;
         mTransaction = mService.mTransactionFactory.get();
     }
 
@@ -305,7 +311,9 @@ class TaskSnapshotSurface implements StartingSurface {
     public void remove() {
         synchronized (mService.mGlobalLock) {
             final long now = SystemClock.uptimeMillis();
-            if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS) {
+            if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS
+                    // Show the latest content as soon as possible for unlocking to home.
+                    && mActivityType != ACTIVITY_TYPE_HOME) {
                 mHandler.postAtTime(this::remove, mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                         "Defer removing snapshot surface in %dms", (now - mShownTime));
