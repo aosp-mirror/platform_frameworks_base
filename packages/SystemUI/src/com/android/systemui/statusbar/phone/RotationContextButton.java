@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
+import android.content.Context;
 import android.view.View;
 
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -28,8 +29,12 @@ public class RotationContextButton extends ContextualButton implements RotationB
 
     private RotationButtonController mRotationButtonController;
 
-    public RotationContextButton(@IdRes int buttonResId, @DrawableRes int iconResId) {
-        super(buttonResId, iconResId);
+    /**
+     * @param lightContext the context to use to load the icon resource
+     */
+    public RotationContextButton(@IdRes int buttonResId, Context lightContext,
+            @DrawableRes int iconResId) {
+        super(buttonResId, lightContext, iconResId);
     }
 
     @Override
