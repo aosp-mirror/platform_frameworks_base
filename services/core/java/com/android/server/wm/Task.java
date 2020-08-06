@@ -3820,7 +3820,10 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean fillsParent() {
-        return matchParentBounds();
+        // From the perspective of policy, we still want to report that this task fills parent
+        // in fullscreen windowing mode even it doesn't match parent bounds because there will be
+        // letterbox around its real content.
+        return getWindowingMode() == WINDOWING_MODE_FULLSCREEN || matchParentBounds();
     }
 
     @Override
