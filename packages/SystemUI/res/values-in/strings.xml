@@ -855,7 +855,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Pengalih keyboard"</string>
     <string name="save" msgid="3392754183673848006">"Simpan"</string>
-    <string name="reset" msgid="8715144064608810383">"Setel ulang"</string>
+    <string name="reset" msgid="8715144064608810383">"Reset"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Sesuaikan lebar tombol"</string>
     <string name="clipboard" msgid="8517342737534284617">"Papan klip"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Tombol navigasi khusus"</string>
@@ -1084,4 +1084,6 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Tahan Tombol daya untuk melihat kontrol baru"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Tambahkan kontrol"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edit kontrol"</string>
+    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Menggunakan mode satu tangan"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Untuk keluar, geser layar dari bawah ke atas atau ketuk di mana saja di atas aplikasi"</string>
 </resources>

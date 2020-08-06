@@ -1084,4 +1084,8 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"ਨਵੇਂ ਕੰਟਰੋਲ ਦੇਖਣ ਲਈ ਪਾਵਰ ਬਟਨ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ਕੰਟਰੋਲਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
+    <!-- no translation found for one_handed_tutorial_title (6312198435090726656) -->
+    <skip />
+    <!-- no translation found for one_handed_tutorial_description (7674850272340517174) -->
+    <skip />
 </resources>
