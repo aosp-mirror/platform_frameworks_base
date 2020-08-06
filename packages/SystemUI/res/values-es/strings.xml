@@ -502,10 +502,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactivar Ahorro de batería"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Empezar a grabar o enviar contenido?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Quieres iniciar la grabación o el envío de contenido con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Iniciar grabación o el envío de contenido en <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
