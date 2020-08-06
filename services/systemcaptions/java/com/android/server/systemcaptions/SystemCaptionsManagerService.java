@@ -34,7 +34,8 @@ public final class SystemCaptionsManagerService extends
                         context,
                         com.android.internal.R.string.config_defaultSystemCaptionsManagerService),
                 /*disallowProperty=*/ null,
-                /*packageUpdatePolicy=*/ PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
+                /*packageUpdatePolicy=*/ PACKAGE_UPDATE_POLICY_REFRESH_EAGER
+                    | PACKAGE_RESTART_POLICY_REFRESH_EAGER);
     }
 
     @Override
