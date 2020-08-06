@@ -170,7 +170,7 @@ public class TimeZoneDetectorServiceTest {
         ITimeZoneConfigurationListener mockListener = mock(ITimeZoneConfigurationListener.class);
         try {
             mTimeZoneDetectorService.removeConfigurationListener(mockListener);
-            fail();
+            fail("Expected a SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.WRITE_SECURE_SETTINGS),
