@@ -3400,6 +3400,11 @@ package android.provider {
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
     field public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED = "accessibility_display_magnification_enabled";
+    field public static final String ACCESSIBILITY_MAGNIFICATION_CAPABILITY = "accessibility_magnification_capability";
+    field public static final String ACCESSIBILITY_MAGNIFICATION_MODE = "accessibility_magnification_mode";
+    field public static final int ACCESSIBILITY_MAGNIFICATION_MODE_ALL = 3; // 0x3
+    field public static final int ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN = 1; // 0x1
+    field public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 2; // 0x2
     field public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE = "accessibility_shortcut_target_service";
     field public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
     field public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";

@@ -9082,6 +9082,7 @@ public final class Settings {
          * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
          * @hide
          */
+        @TestApi
         public static final String ACCESSIBILITY_MAGNIFICATION_MODE =
                 "accessibility_magnification_mode";
 
@@ -9089,12 +9090,14 @@ public final class Settings {
          * Magnification mode value that magnifies whole display.
          * @hide
          */
+        @TestApi
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN = 0x1;
 
         /**
          * Magnification mode value that magnifies magnify particular region in a window
          * @hide
          */
+        @TestApi
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
 
         /**
@@ -9102,6 +9105,7 @@ public final class Settings {
          * region in a window.
          * @hide
          */
+        @TestApi
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_ALL = 0x3;
 
         /**
@@ -9113,6 +9117,7 @@ public final class Settings {
          * @see#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
          * @hide
          */
+        @TestApi
         public static final String ACCESSIBILITY_MAGNIFICATION_CAPABILITY =
                 "accessibility_magnification_capability";
 
