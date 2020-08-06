@@ -130,6 +130,7 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -1090,9 +1091,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // Check if caller is already present on display
         final boolean uidPresentOnDisplay = displayContent.isUidPresent(callingUid);
 
-        final int displayOwnerUid = displayContent.mDisplay.getOwnerUid();
-        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID) {
-            // Limit launching on virtual displays, because their contents can be read from Surface
+        final Display display = displayContent.mDisplay;
+        if (!display.isTrusted()) {
+            // Limit launching on untrusted displays because their contents can be read from Surface
             // by apps that created them.
             if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
@@ -1116,7 +1117,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         // Check if the caller is the owner of the display.
-        if (displayOwnerUid == callingUid) {
+        if (display.getOwnerUid() == callingUid) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                     + " allow launch for owner of the display");
             return true;
