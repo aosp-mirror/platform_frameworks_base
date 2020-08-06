@@ -1616,9 +1616,9 @@ public class MediaRouter {
         Drawable mIcon;
         // playback information
         int mPlaybackType = PLAYBACK_TYPE_LOCAL;
-        int mVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
-        int mVolume = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
-        int mVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+        int mVolumeMax = DEFAULT_PLAYBACK_MAX_VOLUME;
+        int mVolume = DEFAULT_PLAYBACK_VOLUME;
+        int mVolumeHandling = PLAYBACK_VOLUME_VARIABLE;
         int mPlaybackStream = AudioManager.STREAM_MUSIC;
         VolumeCallbackInfo mVcb;
         Display mPresentationDisplay;
@@ -1721,6 +1721,21 @@ public class MediaRouter {
          * @see #getVolumeHandling()
          */
         public final static int PLAYBACK_VOLUME_VARIABLE = 1;
+
+        /**
+         * Default playback max volume if not set.
+         * Hard-coded to the same number of steps as AudioService.MAX_STREAM_VOLUME[STREAM_MUSIC]
+         *
+         * @see #getVolumeMax()
+         */
+        private static final int DEFAULT_PLAYBACK_MAX_VOLUME = 15;
+
+        /**
+         * Default playback volume if not set.
+         *
+         * @see #getVolume()
+         */
+        private static final int DEFAULT_PLAYBACK_VOLUME = DEFAULT_PLAYBACK_MAX_VOLUME;
 
         RouteInfo(RouteCategory category) {
             mCategory = category;
@@ -2430,13 +2445,13 @@ public class MediaRouter {
                 }
                 return;
             }
-            if (mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
+            if (mPlaybackType == PLAYBACK_TYPE_REMOTE) {
                 int volumeControl = VolumeProvider.VOLUME_CONTROL_FIXED;
                 switch (mVolumeHandling) {
-                    case RemoteControlClient.PLAYBACK_VOLUME_VARIABLE:
+                    case PLAYBACK_VOLUME_VARIABLE:
                         volumeControl = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
                         break;
-                    case RemoteControlClient.PLAYBACK_VOLUME_FIXED:
+                    case PLAYBACK_VOLUME_FIXED:
                     default:
                         break;
                 }
