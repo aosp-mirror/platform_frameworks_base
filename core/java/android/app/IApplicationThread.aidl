@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.app.ContentProviderHolder;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
@@ -148,6 +147,4 @@ oneway interface IApplicationThread {
     void performDirectAction(IBinder activityToken, String actionId,
             in Bundle arguments, in RemoteCallback cancellationCallback,
             in RemoteCallback resultCallback);
-    void notifyContentProviderPublishStatus(in ContentProviderHolder holder, String auth,
-            int userId, boolean published);
 }
