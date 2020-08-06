@@ -7912,6 +7912,13 @@ public final class Settings {
         public static final String TAPS_APP_TO_EXIT = "taps_app_to_exit";
 
         /**
+         * Internal use, one handed mode tutorial showed times.
+         * @hide
+         */
+        public static final String ONE_HANDED_TUTORIAL_SHOW_COUNT =
+                "one_handed_tutorial_show_count";
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
