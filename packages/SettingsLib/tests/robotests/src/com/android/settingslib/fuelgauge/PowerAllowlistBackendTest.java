@@ -47,7 +47,7 @@ import org.robolectric.shadows.ShadowPackageManager;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowDefaultDialerManager.class, ShadowSmsApplication.class})
-public class PowerWhitelistBackendTest {
+public class PowerAllowlistBackendTest {
 
     private static final String PACKAGE_ONE = "com.example.packageone";
     private static final String PACKAGE_TWO = "com.example.packagetwo";
@@ -56,7 +56,7 @@ public class PowerWhitelistBackendTest {
     private IDeviceIdleController mDeviceIdleService;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
-    private PowerWhitelistBackend mPowerWhitelistBackend;
+    private PowerAllowlistBackend mPowerAllowlistBackend;
     private ShadowPackageManager mPackageManager;
     private Context mContext;
 
@@ -74,81 +74,81 @@ public class PowerWhitelistBackendTest {
         mPackageManager.setSystemFeature(PackageManager.FEATURE_TELEPHONY, true);
         doReturn(mDevicePolicyManager).when(mContext).getSystemService(DevicePolicyManager.class);
 
-        mPowerWhitelistBackend = new PowerWhitelistBackend(mContext, mDeviceIdleService);
+        mPowerAllowlistBackend = new PowerAllowlistBackend(mContext, mDeviceIdleService);
     }
 
     @Test
-    public void testIsWhitelisted() throws Exception {
+    public void testIsAllowlisted() throws Exception {
         doReturn(new String[] {PACKAGE_ONE}).when(mDeviceIdleService).getFullPowerWhitelist();
-        mPowerWhitelistBackend.refreshList();
+        mPowerAllowlistBackend.refreshList();
 
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_ONE})).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_TWO})).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(new String[] {PACKAGE_ONE})).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(new String[] {PACKAGE_TWO})).isFalse();
 
-        mPowerWhitelistBackend.addApp(PACKAGE_TWO);
+        mPowerAllowlistBackend.addApp(PACKAGE_TWO);
 
         verify(mDeviceIdleService, atLeastOnce()).addPowerSaveWhitelistApp(PACKAGE_TWO);
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_TWO)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(
                 new String[] {PACKAGE_ONE, PACKAGE_TWO})).isTrue();
 
-        mPowerWhitelistBackend.removeApp(PACKAGE_TWO);
+        mPowerAllowlistBackend.removeApp(PACKAGE_TWO);
 
         verify(mDeviceIdleService, atLeastOnce()).removePowerSaveWhitelistApp(PACKAGE_TWO);
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_ONE})).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_TWO})).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(new String[] {PACKAGE_ONE})).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(new String[] {PACKAGE_TWO})).isFalse();
 
-        mPowerWhitelistBackend.removeApp(PACKAGE_ONE);
+        mPowerAllowlistBackend.removeApp(PACKAGE_ONE);
 
         verify(mDeviceIdleService, atLeastOnce()).removePowerSaveWhitelistApp(PACKAGE_ONE);
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(
                 new String[] {PACKAGE_ONE, PACKAGE_TWO})).isFalse();
     }
 
     @Test
-    public void isWhitelisted_shouldWhitelistDefaultSms() {
+    public void isAllowlisted_shouldAllowlistDefaultSms() {
         final String testSms = "com.android.test.defaultsms";
         ShadowSmsApplication.setDefaultSmsApplication(new ComponentName(testSms, "receiver"));
 
-        mPowerWhitelistBackend.refreshList();
+        mPowerAllowlistBackend.refreshList();
 
-        assertThat(mPowerWhitelistBackend.isWhitelisted(testSms)).isTrue();
-        assertThat(mPowerWhitelistBackend.isDefaultActiveApp(testSms)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(testSms)).isTrue();
+        assertThat(mPowerAllowlistBackend.isDefaultActiveApp(testSms)).isTrue();
     }
 
     @Test
-    public void isWhitelisted_shouldWhitelistDefaultDialer() {
+    public void isAllowlisted_shouldAllowlistDefaultDialer() {
         final String testDialer = "com.android.test.defaultdialer";
         ShadowDefaultDialerManager.setDefaultDialerApplication(testDialer);
 
-        mPowerWhitelistBackend.refreshList();
+        mPowerAllowlistBackend.refreshList();
 
-        assertThat(mPowerWhitelistBackend.isWhitelisted(testDialer)).isTrue();
-        assertThat(mPowerWhitelistBackend.isDefaultActiveApp(testDialer)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(testDialer)).isTrue();
+        assertThat(mPowerAllowlistBackend.isDefaultActiveApp(testDialer)).isTrue();
     }
 
     @Test
-    public void isWhitelisted_shouldWhitelistActiveDeviceAdminApp() {
+    public void isAllowlisted_shouldAllowlistActiveDeviceAdminApp() {
         doReturn(true).when(mDevicePolicyManager).packageHasActiveAdmins(PACKAGE_ONE);
 
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
-        assertThat(mPowerWhitelistBackend.isDefaultActiveApp(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerAllowlistBackend.isDefaultActiveApp(PACKAGE_ONE)).isTrue();
     }
 
     @Test
-    public void testIsSystemWhitelisted() throws Exception {
+    public void testIsSystemAllowlisted() throws Exception {
         doReturn(new String[] {PACKAGE_ONE}).when(mDeviceIdleService).getSystemPowerWhitelist();
-        mPowerWhitelistBackend.refreshList();
+        mPowerAllowlistBackend.refreshList();
 
-        assertThat(mPowerWhitelistBackend.isSysWhitelisted(PACKAGE_ONE)).isTrue();
-        assertThat(mPowerWhitelistBackend.isSysWhitelisted(PACKAGE_TWO)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isFalse();
+        assertThat(mPowerAllowlistBackend.isSysAllowlisted(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerAllowlistBackend.isSysAllowlisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isFalse();
     }
 }
