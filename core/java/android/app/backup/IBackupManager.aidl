@@ -547,9 +547,11 @@ interface IBackupManager {
      *        set can be restored.
      * @param transportID The name of the transport to use for the restore operation.
      *        May be null, in which case the current active transport is used.
+     * @param operationType Type of the operation, see {@link BackupManager#OperationType}
      * @return An interface to the restore session, or null on error.
      */
-    IRestoreSession beginRestoreSessionForUser(int userId, String packageName, String transportID);
+    IRestoreSession beginRestoreSessionForUser(int userId, String packageName, String transportID,
+            int operationType);
 
     /**
      * Notify the backup manager that a BackupAgent has completed the operation
