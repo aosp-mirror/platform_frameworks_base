@@ -142,10 +142,21 @@ public final class ClientMonitorCallbackConverter {
         }
     }
 
-    public void onFeatureGet(boolean success, int feature, boolean value)
-            throws RemoteException {
+    public void onFeatureGet(boolean success, int feature, boolean value) throws RemoteException {
         if (mFaceServiceReceiver != null) {
             mFaceServiceReceiver.onFeatureGet(success, feature, value);
+        }
+    }
+
+    public void onChallengeInterrupted(int sensorId) throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onChallengeInterrupted(sensorId);
+        }
+    }
+
+    public void onChallengeInterruptFinished(int sensorId) throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onChallengeInterruptFinished(sensorId);
         }
     }
 }

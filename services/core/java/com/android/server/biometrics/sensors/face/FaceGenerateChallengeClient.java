@@ -17,12 +17,14 @@
 package com.android.server.biometrics.sensors.face;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
 
@@ -36,10 +38,22 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
     private static final String TAG = "FaceGenerateChallengeClient";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
+    // If `this` FaceGenerateChallengeClient was invoked while an existing in-flight challenge
+    // was not revoked yet, store a reference to the interrupted client here. Notify the interrupted
+    // client when `this` challenge is revoked.
+    @Nullable private final FaceGenerateChallengeClient mInterruptedClient;
+
     FaceGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
+            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId,
+            @Nullable FaceGenerateChallengeClient interruptedClient) {
         super(context, lazyDaemon, token, listener, owner, sensorId);
+        mInterruptedClient = interruptedClient;
+    }
+
+    @Nullable
+    public FaceGenerateChallengeClient getInterruptedClient() {
+        return mInterruptedClient;
     }
 
     @Override
