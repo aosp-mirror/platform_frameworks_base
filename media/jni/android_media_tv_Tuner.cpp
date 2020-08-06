@@ -941,6 +941,7 @@ Return<void> FrontendCallback::onScanMessage(FrontendScanMessageType type, const
 
 sp<ITuner> JTuner::mTuner;
 sp<::android::hardware::tv::tuner::V1_1::ITuner> JTuner::mTuner_1_1;
+int JTuner::mTunerVersion = 0;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz)
     : mClass(NULL) {
@@ -971,7 +972,8 @@ JTuner::~JTuner() {
 }
 
 sp<ITuner> JTuner::getTunerService() {
-    if (mTuner == nullptr && mTuner_1_1 == nullptr) {
+    if (mTuner == nullptr) {
+        mTunerVersion = 0;
         mTuner_1_1 = ::android::hardware::tv::tuner::V1_1::ITuner::getService();
 
         if (mTuner_1_1 == nullptr) {
@@ -979,12 +981,20 @@ sp<ITuner> JTuner::getTunerService() {
             mTuner = ITuner::getService();
             if (mTuner == nullptr) {
                 ALOGW("Failed to get tuner 1.0 service.");
+            } else {
+                mTunerVersion = 1 << 16;
             }
         } else {
             mTuner = static_cast<sp<ITuner>>(mTuner_1_1);
+            mTunerVersion = ((1 << 16) | 1);
          }
      }
      return mTuner;
+}
+
+jint JTuner::getTunerVersion() {
+    ALOGD("JTuner::getTunerVersion()");
+    return (jint) mTunerVersion;
 }
 
 jobject JTuner::getFrontendIds() {
@@ -2536,6 +2546,11 @@ static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {
     setTuner(env,thiz, tuner);
 }
 
+static jint android_media_tv_Tuner_native_get_tuner_version(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getTunerVersion();
+}
+
 static jobject android_media_tv_Tuner_get_frontend_ids(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->getFrontendIds();
@@ -3749,6 +3764,7 @@ static void android_media_tv_Tuner_media_event_finalize(JNIEnv* env, jobject med
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
+    { "nativeGetTunerVersion", "()I", (void *)android_media_tv_Tuner_native_get_tuner_version },
     { "nativeGetFrontendIds", "()Ljava/util/List;",
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
