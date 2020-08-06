@@ -90,7 +90,7 @@ class OpenAppToSplitScreenTest(
                     navBarLayerIsAlwaysVisible()
                     statusBarLayerIsAlwaysVisible()
                     noUncoveredRegions(rotation)
-                    navBarLayerRotatesAndScales(rotation)
+                    navBarLayerRotatesAndScales(rotation, bugId = 140855415)
                     statusBarLayerRotatesScales(rotation)
 
                     all("dividerLayerBecomesVisible") {

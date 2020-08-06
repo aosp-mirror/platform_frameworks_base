@@ -92,7 +92,7 @@ open class CloseImeWindowToHomeTest(
                     navBarLayerIsAlwaysVisible(bugId = 140855415)
                     statusBarLayerIsAlwaysVisible(bugId = 140855415)
                     noUncoveredRegions(rotation, Surface.ROTATION_0, allStates = false)
-                    navBarLayerRotatesAndScales(rotation, Surface.ROTATION_0)
+                    navBarLayerRotatesAndScales(rotation, Surface.ROTATION_0, bugId = 140855415)
                     statusBarLayerRotatesScales(rotation, Surface.ROTATION_0)
                     imeLayerBecomesInvisible(bugId = 153739621)
                     imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
