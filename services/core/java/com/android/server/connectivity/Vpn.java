@@ -123,6 +123,7 @@ import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -190,6 +191,7 @@ public class Vpn {
     // automated reconnection
 
     private final Context mContext;
+    @VisibleForTesting final Dependencies mDeps;
     private final NetworkInfo mNetworkInfo;
     @VisibleForTesting protected String mPackage;
     private int mOwnerUID;
@@ -252,17 +254,106 @@ public class Vpn {
     // Handle of the user initiating VPN.
     private final int mUserHandle;
 
+    interface RetryScheduler {
+        void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
+    }
+
+    static class Dependencies {
+        public void startService(final String serviceName) {
+            SystemService.start(serviceName);
+        }
+
+        public void stopService(final String serviceName) {
+            SystemService.stop(serviceName);
+        }
+
+        public boolean isServiceRunning(final String serviceName) {
+            return SystemService.isRunning(serviceName);
+        }
+
+        public boolean isServiceStopped(final String serviceName) {
+            return SystemService.isStopped(serviceName);
+        }
+
+        public File getStateFile() {
+            return new File("/data/misc/vpn/state");
+        }
+
+        public void sendArgumentsToDaemon(
+                final String daemon, final LocalSocket socket, final String[] arguments,
+                final RetryScheduler retryScheduler) throws IOException, InterruptedException {
+            final LocalSocketAddress address = new LocalSocketAddress(
+                    daemon, LocalSocketAddress.Namespace.RESERVED);
+
+            // Wait for the socket to connect.
+            while (true) {
+                try {
+                    socket.connect(address);
+                    break;
+                } catch (Exception e) {
+                    // ignore
+                }
+                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
+            }
+            socket.setSoTimeout(500);
+
+            final OutputStream out = socket.getOutputStream();
+            for (String argument : arguments) {
+                byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
+                if (bytes.length >= 0xFFFF) {
+                    throw new IllegalArgumentException("Argument is too large");
+                }
+                out.write(bytes.length >> 8);
+                out.write(bytes.length);
+                out.write(bytes);
+                retryScheduler.checkInterruptAndDelay(false /* sleepLonger */);
+            }
+            out.write(0xFF);
+            out.write(0xFF);
+
+            // Wait for End-of-File.
+            final InputStream in = socket.getInputStream();
+            while (true) {
+                try {
+                    if (in.read() == -1) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
+            }
+        }
+
+        // TODO : implement and use this.
+        @NonNull
+        public InetAddress resolve(final String endpoint) throws UnknownHostException {
+            try {
+                return InetAddress.parseNumericAddress(endpoint);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Endpoint is not numeric");
+            }
+            throw new UnknownHostException(endpoint);
+        }
+
+        public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
+            return vpn.jniCheck(iface) == 0;
+        }
+    }
+
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
             @UserIdInt int userHandle, @NonNull KeyStore keyStore) {
-        this(looper, context, netService, userHandle, keyStore,
+        this(looper, context, new Dependencies(), netService, userHandle, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
     @VisibleForTesting
-    protected Vpn(Looper looper, Context context, INetworkManagementService netService,
+    protected Vpn(Looper looper, Context context, Dependencies deps,
+            INetworkManagementService netService,
             int userHandle, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
+        mDeps = deps;
         mNetd = netService;
         mUserHandle = userHandle;
         mLooper = looper;
@@ -2129,7 +2220,8 @@ public class Vpn {
     }
 
     /** This class represents the common interface for all VPN runners. */
-    private abstract class VpnRunner extends Thread {
+    @VisibleForTesting
+    abstract class VpnRunner extends Thread {
 
         protected VpnRunner(String name) {
             super(name);
@@ -2638,7 +2730,7 @@ public class Vpn {
                     } catch (InterruptedException e) {
                     }
                     for (String daemon : mDaemons) {
-                        SystemService.stop(daemon);
+                        mDeps.stopService(daemon);
                     }
                 }
                 agentDisconnect();
@@ -2663,13 +2755,13 @@ public class Vpn {
 
                 // Wait for the daemons to stop.
                 for (String daemon : mDaemons) {
-                    while (!SystemService.isStopped(daemon)) {
+                    while (!mDeps.isServiceStopped(daemon)) {
                         checkInterruptAndDelay(true);
                     }
                 }
 
                 // Clear the previous state.
-                File state = new File("/data/misc/vpn/state");
+                final File state = mDeps.getStateFile();
                 state.delete();
                 if (state.exists()) {
                     throw new IllegalStateException("Cannot delete the state");
@@ -2696,57 +2788,19 @@ public class Vpn {
 
                     // Start the daemon.
                     String daemon = mDaemons[i];
-                    SystemService.start(daemon);
+                    mDeps.startService(daemon);
 
                     // Wait for the daemon to start.
-                    while (!SystemService.isRunning(daemon)) {
+                    while (!mDeps.isServiceRunning(daemon)) {
                         checkInterruptAndDelay(true);
                     }
 
                     // Create the control socket.
                     mSockets[i] = new LocalSocket();
-                    LocalSocketAddress address = new LocalSocketAddress(
-                            daemon, LocalSocketAddress.Namespace.RESERVED);
 
-                    // Wait for the socket to connect.
-                    while (true) {
-                        try {
-                            mSockets[i].connect(address);
-                            break;
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        checkInterruptAndDelay(true);
-                    }
-                    mSockets[i].setSoTimeout(500);
-
-                    // Send over the arguments.
-                    OutputStream out = mSockets[i].getOutputStream();
-                    for (String argument : arguments) {
-                        byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
-                        if (bytes.length >= 0xFFFF) {
-                            throw new IllegalArgumentException("Argument is too large");
-                        }
-                        out.write(bytes.length >> 8);
-                        out.write(bytes.length);
-                        out.write(bytes);
-                        checkInterruptAndDelay(false);
-                    }
-                    out.write(0xFF);
-                    out.write(0xFF);
-
-                    // Wait for End-of-File.
-                    InputStream in = mSockets[i].getInputStream();
-                    while (true) {
-                        try {
-                            if (in.read() == -1) {
-                                break;
-                            }
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        checkInterruptAndDelay(true);
-                    }
+                    // Wait for the socket to connect and send over the arguments.
+                    mDeps.sendArgumentsToDaemon(daemon, mSockets[i], arguments,
+                            this::checkInterruptAndDelay);
                 }
 
                 // Wait for the daemons to create the new state.
@@ -2754,7 +2808,7 @@ public class Vpn {
                     // Check if a running daemon is dead.
                     for (int i = 0; i < mDaemons.length; ++i) {
                         String daemon = mDaemons[i];
-                        if (mArguments[i] != null && !SystemService.isRunning(daemon)) {
+                        if (mArguments[i] != null && !mDeps.isServiceRunning(daemon)) {
                             throw new IllegalStateException(daemon + " is dead");
                         }
                     }
@@ -2764,7 +2818,8 @@ public class Vpn {
                 // Now we are connected. Read and parse the new state.
                 String[] parameters = FileUtils.readTextFile(state, 0, null).split("\n", -1);
                 if (parameters.length != 7) {
-                    throw new IllegalStateException("Cannot parse the state");
+                    throw new IllegalStateException("Cannot parse the state: '"
+                            + String.join("', '", parameters) + "'");
                 }
 
                 // Set the interface and the addresses in the config.
@@ -2818,7 +2873,7 @@ public class Vpn {
                     checkInterruptAndDelay(false);
 
                     // Check if the interface is gone while we are waiting.
-                    if (jniCheck(mConfig.interfaze) == 0) {
+                    if (mDeps.checkInterfacePresent(Vpn.this, mConfig.interfaze)) {
                         throw new IllegalStateException(mConfig.interfaze + " is gone");
                     }
 
@@ -2849,7 +2904,7 @@ public class Vpn {
             while (true) {
                 Thread.sleep(2000);
                 for (int i = 0; i < mDaemons.length; i++) {
-                    if (mArguments[i] != null && SystemService.isStopped(mDaemons[i])) {
+                    if (mArguments[i] != null && mDeps.isServiceStopped(mDaemons[i])) {
                         return;
                     }
                 }
