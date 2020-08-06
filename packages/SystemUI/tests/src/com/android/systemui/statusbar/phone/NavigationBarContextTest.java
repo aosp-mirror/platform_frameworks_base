@@ -65,9 +65,9 @@ public class NavigationBarContextTest extends SysuiTestCase {
         mDependency.injectMockDependency(AssistManager.class);
 
         mGroup = new ContextualButtonGroup(GROUP_ID);
-        mBtn0 = new ContextualButton(BUTTON_0_ID, ICON_RES_ID);
-        mBtn1 = new ContextualButton(BUTTON_1_ID, ICON_RES_ID);
-        mBtn2 = new ContextualButton(BUTTON_2_ID, ICON_RES_ID);
+        mBtn0 = new ContextualButton(BUTTON_0_ID, mContext, ICON_RES_ID);
+        mBtn1 = new ContextualButton(BUTTON_1_ID, mContext, ICON_RES_ID);
+        mBtn2 = new ContextualButton(BUTTON_2_ID, mContext, ICON_RES_ID);
 
         // Order of adding buttons to group determines the priority, ascending priority order
         mGroup.addButton(mBtn0);
