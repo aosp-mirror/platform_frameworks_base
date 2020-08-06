@@ -295,11 +295,12 @@ public class NavigationBarView extends FrameLayout implements
         // Set up the context group of buttons
         mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
-                R.drawable.ic_ime_switcher_default);
+                mLightContext, R.drawable.ic_ime_switcher_default);
         final RotationContextButton rotateSuggestionButton = new RotationContextButton(
-                R.id.rotate_suggestion, R.drawable.ic_sysbar_rotate_button_ccw_start_0);
+                R.id.rotate_suggestion, mLightContext,
+                R.drawable.ic_sysbar_rotate_button_ccw_start_0);
         final ContextualButton accessibilityButton =
-                new ContextualButton(R.id.accessibility_button,
+                new ContextualButton(R.id.accessibility_button, mLightContext,
                         R.drawable.ic_sysbar_accessibility_button);
         mContextualButtonGroup.addButton(imeSwitcherButton);
         if (!isGesturalMode) {
