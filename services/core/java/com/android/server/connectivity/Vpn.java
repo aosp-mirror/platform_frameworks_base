@@ -48,6 +48,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
+import android.net.DnsResolver;
 import android.net.INetworkManagementEventObserver;
 import android.net.Ikev2VpnProfile;
 import android.net.IpPrefix;
@@ -79,6 +80,7 @@ import android.net.ipsec.ike.IkeSessionParams;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -135,6 +137,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -325,15 +329,52 @@ public class Vpn {
             }
         }
 
-        // TODO : implement and use this.
         @NonNull
-        public InetAddress resolve(final String endpoint) throws UnknownHostException {
+        public InetAddress resolve(final String endpoint)
+                throws ExecutionException, InterruptedException {
             try {
                 return InetAddress.parseNumericAddress(endpoint);
             } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Endpoint is not numeric");
+                // Endpoint is not numeric : fall through and resolve
             }
-            throw new UnknownHostException(endpoint);
+
+            final CancellationSignal cancellationSignal = new CancellationSignal();
+            try {
+                final DnsResolver resolver = DnsResolver.getInstance();
+                final CompletableFuture<InetAddress> result = new CompletableFuture();
+                final DnsResolver.Callback<List<InetAddress>> cb =
+                        new DnsResolver.Callback<List<InetAddress>>() {
+                            @Override
+                            public void onAnswer(@NonNull final List<InetAddress> answer,
+                                    final int rcode) {
+                                if (answer.size() > 0) {
+                                    result.complete(answer.get(0));
+                                } else {
+                                    result.completeExceptionally(
+                                            new UnknownHostException(endpoint));
+                                }
+                            }
+
+                            @Override
+                            public void onError(@Nullable final DnsResolver.DnsException error) {
+                                // Unfortunately UnknownHostException doesn't accept a cause, so
+                                // print a message here instead. Only show the summary, not the
+                                // full stack trace.
+                                Log.e(TAG, "Async dns resolver error : " + error);
+                                result.completeExceptionally(new UnknownHostException(endpoint));
+                            }
+                        };
+                resolver.query(null /* network, null for default */, endpoint,
+                        DnsResolver.FLAG_EMPTY, r -> r.run(), cancellationSignal, cb);
+                return result.get();
+            } catch (final ExecutionException e) {
+                Log.e(TAG, "Cannot resolve VPN endpoint : " + endpoint + ".", e);
+                throw e;
+            } catch (final InterruptedException e) {
+                Log.e(TAG, "Legacy VPN was interrupted while resolving the endpoint", e);
+                cancellationSignal.cancel();
+                throw e;
+            }
         }
 
         public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
@@ -2747,9 +2788,43 @@ public class Vpn {
             }
         }
 
+        private void checkAndFixupArguments(@NonNull final InetAddress endpointAddress) {
+            final String endpointAddressString = endpointAddress.getHostAddress();
+            // Perform some safety checks before inserting the address in place.
+            // Position 0 in mDaemons and mArguments must be racoon, and position 1 must be mtpd.
+            if (!"racoon".equals(mDaemons[0]) || !"mtpd".equals(mDaemons[1])) {
+                throw new IllegalStateException("Unexpected daemons order");
+            }
+
+            // Respectively, the positions at which racoon and mtpd take the server address
+            // argument are 1 and 2. Not all types of VPN require both daemons however, and
+            // in that case the corresponding argument array is null.
+            if (mArguments[0] != null) {
+                if (!mProfile.server.equals(mArguments[0][1])) {
+                    throw new IllegalStateException("Invalid server argument for racoon");
+                }
+                mArguments[0][1] = endpointAddressString;
+            }
+
+            if (mArguments[1] != null) {
+                if (!mProfile.server.equals(mArguments[1][2])) {
+                    throw new IllegalStateException("Invalid server argument for mtpd");
+                }
+                mArguments[1][2] = endpointAddressString;
+            }
+        }
+
         private void bringup() {
             // Catch all exceptions so we can clean up a few things.
             try {
+                // resolve never returns null. If it does because of some bug, it will be
+                // caught by the catch() block below and cleanup gracefully.
+                final InetAddress endpointAddress = mDeps.resolve(mProfile.server);
+
+                // Big hack : dynamically replace the address of the server in the arguments
+                // with the resolved address.
+                checkAndFixupArguments(endpointAddress);
+
                 // Initialize the timer.
                 mBringupStartTime = SystemClock.elapsedRealtime();
 
@@ -2848,20 +2923,15 @@ public class Vpn {
                 }
 
                 // Add a throw route for the VPN server endpoint, if one was specified.
-                String endpoint = parameters[5].isEmpty() ? mProfile.server : parameters[5];
-                if (!endpoint.isEmpty()) {
-                    try {
-                        InetAddress addr = InetAddress.parseNumericAddress(endpoint);
-                        if (addr instanceof Inet4Address) {
-                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 32), RTN_THROW));
-                        } else if (addr instanceof Inet6Address) {
-                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 128), RTN_THROW));
-                        } else {
-                            Log.e(TAG, "Unknown IP address family for VPN endpoint: " + endpoint);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "Exception constructing throw route to " + endpoint + ": " + e);
-                    }
+                if (endpointAddress instanceof Inet4Address) {
+                    mConfig.routes.add(new RouteInfo(
+                            new IpPrefix(endpointAddress, 32), RTN_THROW));
+                } else if (endpointAddress instanceof Inet6Address) {
+                    mConfig.routes.add(new RouteInfo(
+                            new IpPrefix(endpointAddress, 128), RTN_THROW));
+                } else {
+                    Log.e(TAG, "Unknown IP address family for VPN endpoint: "
+                            + endpointAddress);
                 }
 
                 // Here is the last step and it must be done synchronously.
