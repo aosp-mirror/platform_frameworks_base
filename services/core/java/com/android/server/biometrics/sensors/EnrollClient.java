@@ -77,18 +77,18 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
             mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
             logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
                     true /* enrollSuccessful */);
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         }
         notifyUserActivity();
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         if (hasReachedEnrollmentLimit()) {
             Slog.e(TAG, "Reached enrollment limit");
-            finishCallback.onClientFinished(this, false /* success */);
+            callback.onClientFinished(this, false /* success */);
             return;
         }
 

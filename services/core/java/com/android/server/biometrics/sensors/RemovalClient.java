@@ -55,8 +55,8 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL
         startHalOperation();
@@ -85,7 +85,7 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
                 // cleanup).
                 mAuthenticatorIds.put(getTargetUserId(), 0L);
             }
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         }
     }
 }

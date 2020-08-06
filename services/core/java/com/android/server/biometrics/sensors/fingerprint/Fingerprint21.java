@@ -409,9 +409,12 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
                         mContext.getOpPackageName(), mSensorProperties.sensorId, mCurrentUserId,
                         hasEnrolled, mAuthenticatorIds);
-        mScheduler.scheduleClientMonitor(client, (clientMonitor, success) -> {
-            if (success) {
-                mCurrentUserId = targetUserId;
+        mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+            @Override
+            public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+                if (success) {
+                    mCurrentUserId = targetUserId;
+                }
             }
         });
     }
@@ -453,12 +456,16 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
                     hardwareAuthToken, opPackageName, FingerprintUtils.getInstance(),
                     ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController);
-            mScheduler.scheduleClientMonitor(client, ((clientMonitor, success) -> {
-                if (success) {
-                    // Update authenticatorIds
-                    scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId());
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
+                        boolean success) {
+                    if (success) {
+                        // Update authenticatorIds
+                        scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId());
+                    }
                 }
-            }));
+            });
         });
     }
 

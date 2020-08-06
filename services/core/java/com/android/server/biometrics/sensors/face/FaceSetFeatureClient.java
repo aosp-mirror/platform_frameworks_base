@@ -70,8 +70,8 @@ public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         startHalOperation();
     }
@@ -82,10 +82,10 @@ public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
             final int result = getFreshDaemon()
                     .setFeature(mFeature, mEnabled, mHardwareAuthToken, mFaceId);
             getListener().onFeatureSet(result == Status.OK, mFeature);
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to set feature: " + mFeature + " to enabled: " + mEnabled, e);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

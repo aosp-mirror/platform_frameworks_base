@@ -62,7 +62,7 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
         handleEnumeratedTemplate(identifier);
         if (remaining == 0) {
             doTemplateCleanup();
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         }
     }
 
@@ -72,8 +72,8 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL
         startHalOperation();

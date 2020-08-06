@@ -52,7 +52,7 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiomet
             getFreshDaemon().enumerate();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

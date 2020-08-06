@@ -394,9 +394,12 @@ class Face10 implements IHwBinder.DeathRecipient {
         final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
                 mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId, mCurrentUserId,
                 hasEnrolled, mAuthenticatorIds);
-        mScheduler.scheduleClientMonitor(client, (clientMonitor, success) -> {
-            if (success) {
-                mCurrentUserId = targetUserId;
+        mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+            @Override
+            public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+                if (success) {
+                    mCurrentUserId = targetUserId;
+                }
             }
         });
     }
@@ -488,12 +491,16 @@ class Face10 implements IHwBinder.DeathRecipient {
                     opPackageName, FaceUtils.getInstance(), disabledFeatures, ENROLL_TIMEOUT_SEC,
                     surfaceHandle, mSensorId);
 
-            mScheduler.scheduleClientMonitor(client, ((clientMonitor, success) -> {
-                if (success) {
-                    // Update authenticatorIds
-                    scheduleUpdateActiveUserWithoutHandler(client.getTargetUserId());
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
+                        boolean success) {
+                    if (success) {
+                        // Update authenticatorIds
+                        scheduleUpdateActiveUserWithoutHandler(client.getTargetUserId());
+                    }
                 }
-            }));
+            });
         });
     }
 
