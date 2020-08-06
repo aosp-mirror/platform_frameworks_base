@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -88,7 +89,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
                 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new SurfaceControl(), snapshot, "Test",
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE), sysuiVis, windowFlags, 0,
-                taskBounds, ORIENTATION_PORTRAIT, new InsetsState());
+                taskBounds, ORIENTATION_PORTRAIT, ACTIVITY_TYPE_STANDARD, new InsetsState());
     }
 
     private static TaskDescription createTaskDescription(int background, int statusBar,
