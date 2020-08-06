@@ -19,7 +19,7 @@ package android.webkit;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-
+import android.net.Network;
 
 /**
  * Class to evaluate PAC scripts.
@@ -40,6 +40,20 @@ public interface PacProcessor {
     }
 
     /**
+     * Returns PacProcessor instance associated with the {@link Network}.
+     * The host resolution is done on this {@link Network}.
+     *
+     * @param networkHandle a handle representing {@link Network} handle.
+     * @return PacProcessor instance for the specified network.
+     * @see Network#getNetworkHandle
+     * @see Network#fromNetworkHandle
+     */
+    @NonNull
+    static PacProcessor getInstanceForNetwork(long networkHandle) {
+        return WebViewFactory.getProvider().getPacProcessorForNetwork(networkHandle);
+    }
+
+    /**
      * Set PAC script to use.
      *
      * @param script PAC script.
@@ -55,4 +69,23 @@ public interface PacProcessor {
      */
     @Nullable
     String findProxyForUrl(@NonNull String url);
+
+    /**
+     * Stops support for this {@link PacProcessor} and release its resources.
+     * No methods of this class must be called after calling this method.
+     */
+    default void releasePacProcessor() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    /**
+     * Returns a network handle associated with this {@link PacProcessor}.
+     *
+     * @return a network handle or 0 if a network is unspecified.
+     * @see Network#getNetworkHandle
+     * @see Network#fromNetworkHandle
+     */
+    default long getNetworkHandle() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 }
