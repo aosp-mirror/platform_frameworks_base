@@ -10330,6 +10330,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mInstaller.rmPackageDir(codePath.getAbsolutePath());
                 if (codePathParent.getName().startsWith(RANDOM_DIR_PREFIX)) {
                     mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
+                    removeCachedResult(codePathParent);
                 }
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to remove code path", e);
@@ -10337,6 +10338,16 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             codePath.delete();
         }
+    }
+
+    private void removeCachedResult(@NonNull File codePath) {
+        if (mCacheDir == null) {
+            return;
+        }
+
+        final PackageCacher cacher = new PackageCacher(mCacheDir);
+        // Find and delete the cached result belong to the given codePath.
+        cacher.cleanCachedResult(codePath);
     }
 
     private int[] resolveUserIds(int userId) {
