@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
 import android.media.Rating;
@@ -52,8 +51,6 @@ import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
-
-import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -144,7 +141,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     // Volume handling fields
     private AudioAttributes mAudioAttrs;
     private AudioManager mAudioManager;
-    private AudioManagerInternal mAudioManagerInternal;
     private int mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
     private int mVolumeControlType = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
     private int mMaxVolume = 0;
@@ -179,7 +175,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mContext = mService.getContext();
         mHandler = new MessageHandler(handlerLooper);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = DEFAULT_ATTRIBUTES;
         mPolicies = policies;
 
@@ -328,8 +323,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 @Override
                 public void run() {
                     try {
-                        mAudioManagerInternal.setStreamVolumeForUid(stream, volumeValue, flags,
-                                opPackageName, uid, pid);
+                        mAudioManager.setStreamVolumeForUid(stream, volumeValue, flags,
+                                opPackageName, uid, pid,
+                                mContext.getApplicationInfo().targetSdkVersion);
                     } catch (IllegalArgumentException | SecurityException e) {
                         Log.e(TAG, "Cannot set volume: stream=" + stream + ", value=" + volumeValue
                                 + ", flags=" + flags, e);
@@ -518,16 +514,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 try {
                     if (useSuggested) {
                         if (AudioSystem.isStreamActive(stream, 0)) {
-                            mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream,
-                                    direction, flags, opPackageName, uid, pid);
+                            mAudioManager.adjustSuggestedStreamVolumeForUid(stream,
+                                    direction, flags, opPackageName, uid, pid,
+                                    mContext.getApplicationInfo().targetSdkVersion);
                         } else {
-                            mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
+                            mAudioManager.adjustSuggestedStreamVolumeForUid(
                                     AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
-                                    flags | previousFlagPlaySound, opPackageName, uid, pid);
+                                    flags | previousFlagPlaySound, opPackageName, uid, pid,
+                                    mContext.getApplicationInfo().targetSdkVersion);
                         }
                     } else {
-                        mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
-                                opPackageName, uid, pid);
+                        mAudioManager.adjustStreamVolumeForUid(stream, direction, flags,
+                                opPackageName, uid, pid,
+                                mContext.getApplicationInfo().targetSdkVersion);
                     }
                 } catch (IllegalArgumentException | SecurityException e) {
                     Log.e(TAG, "Cannot adjust volume: direction=" + direction + ", stream="

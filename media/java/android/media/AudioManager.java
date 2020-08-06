@@ -6649,6 +6649,132 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Adjusts the volume of the most relevant stream, or the given fallback
+     * stream.
+     * <p>
+     * This method should only be used by applications that replace the
+     * platform-wide management of audio settings or the main telephony
+     * application.
+     * <p>
+     * This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>This API checks if the caller has the necessary permissions based on the provided
+     * component name, uid, and pid values.
+     * See {@link #adjustSuggestedStreamVolume(int, int, int)}.
+     *
+     * @param suggestedStreamType The stream type that will be used if there
+     *         isn't a relevant stream. {@link #USE_DEFAULT_STREAM_TYPE} is
+     *         valid here.
+     * @param direction The direction to adjust the volume. One of
+     *         {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE},
+     *         {@link #ADJUST_SAME}, {@link #ADJUST_MUTE},
+     *         {@link #ADJUST_UNMUTE}, or {@link #ADJUST_TOGGLE_MUTE}.
+     * @param flags One or more flags.
+     * @param packageName the package name of client application
+     * @param uid the uid of client application
+     * @param pid the pid of client application
+     * @param targetSdkVersion the target sdk version of client application
+     * @see #adjustVolume(int, int)
+     * @see #adjustStreamVolume(int, int, int)
+     * @see #setStreamVolume(int, int, int)
+     * @see #isVolumeFixed()
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void adjustSuggestedStreamVolumeForUid(int suggestedStreamType, int direction, int flags,
+            @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
+        try {
+            getService().adjustSuggestedStreamVolumeForUid(suggestedStreamType, direction, flags,
+                    packageName, uid, pid, UserHandle.getUserHandleForUid(uid), targetSdkVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adjusts the volume of a particular stream by one step in a direction.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
+     * unless the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
+     * <p>This API checks if the caller has the necessary permissions based on the provided
+     * component name, uid, and pid values.
+     * See {@link #adjustStreamVolume(int, int, int)}.
+     *
+     * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
+     *         {@link #STREAM_SYSTEM}, {@link #STREAM_RING}, {@link #STREAM_MUSIC},
+     *         {@link #STREAM_ALARM} or {@link #STREAM_ACCESSIBILITY}.
+     * @param direction The direction to adjust the volume. One of
+     *         {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
+     *         {@link #ADJUST_SAME}.
+     * @param flags One or more flags.
+     * @param packageName the package name of client application
+     * @param uid the uid of client application
+     * @param pid the pid of client application
+     * @param targetSdkVersion the target sdk version of client application
+     * @see #adjustVolume(int, int)
+     * @see #setStreamVolume(int, int, int)
+     * @throws SecurityException if the adjustment triggers a Do Not Disturb change
+     *         and the caller is not granted notification policy access.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void adjustStreamVolumeForUid(int streamType, int direction, int flags,
+            @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
+        try {
+            getService().adjustStreamVolumeForUid(streamType, direction, flags, packageName, uid,
+                    pid, UserHandle.getUserHandleForUid(uid), targetSdkVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the volume index for a particular stream.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
+     * the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
+     * <p>This API checks if the caller has the necessary permissions based on the provided
+     * component name, uid, and pid values.
+     * See {@link #setStreamVolume(int, int, int)}.
+     *
+     * @param streamType The stream whose volume index should be set.
+     * @param index The volume index to set. See
+     *         {@link #getStreamMaxVolume(int)} for the largest valid value.
+     * @param flags One or more flags.
+     * @param packageName the package name of client application
+     * @param uid the uid of client application
+     * @param pid the pid of client application
+     * @param targetSdkVersion the target sdk version of client application
+     * @see #getStreamMaxVolume(int)
+     * @see #getStreamVolume(int)
+     * @see #isVolumeFixed()
+     * @throws SecurityException if the volume change triggers a Do Not Disturb change
+     *         and the caller is not granted notification policy access.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void setStreamVolumeForUid(int streamType, int index, int flags,
+            @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
+        try {
+            getService().setStreamVolumeForUid(streamType, index, flags, packageName, uid, pid,
+                    UserHandle.getUserHandleForUid(uid), targetSdkVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
     /** @hide
      * TODO: make this a @SystemApi */
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
