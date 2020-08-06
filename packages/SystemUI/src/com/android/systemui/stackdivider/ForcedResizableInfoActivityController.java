@@ -28,15 +28,13 @@ import android.util.ArraySet;
 import android.widget.Toast;
 
 import com.android.systemui.R;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.TaskStackChangeListener;
 
 import java.util.function.Consumer;
 
 /**
  * Controller that decides when to show the {@link ForcedResizableInfoActivity}.
  */
-public class ForcedResizableInfoActivityController {
+final class ForcedResizableInfoActivityController implements DividerView.DividerCallbacks {
 
     private static final String SELF_PACKAGE_NAME = "com.android.systemui";
 
@@ -47,12 +45,7 @@ public class ForcedResizableInfoActivityController {
     private final ArraySet<String> mPackagesShownInSession = new ArraySet<>();
     private boolean mDividerDragging;
 
-    private final Runnable mTimeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            showPending();
-        }
-    };
+    private final Runnable mTimeoutRunnable = this::showPending;
 
     private final Consumer<Boolean> mDockedStackExistsListener = exists -> {
         if (!exists) {
@@ -78,44 +71,28 @@ public class ForcedResizableInfoActivityController {
     public ForcedResizableInfoActivityController(Context context,
             DividerController dividerController) {
         mContext = context;
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(
-                new TaskStackChangeListener() {
-                    @Override
-                    public void onActivityForcedResizable(String packageName, int taskId,
-                            int reason) {
-                        activityForcedResizable(packageName, taskId, reason);
-                    }
-
-                    @Override
-                    public void onActivityDismissingDockedStack() {
-                        activityDismissingDockedStack();
-                    }
-
-                    @Override
-                    public void onActivityLaunchOnSecondaryDisplayFailed() {
-                        activityLaunchOnSecondaryDisplayFailed();
-                    }
-                });
         dividerController.registerInSplitScreenListener(mDockedStackExistsListener);
     }
 
-    public void onAppTransitionFinished() {
+    @Override
+    public void onDraggingStart() {
+        mDividerDragging = true;
+        mHandler.removeCallbacks(mTimeoutRunnable);
+    }
+
+    @Override
+    public void onDraggingEnd() {
+        mDividerDragging = false;
+        showPending();
+    }
+
+    void onAppTransitionFinished() {
         if (!mDividerDragging) {
             showPending();
         }
     }
 
-    void onDraggingStart() {
-        mDividerDragging = true;
-        mHandler.removeCallbacks(mTimeoutRunnable);
-    }
-
-    void onDraggingEnd() {
-        mDividerDragging = false;
-        showPending();
-    }
-
-    private void activityForcedResizable(String packageName, int taskId, int reason) {
+    void activityForcedResizable(String packageName, int taskId, int reason) {
         if (debounce(packageName)) {
             return;
         }
@@ -123,12 +100,12 @@ public class ForcedResizableInfoActivityController {
         postTimeout();
     }
 
-    private void activityDismissingDockedStack() {
+    void activityDismissingSplitScreen() {
         Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
                 Toast.LENGTH_SHORT).show();
     }
 
-    private void activityLaunchOnSecondaryDisplayFailed() {
+    void activityLaunchOnSecondaryDisplayFailed() {
         Toast.makeText(mContext, R.string.activity_launch_on_secondary_display_failed_text,
                 Toast.LENGTH_SHORT).show();
     }
