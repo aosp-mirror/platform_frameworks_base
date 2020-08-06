@@ -21,8 +21,9 @@ import com.android.tradefed.device.ITestDevice
 import java.io.File
 import java.io.FileOutputStream
 
-internal fun SystemPreparer.pushApk(file: String, partition: Partition) =
-        pushResourceFile(file, HostUtils.makePathForApk(file, partition).toString())
+internal fun SystemPreparer.pushApk(javaResourceName: String, partition: Partition) =
+        pushResourceFile(javaResourceName, HostUtils.makePathForApk(javaResourceName, partition)
+                .toString())
 
 internal fun SystemPreparer.deleteApkFolders(
     partition: Partition,
@@ -58,4 +59,55 @@ internal object HostUtils {
         }
         return file
     }
+
+    /**
+     * dumpsys package and therefore device.getAppPackageInfo doesn't work immediately after reboot,
+     * so the following methods parse the package dump directly to see if the path matches.
+     */
+    fun getCodePaths(device: ITestDevice, pkgName: String) =
+            device.executeShellCommand("pm dump $pkgName")
+                    .lineSequence()
+                    .map(String::trim)
+                    .filter { it.startsWith("codePath=") }
+                    .map { it.removePrefix("codePath=") }
+                    .toList()
+
+    private fun userIdLineSequence(device: ITestDevice, pkgName: String) =
+            device.executeShellCommand("pm dump $pkgName")
+                    .lineSequence()
+                    .dropWhile { !it.startsWith("Packages:") }
+                    .takeWhile {
+                        !it.startsWith("Hidden system packages:") &&
+                                !it.startsWith("Queries:")
+                    }
+                    .map(String::trim)
+                    .filter { it.startsWith("User ") }
+
+    fun getUserIdToPkgEnabledState(device: ITestDevice, pkgName: String) =
+            userIdLineSequence(device, pkgName).associate {
+                val userId = it.removePrefix("User ")
+                        .takeWhile(Char::isDigit)
+                        .toInt()
+                val enabled = it.substringAfter("enabled=")
+                        .takeWhile(Char::isDigit)
+                        .toInt()
+                        .let {
+                            when (it) {
+                                0, 1 -> true
+                                else -> false
+                            }
+                        }
+                userId to enabled
+            }
+
+    fun getUserIdToPkgInstalledState(device: ITestDevice, pkgName: String) =
+            userIdLineSequence(device, pkgName).associate {
+                val userId = it.removePrefix("User ")
+                        .takeWhile(Char::isDigit)
+                        .toInt()
+                val installed = it.substringAfter("installed=")
+                        .takeWhile { !it.isWhitespace() }
+                        .toBoolean()
+                userId to installed
+            }
 }

@@ -133,6 +133,7 @@ public class BatteryStatsHelper {
     private double mMaxDrainedPower;
 
     PowerCalculator mCpuPowerCalculator;
+    SystemServicePowerCalculator mSystemServicePowerCalculator;
     PowerCalculator mWakelockPowerCalculator;
     MobileRadioPowerCalculator mMobileRadioPowerCalculator;
     PowerCalculator mWifiPowerCalculator;
@@ -396,6 +397,11 @@ public class BatteryStatsHelper {
         }
         mCpuPowerCalculator.reset();
 
+        if (mSystemServicePowerCalculator == null) {
+            mSystemServicePowerCalculator = new SystemServicePowerCalculator(mPowerProfile, mStats);
+        }
+        mSystemServicePowerCalculator.reset();
+
         if (mMemoryPowerCalculator == null) {
             mMemoryPowerCalculator = new MemoryPowerCalculator(mPowerProfile);
         }
@@ -588,6 +594,8 @@ public class BatteryStatsHelper {
             mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
                     mStatsType);
             mMediaPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
+            mSystemServicePowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
+                    mStatsType);
 
             final double totalPower = app.sumPower();
             if (DEBUG && totalPower != 0) {

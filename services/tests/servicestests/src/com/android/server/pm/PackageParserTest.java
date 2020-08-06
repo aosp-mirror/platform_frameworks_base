@@ -312,8 +312,7 @@ public class PackageParserTest {
 
     private static PackageSetting mockPkgSetting(AndroidPackage pkg) {
         return new PackageSetting(pkg.getPackageName(), pkg.getRealPackage(),
-                new File(pkg.getCodePath()), new File(pkg.getCodePath()), null,
-                pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
+                new File(pkg.getCodePath()), null, pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
                 null, pkg.getVersionCode(),
                 PackageInfoUtils.appInfoFlags(pkg, null),
                 PackageInfoUtils.appInfoPrivateFlags(pkg, null),

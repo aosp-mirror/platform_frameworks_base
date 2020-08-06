@@ -95,8 +95,8 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
     ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
-        env->CallVoidMethod(receiverObj.get(),
-                gDisplayEventReceiverClassInfo.dispatchVsync, timestamp, displayId, count);
+        env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchVsync,
+                            timestamp, displayId.value, count);
         ALOGV("receiver %p ~ Returned from vsync handler.", this);
     }
 
@@ -110,8 +110,8 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
     ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking hotplug handler.", this);
-        env->CallVoidMethod(receiverObj.get(),
-                gDisplayEventReceiverClassInfo.dispatchHotplug, timestamp, displayId, connected);
+        env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchHotplug,
+                            timestamp, displayId.value, connected);
         ALOGV("receiver %p ~ Returned from hotplug handler.", this);
     }
 
@@ -126,9 +126,8 @@ void NativeDisplayEventReceiver::dispatchConfigChanged(
                                       jniGetReferent(env, mReceiverWeakGlobal));
   if (receiverObj.get()) {
     ALOGV("receiver %p ~ Invoking config changed handler.", this);
-    env->CallVoidMethod(receiverObj.get(),
-                        gDisplayEventReceiverClassInfo.dispatchConfigChanged,
-                        timestamp, displayId, configId);
+    env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchConfigChanged,
+                        timestamp, displayId.value, configId);
     ALOGV("receiver %p ~ Returned from config changed handler.", this);
   }
 

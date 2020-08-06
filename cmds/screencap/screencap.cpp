@@ -51,12 +51,11 @@ static void usage(const char* pname, PhysicalDisplayId displayId)
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
-            "   -d: specify the physical display ID to capture (default: %"
-                    ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ")\n"
+            "   -d: specify the physical display ID to capture (default: %s)\n"
             "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, displayId);
+            pname, to_string(displayId).c_str());
 }
 
 static int32_t flinger2bitmapFormat(PixelFormat f)
@@ -137,7 +136,7 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = atoll(optarg);
+                displayId = PhysicalDisplayId(atoll(optarg));
                 break;
             case '?':
             case 'h':
@@ -183,7 +182,7 @@ int main(int argc, char** argv)
     ProcessState::self()->startThreadPool();
 
     ScreenCaptureResults captureResults;
-    status_t result = ScreenshotClient::captureDisplay(*displayId, captureResults);
+    status_t result = ScreenshotClient::captureDisplay(displayId->value, captureResults);
     if (result != NO_ERROR) {
         close(fd);
         return 1;

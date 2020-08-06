@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.location.util.identity.CallerIdentity;
 import android.os.Process;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.listeners.ListenerExecutor;
 import com.android.server.FgThread;
 
@@ -38,6 +39,9 @@ import java.util.concurrent.Executor;
  * @param <TListener> listener type
  */
 public class ListenerRegistration<TRequest, TListener> implements ListenerExecutor {
+
+    @VisibleForTesting
+    public static final Executor IN_PROCESS_EXECUTOR = FgThread.getExecutor();
 
     private final Executor mExecutor;
     private final @Nullable TRequest mRequest;
@@ -55,9 +59,9 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
             // there's a slight loophole here for pending intents - pending intent callbacks can
             // always be run on the direct executor since they're always asynchronous, but honestly
             // you shouldn't be using pending intent callbacks within the same process anyways
-            mExecutor =  FgThread.getExecutor();
+            mExecutor = IN_PROCESS_EXECUTOR;
         } else {
-            mExecutor =  DIRECT_EXECUTOR;
+            mExecutor = DIRECT_EXECUTOR;
         }
 
         mRequest = request;
@@ -73,7 +77,7 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
     /**
      * Returns the request associated with this listener, or null if one wasn't supplied.
      */
-    public final @Nullable TRequest getRequest() {
+    public @Nullable TRequest getRequest() {
         return mRequest;
     }
 
@@ -107,7 +111,7 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
      */
     protected void onInactive() {}
 
-    final boolean isActive() {
+    public final boolean isActive() {
         return mActive;
     }
 
@@ -120,7 +124,7 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
         return false;
     }
 
-    final boolean isRegistered() {
+    public final boolean isRegistered() {
         return mListener != null;
     }
 

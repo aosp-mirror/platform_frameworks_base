@@ -225,19 +225,22 @@ public class KernelCpuThreadReader {
 
     /** Set the number of frequency buckets to use */
     void setNumBuckets(int numBuckets) {
-        if (numBuckets < 1) {
-            Slog.w(TAG, "Number of buckets must be at least 1, but was " + numBuckets);
-            return;
-        }
         // If `numBuckets` hasn't changed since the last set, do nothing
         if (mFrequenciesKhz != null && mFrequenciesKhz.length == numBuckets) {
             return;
         }
-        mFrequencyBucketCreator =
-                new FrequencyBucketCreator(mProcTimeInStateReader.getFrequenciesKhz(), numBuckets);
-        mFrequenciesKhz =
-                mFrequencyBucketCreator.bucketFrequencies(
-                        mProcTimeInStateReader.getFrequenciesKhz());
+
+        final long[] frequenciesKhz = mProcTimeInStateReader.getFrequenciesKhz();
+        if (numBuckets != 0) {
+            mFrequencyBucketCreator = new FrequencyBucketCreator(frequenciesKhz, numBuckets);
+            mFrequenciesKhz = mFrequencyBucketCreator.bucketFrequencies(frequenciesKhz);
+        } else {
+            mFrequencyBucketCreator = null;
+            mFrequenciesKhz = new int[frequenciesKhz.length];
+            for (int i = 0; i < frequenciesKhz.length; i++) {
+                mFrequenciesKhz[i] = (int) frequenciesKhz[i];
+            }
+        }
     }
 
     /** Set the UID predicate for {@link #getProcessCpuUsage} */
@@ -320,8 +323,15 @@ public class KernelCpuThreadReader {
         if (cpuUsagesLong == null) {
             return null;
         }
-        int[] cpuUsages = mFrequencyBucketCreator.bucketValues(cpuUsagesLong);
-
+        final int[] cpuUsages;
+        if (mFrequencyBucketCreator != null) {
+            cpuUsages = mFrequencyBucketCreator.bucketValues(cpuUsagesLong);
+        } else {
+            cpuUsages = new int[cpuUsagesLong.length];
+            for (int i = 0; i < cpuUsagesLong.length; i++) {
+                cpuUsages[i] = (int) cpuUsagesLong[i];
+            }
+        }
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
 

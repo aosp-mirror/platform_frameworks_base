@@ -21,12 +21,24 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.location.util.identity.CallerIdentity;
 
+import java.util.List;
+
 /**
  * Location manager local system service interface.
  *
  * @hide Only for use within the system server.
  */
 public abstract class LocationManagerInternal {
+
+    /**
+     * Listener for changes in provider enabled state.
+     */
+    public interface ProviderEnabledListener {
+        /**
+         * Called when the provider enabled state changes for a particular user.
+         */
+        void onProviderEnabledChanged(String provider, int userId, boolean enabled);
+    }
 
     /**
      * Returns true if the given provider is enabled for the given user.
@@ -36,6 +48,24 @@ public abstract class LocationManagerInternal {
      * @return True if the provider is enabled, false otherwise
      */
     public abstract boolean isProviderEnabledForUser(@NonNull String provider, int userId);
+
+    /**
+     * Adds a provider enabled listener. The given provider must exist.
+     *
+     * @param provider The provider to listen for changes
+     * @param listener The listener
+     */
+    public abstract void addProviderEnabledListener(String provider,
+            ProviderEnabledListener listener);
+
+    /**
+     * Removes a provider enabled listener. The given provider must exist.
+     *
+     * @param provider The provider to listen for changes
+     * @param listener The listener
+     */
+    public abstract void removeProviderEnabledListener(String provider,
+            ProviderEnabledListener listener);
 
     /**
      * Returns true if the given identity is a location provider.
@@ -52,4 +82,10 @@ public abstract class LocationManagerInternal {
      */
     // TODO: there is no reason for this to exist as part of any API. move all the logic into gnss
     public abstract void sendNiResponse(int notifId, int userResponse);
+
+    /**
+     * Should only be used by GNSS code.
+     */
+    // TODO: there is no reason for this to exist as part of any API. create a real batching API
+    public abstract void reportGnssBatchLocations(List<Location> locations);
 }

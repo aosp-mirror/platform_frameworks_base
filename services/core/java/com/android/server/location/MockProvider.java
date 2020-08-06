@@ -40,9 +40,8 @@ public class MockProvider extends AbstractLocationProvider {
 
     public MockProvider(ProviderProperties properties, CallerIdentity identity) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR);
+        super(DIRECT_EXECUTOR, identity);
         setProperties(properties);
-        setIdentity(identity);
     }
 
     /** Sets the allowed state of this mock provider. */

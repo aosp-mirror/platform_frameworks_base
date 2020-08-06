@@ -2880,7 +2880,7 @@ public class Activity extends ContextThemeWrapper
      * Return the number of actions that will be displayed in the picture-in-picture UI when the
      * user interacts with the activity currently in picture-in-picture mode. This number may change
      * if the global configuration changes (ie. if the device is plugged into an external display),
-     * but will always be larger than three.
+     * but will always be at least three.
      */
     public int getMaxNumPictureInPictureActions() {
         try {

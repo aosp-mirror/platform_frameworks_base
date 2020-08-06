@@ -465,9 +465,9 @@ public class PackageSignaturesTest {
         // Generic PackageSetting object with values from a test app installed on a device to be
         // used to test the methods under the PackageSignatures signatures data member.
         File appPath = new File("/data/app/app");
-        PackageSetting result = new PackageSetting("test.app", null, appPath, appPath,
-                "/data/app/app", null, null, null,
-                1, 940097092, 0, 0 /*userId*/, null, null, null /*mimeGroups*/);
+        PackageSetting result = new PackageSetting("test.app", null, appPath,
+                "/data/app/app", null, null, null, 1, 940097092, 0, 0 /*userId*/, null, null,
+                null /*mimeGroups*/);
         return result;
     }
 }
