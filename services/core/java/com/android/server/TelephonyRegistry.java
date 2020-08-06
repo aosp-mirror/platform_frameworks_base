@@ -2101,20 +2101,20 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mOutgoingCallEmergencyNumber[phoneId] = emergencyNumber;
-                for (Record r : mRecords) {
-                    if (r.matchPhoneStateListenerEvent(
-                            PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL)
-                                    && idMatch(r.subId, subId, phoneId)) {
-                        try {
-                            r.callback.onOutgoingEmergencyCall(emergencyNumber);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
-                        }
+            }
+            for (Record r : mRecords) {
+                // Send to all listeners regardless of subscription
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL)) {
+                    try {
+                        r.callback.onOutgoingEmergencyCall(emergencyNumber, subId);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
-            handleRemoveListLocked();
         }
+        handleRemoveListLocked();
     }
 
     @Override
