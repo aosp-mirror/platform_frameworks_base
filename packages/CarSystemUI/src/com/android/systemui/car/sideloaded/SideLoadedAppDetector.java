@@ -39,7 +39,7 @@ import javax.inject.Singleton;
 
 /**
  * A class that detects unsafe apps.
- * An app is considered safe if is a system app or installed through whitelisted sources.
+ * An app is considered safe if is a system app or installed through allowed sources.
  */
 @Singleton
 public class SideLoadedAppDetector {
