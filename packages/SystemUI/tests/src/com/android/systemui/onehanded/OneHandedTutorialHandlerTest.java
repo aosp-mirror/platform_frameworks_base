@@ -16,7 +16,6 @@
 
 package com.android.systemui.onehanded;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
@@ -75,7 +74,6 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOneHandedManager_registerForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer, times(1))
-                .registerTransitionCallback(mTutorialHandler);
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mTutorialHandler);
     }
 }
