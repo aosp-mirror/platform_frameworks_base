@@ -847,7 +847,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Pengalih keyboard"</string>
     <string name="save" msgid="3392754183673848006">"Simpan"</string>
-    <string name="reset" msgid="8715144064608810383">"Setel ulang"</string>
+    <string name="reset" msgid="8715144064608810383">"Reset"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Sesuaikan lebar tombol"</string>
     <string name="clipboard" msgid="8517342737534284617">"Papan klip"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Tombol navigasi khusus"</string>
