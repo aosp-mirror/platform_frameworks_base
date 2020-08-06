@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
 import com.android.systemui.car.hvac.HvacController;
 
 import javax.inject.Inject;
@@ -61,7 +60,8 @@ public class CarNavigationBarController {
             NavigationBarViewFactory navigationBarViewFactory,
             ButtonSelectionStateController buttonSelectionStateController,
             Lazy<HvacController> hvacControllerLazy,
-            ButtonRoleHolderController buttonRoleHolderController) {
+            ButtonRoleHolderController buttonRoleHolderController,
+            SystemBarConfigs systemBarConfigs) {
         mContext = context;
         mNavigationBarViewFactory = navigationBarViewFactory;
         mButtonSelectionStateController = buttonSelectionStateController;
@@ -69,10 +69,10 @@ public class CarNavigationBarController {
         mButtonRoleHolderController = buttonRoleHolderController;
 
         // Read configuration.
-        mShowTop = mContext.getResources().getBoolean(R.bool.config_enableTopNavigationBar);
-        mShowBottom = mContext.getResources().getBoolean(R.bool.config_enableBottomNavigationBar);
-        mShowLeft = mContext.getResources().getBoolean(R.bool.config_enableLeftNavigationBar);
-        mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
+        mShowTop = systemBarConfigs.getEnabledStatusBySide(SystemBarConfigs.TOP);
+        mShowBottom = systemBarConfigs.getEnabledStatusBySide(SystemBarConfigs.BOTTOM);
+        mShowLeft = systemBarConfigs.getEnabledStatusBySide(SystemBarConfigs.LEFT);
+        mShowRight = systemBarConfigs.getEnabledStatusBySide(SystemBarConfigs.RIGHT);
     }
 
     /**

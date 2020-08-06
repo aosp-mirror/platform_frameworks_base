@@ -73,7 +73,8 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     private CarNavigationBarController createNavigationBarController() {
         return new CarNavigationBarController(mContext, mNavigationBarViewFactory,
                 mButtonSelectionStateController, () -> mHvacController,
-                mButtonRoleHolderController);
+                mButtonRoleHolderController,
+                new SystemBarConfigs(mTestableResources.getResources()));
     }
 
     @Test

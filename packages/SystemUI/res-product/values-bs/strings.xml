@@ -40,4 +40,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Pokušali ste neispravno otključati telefon <xliff:g id="NUMBER">%d</xliff:g> puta. Radni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate tablet pomoću računa e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću računa e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Otključajte telefon za više opcija"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Otključajte tablet za više opcija"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Otključajte uređaj za više opcija"</string>
 </resources>

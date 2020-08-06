@@ -259,18 +259,19 @@ public class DeviceDiscoveryService extends Service {
     private void onDeviceFound(@Nullable DeviceFilterPair device) {
         if (device == null) return;
 
-        if (mDevicesFound.contains(device)) {
-            return;
-        }
-
-        if (DEBUG) Log.i(LOG_TAG, "Found device " + device);
-
         Handler.getMain().sendMessage(obtainMessage(
                 DeviceDiscoveryService::onDeviceFoundMainThread, this, device));
     }
 
     @MainThread
     void onDeviceFoundMainThread(@NonNull DeviceFilterPair device) {
+        if (mDevicesFound.contains(device)) {
+            Log.i(LOG_TAG, "Skipping device " + device + " - already among found devices");
+            return;
+        }
+
+        Log.i(LOG_TAG, "Found device " + device);
+
         if (mDevicesFound.isEmpty()) {
             onReadyToShowUI();
         }
@@ -432,10 +433,10 @@ public class DeviceDiscoveryService extends Service {
 
         @Override
         public String toString() {
-            return "DeviceFilterPair{" +
-                    "device=" + device +
-                    ", filter=" + filter +
-                    '}';
+            return "DeviceFilterPair{"
+                    + "device=" + device + " " + getDisplayName()
+                    + ", filter=" + filter
+                    + '}';
         }
     }
 
