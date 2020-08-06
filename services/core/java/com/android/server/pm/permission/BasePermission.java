@@ -206,6 +206,11 @@ public final class BasePermission {
         return perm != null && (perm.getFlags() & PermissionInfo.FLAG_IMMUTABLY_RESTRICTED) != 0;
     }
 
+    public boolean isInstallerExemptIgnored() {
+        return perm != null
+                && (perm.getFlags() & PermissionInfo.FLAG_INSTALLER_EXEMPT_IGNORED) != 0;
+    }
+
     public boolean isSignature() {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE) ==
                 PermissionInfo.PROTECTION_SIGNATURE;
