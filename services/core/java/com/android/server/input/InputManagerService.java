@@ -63,6 +63,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.os.VibrationEffect;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -140,6 +141,8 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 4;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 5;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 6;
+
+    private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
 
     // Pointer to native input manager service object.
     private final long mPtr;
@@ -1728,7 +1731,37 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public void vibrate(int deviceId, long[] pattern, int[] amplitudes, int repeat, IBinder token) {
+    public void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
+        long[] pattern;
+        int[] amplitudes;
+        int repeat;
+        if (effect instanceof VibrationEffect.OneShot) {
+            VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
+            pattern = new long[] { 0, oneShot.getDuration() };
+            int amplitude = oneShot.getAmplitude();
+            // android framework uses DEFAULT_AMPLITUDE to signal that the vibration
+            // should use some built-in default value, denoted here as DEFAULT_VIBRATION_MAGNITUDE
+            if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+                amplitude = DEFAULT_VIBRATION_MAGNITUDE;
+            }
+            amplitudes = new int[] { 0, amplitude };
+            repeat = -1;
+        } else if (effect instanceof VibrationEffect.Waveform) {
+            VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
+            pattern = waveform.getTimings();
+            amplitudes = waveform.getAmplitudes();
+            for (int i = 0; i < amplitudes.length; i++) {
+                if (amplitudes[i] == VibrationEffect.DEFAULT_AMPLITUDE) {
+                    amplitudes[i] = DEFAULT_VIBRATION_MAGNITUDE;
+                }
+            }
+            repeat = waveform.getRepeatIndex();
+        } else {
+            // TODO: Add support for prebaked effects
+            Log.w(TAG, "Pre-baked effects aren't supported on input devices");
+            return;
+        }
+
         if (repeat >= pattern.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -1747,7 +1780,6 @@ public class InputManagerService extends IInputManager.Stub
                 mVibratorTokens.put(token, v);
             }
         }
-
         synchronized (v) {
             v.mVibrating = true;
             nativeVibrate(mPtr, deviceId, pattern, amplitudes, repeat, v.mTokenValue);
