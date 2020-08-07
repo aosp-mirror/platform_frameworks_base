@@ -1177,11 +1177,18 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     boolean handleAppDied() {
         mAtm.mStackSupervisor.removeHistoryRecords(this);
 
-        final boolean isRemoved = isRemoved();
         boolean hasVisibleActivities = false;
         if (mInactiveActivities != null && !mInactiveActivities.isEmpty()) {
             // Make sure that all activities in this process are handled.
             mActivities.addAll(mInactiveActivities);
+        }
+        if (isRemoved()) {
+            // The package of the died process should be force-stopped, so make its activities as
+            // finishing to prevent the process from being started again if the next top (or being
+            // visible) activity also resides in the same process. This must be done before removal.
+            for (int i = mActivities.size() - 1; i >= 0; i--) {
+                mActivities.get(i).makeFinishingLocked();
+            }
         }
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = mActivities.get(i);
@@ -1190,12 +1197,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // is already requested to be hidden (mVisibleRequested=false), but this visibility
                 // is not yet committed, so isVisible()=true.
                 hasVisibleActivities = true;
-            }
-            if (isRemoved) {
-                // The package of the died process should be force-stopped, so make its activities
-                // as finishing to prevent the process from being started again if the next top (or
-                // being visible) activity also resides in the same process.
-                r.makeFinishingLocked();
             }
 
             final Task rootTask = r.getRootTask();
