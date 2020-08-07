@@ -71,6 +71,13 @@ public class CustomToastRecord extends ToastRecord {
     }
 
     @Override
+    public boolean keepProcessAlive() {
+        // As custom toasts are rendered by the app, we need to keep the app alive for it to show
+        // the toast.
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "CustomToastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
