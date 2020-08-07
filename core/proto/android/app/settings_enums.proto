@@ -2698,4 +2698,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: S
     EMERGENCY_SOS_GESTURE_SETTINGS = 1847;
+
+    // OPEN: Settings > System > Gestures > Double tap
+    // CATEGORY: SETTINGS
+    // OS: S
+    SETTINGS_COLUMBUS = 1848;
 }
