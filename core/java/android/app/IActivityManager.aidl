@@ -288,7 +288,8 @@ interface IActivityManager {
     void stopAppSwitches();
     @UnsupportedAppUsage
     void resumeAppSwitches();
-    boolean bindBackupAgent(in String packageName, int backupRestoreMode, int targetUserId);
+    boolean bindBackupAgent(in String packageName, int backupRestoreMode, int targetUserId,
+            int operationType);
     void backupAgentCreated(in String packageName, in IBinder agent, int userId);
     void unbindBackupAgent(in ApplicationInfo appInfo);
     int getUidForIntentSender(in IIntentSender sender);

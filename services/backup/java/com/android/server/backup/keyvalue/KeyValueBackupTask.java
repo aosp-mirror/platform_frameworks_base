@@ -731,7 +731,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         try {
             agent =
                     mBackupManagerService.bindToAgentSynchronous(
-                            packageInfo.applicationInfo, BACKUP_MODE_INCREMENTAL);
+                            packageInfo.applicationInfo, BACKUP_MODE_INCREMENTAL,
+                            mBackupEligibilityRules.getOperationType());
             if (agent == null) {
                 mReporter.onAgentError(packageName);
                 throw AgentException.transitory();

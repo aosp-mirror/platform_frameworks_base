@@ -49,6 +49,7 @@ import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BytesReadListener;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
 import com.android.server.backup.utils.RestoreUtils;
@@ -129,11 +130,13 @@ public class FullRestoreEngine extends RestoreEngine {
     private final boolean mIsAdbRestore;
     @GuardedBy("mPipesLock")
     private boolean mPipesClosed;
+    private final BackupEligibilityRules mBackupEligibilityRules;
 
     public FullRestoreEngine(UserBackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
-            int ephemeralOpToken, boolean isAdbRestore) {
+            int ephemeralOpToken, boolean isAdbRestore,
+            BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
         mEphemeralOpToken = ephemeralOpToken;
         mMonitorTask = monitorTask;
@@ -147,6 +150,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 "Timeout parameters cannot be null");
         mIsAdbRestore = isAdbRestore;
         mUserId = backupManagerService.getUserId();
+        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     public IBackupAgent getAgent() {
@@ -365,7 +369,8 @@ public class FullRestoreEngine extends RestoreEngine {
                             mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
                                     FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
                                             ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
-                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
+                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL,
+                                    mBackupEligibilityRules.getOperationType());
                             mAgentPackage = pkg;
                         } catch (IOException | NameNotFoundException e) {
                             // fall through to error handling
