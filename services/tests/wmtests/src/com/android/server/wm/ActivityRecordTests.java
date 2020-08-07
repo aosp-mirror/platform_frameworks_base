@@ -22,6 +22,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -69,10 +73,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.TaskSnapshot;
@@ -84,6 +86,7 @@ import android.app.servertransaction.PauseActivityItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -1683,6 +1686,32 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(true).when(mActivity).getTurnScreenOnFlag();
 
         assertFalse(mActivity.canTurnScreenOn());
+    }
+
+    @Test
+    public void testGetLockTaskLaunchMode() {
+        final ActivityOptions options = ActivityOptions.makeBasic().setLockTaskEnabled(true);
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, options));
+
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_ALWAYS;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_DEFAULT,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_NEVER;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_DEFAULT,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
+        mActivity.info.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_ALWAYS;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_ALWAYS,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_NEVER;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_NEVER,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
     }
 
     /**
