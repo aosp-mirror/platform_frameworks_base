@@ -354,15 +354,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 }
             };
 
-    private final ContextButtonListener mRotationButtonListener = (button, visible) -> {
-        if (visible) {
-            // If the button will actually become visible and the navbar is about to hide,
-            // tell the statusbar to keep it around for longer
-            mAutoHideController.touchAutoHide();
-            mNavigationBarView.notifyActiveTouchRegions();
-        }
-    };
-
     private final Runnable mAutoDim = () -> getBarTransitions().setAutoDim(true);
 
     private final ContentObserver mAssistContentObserver = new ContentObserver(
@@ -550,8 +541,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
         // Currently there is no accelerometer sensor on non-default display.
         if (mIsOnDefaultDisplay) {
-            mNavigationBarView.getRotateSuggestionButton().setListener(mRotationButtonListener);
-
             final RotationButtonController rotationButtonController =
                     mNavigationBarView.getRotationButtonController();
             rotationButtonController.addRotationCallback(mRotationWatcher);
@@ -1355,6 +1344,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (mAutoHideController != null) {
             mAutoHideController.setNavigationBar(mAutoHideUiElement);
         }
+        mNavigationBarView.setAutoHideController(autoHideController);
     }
 
     private boolean isTransientShown() {
