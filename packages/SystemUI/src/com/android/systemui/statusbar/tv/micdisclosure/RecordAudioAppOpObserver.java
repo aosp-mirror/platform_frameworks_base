@@ -42,14 +42,33 @@ class RecordAudioAppOpObserver extends AudioActivityObserver implements
 
     RecordAudioAppOpObserver(Context context, OnAudioActivityStateChangeListener listener) {
         super(context, listener);
+    }
+
+    @Override
+    void start() {
+        if (DEBUG) {
+            Log.d(TAG, "Start");
+        }
 
         // Register AppOpsManager callback
-        final AppOpsManager appOpsManager = (AppOpsManager) mContext.getSystemService(
-                Context.APP_OPS_SERVICE);
-        appOpsManager.startWatchingActive(
-                new String[]{AppOpsManager.OPSTR_RECORD_AUDIO},
-                mContext.getMainExecutor(),
-                this);
+        mContext.getSystemService(AppOpsManager.class)
+                .startWatchingActive(
+                        new String[]{AppOpsManager.OPSTR_RECORD_AUDIO},
+                        mContext.getMainExecutor(),
+                        this);
+    }
+
+    @Override
+    void stop() {
+        if (DEBUG) {
+            Log.d(TAG, "Stop");
+        }
+
+        // Unregister AppOpsManager callback
+        mContext.getSystemService(AppOpsManager.class).stopWatchingActive(this);
+
+        // Clean up state
+        mActiveAudioRecordingPackages.clear();
     }
 
     @UiThread
