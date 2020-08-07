@@ -123,8 +123,8 @@ interface IActivityManager {
             in IIntentReceiver receiver, in IntentFilter filter,
             in String requiredPermission, int userId, int flags);
     Intent registerReceiverWithFeature(in IApplicationThread caller, in String callerPackage,
-            in String callingFeatureId, in IIntentReceiver receiver, in IntentFilter filter,
-            in String requiredPermission, int userId, int flags);
+            in String callingFeatureId, in String receiverId, in IIntentReceiver receiver,
+            in IntentFilter filter, in String requiredPermission, int userId, int flags);
     @UnsupportedAppUsage
     void unregisterReceiver(in IIntentReceiver receiver);
     /** @deprecated Use {@link #broadcastIntentWithFeature} instead */
