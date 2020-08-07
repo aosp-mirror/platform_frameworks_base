@@ -206,6 +206,10 @@ public class Editor {
         int TEXT_LINK = 2;
     }
 
+    // Default content insertion handler.
+    private final TextViewOnReceiveContentCallback mDefaultOnReceiveContentCallback =
+            new TextViewOnReceiveContentCallback();
+
     // Each Editor manages its own undo stack.
     private final UndoManager mUndoManager = new UndoManager();
     private UndoOwner mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
@@ -584,6 +588,11 @@ public class Editor {
         mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
     }
 
+    @VisibleForTesting
+    public @NonNull TextViewOnReceiveContentCallback getDefaultOnReceiveContentCallback() {
+        return mDefaultOnReceiveContentCallback;
+    }
+
     /**
      * Forgets all undo and redo operations for this Editor.
      */
@@ -709,6 +718,8 @@ public class Editor {
 
         hideCursorAndSpanControllers();
         stopTextActionModeWithPreservingSelection();
+
+        mDefaultOnReceiveContentCallback.clearInputConnectionInfo();
     }
 
     private void discardTextDisplayLists() {
