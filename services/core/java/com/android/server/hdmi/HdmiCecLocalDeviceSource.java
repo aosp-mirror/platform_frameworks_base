@@ -114,6 +114,19 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
+    protected void onActiveSourceLost() {
+        // Nothing to do.
+    }
+
+    @ServiceThreadOnly
+    protected void setActiveSource(int physicalAddress) {
+        assertRunOnServiceThread();
+        // Invalidate the internal active source record. This will also update mIsActiveSource.
+        ActiveSource activeSource = ActiveSource.of(Constants.ADDR_INVALID, physicalAddress);
+        setActiveSource(activeSource);
+    }
+
+    @ServiceThreadOnly
     protected boolean handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int logicalAddress = message.getSource();
@@ -148,6 +161,9 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (physicalAddress == mService.getPhysicalAddress() && mService.isPlaybackDevice()) {
             setAndBroadcastActiveSource(message, physicalAddress);
         }
+        if (physicalAddress != mService.getPhysicalAddress()) {
+            setActiveSource(physicalAddress);
+        }
         switchInputOnReceivingNewActivePath(physicalAddress);
         return true;
     }
@@ -156,18 +172,21 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRoutingChange(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
+        if (physicalAddress != mService.getPhysicalAddress()) {
+            setActiveSource(physicalAddress);
+        }
         if (!isRoutingControlFeatureEnabled()) {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return true;
         }
-        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
         // if the current device is a pure playback device
         if (!mIsSwitchDevice
-                && newPath == mService.getPhysicalAddress()
+                && physicalAddress == mService.getPhysicalAddress()
                 && mService.isPlaybackDevice()) {
-            setAndBroadcastActiveSource(message, newPath);
+            setAndBroadcastActiveSource(message, physicalAddress);
         }
-        handleRoutingChangeAndInformation(newPath, message);
+        handleRoutingChangeAndInformation(physicalAddress, message);
         return true;
     }
 
@@ -175,11 +194,14 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRoutingInformation(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        if (physicalAddress != mService.getPhysicalAddress()) {
+            setActiveSource(physicalAddress);
+        }
         if (!isRoutingControlFeatureEnabled()) {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return true;
         }
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         // if the current device is a pure playback device
         if (!mIsSwitchDevice
                 && physicalAddress == mService.getPhysicalAddress()
@@ -222,7 +244,11 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
+        boolean wasActiveSource = mIsActiveSource;
         mIsActiveSource = on;
+        if (wasActiveSource && !mIsActiveSource) {
+            onActiveSourceLost();
+        }
     }
 
     protected void wakeUpIfActiveSource() {
