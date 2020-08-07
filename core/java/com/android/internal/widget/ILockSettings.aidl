@@ -49,7 +49,8 @@ interface ILockSettings {
             in ICheckCredentialProgressCallback progressCallback);
     VerifyCredentialResponse verifyCredential(in LockscreenCredential credential, int userId, int flags);
     VerifyCredentialResponse verifyTiedProfileChallenge(in LockscreenCredential credential, int userId, int flags);
-    VerifyCredentialResponse verifyGatekeeperPassword(in byte[] gatekeeperPassword, long challenge, int userId);
+    VerifyCredentialResponse verifyGatekeeperPasswordHandle(long gatekeeperPasswordHandle, long challenge, int userId);
+    void removeGatekeeperPasswordHandle(long gatekeeperPasswordHandle);
     boolean checkVoldPassword(int userId);
     int getCredentialType(int userId);
     byte[] getHashFactor(in LockscreenCredential currentCredential, int userId);

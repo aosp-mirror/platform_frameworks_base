@@ -49,7 +49,7 @@ public final class VerifyCredentialResponse implements Parcelable {
     private final @ResponseCode int mResponseCode;
     private final int mTimeout;
     @Nullable private final byte[] mGatekeeperHAT;
-    @Nullable private final byte[] mGatekeeperPw;
+    private final long mGatekeeperPasswordHandle;
 
     public static final Parcelable.Creator<VerifyCredentialResponse> CREATOR
             = new Parcelable.Creator<VerifyCredentialResponse>() {
@@ -58,10 +58,10 @@ public final class VerifyCredentialResponse implements Parcelable {
             final @ResponseCode int responseCode = source.readInt();
             final int timeout = source.readInt();
             final byte[] gatekeeperHAT = source.createByteArray();
-            final byte[] gatekeeperPassword = source.createByteArray();
+            long gatekeeperPasswordHandle = source.readLong();
 
             return new VerifyCredentialResponse(responseCode, timeout, gatekeeperHAT,
-                    gatekeeperPassword);
+                    gatekeeperPasswordHandle);
         }
 
         @Override
@@ -72,7 +72,7 @@ public final class VerifyCredentialResponse implements Parcelable {
 
     public static class Builder {
         @Nullable private byte[] mGatekeeperHAT;
-        @Nullable private byte[] mGatekeeperPassword;
+        private long mGatekeeperPasswordHandle;
 
         /**
          * @param gatekeeperHAT Gatekeeper HardwareAuthToken, minted upon successful authentication.
@@ -82,8 +82,8 @@ public final class VerifyCredentialResponse implements Parcelable {
             return this;
         }
 
-        public Builder setGatekeeperPassword(byte[] gatekeeperPassword) {
-            mGatekeeperPassword = gatekeeperPassword;
+        public Builder setGatekeeperPasswordHandle(long gatekeeperPasswordHandle) {
+            mGatekeeperPasswordHandle = gatekeeperPasswordHandle;
             return this;
         }
 
@@ -96,7 +96,7 @@ public final class VerifyCredentialResponse implements Parcelable {
             return new VerifyCredentialResponse(RESPONSE_OK,
                     0 /* timeout */,
                     mGatekeeperHAT,
-                    mGatekeeperPassword);
+                    mGatekeeperPasswordHandle);
         }
     }
 
@@ -110,7 +110,7 @@ public final class VerifyCredentialResponse implements Parcelable {
         return new VerifyCredentialResponse(RESPONSE_RETRY,
                 timeout,
                 null /* gatekeeperHAT */,
-                null /* gatekeeperPassword */);
+                0L /* gatekeeperPasswordHandle */);
     }
 
     /**
@@ -121,20 +121,20 @@ public final class VerifyCredentialResponse implements Parcelable {
         return new VerifyCredentialResponse(RESPONSE_ERROR,
                 0 /* timeout */,
                 null /* gatekeeperHAT */,
-                null /* gatekeeperPassword */);
+                0L /* gatekeeperPasswordHandle */);
     }
 
     private VerifyCredentialResponse(@ResponseCode int responseCode, int timeout,
-            @Nullable byte[] gatekeeperHAT, @Nullable byte[] gatekeeperPassword) {
+            @Nullable byte[] gatekeeperHAT, long gatekeeperPasswordHandle) {
         mResponseCode = responseCode;
         mTimeout = timeout;
         mGatekeeperHAT = gatekeeperHAT;
-        mGatekeeperPw = gatekeeperPassword;
+        mGatekeeperPasswordHandle = gatekeeperPasswordHandle;
     }
 
     public VerifyCredentialResponse stripPayload() {
         return new VerifyCredentialResponse(mResponseCode, mTimeout,
-                null /* gatekeeperHAT */, null /* gatekeeperPassword */);
+                null /* gatekeeperHAT */, 0L /* gatekeeperPasswordHandle */);
     }
 
     @Override
@@ -142,7 +142,7 @@ public final class VerifyCredentialResponse implements Parcelable {
         dest.writeInt(mResponseCode);
         dest.writeInt(mTimeout);
         dest.writeByteArray(mGatekeeperHAT);
-        dest.writeByteArray(mGatekeeperPw);
+        dest.writeLong(mGatekeeperPasswordHandle);
     }
 
     @Override
@@ -155,9 +155,12 @@ public final class VerifyCredentialResponse implements Parcelable {
         return mGatekeeperHAT;
     }
 
-    @Nullable
-    public byte[] getGatekeeperPw() {
-        return mGatekeeperPw;
+    public long getGatekeeperPasswordHandle() {
+        return mGatekeeperPasswordHandle;
+    }
+
+    public boolean containsGatekeeperPasswordHandle() {
+        return mGatekeeperPasswordHandle != 0L;
     }
 
     public int getTimeout() {
@@ -176,7 +179,7 @@ public final class VerifyCredentialResponse implements Parcelable {
     public String toString() {
         return "Response: " + mResponseCode
                 + ", GK HAT: " + (mGatekeeperHAT != null)
-                + ", GK PW: " + (mGatekeeperPw != null);
+                + ", GK PW: " + (mGatekeeperPasswordHandle != 0L);
     }
 
     public static VerifyCredentialResponse fromGateKeeperResponse(
