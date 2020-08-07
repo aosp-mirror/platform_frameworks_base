@@ -7903,9 +7903,6 @@ public class AudioService extends IAudioService.Stub
             return null;
         }
 
-        mDynPolicyLogger.log((new AudioEventLogger.StringEvent("registerAudioPolicy for "
-                + pcb.asBinder() + " with config:" + policyConfig)).printLog(TAG));
-
         String regId = null;
         synchronized (mAudioPolicies) {
             if (mAudioPolicies.containsKey(pcb.asBinder())) {
@@ -7916,6 +7913,13 @@ public class AudioService extends IAudioService.Stub
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
                         isFocusPolicy, isTestFocusPolicy, isVolumeController, projection);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
+
+                // logging after registration so we have the registration id
+                mDynPolicyLogger.log((new AudioEventLogger.StringEvent("registerAudioPolicy for "
+                        + pcb.asBinder() + " u/pid:" + Binder.getCallingUid() + "/"
+                        + Binder.getCallingPid() + " with config:" + app.toCompactLogString()))
+                        .printLog(TAG));
+
                 regId = app.getRegistrationId();
                 mAudioPolicies.put(pcb.asBinder(), app);
             } catch (RemoteException e) {
@@ -8079,7 +8083,10 @@ public class AudioService extends IAudioService.Stub
      * @param pcb nullable because on service interface
      */
     public void unregisterAudioPolicyAsync(@Nullable IAudioPolicyCallback pcb) {
-        unregisterAudioPolicy(pcb);
+        if (pcb == null) {
+            return;
+        }
+        unregisterAudioPolicyInt(pcb, "unregisterAudioPolicyAsync");
     }
 
     /**
@@ -8090,12 +8097,12 @@ public class AudioService extends IAudioService.Stub
         if (pcb == null) {
             return;
         }
-        unregisterAudioPolicyInt(pcb);
+        unregisterAudioPolicyInt(pcb, "unregisterAudioPolicy");
     }
 
 
-    private void unregisterAudioPolicyInt(@NonNull IAudioPolicyCallback pcb) {
-        mDynPolicyLogger.log((new AudioEventLogger.StringEvent("unregisterAudioPolicyAsync for "
+    private void unregisterAudioPolicyInt(@NonNull IAudioPolicyCallback pcb, String operationName) {
+        mDynPolicyLogger.log((new AudioEventLogger.StringEvent(operationName + " for "
                 + pcb.asBinder()).printLog(TAG)));
         synchronized (mAudioPolicies) {
             AudioPolicyProxy app = mAudioPolicies.remove(pcb.asBinder());
@@ -8570,7 +8577,8 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void binderDied() {
-            Log.i(TAG, "audio policy " + mPolicyCallback + " died");
+            mDynPolicyLogger.log((new AudioEventLogger.StringEvent("AudioPolicy "
+                    + mPolicyCallback.asBinder() + " died").printLog(TAG)));
             release();
         }
 
