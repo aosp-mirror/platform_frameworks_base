@@ -725,7 +725,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return The insets state as requested by the client, i.e. the dispatched insets state
      *         for which the visibilities are overridden with what the client requested.
      */
-    InsetsState getRequestedInsetsState() {
+    @Override
+    public InsetsState getRequestedInsetsState() {
         return mRequestedInsetsState;
     }
 
