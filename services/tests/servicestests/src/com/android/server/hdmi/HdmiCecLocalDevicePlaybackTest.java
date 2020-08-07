@@ -262,6 +262,112 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
 
+    @Test
+    public void handleRoutingChange_otherDevice_None() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleRoutingChange_otherDevice_StandbyNow() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isTrue();
+    }
+
+    @Test
+    public void handleRoutingChange_otherDevice_StandbyNow_InactiveSource() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(false);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleRoutingChange_sameDevice_StandbyNow_ActiveSource() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000,
+                        mPlaybackPhysicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isTrue();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleRoutingInformation_otherDevice_None() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleRoutingInformation_otherDevice_StandbyNow() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isTrue();
+    }
+
+    @Test
+    public void handleRoutingInformation_otherDevice_StandbyNow_InactiveSource() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(false);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleRoutingInformation_sameDevice_StandbyNow_ActiveSource() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV,
+                        mPlaybackPhysicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isTrue();
+        assertThat(mStandby).isFalse();
+    }
+
     // Playback device does not handle routing control related feature right now
     @Ignore("b/120845532")
     @Test
@@ -628,5 +734,44 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(
                 mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress());
         assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isTrue();
+    }
+
+    @Test
+    public void handleSetStreamPath_otherDevice_None() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleSetStreamPath_otherDevice_StandbyNow() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isTrue();
+    }
+
+    @Test
+    public void handleSetStreamPath_otherDevice_StandbyNow_InactiveSource() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(false);
+        mStandby = false;
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x5000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mStandby).isFalse();
     }
 }
