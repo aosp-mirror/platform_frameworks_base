@@ -5128,6 +5128,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
             r.setState(ON_DESTROY);
+            mLastReportedWindowingMode.remove(r.activity.getActivityToken());
         }
         schedulePurgeIdler();
         // updatePendingActivityConfiguration() reads from mActivities to update
@@ -5370,16 +5371,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw e.rethrowFromSystemServer();
         }
 
-        // Save the current windowing mode to be restored and compared to the new configuration's
-        // windowing mode (needed because we update the last reported windowing mode when launching
-        // an activity and we can't tell inside performLaunchActivity whether we are relaunching)
-        final int oldWindowingMode = mLastReportedWindowingMode.getOrDefault(
-                r.activity.getActivityToken(), WINDOWING_MODE_UNDEFINED);
         handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
                 pendingActions, tmp.startsNotResumed, tmp.overrideConfig, "handleRelaunchActivity");
-        mLastReportedWindowingMode.put(r.activity.getActivityToken(), oldWindowingMode);
-        handleWindowingModeChangeIfNeeded(r.activity, r.activity.mCurrentConfig);
-
         if (pendingActions != null) {
             // Only report a successful relaunch to WindowManager.
             pendingActions.setReportRelaunchToWindowManager(true);
@@ -5645,10 +5638,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw new IllegalArgumentException("Activity token not set. Is the activity attached?");
         }
 
-        // multi-window / pip mode changes, if any, should be sent before the configuration change
-        // callback, see also PinnedStackTests#testConfigurationChangeOrderDuringTransition
-        handleWindowingModeChangeIfNeeded(activity, newConfig);
-
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity, displayId);
         boolean shouldReportChange = false;
         if (activity.mCurrentConfig == null) {
@@ -5702,6 +5691,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         if (shouldReportChange) {
+            // multi-window / pip mode changes, if any, should be sent before the configuration
+            // change callback, see also
+            // PinnedStackTests#testConfigurationChangeOrderDuringTransition
+            handleWindowingModeChangeIfNeeded(activity, newConfig);
+
             activity.mCalled = false;
             activity.onConfigurationChanged(configToReport);
             if (!activity.mCalled) {
