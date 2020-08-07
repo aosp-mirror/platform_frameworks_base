@@ -314,31 +314,6 @@ static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shel
     return result;
 }
 
-static inline JNIEnv* GetJNIEnvironment(JavaVM* vm) {
-    JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        return 0;
-    }
-    return env;
-}
-
-static inline JNIEnv* GetOrAttachJNIEnvironment(JavaVM* jvm) {
-    JNIEnv* env = GetJNIEnvironment(jvm);
-    if (!env) {
-        int result = jvm->AttachCurrentThread(&env, nullptr);
-        CHECK_EQ(result, JNI_OK) << "thread attach failed";
-        struct VmDetacher {
-            VmDetacher(JavaVM* vm) : mVm(vm) {}
-            ~VmDetacher() { mVm->DetachCurrentThread(); }
-
-        private:
-            JavaVM* const mVm;
-        };
-        static thread_local VmDetacher detacher(jvm);
-    }
-    return env;
-}
-
 class PMSCDataLoader;
 
 struct OnTraceChanged {
@@ -415,7 +390,7 @@ private:
     bool onPrepareImage(dataloader::DataLoaderInstallationFiles addedFiles) final {
         ALOGE("onPrepareImage: start.");
 
-        JNIEnv* env = GetOrAttachJNIEnvironment(mJvm);
+        JNIEnv* env = GetOrAttachJNIEnvironment(mJvm, JNI_VERSION_1_6);
         const auto& jni = jniIds(env);
 
         jobject shellCommand = env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,

@@ -183,7 +183,7 @@ public class VibratorService extends IVibratorService.Stub
     static native int[] vibratorGetSupportedEffects(long controllerPtr);
     static native long vibratorPerformEffect(long effect, long strength, Vibration vibration,
             boolean withCallback);
-    static native void vibratorPerformComposedEffect(
+    static native void vibratorPerformComposedEffect(long controllerPtr,
             VibrationEffect.Composition.PrimitiveEffect[] effect, Vibration vibration);
     static native void vibratorSetExternalControl(long controllerPtr, boolean enabled);
     static native long vibratorGetCapabilities(long controllerPtr);
@@ -251,6 +251,9 @@ public class VibratorService extends IVibratorService.Stub
         public void binderDied() {
             synchronized (mLock) {
                 if (this == mCurrentVibration) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Vibration finished because binder died, cleaning up");
+                    }
                     doCancelVibrateLocked();
                 }
             }
@@ -261,6 +264,9 @@ public class VibratorService extends IVibratorService.Stub
         public void onComplete() {
             synchronized (mLock) {
                 if (this == mCurrentVibration) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Vibration finished by callback, cleaning up");
+                    }
                     doCancelVibrateLocked();
                 }
             }
@@ -915,7 +921,7 @@ public class VibratorService extends IVibratorService.Stub
     // Callback for whenever the current vibration has finished played out
     public void onVibrationFinished() {
         if (DEBUG) {
-            Slog.e(TAG, "Vibration finished, cleaning up");
+            Slog.d(TAG, "Vibration finished, cleaning up");
         }
         synchronized (mLock) {
             // Make sure the vibration is really done. This also reports that the vibration is
@@ -1766,7 +1772,7 @@ public class VibratorService extends IVibratorService.Stub
         /** Turns vibrator on to perform one of the supported composed effects. */
         public void vibratorPerformComposedEffect(
                 VibrationEffect.Composition.PrimitiveEffect[] effect, Vibration vibration) {
-            VibratorService.vibratorPerformComposedEffect(effect, vibration);
+            VibratorService.vibratorPerformComposedEffect(mNativeControllerPtr, effect, vibration);
         }
 
         /** Enabled the device vibrator to be controlled by another service. */
