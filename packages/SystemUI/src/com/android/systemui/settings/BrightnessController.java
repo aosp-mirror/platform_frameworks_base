@@ -385,7 +385,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         if (stopTracking) {
             // TODO(brightnessfloat): change to use float value instead.
             MetricsLogger.action(mContext, metric,
-                    BrightnessSynchronizer.brightnessFloatToInt(mContext, valFloat));
+                    BrightnessSynchronizer.brightnessFloatToInt(valFloat));
 
         }
         setBrightness(valFloat);
