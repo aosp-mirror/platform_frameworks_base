@@ -34,26 +34,6 @@ FLAG_PUBLIC_API = 'public-api'
 FLAG_SYSTEM_API = 'system-api'
 FLAG_TEST_API = 'test-api'
 
-OLD_FLAG_SDK = "whitelist"
-OLD_FLAG_UNSUPPORTED = "greylist"
-OLD_FLAG_BLOCKED = "blacklist"
-OLD_FLAG_MAX_TARGET_O = "greylist-max-o"
-OLD_FLAG_MAX_TARGET_P = "greylist-max-p"
-OLD_FLAG_MAX_TARGET_Q = "greylist-max-q"
-OLD_FLAG_MAX_TARGET_R = "greylist-max-r"
-
-OLD_FLAGS_TO_NEW = {
-    OLD_FLAG_SDK: FLAG_SDK,
-    OLD_FLAG_UNSUPPORTED: FLAG_UNSUPPORTED,
-    OLD_FLAG_BLOCKED: FLAG_BLOCKED,
-    OLD_FLAG_MAX_TARGET_O: FLAG_MAX_TARGET_O,
-    OLD_FLAG_MAX_TARGET_P: FLAG_MAX_TARGET_P,
-    OLD_FLAG_MAX_TARGET_Q: FLAG_MAX_TARGET_Q,
-    OLD_FLAG_MAX_TARGET_R: FLAG_MAX_TARGET_R,
-}
-
-NEW_FLAGS_TO_OLD = dict(zip(OLD_FLAGS_TO_NEW.values(), OLD_FLAGS_TO_NEW.keys()))
-
 # List of all known flags.
 FLAGS_API_LIST = [
     FLAG_SDK,
@@ -205,36 +185,6 @@ class FlagsDict:
             "Please visit go/hiddenapi for more information.").format(
                 source, "\n".join(flags_subset - ALL_FLAGS_SET))
 
-    def convert_to_new_flag(self, flag):
-      """Converts old flag to a new variant.
-
-      Flags that are considered old are replaced with new versions.
-      Otherwise, it is a no-op.
-
-      Args:
-        flag: a string, representing SDK flag.
-
-      Returns:
-         A string. Result of conversion.
-
-      """
-      return OLD_FLAGS_TO_NEW.get(flag, flag)
-
-    def convert_to_old_flag(self, flag):
-      """Converts a new flag to a old variant.
-
-      No-op if there is no suitable old flag.
-      Only used to support backwards compatibility.
-
-      Args:
-        flag: a string, representing SDK flag.
-
-      Returns:
-         A string. Result of conversion.
-
-      """
-      return NEW_FLAGS_TO_OLD.get(flag, flag)
-
     def filter_apis(self, filter_fn):
         """Returns APIs which match a given predicate.
 
@@ -272,7 +222,7 @@ class FlagsDict:
         """
         lines = []
         for api in self._dict:
-          flags = sorted([self.convert_to_old_flag(flag) for flag in self._dict[api]])
+          flags = sorted(self._dict[api])
           lines.append(",".join([api] + flags))
         return sorted(lines)
 
@@ -298,12 +248,12 @@ class FlagsDict:
         # Check that all flags are known.
         csv_flags = set()
         for csv in csv_values:
-          csv_flags.update([self.convert_to_new_flag(flag) for flag in csv[1:]])
+          csv_flags.update(csv[1:])
         self._check_flags_set(csv_flags, source)
 
         # Iterate over all CSV lines, find entry in dict and append flags to it.
         for csv in csv_values:
-            flags = [self.convert_to_new_flag(flag) for flag in csv[1:]]
+            flags = csv[1:]
             if (FLAG_PUBLIC_API in flags) or (FLAG_SYSTEM_API in flags):
                 flags.append(FLAG_SDK)
             self._dict[csv[0]].update(flags)

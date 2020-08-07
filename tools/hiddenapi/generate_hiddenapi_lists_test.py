@@ -35,7 +35,7 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         flags.parse_and_merge_csv(['A,' + FLAG_SDK, 'B', 'C'])
         flags.assign_flag(FLAG_UNSUPPORTED, set(['C']))
         self.assertEqual(flags.generate_csv(),
-            [ 'A,' + OLD_FLAG_SDK, 'B', 'C,' + OLD_FLAG_UNSUPPORTED ])
+            [ 'A,' + FLAG_SDK, 'B', 'C,' + FLAG_UNSUPPORTED ])
 
         # Check three things:
         # (1) B is selected as valid unassigned
@@ -50,8 +50,7 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         # Test empty CSV entry.
         self.assertEqual(flags.generate_csv(), [])
 
-        # Test new additions. CSV generator produces values with old flags
-        # to be backwards compatible.
+        # Test new additions.
         flags.parse_and_merge_csv([
             'A,' + FLAG_UNSUPPORTED,
             'B,' + FLAG_BLOCKED + ',' + FLAG_MAX_TARGET_O,
@@ -60,11 +59,11 @@ class TestHiddenapiListGeneration(unittest.TestCase):
             'E,' + FLAG_BLOCKED + ',' + FLAG_TEST_API,
         ])
         self.assertEqual(flags.generate_csv(), [
-            'A,' + OLD_FLAG_UNSUPPORTED,
-            'B,' + OLD_FLAG_BLOCKED + "," + OLD_FLAG_MAX_TARGET_O,
-            'C,' + FLAG_SYSTEM_API + ',' + OLD_FLAG_SDK,
-            'D,' + OLD_FLAG_UNSUPPORTED + ',' + FLAG_TEST_API,
-            'E,' + OLD_FLAG_BLOCKED + ',' + FLAG_TEST_API,
+            'A,' + FLAG_UNSUPPORTED,
+            'B,' + FLAG_BLOCKED + "," + FLAG_MAX_TARGET_O,
+            'C,' + FLAG_SYSTEM_API + ',' + FLAG_SDK,
+            'D,' + FLAG_UNSUPPORTED + ',' + FLAG_TEST_API,
+            'E,' + FLAG_BLOCKED + ',' + FLAG_TEST_API,
         ])
 
         # Test unknown flag.
@@ -78,7 +77,7 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         # Test new additions.
         flags.assign_flag(FLAG_UNSUPPORTED, set([ 'A', 'B' ]))
         self.assertEqual(flags.generate_csv(),
-            [ 'A,' + OLD_FLAG_UNSUPPORTED + "," + OLD_FLAG_SDK, 'B,' + OLD_FLAG_UNSUPPORTED ])
+            [ 'A,' + FLAG_UNSUPPORTED + "," + FLAG_SDK, 'B,' + FLAG_UNSUPPORTED ])
 
         # Test invalid API signature.
         with self.assertRaises(AssertionError):
