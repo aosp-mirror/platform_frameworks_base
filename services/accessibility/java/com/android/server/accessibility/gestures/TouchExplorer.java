@@ -587,6 +587,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 mSendHoverExitDelayed.cancel();
                 if (mGestureDetector.isMultiFingerGesturesEnabled()
                         && mGestureDetector.isTwoFingerPassthroughEnabled()) {
+                    if (pointerIndex < 0) {
+                        return;
+                    }
                     final float deltaX =
                             mReceivedPointerTracker.getReceivedPointerDownX(pointerId)
                                     - rawEvent.getX(pointerIndex);
@@ -953,25 +956,32 @@ public class TouchExplorer extends BaseEventStreamTransformation
         final float secondPtrX = event.getX(1);
         final float secondPtrY = event.getY(1);
         final int secondPtrId = event.getPointerId(1);
-        float draggingX;
-        float draggingY;
+        float draggingX = firstPtrX;
+        float draggingY = firstPtrY;
+        if (mDraggingPointerId != INVALID_POINTER_ID) {
+            // Just use the coordinates of the dragging pointer.
+            int pointerIndex = event.findPointerIndex(mDraggingPointerId);
+            if (pointerIndex >= 0) {
+                draggingX = event.getX(pointerIndex);
+                draggingY = event.getY(pointerIndex);
+            } else {
+                // We've lost track of the dragging pointer. Try to recover by invalidating it.
+                // We'll the drop into the code below to choose a new one.
+                mDraggingPointerId = INVALID_POINTER_ID;
+            }
+        }
+        // Not quite an else, since the above code can invalidate the pointer
         if (mDraggingPointerId == INVALID_POINTER_ID) {
             // The goal is to use the coordinates of the finger that is closest to its closest edge.
             if (getDistanceToClosestEdge(firstPtrX, firstPtrY)
                     < getDistanceToClosestEdge(secondPtrX, secondPtrY)) {
-                draggingX = firstPtrX;
-                draggingY = firstPtrY;
+                // X and Y initialized to firstPtrX and Y was right
                 mDraggingPointerId = firstPtrId;
             } else {
                 draggingX = secondPtrX;
                 draggingY = secondPtrY;
                 mDraggingPointerId = secondPtrId;
             }
-        } else {
-            // Just use the coordinates of the dragging pointer.
-            int pointerIndex = event.findPointerIndex(mDraggingPointerId);
-            draggingX = event.getX(pointerIndex);
-            draggingY = event.getY(pointerIndex);
         }
         event.setLocation(draggingX, draggingY);
     }
