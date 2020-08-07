@@ -223,6 +223,11 @@ static void android_view_ThreadedRenderer_setColorMode(JNIEnv* env, jobject claz
     proxy->setColorMode(static_cast<ColorMode>(colorMode));
 }
 
+static void android_view_ThreadedRenderer_setSdrWhitePoint(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jfloat sdrWhitePoint) {
+    Properties::defaultSdrWhitePoint = sdrWhitePoint;
+}
+
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
     LOG_ALWAYS_FATAL_IF(frameInfoSize != UI_THREAD_FRAME_INFO_SIZE,
@@ -671,6 +676,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetLightGeometry", "(JFFFF)V", (void*)android_view_ThreadedRenderer_setLightGeometry},
         {"nSetOpaque", "(JZ)V", (void*)android_view_ThreadedRenderer_setOpaque},
         {"nSetColorMode", "(JI)V", (void*)android_view_ThreadedRenderer_setColorMode},
+        {"nSetSdrWhitePoint", "(JF)V", (void*)android_view_ThreadedRenderer_setSdrWhitePoint},
         {"nSyncAndDrawFrame", "(J[JI)I", (void*)android_view_ThreadedRenderer_syncAndDrawFrame},
         {"nDestroy", "(JJ)V", (void*)android_view_ThreadedRenderer_destroy},
         {"nRegisterAnimatingRenderNode", "(JJ)V",

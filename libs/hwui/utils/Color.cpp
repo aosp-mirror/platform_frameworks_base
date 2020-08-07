@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <Properties.h>
 
 namespace android {
 namespace uirenderer {
@@ -344,13 +345,9 @@ SkColor LabToSRGB(const Lab& lab, SkAlpha alpha) {
             static_cast<uint8_t>(rgb.b * 255));
 }
 
-// Note that SkColorSpace doesn't have the notion of an unspecified SDR white
-// level.
-static constexpr float kDefaultSDRWhiteLevel = 150.f;
-
 skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
     if (sdr_white_level <= 0.f) {
-        sdr_white_level = kDefaultSDRWhiteLevel;
+        sdr_white_level = Properties::defaultSdrWhitePoint;
     }
     // The generic PQ transfer function produces normalized luminance values i.e.
     // the range 0-1 represents 0-10000 nits for the reference display, but we
