@@ -30,6 +30,8 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
+import java.util.function.Consumer;
+
 /** Containing logic for the rotation button on the physical left bottom corner of the screen. */
 public class FloatingRotationButton implements RotationButton {
 
@@ -45,6 +47,7 @@ public class FloatingRotationButton implements RotationButton {
     private boolean mCanShow = true;
 
     private RotationButtonController mRotationButtonController;
+    private Consumer<Boolean> mVisibilityChangedCallback;
 
     FloatingRotationButton(Context context) {
         mContext = context;
@@ -64,6 +67,11 @@ public class FloatingRotationButton implements RotationButton {
         mRotationButtonController = rotationButtonController;
         updateIcon(mRotationButtonController.getLightIconColor(),
                 mRotationButtonController.getDarkIconColor());
+    }
+
+    @Override
+    public void setVisibilityChangedCallback(Consumer<Boolean> visibilityChangedCallback) {
+        mVisibilityChangedCallback = visibilityChangedCallback;
     }
 
     @Override
@@ -105,6 +113,16 @@ public class FloatingRotationButton implements RotationButton {
             mKeyButtonDrawable.resetAnimation();
             mKeyButtonDrawable.startAnimation();
         }
+        mKeyButtonView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5,
+                    int i6, int i7) {
+                if (mIsShowing && mVisibilityChangedCallback != null) {
+                    mVisibilityChangedCallback.accept(true);
+                }
+                mKeyButtonView.removeOnLayoutChangeListener(this);
+            }
+        });
         return true;
     }
 
@@ -115,6 +133,9 @@ public class FloatingRotationButton implements RotationButton {
         }
         mWindowManager.removeViewImmediate(mKeyButtonView);
         mIsShowing = false;
+        if (mVisibilityChangedCallback != null) {
+            mVisibilityChangedCallback.accept(false);
+        }
         return true;
     }
 
