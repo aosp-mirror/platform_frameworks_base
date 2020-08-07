@@ -609,7 +609,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     // Two pointers moving in the same direction within
                     // a given distance perform a drag.
                     mState.startDragging();
-                    adjustEventLocationForDrag(event);
+                    computeDraggingPointerIdIfNeeded(event);
                     pointerIdBits = 1 << mDraggingPointerId;
                     event.setEdgeFlags(mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
                     mDispatcher.sendMotionEvent(
@@ -768,7 +768,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     case 2: {
                         if (isDraggingGesture(event)) {
                             // If still dragging send a drag event.
-                            adjustEventLocationForDrag(event);
+                            computeDraggingPointerIdIfNeeded(event);
                             mDispatcher.sendMotionEvent(
                                     event,
                                     MotionEvent.ACTION_MOVE,
@@ -946,44 +946,27 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     /**
-     * Adjust the location of an injected event when performing a drag. The location will be the
-     * location of the finger closest to an edge of the screen.
+     * Computes {@link #mDraggingPointerId} if it is invalid. The pointer will be the finger
+     * closet to an edge of the screen.
      */
-    private void adjustEventLocationForDrag(MotionEvent event) {
+    private void computeDraggingPointerIdIfNeeded(MotionEvent event) {
+        if (mDraggingPointerId != INVALID_POINTER_ID) {
+            // If we have a valid pointer ID, we should be good
+            final int pointerIndex = event.findPointerIndex(mDraggingPointerId);
+            if (event.findPointerIndex(pointerIndex) >= 0) {
+                return;
+            }
+        }
+        // Use the pointer that is closest to its closest edge.
         final float firstPtrX = event.getX(0);
         final float firstPtrY = event.getY(0);
         final int firstPtrId = event.getPointerId(0);
         final float secondPtrX = event.getX(1);
         final float secondPtrY = event.getY(1);
         final int secondPtrId = event.getPointerId(1);
-        float draggingX = firstPtrX;
-        float draggingY = firstPtrY;
-        if (mDraggingPointerId != INVALID_POINTER_ID) {
-            // Just use the coordinates of the dragging pointer.
-            int pointerIndex = event.findPointerIndex(mDraggingPointerId);
-            if (pointerIndex >= 0) {
-                draggingX = event.getX(pointerIndex);
-                draggingY = event.getY(pointerIndex);
-            } else {
-                // We've lost track of the dragging pointer. Try to recover by invalidating it.
-                // We'll the drop into the code below to choose a new one.
-                mDraggingPointerId = INVALID_POINTER_ID;
-            }
-        }
-        // Not quite an else, since the above code can invalidate the pointer
-        if (mDraggingPointerId == INVALID_POINTER_ID) {
-            // The goal is to use the coordinates of the finger that is closest to its closest edge.
-            if (getDistanceToClosestEdge(firstPtrX, firstPtrY)
-                    < getDistanceToClosestEdge(secondPtrX, secondPtrY)) {
-                // X and Y initialized to firstPtrX and Y was right
-                mDraggingPointerId = firstPtrId;
-            } else {
-                draggingX = secondPtrX;
-                draggingY = secondPtrY;
-                mDraggingPointerId = secondPtrId;
-            }
-        }
-        event.setLocation(draggingX, draggingY);
+        mDraggingPointerId = (getDistanceToClosestEdge(firstPtrX, firstPtrY)
+                 < getDistanceToClosestEdge(secondPtrX, secondPtrY))
+                 ? firstPtrId : secondPtrId;
     }
 
     private float getDistanceToClosestEdge(float x, float y) {
