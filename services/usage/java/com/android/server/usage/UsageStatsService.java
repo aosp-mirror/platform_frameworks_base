@@ -763,11 +763,12 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            final LinkedList<Event> events = mReportedEvents.get(userId, new LinkedList<>());
-            events.add(event);
-            if (mReportedEvents.get(userId) == null) {
+            LinkedList<Event> events = mReportedEvents.get(userId);
+            if (events == null) {
+                events = new LinkedList<>();
                 mReportedEvents.put(userId, events);
             }
+            events.add(event);
             if (events.size() == 1) {
                 // Every time a file is persisted to disk, mReportedEvents is cleared for this user
                 // so trigger a flush to disk every time the first event has been added.
