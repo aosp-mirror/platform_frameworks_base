@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"বেটাৰি সঞ্চয়কাৰী অন হৈ আছে"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"বেটাৰি সঞ্চয়কাৰী অফ কৰক"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিংৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিংৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ জৰিয়তে ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে ?"</string>

@@ -376,8 +376,12 @@ public abstract class Tile implements Parcelable {
      * Check whether tile only has primary profile.
      */
     public boolean isPrimaryProfileOnly() {
-        String profile = mMetaData != null
-                ? mMetaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+        return isPrimaryProfileOnly(mMetaData);
+    }
+
+    static boolean isPrimaryProfileOnly(Bundle metaData) {
+        String profile = metaData != null
+                ? metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }
