@@ -45,6 +45,13 @@ package android.media.session {
     field public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 65536; // 0x10000
   }
 
+  public final class MediaSessionManager {
+    method public void dispatchMediaKeyEventAsSystemService(@NonNull android.view.KeyEvent);
+    method public boolean dispatchMediaKeyEventAsSystemService(@NonNull android.media.session.MediaSession.Token, @NonNull android.view.KeyEvent);
+    method public void dispatchVolumeKeyEventAsSystemService(@NonNull android.view.KeyEvent, int);
+    method public void dispatchVolumeKeyEventAsSystemService(@NonNull android.media.session.MediaSession.Token, @NonNull android.view.KeyEvent);
+  }
+
 }
 
 package android.net {
