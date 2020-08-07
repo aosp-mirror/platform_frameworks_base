@@ -34,44 +34,50 @@ import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
 
 /**
- * Handles getting/changing the whitelist for the exceptions to battery saving features.
+ * Handles getting/changing the allowlist for the exceptions to battery saving features.
  */
-public class PowerWhitelistBackend {
+public class PowerAllowlistBackend {
 
-    private static final String TAG = "PowerWhitelistBackend";
+    private static final String TAG = "PowerAllowlistBackend";
 
     private static final String DEVICE_IDLE_SERVICE = "deviceidle";
 
-    private static PowerWhitelistBackend sInstance;
+    private static PowerAllowlistBackend sInstance;
 
     private final Context mAppContext;
     private final IDeviceIdleController mDeviceIdleService;
-    private final ArraySet<String> mWhitelistedApps = new ArraySet<>();
-    private final ArraySet<String> mSysWhitelistedApps = new ArraySet<>();
+    private final ArraySet<String> mAllowlistedApps = new ArraySet<>();
+    private final ArraySet<String> mSysAllowlistedApps = new ArraySet<>();
     private final ArraySet<String> mDefaultActiveApps = new ArraySet<>();
 
-    public PowerWhitelistBackend(Context context) {
+    public PowerAllowlistBackend(Context context) {
         this(context, IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(DEVICE_IDLE_SERVICE)));
     }
 
     @VisibleForTesting
-    PowerWhitelistBackend(Context context, IDeviceIdleController deviceIdleService) {
+    PowerAllowlistBackend(Context context, IDeviceIdleController deviceIdleService) {
         mAppContext = context.getApplicationContext();
         mDeviceIdleService = deviceIdleService;
         refreshList();
     }
 
-    public int getWhitelistSize() {
-        return mWhitelistedApps.size();
+    public int getAllowlistSize() {
+        return mAllowlistedApps.size();
     }
 
-    public boolean isSysWhitelisted(String pkg) {
-        return mSysWhitelistedApps.contains(pkg);
+    /**
+    * Check if target package is in System allow list
+    */
+    public boolean isSysAllowlisted(String pkg) {
+        return mSysAllowlistedApps.contains(pkg);
     }
 
-    public boolean isWhitelisted(String pkg) {
-        if (mWhitelistedApps.contains(pkg)) {
+    /**
+     * Check if target package is in allow list
+     */
+    public boolean isAllowlisted(String pkg) {
+        if (mAllowlistedApps.contains(pkg)) {
             return true;
         }
 
@@ -87,7 +93,7 @@ public class PowerWhitelistBackend {
      */
     public boolean isDefaultActiveApp(String pkg) {
         // Additionally, check if pkg is default dialer/sms. They are considered essential apps and
-        // should be automatically whitelisted (otherwise user may be able to set restriction on
+        // should be automatically allowlisted (otherwise user may be able to set restriction on
         // them, leading to bad device behavior.)
 
         if (mDefaultActiveApps.contains(pkg)) {
@@ -103,12 +109,17 @@ public class PowerWhitelistBackend {
         return false;
     }
 
-    public boolean isWhitelisted(String[] pkgs) {
+    /**
+     *
+     * @param pkgs a list of packageName
+     * @return true when one of package is in allow list
+     */
+    public boolean isAllowlisted(String[] pkgs) {
         if (ArrayUtils.isEmpty(pkgs)) {
             return false;
         }
         for (String pkg : pkgs) {
-            if (isWhitelisted(pkg)) {
+            if (isAllowlisted(pkg)) {
                 return true;
             }
         }
@@ -116,40 +127,51 @@ public class PowerWhitelistBackend {
         return false;
     }
 
+    /**
+     * Add app into power save allow list.
+     * @param pkg packageName
+     */
     public void addApp(String pkg) {
         try {
             mDeviceIdleService.addPowerSaveWhitelistApp(pkg);
-            mWhitelistedApps.add(pkg);
+            mAllowlistedApps.add(pkg);
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);
         }
     }
 
+    /**
+     * Remove package from power save allow list.
+     * @param pkg
+     */
     public void removeApp(String pkg) {
         try {
             mDeviceIdleService.removePowerSaveWhitelistApp(pkg);
-            mWhitelistedApps.remove(pkg);
+            mAllowlistedApps.remove(pkg);
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);
         }
     }
 
+    /**
+     * Refresh all of lists
+     */
     @VisibleForTesting
     public void refreshList() {
-        mSysWhitelistedApps.clear();
-        mWhitelistedApps.clear();
+        mSysAllowlistedApps.clear();
+        mAllowlistedApps.clear();
         mDefaultActiveApps.clear();
         if (mDeviceIdleService == null) {
             return;
         }
         try {
-            final String[] whitelistedApps = mDeviceIdleService.getFullPowerWhitelist();
-            for (String app : whitelistedApps) {
-                mWhitelistedApps.add(app);
+            final String[] allowlistedApps = mDeviceIdleService.getFullPowerWhitelist();
+            for (String app : allowlistedApps) {
+                mAllowlistedApps.add(app);
             }
-            final String[] sysWhitelistedApps = mDeviceIdleService.getSystemPowerWhitelist();
-            for (String app : sysWhitelistedApps) {
-                mSysWhitelistedApps.add(app);
+            final String[] sysAllowlistedApps = mDeviceIdleService.getSystemPowerWhitelist();
+            for (String app : sysAllowlistedApps) {
+                mSysAllowlistedApps.add(app);
             }
             final boolean hasTelephony = mAppContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TELEPHONY);
@@ -171,9 +193,13 @@ public class PowerWhitelistBackend {
         }
     }
 
-    public static PowerWhitelistBackend getInstance(Context context) {
+    /**
+     * @param context
+     * @return a PowerAllowlistBackend object
+     */
+    public static PowerAllowlistBackend getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new PowerWhitelistBackend(context);
+            sInstance = new PowerAllowlistBackend(context);
         }
         return sInstance;
     }

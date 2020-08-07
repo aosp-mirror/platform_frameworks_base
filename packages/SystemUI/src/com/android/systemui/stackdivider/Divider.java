@@ -78,6 +78,22 @@ public class Divider extends SystemUI {
                             onUndockingTask();
                         }
                     }
+
+                    @Override
+                    public void onActivityForcedResizable(String packageName, int taskId,
+                            int reason) {
+                        mDividerController.onActivityForcedResizable(packageName, taskId, reason);
+                    }
+
+                    @Override
+                    public void onActivityDismissingDockedStack() {
+                        mDividerController.onActivityDismissingSplitScreen();
+                    }
+
+                    @Override
+                    public void onActivityLaunchOnSecondaryDisplayFailed() {
+                        mDividerController.onActivityLaunchOnSecondaryDisplayFailed();
+                    }
                 }
         );
     }

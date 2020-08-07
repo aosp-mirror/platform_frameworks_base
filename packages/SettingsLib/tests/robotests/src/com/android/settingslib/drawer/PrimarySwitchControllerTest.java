@@ -23,16 +23,16 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
-public class MasterSwitchControllerTest {
+public class PrimarySwitchControllerTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    private MasterSwitchController mController;
+    private PrimarySwitchController mController;
 
     @Before
     public void setUp() {
-        mController = new TestMasterSwitchController("123");
+        mController = new TestPrimarySwitchController("123");
     }
 
     @Test
@@ -49,11 +49,11 @@ public class MasterSwitchControllerTest {
         mController.getBundle();
     }
 
-    static class TestMasterSwitchController extends MasterSwitchController {
+    static class TestPrimarySwitchController extends PrimarySwitchController {
 
         private String mKey;
 
-        TestMasterSwitchController(String key) {
+        TestPrimarySwitchController(String key) {
             mKey = key;
         }
 

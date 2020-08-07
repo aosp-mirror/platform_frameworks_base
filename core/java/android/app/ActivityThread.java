@@ -37,6 +37,7 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupManager;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -289,6 +290,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     private final Object mNetworkPolicyLock = new Object();
 
+    private static final String DEFAULT_FULL_BACKUP_AGENT = "android.app.backup.FullBackupAgent";
+
     /**
      * Denotes the sequence number of the process state change for which the main thread needs
      * to block until the network rules are updated for it.
@@ -420,8 +423,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static final class ProviderKey {
         final String authority;
         final int userId;
-        ContentProviderHolder mHolder; // Temp holder to be used between notifier and waiter
-        int mWaiters; // Number of threads waiting on the publishing of the provider
 
         public ProviderKey(String authority, int userId) {
             this.authority = authority;
@@ -439,11 +440,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         @Override
         public int hashCode() {
-            return hashCode(authority, userId);
-        }
-
-        public static int hashCode(final String auth, final int userIdent) {
-            return ((auth != null) ? auth.hashCode() : 0) ^ userIdent;
+            return ((authority != null) ? authority.hashCode() : 0) ^ userId;
         }
     }
 
@@ -464,8 +461,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     // Mitigation for b/74523247: Used to serialize calls to AM.getContentProvider().
     // Note we never removes items from this map but that's okay because there are only so many
     // users and so many authorities.
-    @GuardedBy("mGetProviderKeys")
-    final SparseArray<ProviderKey> mGetProviderKeys = new SparseArray<>();
+    // TODO Remove it once we move CPR.wait() from AMS to the client side.
+    @GuardedBy("mGetProviderLocks")
+    final ArrayMap<ProviderKey, Object> mGetProviderLocks = new ArrayMap<>();
 
     final ArrayMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
         = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
@@ -742,6 +740,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         CompatibilityInfo compatInfo;
         int backupMode;
         int userId;
+        int operationType;
         public String toString() {
             return "CreateBackupAgentData{appInfo=" + appInfo
                     + " backupAgent=" + appInfo.backupAgentName
@@ -962,12 +961,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo, int backupMode, int userId) {
+                CompatibilityInfo compatInfo, int backupMode, int userId, int operationType) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
             d.compatInfo = compatInfo;
             d.backupMode = backupMode;
             d.userId = userId;
+            d.operationType = operationType;
 
             sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
@@ -1755,16 +1755,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handlePerformDirectAction,
                     ActivityThread.this, activityToken, actionId, arguments,
                     cancellationSignal, resultCallback));
-        }
-
-        @Override
-        public void notifyContentProviderPublishStatus(@NonNull ContentProviderHolder holder,
-                @NonNull String auth, int userId, boolean published) {
-            final ProviderKey key = getGetProviderKey(auth, userId);
-            synchronized (key) {
-                key.mHolder = holder;
-                key.notifyAll();
-            }
         }
     }
 
@@ -4090,12 +4080,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             return;
         }
 
-        String classname = data.appInfo.backupAgentName;
-        // full backup operation but no app-supplied agent?  use the default implementation
-        if (classname == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
-                || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
-            classname = "android.app.backup.FullBackupAgent";
-        }
+        String classname = getBackupAgentName(data);
 
         try {
             IBinder binder = null;
@@ -4119,7 +4104,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     context.setOuterContext(agent);
                     agent.attach(context);
 
-                    agent.onCreate(UserHandle.of(data.userId));
+                    agent.onCreate(UserHandle.of(data.userId), data.operationType);
                     binder = agent.onBind();
                     backupAgents.put(packageName, agent);
                 } catch (Exception e) {
@@ -4145,6 +4130,23 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw new RuntimeException("Unable to create BackupAgent "
                     + classname + ": " + e.toString(), e);
         }
+    }
+
+    private String getBackupAgentName(CreateBackupAgentData data) {
+        String agentName = data.appInfo.backupAgentName;
+        if (!UserHandle.isCore(data.appInfo.uid)
+                && data.operationType == BackupManager.OperationType.MIGRATION) {
+            // If this is a migration, use the default backup agent regardless of the app's
+            // preferences.
+            agentName = DEFAULT_FULL_BACKUP_AGENT;
+        } else {
+            // full backup operation but no app-supplied agent?  use the default implementation
+            if (agentName == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                    || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
+                agentName = DEFAULT_FULL_BACKUP_AGENT;
+            }
+        }
+        return agentName;
     }
 
     // Tear down a BackupAgent
@@ -6811,40 +6813,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         // provider since it might take a long time to run and it could also potentially
         // be re-entrant in the case where the provider is in the same process.
         ContentProviderHolder holder = null;
-        final ProviderKey key = getGetProviderKey(auth, userId);
-        synchronized (key) {
-            boolean wasWaiting = false;
-            try {
-                if (key.mWaiters == 0) {
-                    // No other thread is waiting for this provider, let's fetch one by ourselves.
-                    // If the returned holder is non-null but its provider is null and it's not
-                    // local, we'll need to wait for the publishing of the provider.
-                    holder = ActivityManager.getService().getContentProvider(
-                            getApplicationThread(), c.getOpPackageName(), auth, userId, stable);
-                }
-                if ((holder != null && holder.provider == null && !holder.mLocal)
-                        || (key.mWaiters > 0 && (holder = key.mHolder) == null)) {
-                    try {
-                        key.mWaiters++;
-                        wasWaiting = true;
-                        key.wait(ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
-                        holder = key.mHolder;
-                        if (holder != null && holder.provider == null) {
-                            // probably timed out
-                            holder = null;
-                        }
-                    } catch (InterruptedException e) {
-                        holder = null;
-                    }
-                }
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            } finally {
-                if (wasWaiting && --key.mWaiters == 0) {
-                    // Clear the holder from the key since the key itself is never cleared.
-                    key.mHolder = null;
-                }
+        try {
+            synchronized (getGetProviderLock(auth, userId)) {
+                holder = ActivityManager.getService().getContentProvider(
+                        getApplicationThread(), c.getOpPackageName(), auth, userId, stable);
             }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
         if (holder == null) {
             if (UserManager.get(c).isUserUnlocked(userId)) {
@@ -6862,13 +6837,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         return holder.provider;
     }
 
-    private ProviderKey getGetProviderKey(String auth, int userId) {
-        final int key = ProviderKey.hashCode(auth, userId);
-        synchronized (mGetProviderKeys) {
-            ProviderKey lock = mGetProviderKeys.get(key);
+    private Object getGetProviderLock(String auth, int userId) {
+        final ProviderKey key = new ProviderKey(auth, userId);
+        synchronized (mGetProviderLocks) {
+            Object lock = mGetProviderLocks.get(key);
             if (lock == null) {
-                lock = new ProviderKey(auth, userId);
-                mGetProviderKeys.put(key, lock);
+                lock = key;
+                mGetProviderLocks.put(key, lock);
             }
             return lock;
         }

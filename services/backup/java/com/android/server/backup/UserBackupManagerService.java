@@ -1651,13 +1651,15 @@ public class UserBackupManagerService {
 
     /** Fires off a backup agent, blocking until it attaches or times out. */
     @Nullable
-    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode) {
+    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode,
+            @OperationType int operationType) {
         IBackupAgent agent = null;
         synchronized (mAgentConnectLock) {
             mConnecting = true;
             mConnectedAgent = null;
             try {
-                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId)) {
+                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId,
+                        operationType)) {
                     Slog.d(TAG, addUserIdToLogMessage(mUserId, "awaiting agent for " + app));
 
                     // success; wait for the agent to arrive
@@ -3973,7 +3975,8 @@ public class UserBackupManagerService {
                                 restoreSet,
                                 packageName,
                                 token,
-                                listener);
+                                listener,
+                                mScheduledBackupEligibility);
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
@@ -4002,13 +4005,15 @@ public class UserBackupManagerService {
     }
 
     /** Hand off a restore session. */
-    public IRestoreSession beginRestoreSession(String packageName, String transport) {
+    public IRestoreSession beginRestoreSession(String packageName, String transport,
+            @OperationType int operationType) {
         if (DEBUG) {
             Slog.v(
                     TAG,
                     addUserIdToLogMessage(
                             mUserId,
-                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport));
+                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport
+                                + "operationType=" + operationType));
         }
 
         boolean needPermission = true;
@@ -4065,7 +4070,8 @@ public class UserBackupManagerService {
                                 "Restore session requested but currently running backups"));
                 return null;
             }
-            mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport);
+            mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport,
+                    getEligibilityRulesForOperation(operationType));
             mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
                     mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
         }

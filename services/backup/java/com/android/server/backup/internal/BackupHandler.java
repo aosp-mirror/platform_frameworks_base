@@ -305,8 +305,7 @@ public class BackupHandler extends Handler {
                                 params.isSystemRestore,
                                 params.filterSet,
                                 params.listener,
-                                backupManagerService.getEligibilityRulesForOperation(
-                                        OperationType.BACKUP));
+                                params.backupEligibilityRules);
 
                 synchronized (backupManagerService.getPendingRestores()) {
                     if (backupManagerService.isRestoreInProgress()) {

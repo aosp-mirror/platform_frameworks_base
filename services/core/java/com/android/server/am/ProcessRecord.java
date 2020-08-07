@@ -673,30 +673,33 @@ class ProcessRecord implements WindowProcessListener {
 
     public void makeActive(IApplicationThread _thread, ProcessStatsService tracker) {
         if (thread == null) {
-            final ProcessState origBase = baseProcessTracker;
-            if (origBase != null) {
-                origBase.setState(ProcessStats.STATE_NOTHING,
-                        tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList.mPkgList);
-                for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
-                            uid, processName, pkgList.keyAt(ipkg),
-                            ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
-                            pkgList.valueAt(ipkg).appVersion);
+            synchronized (tracker.mLock) {
+                final ProcessState origBase = baseProcessTracker;
+                if (origBase != null) {
+                    origBase.setState(ProcessStats.STATE_NOTHING,
+                            tracker.getMemFactorLocked(), SystemClock.uptimeMillis(),
+                            pkgList.mPkgList);
+                    for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                                uid, processName, pkgList.keyAt(ipkg),
+                                ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
+                                pkgList.valueAt(ipkg).appVersion);
+                    }
+                    origBase.makeInactive();
                 }
-                origBase.makeInactive();
-            }
-            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
-                    info.longVersionCode, processName);
-            baseProcessTracker.makeActive();
-            for (int i=0; i<pkgList.size(); i++) {
-                ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
-                if (holder.state != null && holder.state != origBase) {
-                    holder.state.makeInactive();
-                }
-                tracker.updateProcessStateHolderLocked(holder, pkgList.keyAt(i), info.uid,
+                baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
                         info.longVersionCode, processName);
-                if (holder.state != baseProcessTracker) {
-                    holder.state.makeActive();
+                baseProcessTracker.makeActive();
+                for (int i = 0, ipkg = pkgList.size(); i < ipkg; i++) {
+                    ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
+                    if (holder.state != null && holder.state != origBase) {
+                        holder.state.makeInactive();
+                    }
+                    tracker.updateProcessStateHolderLocked(holder, pkgList.keyAt(i), info.uid,
+                            info.longVersionCode, processName);
+                    if (holder.state != baseProcessTracker) {
+                        holder.state.makeActive();
+                    }
                 }
             }
         }
@@ -707,27 +710,30 @@ class ProcessRecord implements WindowProcessListener {
     public void makeInactive(ProcessStatsService tracker) {
         thread = null;
         mWindowProcessController.setThread(null);
-        final ProcessState origBase = baseProcessTracker;
-        if (origBase != null) {
+        synchronized (tracker.mLock) {
+            final ProcessState origBase = baseProcessTracker;
             if (origBase != null) {
-                origBase.setState(ProcessStats.STATE_NOTHING,
-                        tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList.mPkgList);
-                for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
-                            uid, processName, pkgList.keyAt(ipkg),
-                            ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
-                            pkgList.valueAt(ipkg).appVersion);
+                if (origBase != null) {
+                    origBase.setState(ProcessStats.STATE_NOTHING,
+                            tracker.getMemFactorLocked(), SystemClock.uptimeMillis(),
+                            pkgList.mPkgList);
+                    for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                                uid, processName, pkgList.keyAt(ipkg),
+                                ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
+                                pkgList.valueAt(ipkg).appVersion);
+                    }
+                    origBase.makeInactive();
                 }
-                origBase.makeInactive();
-            }
-            baseProcessTracker = null;
-            for (int i=0; i<pkgList.size(); i++) {
-                ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
-                if (holder.state != null && holder.state != origBase) {
-                    holder.state.makeInactive();
+                baseProcessTracker = null;
+                for (int i = 0, ipkg = pkgList.size(); i < ipkg; i++) {
+                    ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
+                    if (holder.state != null && holder.state != origBase) {
+                        holder.state.makeInactive();
+                    }
+                    holder.pkg = null;
+                    holder.state = null;
                 }
-                holder.pkg = null;
-                holder.state = null;
             }
         }
     }
@@ -1026,17 +1032,19 @@ class ProcessRecord implements WindowProcessListener {
      */
     public boolean addPackage(String pkg, long versionCode, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
-            ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
-                    versionCode);
-            if (baseProcessTracker != null) {
-                tracker.updateProcessStateHolderLocked(holder, pkg, info.uid, versionCode,
-                        processName);
-                pkgList.put(pkg, holder);
-                if (holder.state != baseProcessTracker) {
-                    holder.state.makeActive();
+            synchronized (tracker.mLock) {
+                ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
+                        versionCode);
+                if (baseProcessTracker != null) {
+                    tracker.updateProcessStateHolderLocked(holder, pkg, info.uid, versionCode,
+                            processName);
+                    pkgList.put(pkg, holder);
+                    if (holder.state != baseProcessTracker) {
+                        holder.state.makeActive();
+                    }
+                } else {
+                    pkgList.put(pkg, holder);
                 }
-            } else {
-                pkgList.put(pkg, holder);
             }
             return true;
         }
@@ -1072,31 +1080,33 @@ class ProcessRecord implements WindowProcessListener {
     public void resetPackageList(ProcessStatsService tracker) {
         final int N = pkgList.size();
         if (baseProcessTracker != null) {
-            long now = SystemClock.uptimeMillis();
-            baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
-                    tracker.getMemFactorLocked(), now, pkgList.mPkgList);
-            for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
-                        uid, processName, pkgList.keyAt(ipkg),
-                        ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
-                        pkgList.valueAt(ipkg).appVersion);
-            }
-            if (N != 1) {
-                for (int i=0; i<N; i++) {
-                    ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
-                    if (holder.state != null && holder.state != baseProcessTracker) {
-                        holder.state.makeInactive();
-                    }
-
+            synchronized (tracker.mLock) {
+                long now = SystemClock.uptimeMillis();
+                baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
+                        tracker.getMemFactorLocked(), now, pkgList.mPkgList);
+                for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                            uid, processName, pkgList.keyAt(ipkg),
+                            ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
+                            pkgList.valueAt(ipkg).appVersion);
                 }
-                pkgList.clear();
-                ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
-                        info.longVersionCode);
-                tracker.updateProcessStateHolderLocked(holder, info.packageName, info.uid,
-                        info.longVersionCode, processName);
-                pkgList.put(info.packageName, holder);
-                if (holder.state != baseProcessTracker) {
-                    holder.state.makeActive();
+                if (N != 1) {
+                    for (int i = 0; i < N; i++) {
+                        ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
+                        if (holder.state != null && holder.state != baseProcessTracker) {
+                            holder.state.makeInactive();
+                        }
+
+                    }
+                    pkgList.clear();
+                    ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
+                            info.longVersionCode);
+                    tracker.updateProcessStateHolderLocked(holder, info.packageName, info.uid,
+                            info.longVersionCode, processName);
+                    pkgList.put(info.packageName, holder);
+                    if (holder.state != baseProcessTracker) {
+                        holder.state.makeActive();
+                    }
                 }
             }
         } else if (N != 1) {

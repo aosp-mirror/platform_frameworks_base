@@ -19,6 +19,7 @@ package com.android.commands.bmgr;
 import android.annotation.IntDef;
 import android.annotation.UserIdInt;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupProgress;
 import android.app.backup.BackupTransport;
@@ -666,7 +667,7 @@ public class Bmgr {
 
         // The rest of the 'list' options work with a restore session on the current transport
         try {
-            mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null);
+            mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null, OperationType.BACKUP);
             if (mRestore == null) {
                 System.err.println(BMGR_ERR_NO_RESTORESESSION_FOR_USER + userId);
                 return;
@@ -821,7 +822,7 @@ public class Bmgr {
 
         try {
             boolean didRestore = false;
-            mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null);
+            mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null, OperationType.BACKUP);
             if (mRestore == null) {
                 System.err.println(BMGR_ERR_NO_RESTORESESSION_FOR_USER + userId);
                 return;

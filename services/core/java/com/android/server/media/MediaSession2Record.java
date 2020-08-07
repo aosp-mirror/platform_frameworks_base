@@ -20,7 +20,6 @@ import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.UserHandle;

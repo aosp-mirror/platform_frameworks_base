@@ -283,7 +283,6 @@ public class RotationButtonController {
             return;
         }
 
-        // TODO: Remove styles?
         // Prepare to show the navbar icon by updating the icon style to change anim params
         mLastRotationSuggestion = rotation; // Remember rotation for click
         final boolean rotationCCW = isRotationAnimationCCW(windowRotation, rotation);

@@ -2390,6 +2390,13 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public static ScreenshotHardwareBuffer captureLayers(LayerCaptureArgs captureArgs) {
+        return nativeCaptureLayers(captureArgs);
+    }
+
+    /**
      * Like {@link #captureLayers(SurfaceControl, Rect, float, int)} but with an array of layer
      * handles to exclude.
      * @hide

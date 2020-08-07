@@ -999,7 +999,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * <p>If the camera device configuration fails, then {@link #onConfigureFailed} will
          * be invoked instead of this callback.</p>
          *
-         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param session the successfully configured session instance
          */
         public abstract void onConfigured(@NonNull CameraCaptureSession session);
 
@@ -1014,7 +1014,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * to the session prior to this callback will be discarded and will not produce any
          * callbacks on their listeners.</p>
          *
-         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param session the session instance that failed during configuration
          */
         public abstract void onConfigureFailed(@NonNull CameraCaptureSession session);
 
@@ -1028,7 +1028,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * <p>Otherwise, this callback will be invoked any time the session finishes processing
          * all of its active capture requests, and no repeating request or burst is set up.</p>
          *
-         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param session the session returned by {@link #onConfigured}
          *
          */
         public void onReady(@NonNull CameraCaptureSession session) {
@@ -1045,7 +1045,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * <p>If the session runs out of capture requests to process and calls {@link #onReady},
          * then this callback will be invoked again once new requests are submitted for capture.</p>
          *
-         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param session the session returned by {@link #onConfigured}
          */
         public void onActive(@NonNull CameraCaptureSession session) {
             // default empty implementation
@@ -1075,7 +1075,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * {@link #onReady}, which is fired when all requests in both queues have been processed.</p>
          *
          * @param session
-         *            The session returned by {@link CameraDevice#createCaptureSession}
+         *            The session returned by {@link #onConfigured}
          */
         public void onCaptureQueueEmpty(@NonNull CameraCaptureSession session) {
             // default empty implementation
@@ -1093,7 +1093,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * However, any in-progress capture requests submitted to the session will be completed
          * as normal.</p>
          *
-         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param session the session returned by {@link #onConfigured}
          */
         public void onClosed(@NonNull CameraCaptureSession session) {
             // default empty implementation
@@ -1111,7 +1111,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * this callback is still invoked after the error is encountered, though some buffers may
          * not have been successfully pre-allocated.</p>
          *
-         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param session the session returned by {@link #onConfigured}
          * @param surface the Surface that was used with the {@link #prepare} call.
          */
         public void onSurfacePrepared(@NonNull CameraCaptureSession session,

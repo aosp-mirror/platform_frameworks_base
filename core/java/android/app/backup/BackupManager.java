@@ -355,7 +355,36 @@ public class BackupManager {
             try {
                 // All packages, current transport
                 IRestoreSession binder =
-                        sService.beginRestoreSessionForUser(mContext.getUserId(), null, null);
+                        sService.beginRestoreSessionForUser(mContext.getUserId(), null, null,
+                                OperationType.BACKUP);
+                if (binder != null) {
+                    session = new RestoreSession(mContext, binder);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "beginRestoreSession() couldn't connect");
+            }
+        }
+        return session;
+    }
+
+    /**
+     * Begin the process of restoring data from backup.  See the
+     * {@link android.app.backup.RestoreSession} class for documentation on that process.
+     *
+     * @param operationType Type of the operation, see {@link OperationType}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public RestoreSession beginRestoreSession(@OperationType int operationType) {
+        RestoreSession session = null;
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                // All packages, current transport
+                IRestoreSession binder =
+                        sService.beginRestoreSessionForUser(mContext.getUserId(), null, null,
+                                operationType);
                 if (binder != null) {
                     session = new RestoreSession(mContext, binder);
                 }

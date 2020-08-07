@@ -34,6 +34,7 @@ public class ContextualButton extends ButtonDispatcher {
     private ContextButtonListener mListener;
     private ContextualButtonGroup mGroup;
 
+    protected final Context mLightContext;
     protected final @DrawableRes int mIconResId;
 
     /**
@@ -42,8 +43,10 @@ public class ContextualButton extends ButtonDispatcher {
       * @param buttonResId the button view from xml layout
       * @param iconResId icon resource to be used
       */
-    public ContextualButton(@IdRes int buttonResId, @DrawableRes int iconResId) {
+    public ContextualButton(@IdRes int buttonResId, Context lightContext,
+            @DrawableRes int iconResId) {
         super(buttonResId);
+        mLightContext = lightContext;
         mIconResId = iconResId;
     }
 
@@ -117,17 +120,8 @@ public class ContextualButton extends ButtonDispatcher {
     }
 
     protected KeyButtonDrawable getNewDrawable(int lightIconColor, int darkIconColor) {
-        return KeyButtonDrawable.create(getContext().getApplicationContext(), lightIconColor,
-                darkIconColor, mIconResId, false /* shadow */, null /* ovalBackground */);
-    }
-
-    /**
-     * This context is from the view that could be stale after rotation or config change. To get
-     * correct resources use getApplicationContext() as well.
-     * @return current view context
-     */
-    protected Context getContext() {
-        return getCurrentView().getContext();
+        return KeyButtonDrawable.create(mLightContext, lightIconColor, darkIconColor, mIconResId,
+                false /* shadow */, null /* ovalBackground */);
     }
 
     public interface ContextButtonListener {

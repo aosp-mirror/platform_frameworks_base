@@ -794,7 +794,7 @@ public class KeyValueBackupTaskTest  {
         setUpAgent(PACKAGE_1);
         doThrow(SecurityException.class)
                 .when(mBackupManagerService)
-                .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt());
+                .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt(), anyInt());
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
 
         runTask(task);
@@ -812,7 +812,7 @@ public class KeyValueBackupTaskTest  {
         setUpAgent(PACKAGE_1);
         doThrow(SecurityException.class)
                 .when(mBackupManagerService)
-                .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt());
+                .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt(), anyInt());
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
 
         runTask(task);
@@ -2593,11 +2593,13 @@ public class KeyValueBackupTaskTest  {
             if (packageData.available) {
                 doReturn(backupAgentBinder)
                         .when(mBackupManagerService)
-                        .bindToAgentSynchronous(argThat(applicationInfo(packageData)), anyInt());
+                        .bindToAgentSynchronous(argThat(applicationInfo(packageData)), anyInt(),
+                                anyInt());
             } else {
                 doReturn(null)
                         .when(mBackupManagerService)
-                        .bindToAgentSynchronous(argThat(applicationInfo(packageData)), anyInt());
+                        .bindToAgentSynchronous(argThat(applicationInfo(packageData)), anyInt(),
+                                anyInt());
             }
             return new AgentMock(backupAgentBinder, backupAgent);
         } catch (RemoteException e) {

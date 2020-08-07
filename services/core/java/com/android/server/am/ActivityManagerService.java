@@ -176,6 +176,8 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
@@ -1579,7 +1581,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int KILL_APP_ZYGOTE_MSG = 71;
     static final int BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG = 72;
-    static final int WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG = 73;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1916,11 +1917,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG: {
                     handleBinderHeavyHitterAutoSamplerTimeOut();
                 } break;
-                case WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG: {
-                    synchronized (ActivityManagerService.this) {
-                        ((ContentProviderRecord) msg.obj).onProviderPublishStatusLocked(false);
-                    }
-                } break;
             }
         }
     }
@@ -1962,7 +1958,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
                     }
                     memInfo.readMemInfo();
-                    synchronized (ActivityManagerService.this) {
+                    synchronized (mProcessStats.mLock) {
                         if (DEBUG_PSS) Slog.d(TAG_PSS, "Collected native and kernel memory in "
                                 + (SystemClock.uptimeMillis()-start) + "ms");
                         final long cachedKb = memInfo.getCachedSizeKb();
@@ -5380,7 +5376,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 thread.scheduleCreateBackupAgent(backupTarget.appInfo,
                         compatibilityInfoForPackage(backupTarget.appInfo),
-                        backupTarget.backupMode, backupTarget.userId);
+                        backupTarget.backupMode, backupTarget.userId, backupTarget.operationType);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
                 badApp = true;
@@ -7054,9 +7050,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUsageStatsService.prepareShutdown();
         }
         mBatteryStatsService.shutdown();
-        synchronized (this) {
-            mProcessStats.shutdownLocked();
-        }
+        mProcessStats.shutdown();
 
         return timedout;
     }
@@ -12358,7 +12352,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
             if (nativeProcTotalPss > 0) {
-                synchronized (this) {
+                synchronized (mProcessStats.mLock) {
                     final long cachedKb = memInfo.getCachedSizeKb();
                     final long freeKb = memInfo.getFreeSizeKb();
                     final long zramKb = memInfo.getZramTotalSizeKb();
@@ -12940,7 +12934,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
             if (nativeProcTotalPss > 0) {
-                synchronized (this) {
+                synchronized (mProcessStats.mLock) {
                     final long cachedKb = memInfo.getCachedSizeKb();
                     final long freeKb = memInfo.getFreeSizeKb();
                     final long zramKb = memInfo.getZramTotalSizeKb();
@@ -13784,7 +13778,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Cause the target app to be launched if necessary and its backup agent
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
-    public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId) {
+    public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
+            @OperationType int operationType) {
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
                     + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
@@ -13827,7 +13822,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode, targetUserId);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, operationType);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
@@ -13866,7 +13861,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackage(app), backupMode, targetUserId);
+                            compatibilityInfoForPackage(app), backupMode, targetUserId,
+                            operationType);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
@@ -16511,9 +16507,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override public void run() {
-            synchronized (mService) {
-                mProcessStats.writeStateAsyncLocked();
-            }
+            mProcessStats.writeStateAsync();
         }
     }
 
@@ -16563,9 +16557,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mProcessList.getLruSizeLocked();
-        boolean allChanged = mProcessStats.setMemFactorLocked(
-                memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
-        final int trackerMemFactor = mProcessStats.getMemFactorLocked();
+        boolean allChanged;
+        int trackerMemFactor;
+        synchronized (mProcessStats.mLock) {
+            allChanged = mProcessStats.setMemFactorLocked(
+                    memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
+            trackerMemFactor = mProcessStats.getMemFactorLocked();
+        }
         if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;

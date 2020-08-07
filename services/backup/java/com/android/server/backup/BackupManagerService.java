@@ -1239,9 +1239,10 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     @Override
     public IRestoreSession beginRestoreSessionForUser(
-            int userId, String packageName, String transportID) throws RemoteException {
+            int userId, String packageName, String transportID,
+            @OperationType int operationType) throws RemoteException {
         return isUserReadyForBackup(userId)
-                ? beginRestoreSession(userId, packageName, transportID) : null;
+                ? beginRestoreSession(userId, packageName, transportID, operationType) : null;
     }
 
     /**
@@ -1250,13 +1251,15 @@ public class BackupManagerService extends IBackupManager.Stub {
      */
     @Nullable
     public IRestoreSession beginRestoreSession(
-            @UserIdInt int userId, String packageName, String transportName) {
+            @UserIdInt int userId, String packageName, String transportName,
+            @OperationType int operationType) {
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(userId, "beginRestoreSession()");
 
         return userBackupManagerService == null
                 ? null
-                : userBackupManagerService.beginRestoreSession(packageName, transportName);
+                : userBackupManagerService.beginRestoreSession(packageName, transportName,
+                        operationType);
     }
 
     @Override

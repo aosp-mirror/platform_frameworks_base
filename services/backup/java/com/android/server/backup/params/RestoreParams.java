@@ -23,6 +23,7 @@ import android.content.pm.PackageInfo;
 
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ public class RestoreParams {
     public final boolean isSystemRestore;
     @Nullable public final String[] filterSet;
     public final OnTaskFinishedListener listener;
+    public final BackupEligibilityRules backupEligibilityRules;
 
     /**
      * No kill after restore.
@@ -47,7 +49,8 @@ public class RestoreParams {
             IBackupManagerMonitor monitor,
             long token,
             PackageInfo packageInfo,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules eligibilityRules) {
         return new RestoreParams(
                 transportClient,
                 observer,
@@ -57,7 +60,8 @@ public class RestoreParams {
                 /* pmToken */ 0,
                 /* isSystemRestore */ false,
                 /* filterSet */ null,
-                listener);
+                listener,
+                eligibilityRules);
     }
 
     /**
@@ -70,7 +74,8 @@ public class RestoreParams {
             long token,
             String packageName,
             int pmToken,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules backupEligibilityRules) {
         String[] filterSet = {packageName};
         return new RestoreParams(
                 transportClient,
@@ -81,7 +86,8 @@ public class RestoreParams {
                 pmToken,
                 /* isSystemRestore */ false,
                 filterSet,
-                listener);
+                listener,
+                backupEligibilityRules);
     }
 
     /**
@@ -92,7 +98,8 @@ public class RestoreParams {
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules backupEligibilityRules) {
         return new RestoreParams(
                 transportClient,
                 observer,
@@ -102,7 +109,8 @@ public class RestoreParams {
                 /* pmToken */ 0,
                 /* isSystemRestore */ true,
                 /* filterSet */ null,
-                listener);
+                listener,
+                backupEligibilityRules);
     }
 
     /**
@@ -115,7 +123,8 @@ public class RestoreParams {
             long token,
             String[] filterSet,
             boolean isSystemRestore,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules backupEligibilityRules) {
         return new RestoreParams(
                 transportClient,
                 observer,
@@ -125,7 +134,8 @@ public class RestoreParams {
                 /* pmToken */ 0,
                 isSystemRestore,
                 filterSet,
-                listener);
+                listener,
+                backupEligibilityRules);
     }
 
     private RestoreParams(
@@ -137,7 +147,8 @@ public class RestoreParams {
             int pmToken,
             boolean isSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules backupEligibilityRules) {
         this.transportClient = transportClient;
         this.observer = observer;
         this.monitor = monitor;
@@ -147,5 +158,6 @@ public class RestoreParams {
         this.isSystemRestore = isSystemRestore;
         this.filterSet = filterSet;
         this.listener = listener;
+        this.backupEligibilityRules = backupEligibilityRules;
     }
 }

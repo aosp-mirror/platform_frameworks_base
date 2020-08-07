@@ -169,7 +169,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int MSG_STREAM_VALIDATE_AND_COMMIT = 2;
     private static final int MSG_INSTALL = 3;
     private static final int MSG_ON_PACKAGE_INSTALLED = 4;
-    private static final int MSG_SESSION_VERIFICATION_FAILURE = 5;
+    private static final int MSG_SESSION_VALIDATION_FAILURE = 5;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -475,10 +475,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             packageName, returnCode, message, extras);
 
                     break;
-                case MSG_SESSION_VERIFICATION_FAILURE:
+                case MSG_SESSION_VALIDATION_FAILURE:
                     final int error = msg.arg1;
                     final String detailMessage = (String) msg.obj;
-                    onSessionVerificationFailure(error, detailMessage);
+                    onSessionValidationFailure(error, detailMessage);
                     break;
             }
 
@@ -1246,14 +1246,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // the parent
             if (unrecoverableFailure != null) {
                 // {@link #streamValidateAndCommit()} calls
-                // {@link #onSessionVerificationFailure(PackageManagerException)}, but we don't
+                // {@link #onSessionValidationFailure(PackageManagerException)}, but we don't
                 // expect it to ever do so for parent sessions. Call that on this parent to clean
                 // it up and notify listeners of the error.
-                onSessionVerificationFailure(unrecoverableFailure);
+                onSessionValidationFailure(unrecoverableFailure);
                 // fail other child sessions that did not already fail
                 for (int i = nonFailingSessions.size() - 1; i >= 0; --i) {
                     PackageInstallerSession session = nonFailingSessions.get(i);
-                    session.onSessionVerificationFailure(unrecoverableFailure);
+                    session.onSessionValidationFailure(unrecoverableFailure);
                 }
             }
         }
@@ -1575,11 +1575,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 assertMultiPackageConsistencyLocked(childSessions);
             }
         } catch (PackageManagerException e) {
-            throw onSessionVerificationFailure(e);
+            throw onSessionValidationFailure(e);
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above.
-            throw onSessionVerificationFailure(new PackageManagerException(e));
+            throw onSessionValidationFailure(new PackageManagerException(e));
         }
     }
 
@@ -1613,20 +1613,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             return true;
         } catch (PackageManagerException e) {
-            throw onSessionVerificationFailure(e);
+            throw onSessionValidationFailure(e);
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above.
-            throw onSessionVerificationFailure(new PackageManagerException(e));
+            throw onSessionValidationFailure(new PackageManagerException(e));
         }
     }
 
-    private PackageManagerException onSessionVerificationFailure(PackageManagerException e) {
-        onSessionVerificationFailure(e.error, ExceptionUtils.getCompleteMessage(e));
+    private PackageManagerException onSessionValidationFailure(PackageManagerException e) {
+        onSessionValidationFailure(e.error, ExceptionUtils.getCompleteMessage(e));
         return e;
     }
 
-    private void onSessionVerificationFailure(int error, String detailMessage) {
+    private void onSessionValidationFailure(int error, String detailMessage) {
         // Session is sealed but could not be verified, we need to destroy it.
         destroyInternal();
         // Dispatch message to remove session from PackageInstallerService.
@@ -2990,7 +2990,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         synchronized (mLock) {
                             mDataLoaderFinished = true;
                         }
-                        dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                        dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                 "Failure to obtain data loader");
                         return;
                     }
@@ -3040,7 +3040,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             synchronized (mLock) {
                                 mDataLoaderFinished = true;
                             }
-                            dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                            dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Failed to prepare image.");
                             if (manualStartAndDestroy) {
                                 dataLoader.destroy(dataLoaderId);
@@ -3061,7 +3061,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             synchronized (mLock) {
                                 mDataLoaderFinished = true;
                             }
-                            dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                            dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
                             break;
                     }
@@ -3117,7 +3117,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             synchronized (mLock) {
                                 mDataLoaderFinished = true;
                             }
-                            dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                            dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Image is missing pages required for installation.");
                             break;
                     }
@@ -3142,8 +3142,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return false;
     }
 
-    private void dispatchSessionVerificationFailure(int error, String detailMessage) {
-        mHandler.obtainMessage(MSG_SESSION_VERIFICATION_FAILURE, error, -1,
+    private void dispatchSessionValidationFailure(int error, String detailMessage) {
+        mHandler.obtainMessage(MSG_SESSION_VALIDATION_FAILURE, error, -1,
                 detailMessage).sendToTarget();
     }
 

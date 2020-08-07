@@ -19,6 +19,7 @@ package android.app.backup;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -38,6 +39,8 @@ import android.system.StructStat;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -50,6 +53,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -129,6 +133,7 @@ import java.util.concurrent.CountDownLatch;
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
     private static final boolean DEBUG = false;
+    private static final int DEFAULT_OPERATION_TYPE = OperationType.BACKUP;
 
     /** @hide */
     public static final int RESULT_SUCCESS = 0;
@@ -186,6 +191,9 @@ public abstract class BackupAgent extends ContextWrapper {
     Handler mHandler = null;
 
     @Nullable private UserHandle mUser;
+     // This field is written from the main thread (in onCreate), and read in a Binder thread (in
+     // onFullBackup that is called from system_server via Binder).
+    @OperationType private volatile int mOperationType = DEFAULT_OPERATION_TYPE;
 
     Handler getHandler() {
         if (mHandler == null) {
@@ -229,6 +237,13 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     /**
+     * @hide
+     */
+    public void onCreate(UserHandle user) {
+        onCreate(user, DEFAULT_OPERATION_TYPE);
+    }
+
+    /**
      * Provided as a convenience for agent implementations that need an opportunity
      * to do one-time initialization before the actual backup or restore operation
      * is begun with information about the calling user.
@@ -236,10 +251,11 @@ public abstract class BackupAgent extends ContextWrapper {
      *
      * @hide
      */
-    public void onCreate(UserHandle user) {
+    public void onCreate(UserHandle user, @OperationType int operationType) {
         onCreate();
 
         mUser = user;
+        mOperationType = operationType;
     }
 
     /**
@@ -390,12 +406,9 @@ public abstract class BackupAgent extends ContextWrapper {
             return;
         }
 
-        Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap;
-        ArraySet<PathWithRequiredFlags> manifestExcludeSet;
+        IncludeExcludeRules includeExcludeRules;
         try {
-            manifestIncludeMap =
-                    backupScheme.maybeParseAndGetCanonicalIncludePaths();
-            manifestExcludeSet = backupScheme.maybeParseAndGetCanonicalExcludePaths();
+            includeExcludeRules = getIncludeExcludeRules(backupScheme);
         } catch (IOException | XmlPullParserException e) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(FullBackup.TAG_XML_PARSER,
@@ -404,6 +417,10 @@ public abstract class BackupAgent extends ContextWrapper {
             }
             return;
         }
+        Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap
+                = includeExcludeRules.getIncludeMap();
+        Set<PathWithRequiredFlags> manifestExcludeSet
+                = includeExcludeRules.getExcludeSet();
 
         final String packageName = getPackageName();
         final ApplicationInfo appInfo = getApplicationInfo();
@@ -528,6 +545,24 @@ public abstract class BackupAgent extends ContextWrapper {
         }
     }
 
+    /** @hide */
+    @VisibleForTesting
+    public IncludeExcludeRules getIncludeExcludeRules(FullBackup.BackupScheme backupScheme)
+            throws IOException, XmlPullParserException {
+        if (mOperationType == OperationType.MIGRATION) {
+            return IncludeExcludeRules.emptyRules();
+        }
+
+        Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap;
+        ArraySet<PathWithRequiredFlags> manifestExcludeSet;
+
+        manifestIncludeMap =
+                backupScheme.maybeParseAndGetCanonicalIncludePaths();
+        manifestExcludeSet = backupScheme.maybeParseAndGetCanonicalExcludePaths();
+
+        return new IncludeExcludeRules(manifestIncludeMap, manifestExcludeSet);
+    }
+
     /**
      * Notification that the application's current backup operation causes it to exceed
      * the maximum size permitted by the transport.  The ongoing backup operation is
@@ -570,7 +605,7 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     private void applyXmlFiltersAndDoFullBackupForDomain(String packageName, String domainToken,
             Map<String, Set<PathWithRequiredFlags>> includeMap,
-            ArraySet<PathWithRequiredFlags> filterSet, ArraySet<String> traversalExcludeSet,
+            Set<PathWithRequiredFlags> filterSet, ArraySet<String> traversalExcludeSet,
             FullBackupDataOutput data) throws IOException {
         if (includeMap == null || includeMap.size() == 0) {
             // Do entire sub-tree for the provided token.
@@ -742,7 +777,7 @@ public abstract class BackupAgent extends ContextWrapper {
      * @hide
      */
     protected final void fullBackupFileTree(String packageName, String domain, String startingPath,
-                                            ArraySet<PathWithRequiredFlags> manifestExcludes,
+                                            Set<PathWithRequiredFlags> manifestExcludes,
                                             ArraySet<String> systemExcludes,
             FullBackupDataOutput output) {
         // Pull out the domain and set it aside to use when making the tarball.
@@ -811,7 +846,7 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean manifestExcludesContainFilePath(
-        ArraySet<PathWithRequiredFlags> manifestExcludes, String filePath) {
+        Set<PathWithRequiredFlags> manifestExcludes, String filePath) {
         for (PathWithRequiredFlags exclude : manifestExcludes) {
             String excludePath = exclude.getPath();
             if (excludePath != null && excludePath.equals(filePath)) {
@@ -1263,6 +1298,55 @@ public abstract class BackupAgent extends ContextWrapper {
         @Override
         public void run() {
             throw new IllegalStateException(mMessage);
+        }
+    }
+
+    /**  @hide */
+    @VisibleForTesting
+    public static class IncludeExcludeRules {
+        private final Map<String, Set<PathWithRequiredFlags>> mManifestIncludeMap;
+        private final Set<PathWithRequiredFlags> mManifestExcludeSet;
+
+        /** @hide */
+        public IncludeExcludeRules(
+                Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap,
+                Set<PathWithRequiredFlags> manifestExcludeSet) {
+            mManifestIncludeMap = manifestIncludeMap;
+            mManifestExcludeSet = manifestExcludeSet;
+        }
+
+        /**  @hide */
+        @VisibleForTesting
+        public static IncludeExcludeRules emptyRules() {
+            return new IncludeExcludeRules(Collections.emptyMap(), new ArraySet<>());
+        }
+
+        private Map<String, Set<PathWithRequiredFlags>> getIncludeMap() {
+            return mManifestIncludeMap;
+        }
+
+        private Set<PathWithRequiredFlags> getExcludeSet() {
+            return mManifestExcludeSet;
+        }
+
+        /**  @hide */
+        @Override
+        public int hashCode() {
+            return Objects.hash(mManifestIncludeMap, mManifestExcludeSet);
+        }
+
+        /**  @hide */
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            IncludeExcludeRules that = (IncludeExcludeRules) object;
+            return Objects.equals(mManifestIncludeMap, that.mManifestIncludeMap) &&
+                    Objects.equals(mManifestExcludeSet, that.mManifestExcludeSet);
         }
     }
 }

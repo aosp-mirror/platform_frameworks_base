@@ -16,11 +16,13 @@
 
 package com.android.systemui.onehanded;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,12 +50,15 @@ import javax.inject.Singleton;
 @Singleton
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Dumpable {
     private static final String TAG = "OneHandedTutorialHandler";
+    private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
     private final Rect mLastUpdatedBounds = new Rect();
     private final WindowManager mWindowManager;
 
     private View mTutorialView;
     private Point mDisplaySize = new Point();
     private Handler mUpdateHandler;
+    private ContentResolver mContentResolver;
+    private boolean mCanShowTutorial;
 
     /**
      * Container of the tutorial panel showing at outside region when one handed starting
@@ -71,6 +76,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
     @Inject
     public OneHandedTutorialHandler(Context context) {
         context.getDisplay().getRealSize(mDisplaySize);
+        mContentResolver = context.getContentResolver();
         mUpdateHandler = new Handler();
         mWindowManager = context.getSystemService(WindowManager.class);
         mTargetViewContainer = new FrameLayout(context);
@@ -79,12 +85,20 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
                 R.fraction.config_one_handed_offset, 1, 1));
         mTutorialView = LayoutInflater.from(context).inflate(R.xml.one_handed_tutorial, null);
         mTargetViewContainer.addView(mTutorialView);
-        createOrUpdateTutorialTarget();
+        mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
+                ? false : true;
+        if (mCanShowTutorial) {
+            createOrUpdateTutorialTarget();
+        }
     }
 
     @Override
     public void onStartFinished(Rect bounds) {
-        mUpdateHandler.post(() -> updateFinished(View.VISIBLE, 0f));
+        mUpdateHandler.post(() -> {
+            updateFinished(View.VISIBLE, 0f);
+            updateTutorialCount();
+        });
     }
 
     @Override
@@ -94,8 +108,21 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
     }
 
     private void updateFinished(int visible, float finalPosition) {
+        if (!canShowTutorial()) {
+            return;
+        }
+
         mTargetViewContainer.setVisibility(visible);
         mTargetViewContainer.setTranslationY(finalPosition);
+    }
+
+    private void updateTutorialCount() {
+        int showCount = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0);
+        showCount = Math.min(MAX_TUTORIAL_SHOW_COUNT, showCount + 1);
+        mCanShowTutorial = showCount < MAX_TUTORIAL_SHOW_COUNT;
+        Settings.Secure.putInt(mContentResolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, showCount);
     }
 
     /**
@@ -153,7 +180,19 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
         pw.println(mLastUpdatedBounds);
     }
 
+    private boolean canShowTutorial() {
+        if (!mCanShowTutorial) {
+            mTargetViewContainer.setVisibility(View.GONE);
+            return false;
+        }
+
+        return true;
+    }
+
     private void onAnimationUpdate(float value) {
+        if (!canShowTutorial()) {
+            return;
+        }
         mTargetViewContainer.setVisibility(View.VISIBLE);
         mTargetViewContainer.setTransitionGroup(true);
         mTargetViewContainer.setTranslationY(value - mTargetViewContainer.getHeight());
