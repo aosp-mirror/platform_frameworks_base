@@ -659,13 +659,15 @@ public final class OomAdjuster {
 
         updateUidsLocked(activeUids, nowElapsed);
 
-        if (mService.mProcessStats.shouldWriteNowLocked(now)) {
-            mService.mHandler.post(new ActivityManagerService.ProcStatsRunnable(mService,
-                    mService.mProcessStats));
-        }
+        synchronized (mService.mProcessStats.mLock) {
+            if (mService.mProcessStats.shouldWriteNowLocked(now)) {
+                mService.mHandler.post(new ActivityManagerService.ProcStatsRunnable(mService,
+                        mService.mProcessStats));
+            }
 
-        // Run this after making sure all procstates are updated.
-        mService.mProcessStats.updateTrackingAssociationsLocked(mAdjSeq, now);
+            // Run this after making sure all procstates are updated.
+            mService.mProcessStats.updateTrackingAssociationsLocked(mAdjSeq, now);
+        }
 
         if (DEBUG_OOM_ADJ) {
             final long duration = SystemClock.uptimeMillis() - now;

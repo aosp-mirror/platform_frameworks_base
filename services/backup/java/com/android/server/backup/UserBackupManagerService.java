@@ -3973,7 +3973,8 @@ public class UserBackupManagerService {
                                 restoreSet,
                                 packageName,
                                 token,
-                                listener);
+                                listener,
+                                mScheduledBackupEligibility);
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
@@ -4002,13 +4003,15 @@ public class UserBackupManagerService {
     }
 
     /** Hand off a restore session. */
-    public IRestoreSession beginRestoreSession(String packageName, String transport) {
+    public IRestoreSession beginRestoreSession(String packageName, String transport,
+            @OperationType int operationType) {
         if (DEBUG) {
             Slog.v(
                     TAG,
                     addUserIdToLogMessage(
                             mUserId,
-                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport));
+                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport
+                                + "operationType=" + operationType));
         }
 
         boolean needPermission = true;
@@ -4065,7 +4068,8 @@ public class UserBackupManagerService {
                                 "Restore session requested but currently running backups"));
                 return null;
             }
-            mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport);
+            mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport,
+                    getEligibilityRulesForOperation(operationType));
             mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
                     mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
         }

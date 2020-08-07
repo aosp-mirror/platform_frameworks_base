@@ -104,8 +104,11 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
     }
 
     private val tempFolder = TemporaryFolder()
+
+    // TODO(b/160159215): Use START_STOP rather than FULL once it's fixed. This will drastically
+    //  improve pre/post-submit times.
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
-            SystemPreparer.RebootStrategy.START_STOP, deviceRebootRule) { this.device }
+            SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
     @get:Rule
     val rules = RuleChain.outerRule(tempFolder).let {

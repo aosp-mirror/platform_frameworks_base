@@ -90,7 +90,7 @@ class OpenAppToSplitScreenTest(
                     navBarLayerIsAlwaysVisible()
                     statusBarLayerIsAlwaysVisible()
                     noUncoveredRegions(rotation)
-                    navBarLayerRotatesAndScales(rotation)
+                    navBarLayerRotatesAndScales(rotation, bugId = 140855415)
                     statusBarLayerRotatesScales(rotation)
 
                     all("dividerLayerBecomesVisible") {
@@ -102,7 +102,8 @@ class OpenAppToSplitScreenTest(
 
                 eventLog {
                     focusChanges(testApp.`package`,
-                            "recents_animation_input_consumer", "NexusLauncherActivity")
+                            "recents_animation_input_consumer", "NexusLauncherActivity",
+                            bugId = 151179149)
                 }
             }
         }

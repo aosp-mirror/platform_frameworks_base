@@ -3496,6 +3496,7 @@ public abstract class Context {
             //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
             LIGHTS_SERVICE,
+            //@hide: PEOPLE_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5187,6 +5188,14 @@ public abstract class Context {
      * @hide
      */
     public static final String SMS_SERVICE = "sms";
+
+    /**
+     * Use with {@link #getSystemService(String)} to access people service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String PEOPLE_SERVICE = "people";
 
     /**
      * Determine whether the given permission is allowed for a particular

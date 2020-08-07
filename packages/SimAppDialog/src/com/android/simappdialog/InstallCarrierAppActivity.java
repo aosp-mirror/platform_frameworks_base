@@ -17,14 +17,17 @@ package com.android.simappdialog;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.sysprop.SetupWizardProperties;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.setupwizardlib.util.WizardManagerHelper;
+import com.google.android.setupcompat.template.FooterBarMixin;
+import com.google.android.setupcompat.template.FooterButton;
+import com.google.android.setupdesign.GlifLayout;
+import com.google.android.setupdesign.util.ThemeResolver;
 
 /**
  * Activity that gives a user the choice to download the SIM app or defer until a later time
@@ -35,7 +38,7 @@ import com.android.setupwizardlib.util.WizardManagerHelper;
  * Can display the carrier app name if its passed into the intent with key
  * {@link #BUNDLE_KEY_CARRIER_NAME}
  */
-public class InstallCarrierAppActivity extends Activity implements View.OnClickListener {
+public class InstallCarrierAppActivity extends Activity {
     /**
      * Key for the carrier app name that will be displayed as the app to download.  If unset, a
      * default description will be used
@@ -50,20 +53,33 @@ public class InstallCarrierAppActivity extends Activity implements View.OnClickL
     protected void onCreate(Bundle icicle) {
         // Setup theme for aosp/pixel
         setTheme(
-                WizardManagerHelper.getThemeRes(
-                        SetupWizardProperties.theme().orElse(""),
-                        R.style.SuwThemeGlif_Light
-                )
-        );
+                new ThemeResolver.Builder()
+                        .setDefaultTheme(R.style.SudThemeGlifV3_Light)
+                        .build()
+                        .resolve(SetupWizardProperties.theme().orElse(""),
+                                /* suppressDayNight= */ false));
 
         super.onCreate(icicle);
         setContentView(R.layout.install_carrier_app_activity);
 
-        Button notNowButton = findViewById(R.id.skip_button);
-        notNowButton.setOnClickListener(this);
+        GlifLayout layout = findViewById(R.id.setup_wizard_layout);
+        FooterBarMixin mixin = layout.getMixin(FooterBarMixin.class);
+        mixin.setSecondaryButton(
+                new FooterButton.Builder(this)
+                        .setText(R.string.install_carrier_app_defer_action)
+                        .setListener(this::onSkipButtonClick)
+                        .setButtonType(FooterButton.ButtonType.SKIP)
+                        .setTheme(R.style.SudGlifButton_Secondary)
+                        .build());
 
-        Button downloadButton = findViewById(R.id.download_button);
-        downloadButton.setOnClickListener(this);
+        mixin.setPrimaryButton(
+                new FooterButton.Builder(this)
+                        .setText(R.string.install_carrier_app_download_action)
+                        .setListener(this::onDownloadButtonClick)
+                        .setButtonType(FooterButton.ButtonType.OTHER)
+                        .setTheme(R.style.SudGlifButton_Primary)
+                        .build());
+
 
         // Show/hide illo depending on whether one was provided in a resource overlay
         boolean showIllo = getResources().getBoolean(R.bool.show_sim_app_dialog_illo);
@@ -82,15 +98,17 @@ public class InstallCarrierAppActivity extends Activity implements View.OnClickL
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.skip_button:
-                finish(DEFER_RESULT);
-                break;
-            case R.id.download_button:
-                finish(DOWNLOAD_RESULT);
-                break;
-        }
+    protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
+        theme.applyStyle(R.style.SetupWizardPartnerResource, true);
+        super.onApplyThemeResource(theme, resid, first);
+    }
+
+    protected void onSkipButtonClick(View view) {
+        finish(DEFER_RESULT);
+    }
+
+    protected void onDownloadButtonClick(View view) {
+        finish(DOWNLOAD_RESULT);
     }
 
     private void finish(int resultCode) {

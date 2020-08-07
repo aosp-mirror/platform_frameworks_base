@@ -375,6 +375,34 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
+    private static class NavBarViewAttachedListener implements View.OnAttachStateChangeListener {
+        private NavigationBarFragment mFragment;
+        private FragmentListener mListener;
+
+        NavBarViewAttachedListener(NavigationBarFragment fragment, FragmentListener listener) {
+            mFragment = fragment;
+            mListener = listener;
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            final FragmentHostManager fragmentHost = FragmentHostManager.get(v);
+            fragmentHost.getFragmentManager().beginTransaction()
+                    .replace(R.id.navigation_bar_frame, mFragment, TAG)
+                    .commit();
+            fragmentHost.addTagListener(TAG, mListener);
+            mFragment = null;
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            final FragmentHostManager fragmentHost = FragmentHostManager.get(v);
+            fragmentHost.removeTagListener(TAG, mListener);
+            FragmentHostManager.removeAndDestroy(v);
+            v.removeOnAttachStateChangeListener(this);
+        }
+    }
+
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
         @Override
@@ -1470,26 +1498,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + navigationBarView);
         if (navigationBarView == null) return null;
 
-        navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(View v) {
-                final NavigationBarFragment fragment =
-                        FragmentHostManager.get(v).create(NavigationBarFragment.class);
-                final FragmentHostManager fragmentHost = FragmentHostManager.get(v);
-                fragmentHost.getFragmentManager().beginTransaction()
-                        .replace(R.id.navigation_bar_frame, fragment, TAG)
-                        .commit();
-                fragmentHost.addTagListener(TAG, listener);
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(View v) {
-                final FragmentHostManager fragmentHost = FragmentHostManager.get(v);
-                fragmentHost.removeTagListener(TAG, listener);
-                FragmentHostManager.removeAndDestroy(v);
-                navigationBarView.removeOnAttachStateChangeListener(this);
-            }
-        });
+        NavigationBarFragment fragment = FragmentHostManager.get(navigationBarView)
+                .create(NavigationBarFragment.class);
+        navigationBarView.addOnAttachStateChangeListener(new NavBarViewAttachedListener(fragment,
+                listener));
         context.getSystemService(WindowManager.class).addView(navigationBarView, lp);
         return navigationBarView;
     }

@@ -117,7 +117,7 @@ public final class TimeZoneDetectorImpl implements TimeZoneDetector {
     }
 
     private void notifyConfigurationListeners(@NonNull TimeZoneConfiguration configuration) {
-        ArraySet<TimeZoneConfigurationListener> configurationListeners;
+        final ArraySet<TimeZoneConfigurationListener> configurationListeners;
         synchronized (this) {
             configurationListeners = new ArraySet<>(mConfigurationListeners);
         }
