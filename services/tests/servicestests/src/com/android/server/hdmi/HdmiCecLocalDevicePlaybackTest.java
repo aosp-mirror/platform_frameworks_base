@@ -16,7 +16,6 @@
 package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
-import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
@@ -62,6 +61,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPlaybackPhysicalAddress;
+    private int mPlaybackLogicalAddress;
     private boolean mWokenUp;
     private boolean mStandby;
 
@@ -129,6 +129,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mPlaybackPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mTestLooper.dispatchAll();
+        mPlaybackLogicalAddress = mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
         mNativeWrapper.clearResultMessages();
     }
 
@@ -144,7 +145,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                         mPlaybackPhysicalAddress);
 
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                         mPlaybackPhysicalAddress);
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
@@ -165,7 +166,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                         mPlaybackPhysicalAddress);
 
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                         mPlaybackPhysicalAddress);
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
@@ -186,7 +187,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                         mPlaybackPhysicalAddress);
 
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                         mPlaybackPhysicalAddress);
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
@@ -207,7 +208,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                         mPlaybackPhysicalAddress);
 
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                         mPlaybackPhysicalAddress);
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
@@ -230,7 +231,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                         mPlaybackPhysicalAddress);
 
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                         mPlaybackPhysicalAddress);
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
@@ -253,7 +254,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                         mPlaybackPhysicalAddress);
 
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                         mPlaybackPhysicalAddress);
 
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
@@ -548,7 +549,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
             HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
         mStandby = false;
-        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                                          mPlaybackPhysicalAddress);
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
         mTestLooper.dispatchAll();
@@ -571,7 +572,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
             HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
         mStandby = false;
-        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                                          mPlaybackPhysicalAddress);
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
         mTestLooper.dispatchAll();
