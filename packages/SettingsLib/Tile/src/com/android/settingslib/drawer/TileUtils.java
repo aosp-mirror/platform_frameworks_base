@@ -339,6 +339,16 @@ public class TileUtils {
     private static void loadTile(UserHandle user, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, Intent intent, Bundle metaData,
             ComponentInfo componentInfo) {
+        // Skip loading tile if the component is tagged primary_profile_only but not running on
+        // the current user.
+        if (user.getIdentifier() != ActivityManager.getCurrentUser()
+                && Tile.isPrimaryProfileOnly(componentInfo.metaData)) {
+            Log.w(LOG_TAG, "Found " + componentInfo.name + " for intent "
+                    + intent + " is primary profile only, skip loading tile for uid "
+                    + user.getIdentifier());
+            return;
+        }
+
         String categoryKey = defaultCategory;
         // Load category
         if ((metaData == null || !metaData.containsKey(EXTRA_CATEGORY_KEY))
