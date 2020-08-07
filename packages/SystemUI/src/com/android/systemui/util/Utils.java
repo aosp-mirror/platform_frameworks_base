@@ -21,12 +21,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class Utils {
@@ -140,5 +143,22 @@ public class Utils {
         int flag = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.MEDIA_CONTROLS_RESUME, 1);
         return useQsMediaPlayer(context) && flag > 0;
+    }
+
+    /**
+     * Get the set of apps for which the user has manually disabled resumption.
+     */
+    public static Set<String> getBlockedMediaApps(Context context) {
+        String list = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.MEDIA_CONTROLS_RESUME_BLOCKED);
+        if (TextUtils.isEmpty(list)) {
+            return new HashSet<>();
+        }
+        String[] names = list.split(":");
+        Set<String> apps = new HashSet<>(names.length);
+        for (String s : names) {
+            apps.add(s);
+        }
+        return apps;
     }
 }
