@@ -230,7 +230,7 @@ public class PipTouchHandler {
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, sysUiState, pipUiEventLogger);
+                        this::updateMovementBounds, sysUiState, pipUiEventLogger, menuController);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()),
@@ -773,10 +773,7 @@ public class PipTouchHandler {
      * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
      */
     private void updateDismissFraction() {
-        // Skip updating the dismiss fraction when the IME is showing. This is to work around an
-        // issue where starting the menu activity for the dismiss overlay will steal the window
-        // focus, which closes the IME.
-        if (mMenuController != null && !mIsImeShowing) {
+        if (mMenuController != null) {
             Rect bounds = mMotionHelper.getBounds();
             final float target = mInsetBounds.bottom;
             float fraction = 0f;
@@ -784,7 +781,7 @@ public class PipTouchHandler {
                 final float distance = bounds.bottom - target;
                 fraction = Math.min(distance / bounds.height(), 1f);
             }
-            if (Float.compare(fraction, 0f) != 0 || mMenuController.isMenuActivityVisible()) {
+            if (Float.compare(fraction, 0f) != 0 || mMenuController.isMenuVisible()) {
                 // Update if the fraction > 0, or if fraction == 0 and the menu was already visible
                 mMenuController.setDismissFraction(fraction);
             }

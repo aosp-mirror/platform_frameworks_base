@@ -23,6 +23,8 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Choreographer;
 
@@ -65,6 +67,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
+
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     /** PIP's current bounds on the screen. */
     private final Rect mBounds = new Rect();
@@ -128,8 +132,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
-        mMenuController.updateMenuLayout(newBounds);
-        mBounds.set(newBounds);
+        mMainHandler.post(() -> {
+            mMenuController.updateMenuLayout(newBounds);
+            mBounds.set(newBounds);
+        });
     };
 
     /**
@@ -253,7 +259,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 mTemporaryBounds.set(toBounds);
                 mPipTaskOrganizer.scheduleUserResizePip(mBounds, mTemporaryBounds,
                         (Rect newBounds) -> {
-                            mMenuController.updateMenuLayout(newBounds);
+                            mMainHandler.post(() -> {
+                                mMenuController.updateMenuLayout(newBounds);
+                            });
                     });
             }
         } else {
