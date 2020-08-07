@@ -262,8 +262,7 @@ public abstract class UserManagerInternal {
     public abstract boolean hasUserRestriction(String restriction, int userId);
 
     /**
-     * Gets an {@link UserInfo} for the given {@code userId}, or {@code null} if not
-     * found.
+     * Gets a {@link UserInfo} for the given {@code userId}, or {@code null} if not found.
      */
     public abstract @Nullable UserInfo getUserInfo(@UserIdInt int userId);
 

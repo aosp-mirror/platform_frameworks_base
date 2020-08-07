@@ -360,7 +360,7 @@ public final class AutofillManagerService
 
     @Override // from SystemService
     public boolean isUserSupported(TargetUser user) {
-        return user.getUserInfo().isFull() || user.getUserInfo().isManagedProfile();
+        return user.isFull() || user.isManagedProfile();
     }
 
     @Override // from SystemService
