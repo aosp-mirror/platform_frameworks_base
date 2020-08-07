@@ -631,7 +631,7 @@ public class PhoneStatusBarPolicy
     }
 
     @Override  // PrivacyItemController.Callback
-    public void privacyChanged(List<PrivacyItem> privacyItems) {
+    public void onPrivacyItemsChanged(List<PrivacyItem> privacyItems) {
         updatePrivacyItems(privacyItems);
     }
 
@@ -664,16 +664,18 @@ public class PhoneStatusBarPolicy
 
         mIconController.setIconVisibility(mSlotCamera, showCamera);
         mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
-        mIconController.setIconVisibility(mSlotLocation, showLocation);
+        if (mPrivacyItemController.getAllIndicatorsAvailable()) {
+            mIconController.setIconVisibility(mSlotLocation, showLocation);
+        }
     }
 
     @Override
     public void onLocationActiveChanged(boolean active) {
-        if (!mPrivacyItemController.isPermissionsHubEnabled()) updateLocation();
+        if (!mPrivacyItemController.getAllIndicatorsAvailable()) updateLocationFromController();
     }
 
     // Updates the status view based on the current state of location requests.
-    private void updateLocation() {
+    private void updateLocationFromController() {
         if (mLocationController.isLocationActive()) {
             mIconController.setIconVisibility(mSlotLocation, true);
         } else {
