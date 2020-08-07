@@ -866,6 +866,10 @@ public class AudioSystem
     public static final int DEVICE_OUT_USB_HEADSET = 0x4000000;
     /** @hide */
     public static final int DEVICE_OUT_HEARING_AID = 0x8000000;
+    /** @hide */
+    public static final int DEVICE_OUT_BLE_HEADSET = 0x20000000;
+    /** @hide */
+    public static final int DEVICE_OUT_BLE_SPEAKER = 0x20000001;
 
     /** @hide */
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
@@ -890,6 +894,8 @@ public class AudioSystem
     public static final Set<Integer> DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET;
     /** @hide */
     public static final Set<Integer> DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET;
+    /** @hide */
+    public static final Set<Integer> DEVICE_OUT_ALL_BLE_SET;
     static {
         DEVICE_OUT_ALL_SET = new HashSet<>();
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_EARPIECE);
@@ -920,6 +926,8 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_PROXY);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HEARING_AID);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_HEADSET);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_SPEAKER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DEFAULT);
 
         DEVICE_OUT_ALL_A2DP_SET = new HashSet<>();
@@ -945,6 +953,10 @@ public class AudioSystem
         DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET = new HashSet<>();
         DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET.addAll(DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET);
         DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET.add(DEVICE_OUT_SPEAKER);
+
+        DEVICE_OUT_ALL_BLE_SET = new HashSet<>();
+        DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_HEADSET);
+        DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_SPEAKER);
     }
 
     // input devices
@@ -1019,6 +1031,8 @@ public class AudioSystem
     /** @hide */
     public static final int DEVICE_IN_ECHO_REFERENCE = DEVICE_BIT_IN | 0x10000000;
     /** @hide */
+    public static final int DEVICE_IN_BLE_HEADSET = DEVICE_BIT_IN | 0x20000000;
+    /** @hide */
     @UnsupportedAppUsage
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
@@ -1056,6 +1070,7 @@ public class AudioSystem
         DEVICE_IN_ALL_SET.add(DEVICE_IN_BLUETOOTH_BLE);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_HDMI_ARC);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_ECHO_REFERENCE);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BLE_HEADSET);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_DEFAULT);
 
         DEVICE_IN_ALL_SCO_SET = new HashSet<>();
@@ -1118,6 +1133,8 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     /** @hide */ public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
     /** @hide */ public static final String DEVICE_OUT_HEARING_AID_NAME = "hearing_aid_out";
+    /** @hide */ public static final String DEVICE_OUT_BLE_HEADSET_NAME = "ble_headset";
+    /** @hide */ public static final String DEVICE_OUT_BLE_SPEAKER_NAME = "ble_speaker";
 
     /** @hide */ public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     /** @hide */ public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -1145,6 +1162,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_IN_BLUETOOTH_BLE_NAME = "bt_ble";
     /** @hide */ public static final String DEVICE_IN_ECHO_REFERENCE_NAME = "echo_reference";
     /** @hide */ public static final String DEVICE_IN_HDMI_ARC_NAME = "hdmi_arc";
+    /** @hide */ public static final String DEVICE_IN_BLE_HEADSET_NAME = "ble_headset";
 
     /** @hide */
     @UnsupportedAppUsage
@@ -1207,6 +1225,10 @@ public class AudioSystem
             return DEVICE_OUT_USB_HEADSET_NAME;
         case DEVICE_OUT_HEARING_AID:
             return DEVICE_OUT_HEARING_AID_NAME;
+        case DEVICE_OUT_BLE_HEADSET:
+            return DEVICE_OUT_BLE_HEADSET_NAME;
+        case DEVICE_OUT_BLE_SPEAKER:
+            return DEVICE_OUT_BLE_SPEAKER_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
@@ -1269,6 +1291,8 @@ public class AudioSystem
             return DEVICE_IN_ECHO_REFERENCE_NAME;
         case DEVICE_IN_HDMI_ARC:
             return DEVICE_IN_HDMI_ARC_NAME;
+        case DEVICE_IN_BLE_HEADSET:
+            return DEVICE_IN_BLE_HEADSET_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return Integer.toString(device);
