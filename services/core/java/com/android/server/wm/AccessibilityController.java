@@ -177,7 +177,7 @@ final class AccessibilityController {
 
     public void performComputeChangedWindowsNotLocked(int displayId, boolean forceSend) {
         WindowsForAccessibilityObserver observer = null;
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (windowsForA11yObserver != null) {
@@ -266,7 +266,7 @@ final class AccessibilityController {
         // Not relevant for the display magnifier.
 
         WindowsForAccessibilityObserver observer = null;
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (windowsForA11yObserver != null) {
