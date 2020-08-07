@@ -37,6 +37,7 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupManager;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -288,6 +289,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static final String PROC_START_SEQ_IDENT = "seq=";
 
     private final Object mNetworkPolicyLock = new Object();
+
+    private static final String DEFAULT_FULL_BACKUP_AGENT = "android.app.backup.FullBackupAgent";
 
     /**
      * Denotes the sequence number of the process state change for which the main thread needs
@@ -737,6 +740,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         CompatibilityInfo compatInfo;
         int backupMode;
         int userId;
+        int operationType;
         public String toString() {
             return "CreateBackupAgentData{appInfo=" + appInfo
                     + " backupAgent=" + appInfo.backupAgentName
@@ -957,12 +961,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo, int backupMode, int userId) {
+                CompatibilityInfo compatInfo, int backupMode, int userId, int operationType) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
             d.compatInfo = compatInfo;
             d.backupMode = backupMode;
             d.userId = userId;
+            d.operationType = operationType;
 
             sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
@@ -4075,12 +4080,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             return;
         }
 
-        String classname = data.appInfo.backupAgentName;
-        // full backup operation but no app-supplied agent?  use the default implementation
-        if (classname == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
-                || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
-            classname = "android.app.backup.FullBackupAgent";
-        }
+        String classname = getBackupAgentName(data);
 
         try {
             IBinder binder = null;
@@ -4104,7 +4104,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     context.setOuterContext(agent);
                     agent.attach(context);
 
-                    agent.onCreate(UserHandle.of(data.userId));
+                    agent.onCreate(UserHandle.of(data.userId), data.operationType);
                     binder = agent.onBind();
                     backupAgents.put(packageName, agent);
                 } catch (Exception e) {
@@ -4130,6 +4130,23 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw new RuntimeException("Unable to create BackupAgent "
                     + classname + ": " + e.toString(), e);
         }
+    }
+
+    private String getBackupAgentName(CreateBackupAgentData data) {
+        String agentName = data.appInfo.backupAgentName;
+        if (!UserHandle.isCore(data.appInfo.uid)
+                && data.operationType == BackupManager.OperationType.MIGRATION) {
+            // If this is a migration, use the default backup agent regardless of the app's
+            // preferences.
+            agentName = DEFAULT_FULL_BACKUP_AGENT;
+        } else {
+            // full backup operation but no app-supplied agent?  use the default implementation
+            if (agentName == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                    || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
+                agentName = DEFAULT_FULL_BACKUP_AGENT;
+            }
+        }
+        return agentName;
     }
 
     // Tear down a BackupAgent
