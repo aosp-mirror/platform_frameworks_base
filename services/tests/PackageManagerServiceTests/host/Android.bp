@@ -32,6 +32,7 @@ java_test_host {
         ":PackageManagerTestAppVersion3Invalid",
         ":PackageManagerTestAppVersion4",
         ":PackageManagerTestAppOriginalOverride",
+        ":PackageManagerServiceDeviceSideTests",
     ],
 }
 
