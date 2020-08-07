@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 
@@ -33,6 +34,7 @@ import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
@@ -50,9 +52,11 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private static final String TAG = "OneHandedManager";
 
     private boolean mIsOneHandedEnabled;
+    private boolean mIsSwipeToNotificationEnabled;
     private boolean mTaskChangeToExit;
     private float mOffSetFraction;
 
+    private final CommandQueue mCommandQueue;
     private final DisplayController mDisplayController;
     private final OneHandedGestureHandler mGestureHandler;
     private final OneHandedTimeoutHandler mTimeoutHandler;
@@ -60,11 +64,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private final OneHandedTutorialHandler mTutorialHandler;
     private final SysUiState mSysUiFlagContainer;
 
-    private Context mContext;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
-    private OneHandedGestureHandler.OneHandedGestureEventCallback mGestureEventCallback;
-    private OneHandedTouchHandler.OneHandedTouchEventCallback mTouchEventCallback;
-    private OneHandedTransitionCallback mTransitionCallback;
 
     /**
      * Handler for system task stack changes, exit when user lunch new task or bring task to front
@@ -105,13 +105,14 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     @Inject
     public OneHandedManagerImpl(Context context,
+            CommandQueue commandQueue,
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
             OneHandedTouchHandler touchHandler,
             OneHandedTutorialHandler tutorialHandler,
             OneHandedGestureHandler gestureHandler,
             SysUiState sysUiState) {
-        mContext = context;
+        mCommandQueue = commandQueue;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
         mDisplayController.addDisplayChangingController(mRotationController);
@@ -119,6 +120,8 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
         mOffSetFraction =
                 context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);
         mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                context.getContentResolver());
+        mIsSwipeToNotificationEnabled = OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                 context.getContentResolver());
         mTimeoutHandler = OneHandedTimeoutHandler.get();
         mTouchHandler = touchHandler;
@@ -148,11 +151,19 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     }
 
     /**
-     * Start one handed mode
+     * Sets whether to enable swipe bottom to notification gesture when user update settings.
+     */
+    public void setSwipeToNotificationEnabled(boolean enabled) {
+        mIsSwipeToNotificationEnabled = enabled;
+        updateOneHandedEnabled();
+    }
+
+    /**
+     * Enters one handed mode.
      */
     @Override
     public void startOneHanded() {
-        if (!mDisplayAreaOrganizer.isInOneHanded() && mIsOneHandedEnabled) {
+        if (!mDisplayAreaOrganizer.isInOneHanded()) {
             final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
@@ -160,7 +171,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     }
 
     /**
-     * Stop one handed mode
+     * Exits one handed mode.
      */
     @Override
     public void stopOneHanded() {
@@ -171,53 +182,45 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     }
 
     private void setupGestures() {
-        mTouchEventCallback = new OneHandedTouchHandler.OneHandedTouchEventCallback() {
-            @Override
-            public boolean onStart() {
-                boolean result = false;
-                if (!mDisplayAreaOrganizer.isInOneHanded()) {
-                    startOneHanded();
-                    result = true;
-                }
-                return result;
-            }
+        mTouchHandler.registerTouchEventListener(
+                new OneHandedTouchHandler.OneHandedTouchEventCallback() {
+                    @Override
+                    public void onStart() {
+                        if (mIsOneHandedEnabled) {
+                            startOneHanded();
+                        }
+                    }
 
-            @Override
-            public boolean onStop() {
-                boolean result = false;
-                if (mDisplayAreaOrganizer.isInOneHanded()) {
-                    stopOneHanded();
-                    result = true;
-                }
-                return result;
-            }
-        };
-        mTouchHandler.registerTouchEventListener(mTouchEventCallback);
+                    @Override
+                    public void onStop() {
+                        if (mIsOneHandedEnabled) {
+                            stopOneHanded();
+                        }
+                    }
+                });
 
-        mGestureEventCallback = new OneHandedGestureHandler.OneHandedGestureEventCallback() {
-            @Override
-            public boolean onStart() {
-                boolean result = false;
-                if (!mDisplayAreaOrganizer.isInOneHanded()) {
-                    startOneHanded();
-                    result = true;
-                }
-                return result;
-            }
+        mGestureHandler.setGestureEventListener(
+                new OneHandedGestureHandler.OneHandedGestureEventCallback() {
+                    @Override
+                    public void onStart() {
+                        if (mIsOneHandedEnabled) {
+                            startOneHanded();
+                        } else if (mIsSwipeToNotificationEnabled) {
+                            mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
+                        }
+                    }
 
-            @Override
-            public boolean onStop() {
-                boolean result = false;
-                if (mDisplayAreaOrganizer.isInOneHanded()) {
-                    stopOneHanded();
-                    result = true;
-                }
-                return result;
-            }
-        };
-        mGestureHandler.setGestureEventListener(mGestureEventCallback);
+                    @Override
+                    public void onStop() {
+                        if (mIsOneHandedEnabled) {
+                            stopOneHanded();
+                        } else if (mIsSwipeToNotificationEnabled) {
+                            mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP);
+                        }
+                    }
+                });
 
-        mTransitionCallback = new OneHandedTransitionCallback() {
+        mDisplayAreaOrganizer.registerTransitionCallback(new OneHandedTransitionCallback() {
             @Override
             public void onStartFinished(Rect bounds) {
                 mSysUiFlagContainer.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
@@ -229,8 +232,8 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
                 mSysUiFlagContainer.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
                         false).commitUpdate(DEFAULT_DISPLAY);
             }
-        };
-        mDisplayAreaOrganizer.registerTransitionCallback(mTransitionCallback);
+        });
+
         mDisplayAreaOrganizer.registerTransitionCallback(mTouchHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mGestureHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mTutorialHandler);
@@ -264,7 +267,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         }
         mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
-        mGestureHandler.onOneHandedEnabled(mIsOneHandedEnabled);
+        mGestureHandler.onOneHandedEnabled(mIsOneHandedEnabled || mIsSwipeToNotificationEnabled);
     }
 
     @Override

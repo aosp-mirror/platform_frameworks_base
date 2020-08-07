@@ -159,7 +159,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
                     } else {
                         float distance = (float) Math.hypot(mLastPos.x - mDownPos.x,
                                 mLastPos.y - mDownPos.y);
-                        if (distance > mDragDistThreshold && mPassedSlop) {
+                        if (distance > mDragDistThreshold) {
                             mGestureEventCallback.onStop();
                         }
                     }
@@ -273,13 +273,13 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      */
     public interface OneHandedGestureEventCallback {
         /**
-         * Handle the start event event, and return whether the event was consumed.
+         * Handles the start gesture.
          */
-        boolean onStart();
+        void onStart();
 
         /**
-         * Handle the exit event event, and return whether the event was consumed.
+         * Handles the exit gesture.
          */
-        boolean onStop();
+        void onStop();
     }
 }
