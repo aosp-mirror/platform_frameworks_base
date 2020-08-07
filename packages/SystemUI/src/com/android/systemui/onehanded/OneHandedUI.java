@@ -40,7 +40,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUI;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -80,7 +79,10 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
                 mOneHandedManager.setOneHandedEnabled(enabled);
             }
 
-            setEnabledGesturalOverlay(enabled);
+            // Also checks swipe to notification settings since they all need gesture overlay.
+            setEnabledGesturalOverlay(
+                    enabled || OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                            mContext.getContentResolver()));
         }
     };
 
@@ -130,11 +132,28 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         }
     };
 
+    private final ContentObserver mSwipeToNotificationEnabledObserver =
+            new ContentObserver(mMainHandler) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    final boolean enabled =
+                            OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                                    mContext.getContentResolver());
+                    if (mOneHandedManager != null) {
+                        mOneHandedManager.setSwipeToNotificationEnabled(enabled);
+                    }
+
+                    // Also checks one handed mode settings since they all need gesture overlay.
+                    setEnabledGesturalOverlay(
+                            enabled || OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                                    mContext.getContentResolver()));
+                }
+            };
+
     @Inject
     public OneHandedUI(Context context,
             CommandQueue commandQueue,
             OneHandedManagerImpl oneHandedManager,
-            DumpManager dumpManager,
             OneHandedSettingsUtil settingsUtil,
             ScreenLifecycle screenLifecycle) {
         super(context);
@@ -239,6 +258,9 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
                 mContext.getContentResolver(), mTimeoutObserver);
         mSettingUtil.registerSettingsKeyObserver(Settings.Secure.TAPS_APP_TO_EXIT,
                 mContext.getContentResolver(), mTaskChangeExitObserver);
+        mSettingUtil.registerSettingsKeyObserver(
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
+                mContext.getContentResolver(), mSwipeToNotificationEnabledObserver);
     }
 
     private void updateSettings() {
@@ -248,6 +270,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
                 mSettingUtil.getSettingsOneHandedModeTimeout(mContext.getContentResolver()));
         mOneHandedManager.setTaskChangeToExit(
                 mSettingUtil.getSettingsTapsAppToExit(mContext.getContentResolver()));
+        mOneHandedManager.setSwipeToNotificationEnabled(
+                mSettingUtil.getSettingsSwipeToNotificationEnabled(mContext.getContentResolver()));
     }
 
     @Override

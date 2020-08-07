@@ -28,7 +28,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -53,8 +52,6 @@ public class OneHandedUITest extends OneHandedTestCase {
     @Mock
     OneHandedManagerImpl mMockOneHandedManagerImpl;
     @Mock
-    DumpManager mMockDumpManager;
-    @Mock
     OneHandedSettingsUtil mMockSettingsUtil;
     @Mock
     OneHandedTimeoutHandler mMockTimeoutHandler;
@@ -68,7 +65,6 @@ public class OneHandedUITest extends OneHandedTestCase {
         mOneHandedUI = new OneHandedUI(mContext,
                 mCommandQueue,
                 mMockOneHandedManagerImpl,
-                mMockDumpManager,
                 mMockSettingsUtil,
                 mScreenLifecycle);
         mOneHandedUI.start();
@@ -166,6 +162,18 @@ public class OneHandedUITest extends OneHandedTestCase {
 
         verify(mMockTimeoutHandler).setTimeout(
                 OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+    }
+
+    @Test
+    public void tesSettingsObserver_updateSwipeToNotification() {
+        // Bypass test if device not support one-handed mode
+        if (!mIsSupportOneHandedMode) {
+            return;
+        }
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
+
+        verify(mMockOneHandedManagerImpl).setSwipeToNotificationEnabled(true);
     }
 
     @Ignore("Clarifying do not receive callback")

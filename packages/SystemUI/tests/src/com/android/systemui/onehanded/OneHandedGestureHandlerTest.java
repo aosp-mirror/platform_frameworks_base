@@ -24,14 +24,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.Instrumentation;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.wm.shell.common.DisplayController;
 
@@ -46,11 +45,12 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class OneHandedGestureHandlerTest extends OneHandedTestCase {
-    Instrumentation mInstrumentation;
     OneHandedTouchHandler mTouchHandler;
     OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
     OneHandedManagerImpl mOneHandedManagerImpl;
+    @Mock
+    CommandQueue mCommandQueue;
     @Mock
     DisplayController mMockDisplayController;
     @Mock
@@ -62,12 +62,13 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mTouchHandler = new OneHandedTouchHandler();
         mTutorialHandler = new OneHandedTutorialHandler(mContext);
         mGestureHandler = Mockito.spy(new OneHandedGestureHandler(
                 mContext, mMockDisplayController, mMockNavigationModeController));
-        mOneHandedManagerImpl = new OneHandedManagerImpl(mInstrumentation.getContext(),
+        mOneHandedManagerImpl = new OneHandedManagerImpl(
+                getContext(),
+                mCommandQueue,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
@@ -100,6 +101,7 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     @Test
     public void testOneHandedDisabled_shouldDisposeInputChannel() {
         mOneHandedManagerImpl.setOneHandedEnabled(false);
+        mOneHandedManagerImpl.setSwipeToNotificationEnabled(false);
 
         assertThat(mGestureHandler.mInputMonitor).isNull();
         assertThat(mGestureHandler.mInputEventReceiver).isNull();

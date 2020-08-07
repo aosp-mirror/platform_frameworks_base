@@ -33,6 +33,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -51,6 +52,8 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     OneHandedTimeoutHandler mTimeoutHandler;
 
     @Mock
+    CommandQueue mCommandQueue;
+    @Mock
     DisplayController mMockDisplayController;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
@@ -67,7 +70,9 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
-        mOneHandedManagerImpl = new OneHandedManagerImpl(getContext(),
+        mOneHandedManagerImpl = new OneHandedManagerImpl(
+                getContext(),
+                mCommandQueue,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
@@ -94,14 +99,14 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
 
     @Test
     public void testRegisterOrganizer() {
-        verify(mMockDisplayAreaOrganizer, times(1)).registerOrganizer(anyInt());
+        verify(mMockDisplayAreaOrganizer).registerOrganizer(anyInt());
     }
 
     @Test
     public void testStartOneHanded() {
         mOneHandedManagerImpl.startOneHanded();
 
-        verify(mMockDisplayAreaOrganizer, times(1)).scheduleOffset(anyInt(), anyInt());
+        verify(mMockDisplayAreaOrganizer).scheduleOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -121,7 +126,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     public void testStopOneHanded_shouldRemoveTimer() {
         mOneHandedManagerImpl.stopOneHanded();
 
-        verify(mTimeoutHandler, times(1)).removeTimer();
+        verify(mTimeoutHandler).removeTimer();
     }
 
     @Test
@@ -129,7 +134,14 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
         final boolean enabled = true;
         mOneHandedManagerImpl.setOneHandedEnabled(enabled);
 
-        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
+        verify(mMockTouchHandler, times(2)).onOneHandedEnabled(enabled);
     }
 
+    @Test
+    public void testUpdateSwipeToNotificationIsEnabled() {
+        final boolean enabled = true;
+        mOneHandedManagerImpl.setSwipeToNotificationEnabled(enabled);
+
+        verify(mMockTouchHandler, times(2)).onOneHandedEnabled(enabled);
+    }
 }
