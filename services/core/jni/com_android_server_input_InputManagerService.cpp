@@ -424,6 +424,10 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         AutoMutex _l(mLock);
         mLocked.viewports = viewports;
         mLocked.pointerDisplayId = pointerDisplayId;
+        std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
+        if (controller != nullptr) {
+            controller->onDisplayViewportsUpdated(mLocked.viewports);
+        }
     } // release lock
 
     mInputManager->getReader()->requestRefreshConfiguration(
@@ -847,8 +851,8 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
     }
 
     bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
-    controller->setInactivityTimeout(lightsOut ? PointerController::InactivityTimeout::SHORT
-                                               : PointerController::InactivityTimeout::NORMAL);
+    controller->setInactivityTimeout(lightsOut ? InactivityTimeout::SHORT
+                                               : InactivityTimeout::NORMAL);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
