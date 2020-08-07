@@ -78,6 +78,7 @@ bool Properties::isolatedProcess = false;
 
 int Properties::contextPriority = 0;
 int Properties::defaultRenderAhead = -1;
+float Properties::defaultSdrWhitePoint = 200.f;
 
 bool Properties::load() {
     bool prevDebugLayersUpdates = debugLayersUpdates;

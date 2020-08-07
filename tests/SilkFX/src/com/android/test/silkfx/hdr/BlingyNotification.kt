@@ -71,9 +71,9 @@ class BlingyNotification : BaseDrawingView {
         paint.shader = LinearGradient(0f, 0f, w.toFloat(), 0f,
                 longArrayOf(
                         color(1f, 1f, 1f, 0f),
-                        color(1f, 1f, 1f, .4f),
-                        color(2f, 2f, 2f, .8f),
-                        color(1f, 1f, 1f, .4f),
+                        color(1f, 1f, 1f, .1f),
+                        color(2f, 2f, 2f, .3f),
+                        color(1f, 1f, 1f, .2f),
                         color(1f, 1f, 1f, 0f)
                         ),
                 floatArrayOf(.2f, .4f, .5f, .6f, .8f),
