@@ -231,6 +231,9 @@ bool isValidEffect(jlong effect) {
 }
 
 static void callVibrationOnComplete(jobject vibration) {
+    if (vibration == nullptr) {
+        return;
+    }
     auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
     jniEnv->CallVoidMethod(vibration, sMethodIdOnComplete);
     jniEnv->DeleteGlobalRef(vibration);
@@ -281,18 +284,16 @@ static jboolean vibratorExists(JNIEnv* env, jclass /* clazz */, jlong controller
     return controller->ping().isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        auto status = hal->call(&aidl::IVibrator::on, timeout_ms, nullptr);
-        if (!status.isOk()) {
-            ALOGE("vibratorOn command failed: %s", status.toString8().string());
-        }
-    } else {
-        Status retStatus = halCall(&V1_0::IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
-        if (retStatus != Status::OK) {
-            ALOGE("vibratorOn command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
-        }
+static void vibratorOn(JNIEnv* env, jclass /* clazz */, jlong controllerPtr, jlong timeoutMs,
+                       jobject vibration) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorOn failed because controller was not initialized");
+        return;
     }
+    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
+    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
+    controller->on(std::chrono::milliseconds(timeoutMs), callback);
 }
 
 static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
@@ -420,9 +421,8 @@ static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong
         jobject element = env->GetObjectArrayElement(composition, i);
         effects.push_back(effectFromJavaPrimitive(env, element));
     }
-    auto callback = [vibrationRef(MakeGlobalRefOrDie(env, vibration))]() {
-        callVibrationOnComplete(vibrationRef);
-    };
+    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
+    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
     controller->performComposedEffect(effects, callback);
 }
 
@@ -461,7 +461,7 @@ static const JNINativeMethod method_table[] = {
         {"vibratorInit", "()J", (void*)vibratorInit},
         {"vibratorGetFinalizer", "()J", (void*)vibratorGetFinalizer},
         {"vibratorExists", "(J)Z", (void*)vibratorExists},
-        {"vibratorOn", "(J)V", (void*)vibratorOn},
+        {"vibratorOn", "(JJLcom/android/server/VibratorService$Vibration;)V", (void*)vibratorOn},
         {"vibratorOff", "(J)V", (void*)vibratorOff},
         {"vibratorSetAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
         {"vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;Z)J",
