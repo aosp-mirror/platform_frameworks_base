@@ -116,7 +116,9 @@ public interface ChooserActivityLogger {
         @UiEvent(doc = "User selected a standard target.")
         SHARESHEET_STANDARD_TARGET_SELECTED(234),
         @UiEvent(doc = "User selected the copy target.")
-        SHARESHEET_COPY_TARGET_SELECTED(235);
+        SHARESHEET_COPY_TARGET_SELECTED(235),
+        @UiEvent(doc = "User selected the nearby target.")
+        SHARESHEET_NEARBY_TARGET_SELECTED(626);
 
         private final int mId;
         SharesheetTargetSelectedEvent(int id) {
@@ -136,6 +138,8 @@ public interface ChooserActivityLogger {
                     return SHARESHEET_STANDARD_TARGET_SELECTED;
                 case ChooserActivity.SELECTION_TYPE_COPY:
                     return SHARESHEET_COPY_TARGET_SELECTED;
+                case ChooserActivity.SELECTION_TYPE_NEARBY:
+                    return SHARESHEET_NEARBY_TARGET_SELECTED;
                 default:
                     return INVALID;
             }
