@@ -2657,8 +2657,10 @@ public class AppOpsManager {
      * @hide
      */
     // TODO: this should probably be @SystemApi as well
-    public static @NonNull String toReceiverId(@NonNull Object obj) {
-        if (obj instanceof PendingIntent) {
+    public static @NonNull String toReceiverId(@Nullable Object obj) {
+        if (obj == null) {
+            return "null";
+        } else if (obj instanceof PendingIntent) {
             return toReceiverId((PendingIntent) obj);
         } else {
             return obj.getClass().getName() + "@" + System.identityHashCode(obj);
