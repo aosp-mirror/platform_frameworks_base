@@ -23,6 +23,7 @@ import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
+import android.os.VibrationEffect;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
@@ -83,7 +84,7 @@ interface IInputManager {
     int isMicMuted();
 
     // Input device vibrator control.
-    void vibrate(int deviceId, in long[] pattern, in int[] amplitudes, int repeat, IBinder token);
+    void vibrate(int deviceId, in VibrationEffect effect, IBinder token);
     void cancelVibrate(int deviceId, IBinder token);
 
     void setPointerIconType(int typeId);

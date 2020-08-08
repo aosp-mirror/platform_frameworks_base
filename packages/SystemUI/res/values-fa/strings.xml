@@ -742,7 +742,7 @@
     <string name="feedback_promoted" msgid="8075757485407091976">"سیستمْ این اعلان را ارتقا داده است."</string>
     <string name="feedback_demoted" msgid="5848066008939031913">"سیستمْ این اعلان را تنزل داده است."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"این مورد درست بود؟"</string>
-    <string name="feedback_response" msgid="4671729244976641339">"از بازخورد شما سپاسگزاریم!"</string>
+    <string name="feedback_response" msgid="4671729244976641339">"از بازخورد شما سپاس‌گذاریم!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"تأیید"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> بسته شد"</string>
@@ -1084,4 +1084,6 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"برای دیدن کنترل‌های جدید، دکمه روشن/خاموش را پایین نگه دارید"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"افزودن کنترل‌ها"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ویرایش کنترل‌ها"</string>
+    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"استفاده از «حالت تک حرکت»"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"برای خارج شدن، از پایین صفحه‌نمایش تند به‌طرف بالا بکشید یا در هر جایی از بالای برنامه که می‌خواهید ضربه بزنید"</string>
 </resources>

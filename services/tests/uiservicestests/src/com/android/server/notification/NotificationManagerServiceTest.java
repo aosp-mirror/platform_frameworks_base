@@ -4856,6 +4856,70 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void backgroundSystemCustomToast_callsSetProcessImportantAsForegroundForToast() throws
+            Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = true;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        // notifications from this package are blocked by the user
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.getImportance(testPackage, mUid)).thenReturn(IMPORTANCE_NONE);
+
+        setAppInForegroundForToasts(mUid, false);
+
+        // enqueue toast -> toast should still enqueue
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
+                new TestableToastCallback(), 2000, 0);
+        assertEquals(1, mService.mToastQueue.size());
+        verify(mAm).setProcessImportant(any(), anyInt(), eq(true), any());
+    }
+
+    @Test
+    public void foregroundTextToast_callsSetProcessImportantAsNotForegroundForToast() throws
+            Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, true);
+
+        // enqueue toast -> toast should still enqueue
+        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
+                "Text", 2000, 0, null);
+        assertEquals(1, mService.mToastQueue.size());
+        verify(mAm).setProcessImportant(any(), anyInt(), eq(false), any());
+    }
+
+    @Test
+    public void backgroundTextToast_callsSetProcessImportantAsNotForegroundForToast() throws
+            Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, false);
+
+        // enqueue toast -> toast should still enqueue
+        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
+                "Text", 2000, 0, null);
+        assertEquals(1, mService.mToastQueue.size());
+        verify(mAm).setProcessImportant(any(), anyInt(), eq(false), any());
+    }
+
+    @Test
     public void testTextToastsCallStatusBar() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());

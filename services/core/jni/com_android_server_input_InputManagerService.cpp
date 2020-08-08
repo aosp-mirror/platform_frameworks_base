@@ -75,6 +75,12 @@
 using android::base::ParseUint;
 using android::base::StringPrintf;
 
+// Maximum allowable delay value in a vibration pattern before
+// which the delay will be truncated.
+static constexpr std::chrono::duration MAX_VIBRATE_PATTERN_DELAY = 100s;
+static constexpr std::chrono::milliseconds MAX_VIBRATE_PATTERN_DELAY_MILLIS =
+        std::chrono::duration_cast<std::chrono::milliseconds>(MAX_VIBRATE_PATTERN_DELAY);
+
 namespace android {
 
 // The exponent used to calculate the pointer speed scaling factor.
@@ -415,6 +421,10 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         AutoMutex _l(mLock);
         mLocked.viewports = viewports;
         mLocked.pointerDisplayId = pointerDisplayId;
+        std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
+        if (controller != nullptr) {
+            controller->onDisplayViewportsUpdated(mLocked.viewports);
+        }
     } // release lock
 
     mInputManager->getReader()->requestRefreshConfiguration(
@@ -812,8 +822,8 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
     }
 
     bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
-    controller->setInactivityTimeout(lightsOut ? PointerController::InactivityTimeout::SHORT
-                                               : PointerController::InactivityTimeout::NORMAL);
+    controller->setInactivityTimeout(lightsOut ? InactivityTimeout::SHORT
+                                               : InactivityTimeout::NORMAL);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
@@ -1636,17 +1646,19 @@ static void nativeVibrate(JNIEnv* env, jclass /* clazz */, jlong ptr, jint devic
             patternObj, nullptr));
     jint* amplitudes = static_cast<jint*>(env->GetPrimitiveArrayCritical(amplitudesObj, nullptr));
 
-    std::vector<VibrationElement> pattern(patternSize);
+    std::vector<VibrationElement> elements(patternSize);
     for (size_t i = 0; i < patternSize; i++) {
-        jlong duration =
-                max(min(patternMillis[i], (jlong)MAX_VIBRATE_PATTERN_DELAY_MSECS), (jlong)0);
-        pattern[i].duration = std::chrono::milliseconds(duration);
-        pattern[i].channels = {amplitudes[i]};
+        // VibrationEffect.validate guarantees duration > 0.
+        std::chrono::milliseconds duration(patternMillis[i]);
+        elements[i].duration = std::min(duration, MAX_VIBRATE_PATTERN_DELAY_MILLIS);
+        // TODO: (b/161629089) apply channel specific amplitudes from development API.
+        elements[i].channels = {static_cast<uint8_t>(amplitudes[i]),
+                                static_cast<uint8_t>(amplitudes[i])};
     }
     env->ReleasePrimitiveArrayCritical(patternObj, patternMillis, JNI_ABORT);
     env->ReleasePrimitiveArrayCritical(amplitudesObj, amplitudes, JNI_ABORT);
 
-    im->getInputManager()->getReader()->vibrate(deviceId, pattern, repeat, token);
+    im->getInputManager()->getReader()->vibrate(deviceId, elements, repeat, token);
 }
 
 static void nativeCancelVibrate(JNIEnv* /* env */,

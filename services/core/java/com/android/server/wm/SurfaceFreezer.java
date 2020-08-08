@@ -22,7 +22,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -89,8 +88,7 @@ class SurfaceFreezer {
             if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
                 return;
             }
-            mSnapshot = new Snapshot(mWmService.mSurfaceFactory, t, buffer,
-                    screenshotBuffer.getColorSpace(), mLeash);
+            mSnapshot = new Snapshot(mWmService.mSurfaceFactory, t, screenshotBuffer, mLeash);
         }
     }
 
@@ -135,8 +133,12 @@ class SurfaceFreezer {
             cropBounds = new Rect(bounds);
             cropBounds.offsetTo(0, 0);
         }
-        return SurfaceControl.captureLayers(target, cropBounds, 1.f /* frameScale */,
-                PixelFormat.RGBA_8888);
+        SurfaceControl.LayerCaptureArgs captureArgs =
+                new SurfaceControl.LayerCaptureArgs.Builder(target)
+                        .setSourceCrop(cropBounds)
+                        .setCaptureSecureLayers(true)
+                        .build();
+        return SurfaceControl.captureLayers(captureArgs);
     }
 
     class Snapshot {
@@ -146,21 +148,23 @@ class SurfaceFreezer {
 
         /**
          * @param t Transaction to create the thumbnail in.
-         * @param thumbnailHeader A thumbnail or placeholder for thumbnail to initialize with.
+         * @param screenshotBuffer A thumbnail or placeholder for thumbnail to initialize with.
          */
         Snapshot(Supplier<Surface> surfaceFactory, SurfaceControl.Transaction t,
-                HardwareBuffer thumbnailHeader, ColorSpace colorSpace, SurfaceControl parent) {
+                SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer, SurfaceControl parent) {
             Surface drawSurface = surfaceFactory.get();
             // We can't use a delegating constructor since we need to
             // reference this::onAnimationFinished
-            final int width = thumbnailHeader.getWidth();
-            final int height = thumbnailHeader.getHeight();
+            HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+            final int width = hardwareBuffer.getWidth();
+            final int height = hardwareBuffer.getHeight();
 
             mSurfaceControl = mAnimatable.makeAnimationLeash()
                     .setName("snapshot anim: " + mAnimatable.toString())
                     .setBufferSize(width, height)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .setParent(parent)
+                    .setSecure(screenshotBuffer.containsSecureLayers())
                     .setCallsite("SurfaceFreezer.Snapshot")
                     .build();
 
@@ -168,7 +172,8 @@ class SurfaceFreezer {
 
             // Transfer the thumbnail to the surface
             drawSurface.copyFrom(mSurfaceControl);
-            drawSurface.attachAndQueueBufferWithColorSpace(thumbnailHeader, colorSpace);
+            drawSurface.attachAndQueueBufferWithColorSpace(hardwareBuffer,
+                    screenshotBuffer.getColorSpace());
             drawSurface.release();
             t.show(mSurfaceControl);
 

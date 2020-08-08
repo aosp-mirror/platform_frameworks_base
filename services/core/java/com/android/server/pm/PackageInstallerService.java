@@ -442,7 +442,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         // After reboot housekeeping.
         for (int i = 0; i < mSessions.size(); ++i) {
             PackageInstallerSession session = mSessions.valueAt(i);
-            session.onAfterSessionRead();
+            session.onAfterSessionRead(mSessions);
         }
     }
 

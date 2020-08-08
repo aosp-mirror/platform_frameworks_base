@@ -52,6 +52,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import libcore.io.IoUtils;
 import libcore.util.HexEncoding;
@@ -112,6 +113,7 @@ class InstantAppRegistry {
     private static final String ATTR_GRANTED = "granted";
 
     private final PackageManagerService mService;
+    private final PermissionManagerServiceInternal mPermissionManager;
     private final CookiePersistence mCookiePersistence;
 
     /** State for uninstalled instant apps */
@@ -131,8 +133,10 @@ class InstantAppRegistry {
     @GuardedBy("mService.mLock")
     private SparseArray<SparseBooleanArray> mInstalledInstantAppUids;
 
-    public InstantAppRegistry(PackageManagerService service) {
+    public InstantAppRegistry(PackageManagerService service,
+            PermissionManagerServiceInternal permissionManager) {
         mService = service;
+        mPermissionManager = permissionManager;
         mCookiePersistence = new CookiePersistence(BackgroundThread.getHandler().getLooper());
     }
 
@@ -861,7 +865,8 @@ class InstantAppRegistry {
         String[] requestedPermissions = new String[pkg.getRequestedPermissions().size()];
         pkg.getRequestedPermissions().toArray(requestedPermissions);
 
-        Set<String> permissions = ps.getPermissionsState().getPermissions(userId);
+        Set<String> permissions = mPermissionManager.getGrantedPermissions(
+                pkg.getPackageName(), userId);
         String[] grantedPermissions = new String[permissions.size()];
         permissions.toArray(grantedPermissions);
 

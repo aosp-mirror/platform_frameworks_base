@@ -28,6 +28,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -262,6 +263,25 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
+
+    /**
+     * Get all the permissions granted to a package.
+     */
+    @NonNull
+    public abstract Set<String> getGrantedPermissions(@NonNull String packageName,
+            @UserIdInt int userId);
+
+    /**
+     * Get the GIDs of a permission.
+     */
+    @Nullable
+    public abstract int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId);
+
+    /**
+     * Get the GIDs computed from the permission state of a package.
+     */
+    @Nullable
+    public abstract int[] getPackageGids(@NonNull String packageName, @UserIdInt int userId);
 
     /** Retrieve the packages that have requested the given app op permission */
     public abstract @Nullable String[] getAppOpPermissionPackages(

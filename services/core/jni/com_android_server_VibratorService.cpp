@@ -49,6 +49,8 @@ namespace aidl = android::hardware::vibrator;
 
 namespace android {
 
+static JavaVM* sJvm = nullptr;
+
 static jmethodID sMethodIdOnComplete;
 
 static struct {
@@ -228,6 +230,15 @@ bool isValidEffect(jlong effect) {
     return val >= *iter.begin() && val <= *std::prev(iter.end());
 }
 
+static void callVibrationOnComplete(jobject vibration) {
+    if (vibration == nullptr) {
+        return;
+    }
+    auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+    jniEnv->CallVoidMethod(vibration, sMethodIdOnComplete);
+    jniEnv->DeleteGlobalRef(vibration);
+}
+
 static aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
     aidl::CompositeEffect effect;
     effect.primitive = static_cast<aidl::CompositePrimitive>(
@@ -273,18 +284,16 @@ static jboolean vibratorExists(JNIEnv* env, jclass /* clazz */, jlong controller
     return controller->ping().isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms) {
-    if (auto hal = getHal<aidl::IVibrator>()) {
-        auto status = hal->call(&aidl::IVibrator::on, timeout_ms, nullptr);
-        if (!status.isOk()) {
-            ALOGE("vibratorOn command failed: %s", status.toString8().string());
-        }
-    } else {
-        Status retStatus = halCall(&V1_0::IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
-        if (retStatus != Status::OK) {
-            ALOGE("vibratorOn command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
-        }
+static void vibratorOn(JNIEnv* env, jclass /* clazz */, jlong controllerPtr, jlong timeoutMs,
+                       jobject vibration) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorOn failed because controller was not initialized");
+        return;
     }
+    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
+    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
+    controller->on(std::chrono::milliseconds(timeoutMs), callback);
 }
 
 static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
@@ -399,10 +408,11 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong effect
     return -1;
 }
 
-static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jobjectArray composition,
-                                          jobject vibration) {
-    auto hal = getHal<aidl::IVibrator>();
-    if (!hal) {
+static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
+                                          jobjectArray composition, jobject vibration) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorPerformComposedEffect failed because controller was not initialized");
         return;
     }
     size_t size = env->GetArrayLength(composition);
@@ -411,14 +421,9 @@ static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jobje
         jobject element = env->GetObjectArrayElement(composition, i);
         effects.push_back(effectFromJavaPrimitive(env, element));
     }
-    sp<AidlVibratorCallback> effectCallback = new AidlVibratorCallback(env, vibration);
-
-    auto status = hal->call(&aidl::IVibrator::compose, effects, effectCallback);
-    if (!status.isOk()) {
-        if (status.exceptionCode() != binder::Status::EX_UNSUPPORTED_OPERATION) {
-            ALOGE("Failed to play haptic effect composition");
-        }
-    }
+    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
+    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
+    controller->performComposedEffect(effects, callback);
 }
 
 static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
@@ -456,13 +461,13 @@ static const JNINativeMethod method_table[] = {
         {"vibratorInit", "()J", (void*)vibratorInit},
         {"vibratorGetFinalizer", "()J", (void*)vibratorGetFinalizer},
         {"vibratorExists", "(J)Z", (void*)vibratorExists},
-        {"vibratorOn", "(J)V", (void*)vibratorOn},
+        {"vibratorOn", "(JJLcom/android/server/VibratorService$Vibration;)V", (void*)vibratorOn},
         {"vibratorOff", "(J)V", (void*)vibratorOff},
         {"vibratorSetAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
         {"vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;Z)J",
          (void*)vibratorPerformEffect},
         {"vibratorPerformComposedEffect",
-         "([Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/"
+         "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/"
          "VibratorService$Vibration;)V",
          (void*)vibratorPerformComposedEffect},
         {"vibratorGetSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
@@ -472,7 +477,8 @@ static const JNINativeMethod method_table[] = {
         {"vibratorAlwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
 };
 
-int register_android_server_VibratorService(JNIEnv *env) {
+int register_android_server_VibratorService(JavaVM* vm, JNIEnv* env) {
+    sJvm = vm;
     sMethodIdOnComplete =
             GetMethodIDOrDie(env,
                              FindClassOrDie(env, "com/android/server/VibratorService$Vibration"),

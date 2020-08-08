@@ -501,7 +501,7 @@ public class MockingOomAdjusterTests {
     public void testUpdateOomAdj_DoOne_Backup() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
-        BackupRecord backupTarget = new BackupRecord(null, 0, 0);
+        BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0);
         backupTarget.app = app;
         doReturn(backupTarget).when(sService.mBackupTargets).get(anyInt());
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -803,7 +803,7 @@ public class MockingOomAdjusterTests {
         ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
         bindService(app, client, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        BackupRecord backupTarget = new BackupRecord(null, 0, 0);
+        BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0);
         backupTarget.app = client;
         doReturn(backupTarget).when(sService.mBackupTargets).get(anyInt());
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;

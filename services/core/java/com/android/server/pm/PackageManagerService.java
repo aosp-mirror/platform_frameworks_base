@@ -2970,7 +2970,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mHandler = new PackageHandler(mHandlerThread.getLooper());
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
-            mInstantAppRegistry = new InstantAppRegistry(this);
+            mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager);
 
             ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
                     = systemConfig.getSharedLibraries();
@@ -4385,14 +4385,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageUserState state = ps.readUserState(userId);
         AndroidPackage p = ps.pkg;
         if (p != null) {
-            final PermissionsState permissionsState = ps.getPermissionsState();
-
             // Compute GIDs only if requested
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0
-                    ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
+                    ? EMPTY_INT_ARRAY : mPermissionManager.getPackageGids(ps.name, userId);
             // Compute granted permissions only if package has requested permissions
             final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
-                    ? Collections.emptySet() : permissionsState.getPermissions(userId);
+                    ? Collections.emptySet()
+                    : mPermissionManager.getGrantedPermissions(ps.name, userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
                     ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
@@ -4863,13 +4862,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // TODO: Shouldn't this be checking for package installed state for userId and
                 // return null?
-                return ps.getPermissionsState().computeGids(userId);
+                return mPermissionManager.getPackageGids(packageName, userId);
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return ps.getPermissionsState().computeGids(userId);
+                    return mPermissionManager.getPackageGids(packageName, userId);
                 }
             }
         }
@@ -10352,6 +10351,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mInstaller.rmPackageDir(codePath.getAbsolutePath());
                 if (codePathParent.getName().startsWith(RANDOM_DIR_PREFIX)) {
                     mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
+                    removeCachedResult(codePathParent);
                 }
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to remove code path", e);
@@ -10359,6 +10359,16 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             codePath.delete();
         }
+    }
+
+    private void removeCachedResult(@NonNull File codePath) {
+        if (mCacheDir == null) {
+            return;
+        }
+
+        final PackageCacher cacher = new PackageCacher(mCacheDir);
+        // Find and delete the cached result belong to the given codePath.
+        cacher.cleanCachedResult(codePath);
     }
 
     private int[] resolveUserIds(int userId) {
@@ -24948,9 +24958,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public int[] getPermissionGids(String permissionName, int userId) {
-            synchronized (mLock) {
-                return getPermissionGidsLocked(permissionName, userId);
-            }
+            return mPermissionManager.getPermissionGids(permissionName, userId);
         }
 
         @Override
@@ -25271,16 +25279,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
-    @GuardedBy("mLock")
-    public int[] getPermissionGidsLocked(String permissionName, int userId) {
-        BasePermission perm
-                = mPermissionManager.getPermissionSettings().getPermission(permissionName);
-        if (perm != null) {
-            return perm.computeGids(userId);
-        }
-        return null;
-    }
-
     @Override
     public int getRuntimePermissionsVersion(@UserIdInt int userId) {
         Preconditions.checkArgumentNonnegative(userId);
@@ -25414,18 +25412,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int mode = mInjector.getAppOpsManager().checkOpNoThrow(
                 AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
                 Binder.getCallingUid(), packageName);
-        if (mode == MODE_ALLOWED) {
-            return false;
-        } else if (mode == MODE_IGNORED) {
-            return true;
-        } else {
-            synchronized (mLock) {
-                boolean manifestWhitelisted =
-                        mPackages.get(packageName).getAutoRevokePermissions()
-                                == ApplicationInfo.AUTO_REVOKE_DISALLOWED;
-                return manifestWhitelisted;
-            }
-        }
+        return mode == MODE_IGNORED;
     }
 
     @Override
