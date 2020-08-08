@@ -729,11 +729,11 @@
     <string name="see_more_title" msgid="7409317011708185729">"थप हेर्नुहोस्"</string>
     <string name="appops_camera" msgid="5215967620896725715">"यो अनुप्रयोगले क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"यो अनुप्रयोगले माइक्रोफोनको प्रयोग गर्दै छ।"</string>
-    <string name="appops_overlay" msgid="4822261562576558490">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्दै छ।"</string>
+    <string name="appops_overlay" msgid="4822261562576558490">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्दै छ।"</string>
     <string name="appops_camera_mic" msgid="7032239823944420431">"यो अनुप्रयोगले माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
-    <string name="appops_camera_overlay" msgid="6466845606058816484">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
-    <string name="appops_mic_overlay" msgid="4609326508944233061">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
-    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_overlay" msgid="6466845606058816484">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_mic_overlay" msgid="4609326508944233061">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"सेटिङहरू"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ठिक छ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई खोलियो"</string>

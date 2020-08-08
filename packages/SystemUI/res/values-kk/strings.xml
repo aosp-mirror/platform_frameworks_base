@@ -502,8 +502,8 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Battery saver қосулы"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Battery saver функциясын өшіру"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экранда көрсетілетін немесе жазу не трансляциялау кезінде құрылғыда ойнатылған барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және ойнатылатын аудио сияқты ақпарат кіреді."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Осы функцияны ұсынатын қызмет экранда көрсетілетін немесе жазу не трансляциялау кезінде құрылғыда ойнатылған барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және ойнатылатын аудио сияқты ақпарат кіреді."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> жазу не трансляциялау кезінде экранда көрсетілетін немесе дыбысталатын барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Осы функцияны ұсынатын қызмет жазу не трансляциялау кезінде экранда көрсетілетін немесе құрылғыда дыбысталатын ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Жазу немесе трансляциялау басталсын ба?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> арқылы жазу немесе трансляциялау басталсын ба?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Қайта көрсетпеу"</string>
