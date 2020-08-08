@@ -270,6 +270,21 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onSaveReentryBounds_restoreLastSize() {
+        final Rect oldSize = mPipBoundsHandler.getDestinationBounds(mTestComponentName1,
+                DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS, EMPTY_MINIMAL_SIZE);
+
+        oldSize.scale(1.25f);
+        mPipBoundsHandler.onSaveReentryBounds(mTestComponentName1, oldSize);
+
+        final Rect newSize = mPipBoundsHandler.getDestinationBounds(mTestComponentName1,
+                DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS, EMPTY_MINIMAL_SIZE);
+
+        assertEquals(oldSize.width(), newSize.width());
+        assertEquals(oldSize.height(), newSize.height());
+    }
+
+    @Test
     public void onResetReentryBounds_useDefaultBounds() {
         final Rect defaultBounds = mPipBoundsHandler.getDestinationBounds(mTestComponentName1,
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS, EMPTY_MINIMAL_SIZE);
@@ -297,6 +312,22 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS, EMPTY_MINIMAL_SIZE);
 
         assertBoundsInclusionWithMargin("restoreLastPosition", newBounds, actualBounds);
+    }
+
+    @Test
+    public void onSaveReentryBounds_componentMismatch_restoreLastSize() {
+        final Rect oldSize = mPipBoundsHandler.getDestinationBounds(mTestComponentName1,
+                DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS, EMPTY_MINIMAL_SIZE);
+
+        oldSize.scale(1.25f);
+        mPipBoundsHandler.onSaveReentryBounds(mTestComponentName1, oldSize);
+
+        mPipBoundsHandler.onResetReentryBounds(mTestComponentName2);
+        final Rect newSize = mPipBoundsHandler.getDestinationBounds(mTestComponentName1,
+                DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS, EMPTY_MINIMAL_SIZE);
+
+        assertEquals(oldSize.width(), newSize.width());
+        assertEquals(oldSize.height(), newSize.height());
     }
 
     private void assertBoundsInclusionWithMargin(String from, Rect expected, Rect actual) {

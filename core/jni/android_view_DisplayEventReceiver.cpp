@@ -63,6 +63,7 @@ private:
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
     void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
                                int32_t configId, nsecs_t vsyncPeriod) override;
+    void dispatchNullEvent(nsecs_t timestamp, PhysicalDisplayId displayId) override {}
 };
 
 
