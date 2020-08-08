@@ -149,9 +149,6 @@ public final class Magnifier {
     private int mLeftCutWidth = 0;
     // The width of the cut region on the right edge of the pixel copy source rect.
     private int mRightCutWidth = 0;
-    // The horizontal bounds of the content source in pixels, relative to the view.
-    private int mLeftBound = Integer.MIN_VALUE;
-    private int mRightBound = Integer.MAX_VALUE;
     // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
     private final int mRamp;
 
@@ -244,18 +241,6 @@ public final class Magnifier {
     }
 
     /**
-     * Sets the horizontal bounds of the source when showing the magnifier.
-     * This is used for new style magnifier. e.g. limit the source bounds by the text line bounds.
-     *
-     * @param left the left of the bounds, relative to the view.
-     * @param right the right of the bounds, relative to the view.
-     */
-    void setSourceHorizontalBounds(int left, int right) {
-        mLeftBound = left;
-        mRightBound = right;
-    }
-
-    /**
      * Shows the magnifier on the screen. The method takes the coordinates of the center
      * of the content source going to be magnified and copied to the magnifier. The coordinates
      * are relative to the top left corner of the magnified view. The magnifier will be
@@ -278,6 +263,14 @@ public final class Magnifier {
         show(sourceCenterX, sourceCenterY,
                 sourceCenterX + mDefaultHorizontalSourceToMagnifierOffset,
                 sourceCenterY + mDefaultVerticalSourceToMagnifierOffset);
+    }
+
+    private Drawable mCursorDrawable;
+    private boolean mDrawCursorEnabled;
+
+    void setDrawCursor(boolean enabled, Drawable cursorDrawable) {
+        mDrawCursorEnabled = enabled;
+        mCursorDrawable = cursorDrawable;
     }
 
     /**
@@ -309,8 +302,7 @@ public final class Magnifier {
             magnifierCenterX = mClampedCenterZoomCoords.x - mViewCoordinatesInSurface[0];
             magnifierCenterY = mClampedCenterZoomCoords.y - mViewCoordinatesInSurface[1];
 
-            // mLeftBound & mRightBound (typically the text line left/right) is for magnified
-            // content. However the PixelCopy requires the pre-magnified bounds.
+            // PixelCopy requires the pre-magnified bounds.
             // The below logic calculates the leftBound & rightBound for the pre-magnified bounds.
             final float rampPre =
                     (mSourceWidth - (mSourceWidth - 2 * mRamp) / mZoom) / 2;
@@ -318,7 +310,7 @@ public final class Magnifier {
             // Calculates the pre-zoomed left edge.
             // The leftEdge moves from the left of view towards to sourceCenterX, considering the
             // fisheye-like zooming.
-            final float x0 = sourceCenterX - mSourceWidth / 2;
+            final float x0 = sourceCenterX - mSourceWidth / 2f;
             final float rampX0 = x0 + mRamp;
             float leftEdge = 0;
             if (leftEdge > rampX0) {
@@ -330,12 +322,12 @@ public final class Magnifier {
                 // increase per ramp zoom (ramp / rampPre).
                 leftEdge = x0 + rampPre - (rampX0 - leftEdge) * rampPre / mRamp;
             }
-            int leftBound = Math.min(Math.max((int) leftEdge, mLeftBound), mRightBound);
+            int leftBound = Math.min((int) leftEdge, mView.getWidth());
 
             // Calculates the pre-zoomed right edge.
             // The rightEdge moves from the right of view towards to sourceCenterX, considering the
             // fisheye-like zooming.
-            final float x1 = sourceCenterX + mSourceWidth / 2;
+            final float x1 = sourceCenterX + mSourceWidth / 2f;
             final float rampX1 = x1 - mRamp;
             float rightEdge = mView.getWidth();
             if (rightEdge < rampX1) {
@@ -347,7 +339,7 @@ public final class Magnifier {
                 // increase per ramp zoom (ramp / rampPre).
                 rightEdge = x1 - rampPre + (rightEdge - rampX1) * rampPre / mRamp;
             }
-            int rightBound = Math.max(leftBound, Math.min((int) rightEdge, mRightBound));
+            int rightBound = Math.max(leftBound, (int) rightEdge);
 
             // Gets the startX for new style, which should be bounded by the horizontal bounds.
             // Also calculates the left/right cut width for pixel copy.
@@ -772,6 +764,23 @@ public final class Magnifier {
         }
     }
 
+    private void maybeDrawCursor(Canvas canvas) {
+        if (mDrawCursorEnabled) {
+            if (mCursorDrawable != null) {
+                mCursorDrawable.setBounds(
+                        mSourceWidth / 2, 0,
+                        mSourceWidth / 2 + mCursorDrawable.getIntrinsicWidth(), mSourceHeight);
+                mCursorDrawable.draw(canvas);
+            } else {
+                Paint paint = new Paint();
+                paint.setColor(Color.BLACK);  // The cursor on magnifier is by default in black.
+                canvas.drawRect(
+                        new Rect(mSourceWidth / 2 - 1, 0, mSourceWidth / 2 + 1, mSourceHeight),
+                        paint);
+            }
+        }
+    }
+
     private void performPixelCopy(final int startXInSurface, final int startYInSurface,
             final boolean updateWindowPosition) {
         if (mContentCopySurface.mSurface == null || !mContentCopySurface.mSurface.isValid()) {
@@ -827,8 +836,10 @@ public final class Magnifier {
                             final Rect dstRect = new Rect(mLeftCutWidth, 0,
                                     mSourceWidth - mRightCutWidth, bitmap.getHeight());
                             can.drawBitmap(bitmap, null, dstRect, null);
+                            maybeDrawCursor(can);
                             mWindow.updateContent(newBitmap);
                         } else {
+                            maybeDrawCursor(new Canvas(bitmap));
                             mWindow.updateContent(bitmap);
                         }
                     }
