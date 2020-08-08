@@ -377,12 +377,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
-    public abstract static class GenerateChallengeCallback {
-        public abstract void onChallengeGenerated(long challenge);
+    public interface GenerateChallengeCallback {
+        void onChallengeGenerated(long challenge);
     }
 
     private abstract static class InternalGenerateChallengeCallback
-            extends GenerateChallengeCallback {}
+            implements GenerateChallengeCallback {}
 
     /**
      * Request authentication of a crypto object. This call warms up the fingerprint hardware
@@ -579,37 +579,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             }
         }
     }
-
-    /**
-     * Same as {@link #generateChallenge(GenerateChallengeCallback)}, except blocks until the
-     * TEE/hardware operation is complete.
-     * @return challenge generated in the TEE/hardware
-     * @hide
-     */
-    @RequiresPermission(MANAGE_FINGERPRINT)
-    public long generateChallengeBlocking() {
-        final AtomicReference<Long> result = new AtomicReference<>();
-        final CountDownLatch latch = new CountDownLatch(1);
-        final GenerateChallengeCallback callback = new InternalGenerateChallengeCallback() {
-            @Override
-            public void onChallengeGenerated(long challenge) {
-                result.set(challenge);
-                latch.countDown();
-            }
-        };
-
-        generateChallenge(callback);
-
-        try {
-            latch.await(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Slog.e(TAG, "Interrupted while generatingChallenge", e);
-            e.printStackTrace();
-        }
-
-        return result.get();
-    }
-
 
     /**
      * Generates a unique random challenge in the TEE. A typical use case is to have it wrapped in a
