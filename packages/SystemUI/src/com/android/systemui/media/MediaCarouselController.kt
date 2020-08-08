@@ -43,7 +43,7 @@ class MediaCarouselController @Inject constructor(
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val activityStarter: ActivityStarter,
     @Main executor: DelayableExecutor,
-    mediaManager: MediaDataFilter,
+    mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager
 ) {
