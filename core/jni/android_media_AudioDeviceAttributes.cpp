@@ -31,7 +31,7 @@ jint createAudioDeviceAttributesFromNative(JNIEnv *env, jobject *jAudioDeviceAtt
                                  const AudioDeviceTypeAddr *devTypeAddr) {
     jint jStatus = (jint)AUDIO_JAVA_SUCCESS;
     jint jNativeType = (jint)devTypeAddr->mType;
-    ScopedLocalRef<jstring> jAddress(env, env->NewStringUTF(devTypeAddr->mAddress.data()));
+    ScopedLocalRef<jstring> jAddress(env, env->NewStringUTF(devTypeAddr->getAddress()));
 
     *jAudioDeviceAttributes = env->NewObject(gAudioDeviceAttributesClass, gAudioDeviceAttributesCstor,
             jNativeType, jAddress.get());
