@@ -1073,12 +1073,12 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     /**
      * @hide
      */
-    public abstract static class GenerateChallengeCallback {
-        public abstract void onGenerateChallengeResult(long challenge);
+    public interface GenerateChallengeCallback {
+        void onGenerateChallengeResult(long challenge);
     }
 
     private abstract static class InternalGenerateChallengeCallback
-            extends GenerateChallengeCallback {}
+            implements GenerateChallengeCallback {}
 
     private class OnEnrollCancelListener implements OnCancelListener {
         @Override
