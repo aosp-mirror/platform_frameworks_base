@@ -154,6 +154,10 @@ public class Editor {
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
 
+    // Specifies how far to make the cursor start float when drag the cursor away from the
+    // beginning or end of the line.
+    private static final int CURSOR_START_FLOAT_DISTANCE_PX = 20;
+
     private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
     private static final int RECENT_CUT_COPY_DURATION_MS = 15 * 1000; // 15 seconds in millis
 
@@ -289,6 +293,9 @@ public class Editor {
     private boolean mRenderCursorRegardlessTiming;
     private Blink mBlink;
 
+    // Whether to let magnifier draw cursor on its surface. This is for floating cursor effect.
+    // And it can only be true when |mNewMagnifierEnabled| is true.
+    private boolean mDrawCursorOnMagnifier;
     boolean mCursorVisible = true;
     boolean mSelectAllOnFocus;
     boolean mTextIsSelectable;
@@ -890,7 +897,7 @@ public class Editor {
         }
 
         boolean enabled = windowSupportsHandles && mTextView.getLayout() != null;
-        mInsertionControllerEnabled = enabled && isCursorVisible();
+        mInsertionControllerEnabled = enabled && (mDrawCursorOnMagnifier || isCursorVisible());
         mSelectionControllerEnabled = enabled && mTextView.textCanBeSelected();
 
         if (!mInsertionControllerEnabled) {
@@ -5101,26 +5108,38 @@ public class Editor {
             final int[] textViewLocationOnScreen = new int[2];
             mTextView.getLocationOnScreen(textViewLocationOnScreen);
             final float touchXInView = event.getRawX() - textViewLocationOnScreen[0];
-            float leftBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
-            float rightBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
-            if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_END) ^ rtl)) {
-                leftBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+            float leftBound, rightBound;
+            if (mNewMagnifierEnabled) {
+                leftBound = 0;
+                rightBound = mTextView.getWidth();
+                if (touchXInView < leftBound || touchXInView > rightBound) {
+                    // The touch is too far from the current line / selection, so hide the magnifier.
+                    return false;
+                }
             } else {
-                leftBound += mTextView.getLayout().getLineLeft(lineNumber);
-            }
-            if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_START) ^ rtl)) {
-                rightBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
-            } else {
-                rightBound += mTextView.getLayout().getLineRight(lineNumber);
-            }
-            leftBound *= mTextViewScaleX;
-            rightBound *= mTextViewScaleX;
-            final float contentWidth = Math.round(mMagnifierAnimator.mMagnifier.getWidth()
-                    / mMagnifierAnimator.mMagnifier.getZoom());
-            if (touchXInView < leftBound - contentWidth / 2
-                    || touchXInView > rightBound + contentWidth / 2) {
-                // The touch is too far from the current line / selection, so hide the magnifier.
-                return false;
+                leftBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+                rightBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+                if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_END)
+                        ^ rtl)) {
+                    leftBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+                } else {
+                    leftBound += mTextView.getLayout().getLineLeft(lineNumber);
+                }
+                if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_START)
+                        ^ rtl)) {
+                    rightBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+                } else {
+                    rightBound += mTextView.getLayout().getLineRight(lineNumber);
+                }
+                leftBound *= mTextViewScaleX;
+                rightBound *= mTextViewScaleX;
+                final float contentWidth = Math.round(mMagnifierAnimator.mMagnifier.getWidth()
+                        / mMagnifierAnimator.mMagnifier.getZoom());
+                if (touchXInView < leftBound - contentWidth / 2
+                        || touchXInView > rightBound + contentWidth / 2) {
+                    // The touch is too far from the current line / selection, so hide the magnifier.
+                    return false;
+                }
             }
 
             final float scaledTouchXInView;
@@ -5178,7 +5197,8 @@ public class Editor {
             final Rect magnifierRect = new Rect(magnifierTopLeft.x, magnifierTopLeft.y,
                     magnifierTopLeft.x + mMagnifierAnimator.mMagnifier.getWidth(),
                     magnifierTopLeft.y + mMagnifierAnimator.mMagnifier.getHeight());
-            setVisible(!handleOverlapsMagnifier(HandleView.this, magnifierRect));
+            setVisible(!handleOverlapsMagnifier(HandleView.this, magnifierRect)
+                    && !mDrawCursorOnMagnifier);
             final HandleView otherHandle = getOtherSelectionHandle();
             if (otherHandle != null) {
                 otherHandle.setVisible(!handleOverlapsMagnifier(otherHandle, magnifierRect));
@@ -5208,7 +5228,20 @@ public class Editor {
                     lineLeft += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
                     int lineRight = (int) layout.getLineRight(line);
                     lineRight += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
-                    mMagnifierAnimator.mMagnifier.setSourceHorizontalBounds(lineLeft, lineRight);
+                    mDrawCursorOnMagnifier =
+                            showPosInView.x < lineLeft - CURSOR_START_FLOAT_DISTANCE_PX
+                            || showPosInView.x > lineRight + CURSOR_START_FLOAT_DISTANCE_PX;
+                    mMagnifierAnimator.mMagnifier.setDrawCursor(
+                            mDrawCursorOnMagnifier, mDrawableForCursor);
+                    boolean cursorVisible = mCursorVisible;
+                    // Updates cursor visibility, so that the real cursor and the float cursor on
+                    // magnifier surface won't appear at the same time.
+                    mCursorVisible = !mDrawCursorOnMagnifier;
+                    if (mCursorVisible && !cursorVisible) {
+                        // When the real cursor is a drawable, hiding/showing it would change its
+                        // bounds. So, call updateCursorPosition() to correct its position.
+                        updateCursorPosition();
+                    }
                     final int lineHeight =
                             layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
                     float zoom = mInitialZoom;
@@ -5230,6 +5263,11 @@ public class Editor {
             if (mMagnifierAnimator != null) {
                 mMagnifierAnimator.dismiss();
                 mRenderCursorRegardlessTiming = false;
+                mDrawCursorOnMagnifier = false;
+                if (!mCursorVisible) {
+                    mCursorVisible = true;
+                    mTextView.invalidate();
+                }
                 resumeBlink();
                 setVisible(true);
                 final HandleView otherHandle = getOtherSelectionHandle();

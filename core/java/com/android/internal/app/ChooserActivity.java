@@ -206,6 +206,7 @@ public class ChooserActivity extends ResolverActivity implements
     public static final int SELECTION_TYPE_APP = 2;
     public static final int SELECTION_TYPE_STANDARD = 3;
     public static final int SELECTION_TYPE_COPY = 4;
+    public static final int SELECTION_TYPE_NEARBY = 5;
 
     private static final int SCROLL_STATUS_IDLE = 0;
     private static final int SCROLL_STATUS_SCROLLING_VERTICAL = 1;
@@ -784,8 +785,8 @@ public class ChooserActivity extends ResolverActivity implements
                 FrameworkStatsLog.SHARESHEET_STARTED,
                 getReferrerPackageName(),
                 target.getType(),
-                initialIntents == null ? 0 : initialIntents.length,
                 mCallerChooserTargets == null ? 0 : mCallerChooserTargets.length,
+                initialIntents == null ? 0 : initialIntents.length,
                 isWorkProfile(),
                 findPreferredContentPreview(getTargetIntent(), getContentResolver()),
                 target.getAction()
@@ -1135,7 +1136,8 @@ public class ChooserActivity extends ResolverActivity implements
         return displayContentPreview(previewType, targetIntent, getLayoutInflater(), parent);
     }
 
-    private ComponentName getNearbySharingComponent() {
+    @VisibleForTesting
+    protected ComponentName getNearbySharingComponent() {
         String nearbyComponent = Settings.Secure.getString(
                 getContentResolver(),
                 Settings.Secure.NEARBY_SHARING_COMPONENT);
@@ -1148,7 +1150,8 @@ public class ChooserActivity extends ResolverActivity implements
         return ComponentName.unflattenFromString(nearbyComponent);
     }
 
-    private TargetInfo getNearbySharingTarget(Intent originalIntent) {
+    @VisibleForTesting
+    protected TargetInfo getNearbySharingTarget(Intent originalIntent) {
         final ComponentName cn = getNearbySharingComponent();
         if (cn == null) return null;
 
@@ -1216,14 +1219,21 @@ public class ChooserActivity extends ResolverActivity implements
         final TargetInfo ti = getNearbySharingTarget(originalIntent);
         if (ti == null) return null;
 
-        return createActionButton(
+        final Button b = createActionButton(
                 ti.getDisplayIcon(this),
                 ti.getDisplayLabel(),
                 (View unused) -> {
+                    // Log share completion via nearby
+                    getChooserActivityLogger().logShareTargetSelected(
+                            SELECTION_TYPE_NEARBY,
+                            "",
+                            -1);
                     safelyStartActivity(ti);
                     finish();
                 }
         );
+        b.setId(R.id.chooser_nearby_button);
+        return b;
     }
 
     private void addActionButton(ViewGroup parent, Button b) {
@@ -2616,7 +2626,9 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    static final class EmptyTargetInfo extends NotSelectableTargetInfo {
+    protected static final class EmptyTargetInfo extends NotSelectableTargetInfo {
+        public EmptyTargetInfo() {}
+
         public Drawable getDisplayIcon(Context context) {
             return null;
         }

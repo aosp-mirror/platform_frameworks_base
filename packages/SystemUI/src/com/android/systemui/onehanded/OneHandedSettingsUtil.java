@@ -132,6 +132,14 @@ public final class OneHandedSettingsUtil {
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
 
+    /**
+     * Returns whether swipe bottom to notification gesture enabled or not.
+     */
+    public static boolean getSettingsSwipeToNotificationEnabled(ContentResolver resolver) {
+        return Settings.Secure.getInt(resolver,
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 0) == 1;
+    }
+
     protected static void dump(PrintWriter pw, String prefix, ContentResolver resolver) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);

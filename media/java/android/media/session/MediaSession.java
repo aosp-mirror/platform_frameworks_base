@@ -19,6 +19,7 @@ package android.media.session;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -105,6 +106,7 @@ public final class MediaSession {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
 
     /**

@@ -175,13 +175,13 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
      */
     public interface OneHandedTouchEventCallback {
         /**
-         * Handle the start event event, and return whether the event was consumed.
+         * Handle the start event.
          */
-        boolean onStart();
+        void onStart();
 
         /**
-         * Handle the exit event event, and return whether the event was consumed.
+         * Handle the exit event.
          */
-        boolean onStop();
+        void onStop();
     }
 }

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
 import dalvik.annotation.optimization.FastNative;
@@ -38,7 +39,8 @@ import java.io.Reader;
  * 
  * {@hide}
  */
-final class XmlBlock implements AutoCloseable {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public final class XmlBlock implements AutoCloseable {
     private static final boolean DEBUG=false;
 
     @UnsupportedAppUsage
@@ -88,7 +90,8 @@ final class XmlBlock implements AutoCloseable {
         }
     }
 
-    /*package*/ final class Parser implements XmlResourceParser {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public final class Parser implements XmlResourceParser {
         Parser(long parseState, XmlBlock block) {
             mParseState = parseState;
             mBlock = block;

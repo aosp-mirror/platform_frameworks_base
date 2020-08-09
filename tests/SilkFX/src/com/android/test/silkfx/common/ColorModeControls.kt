@@ -26,10 +26,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.test.silkfx.R
 import com.android.test.silkfx.app.WindowObserver
-import java.lang.Exception
 
 class ColorModeControls : LinearLayout, WindowObserver {
     private val COLOR_MODE_HDR10 = 3
+    private val SDR_WHITE_POINTS = floatArrayOf(200f, 250f, 300f, 350f, 400f, 100f, 150f)
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
@@ -37,14 +37,17 @@ class ColorModeControls : LinearLayout, WindowObserver {
     }
 
     private var window: Window? = null
-    private var currentMode: TextView? = null
+    private var currentModeDisplay: TextView? = null
     private val displayManager: DisplayManager
+    private var targetSdrWhitePointIndex = 0
+
+    private val whitePoint get() = SDR_WHITE_POINTS[targetSdrWhitePointIndex]
 
     override fun onFinishInflate() {
         super.onFinishInflate()
         val window = window ?: throw IllegalStateException("Failed to attach window")
 
-        currentMode = findViewById(R.id.current_mode)!!
+        currentModeDisplay = findViewById(R.id.current_mode)!!
         setColorMode(window.colorMode)
 
         findViewById<Button>(R.id.mode_default)!!.setOnClickListener {
@@ -63,21 +66,30 @@ class ColorModeControls : LinearLayout, WindowObserver {
 
     private fun setColorMode(newMode: Int) {
         val window = window!!
+        var sdrWhitepointChanged = false
         // Need to do this before setting the colorMode, as setting the colorMode will
         // trigger the attribute change listener
         if (newMode == ActivityInfo.COLOR_MODE_HDR ||
                 newMode == COLOR_MODE_HDR10) {
+            if (window.colorMode == newMode) {
+                targetSdrWhitePointIndex = (targetSdrWhitePointIndex + 1) % SDR_WHITE_POINTS.size
+                sdrWhitepointChanged = true
+            }
             setBrightness(1.0f)
         } else {
             setBrightness(.4f)
         }
         window.colorMode = newMode
-        currentMode?.run {
+        if (sdrWhitepointChanged) {
+            threadedRenderer?.setColorMode(newMode, whitePoint)
+        }
+        val whitePoint = whitePoint.toInt()
+        currentModeDisplay?.run {
             text = "Current Mode: " + when (newMode) {
                 ActivityInfo.COLOR_MODE_DEFAULT -> "Default/SRGB"
                 ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT -> "Wide Gamut"
-                ActivityInfo.COLOR_MODE_HDR -> "HDR (sdr white point 150)"
-                COLOR_MODE_HDR10 -> "HDR10 (sdr white point 150)"
+                ActivityInfo.COLOR_MODE_HDR -> "HDR (sdr white point $whitePoint)"
+                COLOR_MODE_HDR10 -> "HDR10 (sdr white point $whitePoint)"
                 else -> "Unknown"
             }
         }
@@ -100,5 +112,11 @@ class ColorModeControls : LinearLayout, WindowObserver {
                 // Ignore a permission denied rejection - it doesn't meaningfully change much
             }
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        threadedRenderer?.setColorMode(window!!.colorMode, whitePoint)
     }
 }

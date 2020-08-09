@@ -639,7 +639,7 @@ public final class BroadcastQueue {
                 final int opCode = AppOpsManager.permissionToOpCode(filter.requiredPermission);
                 if (opCode != AppOpsManager.OP_NONE
                         && mService.getAppOpsManager().noteOpNoThrow(opCode, r.callingUid,
-                        r.callerPackage, r.callerFeatureId, "")
+                        r.callerPackage, r.callerFeatureId, "Broadcast sent to protected receiver")
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: broadcasting "
                             + r.intent.toString()
@@ -672,7 +672,8 @@ public final class BroadcastQueue {
                 int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
                 if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
                         && mService.getAppOpsManager().noteOpNoThrow(appOp,
-                        filter.receiverList.uid, filter.packageName, filter.featureId, "")
+                        filter.receiverList.uid, filter.packageName, filter.featureId,
+                        "Broadcast delivered to registered receiver " + filter.receiverId)
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: receiving "
                             + r.intent.toString()
@@ -704,7 +705,8 @@ public final class BroadcastQueue {
         }
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
-                filter.receiverList.uid, filter.packageName, filter.featureId, "")
+                filter.receiverList.uid, filter.packageName, filter.featureId,
+                "Broadcast delivered to registered receiver " + filter.receiverId)
                 != AppOpsManager.MODE_ALLOWED) {
             Slog.w(TAG, "Appop Denial: receiving "
                     + r.intent.toString()
@@ -1366,9 +1368,10 @@ public final class BroadcastQueue {
             skip = true;
         } else if (!skip && info.activityInfo.permission != null) {
             final int opCode = AppOpsManager.permissionToOpCode(info.activityInfo.permission);
-            if (opCode != AppOpsManager.OP_NONE
-                    && mService.getAppOpsManager().noteOpNoThrow(opCode, r.callingUid, r.callerPackage,
-                    r.callerFeatureId, "") != AppOpsManager.MODE_ALLOWED) {
+            if (opCode != AppOpsManager.OP_NONE && mService.getAppOpsManager().noteOpNoThrow(opCode,
+                    r.callingUid, r.callerPackage, r.callerFeatureId,
+                    "Broadcast delivered to " + info.activityInfo.name)
+                    != AppOpsManager.MODE_ALLOWED) {
                 Slog.w(TAG, "Appop Denial: broadcasting "
                         + r.intent.toString()
                         + " from " + r.callerPackage + " (pid="
@@ -1407,7 +1410,8 @@ public final class BroadcastQueue {
                 if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
                         && mService.getAppOpsManager().noteOpNoThrow(appOp,
                         info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
-                        null /* default featureId */, "")
+                        null /* default featureId */,
+                        "Broadcast delivered to " + info.activityInfo.name)
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: receiving "
                             + r.intent + " to "
@@ -1424,7 +1428,7 @@ public final class BroadcastQueue {
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
                 info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
-                null  /* default featureId */, "")
+                null  /* default featureId */, "Broadcast delivered to " + info.activityInfo.name)
                 != AppOpsManager.MODE_ALLOWED) {
             Slog.w(TAG, "Appop Denial: receiving "
                     + r.intent + " to "

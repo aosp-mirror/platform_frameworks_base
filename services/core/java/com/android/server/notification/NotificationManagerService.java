@@ -7288,12 +7288,12 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mToastQueue")
     private void keepProcessAliveForToastIfNeededLocked(int pid) {
-        int toastCount = 0; // toasts from this pid
+        int toastCount = 0; // toasts from this pid, rendered by the app
         ArrayList<ToastRecord> list = mToastQueue;
         int n = list.size();
         for (int i = 0; i < n; i++) {
             ToastRecord r = list.get(i);
-            if (r.pid == pid) {
+            if (r.pid == pid && r.keepProcessAlive()) {
                 toastCount++;
             }
         }

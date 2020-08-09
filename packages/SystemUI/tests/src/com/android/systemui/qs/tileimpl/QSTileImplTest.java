@@ -244,6 +244,8 @@ public class QSTileImplTest extends SysuiTestCase {
         assertNotEquals(DESTROYED, mTile.getLifecycle().getCurrentState());
         mTile.handleDestroy();
 
+        mTestableLooper.processAllMessages();
+
         assertEquals(DESTROYED, mTile.getLifecycle().getCurrentState());
     }
 
@@ -296,6 +298,25 @@ public class QSTileImplTest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         assertNotEquals(DESTROYED, mTile.getLifecycle().getCurrentState());
+    }
+
+    @Test
+    public void testRefreshStateAfterDestroyedDoesNotCrash() {
+        mTile.destroy();
+        mTile.refreshState();
+
+        mTestableLooper.processAllMessages();
+    }
+
+    @Test
+    public void testSetListeningAfterDestroyedDoesNotCrash() {
+        Object o = new Object();
+        mTile.destroy();
+
+        mTile.setListening(o, true);
+        mTile.setListening(o, false);
+
+        mTestableLooper.processAllMessages();
     }
 
     private void assertEvent(UiEventLogger.UiEventEnum eventType,

@@ -1624,8 +1624,9 @@ class ContextImpl extends Context {
         }
         try {
             final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
-                    mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(), rd,
-                    filter, broadcastPermission, userId, flags);
+                    mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
+                    AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,
+                    flags);
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
                 intent.prepareToEnterProcess();

@@ -634,6 +634,19 @@ public class HardwareRenderer {
     }
 
     /**
+     * Sets the colormode with the desired SDR white point.
+     *
+     * The white point only applies if the color mode is an HDR mode
+     *
+     * @hide
+     */
+    public void setColorMode(@ActivityInfo.ColorMode int colorMode, float whitePoint) {
+        nSetSdrWhitePoint(mNativeProxy, whitePoint);
+        mColorMode = colorMode;
+        nSetColorMode(mNativeProxy, colorMode);
+    }
+
+    /**
      * Blocks until all previously queued work has completed.
      *
      * TODO: Only used for draw finished listeners, but the FrameCompleteCallback does that
@@ -1226,6 +1239,8 @@ public class HardwareRenderer {
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
 
     private static native void nSetColorMode(long nativeProxy, int colorMode);
+
+    private static native void nSetSdrWhitePoint(long nativeProxy, float whitePoint);
 
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
 

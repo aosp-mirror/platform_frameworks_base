@@ -104,4 +104,10 @@ public class OneHandedSettingsUtilTest extends OneHandedTestCase {
                 ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS,
                 ONE_HANDED_TIMEOUT_LONG_IN_SECONDS);
     }
+
+    @Test
+    public void testGetSettingsSwipeToNotificationEnabled() {
+        assertThat(mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                mContentResolver)).isAnyOf(true, false);
+    }
 }

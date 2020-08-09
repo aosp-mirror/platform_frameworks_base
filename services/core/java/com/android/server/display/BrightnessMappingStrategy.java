@@ -349,9 +349,7 @@ public abstract class BrightnessMappingStrategy {
 
     // Normalize entire brightness range to 0 - 1.
     protected static float normalizeAbsoluteBrightness(int brightness) {
-        return BrightnessSynchronizer.brightnessIntToFloat(brightness,
-                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
-                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
+        return BrightnessSynchronizer.brightnessIntToFloat(brightness);
     }
 
     private Pair<float[], float[]> insertControlPoint(

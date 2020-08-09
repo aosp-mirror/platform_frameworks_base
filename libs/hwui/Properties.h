@@ -249,6 +249,8 @@ public:
 
     static int defaultRenderAhead;
 
+    static float defaultSdrWhitePoint;
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;

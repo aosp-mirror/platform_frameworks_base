@@ -1209,11 +1209,14 @@ public class TelecomManager {
     /**
      *  Returns a list of all {@link PhoneAccount}s registered for the calling package.
      *
+     * @deprecated Use {@link #getSelfManagedPhoneAccounts()} instead to get only self-managed
+     * {@link PhoneAccountHandle} for the calling package.
      * @return A list of {@code PhoneAccountHandle} objects.
      * @hide
      */
     @SystemApi
     @SuppressLint("Doclava125")
+    @Deprecated
     public List<PhoneAccountHandle> getPhoneAccountsForPackage() {
         try {
             if (isServiceConnected()) {
