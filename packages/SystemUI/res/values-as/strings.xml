@@ -1069,7 +1069,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"চুপাৰিছসমূহ ল’ড কৰি থকা হৈছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"বৰ্তমানৰ ছেশ্বনটো লুকুৱাওক।"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"লুকুৱাওক"</string>
+    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"পুনৰ আৰম্ভ কৰক"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ছেটিংসমূহ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"সক্ৰিয় নহয়, এপ্‌টো পৰীক্ষা কৰক"</string>

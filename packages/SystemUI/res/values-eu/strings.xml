@@ -1069,7 +1069,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ezkutatu uneko saioa."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ezkutatu"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Baztertu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ezarpenak"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktibo; egiaztatu aplikazioa"</string>
@@ -1085,5 +1085,5 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Gehitu aukerak"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editatu aukerak"</string>
     <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Esku bakarreko modua erabiltzea"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Ateratzeko, pasatu hatza pantailaren behealdetik gora edo sakatu aplikazioaren gainean, edonon"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Ateratzeko, pasatu hatza pantailaren behealdetik gora edo sakatu aplikazioaren gainaldea"</string>
 </resources>
