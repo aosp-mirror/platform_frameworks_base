@@ -23,7 +23,7 @@ android_test_helper_app {
 java_test_host {
     name: "StagedInstallInternalTest",
     srcs: ["src/**/*.java"],
-    libs: ["tradefed"],
+    libs: ["tradefed", "cts-shim-host-lib"],
     static_libs: [
         "testng",
         "compatibility-tradefed",

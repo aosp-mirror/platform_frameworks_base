@@ -16,6 +16,8 @@
 
 package com.android.tests.stagedinstallinternal.host;
 
+import static com.android.cts.shim.lib.ShimPackage.SHIM_APEX_PACKAGE_NAME;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
@@ -137,6 +139,24 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         final String sessionId = getDevice().executeShellCommand(
                 "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
         assertThat(sessionId).isEmpty();
+    }
+
+    // Test rollback-app command waits for staged sessions to be ready
+    @Test
+    public void testAdbRollbackAppWaitsForStagedReady() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        String output = getDevice().executeAdbCommand("install", "--staged",
+                "--enable-rollback", apexFile.getAbsolutePath());
+        assertThat(output).contains("Reboot device to apply staged session");
+        getDevice().reboot();
+        output = getDevice().executeShellCommand("pm rollback-app " + SHIM_APEX_PACKAGE_NAME);
+        assertThat(output).contains("Reboot device to apply staged session");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
     }
 
     @Test

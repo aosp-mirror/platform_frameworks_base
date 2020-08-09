@@ -456,9 +456,20 @@ class PackageManagerShellCommand extends ShellCommand {
         return 1;
     }
 
-    private int runRollbackApp() {
+    private int runRollbackApp() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
 
+        String opt;
+        long stagedReadyTimeoutMs = DEFAULT_STAGED_READY_TIMEOUT_MS;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--staged-ready-timeout":
+                    stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+            }
+        }
         final String packageName = getNextArgRequired();
         if (packageName == null) {
             pw.println("Error: package name not specified");
@@ -466,11 +477,10 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
+        RollbackInfo rollback = null;
         try {
             IRollbackManager rm = IRollbackManager.Stub.asInterface(
                     ServiceManager.getService(Context.ROLLBACK_SERVICE));
-
-            RollbackInfo rollback = null;
             for (RollbackInfo r : (List<RollbackInfo>) rm.getAvailableRollbacks().getList()) {
                 for (PackageRollbackInfo info : r.getPackages()) {
                     if (packageName.equals(info.getPackageName())) {
@@ -495,14 +505,21 @@ class PackageManagerShellCommand extends ShellCommand {
         final Intent result = receiver.getResult();
         final int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
                 RollbackManager.STATUS_FAILURE);
-        if (status == RollbackManager.STATUS_SUCCESS) {
-            pw.println("Success");
-            return 0;
-        } else {
+
+        if (status != RollbackManager.STATUS_SUCCESS) {
             pw.println("Failure ["
                     + result.getStringExtra(RollbackManager.EXTRA_STATUS_MESSAGE) + "]");
             return 1;
         }
+
+        if (rollback.isStaged() && stagedReadyTimeoutMs > 0) {
+            final int committedSessionId = rollback.getCommittedSessionId();
+            return doWaitForStagedSessionReady(committedSessionId, stagedReadyTimeoutMs, pw);
+        }
+
+        pw.println("Success");
+        return 0;
+
     }
 
     private void setParamsSize(InstallParams params, List<String> inPaths) {
@@ -1306,7 +1323,7 @@ class PackageManagerShellCommand extends ShellCommand {
             abandonSession = false;
 
             if (params.sessionParams.isStaged && params.stagedReadyTimeoutMs > 0) {
-                return doWaitForStagedSessionRead(sessionId, params.stagedReadyTimeoutMs, pw);
+                return doWaitForStagedSessionReady(sessionId, params.stagedReadyTimeoutMs, pw);
             }
 
             pw.println("Success");
@@ -1321,7 +1338,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int doWaitForStagedSessionRead(int sessionId, long timeoutMs, PrintWriter pw)
+    private int doWaitForStagedSessionReady(int sessionId, long timeoutMs, PrintWriter pw)
               throws RemoteException {
         Preconditions.checkArgument(timeoutMs > 0);
         PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
@@ -1390,7 +1407,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
                 .getSessionInfo(sessionId);
         if (si != null && si.isStaged() && stagedReadyTimeoutMs > 0) {
-            return doWaitForStagedSessionRead(sessionId, stagedReadyTimeoutMs, pw);
+            return doWaitForStagedSessionReady(sessionId, stagedReadyTimeoutMs, pw);
         }
         pw.println("Success");
         return 0;
