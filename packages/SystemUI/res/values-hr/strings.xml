@@ -505,10 +505,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Štednja baterije je uključena"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Smanjuje količinu rada i pozadinske podatke"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Isključite Štednju baterije"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkcionalnost imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Započeti snimanje ili emitiranje?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranja pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranje pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne prikazuj ponovo"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši sve"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>

@@ -502,10 +502,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батареяны үнөмдөгүч режими күйүк"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Иштин майнаптуулугун начарлатып, фондук дайын-даректерди чектейт"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батареяны үнөмдөгүчтү өчүрүү"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Бул функцияны аткарган <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> кызматы экраныңызда көрүнүп турган бардык маалыматты же жаздыруу жана тышкы экранга чыгаруу учурунда түзмөгүңүздө ойнотулган маалыматты колдоно алат. Буга сырсөздөр, төлөмдүн чоо-жайы, сүрөттөр, билдирүүлөр жана ойнотулган аудио кирет."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Бул функцияны аткарган кызматка экраныңыздагы бардык маалымат же түзмөктө ойнотулуп жаткан нерсе, сырсөздөр, төлөмдөрдүн чоо-жайы, сүрөттөр, билдирүүлөр жана аудио файлдар жеткиликтүү болот."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Жаздырып же тышкы экранга чыгарып жатканда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Жаздырып же тышкы экранга чыгарып жатканда, бул колдонмо экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> менен жаздырылып же тышкы экранга чыгарылып башталсынбы?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу аркылуу жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Экинчи көрүнбөсүн"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Баарын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Башкаруу"</string>
