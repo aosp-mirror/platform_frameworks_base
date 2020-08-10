@@ -568,7 +568,7 @@ public class SizeCompatTests extends WindowTestsBase {
     private static WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-        final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
+        final TestWindowState w = new TestWindowState(
                 activity.mWmService, mock(Session.class), new TestIWindow(), params, activity);
         WindowTestsBase.makeWindowVisible(w);
         w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
@@ -581,7 +581,7 @@ public class SizeCompatTests extends WindowTestsBase {
         doReturn(true).when(displayPolicy).hasStatusBar();
         displayPolicy.onConfigurationChanged();
 
-        final WindowTestUtils.TestWindowToken token = WindowTestUtils.createTestWindowToken(
+        final TestWindowToken token = createTestWindowToken(
                 WindowManager.LayoutParams.TYPE_STATUS_BAR, displayContent);
         final WindowManager.LayoutParams attrs =
                 new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_STATUS_BAR);
@@ -589,7 +589,7 @@ public class SizeCompatTests extends WindowTestsBase {
         attrs.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0 /* types */);
-        final WindowTestUtils.TestWindowState statusBar = new WindowTestUtils.TestWindowState(
+        final TestWindowState statusBar = new TestWindowState(
                 displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
         token.addWindow(statusBar);
         statusBar.setRequestedSize(displayContent.mBaseDisplayWidth,
