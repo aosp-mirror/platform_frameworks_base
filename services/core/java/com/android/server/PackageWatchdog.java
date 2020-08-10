@@ -1453,8 +1453,11 @@ public class PackageWatchdog {
             } else {
                 mHealthCheckState = HealthCheckState.ACTIVE;
             }
-            Slog.i(TAG, "Updated health check state for package " + getName() + ": "
-                    + toString(oldState) + " -> " + toString(mHealthCheckState));
+
+            if (oldState != mHealthCheckState) {
+                Slog.i(TAG, "Updated health check state for package " + getName() + ": "
+                        + toString(oldState) + " -> " + toString(mHealthCheckState));
+            }
             return mHealthCheckState;
         }
 
