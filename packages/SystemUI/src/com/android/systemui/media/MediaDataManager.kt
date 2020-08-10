@@ -44,6 +44,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
@@ -96,6 +97,7 @@ class MediaDataManager(
     dumpManager: DumpManager,
     mediaTimeoutListener: MediaTimeoutListener,
     mediaResumeListener: MediaResumeListener,
+    private val activityStarter: ActivityStarter,
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean
 ) : Dumpable {
@@ -112,10 +114,11 @@ class MediaDataManager(
         dumpManager: DumpManager,
         broadcastDispatcher: BroadcastDispatcher,
         mediaTimeoutListener: MediaTimeoutListener,
-        mediaResumeListener: MediaResumeListener
+        mediaResumeListener: MediaResumeListener,
+        activityStarter: ActivityStarter
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
-            Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
+            activityStarter, Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -393,10 +396,13 @@ class MediaDataManager(
                 }
                 val runnable = if (action.actionIntent != null) {
                     Runnable {
-                        try {
-                            action.actionIntent.send()
-                        } catch (e: PendingIntent.CanceledException) {
-                            Log.d(TAG, "Intent canceled", e)
+                        if (action.isAuthenticationRequired()) {
+                            activityStarter.dismissKeyguardThenExecute ({
+                                var result = sendPendingIntent(action.actionIntent)
+                                result
+                            }, {}, true)
+                        } else {
+                            sendPendingIntent(action.actionIntent)
                         }
                     }
                 } else {
@@ -439,6 +445,15 @@ class MediaDataManager(
         return null
     }
 
+    private fun sendPendingIntent(intent: PendingIntent): Boolean {
+        return try {
+            intent.send()
+            true
+        } catch (e: PendingIntent.CanceledException) {
+            Log.d(TAG, "Intent canceled", e)
+            false
+        }
+    }
     /**
      * Load a bitmap from a URI
      * @param uri the uri to load

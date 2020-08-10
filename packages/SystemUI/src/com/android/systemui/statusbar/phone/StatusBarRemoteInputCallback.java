@@ -244,9 +244,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
+            boolean appRequestedAuth,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
-        if (isActivity) {
+        if (isActivity || appRequestedAuth) {
             mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
             final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
                     pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
