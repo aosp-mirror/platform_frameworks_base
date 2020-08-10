@@ -462,7 +462,7 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testTurnRestrictBackgroundOn() throws Exception {
-        assertRestrictBackgroundOff(); // Sanity check.
+        assertRestrictBackgroundOff();
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         setRestrictBackground(true);
         assertRestrictBackgroundChangedReceived(futureIntent, null);
@@ -471,7 +471,7 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     @NetPolicyXml("restrict-background-on.xml")
     public void testTurnRestrictBackgroundOff() throws Exception {
-        assertRestrictBackgroundOn(); // Sanity check.
+        assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         setRestrictBackground(false);
@@ -479,28 +479,27 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
-     * Adds whitelist when restrict background is on - app should receive an intent.
+     * Adds allowlist when restrict background is on - app should receive an intent.
      */
     @Test
     @NetPolicyXml("restrict-background-on.xml")
-    public void testAddRestrictBackgroundWhitelist_restrictBackgroundOn() throws Exception {
-        assertRestrictBackgroundOn(); // Sanity check.
+    public void testAddRestrictBackgroundAllowlist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
-        addRestrictBackgroundWhitelist(true);
+        addRestrictBackgroundAllowlist(true);
     }
 
     /**
-     * Adds whitelist when restrict background is off - app should not receive an intent.
+     * Adds allowlist when restrict background is off - app should not receive an intent.
      */
     @Test
-    public void testAddRestrictBackgroundWhitelist_restrictBackgroundOff() throws Exception {
-        assertRestrictBackgroundOff(); // Sanity check.
-        addRestrictBackgroundWhitelist(false);
+    public void testAddRestrictBackgroundAllowlist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff();
+        addRestrictBackgroundAllowlist(false);
     }
 
-    private void addRestrictBackgroundWhitelist(boolean expectIntent) throws Exception {
-        // Sanity checks.
-        assertWhitelistUids();
+    private void addRestrictBackgroundAllowlist(boolean expectIntent) throws Exception {
+        assertAllowlistUids();
         assertUidPolicy(UID_A, POLICY_NONE);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
@@ -508,7 +507,7 @@ public class NetworkPolicyManagerServiceTest {
 
         mService.setUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
 
-        assertWhitelistUids(UID_A);
+        assertAllowlistUids(UID_A);
         assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
         mPolicyListener.waitAndVerify()
                 .onUidPoliciesChanged(APP_ID_A, POLICY_ALLOW_METERED_BACKGROUND);
@@ -520,24 +519,24 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
-     * Removes whitelist when restrict background is on - app should receive an intent.
+     * Removes allowlist when restrict background is on - app should receive an intent.
      */
     @Test
-    @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
-    public void testRemoveRestrictBackgroundWhitelist_restrictBackgroundOn() throws Exception {
-        assertRestrictBackgroundOn(); // Sanity check.
+    @NetPolicyXml("uidA-allowlisted-restrict-background-on.xml")
+    public void testRemoveRestrictBackgroundAllowlist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
-        removeRestrictBackgroundWhitelist(true);
+        removeRestrictBackgroundAllowlist(true);
     }
 
     /**
-     * Removes whitelist when restrict background is off - app should not receive an intent.
+     * Removes allowlist when restrict background is off - app should not receive an intent.
      */
     @Test
-    @NetPolicyXml("uidA-whitelisted-restrict-background-off.xml")
-    public void testRemoveRestrictBackgroundWhitelist_restrictBackgroundOff() throws Exception {
-        assertRestrictBackgroundOff(); // Sanity check.
-        removeRestrictBackgroundWhitelist(false);
+    @NetPolicyXml("uidA-allowlisted-restrict-background-off.xml")
+    public void testRemoveRestrictBackgroundAllowlist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff();
+        removeRestrictBackgroundAllowlist(false);
     }
 
     @Test
@@ -688,9 +687,8 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.getRestrictBackground());
     }
 
-    private void removeRestrictBackgroundWhitelist(boolean expectIntent) throws Exception {
-        // Sanity checks.
-        assertWhitelistUids(UID_A);
+    private void removeRestrictBackgroundAllowlist(boolean expectIntent) throws Exception {
+        assertAllowlistUids(UID_A);
         assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
@@ -698,7 +696,7 @@ public class NetworkPolicyManagerServiceTest {
 
         mService.setUidPolicy(UID_A, POLICY_NONE);
 
-        assertWhitelistUids();
+        assertAllowlistUids();
         assertUidPolicy(UID_A, POLICY_NONE);
         mPolicyListener.waitAndVerify().onUidPoliciesChanged(APP_ID_A, POLICY_NONE);
         if (expectIntent) {
@@ -709,27 +707,27 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
-     * Adds blacklist when restrict background is on - app should not receive an intent.
+     * Adds denylist when restrict background is on - app should not receive an intent.
      */
     @Test
     @NetPolicyXml("restrict-background-on.xml")
-    public void testAddRestrictBackgroundBlacklist_restrictBackgroundOn() throws Exception {
-        assertRestrictBackgroundOn(); // Sanity check.
+    public void testAddRestrictBackgroundDenylist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
-        addRestrictBackgroundBlacklist(false);
+        addRestrictBackgroundDenylist(false);
     }
 
     /**
-     * Adds blacklist when restrict background is off - app should receive an intent.
+     * Adds denylist when restrict background is off - app should receive an intent.
      */
     @Test
-    public void testAddRestrictBackgroundBlacklist_restrictBackgroundOff() throws Exception {
-        assertRestrictBackgroundOff(); // Sanity check.
-        addRestrictBackgroundBlacklist(true);
+    public void testAddRestrictBackgroundDenylist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff();
+        addRestrictBackgroundDenylist(true);
     }
 
-    private void addRestrictBackgroundBlacklist(boolean expectIntent) throws Exception {
-        assertUidPolicy(UID_A, POLICY_NONE); // Sanity check.
+    private void addRestrictBackgroundDenylist(boolean expectIntent) throws Exception {
+        assertUidPolicy(UID_A, POLICY_NONE);
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         mPolicyListener.expect().onUidPoliciesChanged(anyInt(), anyInt());
 
@@ -746,28 +744,28 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
-     * Removes blacklist when restrict background is on - app should not receive an intent.
+     * Removes denylist when restrict background is on - app should not receive an intent.
      */
     @Test
-    @NetPolicyXml("uidA-blacklisted-restrict-background-on.xml")
-    public void testRemoveRestrictBackgroundBlacklist_restrictBackgroundOn() throws Exception {
-        assertRestrictBackgroundOn(); // Sanity check.
+    @NetPolicyXml("uidA-denylisted-restrict-background-on.xml")
+    public void testRemoveRestrictBackgroundDenylist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
-        removeRestrictBackgroundBlacklist(false);
+        removeRestrictBackgroundDenylist(false);
     }
 
     /**
-     * Removes blacklist when restrict background is off - app should receive an intent.
+     * Removes denylist when restrict background is off - app should receive an intent.
      */
     @Test
-    @NetPolicyXml("uidA-blacklisted-restrict-background-off.xml")
-    public void testRemoveRestrictBackgroundBlacklist_restrictBackgroundOff() throws Exception {
-        assertRestrictBackgroundOff(); // Sanity check.
-        removeRestrictBackgroundBlacklist(true);
+    @NetPolicyXml("uidA-denylisted-restrict-background-off.xml")
+    public void testRemoveRestrictBackgroundDenylist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff();
+        removeRestrictBackgroundDenylist(true);
     }
 
-    private void removeRestrictBackgroundBlacklist(boolean expectIntent) throws Exception {
-        assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND); // Sanity check.
+    private void removeRestrictBackgroundDenylist(boolean expectIntent) throws Exception {
+        assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         mPolicyListener.expect().onUidPoliciesChanged(anyInt(), anyInt());
 
@@ -784,9 +782,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @NetPolicyXml("uidA-blacklisted-restrict-background-on.xml")
-    public void testBlacklistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
-        // Sanity checks.
+    @NetPolicyXml("uidA-denylisted-restrict-background-on.xml")
+    public void testDenylistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
@@ -797,12 +794,11 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
-    public void testWhitelistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
-        // Sanity checks.
+    @NetPolicyXml("uidA-allowlisted-restrict-background-on.xml")
+    public void testAllowlistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
-        assertWhitelistUids(UID_A);
+        assertAllowlistUids(UID_A);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         setRestrictBackground(true);
@@ -810,12 +806,11 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
-    public void testWhitelistedAppIsNotifiedWhenBlacklisted() throws Exception {
-        // Sanity checks.
+    @NetPolicyXml("uidA-allowlisted-restrict-background-on.xml")
+    public void testAllowlistedAppIsNotifiedWhenDenylisted() throws Exception {
         assertRestrictBackgroundOn();
         assertRestrictBackgroundChangedReceived(mFutureIntent, null);
-        assertWhitelistUids(UID_A);
+        assertAllowlistUids(UID_A);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
@@ -823,8 +818,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @NetPolicyXml("restrict-background-lists-whitelist-format.xml")
-    public void testRestrictBackgroundLists_whitelistFormat() throws Exception {
+    @NetPolicyXml("restrict-background-lists-allowlist-format.xml")
+    public void testRestrictBackgroundLists_allowlistFormat() throws Exception {
         restrictBackgroundListsTest();
     }
 
@@ -835,33 +830,33 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void restrictBackgroundListsTest() throws Exception {
-        // UIds that are whitelisted.
-        assertWhitelistUids(UID_A, UID_B, UID_C);
+        // UIds that are allowlisted.
+        assertAllowlistUids(UID_A, UID_B, UID_C);
         assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
         assertUidPolicy(UID_B, POLICY_ALLOW_METERED_BACKGROUND);
         assertUidPolicy(UID_C, POLICY_ALLOW_METERED_BACKGROUND);
 
-        // UIDs that are blacklisted.
+        // UIDs that are denylisted.
         assertUidPolicy(UID_D, POLICY_NONE);
         assertUidPolicy(UID_E, POLICY_REJECT_METERED_BACKGROUND);
 
         // UIDS that have legacy policies.
         assertUidPolicy(UID_F, 2); // POLICY_ALLOW_BACKGROUND_BATTERY_SAVE
 
-        // Remove whitelist.
+        // Remove allowlist.
         mService.setUidPolicy(UID_A, POLICY_NONE);
         assertUidPolicy(UID_A, POLICY_NONE);
-        assertWhitelistUids(UID_B, UID_C);
+        assertAllowlistUids(UID_B, UID_C);
 
-        // Add whitelist when blacklisted.
+        // Add allowlist when denylisted.
         mService.setUidPolicy(UID_E, POLICY_ALLOW_METERED_BACKGROUND);
         assertUidPolicy(UID_E, POLICY_ALLOW_METERED_BACKGROUND);
-        assertWhitelistUids(UID_B, UID_C, UID_E);
+        assertAllowlistUids(UID_B, UID_C, UID_E);
 
-        // Add blacklist when whitelisted.
+        // Add denylist when allowlisted.
         mService.setUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND);
         assertUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND);
-        assertWhitelistUids(UID_C, UID_E);
+        assertAllowlistUids(UID_C, UID_E);
     }
 
     /**
@@ -870,9 +865,9 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     @NetPolicyXml("restrict-background-lists-mixed-format.xml")
     public void testRestrictBackgroundLists_mixedFormat() throws Exception {
-        assertWhitelistUids(UID_A, UID_C, UID_D);
+        assertAllowlistUids(UID_A, UID_C, UID_D);
         assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
-        assertUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND); // Blacklist prevails.
+        assertUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND); // Denylist prevails.
         assertUidPolicy(UID_C, (POLICY_ALLOW_METERED_BACKGROUND | 2));
         assertUidPolicy(UID_D, POLICY_ALLOW_METERED_BACKGROUND);
     }
@@ -2045,7 +2040,7 @@ public class NetworkPolicyManagerServiceTest {
         }
     }
 
-    private void assertWhitelistUids(int... uids) {
+    private void assertAllowlistUids(int... uids) {
         assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_ALLOW_METERED_BACKGROUND), uids);
     }
 
@@ -2133,7 +2128,6 @@ public class NetworkPolicyManagerServiceTest {
 
     private void setRestrictBackground(boolean flag) throws Exception {
         mService.setRestrictBackground(flag);
-        // Sanity check.
         assertEquals("restrictBackground not set", flag, mService.getRestrictBackground());
     }
 
