@@ -903,7 +903,7 @@ public final class UiAutomation {
         try {
             // Calling out without a lock held.
             screenShot = mUiAutomationConnection.takeScreenshot(
-                    new Rect(0, 0, displaySize.x, displaySize.y), rotation);
+                    new Rect(0, 0, displaySize.x, displaySize.y));
             if (screenShot == null) {
                 return null;
             }
