@@ -483,6 +483,13 @@ public class ExternalStorageProvider extends FileSystemProvider {
     }
 
     @Override
+    protected void onDocIdDeleted(String docId) {
+        Uri uri = DocumentsContract.buildDocumentUri(AUTHORITY, docId);
+        getContext().revokeUriPermission(uri, ~0);
+    }
+
+
+    @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
         synchronized (mRootsLock) {
