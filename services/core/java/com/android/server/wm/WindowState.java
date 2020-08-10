@@ -2456,9 +2456,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             finishInputEvent(event, true);
         }
     }
-    /**
-     *  Dummy event receiver for windows that died visible.
-     */
+    /** Fake event receiver for windows that died visible. */
     private DeadWindowEventReceiver mDeadWindowEventReceiver;
 
     void openInputChannel(InputChannel outInputChannel) {
@@ -2476,9 +2474,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClientChannel.dispose();
             mClientChannel = null;
         } else {
-            // If the window died visible, we setup a dummy input channel, so that taps
+            // If the window died visible, we setup a fake input channel, so that taps
             // can still detected by input monitor channel, and we can relaunch the app.
-            // Create dummy event receiver that simply reports all events as handled.
+            // Create fake event receiver that simply reports all events as handled.
             mDeadWindowEventReceiver = new DeadWindowEventReceiver(mClientChannel);
         }
         mWmService.mInputToWindowMap.put(mInputWindowHandle.token, this);

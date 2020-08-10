@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RecordingCanvas;
@@ -82,7 +81,7 @@ class TaskSnapshotController {
 
     /**
      * Return value for {@link #getSnapshotMode}: We are not allowed to take a real screenshot but
-     * we should try to use the app theme to create a dummy representation of the app.
+     * we should try to use the app theme to create a fake representation of the app.
      */
     @VisibleForTesting
     static final int SNAPSHOT_MODE_APP_THEME = 1;
