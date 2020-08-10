@@ -1069,7 +1069,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Empfehlungen werden geladen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Du kannst die aktuelle Sitzung ausblenden."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ausblenden"</string>
+    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
@@ -1084,8 +1085,6 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zum Anzeigen der Karten für neue Geräte Ein-/Aus-Taste gedrückt halten"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Steuerelemente hinzufügen"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Steuerelemente bearbeiten"</string>
-    <!-- no translation found for one_handed_tutorial_title (6312198435090726656) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (7674850272340517174) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Einhandmodus verwenden"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Wenn du die App schließen möchtest, wische vom unteren Rand des Displays nach oben oder tippe auf eine beliebige Stelle oberhalb der App"</string>
 </resources>

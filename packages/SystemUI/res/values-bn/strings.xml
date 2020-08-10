@@ -1069,7 +1069,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"বর্তমান সেশন লুকান।"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"লুকান"</string>
+    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"আবার চালু করুন"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"বন্ধ আছে, অ্যাপ চেক করুন"</string>
@@ -1084,8 +1085,6 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"নতুন কন্ট্রোল দেখতে পাওয়ার বোতাম টিপে ধরে থাকুন"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"কন্ট্রোল যোগ করুন"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"কন্ট্রোল এডিট করুন"</string>
-    <!-- no translation found for one_handed_tutorial_title (6312198435090726656) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (7674850272340517174) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"\'এক হাতে ব্যবহার করার মোড\'-এর ব্যবহার"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"বেরিয়ে আসার জন্য, স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন অথবা অ্যাপের আইকনের উপরে যেকোনও জায়গায় ট্যাপ করুন"</string>
 </resources>

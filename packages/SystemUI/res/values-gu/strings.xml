@@ -1069,7 +1069,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"છુપાવો"</string>
+    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
@@ -1084,8 +1085,6 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"નવા નિયંત્રણ જોવા માટે પાવર બટનને દબાવી રાખો"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"નિયંત્રણો ઉમેરો"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"નિયંત્રણોમાં ફેરફાર કરો"</string>
-    <!-- no translation found for one_handed_tutorial_title (6312198435090726656) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (7674850272340517174) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"એક-હાથે વાપરો મોડનો ઉપયોગ કરી રહ્યાં છીએ"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"બહાર નીકળવા માટે, સ્ક્રીનની નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરો અથવા ઍપના આઇકન પર ગમે ત્યાં ટૅપ કરો"</string>
 </resources>
