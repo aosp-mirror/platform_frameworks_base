@@ -99,9 +99,8 @@ class RunningTasks {
                 // the task's profile
                 return;
             }
-            if (!mAllowed && !task.isActivityTypeHome()) {
-                // Skip if the caller isn't allowed to fetch this task, except for the home
-                // task which we always return.
+            if (!mAllowed) {
+                // Skip if the caller isn't allowed to fetch this task
                 return;
             }
         }
