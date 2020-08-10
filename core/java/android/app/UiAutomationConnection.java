@@ -180,7 +180,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public Bitmap takeScreenshot(Rect crop, int rotation) {
+    public Bitmap takeScreenshot(Rect crop) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -190,7 +190,15 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         try {
             int width = crop.width();
             int height = crop.height();
-            return SurfaceControl.screenshot(crop, width, height, rotation);
+            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+            final SurfaceControl.DisplayCaptureArgs captureArgs =
+                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                            .setSourceCrop(crop)
+                            .setSize(width, height)
+                            .build();
+            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    SurfaceControl.captureDisplay(captureArgs);
+            return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
