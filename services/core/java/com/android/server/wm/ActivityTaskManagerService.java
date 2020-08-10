@@ -5380,15 +5380,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mAmInternal.isBackgroundActivityStartsEnabled();
     }
 
-    void enableScreenAfterBoot(boolean booted) {
-        writeBootProgressEnableScreen(SystemClock.uptimeMillis());
-        mWindowManager.enableScreenAfterBoot();
-
-        synchronized (mGlobalLock) {
-            updateEventDispatchingLocked(booted);
-        }
-    }
-
     static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
         if (r == null || !r.hasProcess()) {
             return KEY_DISPATCHING_TIMEOUT_MS;
@@ -6474,9 +6465,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void enableScreenAfterBoot(boolean booted) {
+            writeBootProgressEnableScreen(SystemClock.uptimeMillis());
+            mWindowManager.enableScreenAfterBoot();
             synchronized (mGlobalLock) {
-                writeBootProgressEnableScreen(SystemClock.uptimeMillis());
-                mWindowManager.enableScreenAfterBoot();
                 updateEventDispatchingLocked(booted);
             }
         }
