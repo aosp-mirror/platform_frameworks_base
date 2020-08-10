@@ -206,11 +206,31 @@ public CustomView(@Named(VIEW_CONTEXT) Context themedViewContext, AttributeSet a
 
 ## Updating Dagger2
 
+We depend on the Dagger source found in external/dagger2. We should automatically pick up on updates
+when that repository is updated.
+
+*Deprecated:*
+
 Binaries can be downloaded from https://repo1.maven.org/maven2/com/google/dagger/ and then loaded
 into
 [/prebuilts/tools/common/m2/repository/com/google/dagger/](http://cs/android/prebuilts/tools/common/m2/repository/com/google/dagger/)
 
+The following commands should work, substituting in the version that you are looking for:
 
+````
+cd prebuilts/tools/common/m2/repository/com/google/dagger/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger/2.28.1/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger-compiler/2.28.1/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger-spi/2.28.1/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger-producers/2.28.1/
+````
+
+Then update `prebuilts/tools/common/m2/Android.bp` to point at your new jars.
+ 
 ## TODO List
 
  - Eliminate usages of Dependency#get

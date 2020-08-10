@@ -48,7 +48,7 @@ android_library {
         "androidx.lifecycle_lifecycle-extensions",
         "SystemUI-tags",
         "SystemUI-proto",
-        "dagger2-2.19",
+        "dagger2",
         "//external/kotlinc:kotlin-annotations",
     ],
 
@@ -59,7 +59,7 @@ android_library {
 
     manifest: "AndroidManifest.xml",
 
-    plugins: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler"],
 
 }
 
@@ -100,7 +100,7 @@ android_app {
 
     kotlincflags: ["-Xjvm-default=enable"],
 
-    plugins: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler"],
 
     required: ["privapp_whitelist_com.android.systemui"],
 }
