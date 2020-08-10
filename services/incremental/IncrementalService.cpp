@@ -23,7 +23,6 @@
 #include <android-base/properties.h>
 #include <android-base/stringprintf.h>
 #include <binder/AppOpsManager.h>
-#include <binder/Nullable.h>
 #include <binder/Status.h>
 #include <sys/stat.h>
 #include <uuid/uuid.h>
@@ -1404,7 +1403,7 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
     }
 
     FileSystemControlParcel fsControlParcel;
-    fsControlParcel.incremental = aidl::make_nullable<IncrementalFileSystemControlParcel>();
+    fsControlParcel.incremental = std::make_optional<IncrementalFileSystemControlParcel>();
     fsControlParcel.incremental->cmd.reset(dup(ifs.control.cmd()));
     fsControlParcel.incremental->pendingReads.reset(dup(ifs.control.pendingReads()));
     fsControlParcel.incremental->log.reset(dup(ifs.control.logs()));
