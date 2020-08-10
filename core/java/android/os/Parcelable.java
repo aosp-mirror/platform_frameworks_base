@@ -161,6 +161,7 @@ public interface Parcelable {
      * @return true if this parcelable is stable.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     default @Stability int getStability() {
         return PARCELABLE_STABILITY_LOCAL;
     }
