@@ -941,6 +941,7 @@ public final class DisplayManager {
          */
         String KEY_PEAK_REFRESH_RATE_DEFAULT = "peak_refresh_rate_default";
 
+        // TODO(b/162536543): rename it once it is proved not harmful for users.
         /**
          * Key for controlling which packages are explicitly blocked from running at refresh rates
          * higher than 60hz. An app may be added to this list if they exhibit performance issues at

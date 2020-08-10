@@ -40,107 +40,107 @@ import java.util.concurrent.Executor;
 
 /**
  * Build/Install/Run:
- * atest WmTests:HighRefreshRateBlacklistTest
+ * atest WmTests:HighRefreshRateDenylistTest
  */
 @SmallTest
 @Presubmit
-public class HighRefreshRateBlacklistTest {
+public class HighRefreshRateDenylistTest {
     private static final String APP1 = "com.android.sample1";
     private static final String APP2 = "com.android.sample2";
     private static final String APP3 = "com.android.sample3";
 
-    private HighRefreshRateBlacklist mBlacklist;
+    private HighRefreshRateDenylist mDenylist;
 
     @After
     public void tearDown() {
-        mBlacklist.dispose();
+        mDenylist.dispose();
     }
 
     @Test
-    public void testDefaultBlacklist() {
+    public void testDefaultDenylist() {
         final Resources r = createResources(APP1, APP2);
-        mBlacklist = new HighRefreshRateBlacklist(r, new FakeDeviceConfig());
+        mDenylist = new HighRefreshRateDenylist(r, new FakeDeviceConfig());
 
-        assertTrue(mBlacklist.isBlacklisted(APP1));
-        assertTrue(mBlacklist.isBlacklisted(APP2));
-        assertFalse(mBlacklist.isBlacklisted(APP3));
+        assertTrue(mDenylist.isDenylisted(APP1));
+        assertTrue(mDenylist.isDenylisted(APP2));
+        assertFalse(mDenylist.isDenylisted(APP3));
     }
 
     @Test
-    public void testNoDefaultBlacklist() {
+    public void testNoDefaultDenylist() {
         final Resources r = createResources();
-        mBlacklist = new HighRefreshRateBlacklist(r, new FakeDeviceConfig());
+        mDenylist = new HighRefreshRateDenylist(r, new FakeDeviceConfig());
 
-        assertFalse(mBlacklist.isBlacklisted(APP1));
+        assertFalse(mDenylist.isDenylisted(APP1));
     }
 
     @Test
-    public void testDefaultBlacklistIsOverriddenByDeviceConfig() {
+    public void testDefaultDenylistIsOverriddenByDeviceConfig() {
         final Resources r = createResources(APP1);
         final FakeDeviceConfig config = new FakeDeviceConfig();
-        config.setBlacklist(APP2 + "," + APP3);
-        mBlacklist = new HighRefreshRateBlacklist(r, config);
+        config.setDenylist(APP2 + "," + APP3);
+        mDenylist = new HighRefreshRateDenylist(r, config);
 
-        assertFalse(mBlacklist.isBlacklisted(APP1));
-        assertTrue(mBlacklist.isBlacklisted(APP2));
-        assertTrue(mBlacklist.isBlacklisted(APP3));
+        assertFalse(mDenylist.isDenylisted(APP1));
+        assertTrue(mDenylist.isDenylisted(APP2));
+        assertTrue(mDenylist.isDenylisted(APP3));
     }
 
     @Test
-    public void testDefaultBlacklistIsOverriddenByEmptyDeviceConfig() {
+    public void testDefaultDenylistIsOverriddenByEmptyDeviceConfig() {
         final Resources r = createResources(APP1);
         final FakeDeviceConfig config = new FakeDeviceConfig();
-        config.setBlacklist("");
-        mBlacklist = new HighRefreshRateBlacklist(r, config);
+        config.setDenylist("");
+        mDenylist = new HighRefreshRateDenylist(r, config);
 
-        assertFalse(mBlacklist.isBlacklisted(APP1));
+        assertFalse(mDenylist.isDenylisted(APP1));
     }
 
     @Test
-    public void testDefaultBlacklistIsOverriddenByDeviceConfigUpdate() {
+    public void testDefaultDenylistIsOverriddenByDeviceConfigUpdate() {
         final Resources r = createResources(APP1);
         final FakeDeviceConfig config = new FakeDeviceConfig();
-        mBlacklist = new HighRefreshRateBlacklist(r, config);
+        mDenylist = new HighRefreshRateDenylist(r, config);
 
         // First check that the default denylist is in effect
-        assertTrue(mBlacklist.isBlacklisted(APP1));
-        assertFalse(mBlacklist.isBlacklisted(APP2));
-        assertFalse(mBlacklist.isBlacklisted(APP3));
+        assertTrue(mDenylist.isDenylisted(APP1));
+        assertFalse(mDenylist.isDenylisted(APP2));
+        assertFalse(mDenylist.isDenylisted(APP3));
 
         //  Then confirm that the DeviceConfig list has propagated and taken effect.
-        config.setBlacklist(APP2 + "," + APP3);
-        assertFalse(mBlacklist.isBlacklisted(APP1));
-        assertTrue(mBlacklist.isBlacklisted(APP2));
-        assertTrue(mBlacklist.isBlacklisted(APP3));
+        config.setDenylist(APP2 + "," + APP3);
+        assertFalse(mDenylist.isDenylisted(APP1));
+        assertTrue(mDenylist.isDenylisted(APP2));
+        assertTrue(mDenylist.isDenylisted(APP3));
 
         //  Finally make sure we go back to the default list if the DeviceConfig gets deleted.
-        config.setBlacklist(null);
-        assertTrue(mBlacklist.isBlacklisted(APP1));
-        assertFalse(mBlacklist.isBlacklisted(APP2));
-        assertFalse(mBlacklist.isBlacklisted(APP3));
+        config.setDenylist(null);
+        assertTrue(mDenylist.isDenylisted(APP1));
+        assertFalse(mDenylist.isDenylisted(APP2));
+        assertFalse(mDenylist.isDenylisted(APP3));
     }
 
     @Test
     public void testOverriddenByDeviceConfigUnrelatedFlagChanged() {
         final Resources r = createResources(APP1);
         final FakeDeviceConfig config = new FakeDeviceConfig();
-        mBlacklist = new HighRefreshRateBlacklist(r, config);
-        config.setBlacklist(APP2 + "," + APP3);
-        assertFalse(mBlacklist.isBlacklisted(APP1));
-        assertTrue(mBlacklist.isBlacklisted(APP2));
-        assertTrue(mBlacklist.isBlacklisted(APP3));
+        mDenylist = new HighRefreshRateDenylist(r, config);
+        config.setDenylist(APP2 + "," + APP3);
+        assertFalse(mDenylist.isDenylisted(APP1));
+        assertTrue(mDenylist.isDenylisted(APP2));
+        assertTrue(mDenylist.isDenylisted(APP3));
 
         //  Change an unrelated flag in our namespace and verify that the denylist is intact
         config.putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER, "someKey", "someValue");
-        assertFalse(mBlacklist.isBlacklisted(APP1));
-        assertTrue(mBlacklist.isBlacklisted(APP2));
-        assertTrue(mBlacklist.isBlacklisted(APP3));
+        assertFalse(mDenylist.isDenylisted(APP1));
+        assertTrue(mDenylist.isDenylisted(APP2));
+        assertTrue(mDenylist.isDenylisted(APP3));
     }
 
-    private Resources createResources(String... defaultBlacklist) {
+    private Resources createResources(String... defaultDenylist) {
         Resources r = mock(Resources.class);
         when(r.getStringArray(R.array.config_highRefreshRateBlacklist))
-                .thenReturn(defaultBlacklist);
+                .thenReturn(defaultDenylist);
         return r;
     }
 
@@ -160,9 +160,9 @@ public class HighRefreshRateBlacklistTest {
             super.addOnPropertiesChangedListener(namespace, executor, listener);
         }
 
-        void setBlacklist(String blacklist) {
+        void setDenylist(String denylist) {
             putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                    KEY_HIGH_REFRESH_RATE_BLACKLIST, blacklist);
+                    KEY_HIGH_REFRESH_RATE_BLACKLIST, denylist);
         }
     }
 }
