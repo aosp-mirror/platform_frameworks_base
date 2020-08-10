@@ -49,8 +49,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
-import android.os.PowerManager.ServiceType;
-import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -486,10 +484,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         deviceIdleService.unregisterStationaryListener(
                                 mDeviceIdleStationaryListener);
                     }
-                    // Intentional fall-through.
-                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGED:
-                case Intent.ACTION_SCREEN_OFF:
-                case Intent.ACTION_SCREEN_ON:
                     // Call updateLowPowerMode on handler thread so it's always called from the
                     // same thread.
                     mHandler.sendEmptyMessage(UPDATE_LOW_POWER_MODE);
@@ -554,15 +548,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private void updateLowPowerMode() {
         // Disable GPS if we are in device idle mode and the device is stationary.
         boolean disableGpsForPowerManager = mPowerManager.isDeviceIdleMode() && mIsDeviceStationary;
-        final PowerSaveState result = mPowerManager.getPowerSaveState(ServiceType.LOCATION);
-        switch (result.locationMode) {
-            case PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF:
-            case PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF:
-                // If we are in battery saver mode and the screen is off, disable GPS.
-                disableGpsForPowerManager |=
-                        result.batterySaverEnabled && !mPowerManager.isInteractive();
-                break;
-        }
         if (disableGpsForPowerManager != mDisableGpsForPowerManager) {
             mDisableGpsForPowerManager = disableGpsForPowerManager;
             updateEnabled();
@@ -1959,10 +1944,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(ALARM_WAKEUP);
             intentFilter.addAction(ALARM_TIMEOUT);
-            intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
-            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-            intentFilter.addAction(Intent.ACTION_SCREEN_ON);
             intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
             intentFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
             mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
