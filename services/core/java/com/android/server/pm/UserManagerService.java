@@ -22,6 +22,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.Manifest;
 import android.annotation.ColorRes;
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -110,7 +111,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -132,6 +132,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -246,6 +248,43 @@ public class UserManagerService extends IUserManager.Stub {
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
 
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
+     * user has been successfully removed.
+     */
+    public static final int REMOVE_RESULT_REMOVED = 0;
+
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
+     * user has had its {@link UserInfo#FLAG_EPHEMERAL} flag set to {@code true}, so that it will be
+     * removed when the user is stopped or on boot.
+     */
+    public static final int REMOVE_RESULT_SET_EPHEMERAL = 1;
+
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
+     * user is already in the process of being removed.
+     */
+    public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
+
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that an error occurred
+     * that prevented the user from being removed or set as ephemeral.
+     */
+    public static final int REMOVE_RESULT_ERROR = 3;
+
+    /**
+     * Possible response codes from {@link #removeUserOrSetEphemeral(int)}.
+     */
+    @IntDef(prefix = { "REMOVE_RESULT_" }, value = {
+            REMOVE_RESULT_REMOVED,
+            REMOVE_RESULT_SET_EPHEMERAL,
+            REMOVE_RESULT_ALREADY_BEING_REMOVED,
+            REMOVE_RESULT_ERROR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RemoveResult {}
+
     // Tron counters
     private static final String TRON_GUEST_CREATED = "users_guest_created";
     private static final String TRON_USER_CREATED = "users_user_created";
@@ -253,9 +292,17 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final Context mContext;
     private final PackageManagerService mPm;
+
+    /**
+     * Lock for packages. If using with {@link #mUsersLock}, {@link #mPackagesLock} should be
+     * acquired first.
+     */
     private final Object mPackagesLock;
     private final UserDataPreparer mUserDataPreparer;
-    // Short-term lock for internal state, when interaction/sync with PM is not required
+    /**
+     * Short-term lock for internal state, when interaction/sync with PM is not required. If using
+     * with {@link #mPackagesLock}, {@link #mPackagesLock} should be acquired first.
+     */
     private final Object mUsersLock = LockGuard.installNewLock(LockGuard.INDEX_USER);
     private final Object mRestrictionsLock = new Object();
     // Used for serializing access to app restriction files
@@ -3862,13 +3909,7 @@ public class UserManagerService extends IUserManager.Stub {
         Slog.i(LOG_TAG, "removeUser u" + userId);
         checkManageOrCreateUsersPermission("Only the system can remove users");
 
-        final boolean isManagedProfile;
-        synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userId);
-            isManagedProfile = userInfo != null && userInfo.isManagedProfile();
-        }
-        String restriction = isManagedProfile
-                ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
+        final String restriction = getUserRemovalRestriction(userId);
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
             Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
             return false;
@@ -3880,6 +3921,21 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean removeUserEvenWhenDisallowed(@UserIdInt int userId) {
         checkManageOrCreateUsersPermission("Only the system can remove users");
         return removeUserUnchecked(userId);
+    }
+
+    /**
+     * Returns the string name of the restriction to check for user removal. The restriction name
+     * varies depending on whether the user is a managed profile.
+     */
+    private String getUserRemovalRestriction(@UserIdInt int userId) {
+        final boolean isManagedProfile;
+        final UserInfo userInfo;
+        synchronized (mUsersLock) {
+            userInfo = getUserInfoLU(userId);
+        }
+        isManagedProfile = userInfo != null && userInfo.isManagedProfile();
+        return isManagedProfile
+                ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
     }
 
     private boolean removeUserUnchecked(@UserIdInt int userId) {
@@ -3971,6 +4027,64 @@ public class UserManagerService extends IUserManager.Stub {
         // Keep LRU queue of recently removed IDs for recycling
         if (mRecentlyRemovedIds.size() > MAX_RECENTLY_REMOVED_IDS_SIZE) {
             mRecentlyRemovedIds.removeFirst();
+        }
+    }
+
+    @Override
+    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
+        Slog.i(LOG_TAG, "removeUserOrSetEphemeral u" + userId);
+        checkManageUsersPermission("Only the system can remove users");
+        final String restriction = getUserRemovalRestriction(userId);
+        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
+            Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+            return REMOVE_RESULT_ERROR;
+        }
+        if (userId == UserHandle.USER_SYSTEM) {
+            Slog.e(LOG_TAG, "System user cannot be removed.");
+            return REMOVE_RESULT_ERROR;
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final UserData userData;
+            synchronized (mPackagesLock) {
+                synchronized (mUsersLock) {
+                    userData = mUsers.get(userId);
+                    if (userData == null) {
+                        Slog.e(LOG_TAG,
+                                "Cannot remove user " + userId + ", invalid user id provided.");
+                        return REMOVE_RESULT_ERROR;
+                    }
+
+                    if (mRemovingUserIds.get(userId)) {
+                        Slog.e(LOG_TAG, "User " + userId + " is already scheduled for removal.");
+                        return REMOVE_RESULT_ALREADY_BEING_REMOVED;
+                    }
+                }
+
+                // Attempt to immediately remove a non-current user
+                final int currentUser = ActivityManager.getCurrentUser();
+                if (currentUser != userId) {
+                    // Attempt to remove the user. This will fail if the user is the current user
+                    if (removeUser(userId)) {
+                        return REMOVE_RESULT_REMOVED;
+                    }
+
+                    Slog.w(LOG_TAG, "Unable to immediately remove non-current user: " + userId
+                            + ". User is still set as ephemeral and will be removed on user "
+                            + "switch or reboot.");
+                }
+
+                // If the user was not immediately removed, make sure it is marked as ephemeral.
+                // Don't mark as disabled since, per UserInfo.FLAG_DISABLED documentation, an
+                // ephemeral user should only be marked as disabled when its removal is in progress.
+                userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
+                writeUserLP(userData);
+
+                return REMOVE_RESULT_SET_EPHEMERAL;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
