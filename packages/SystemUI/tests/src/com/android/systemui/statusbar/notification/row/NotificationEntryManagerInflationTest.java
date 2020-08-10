@@ -221,6 +221,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .thenAnswer((Answer<ExpandableNotificationRowController>) invocation ->
                         new ExpandableNotificationRowController(
                                 viewCaptor.getValue(),
+                                mListContainer,
                                 mock(ActivatableNotificationViewController.class),
                                 mNotificationMediaManager,
                                 mock(PluginManager.class),
