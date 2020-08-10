@@ -225,9 +225,31 @@ public final class MediaTranscodeManager {
             job.updateStatusAndResult(TranscodingJob.STATUS_FINISHED,
                     TranscodingJob.RESULT_ERROR);
 
-            // Notifies client the job is done.
+            // Notifies client the job failed.
             if (job.mListener != null && job.mListenerExecutor != null) {
                 job.mListenerExecutor.execute(() -> job.mListener.onTranscodingFinished(job));
+            }
+        }
+    }
+
+    private void handleTranscodingProgressUpdate(int jobId, int newProgress) {
+        synchronized (mPendingTranscodingJobs) {
+            // Gets the job associated with the jobId.
+            final TranscodingJob job = mPendingTranscodingJobs.get(jobId);
+
+            if (job == null) {
+                // This should not happen in reality.
+                Log.e(TAG, "Job " + jobId + " is not in PendingJobs");
+                return;
+            }
+
+            // Updates the job progress.
+            job.setJobProgress(newProgress);
+
+            // Notifies client the progress update.
+            if (job.mProgressUpdateExecutor != null && job.mProgressUpdateListener != null) {
+                job.mProgressUpdateExecutor.execute(
+                        () -> job.mProgressUpdateListener.onProgressUpdate(newProgress));
             }
         }
     }
@@ -294,8 +316,8 @@ public final class MediaTranscodeManager {
                 }
 
                 @Override
-                public void onProgressUpdate(int jobId, int progress) throws RemoteException {
-                    //TODO(hkuang): Implement this.
+                public void onProgressUpdate(int jobId, int newProgress) throws RemoteException {
+                    handleTranscodingProgressUpdate(jobId, newProgress);
                 }
             };
 
@@ -821,17 +843,8 @@ public final class MediaTranscodeManager {
             return mResult;
         }
 
-        private void setJobProgress(int newProgress) {
-            synchronized (this) {
-                mProgress = newProgress;
-            }
-
-            // Notify listener.
-            OnProgressUpdateListener onProgressUpdateListener = mProgressUpdateListener;
-            if (mProgressUpdateListener != null) {
-                mProgressUpdateExecutor.execute(
-                        () -> onProgressUpdateListener.onProgressUpdate(mProgress));
-            }
+        private synchronized void setJobProgress(int newProgress) {
+            mProgress = newProgress;
         }
     }
 
