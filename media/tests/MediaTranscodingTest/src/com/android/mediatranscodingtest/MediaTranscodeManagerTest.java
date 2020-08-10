@@ -37,6 +37,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * Functional tests for MediaTranscodeManager in the media framework.
@@ -229,6 +230,64 @@ public class MediaTranscodeManagerTest
         boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
                 30, TimeUnit.MILLISECONDS);
         assertTrue("Fails to cancel transcoding", finishedOnTime);
+    }
+
+
+    @Test
+    public void testTranscodingProgressUpdate() throws Exception {
+        Log.d(TAG, "Starting: testMediaTranscodeManager");
+
+        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
+
+        // Create a file Uri: file:///data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
+        // The full path of this file is:
+        // /data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
+        Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/HevcTranscode.mp4");
+
+        TranscodingRequest request =
+                new TranscodingRequest.Builder()
+                        .setSourceUri(mSourceHEVCVideoUri)
+                        .setDestinationUri(destinationUri)
+                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
+                        .setVideoTrackFormat(createMediaFormat())
+                        .build();
+        Executor listenerExecutor = Executors.newSingleThreadExecutor();
+
+        Log.i(TAG, "transcoding to " + createMediaFormat());
+
+        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
+                transcodingJob -> {
+                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
+                    assertEquals(transcodingJob.getResult(), TranscodingJob.RESULT_SUCCESS);
+                    transcodeCompleteSemaphore.release();
+                });
+        assertNotNull(job);
+
+        AtomicInteger progressUpdateCount = new AtomicInteger(0);
+
+        // Set progress update executor and use the same executor as result listener.
+        job.setOnProgressUpdateListener(listenerExecutor,
+                new TranscodingJob.OnProgressUpdateListener() {
+                    int mPreviousProgress = 0;
+
+                    @Override
+                    public void onProgressUpdate(int newProgress) {
+                        assertTrue("Invalid proress update", newProgress > mPreviousProgress);
+                        assertTrue("Invalid proress update", newProgress <= 100);
+                        mPreviousProgress = newProgress;
+                        progressUpdateCount.getAndIncrement();
+                        Log.i(TAG, "Get progress update " + newProgress);
+                    }
+                });
+
+        Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to cancel.");
+        boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
+                TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertTrue("Transcode failed to complete in time.", finishedOnTime);
+        assertTrue("Failed to receive at least 10 progress updates",
+                progressUpdateCount.get() > 10);
     }
 }
 
