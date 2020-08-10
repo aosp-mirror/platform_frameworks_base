@@ -44,6 +44,7 @@ import android.widget.Space
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
@@ -75,7 +76,8 @@ class ControlsUiControllerImpl @Inject constructor (
     @Main val sharedPreferences: SharedPreferences,
     val controlActionCoordinator: ControlActionCoordinator,
     private val activityStarter: ActivityStarter,
-    private val shadeController: ShadeController
+    private val shadeController: ShadeController,
+    private val iconCache: CustomIconCache
 ) : ControlsUiController {
 
     companion object {
@@ -502,6 +504,7 @@ class ControlsUiControllerImpl @Inject constructor (
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
+                iconCache.store(componentName, c.controlId, c.customIcon)
                 val cws = ControlWithState(componentName, it.ci, c)
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)
