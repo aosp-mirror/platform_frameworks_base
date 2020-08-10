@@ -101,14 +101,11 @@ public final class ApkAssets {
     public @interface FormatType {}
 
     @GuardedBy("this")
-    private final long mNativePtr;
+    private long mNativePtr;  // final, except cleared in finalizer.
 
     @Nullable
     @GuardedBy("this")
-    private final StringBlock mStringBlock;
-
-    @GuardedBy("this")
-    private boolean mOpen = true;
+    private final StringBlock mStringBlock;  // null or closed if mNativePtr = 0.
 
     @PropertyFlags
     private final int mFlags;
@@ -380,12 +377,16 @@ public final class ApkAssets {
     /** @hide */
     @Nullable
     public OverlayableInfo getOverlayableInfo(String overlayableName) throws IOException {
-        return nativeGetOverlayableInfo(mNativePtr, overlayableName);
+        synchronized (this) {
+            return nativeGetOverlayableInfo(mNativePtr, overlayableName);
+        }
     }
 
     /** @hide */
     public boolean definesOverlayable() throws IOException {
-        return nativeDefinesOverlayable(mNativePtr);
+        synchronized (this) {
+            return nativeDefinesOverlayable(mNativePtr);
+        }
     }
 
     /**
@@ -412,12 +413,12 @@ public final class ApkAssets {
      */
     public void close() {
         synchronized (this) {
-            if (mOpen) {
-                mOpen = false;
+            if (mNativePtr != 0) {
                 if (mStringBlock != null) {
                     mStringBlock.close();
                 }
                 nativeDestroy(mNativePtr);
+                mNativePtr = 0;
             }
         }
     }
