@@ -29,8 +29,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
 import com.android.systemui.car.keyguard.CarKeyguardViewController;
+import com.android.systemui.car.notification.NotificationShadeWindowControllerImpl;
 import com.android.systemui.car.statusbar.DozeServiceHost;
-import com.android.systemui.car.statusbar.DummyNotificationShadeWindowController;
 import com.android.systemui.car.volume.CarVolumeDialogComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -53,12 +53,12 @@ import com.android.systemui.stackdivider.DividerModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -209,16 +209,16 @@ abstract class CarSystemUIModule {
             CarKeyguardViewController carKeyguardViewController);
 
     @Binds
+    abstract NotificationShadeWindowController bindNotificationShadeController(
+            NotificationShadeWindowControllerImpl notificationPanelViewController);
+
+    @Binds
     abstract DeviceProvisionedController bindDeviceProvisionedController(
             CarDeviceProvisionedControllerImpl deviceProvisionedController);
 
     @Binds
     abstract CarDeviceProvisionedController bindCarDeviceProvisionedController(
             CarDeviceProvisionedControllerImpl deviceProvisionedController);
-
-    @Binds
-    abstract NotificationShadeWindowController bindNotificationShadeWindowController(
-            DummyNotificationShadeWindowController notificationShadeWindowController);
 
     @Binds
     abstract DozeHost bindDozeHost(DozeServiceHost dozeServiceHost);
