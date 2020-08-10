@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.os.Binder;
 import android.os.Handler;
@@ -44,6 +45,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -493,7 +495,9 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
         PrintWriter pw = new PrintWriter(new StringWriter());
-        bcs.dump(pw, new AppIdToPackageMap(new HashMap<>()), true);
+        bcs.dump(pw, new AppIdToPackageMap(new HashMap<>()), Process.INVALID_UID, true);
+
+        bcs.dump(pw, new AppIdToPackageMap(new HashMap<>()), WORKSOURCE_UID, true);
     }
 
     @Test
@@ -606,8 +610,8 @@ public class BinderCallsStatsTest {
         assertEquals("-1", callStats.methodName);
         assertEquals("com.android.internal.os.BinderCallsStats$OverflowBinder",
                 callStats.className);
-        assertEquals(false , callStats.screenInteractive);
-        assertEquals(-1 , callStats.callingUid);
+        assertEquals(false, callStats.screenInteractive);
+        assertEquals(-1, callStats.callingUid);
     }
 
     @Test
@@ -785,7 +789,7 @@ public class BinderCallsStatsTest {
         bcs.time += 30;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
-        for (Runnable runnable: mHandler.mRunnables) {
+        for (Runnable runnable : mHandler.mRunnables) {
             // Execute all pending runnables. Ignore the delay.
             runnable.run();
         }
@@ -837,6 +841,53 @@ public class BinderCallsStatsTest {
         assertEquals(1, tids[0]);
         assertEquals(2, tids[1]);
         assertEquals(3, tids[2]);
+    }
+
+    @Test
+    public void testTrackingSpecificWorksourceUid() {
+        mDeviceState.setCharging(true);
+
+        Binder binder = new Binder();
+
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.recordAllCallsForWorkSourceUid(WORKSOURCE_UID);
+
+        int[] transactions = {41, 42, 43, 42, 43, 43};
+        int[] durationsMs = {100, 200, 300, 400, 500, 600};
+
+        for (int i = 0; i < transactions.length; i++) {
+            CallSession callSession = bcs.callStarted(binder, transactions[i], WORKSOURCE_UID);
+            bcs.time += durationsMs[i];
+            bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+        }
+
+        BinderCallsStats.UidEntry uidEntry = bcs.getUidEntries().get(WORKSOURCE_UID);
+        Assert.assertNotNull(uidEntry);
+        assertEquals(6, uidEntry.callCount);
+
+        Collection<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        assertEquals(3, callStatsList.size());
+        for (BinderCallsStats.CallStat callStat : callStatsList) {
+            switch (callStat.transactionCode) {
+                case 41:
+                    assertEquals(1, callStat.callCount);
+                    assertEquals(1, callStat.incrementalCallCount);
+                    assertEquals(100, callStat.cpuTimeMicros);
+                    break;
+                case 42:
+                    assertEquals(2, callStat.callCount);
+                    assertEquals(2, callStat.incrementalCallCount);
+                    assertEquals(200 + 400, callStat.cpuTimeMicros);
+                    break;
+                case 43:
+                    assertEquals(3, callStat.callCount);
+                    assertEquals(3, callStat.incrementalCallCount);
+                    assertEquals(300 + 500 + 600, callStat.cpuTimeMicros);
+                    break;
+                default:
+                    fail("Unexpected transaction code: " + callStat.transactionCode);
+            }
+        }
     }
 
     private static class TestHandler extends Handler {
