@@ -141,6 +141,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Service for {@link UserManager}.
@@ -443,6 +444,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
     };
 
+    // TODO(b/161915546): remove once userWithName() is fixed / removed
+    // Use to debug / dump when user 0 is allocated at userWithName()
+    public static final boolean DBG_ALLOCATION = false; // DO NOT SUBMIT WITH TRUE
+    public final AtomicInteger mUser0Allocations;
+
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
      *
@@ -629,6 +635,7 @@ public class UserManagerService extends IUserManager.Stub {
         LocalServices.addService(UserManagerInternal.class, mLocalService);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mUserStates.put(UserHandle.USER_SYSTEM, UserState.STATE_BOOTING);
+        mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
     }
 
     void systemReady() {
@@ -1310,6 +1317,10 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private UserInfo userWithName(UserInfo orig) {
         if (orig != null && orig.name == null && orig.id == UserHandle.USER_SYSTEM) {
+            if (DBG_ALLOCATION) {
+                final int number = mUser0Allocations.incrementAndGet();
+                Slog.w(LOG_TAG, "System user instantiated at least " + number + " times");
+            }
             UserInfo withName = new UserInfo(orig);
             withName.name = getOwnerName();
             return withName;
@@ -4835,6 +4846,10 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
         pw.println("  Is headless-system mode: " + UserManager.isHeadlessSystemUserMode());
         pw.println("  User version: " + mUserVersion);
+        pw.println("  Owner name: " + getOwnerName());
+        if (DBG_ALLOCATION) {
+            pw.println("  System user allocations: " + mUser0Allocations.get());
+        }
 
         // Dump UserTypes
         pw.println();
