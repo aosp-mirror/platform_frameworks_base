@@ -1604,7 +1604,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setApplicationRestrictionsManagingPackage(admin1, RESTRICTIONS_DELEGATE);
 
         // DPMS correctly stores and retrieves the delegates
-        DevicePolicyManagerService.DevicePolicyData policy = dpms.mUserData.get(userHandle);
+        DevicePolicyData policy = dpms.mUserData.get(userHandle);
         assertEquals(2, policy.mDelegationMap.size());
         MoreAsserts.assertContentsInAnyOrder(policy.mDelegationMap.get(CERT_DELEGATE),
             DELEGATION_CERT_INSTALL);
@@ -1846,11 +1846,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().userManagerInternal);
     }
 
-    private DevicePolicyManagerService.ActiveAdmin getDeviceOwner() {
+    private ActiveAdmin getDeviceOwner() {
         ComponentName component = dpms.mOwners.getDeviceOwnerComponent();
-        DevicePolicyManagerService.DevicePolicyData policy =
+        DevicePolicyData policy =
                 dpms.getUserData(dpms.mOwners.getDeviceOwnerUserId());
-        for (DevicePolicyManagerService.ActiveAdmin admin : policy.mAdminList) {
+        for (ActiveAdmin admin : policy.mAdminList) {
             if (component.equals(admin.info.getComponent())) {
                 return admin;
             }
@@ -3745,8 +3745,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUserSetupCompleteForUser(false, userId);
 
         // GIVEN userComplete is true in DPM
-        DevicePolicyManagerService.DevicePolicyData userData =
-                new DevicePolicyManagerService.DevicePolicyData(userId);
+        DevicePolicyData userData = new DevicePolicyData(userId);
         userData.mUserSetupComplete = true;
         dpms.mUserData.put(UserHandle.USER_SYSTEM, userData);
 
@@ -3770,8 +3769,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUserSetupCompleteForUser(false, userId);
 
         // GIVEN userComplete is true in DPM
-        DevicePolicyManagerService.DevicePolicyData userData =
-                new DevicePolicyManagerService.DevicePolicyData(userId);
+        DevicePolicyData userData = new DevicePolicyData(userId);
         userData.mUserSetupComplete = true;
         dpms.mUserData.put(UserHandle.USER_SYSTEM, userData);
 
