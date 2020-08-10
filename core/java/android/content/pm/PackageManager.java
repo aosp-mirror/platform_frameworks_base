@@ -1164,7 +1164,8 @@ public abstract class PackageManager {
 
     /**
      * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
-     * if the new package uses a shared library that is not available.
+     * when the package being replaced is a system app and the caller didn't provide the
+     * {@link #DELETE_SYSTEM_APP} flag.
      *
      * @hide
      */
