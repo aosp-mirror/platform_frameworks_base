@@ -28,6 +28,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
 import android.app.BroadcastOptions;
 import android.app.IActivityController;
@@ -2586,7 +2587,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             case "list":
                 return runStackList(pw);
             case "info":
-                return runStackInfo(pw);
+                return runRootTaskInfo(pw);
             case "move-top-activity-to-pinned-stack":
                 return runMoveTopActivityToPinnedStack(pw);
             case "remove":
@@ -2668,17 +2669,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runStackList(PrintWriter pw) throws RemoteException {
-        List<ActivityManager.StackInfo> stacks = mTaskInterface.getAllStackInfos();
-        for (ActivityManager.StackInfo info : stacks) {
+        List<RootTaskInfo> tasks = mTaskInterface.getAllRootTaskInfos();
+        for (RootTaskInfo info : tasks) {
             pw.println(info);
         }
         return 0;
     }
 
-    int runStackInfo(PrintWriter pw) throws RemoteException {
+    int runRootTaskInfo(PrintWriter pw) throws RemoteException {
         int windowingMode = Integer.parseInt(getNextArgRequired());
         int activityType = Integer.parseInt(getNextArgRequired());
-        ActivityManager.StackInfo info = mTaskInterface.getStackInfo(windowingMode, activityType);
+        RootTaskInfo info = mTaskInterface.getRootTaskInfo(windowingMode, activityType);
         pw.println(info);
         return 0;
     }

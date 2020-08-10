@@ -99,6 +99,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -2423,77 +2424,73 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return display.getStack(windowingMode, activityType);
     }
 
-    private ActivityManager.StackInfo getStackInfo(Task stack) {
-        final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
-        ActivityManager.StackInfo info = new ActivityManager.StackInfo();
-        stack.getBounds(info.bounds);
-        info.displayId = taskDisplayArea != null ? taskDisplayArea.getDisplayId() : INVALID_DISPLAY;
-        info.stackId = stack.mTaskId;
-        info.stackToken = stack.mRemoteToken.toWindowContainerToken();
-        info.userId = stack.mCurrentUser;
-        info.visible = stack.shouldBeVisible(null);
-        // A stack might be not attached to a display.
-        // TODO: Can be removed since no one is using it.
-        info.position = taskDisplayArea != null ? taskDisplayArea.getIndexOf(stack) : 0;
-        info.configuration.setTo(stack.getConfiguration());
+    private RootTaskInfo getRootTaskInfo(Task task) {
+        final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
+        RootTaskInfo info = new RootTaskInfo();
+        task.fillTaskInfo(info);
 
-        final int numTasks = stack.getDescendantTaskCount();
-        info.taskIds = new int[numTasks];
-        info.taskNames = new String[numTasks];
-        info.taskBounds = new Rect[numTasks];
-        info.taskUserIds = new int[numTasks];
+        // A task might be not attached to a display.
+        info.position = taskDisplayArea != null ? taskDisplayArea.getIndexOf(task) : 0;
+        info.visible = task.shouldBeVisible(null);
+        task.getBounds(info.bounds);
+
+        final int numTasks = task.getDescendantTaskCount();
+        info.childTaskIds = new int[numTasks];
+        info.childTaskNames = new String[numTasks];
+        info.childTaskBounds = new Rect[numTasks];
+        info.childTaskUserIds = new int[numTasks];
         final int[] currentIndex = {0};
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
-                RootWindowContainer::processTaskForStackInfo, PooledLambda.__(Task.class), info,
+                RootWindowContainer::processTaskForTaskInfo, PooledLambda.__(Task.class), info,
                 currentIndex);
-        stack.forAllLeafTasks(c, false /* traverseTopToBottom */);
+        task.forAllLeafTasks(c, false /* traverseTopToBottom */);
         c.recycle();
 
-        final ActivityRecord top = stack.topRunningActivity();
+        final ActivityRecord top = task.topRunningActivity();
         info.topActivity = top != null ? top.intent.getComponent() : null;
         return info;
     }
 
-    private static void processTaskForStackInfo(
-            Task task, ActivityManager.StackInfo info, int[] currentIndex) {
+    private static void processTaskForTaskInfo(
+            Task task, RootTaskInfo info, int[] currentIndex) {
         int i = currentIndex[0];
-        info.taskIds[i] = task.mTaskId;
-        info.taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
+        info.childTaskIds[i] = task.mTaskId;
+        info.childTaskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
                 : task.realActivity != null ? task.realActivity.flattenToString()
                         : task.getTopNonFinishingActivity() != null
                                 ? task.getTopNonFinishingActivity().packageName : "unknown";
-        info.taskBounds[i] = task.mAtmService.getTaskBounds(task.mTaskId);
-        info.taskUserIds[i] = task.mUserId;
+        info.childTaskBounds[i] = task.mAtmService.getTaskBounds(task.mTaskId);
+        info.childTaskUserIds[i] = task.mUserId;
         currentIndex[0] = ++i;
     }
 
-    ActivityManager.StackInfo getStackInfo(int stackId) {
-        Task stack = getStack(stackId);
-        if (stack != null) {
-            return getStackInfo(stack);
+    RootTaskInfo getRootTaskInfo(int taskId) {
+        Task task = getStack(taskId);
+        if (task != null) {
+            return getRootTaskInfo(task);
         }
         return null;
     }
 
-    ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType) {
+    RootTaskInfo getRootTaskInfo(int windowingMode, int activityType) {
         final Task stack = getStack(windowingMode, activityType);
-        return (stack != null) ? getStackInfo(stack) : null;
+        return (stack != null) ? getRootTaskInfo(stack) : null;
     }
 
-    ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType, int displayId) {
+    RootTaskInfo getRootTaskInfo(int windowingMode, int activityType, int displayId) {
         final Task stack = getStack(windowingMode, activityType, displayId);
-        return (stack != null) ? getStackInfo(stack) : null;
+        return (stack != null) ? getRootTaskInfo(stack) : null;
     }
 
-    /** If displayId == INVALID_DISPLAY, this will get stack infos on all displays */
-    ArrayList<ActivityManager.StackInfo> getAllStackInfos(int displayId) {
-        ArrayList<ActivityManager.StackInfo> list = new ArrayList<>();
+    /** If displayId == INVALID_DISPLAY, this will get root task infos on all displays */
+    ArrayList<RootTaskInfo> getAllRootTaskInfos(int displayId) {
+        ArrayList<RootTaskInfo> list = new ArrayList<>();
         if (displayId == INVALID_DISPLAY) {
             forAllTaskDisplayAreas(taskDisplayArea -> {
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                     final Task stack = taskDisplayArea.getStackAt(sNdx);
-                    list.add(getStackInfo(stack));
+                    list.add(getRootTaskInfo(stack));
                 }
             });
             return list;
@@ -2505,7 +2502,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         display.forAllTaskDisplayAreas(taskDisplayArea -> {
             for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                 final Task stack = taskDisplayArea.getStackAt(sNdx);
-                list.add(getStackInfo(stack));
+                list.add(getRootTaskInfo(stack));
             }
         });
         return list;

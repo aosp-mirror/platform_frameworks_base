@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ApplicationErrorReport;
 import android.app.ContentProviderHolder;
 import android.app.GrantedUriPermission;
@@ -186,7 +187,7 @@ interface IActivityTaskManager {
             in AssistStructure structure, in AssistContent content, in Uri referrer);
 
     void setFocusedStack(int stackId);
-    ActivityManager.StackInfo getFocusedStackInfo();
+    ActivityTaskManager.RootTaskInfo getFocusedRootTaskInfo();
     Rect getTaskBounds(int taskId);
 
     void cancelRecentsAnimation(boolean restoreHomeStackPosition);
@@ -260,11 +261,10 @@ interface IActivityTaskManager {
     /** Removes stack of the activity types from the system. */
     void removeStacksWithActivityTypes(in int[] activityTypes);
 
-    List<ActivityManager.StackInfo> getAllStackInfos();
-    ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType);
-    List<ActivityManager.StackInfo> getAllStackInfosOnDisplay(int displayId);
-    ActivityManager.StackInfo getStackInfoOnDisplay(int windowingMode, int activityType,
-            int displayId);
+    List<ActivityTaskManager.RootTaskInfo> getAllRootTaskInfos();
+    ActivityTaskManager.RootTaskInfo getRootTaskInfo(int windowingMode, int activityType);
+    List<ActivityTaskManager.RootTaskInfo> getAllRootTaskInfosOnDisplay(int displayId);
+    ActivityTaskManager.RootTaskInfo getRootTaskInfoOnDisplay(int windowingMode, int activityType, int displayId);
 
     /**
      * Informs ActivityTaskManagerService that the keyguard is showing.

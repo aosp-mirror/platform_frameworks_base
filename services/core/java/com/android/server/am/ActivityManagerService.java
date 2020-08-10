@@ -133,7 +133,6 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
 
-
 import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.BroadcastBehavior;
@@ -143,8 +142,8 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -342,7 +341,6 @@ import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
@@ -6418,8 +6416,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public List<StackInfo> getAllStackInfos() {
-        return mActivityTaskManager.getAllStackInfos();
+    public List<RootTaskInfo> getAllRootTaskInfos() {
+        return mActivityTaskManager.getAllRootTaskInfos();
     }
 
     @Override
@@ -15385,8 +15383,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public StackInfo getFocusedStackInfo() throws RemoteException {
-        return mActivityTaskManager.getFocusedStackInfo();
+    public RootTaskInfo getFocusedRootTaskInfo() throws RemoteException {
+        return mActivityTaskManager.getFocusedRootTaskInfo();
     }
 
     @Override

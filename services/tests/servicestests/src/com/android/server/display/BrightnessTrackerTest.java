@@ -24,7 +24,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -984,8 +984,8 @@ public class BrightnessTrackerTest {
         }
 
         @Override
-        public ActivityManager.StackInfo getFocusedStack() throws RemoteException {
-            ActivityManager.StackInfo focusedStack = new ActivityManager.StackInfo();
+        public RootTaskInfo getFocusedStack() throws RemoteException {
+            RootTaskInfo focusedStack = new RootTaskInfo();
             focusedStack.userId = 0;
             focusedStack.topActivity = new ComponentName("a.package", "a.class");
             return focusedStack;

@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
@@ -79,8 +79,8 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
 
     @Test
     public void isSafe_systemApp_returnsTrue() throws Exception {
-        ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-        stackInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
+        RootTaskInfo taskInfo = new RootTaskInfo();
+        taskInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.packageName = APP_PACKAGE_NAME;
@@ -89,13 +89,13 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
         when(mPackageManager.getApplicationInfoAsUser(eq(APP_PACKAGE_NAME), anyInt(), any()))
                 .thenReturn(applicationInfo);
 
-        assertThat(mSideLoadedAppDetector.isSafe(stackInfo)).isTrue();
+        assertThat(mSideLoadedAppDetector.isSafe(taskInfo)).isTrue();
     }
 
     @Test
     public void isSafe_updatedSystemApp_returnsTrue() throws Exception {
-        ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-        stackInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
+        RootTaskInfo taskInfo = new RootTaskInfo();
+        taskInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.packageName = APP_PACKAGE_NAME;
@@ -104,7 +104,7 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
         when(mPackageManager.getApplicationInfoAsUser(eq(APP_PACKAGE_NAME), anyInt(), any()))
                 .thenReturn(applicationInfo);
 
-        assertThat(mSideLoadedAppDetector.isSafe(stackInfo)).isTrue();
+        assertThat(mSideLoadedAppDetector.isSafe(taskInfo)).isTrue();
     }
 
     @Test
@@ -113,8 +113,8 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
                 /* initiatingPackageSigningInfo= */null,
                 /* originatingPackageName= */ null,
                 /* installingPackageName= */ null);
-        ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-        stackInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
+        RootTaskInfo taskInfo = new RootTaskInfo();
+        taskInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.packageName = APP_PACKAGE_NAME;
@@ -123,7 +123,7 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
                 .thenReturn(applicationInfo);
         when(mPackageManager.getInstallSourceInfo(APP_PACKAGE_NAME)).thenReturn(sourceInfo);
 
-        assertThat(mSideLoadedAppDetector.isSafe(stackInfo)).isTrue();
+        assertThat(mSideLoadedAppDetector.isSafe(taskInfo)).isTrue();
     }
 
     @Test
@@ -132,8 +132,8 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
                 /* initiatingPackageSigningInfo= */null,
                 /* originatingPackageName= */ null,
                 /* installingPackageName= */ null);
-        ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-        stackInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
+        RootTaskInfo taskInfo = new RootTaskInfo();
+        taskInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.packageName = APP_PACKAGE_NAME;
@@ -142,7 +142,7 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
                 .thenReturn(applicationInfo);
         when(mPackageManager.getInstallSourceInfo(APP_PACKAGE_NAME)).thenReturn(sourceInfo);
 
-        assertThat(mSideLoadedAppDetector.isSafe(stackInfo)).isFalse();
+        assertThat(mSideLoadedAppDetector.isSafe(taskInfo)).isFalse();
     }
 
     @Test
@@ -151,8 +151,8 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
                 /* initiatingPackageSigningInfo= */null,
                 /* originatingPackageName= */ null,
                 /* installingPackageName= */ null);
-        ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-        stackInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
+        RootTaskInfo taskInfo = new RootTaskInfo();
+        taskInfo.topActivity = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.packageName = APP_PACKAGE_NAME;
@@ -161,6 +161,6 @@ public class SideLoadedAppDetectorTest extends SysuiTestCase {
                 .thenReturn(applicationInfo);
         when(mPackageManager.getInstallSourceInfo(APP_PACKAGE_NAME)).thenReturn(sourceInfo);
 
-        assertThat(mSideLoadedAppDetector.isSafe(stackInfo)).isFalse();
+        assertThat(mSideLoadedAppDetector.isSafe(taskInfo)).isFalse();
     }
 }

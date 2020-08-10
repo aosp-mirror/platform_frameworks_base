@@ -21,8 +21,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
@@ -289,7 +289,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         //   1. Configuration changed due to the language change (RTL <-> RTL)
         //   2. SystemUI restarts after the crash
         mPipBounds = mDefaultPipBounds;
-        resizePinnedStack(getPinnedStackInfo() == null ? STATE_NO_PIP : STATE_PIP);
+        resizePinnedStack(getPinnedTaskInfo() == null ? STATE_NO_PIP : STATE_PIP);
     }
 
     /**
@@ -505,15 +505,15 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         return mState != STATE_NO_PIP;
     }
 
-    private StackInfo getPinnedStackInfo() {
-        StackInfo stackInfo = null;
+    private RootTaskInfo getPinnedTaskInfo() {
+        RootTaskInfo taskInfo = null;
         try {
-            stackInfo = ActivityTaskManager.getService().getStackInfo(
+            taskInfo = ActivityTaskManager.getService().getRootTaskInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
         } catch (RemoteException e) {
-            Log.e(TAG, "getStackInfo failed", e);
+            Log.e(TAG, "getRootTaskInfo failed", e);
         }
-        return stackInfo;
+        return taskInfo;
     }
 
     private void handleMediaResourceGranted(String[] packageNames) {
@@ -611,14 +611,14 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             if (getState() != STATE_NO_PIP) {
                 boolean hasPip = false;
 
-                StackInfo stackInfo = getPinnedStackInfo();
-                if (stackInfo == null || stackInfo.taskIds == null) {
+                RootTaskInfo taskInfo = getPinnedTaskInfo();
+                if (taskInfo == null || taskInfo.childTaskIds == null) {
                     Log.w(TAG, "There is nothing in pinned stack");
                     closePipInternal(false);
                     return;
                 }
-                for (int i = stackInfo.taskIds.length - 1; i >= 0; --i) {
-                    if (stackInfo.taskIds[i] == mPipTaskId) {
+                for (int i = taskInfo.childTaskIds.length - 1; i >= 0; --i) {
+                    if (taskInfo.childTaskIds[i] == mPipTaskId) {
                         // PIP task is still alive.
                         hasPip = true;
                         break;
@@ -642,16 +642,16 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
 
-            StackInfo stackInfo = getPinnedStackInfo();
-            if (stackInfo == null) {
+            RootTaskInfo taskInfo = getPinnedTaskInfo();
+            if (taskInfo == null) {
                 Log.w(TAG, "Cannot find pinned stack");
                 return;
             }
-            if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
-            mPinnedStackId = stackInfo.stackId;
-            mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
+            if (DEBUG) Log.d(TAG, "PINNED_STACK:" + taskInfo);
+            mPinnedStackId = taskInfo.taskId;
+            mPipTaskId = taskInfo.childTaskIds[taskInfo.childTaskIds.length - 1];
             mPipComponentName = ComponentName.unflattenFromString(
-                    stackInfo.taskNames[stackInfo.taskNames.length - 1]);
+                    taskInfo.childTaskNames[taskInfo.childTaskNames.length - 1]);
             // Set state to STATE_PIP so we show it when the pinned stack animation ends.
             mState = STATE_PIP;
             mMediaSessionManager.addOnActiveSessionsChangedListener(

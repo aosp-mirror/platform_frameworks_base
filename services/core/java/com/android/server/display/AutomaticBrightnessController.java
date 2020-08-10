@@ -17,8 +17,8 @@
 package com.android.server.display;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
@@ -846,7 +846,7 @@ class AutomaticBrightnessController {
             public void run() {
                 try {
                     // The foreground app is the top activity of the focused tasks stack.
-                    final StackInfo info = mActivityTaskManager.getFocusedStackInfo();
+                    final RootTaskInfo info = mActivityTaskManager.getFocusedRootTaskInfo();
                     if (info == null || info.topActivity == null) {
                         return;
                     }

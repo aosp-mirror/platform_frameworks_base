@@ -22,8 +22,8 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -328,14 +328,14 @@ public class PipBoundsHandler {
             return false;
         }
 
-        // Bail early if the pinned stack is staled.
-        final ActivityManager.StackInfo pinnedStackInfo;
+        // Bail early if the pinned task is staled.
+        final RootTaskInfo pinnedTaskInfo;
         try {
-            pinnedStackInfo = ActivityTaskManager.getService()
-                    .getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-            if (pinnedStackInfo == null) return false;
+            pinnedTaskInfo = ActivityTaskManager.getService()
+                    .getRootTaskInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            if (pinnedTaskInfo == null) return false;
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get StackInfo for pinned stack", e);
+            Log.e(TAG, "Failed to get RootTaskInfo for pinned task", e);
             return false;
         }
 
@@ -362,7 +362,7 @@ public class PipBoundsHandler {
 
         getInsetBounds(outInsetBounds);
         outBounds.set(postChangeStackBounds);
-        t.setBounds(pinnedStackInfo.stackToken, outBounds);
+        t.setBounds(pinnedTaskInfo.token, outBounds);
         return true;
     }
 

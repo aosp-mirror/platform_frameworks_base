@@ -25,6 +25,7 @@ import static com.android.systemui.pip.PipAnimationController.isOutPipDirection;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityManager;
 import android.app.RemoteAction;
 import android.content.ComponentName;
@@ -324,9 +325,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         configController.addCallback(mOverlayChangedListener);
 
         try {
-            ActivityManager.StackInfo stackInfo = ActivityTaskManager.getService().getStackInfo(
+            RootTaskInfo taskInfo = ActivityTaskManager.getService().getRootTaskInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-            if (stackInfo != null) {
+            if (taskInfo != null) {
                 // If SystemUI restart, and it already existed a pinned stack,
                 // register the pip input consumer to ensure touch can send to it.
                 mInputConsumerController.registerInputConsumer(true /* withSfVsync */);

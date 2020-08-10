@@ -21,7 +21,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.display.DisplayManager;
@@ -81,22 +81,22 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
         int displayId = 123;
         ComponentName componentName = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
-        StackInfo stackInfo1 = createTask(1, /* isVisible= */ true);
-        stackInfo1.taskIds = new int[] { 11, 22, 33 };
+        RootTaskInfo taskInfo1 = createTask(1, /* isVisible= */ true);
+        taskInfo1.childTaskIds = new int[] { 11, 22, 33 };
 
-        StackInfo stackInfo2 = createTask(2, /* isVisible= */ true);
-        stackInfo2.taskIds = new int[] { 111, 222, 333, taskId };
-        stackInfo2.displayId = displayId;
+        RootTaskInfo taskInfo2 = createTask(2, /* isVisible= */ true);
+        taskInfo2.childTaskIds = new int[] { 111, 222, 333, taskId };
+        taskInfo2.displayId = displayId;
 
-        List<StackInfo> stackInfoList = Arrays.asList(stackInfo1, stackInfo2);
+        List<RootTaskInfo> taskInfoList = Arrays.asList(taskInfo1, taskInfo2);
 
-        when(mActivityTaskManager.getAllStackInfos()).thenReturn(stackInfoList);
-        when(mSideLoadedAppDetector.isSafe(stackInfo2)).thenReturn(true);
+        when(mActivityTaskManager.getAllRootTaskInfos()).thenReturn(taskInfoList);
+        when(mSideLoadedAppDetector.isSafe(taskInfo2)).thenReturn(true);
 
         mSideLoadedAppListener.onTaskCreated(taskId, componentName);
 
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo1);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo2);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo1);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo2);
 
         verify(mSideLoadedAppStateController, never()).onUnsafeTaskCreatedOnDisplay(any());
         verify(mSideLoadedAppStateController, never()).onSafeTaskDisplayedOnDisplay(any());
@@ -109,23 +109,23 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
         int displayId = 123;
         ComponentName componentName = new ComponentName(APP_PACKAGE_NAME, APP_CLASS_NAME);
 
-        StackInfo stackInfo1 = createTask(1, /* isVisible= */ true);
-        stackInfo1.taskIds = new int[] { 11, 22, 33 };
-        StackInfo stackInfo2 = createTask(2, /* isVisible= */ true);
-        stackInfo2.taskIds = new int[] { 111, 222, 333, taskId };
-        stackInfo2.displayId = displayId;
-        List<StackInfo> stackInfoList = Arrays.asList(stackInfo1, stackInfo2);
+        RootTaskInfo taskInfo1 = createTask(1, /* isVisible= */ true);
+        taskInfo1.childTaskIds = new int[] { 11, 22, 33 };
+        RootTaskInfo taskInfo2 = createTask(2, /* isVisible= */ true);
+        taskInfo2.childTaskIds = new int[] { 111, 222, 333, taskId };
+        taskInfo2.displayId = displayId;
+        List<RootTaskInfo> taskInfoList = Arrays.asList(taskInfo1, taskInfo2);
 
         Display display = createDisplay(displayId);
 
-        when(mActivityTaskManager.getAllStackInfos()).thenReturn(stackInfoList);
-        when(mSideLoadedAppDetector.isSafe(stackInfo2)).thenReturn(false);
+        when(mActivityTaskManager.getAllRootTaskInfos()).thenReturn(taskInfoList);
+        when(mSideLoadedAppDetector.isSafe(taskInfo2)).thenReturn(false);
         when(mDisplayManager.getDisplay(displayId)).thenReturn(display);
 
         mSideLoadedAppListener.onTaskCreated(taskId, componentName);
 
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo1);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo2);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo1);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo2);
 
         verify(mSideLoadedAppStateController).onUnsafeTaskCreatedOnDisplay(display);
         verify(mSideLoadedAppStateController, never()).onSafeTaskDisplayedOnDisplay(any());
@@ -135,21 +135,21 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
     @Test
     public void onTaskStackChanged_safeTask_callsSafeTaskDisplayed() throws Exception {
         Display display = createDisplay(123);
-        StackInfo stackInfo1 = createTask(1, /* isVisible= */ false);
-        StackInfo stackInfo2 = createTask(2, /* isVisible= */ true);
-        StackInfo stackInfo3 = createTask(3, /* isVisible= */ true);
-        List<StackInfo> stackInfoList = Arrays.asList(stackInfo1, stackInfo2, stackInfo3);
+        RootTaskInfo taskInfo1 = createTask(1, /* isVisible= */ false);
+        RootTaskInfo taskInfo2 = createTask(2, /* isVisible= */ true);
+        RootTaskInfo taskInfo3 = createTask(3, /* isVisible= */ true);
+        List<RootTaskInfo> taskInfoList = Arrays.asList(taskInfo1, taskInfo2, taskInfo3);
 
-        when(mActivityTaskManager.getAllStackInfosOnDisplay(display.getDisplayId()))
-                .thenReturn(stackInfoList);
-        when(mSideLoadedAppDetector.isSafe(stackInfo2)).thenReturn(true);
+        when(mActivityTaskManager.getAllRootTaskInfosOnDisplay(display.getDisplayId()))
+                .thenReturn(taskInfoList);
+        when(mSideLoadedAppDetector.isSafe(taskInfo2)).thenReturn(true);
         when(mDisplayManager.getDisplays()).thenReturn(new Display[] { display });
 
         mSideLoadedAppListener.onTaskStackChanged();
 
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo1);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo2);
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo3);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo1);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo2);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo3);
 
         verify(mSideLoadedAppStateController, never()).onUnsafeTaskCreatedOnDisplay(any());
         verify(mSideLoadedAppStateController).onSafeTaskDisplayedOnDisplay(display);
@@ -159,21 +159,21 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
     @Test
     public void onTaskStackChanged_unsafeTask_callsUnsafeTaskDisplayed() throws Exception {
         Display display = createDisplay(123);
-        StackInfo stackInfo1 = createTask(1, /* isVisible= */ false);
-        StackInfo stackInfo2 = createTask(2, /* isVisible= */ true);
-        StackInfo stackInfo3 = createTask(3, /* isVisible= */ true);
-        List<StackInfo> stackInfoList = Arrays.asList(stackInfo1, stackInfo2, stackInfo3);
+        RootTaskInfo taskInfo1 = createTask(1, /* isVisible= */ false);
+        RootTaskInfo taskInfo2 = createTask(2, /* isVisible= */ true);
+        RootTaskInfo taskInfo3 = createTask(3, /* isVisible= */ true);
+        List<RootTaskInfo> taskInfoList = Arrays.asList(taskInfo1, taskInfo2, taskInfo3);
 
-        when(mActivityTaskManager.getAllStackInfosOnDisplay(display.getDisplayId()))
-                .thenReturn(stackInfoList);
-        when(mSideLoadedAppDetector.isSafe(stackInfo2)).thenReturn(false);
+        when(mActivityTaskManager.getAllRootTaskInfosOnDisplay(display.getDisplayId()))
+                .thenReturn(taskInfoList);
+        when(mSideLoadedAppDetector.isSafe(taskInfo2)).thenReturn(false);
         when(mDisplayManager.getDisplays()).thenReturn(new Display[] { display });
 
         mSideLoadedAppListener.onTaskStackChanged();
 
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo1);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo2);
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo3);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo1);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo2);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo3);
 
         verify(mSideLoadedAppStateController, never()).onUnsafeTaskCreatedOnDisplay(any());
         verify(mSideLoadedAppStateController, never()).onSafeTaskDisplayedOnDisplay(any());
@@ -183,40 +183,40 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
     @Test
     public void onTaskStackChanged_multiDisplay_callsTasksDisplayed() throws Exception {
         Display display1 = createDisplay(1);
-        StackInfo stackInfo1 = createTask(1, /* isVisible= */ false);
-        StackInfo stackInfo2 = createTask(2, /* isVisible= */ true);
-        StackInfo stackInfo3 = createTask(3, /* isVisible= */ true);
-        List<StackInfo> display1Stack = Arrays.asList(stackInfo1, stackInfo2, stackInfo3);
+        RootTaskInfo taskInfo1 = createTask(1, /* isVisible= */ false);
+        RootTaskInfo taskInfo2 = createTask(2, /* isVisible= */ true);
+        RootTaskInfo taskInfo3 = createTask(3, /* isVisible= */ true);
+        List<RootTaskInfo> display1Tasks = Arrays.asList(taskInfo1, taskInfo2, taskInfo3);
 
         Display display2 = createDisplay(2);
-        StackInfo stackInfo4 = createTask(4, /* isVisible= */ true);
-        List<StackInfo> display2Stack = Collections.singletonList(stackInfo4);
+        RootTaskInfo taskInfo4 = createTask(4, /* isVisible= */ true);
+        List<RootTaskInfo> display2Tasks = Collections.singletonList(taskInfo4);
 
         Display display3 = createDisplay(3);
-        StackInfo stackInfo5 = createTask(5, /* isVisible= */ true);
-        List<StackInfo> display3Stack = Collections.singletonList(stackInfo5);
+        RootTaskInfo taskInfo5 = createTask(5, /* isVisible= */ true);
+        List<RootTaskInfo> display3Tasks = Collections.singletonList(taskInfo5);
 
-        when(mActivityTaskManager.getAllStackInfosOnDisplay(display1.getDisplayId()))
-                .thenReturn(display1Stack);
-        when(mActivityTaskManager.getAllStackInfosOnDisplay(display2.getDisplayId()))
-                .thenReturn(display2Stack);
-        when(mActivityTaskManager.getAllStackInfosOnDisplay(display3.getDisplayId()))
-                .thenReturn(display3Stack);
+        when(mActivityTaskManager.getAllRootTaskInfosOnDisplay(display1.getDisplayId()))
+                .thenReturn(display1Tasks);
+        when(mActivityTaskManager.getAllRootTaskInfosOnDisplay(display2.getDisplayId()))
+                .thenReturn(display2Tasks);
+        when(mActivityTaskManager.getAllRootTaskInfosOnDisplay(display3.getDisplayId()))
+                .thenReturn(display3Tasks);
 
-        when(mSideLoadedAppDetector.isSafe(stackInfo2)).thenReturn(true);
-        when(mSideLoadedAppDetector.isSafe(stackInfo4)).thenReturn(false);
-        when(mSideLoadedAppDetector.isSafe(stackInfo5)).thenReturn(true);
+        when(mSideLoadedAppDetector.isSafe(taskInfo2)).thenReturn(true);
+        when(mSideLoadedAppDetector.isSafe(taskInfo4)).thenReturn(false);
+        when(mSideLoadedAppDetector.isSafe(taskInfo5)).thenReturn(true);
 
         when(mDisplayManager.getDisplays())
                 .thenReturn(new Display[] { display1, display2, display3});
 
         mSideLoadedAppListener.onTaskStackChanged();
 
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo1);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo2);
-        verify(mSideLoadedAppDetector, never()).isSafe(stackInfo3);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo4);
-        verify(mSideLoadedAppDetector).isSafe(stackInfo5);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo1);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo2);
+        verify(mSideLoadedAppDetector, never()).isSafe(taskInfo3);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo4);
+        verify(mSideLoadedAppDetector).isSafe(taskInfo5);
 
         verify(mSideLoadedAppStateController, never()).onUnsafeTaskCreatedOnDisplay(any());
         verify(mSideLoadedAppStateController).onSafeTaskDisplayedOnDisplay(display1);
@@ -234,10 +234,10 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
                 DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
-    private StackInfo createTask(int id, boolean isVisible) {
-        StackInfo stackInfo = new StackInfo();
-        stackInfo.stackId = id;
-        stackInfo.visible = isVisible;
-        return stackInfo;
+    private RootTaskInfo createTask(int id, boolean isVisible) {
+        RootTaskInfo taskInfo = new RootTaskInfo();
+        taskInfo.taskId = id;
+        taskInfo.visible = isVisible;
+        return taskInfo;
     }
 }

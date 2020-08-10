@@ -52,7 +52,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.PictureInPictureParams;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -301,9 +301,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         removeGlobalMinSizeRestriction();
         final Task stack = new StackBuilder(mWm.mRoot)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        StackInfo info =
-                mWm.mAtmService.getStackInfo(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-        assertEquals(stack.mRemoteToken.toWindowContainerToken(), info.stackToken);
+        RootTaskInfo info =
+                mWm.mAtmService.getRootTaskInfo(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
+        assertEquals(stack.mRemoteToken.toWindowContainerToken(), info.token);
         testTransaction(stack);
     }
 

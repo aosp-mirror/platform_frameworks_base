@@ -43,9 +43,9 @@ class ButtonSelectionStateListener extends TaskStackChangeListener {
     public void onTaskStackChanged() {
         try {
             mButtonSelectionStateController.taskChanged(
-                    ActivityTaskManager.getService().getAllStackInfos());
+                    ActivityTaskManager.getService().getAllRootTaskInfos());
         } catch (Exception e) {
-            Log.e(TAG, "Getting StackInfo from activity manager failed", e);
+            Log.e(TAG, "Getting RootTaskInfo from activity task manager failed", e);
         }
     }
 
@@ -53,9 +53,9 @@ class ButtonSelectionStateListener extends TaskStackChangeListener {
     public void onTaskDisplayChanged(int taskId, int newDisplayId) {
         try {
             mButtonSelectionStateController.taskChanged(
-                    ActivityTaskManager.getService().getAllStackInfos());
+                    ActivityTaskManager.getService().getAllRootTaskInfos());
         } catch (Exception e) {
-            Log.e(TAG, "Getting StackInfo from activity manager failed", e);
+            Log.e(TAG, "Getting RootTaskInfo from activity task manager failed", e);
         }
 
     }

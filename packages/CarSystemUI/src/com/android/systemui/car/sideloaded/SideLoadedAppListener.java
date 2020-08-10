@@ -16,8 +16,7 @@
 
 package com.android.systemui.car.sideloaded;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
@@ -56,15 +55,15 @@ public class SideLoadedAppListener extends TaskStackListener {
     public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
         super.onTaskCreated(taskId, componentName);
 
-        List<StackInfo> stackInfoList = mActivityTaskManager.getAllStackInfos();
-        ActivityManager.StackInfo stackInfo = getStackInfo(stackInfoList, taskId);
-        if (stackInfo == null) {
+        List<RootTaskInfo> taskInfoList = mActivityTaskManager.getAllRootTaskInfos();
+        RootTaskInfo taskInfo = getStackInfo(taskInfoList, taskId);
+        if (taskInfo == null) {
             Log.e(TAG, "Stack info was not available for taskId: " + taskId);
             return;
         }
 
-        if (!mSideLoadedAppDetector.isSafe(stackInfo)) {
-            Display display = mDisplayManager.getDisplay(stackInfo.displayId);
+        if (!mSideLoadedAppDetector.isSafe(taskInfo)) {
+            Display display = mDisplayManager.getDisplay(taskInfo.displayId);
             mSideLoadedAppStateController.onUnsafeTaskCreatedOnDisplay(display);
         }
     }
@@ -75,18 +74,18 @@ public class SideLoadedAppListener extends TaskStackListener {
 
         Display[] displays = mDisplayManager.getDisplays();
         for (Display display : displays) {
-            // Note that the stackInfoList is ordered by recency.
-            List<StackInfo> stackInfoList =
-                    mActivityTaskManager.getAllStackInfosOnDisplay(display.getDisplayId());
+            // Note that the taskInfoList is ordered by recency.
+            List<RootTaskInfo> taskInfoList =
+                    mActivityTaskManager.getAllRootTaskInfosOnDisplay(display.getDisplayId());
 
-            if (stackInfoList == null) {
+            if (taskInfoList == null) {
                 continue;
             }
-            StackInfo stackInfo = getTopVisibleStackInfo(stackInfoList);
-            if (stackInfo == null) {
+            RootTaskInfo taskInfo = getTopVisibleStackInfo(taskInfoList);
+            if (taskInfo == null) {
                 continue;
             }
-            if (mSideLoadedAppDetector.isSafe(stackInfo)) {
+            if (mSideLoadedAppDetector.isSafe(taskInfo)) {
                 mSideLoadedAppStateController.onSafeTaskDisplayedOnDisplay(display);
             } else {
                 mSideLoadedAppStateController.onUnsafeTaskDisplayedOnDisplay(display);
@@ -97,18 +96,17 @@ public class SideLoadedAppListener extends TaskStackListener {
     /**
      * Returns stack info for a given taskId.
      */
-    private ActivityManager.StackInfo getStackInfo(
-            List<ActivityManager.StackInfo> stackInfoList, int taskId) {
-        if (stackInfoList == null) {
+    private RootTaskInfo getStackInfo(List<RootTaskInfo> taskInfoList, int taskId) {
+        if (taskInfoList == null) {
             return null;
         }
-        for (ActivityManager.StackInfo stackInfo : stackInfoList) {
-            if (stackInfo.taskIds == null) {
+        for (RootTaskInfo taskInfo : taskInfoList) {
+            if (taskInfo.childTaskIds == null) {
                 continue;
             }
-            for (int stackTaskId : stackInfo.taskIds) {
-                if (taskId == stackTaskId) {
-                    return stackInfo;
+            for (int taskTaskId : taskInfo.childTaskIds) {
+                if (taskId == taskTaskId) {
+                    return taskInfo;
                 }
             }
         }
@@ -118,11 +116,10 @@ public class SideLoadedAppListener extends TaskStackListener {
     /**
      * Returns the first visible stackInfo.
      */
-    private ActivityManager.StackInfo getTopVisibleStackInfo(
-            List<ActivityManager.StackInfo> stackInfoList) {
-        for (ActivityManager.StackInfo stackInfo : stackInfoList) {
-            if (stackInfo.visible) {
-                return stackInfo;
+    private RootTaskInfo getTopVisibleStackInfo(List<RootTaskInfo> taskInfoList) {
+        for (RootTaskInfo taskInfo : taskInfoList) {
+            if (taskInfo.visible) {
+                return taskInfo;
             }
         }
         return null;

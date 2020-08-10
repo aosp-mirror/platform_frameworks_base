@@ -29,6 +29,8 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
@@ -391,27 +393,6 @@ public class ActivityTaskManager {
     }
 
     /**
-     * List all activity stacks information.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public String listAllStacks() {
-        final List<ActivityManager.StackInfo> stacks;
-        try {
-            stacks = getService().getAllStackInfos();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-        final StringBuilder sb = new StringBuilder();
-        if (stacks != null) {
-            for (ActivityManager.StackInfo info : stacks) {
-                sb.append(info).append("\n");
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
      * Clears launch params for the given package.
      * @param packageNames the names of the packages of which the launch params are to be cleared
      */
@@ -467,5 +448,97 @@ public class ActivityTaskManager {
     public static boolean currentUiModeSupportsErrorDialogs(@NonNull Context context) {
         final Configuration config = context.getResources().getConfiguration();
         return currentUiModeSupportsErrorDialogs(config);
+    }
+
+    /**
+     * Information you can retrieve about a root task in the system.
+     * @hide
+     */
+    public static class RootTaskInfo extends TaskInfo implements Parcelable {
+        // TODO(b/148895075): Move some of the fields to TaskInfo.
+        public Rect bounds = new Rect();
+        public int[] childTaskIds;
+        public String[] childTaskNames;
+        public Rect[] childTaskBounds;
+        public int[] childTaskUserIds;
+        public boolean visible;
+        // Index of the stack in the display's stack list, can be used for comparison of stack order
+        public int position;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeTypedObject(bounds, flags);
+            dest.writeIntArray(childTaskIds);
+            dest.writeStringArray(childTaskNames);
+            dest.writeTypedArray(childTaskBounds, flags);
+            dest.writeIntArray(childTaskUserIds);
+            dest.writeInt(visible ? 1 : 0);
+            dest.writeInt(position);
+            super.writeToParcel(dest, flags);
+        }
+
+        @Override
+        void readFromParcel(Parcel source) {
+            bounds = source.readTypedObject(Rect.CREATOR);
+            childTaskIds = source.createIntArray();
+            childTaskNames = source.createStringArray();
+            childTaskBounds = source.createTypedArray(Rect.CREATOR);
+            childTaskUserIds = source.createIntArray();
+            visible = source.readInt() > 0;
+            position = source.readInt();
+            super.readFromParcel(source);
+        }
+
+        public static final @NonNull Creator<RootTaskInfo> CREATOR = new Creator<>() {
+            @Override
+            public RootTaskInfo createFromParcel(Parcel source) {
+                return new RootTaskInfo(source);
+            }
+
+            @Override
+            public RootTaskInfo[] newArray(int size) {
+                return new RootTaskInfo[size];
+            }
+        };
+
+        public RootTaskInfo() {
+        }
+
+        private RootTaskInfo(Parcel source) {
+            readFromParcel(source);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(256);
+            sb.append("RootTask id="); sb.append(taskId);
+            sb.append(" bounds="); sb.append(bounds.toShortString());
+            sb.append(" displayId="); sb.append(displayId);
+            sb.append(" userId="); sb.append(userId);
+            sb.append("\n");
+
+            sb.append(" configuration="); sb.append(configuration);
+            sb.append("\n");
+
+            for (int i = 0; i < childTaskIds.length; ++i) {
+                sb.append("  taskId="); sb.append(childTaskIds[i]);
+                sb.append(": "); sb.append(childTaskNames[i]);
+                if (childTaskBounds != null) {
+                    sb.append(" bounds="); sb.append(childTaskBounds[i].toShortString());
+                }
+                sb.append(" userId=").append(childTaskUserIds[i]);
+                sb.append(" visible=").append(visible);
+                if (topActivity != null) {
+                    sb.append(" topActivity=").append(topActivity);
+                }
+                sb.append("\n");
+            }
+            return sb.toString();
+        }
     }
 }

@@ -4019,7 +4019,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void fillTaskInfo(TaskInfo info, boolean stripExtras) {
         getNumRunningActivities(mReuseActivitiesReport);
-        info.userId = mUserId;
+        info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.stackId = getRootTaskId();
         info.taskId = mTaskId;
         info.displayId = getDisplayId();

@@ -17,7 +17,7 @@
 package com.android.systemui.car.sideloaded;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
@@ -78,10 +78,10 @@ public class SideLoadedAppDetector {
         return false;
     }
 
-    boolean isSafe(@NonNull ActivityManager.StackInfo stackInfo) {
-        ComponentName componentName = stackInfo.topActivity;
+    boolean isSafe(@NonNull RootTaskInfo taskInfo) {
+        ComponentName componentName = taskInfo.topActivity;
         if (componentName == null) {
-            Log.w(TAG, "Stack info does not have top activity: " + stackInfo.stackId);
+            Log.w(TAG, "Task info does not have top activity: " + taskInfo.taskId);
             return false;
         }
         return isSafe(componentName.getPackageName());

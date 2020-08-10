@@ -36,6 +36,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
@@ -2783,7 +2784,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onTaskStackChangedBackground() {
             try {
-                ActivityManager.StackInfo info = ActivityTaskManager.getService().getStackInfo(
+                RootTaskInfo info = ActivityTaskManager.getService().getRootTaskInfo(
                         WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_ASSISTANT);
                 if (info == null) {
                     return;
