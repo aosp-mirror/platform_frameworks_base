@@ -176,7 +176,7 @@ public class TaskRecordTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task stack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         final Configuration parentConfig = stack.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
         parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
@@ -212,7 +212,7 @@ public class TaskRecordTests extends WindowTestsBase {
     @Test
     public void testBoundsOnModeChangeFreeformToFullscreen() {
         DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
-        Task stack = new StackBuilder(mRootWindowContainer).setDisplay(display)
+        Task stack = new TaskBuilder(mSupervisor).setDisplay(display).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         Task task = stack.getBottomMostTask();
         task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
@@ -253,7 +253,7 @@ public class TaskRecordTests extends WindowTestsBase {
         dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
         dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
 
-        final Task stack = new StackBuilder(mRootWindowContainer)
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         final Task task = stack.getBottomMostTask();
         final ActivityRecord root = task.getTopNonFinishingActivity();
@@ -317,7 +317,7 @@ public class TaskRecordTests extends WindowTestsBase {
         dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
         dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
 
-        final Task stack = new StackBuilder(mRootWindowContainer)
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         final Task task = stack.getBottomMostTask();
         ActivityRecord root = task.getTopNonFinishingActivity();
@@ -341,7 +341,7 @@ public class TaskRecordTests extends WindowTestsBase {
                 Configuration.ORIENTATION_LANDSCAPE;
         display.onRequestedOverrideConfigurationChanged(
                 display.getRequestedOverrideConfiguration());
-        Task stack = new StackBuilder(mRootWindowContainer)
+        Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         Task task = stack.getBottomMostTask();
         ActivityRecord root = task.getTopNonFinishingActivity();
@@ -497,7 +497,7 @@ public class TaskRecordTests extends WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
-        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
         final int longSide = 1200;
@@ -1029,7 +1029,7 @@ public class TaskRecordTests extends WindowTestsBase {
     }
 
     private Task getTestTask() {
-        final Task stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         return stack.getBottomMostTask();
     }
 
@@ -1039,7 +1039,7 @@ public class TaskRecordTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task stack = taskDisplayArea.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
 
         final Configuration parentConfig = stack.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);

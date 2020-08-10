@@ -218,7 +218,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task rootHomeTask = defaultTaskDisplayArea.getRootHomeTask();
         rootHomeTask.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
 
-        final Task primarySplitTask = new StackBuilder(rootWindowContainer)
+        final Task primarySplitTask = new TaskBuilder(mSupervisor)
                 .setTaskDisplayArea(defaultTaskDisplayArea)
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 .setActivityType(ACTIVITY_TYPE_STANDARD)

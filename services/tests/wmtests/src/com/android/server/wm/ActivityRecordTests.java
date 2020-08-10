@@ -131,7 +131,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mStack = new StackBuilder(mRootWindowContainer).build();
+        mStack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         mTask = mStack.getBottomMostTask();
         mActivity = mTask.getTopNonFinishingActivity();
 
@@ -172,7 +172,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() {
-        final Task newTask = new TaskBuilder(mAtm.mStackSupervisor).setStack(mStack).build();
+        final Task newTask = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(mStack).build();
         mActivity.reparent(newTask, 0, null /*reason*/);
         verify(mStack, times(0)).cleanUpActivityReferences(any());
     }
@@ -262,7 +262,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Set options for two ActivityRecords in separate Tasks. Apply one ActivityRecord options.
         // Pending options should be cleared for only ActivityRecord that was applied
-        Task task2 = new TaskBuilder(mAtm.mStackSupervisor).setStack(mStack).build();
+        Task task2 = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(mStack).build();
         activity2 = new ActivityBuilder(mAtm).setTask(task2).build();
         activity2.updateOptionsLocked(activityOptions);
         mActivity.updateOptionsLocked(activityOptions);
@@ -548,7 +548,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         mActivity.setState(Task.ActivityState.STOPPED, "Testing");
 
-        final Task stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         try {
             doReturn(false).when(stack).isTranslucent(any());
             assertFalse(mStack.shouldBeVisible(null /* starting */));
@@ -756,14 +756,14 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testFinishActivityIfPossible_adjustStackOrder() {
         // Prepare the stacks with order (top to bottom): mStack, stack1, stack2.
-        final Task stack1 = new StackBuilder(mRootWindowContainer).build();
+        final Task stack1 = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         mStack.moveToFront("test");
         // The stack2 is needed here for moving back to simulate the
         // {@link DisplayContent#mPreferredTopFocusableStack} is cleared, so
         // {@link DisplayContent#getFocusedStack} will rely on the order of focusable-and-visible
         // stacks. Then when mActivity is finishing, its stack will be invisible (no running
         // activities in the stack) that is the key condition to verify.
-        final Task stack2 = new StackBuilder(mRootWindowContainer).build();
+        final Task stack2 = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         stack2.moveToBack("test", stack2.getBottomMostTask());
 
         assertTrue(mStack.isTopStackInDisplayArea());
@@ -973,7 +973,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Simulates that {@code currentTop} starts an existing activity from background (so its
         // state is stopped) and the starting flow just goes to place it at top.
-        final Task nextStack = new StackBuilder(mRootWindowContainer).build();
+        final Task nextStack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord nextTop = nextStack.getTopNonFinishingActivity();
         nextTop.setState(STOPPED, "test");
 
@@ -1095,7 +1095,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Add another stack to become focused and make the activity there visible. This way it
         // simulates finishing in non-focused stack in split-screen.
-        final Task stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord focusedActivity = stack.getTopMostActivity();
         focusedActivity.nowVisible = true;
         focusedActivity.mVisibleRequested = true;
@@ -1581,7 +1581,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Create a new task with custom config to reparent the activity to.
         final Task newTask =
-                new TaskBuilder(mSupervisor).setStack(initialTask.getRootTask()).build();
+                new TaskBuilder(mSupervisor).setParentTask(initialTask.getRootTask()).build();
         final Configuration newConfig = newTask.getConfiguration();
         newConfig.densityDpi += 100;
         newTask.onRequestedOverrideConfigurationChanged(newConfig);
@@ -1613,7 +1613,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Create a new task with custom config to reparent the second activity to.
         final Task newTask =
-                new TaskBuilder(mSupervisor).setStack(initialTask.getRootTask()).build();
+                new TaskBuilder(mSupervisor).setParentTask(initialTask.getRootTask()).build();
         final Configuration newConfig = newTask.getConfiguration();
         newConfig.densityDpi += 100;
         newTask.onRequestedOverrideConfigurationChanged(newConfig);
@@ -1750,7 +1750,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         }
         final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         return new ActivityBuilder(mAtm).setTask(task).setUseProcess(process).build();
     }
 }
