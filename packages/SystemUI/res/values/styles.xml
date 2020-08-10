@@ -387,6 +387,9 @@
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
     </style>
 
+    <!-- Overridden by values-television/styles.xml with tv-specific settings -->
+    <style name="volume_dialog_theme" parent="qs_theme"/>
+
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>

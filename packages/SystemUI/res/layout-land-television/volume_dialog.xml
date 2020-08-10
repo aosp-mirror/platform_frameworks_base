@@ -20,7 +20,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@android:color/transparent"
-    android:theme="@style/qs_theme">
+    android:theme="@style/volume_dialog_theme">
 
     <FrameLayout
         android:id="@+id/volume_dialog"
@@ -46,7 +46,7 @@
             android:translationZ="@dimen/volume_dialog_elevation"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:background="@drawable/rounded_bg_full">
+            android:background="@drawable/tv_volume_dialog_background">
 
             <LinearLayout
                 android:id="@+id/volume_dialog_rows"
@@ -54,9 +54,7 @@
                 android:layout_height="wrap_content"
                 android:minWidth="@dimen/volume_dialog_panel_width"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingRight="@dimen/volume_dialog_stream_padding"
-                android:paddingLeft="@dimen/volume_dialog_stream_padding">
+                android:orientation="horizontal">
                 <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
 

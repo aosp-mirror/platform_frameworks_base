@@ -574,4 +574,6 @@
     <!-- Animation duration for translating of one handed when trigger / dismiss. -->
     <integer name="config_one_handed_translate_animation_duration">150</integer>
 
+    <!-- Show a separate icon for low and high volume on the volume dialog -->
+    <bool name="config_showLowMediaVolumeIcon">false</bool>
 </resources>
