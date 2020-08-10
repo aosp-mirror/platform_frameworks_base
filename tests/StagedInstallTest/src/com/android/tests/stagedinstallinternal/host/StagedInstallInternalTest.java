@@ -22,7 +22,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
-import com.android.cts.install.lib.host.InstallUtilsHost;
+import android.cts.install.lib.host.InstallUtilsHost;
+
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tests.util.ModuleTestUtils;
