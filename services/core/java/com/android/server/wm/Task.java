@@ -7056,17 +7056,21 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * Reset local parameters because an app's activity died.
      * @param app The app of the activity that died.
+     * @return {@code true} if the process of the pausing activity is died.
      */
-    void handleAppDied(WindowProcessController app) {
+    boolean handleAppDied(WindowProcessController app) {
+        boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG_PAUSE,
                     "App died while pausing: " + mPausingActivity);
             mPausingActivity = null;
+            isPausingDied = true;
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
             mLastPausedActivity = null;
             mLastNoHistoryActivity = null;
         }
+        return isPausingDied;
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
