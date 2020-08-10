@@ -931,8 +931,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         final Task stack = createStack();
         final Task task = createTask(stack);
-        final ActivityRecord record = WindowTestUtils.createActivityRecordInTask(
-                stack.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordInTask(stack.mDisplayContent, task);
 
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
@@ -966,8 +965,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testInterceptBackPressedOnTaskRoot() throws RemoteException {
         final Task stack = createStack();
         final Task task = createTask(stack);
-        final ActivityRecord activity = WindowTestUtils.createActivityRecordInTask(
-                stack.mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecordInTask(stack.mDisplayContent, task);
         final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
 
         // Setup the task to be controlled by the MW mode organizer
