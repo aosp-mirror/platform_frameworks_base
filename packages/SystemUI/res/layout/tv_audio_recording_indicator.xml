@@ -19,7 +19,7 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:orientation="horizontal"
-              android:padding="32dp">
+              android:padding="12dp">
 
     <FrameLayout
         android:layout_width="wrap_content"
@@ -32,45 +32,25 @@
             android:orientation="horizontal">
 
             <FrameLayout
-                android:layout_width="45dp"
-                android:layout_height="47dp">
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
                 <View
                     android:id="@+id/icon_container_bg"
-                    android:layout_width="match_parent"
+                    android:layout_width="50dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/tv_rect_dark_left_rounded"/>
 
                 <FrameLayout
                     android:id="@+id/icon_mic"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="6dp">
-
-                    <View
-                        android:layout_width="27dp"
-                        android:layout_height="27dp"
-                        android:layout_gravity="center"
-                        android:background="@drawable/tv_circle_dark"/>
+                    android:layout_width="34dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/tv_rect_shadow_rounded">
 
                     <ImageView
-                        android:id="@+id/pulsating_circle"
-                        android:layout_width="27dp"
-                        android:layout_height="27dp"
-                        android:layout_gravity="center"
-                        android:background="@drawable/tv_circle_white_translucent"/>
-
-                    <ImageView
-                        android:layout_width="27dp"
-                        android:layout_height="27dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/tv_ring_white"/>
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
                         android:layout_gravity="center"
                         android:background="@drawable/tv_ic_mic_white"/>
                 </FrameLayout>

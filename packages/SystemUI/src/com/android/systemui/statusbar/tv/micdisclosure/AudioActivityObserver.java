@@ -40,5 +40,9 @@ abstract class AudioActivityObserver {
         mListener = listener;
     }
 
+    abstract void start();
+
+    abstract void stop();
+
     abstract Set<String> getActivePackages();
 }
