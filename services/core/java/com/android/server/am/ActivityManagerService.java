@@ -14466,7 +14466,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 resolvedType, resultTo, resultCode, resultData, resultExtras, requiredPermissions,
                 appOp, bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
                 realCallingPid, userId, false /* allowBackgroundActivityStarts */,
-                null /* tokenNeededForBackgroundActivityStarts */, null /* broadcastWhitelist */);
+                null /* tokenNeededForBackgroundActivityStarts */, null /* broadcastAllowList */);
     }
 
     @GuardedBy("this")
@@ -15310,7 +15310,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         OP_NONE, bOptions, serialized, sticky, -1, uid, realCallingUid,
                         realCallingPid, userId, allowBackgroundActivityStarts,
                         backgroundActivityStartsToken,
-                        null /*broadcastWhitelist*/);
+                        null /* broadcastAllowList */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
