@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -197,7 +198,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mEntryManager.setUpWithPresenter(mock(NotificationPresenter.class));
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
+        NotificationShelfController notificationShelfController =
+                mock(NotificationShelfController.class);
         NotificationShelf notificationShelf = mock(NotificationShelf.class);
+        when(notificationShelfController.getView()).thenReturn(notificationShelf);
         when(mNotificationSectionsManager.createSectionsForBuckets()).thenReturn(
                 new NotificationSection[]{
                         mNotificationSection
@@ -230,7 +234,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         verify(mLockscreenUserManager).addUserChangedListener(userChangedCaptor.capture());
         mUserChangedListener = userChangedCaptor.getValue();
         mStackScroller = spy(mStackScrollerInternal);
-        mStackScroller.setShelf(notificationShelf);
+        mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);
         mStackScroller.setScrimController(mock(ScrimController.class));
         mStackScroller.setGroupManager(mGroupManager);

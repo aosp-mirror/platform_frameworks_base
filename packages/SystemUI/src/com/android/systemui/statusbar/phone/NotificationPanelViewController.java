@@ -86,6 +86,7 @@ import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -454,6 +455,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private boolean mAnimatingQS;
     private int mOldLayoutDirection;
+    private NotificationShelfController mNotificationShelfController;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -858,7 +860,7 @@ public class NotificationPanelViewController extends PanelViewController {
         float minPadding = mClockPositionAlgorithm.getMinStackScrollerPadding();
         int notificationPadding = Math.max(
                 1, mResources.getDimensionPixelSize(R.dimen.notification_divider_height));
-        NotificationShelf shelf = mNotificationStackScroller.getNotificationShelf();
+        NotificationShelf shelf = mNotificationShelfController.getView();
         float
                 shelfSize =
                 shelf.getVisibility() == View.GONE ? 0
@@ -3053,7 +3055,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void initDependencies(StatusBar statusBar, NotificationGroupManager groupManager,
-            NotificationShelf notificationShelf,
+            NotificationShelfController notificationShelfController,
             NotificationIconAreaController notificationIconAreaController,
             ScrimController scrimController) {
         setStatusBar(statusBar);
@@ -3062,9 +3064,10 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScroller.setIconAreaController(notificationIconAreaController);
         mNotificationStackScroller.setStatusBar(statusBar);
         mNotificationStackScroller.setGroupManager(groupManager);
-        mNotificationStackScroller.setShelf(notificationShelf);
+        mNotificationStackScroller.setShelfController(notificationShelfController);
         mNotificationStackScroller.setScrimController(scrimController);
         updateShowEmptyShadeView();
+        mNotificationShelfController = notificationShelfController;
     }
 
     public void showTransientIndication(int id) {

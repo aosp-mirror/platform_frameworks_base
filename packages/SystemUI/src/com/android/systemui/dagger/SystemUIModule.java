@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
@@ -72,7 +73,8 @@ import dagger.Provides;
         subcomponents = {StatusBarComponent.class,
                 NotificationRowComponent.class,
                 DozeComponent.class,
-                ExpandableNotificationRowComponent.class})
+                ExpandableNotificationRowComponent.class,
+                NotificationShelfComponent.class})
 public abstract class SystemUIModule {
 
     @Binds
