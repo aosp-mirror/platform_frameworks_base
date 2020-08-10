@@ -27,6 +27,7 @@
         <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:textSize">14dp</item>
         <item name="android:background">@drawable/kg_emergency_button_background</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingLeft">12dp</item>
         <item name="android:paddingRight">12dp</item>
     </style>
