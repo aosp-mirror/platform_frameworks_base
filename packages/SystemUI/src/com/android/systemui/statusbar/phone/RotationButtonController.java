@@ -117,7 +117,8 @@ public class RotationButtonController {
         return (disable2Flags & StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS) != 0;
     }
 
-    RotationButtonController(Context context, @StyleRes int style, RotationButton rotationButton) {
+    RotationButtonController(Context context, @StyleRes int style, RotationButton rotationButton,
+            Consumer<Boolean> visibilityChangedCallback) {
         mContext = context;
         mRotationButton = rotationButton;
         mRotationButton.setRotationButtonController(this);
@@ -131,6 +132,7 @@ public class RotationButtonController {
         mTaskStackListener = new TaskStackListenerImpl();
         mRotationButton.setOnClickListener(this::onRotateSuggestionClick);
         mRotationButton.setOnHoverListener(this::onRotateSuggestionHover);
+        mRotationButton.setVisibilityChangedCallback(visibilityChangedCallback);
     }
 
     void registerListeners() {
