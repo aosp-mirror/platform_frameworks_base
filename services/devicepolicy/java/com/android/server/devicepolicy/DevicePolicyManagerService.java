@@ -106,10 +106,6 @@ import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.A
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
-import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
-import static org.xmlpull.v1.XmlPullParser.END_TAG;
-import static org.xmlpull.v1.XmlPullParser.TEXT;
-
 import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.Account;
@@ -189,7 +185,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -204,7 +199,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -248,7 +242,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -280,7 +273,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
-import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
@@ -290,8 +282,7 @@ import com.android.server.LockGuard;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
-import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
+import com.android.server.devicepolicy.ActiveAdmin.TrustAgentInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.RestrictionsSet;
@@ -328,7 +319,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -350,54 +340,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String TRANSFER_OWNERSHIP_PARAMETERS_XML =
             "transfer-ownership-parameters.xml";
 
-    private static final String TAG_ACCEPTED_CA_CERTIFICATES = "accepted-ca-certificate";
-
-    private static final String TAG_LOCK_TASK_COMPONENTS = "lock-task-component";
-
-    private static final String TAG_LOCK_TASK_FEATURES = "lock-task-features";
-
-    private static final String TAG_STATUS_BAR = "statusbar";
-
-    private static final String ATTR_DISABLED = "disabled";
-
-    private static final String ATTR_NAME = "name";
-
-    private static final String DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML =
-            "do-not-ask-credentials-on-boot";
-
-    private static final String TAG_AFFILIATION_ID = "affiliation-id";
-
-    private static final String TAG_LAST_SECURITY_LOG_RETRIEVAL = "last-security-log-retrieval";
-
-    private static final String TAG_LAST_BUG_REPORT_REQUEST = "last-bug-report-request";
-
-    private static final String TAG_LAST_NETWORK_LOG_RETRIEVAL = "last-network-log-retrieval";
-
-    private static final String TAG_ADMIN_BROADCAST_PENDING = "admin-broadcast-pending";
-
-    private static final String TAG_CURRENT_INPUT_METHOD_SET = "current-ime-set";
-
-    private static final String TAG_OWNER_INSTALLED_CA_CERT = "owner-installed-ca-cert";
-
-    private static final String ATTR_ID = "id";
-
-    private static final String ATTR_VALUE = "value";
-
-    private static final String ATTR_ALIAS = "alias";
-
-    private static final String TAG_INITIALIZATION_BUNDLE = "initialization-bundle";
-
-    private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
-
-    private static final String TAG_PASSWORD_VALIDITY = "password-validity";
-
     private static final String TAG_TRANSFER_OWNERSHIP_BUNDLE = "transfer-ownership-bundle";
-
-    private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
-
-    private static final String TAG_SECONDARY_LOCK_SCREEN = "secondary-lock-screen";
-
-    private static final String TAG_APPS_SUSPENDED = "apps-suspended";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
@@ -422,17 +365,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @VisibleForTesting
     static final String ACTION_PROFILE_OFF_DEADLINE =
             "com.android.server.ACTION_PROFILE_OFF_DEADLINE";
-
-    private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
-    private static final String ATTR_SETUP_COMPLETE = "setup-complete";
-    private static final String ATTR_PROVISIONING_STATE = "provisioning-state";
-    private static final String ATTR_PERMISSION_POLICY = "permission-policy";
-    private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
-            "device-provisioning-config-applied";
-    private static final String ATTR_DEVICE_PAIRED = "device-paired";
-    private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
-    private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
-            = "application-restrictions-manager";
 
     private static final String CALLED_FROM_PARENT = "calledFromParent";
     private static final String NOT_CALLED_FROM_PARENT = "notCalledFromParent";
@@ -488,7 +420,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final Set<String> SYSTEM_SETTINGS_WHITELIST;
     private static final Set<Integer> DA_DISALLOWED_POLICIES;
     // A collection of user restrictions that are deprecated and should simply be ignored.
-    private static final Set<String> DEPRECATED_USER_RESTRICTIONS;
     private static final String AB_DEVICE_KEY = "ro.build.ab_update";
 
     static {
@@ -532,10 +463,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD);
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-
-        DEPRECATED_USER_RESTRICTIONS = Sets.newHashSet(
-                UserManager.DISALLOW_ADD_MANAGED_PROFILE,
-                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
     }
 
     /**
@@ -791,76 +718,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    public static class DevicePolicyData {
-        int mFailedPasswordAttempts = 0;
-        boolean mPasswordValidAtLastCheckpoint = true;
-
-        int mUserHandle;
-        int mPasswordOwner = -1;
-        long mLastMaximumTimeToLock = -1;
-        boolean mUserSetupComplete = false;
-        boolean mPaired = false;
-        int mUserProvisioningState;
-        int mPermissionPolicy;
-
-        boolean mDeviceProvisioningConfigApplied = false;
-
-        final ArrayMap<ComponentName, ActiveAdmin> mAdminMap = new ArrayMap<>();
-        final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
-        final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
-
-        // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
-        final ArraySet<String> mAcceptedCaCertificates = new ArraySet<>();
-
-        // This is the list of component allowed to start lock task mode.
-        List<String> mLockTaskPackages = new ArrayList<>();
-
-        // List of packages protected by device owner
-        List<String> mUserControlDisabledPackages = new ArrayList<>();
-
-        // Bitfield of feature flags to be enabled during LockTask mode.
-        // We default on the power button menu, in order to be consistent with pre-P behaviour.
-        int mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
-
-        boolean mStatusBarDisabled = false;
-
-        ComponentName mRestrictionsProvider;
-
-        // Map of delegate package to delegation scopes
-        final ArrayMap<String, List<String>> mDelegationMap = new ArrayMap<>();
-
-        boolean doNotAskCredentialsOnBoot = false;
-
-        Set<String> mAffiliationIds = new ArraySet<>();
-
-        long mLastSecurityLogRetrievalTime = -1;
-
-        long mLastBugReportRequestTime = -1;
-
-        long mLastNetworkLogsRetrievalTime = -1;
-
-        boolean mCurrentInputMethodSet = false;
-
-        boolean mSecondaryLockscreenEnabled = false;
-
-        // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
-        Set<String> mOwnerInstalledCaCerts = new ArraySet<>();
-
-        // Used for initialization of users created by createAndManageUser.
-        boolean mAdminBroadcastPending = false;
-        PersistableBundle mInitBundle = null;
-
-        long mPasswordTokenHandle = 0;
-
-        // Whether user's apps are suspended. This flag should only be written AFTER all the needed
-        // apps were suspended or unsuspended.
-        boolean mAppsSuspended = false;
-
-        public DevicePolicyData(int userHandle) {
-            mUserHandle = userHandle;
-        }
-    }
-
     @GuardedBy("getLockObject()")
     final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
 
@@ -1045,1002 +902,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    static class ActiveAdmin {
-        private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
-        private static final String TAG_TEST_ONLY_ADMIN = "test-only-admin";
-        private static final String TAG_DISABLE_CAMERA = "disable-camera";
-        private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
-        private static final String TAG_DISABLE_CONTACTS_SEARCH = "disable-contacts-search";
-        private static final String TAG_DISABLE_BLUETOOTH_CONTACT_SHARING
-                = "disable-bt-contacts-sharing";
-        private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
-        private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
-        private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
-        private static final String TAG_FORCE_EPHEMERAL_USERS = "force_ephemeral_users";
-        private static final String TAG_IS_NETWORK_LOGGING_ENABLED = "is_network_logging_enabled";
-        private static final String TAG_ACCOUNT_TYPE = "account-type";
-        private static final String TAG_PERMITTED_ACCESSIBILITY_SERVICES
-                = "permitted-accessiblity-services";
-        private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
-        private static final String TAG_MANAGE_TRUST_AGENT_FEATURES = "manage-trust-agent-features";
-        private static final String TAG_TRUST_AGENT_COMPONENT_OPTIONS = "trust-agent-component-options";
-        private static final String TAG_TRUST_AGENT_COMPONENT = "component";
-        private static final String TAG_PASSWORD_EXPIRATION_DATE = "password-expiration-date";
-        private static final String TAG_PASSWORD_EXPIRATION_TIMEOUT = "password-expiration-timeout";
-        private static final String TAG_GLOBAL_PROXY_EXCLUSION_LIST = "global-proxy-exclusion-list";
-        private static final String TAG_GLOBAL_PROXY_SPEC = "global-proxy-spec";
-        private static final String TAG_SPECIFIES_GLOBAL_PROXY = "specifies-global-proxy";
-        private static final String TAG_PERMITTED_IMES = "permitted-imes";
-        private static final String TAG_PERMITTED_NOTIFICATION_LISTENERS =
-                "permitted-notification-listeners";
-        private static final String TAG_MAX_FAILED_PASSWORD_WIPE = "max-failed-password-wipe";
-        private static final String TAG_MAX_TIME_TO_UNLOCK = "max-time-to-unlock";
-        private static final String TAG_STRONG_AUTH_UNLOCK_TIMEOUT = "strong-auth-unlock-timeout";
-        private static final String TAG_MIN_PASSWORD_NONLETTER = "min-password-nonletter";
-        private static final String TAG_MIN_PASSWORD_SYMBOLS = "min-password-symbols";
-        private static final String TAG_MIN_PASSWORD_NUMERIC = "min-password-numeric";
-        private static final String TAG_MIN_PASSWORD_LETTERS = "min-password-letters";
-        private static final String TAG_MIN_PASSWORD_LOWERCASE = "min-password-lowercase";
-        private static final String TAG_MIN_PASSWORD_UPPERCASE = "min-password-uppercase";
-        private static final String TAG_PASSWORD_HISTORY_LENGTH = "password-history-length";
-        private static final String TAG_MIN_PASSWORD_LENGTH = "min-password-length";
-        private static final String ATTR_VALUE = "value";
-        private static final String TAG_PASSWORD_QUALITY = "password-quality";
-        private static final String TAG_POLICIES = "policies";
-        private static final String TAG_CROSS_PROFILE_WIDGET_PROVIDERS =
-                "cross-profile-widget-providers";
-        private static final String TAG_PROVIDER = "provider";
-        private static final String TAG_PACKAGE_LIST_ITEM  = "item";
-        private static final String TAG_KEEP_UNINSTALLED_PACKAGES  = "keep-uninstalled-packages";
-        private static final String TAG_USER_RESTRICTIONS = "user-restrictions";
-        private static final String TAG_DEFAULT_ENABLED_USER_RESTRICTIONS =
-                "default-enabled-user-restrictions";
-        private static final String TAG_RESTRICTION = "restriction";
-        private static final String TAG_SHORT_SUPPORT_MESSAGE = "short-support-message";
-        private static final String TAG_LONG_SUPPORT_MESSAGE = "long-support-message";
-        private static final String TAG_PARENT_ADMIN = "parent-admin";
-        private static final String TAG_ORGANIZATION_COLOR = "organization-color";
-        private static final String TAG_ORGANIZATION_NAME = "organization-name";
-        private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
-        private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
-        private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
-        private static final String TAG_START_USER_SESSION_MESSAGE = "start_user_session_message";
-        private static final String TAG_END_USER_SESSION_MESSAGE = "end_user_session_message";
-        private static final String TAG_METERED_DATA_DISABLED_PACKAGES =
-                "metered_data_disabled_packages";
-        private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES =
-                "cross-profile-calendar-packages";
-        private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL =
-                "cross-profile-calendar-packages-null";
-        private static final String TAG_CROSS_PROFILE_PACKAGES = "cross-profile-packages";
-        private static final String TAG_FACTORY_RESET_PROTECTION_POLICY =
-                "factory_reset_protection_policy";
-        private static final String TAG_SUSPEND_PERSONAL_APPS = "suspend-personal-apps";
-        private static final String TAG_PROFILE_MAXIMUM_TIME_OFF = "profile-max-time-off";
-        private static final String TAG_PROFILE_OFF_DEADLINE = "profile-off-deadline";
-        private static final String TAG_ALWAYS_ON_VPN_PACKAGE = "vpn-package";
-        private static final String TAG_ALWAYS_ON_VPN_LOCKDOWN = "vpn-lockdown";
-        private static final String TAG_COMMON_CRITERIA_MODE = "common-criteria-mode";
-        DeviceAdminInfo info;
-
-
-        static final int DEF_PASSWORD_HISTORY_LENGTH = 0;
-        int passwordHistoryLength = DEF_PASSWORD_HISTORY_LENGTH;
-
-        @NonNull
-        PasswordPolicy mPasswordPolicy = new PasswordPolicy();
-
-        @Nullable
-        FactoryResetProtectionPolicy mFactoryResetProtectionPolicy = null;
-
-        static final long DEF_MAXIMUM_TIME_TO_UNLOCK = 0;
-        long maximumTimeToUnlock = DEF_MAXIMUM_TIME_TO_UNLOCK;
-
-        long strongAuthUnlockTimeout = 0; // admin doesn't participate by default
-
-        static final int DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE = 0;
-        int maximumFailedPasswordsForWipe = DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE;
-
-        static final long DEF_PASSWORD_EXPIRATION_TIMEOUT = 0;
-        long passwordExpirationTimeout = DEF_PASSWORD_EXPIRATION_TIMEOUT;
-
-        static final long DEF_PASSWORD_EXPIRATION_DATE = 0;
-        long passwordExpirationDate = DEF_PASSWORD_EXPIRATION_DATE;
-
-        static final int DEF_KEYGUARD_FEATURES_DISABLED = 0; // none
-
-        int disabledKeyguardFeatures = DEF_KEYGUARD_FEATURES_DISABLED;
-
-        boolean encryptionRequested = false;
-        boolean testOnlyAdmin = false;
-        boolean disableCamera = false;
-        boolean disableCallerId = false;
-        boolean disableContactsSearch = false;
-        boolean disableBluetoothContactSharing = true;
-        boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
-        boolean requireAutoTime = false; // Can only be set by a device owner.
-        boolean forceEphemeralUsers = false; // Can only be set by a device owner.
-        boolean isNetworkLoggingEnabled = false; // Can only be set by a device owner.
-        boolean isLogoutEnabled = false; // Can only be set by a device owner.
-
-        // one notification after enabling + one more after reboots
-        static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 2;
-        int numNetworkLoggingNotifications = 0;
-        long lastNetworkLoggingNotificationTimeMs = 0; // Time in milliseconds since epoch
-
-        ActiveAdmin parentAdmin;
-        final boolean isParent;
-
-        static class TrustAgentInfo {
-            public PersistableBundle options;
-            TrustAgentInfo(PersistableBundle bundle) {
-                options = bundle;
-            }
-        }
-
-        // The list of packages which are not allowed to use metered data.
-        List<String> meteredDisabledPackages;
-
-        final Set<String> accountTypesWithManagementDisabled = new ArraySet<>();
-
-        // The list of permitted accessibility services package namesas set by a profile
-        // or device owner. Null means all accessibility services are allowed, empty means
-        // none except system services are allowed.
-        List<String> permittedAccessiblityServices;
-
-        // The list of permitted input methods package names as set by a profile or device owner.
-        // Null means all input methods are allowed, empty means none except system imes are
-        // allowed.
-        List<String> permittedInputMethods;
-
-        // The list of packages allowed to use a NotificationListenerService to receive events for
-        // notifications from this user. Null means that all packages are allowed. Empty list means
-        // that only packages from the system are allowed.
-        List<String> permittedNotificationListeners;
-
-        // List of package names to keep cached.
-        List<String> keepUninstalledPackages;
-
-        // TODO: review implementation decisions with frameworks team
-        boolean specifiesGlobalProxy = false;
-        String globalProxySpec = null;
-        String globalProxyExclusionList = null;
-
-        @NonNull ArrayMap<String, TrustAgentInfo> trustAgentInfos = new ArrayMap<>();
-
-        List<String> crossProfileWidgetProviders;
-
-        Bundle userRestrictions;
-
-        // User restrictions that have already been enabled by default for this admin (either when
-        // setting the device or profile owner, or during a system update if one of those "enabled
-        // by default" restrictions is newly added).
-        final Set<String> defaultEnabledRestrictionsAlreadySet = new ArraySet<>();
-
-        // Support text provided by the admin to display to the user.
-        CharSequence shortSupportMessage = null;
-        CharSequence longSupportMessage = null;
-
-        // Background color of confirm credentials screen. Default: teal.
-        static final int DEF_ORGANIZATION_COLOR = Color.parseColor("#00796B");
-        int organizationColor = DEF_ORGANIZATION_COLOR;
-
-        // Default title of confirm credentials screen
-        String organizationName = null;
-
-        // Message for user switcher
-        String startUserSessionMessage = null;
-        String endUserSessionMessage = null;
-
-        // The whitelist of packages that can access cross profile calendar APIs.
-        // This whitelist should be in default an empty list, which indicates that no package
-        // is whitelisted.
-        List<String> mCrossProfileCalendarPackages = Collections.emptyList();
-
-        // The whitelist of packages that the admin has enabled to be able to request consent from
-        // the user to communicate cross-profile. By default, no packages are whitelisted, which is
-        // represented as an empty list.
-        List<String> mCrossProfilePackages = Collections.emptyList();
-
-        // Whether the admin explicitly requires personal apps to be suspended
-        boolean mSuspendPersonalApps = false;
-        // Maximum time the profile owned by this admin can be off.
-        long mProfileMaximumTimeOffMillis = 0;
-        // Time by which the profile should be turned on according to System.currentTimeMillis().
-        long mProfileOffDeadline = 0;
-
-        public String mAlwaysOnVpnPackage;
-        public boolean mAlwaysOnVpnLockdown;
-        boolean mCommonCriteriaMode;
-
-        ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
-            info = _info;
-            isParent = parent;
-        }
-
-        ActiveAdmin getParentActiveAdmin() {
-            Preconditions.checkState(!isParent);
-
-            if (parentAdmin == null) {
-                parentAdmin = new ActiveAdmin(info, /* parent */ true);
-            }
-            return parentAdmin;
-        }
-
-        boolean hasParentActiveAdmin() {
-            return parentAdmin != null;
-        }
-
-        int getUid() { return info.getActivityInfo().applicationInfo.uid; }
-
-        public UserHandle getUserHandle() {
-            return UserHandle.of(UserHandle.getUserId(info.getActivityInfo().applicationInfo.uid));
-        }
-
-        void writeToXml(XmlSerializer out)
-                throws IllegalArgumentException, IllegalStateException, IOException {
-            out.startTag(null, TAG_POLICIES);
-            info.writePoliciesToXml(out);
-            out.endTag(null, TAG_POLICIES);
-            if (mPasswordPolicy.quality != PASSWORD_QUALITY_UNSPECIFIED) {
-                writeAttributeValueToXml(
-                        out, TAG_PASSWORD_QUALITY, mPasswordPolicy.quality);
-                if (mPasswordPolicy.length != PasswordPolicy.DEF_MINIMUM_LENGTH) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_LENGTH, mPasswordPolicy.length);
-                }
-                if (mPasswordPolicy.upperCase != PasswordPolicy.DEF_MINIMUM_UPPER_CASE) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_UPPERCASE, mPasswordPolicy.upperCase);
-                }
-                if (mPasswordPolicy.lowerCase != PasswordPolicy.DEF_MINIMUM_LOWER_CASE) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_LOWERCASE, mPasswordPolicy.lowerCase);
-                }
-                if (mPasswordPolicy.letters != PasswordPolicy.DEF_MINIMUM_LETTERS) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_LETTERS, mPasswordPolicy.letters);
-                }
-                if (mPasswordPolicy.numeric != PasswordPolicy.DEF_MINIMUM_NUMERIC) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_NUMERIC, mPasswordPolicy.numeric);
-                }
-                if (mPasswordPolicy.symbols != PasswordPolicy.DEF_MINIMUM_SYMBOLS) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_SYMBOLS, mPasswordPolicy.symbols);
-                }
-                if (mPasswordPolicy.nonLetter > PasswordPolicy.DEF_MINIMUM_NON_LETTER) {
-                    writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_NONLETTER, mPasswordPolicy.nonLetter);
-                }
-            }
-            if (passwordHistoryLength != DEF_PASSWORD_HISTORY_LENGTH) {
-                writeAttributeValueToXml(
-                        out, TAG_PASSWORD_HISTORY_LENGTH, passwordHistoryLength);
-            }
-            if (maximumTimeToUnlock != DEF_MAXIMUM_TIME_TO_UNLOCK) {
-                writeAttributeValueToXml(
-                        out, TAG_MAX_TIME_TO_UNLOCK, maximumTimeToUnlock);
-            }
-            if (strongAuthUnlockTimeout != DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS) {
-                writeAttributeValueToXml(
-                        out, TAG_STRONG_AUTH_UNLOCK_TIMEOUT, strongAuthUnlockTimeout);
-            }
-            if (maximumFailedPasswordsForWipe != DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
-                writeAttributeValueToXml(
-                        out, TAG_MAX_FAILED_PASSWORD_WIPE, maximumFailedPasswordsForWipe);
-            }
-            if (specifiesGlobalProxy) {
-                writeAttributeValueToXml(
-                        out, TAG_SPECIFIES_GLOBAL_PROXY, specifiesGlobalProxy);
-                if (globalProxySpec != null) {
-                    writeAttributeValueToXml(out, TAG_GLOBAL_PROXY_SPEC, globalProxySpec);
-                }
-                if (globalProxyExclusionList != null) {
-                    writeAttributeValueToXml(
-                            out, TAG_GLOBAL_PROXY_EXCLUSION_LIST, globalProxyExclusionList);
-                }
-            }
-            if (passwordExpirationTimeout != DEF_PASSWORD_EXPIRATION_TIMEOUT) {
-                writeAttributeValueToXml(
-                        out, TAG_PASSWORD_EXPIRATION_TIMEOUT, passwordExpirationTimeout);
-            }
-            if (passwordExpirationDate != DEF_PASSWORD_EXPIRATION_DATE) {
-                writeAttributeValueToXml(
-                        out, TAG_PASSWORD_EXPIRATION_DATE, passwordExpirationDate);
-            }
-            if (encryptionRequested) {
-                writeAttributeValueToXml(
-                        out, TAG_ENCRYPTION_REQUESTED, encryptionRequested);
-            }
-            if (testOnlyAdmin) {
-                writeAttributeValueToXml(
-                        out, TAG_TEST_ONLY_ADMIN, testOnlyAdmin);
-            }
-            if (disableCamera) {
-                writeAttributeValueToXml(
-                        out, TAG_DISABLE_CAMERA, disableCamera);
-            }
-            if (disableCallerId) {
-                writeAttributeValueToXml(
-                        out, TAG_DISABLE_CALLER_ID, disableCallerId);
-            }
-            if (disableContactsSearch) {
-                writeAttributeValueToXml(
-                        out, TAG_DISABLE_CONTACTS_SEARCH, disableContactsSearch);
-            }
-            if (!disableBluetoothContactSharing) {
-                writeAttributeValueToXml(
-                        out, TAG_DISABLE_BLUETOOTH_CONTACT_SHARING, disableBluetoothContactSharing);
-            }
-            if (disableScreenCapture) {
-                writeAttributeValueToXml(
-                        out, TAG_DISABLE_SCREEN_CAPTURE, disableScreenCapture);
-            }
-            if (requireAutoTime) {
-                writeAttributeValueToXml(
-                        out, TAG_REQUIRE_AUTO_TIME, requireAutoTime);
-            }
-            if (forceEphemeralUsers) {
-                writeAttributeValueToXml(
-                        out, TAG_FORCE_EPHEMERAL_USERS, forceEphemeralUsers);
-            }
-            if (isNetworkLoggingEnabled) {
-                out.startTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
-                out.attribute(null, ATTR_VALUE, Boolean.toString(isNetworkLoggingEnabled));
-                out.attribute(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS,
-                        Integer.toString(numNetworkLoggingNotifications));
-                out.attribute(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION,
-                        Long.toString(lastNetworkLoggingNotificationTimeMs));
-                out.endTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
-            }
-            if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
-                writeAttributeValueToXml(
-                        out, TAG_DISABLE_KEYGUARD_FEATURES, disabledKeyguardFeatures);
-            }
-            if (!accountTypesWithManagementDisabled.isEmpty()) {
-                writeAttributeValuesToXml(
-                        out, TAG_DISABLE_ACCOUNT_MANAGEMENT, TAG_ACCOUNT_TYPE,
-                        accountTypesWithManagementDisabled);
-            }
-            if (!trustAgentInfos.isEmpty()) {
-                Set<Entry<String, TrustAgentInfo>> set = trustAgentInfos.entrySet();
-                out.startTag(null, TAG_MANAGE_TRUST_AGENT_FEATURES);
-                for (Entry<String, TrustAgentInfo> entry : set) {
-                    TrustAgentInfo trustAgentInfo = entry.getValue();
-                    out.startTag(null, TAG_TRUST_AGENT_COMPONENT);
-                    out.attribute(null, ATTR_VALUE, entry.getKey());
-                    if (trustAgentInfo.options != null) {
-                        out.startTag(null, TAG_TRUST_AGENT_COMPONENT_OPTIONS);
-                        try {
-                            trustAgentInfo.options.saveToXml(out);
-                        } catch (XmlPullParserException e) {
-                            Log.e(LOG_TAG, "Failed to save TrustAgent options", e);
-                        }
-                        out.endTag(null, TAG_TRUST_AGENT_COMPONENT_OPTIONS);
-                    }
-                    out.endTag(null, TAG_TRUST_AGENT_COMPONENT);
-                }
-                out.endTag(null, TAG_MANAGE_TRUST_AGENT_FEATURES);
-            }
-            if (crossProfileWidgetProviders != null && !crossProfileWidgetProviders.isEmpty()) {
-                writeAttributeValuesToXml(
-                        out, TAG_CROSS_PROFILE_WIDGET_PROVIDERS, TAG_PROVIDER,
-                        crossProfileWidgetProviders);
-            }
-            writePackageListToXml(out, TAG_PERMITTED_ACCESSIBILITY_SERVICES,
-                    permittedAccessiblityServices);
-            writePackageListToXml(out, TAG_PERMITTED_IMES, permittedInputMethods);
-            writePackageListToXml(out, TAG_PERMITTED_NOTIFICATION_LISTENERS,
-                    permittedNotificationListeners);
-            writePackageListToXml(out, TAG_KEEP_UNINSTALLED_PACKAGES, keepUninstalledPackages);
-            writePackageListToXml(out, TAG_METERED_DATA_DISABLED_PACKAGES, meteredDisabledPackages);
-            if (hasUserRestrictions()) {
-                UserRestrictionsUtils.writeRestrictions(
-                        out, userRestrictions, TAG_USER_RESTRICTIONS);
-            }
-            if (!defaultEnabledRestrictionsAlreadySet.isEmpty()) {
-                writeAttributeValuesToXml(out, TAG_DEFAULT_ENABLED_USER_RESTRICTIONS,
-                        TAG_RESTRICTION,
-                        defaultEnabledRestrictionsAlreadySet);
-            }
-            if (!TextUtils.isEmpty(shortSupportMessage)) {
-                writeTextToXml(out, TAG_SHORT_SUPPORT_MESSAGE, shortSupportMessage.toString());
-            }
-            if (!TextUtils.isEmpty(longSupportMessage)) {
-                writeTextToXml(out, TAG_LONG_SUPPORT_MESSAGE, longSupportMessage.toString());
-            }
-            if (parentAdmin != null) {
-                out.startTag(null, TAG_PARENT_ADMIN);
-                parentAdmin.writeToXml(out);
-                out.endTag(null, TAG_PARENT_ADMIN);
-            }
-            if (organizationColor != DEF_ORGANIZATION_COLOR) {
-                writeAttributeValueToXml(out, TAG_ORGANIZATION_COLOR, organizationColor);
-            }
-            if (organizationName != null) {
-                writeTextToXml(out, TAG_ORGANIZATION_NAME, organizationName);
-            }
-            if (isLogoutEnabled) {
-                writeAttributeValueToXml(out, TAG_IS_LOGOUT_ENABLED, isLogoutEnabled);
-            }
-            if (startUserSessionMessage != null) {
-                writeTextToXml(out, TAG_START_USER_SESSION_MESSAGE, startUserSessionMessage);
-            }
-            if (endUserSessionMessage != null) {
-                writeTextToXml(out, TAG_END_USER_SESSION_MESSAGE, endUserSessionMessage);
-            }
-            if (mCrossProfileCalendarPackages == null) {
-                out.startTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL);
-                out.endTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL);
-            } else {
-                writePackageListToXml(out, TAG_CROSS_PROFILE_CALENDAR_PACKAGES,
-                        mCrossProfileCalendarPackages);
-            }
-            writePackageListToXml(out, TAG_CROSS_PROFILE_PACKAGES, mCrossProfilePackages);
-            if (mFactoryResetProtectionPolicy != null) {
-                out.startTag(null, TAG_FACTORY_RESET_PROTECTION_POLICY);
-                mFactoryResetProtectionPolicy.writeToXml(out);
-                out.endTag(null, TAG_FACTORY_RESET_PROTECTION_POLICY);
-            }
-            if (mSuspendPersonalApps) {
-                writeAttributeValueToXml(out, TAG_SUSPEND_PERSONAL_APPS, mSuspendPersonalApps);
-            }
-            if (mProfileMaximumTimeOffMillis != 0) {
-                writeAttributeValueToXml(out, TAG_PROFILE_MAXIMUM_TIME_OFF,
-                        mProfileMaximumTimeOffMillis);
-            }
-            if (mProfileMaximumTimeOffMillis != 0) {
-                writeAttributeValueToXml(out, TAG_PROFILE_OFF_DEADLINE, mProfileOffDeadline);
-            }
-            if (!TextUtils.isEmpty(mAlwaysOnVpnPackage)) {
-                writeAttributeValueToXml(out, TAG_ALWAYS_ON_VPN_PACKAGE, mAlwaysOnVpnPackage);
-            }
-            if (mAlwaysOnVpnLockdown) {
-                writeAttributeValueToXml(out, TAG_ALWAYS_ON_VPN_LOCKDOWN, mAlwaysOnVpnLockdown);
-            }
-            if (mCommonCriteriaMode) {
-                writeAttributeValueToXml(out, TAG_COMMON_CRITERIA_MODE, mCommonCriteriaMode);
-            }
-        }
-
-        void writeTextToXml(XmlSerializer out, String tag, String text) throws IOException {
-            out.startTag(null, tag);
-            out.text(text);
-            out.endTag(null, tag);
-        }
-
-        void writePackageListToXml(XmlSerializer out, String outerTag,
-                List<String> packageList)
-                throws IllegalArgumentException, IllegalStateException, IOException {
-            if (packageList == null) {
-                return;
-            }
-            writeAttributeValuesToXml(out, outerTag, TAG_PACKAGE_LIST_ITEM, packageList);
-        }
-
-        void writeAttributeValueToXml(XmlSerializer out, String tag, String value)
-                throws IOException {
-            out.startTag(null, tag);
-            out.attribute(null, ATTR_VALUE, value);
-            out.endTag(null, tag);
-        }
-
-        void writeAttributeValueToXml(XmlSerializer out, String tag, int value)
-                throws IOException {
-            out.startTag(null, tag);
-            out.attribute(null, ATTR_VALUE, Integer.toString(value));
-            out.endTag(null, tag);
-        }
-
-        void writeAttributeValueToXml(XmlSerializer out, String tag, long value)
-                throws IOException {
-            out.startTag(null, tag);
-            out.attribute(null, ATTR_VALUE, Long.toString(value));
-            out.endTag(null, tag);
-        }
-
-        void writeAttributeValueToXml(XmlSerializer out, String tag, boolean value)
-                throws IOException {
-            out.startTag(null, tag);
-            out.attribute(null, ATTR_VALUE, Boolean.toString(value));
-            out.endTag(null, tag);
-        }
-
-        void writeAttributeValuesToXml(XmlSerializer out, String outerTag, String innerTag,
-                @NonNull Collection<String> values) throws IOException {
-            out.startTag(null, outerTag);
-            for (String value : values) {
-                out.startTag(null, innerTag);
-                out.attribute(null, ATTR_VALUE, value);
-                out.endTag(null, innerTag);
-            }
-            out.endTag(null, outerTag);
-        }
-
-        void readFromXml(XmlPullParser parser, boolean shouldOverridePolicies)
-                throws XmlPullParserException, IOException {
-            int outerDepth = parser.getDepth();
-            int type;
-            while ((type=parser.next()) != END_DOCUMENT
-                   && (type != END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == END_TAG || type == TEXT) {
-                    continue;
-                }
-                String tag = parser.getName();
-                if (TAG_POLICIES.equals(tag)) {
-                    if (shouldOverridePolicies) {
-                        Log.d(LOG_TAG, "Overriding device admin policies from XML.");
-                        info.readPoliciesFromXml(parser);
-                    }
-                } else if (TAG_PASSWORD_QUALITY.equals(tag)) {
-                    mPasswordPolicy.quality = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_LENGTH.equals(tag)) {
-                    mPasswordPolicy.length = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_PASSWORD_HISTORY_LENGTH.equals(tag)) {
-                    passwordHistoryLength = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_UPPERCASE.equals(tag)) {
-                    mPasswordPolicy.upperCase = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_LOWERCASE.equals(tag)) {
-                    mPasswordPolicy.lowerCase = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_LETTERS.equals(tag)) {
-                    mPasswordPolicy.letters = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_NUMERIC.equals(tag)) {
-                    mPasswordPolicy.numeric = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_SYMBOLS.equals(tag)) {
-                    mPasswordPolicy.symbols = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
-                    mPasswordPolicy.nonLetter = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                }else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
-                    maximumTimeToUnlock = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_STRONG_AUTH_UNLOCK_TIMEOUT.equals(tag)) {
-                    strongAuthUnlockTimeout = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MAX_FAILED_PASSWORD_WIPE.equals(tag)) {
-                    maximumFailedPasswordsForWipe = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_SPECIFIES_GLOBAL_PROXY.equals(tag)) {
-                    specifiesGlobalProxy = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_GLOBAL_PROXY_SPEC.equals(tag)) {
-                    globalProxySpec =
-                        parser.getAttributeValue(null, ATTR_VALUE);
-                } else if (TAG_GLOBAL_PROXY_EXCLUSION_LIST.equals(tag)) {
-                    globalProxyExclusionList =
-                        parser.getAttributeValue(null, ATTR_VALUE);
-                } else if (TAG_PASSWORD_EXPIRATION_TIMEOUT.equals(tag)) {
-                    passwordExpirationTimeout = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_PASSWORD_EXPIRATION_DATE.equals(tag)) {
-                    passwordExpirationDate = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_ENCRYPTION_REQUESTED.equals(tag)) {
-                    encryptionRequested = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_TEST_ONLY_ADMIN.equals(tag)) {
-                    testOnlyAdmin = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DISABLE_CAMERA.equals(tag)) {
-                    disableCamera = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DISABLE_CALLER_ID.equals(tag)) {
-                    disableCallerId = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DISABLE_CONTACTS_SEARCH.equals(tag)) {
-                    disableContactsSearch = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DISABLE_BLUETOOTH_CONTACT_SHARING.equals(tag)) {
-                    disableBluetoothContactSharing = Boolean.parseBoolean(parser
-                            .getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DISABLE_SCREEN_CAPTURE.equals(tag)) {
-                    disableScreenCapture = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_REQUIRE_AUTO_TIME.equals(tag)) {
-                    requireAutoTime = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_FORCE_EPHEMERAL_USERS.equals(tag)) {
-                    forceEphemeralUsers = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_IS_NETWORK_LOGGING_ENABLED.equals(tag)) {
-                    isNetworkLoggingEnabled = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                    lastNetworkLoggingNotificationTimeMs = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION));
-                    numNetworkLoggingNotifications = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS));
-                } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
-                    disabledKeyguardFeatures = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DISABLE_ACCOUNT_MANAGEMENT.equals(tag)) {
-                    readAttributeValues(
-                            parser, TAG_ACCOUNT_TYPE, accountTypesWithManagementDisabled);
-                } else if (TAG_MANAGE_TRUST_AGENT_FEATURES.equals(tag)) {
-                    trustAgentInfos = getAllTrustAgentInfos(parser, tag);
-                } else if (TAG_CROSS_PROFILE_WIDGET_PROVIDERS.equals(tag)) {
-                    crossProfileWidgetProviders = new ArrayList<>();
-                    readAttributeValues(parser, TAG_PROVIDER, crossProfileWidgetProviders);
-                } else if (TAG_PERMITTED_ACCESSIBILITY_SERVICES.equals(tag)) {
-                    permittedAccessiblityServices = readPackageList(parser, tag);
-                } else if (TAG_PERMITTED_IMES.equals(tag)) {
-                    permittedInputMethods = readPackageList(parser, tag);
-                } else if (TAG_PERMITTED_NOTIFICATION_LISTENERS.equals(tag)) {
-                    permittedNotificationListeners = readPackageList(parser, tag);
-                } else if (TAG_KEEP_UNINSTALLED_PACKAGES.equals(tag)) {
-                    keepUninstalledPackages = readPackageList(parser, tag);
-                } else if (TAG_METERED_DATA_DISABLED_PACKAGES.equals(tag)) {
-                    meteredDisabledPackages = readPackageList(parser, tag);
-                } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
-                    userRestrictions = UserRestrictionsUtils.readRestrictions(parser);
-                } else if (TAG_DEFAULT_ENABLED_USER_RESTRICTIONS.equals(tag)) {
-                    readAttributeValues(
-                            parser, TAG_RESTRICTION, defaultEnabledRestrictionsAlreadySet);
-                } else if (TAG_SHORT_SUPPORT_MESSAGE.equals(tag)) {
-                    type = parser.next();
-                    if (type == XmlPullParser.TEXT) {
-                        shortSupportMessage = parser.getText();
-                    } else {
-                        Log.w(LOG_TAG, "Missing text when loading short support message");
-                    }
-                } else if (TAG_LONG_SUPPORT_MESSAGE.equals(tag)) {
-                    type = parser.next();
-                    if (type == XmlPullParser.TEXT) {
-                        longSupportMessage = parser.getText();
-                    } else {
-                        Log.w(LOG_TAG, "Missing text when loading long support message");
-                    }
-                } else if (TAG_PARENT_ADMIN.equals(tag)) {
-                    Preconditions.checkState(!isParent);
-                    parentAdmin = new ActiveAdmin(info, /* parent */ true);
-                    parentAdmin.readFromXml(parser, shouldOverridePolicies);
-                } else if (TAG_ORGANIZATION_COLOR.equals(tag)) {
-                    organizationColor = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_ORGANIZATION_NAME.equals(tag)) {
-                    type = parser.next();
-                    if (type == XmlPullParser.TEXT) {
-                        organizationName = parser.getText();
-                    } else {
-                        Log.w(LOG_TAG, "Missing text when loading organization name");
-                    }
-                } else if (TAG_IS_LOGOUT_ENABLED.equals(tag)) {
-                    isLogoutEnabled = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_START_USER_SESSION_MESSAGE.equals(tag)) {
-                    type = parser.next();
-                    if (type == XmlPullParser.TEXT) {
-                        startUserSessionMessage = parser.getText();
-                    } else {
-                        Log.w(LOG_TAG, "Missing text when loading start session message");
-                    }
-                } else if (TAG_END_USER_SESSION_MESSAGE.equals(tag)) {
-                    type = parser.next();
-                    if (type == XmlPullParser.TEXT) {
-                        endUserSessionMessage = parser.getText();
-                    } else {
-                        Log.w(LOG_TAG, "Missing text when loading end session message");
-                    }
-                } else if (TAG_CROSS_PROFILE_CALENDAR_PACKAGES.equals(tag)) {
-                    mCrossProfileCalendarPackages = readPackageList(parser, tag);
-                } else if (TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL.equals(tag)) {
-                    mCrossProfileCalendarPackages = null;
-                } else if (TAG_CROSS_PROFILE_PACKAGES.equals(tag)) {
-                    mCrossProfilePackages = readPackageList(parser, tag);
-                } else if (TAG_FACTORY_RESET_PROTECTION_POLICY.equals(tag)) {
-                    mFactoryResetProtectionPolicy = FactoryResetProtectionPolicy.readFromXml(
-                                parser);
-                } else if (TAG_SUSPEND_PERSONAL_APPS.equals(tag)) {
-                    mSuspendPersonalApps = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_PROFILE_MAXIMUM_TIME_OFF.equals(tag)) {
-                    mProfileMaximumTimeOffMillis =
-                            Long.parseLong(parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_PROFILE_OFF_DEADLINE.equals(tag)) {
-                    mProfileOffDeadline =
-                            Long.parseLong(parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_ALWAYS_ON_VPN_PACKAGE.equals(tag)) {
-                    mAlwaysOnVpnPackage = parser.getAttributeValue(null, ATTR_VALUE);
-                } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
-                    mAlwaysOnVpnLockdown = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
-                    mCommonCriteriaMode = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else {
-                    Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
-                    XmlUtils.skipCurrentTag(parser);
-                }
-            }
-        }
-
-        private List<String> readPackageList(XmlPullParser parser,
-                String tag) throws XmlPullParserException, IOException {
-            List<String> result = new ArrayList<String>();
-            int outerDepth = parser.getDepth();
-            int outerType;
-            while ((outerType=parser.next()) != XmlPullParser.END_DOCUMENT
-                    && (outerType != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (outerType == XmlPullParser.END_TAG || outerType == XmlPullParser.TEXT) {
-                    continue;
-                }
-                String outerTag = parser.getName();
-                if (TAG_PACKAGE_LIST_ITEM.equals(outerTag)) {
-                    String packageName = parser.getAttributeValue(null, ATTR_VALUE);
-                    if (packageName != null) {
-                        result.add(packageName);
-                    } else {
-                        Slog.w(LOG_TAG, "Package name missing under " + outerTag);
-                    }
-                } else {
-                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + outerTag);
-                }
-            }
-            return result;
-        }
-
-        private void readAttributeValues(
-                XmlPullParser parser, String tag, Collection<String> result)
-                throws XmlPullParserException, IOException {
-            result.clear();
-            int outerDepthDAM = parser.getDepth();
-            int typeDAM;
-            while ((typeDAM=parser.next()) != END_DOCUMENT
-                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
-                if (typeDAM == END_TAG || typeDAM == TEXT) {
-                    continue;
-                }
-                String tagDAM = parser.getName();
-                if (tag.equals(tagDAM)) {
-                    result.add(parser.getAttributeValue(null, ATTR_VALUE));
-                } else {
-                    Slog.e(LOG_TAG, "Expected tag " + tag +  " but found " + tagDAM);
-                }
-            }
-        }
-
-        @NonNull
-        private ArrayMap<String, TrustAgentInfo> getAllTrustAgentInfos(
-                XmlPullParser parser, String tag) throws XmlPullParserException, IOException {
-            int outerDepthDAM = parser.getDepth();
-            int typeDAM;
-            final ArrayMap<String, TrustAgentInfo> result = new ArrayMap<>();
-            while ((typeDAM=parser.next()) != END_DOCUMENT
-                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
-                if (typeDAM == END_TAG || typeDAM == TEXT) {
-                    continue;
-                }
-                String tagDAM = parser.getName();
-                if (TAG_TRUST_AGENT_COMPONENT.equals(tagDAM)) {
-                    final String component = parser.getAttributeValue(null, ATTR_VALUE);
-                    final TrustAgentInfo trustAgentInfo = getTrustAgentInfo(parser, tag);
-                    result.put(component, trustAgentInfo);
-                } else {
-                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
-                }
-            }
-            return result;
-        }
-
-        private TrustAgentInfo getTrustAgentInfo(XmlPullParser parser, String tag)
-                throws XmlPullParserException, IOException  {
-            int outerDepthDAM = parser.getDepth();
-            int typeDAM;
-            TrustAgentInfo result = new TrustAgentInfo(null);
-            while ((typeDAM=parser.next()) != END_DOCUMENT
-                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
-                if (typeDAM == END_TAG || typeDAM == TEXT) {
-                    continue;
-                }
-                String tagDAM = parser.getName();
-                if (TAG_TRUST_AGENT_COMPONENT_OPTIONS.equals(tagDAM)) {
-                    result.options = PersistableBundle.restoreFromXml(parser);
-                } else {
-                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
-                }
-            }
-            return result;
-        }
-
-        boolean hasUserRestrictions() {
-            return userRestrictions != null && userRestrictions.size() > 0;
-        }
-
-        Bundle ensureUserRestrictions() {
-            if (userRestrictions == null) {
-                userRestrictions = new Bundle();
-            }
-            return userRestrictions;
-        }
-
-        public void transfer(DeviceAdminInfo deviceAdminInfo) {
-            if (hasParentActiveAdmin()) {
-                parentAdmin.info = deviceAdminInfo;
-            }
-            info = deviceAdminInfo;
-        }
-
-        Bundle addSyntheticRestrictions(Bundle restrictions) {
-            if (disableCamera) {
-                restrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
-            }
-            if (requireAutoTime) {
-                restrictions.putBoolean(UserManager.DISALLOW_CONFIG_DATE_TIME, true);
-            }
-            return restrictions;
-        }
-
-        static Bundle removeDeprecatedRestrictions(Bundle restrictions) {
-            for (String deprecatedRestriction: DEPRECATED_USER_RESTRICTIONS) {
-                restrictions.remove(deprecatedRestriction);
-            }
-            return restrictions;
-        }
-
-        static Bundle filterRestrictions(Bundle restrictions, Predicate<String> filter) {
-            Bundle result = new Bundle();
-            for (String key : restrictions.keySet()) {
-                if (!restrictions.getBoolean(key)) {
-                    continue;
-                }
-                if (filter.test(key)) {
-                    result.putBoolean(key, true);
-                }
-            }
-            return result;
-        }
-
-        Bundle getEffectiveRestrictions() {
-            return addSyntheticRestrictions(
-                    removeDeprecatedRestrictions(new Bundle(ensureUserRestrictions())));
-        }
-
-        Bundle getLocalUserRestrictions(int adminType) {
-            return filterRestrictions(getEffectiveRestrictions(),
-                    key -> UserRestrictionsUtils.isLocal(adminType, key));
-        }
-
-        Bundle getGlobalUserRestrictions(int adminType) {
-            return filterRestrictions(getEffectiveRestrictions(),
-                    key -> UserRestrictionsUtils.isGlobal(adminType, key));
-        }
-
-        void dump(IndentingPrintWriter pw) {
-            pw.print("uid="); pw.println(getUid());
-            pw.print("testOnlyAdmin=");
-            pw.println(testOnlyAdmin);
-            pw.println("policies:");
-            ArrayList<DeviceAdminInfo.PolicyInfo> pols = info.getUsedPolicies();
-            if (pols != null) {
-                pw.increaseIndent();
-                for (int i=0; i<pols.size(); i++) {
-                    pw.println(pols.get(i).tag);
-                }
-                pw.decreaseIndent();
-            }
-            pw.print("passwordQuality=0x");
-                    pw.println(Integer.toHexString(mPasswordPolicy.quality));
-            pw.print("minimumPasswordLength=");
-                    pw.println(mPasswordPolicy.length);
-            pw.print("passwordHistoryLength=");
-                    pw.println(passwordHistoryLength);
-            pw.print("minimumPasswordUpperCase=");
-                    pw.println(mPasswordPolicy.upperCase);
-            pw.print("minimumPasswordLowerCase=");
-                    pw.println(mPasswordPolicy.lowerCase);
-            pw.print("minimumPasswordLetters=");
-                    pw.println(mPasswordPolicy.letters);
-            pw.print("minimumPasswordNumeric=");
-                    pw.println(mPasswordPolicy.numeric);
-            pw.print("minimumPasswordSymbols=");
-                    pw.println(mPasswordPolicy.symbols);
-            pw.print("minimumPasswordNonLetter=");
-                    pw.println(mPasswordPolicy.nonLetter);
-            pw.print("maximumTimeToUnlock=");
-                    pw.println(maximumTimeToUnlock);
-            pw.print("strongAuthUnlockTimeout=");
-                    pw.println(strongAuthUnlockTimeout);
-            pw.print("maximumFailedPasswordsForWipe=");
-                    pw.println(maximumFailedPasswordsForWipe);
-            pw.print("specifiesGlobalProxy=");
-                    pw.println(specifiesGlobalProxy);
-            pw.print("passwordExpirationTimeout=");
-                    pw.println(passwordExpirationTimeout);
-            pw.print("passwordExpirationDate=");
-                    pw.println(passwordExpirationDate);
-            if (globalProxySpec != null) {
-                pw.print("globalProxySpec=");
-                        pw.println(globalProxySpec);
-            }
-            if (globalProxyExclusionList != null) {
-                pw.print("globalProxyEclusionList=");
-                        pw.println(globalProxyExclusionList);
-            }
-            pw.print("encryptionRequested=");
-                    pw.println(encryptionRequested);
-            pw.print("disableCamera=");
-                    pw.println(disableCamera);
-            pw.print("disableCallerId=");
-                    pw.println(disableCallerId);
-            pw.print("disableContactsSearch=");
-                    pw.println(disableContactsSearch);
-            pw.print("disableBluetoothContactSharing=");
-                    pw.println(disableBluetoothContactSharing);
-            pw.print("disableScreenCapture=");
-                    pw.println(disableScreenCapture);
-            pw.print("requireAutoTime=");
-                    pw.println(requireAutoTime);
-            pw.print("forceEphemeralUsers=");
-                    pw.println(forceEphemeralUsers);
-            pw.print("isNetworkLoggingEnabled=");
-                    pw.println(isNetworkLoggingEnabled);
-            pw.print("disabledKeyguardFeatures=");
-                    pw.println(disabledKeyguardFeatures);
-            pw.print("crossProfileWidgetProviders=");
-                    pw.println(crossProfileWidgetProviders);
-            if (permittedAccessiblityServices != null) {
-                pw.print("permittedAccessibilityServices=");
-                    pw.println(permittedAccessiblityServices);
-            }
-            if (permittedInputMethods != null) {
-                pw.print("permittedInputMethods=");
-                    pw.println(permittedInputMethods);
-            }
-            if (permittedNotificationListeners != null) {
-                pw.print("permittedNotificationListeners=");
-                pw.println(permittedNotificationListeners);
-            }
-            if (keepUninstalledPackages != null) {
-                pw.print("keepUninstalledPackages=");
-                    pw.println(keepUninstalledPackages);
-            }
-            pw.print("organizationColor=");
-                    pw.println(organizationColor);
-            if (organizationName != null) {
-                pw.print("organizationName=");
-                    pw.println(organizationName);
-            }
-            pw.println("userRestrictions:");
-            UserRestrictionsUtils.dumpRestrictions(pw, "  ", userRestrictions);
-            pw.print("defaultEnabledRestrictionsAlreadySet=");
-                    pw.println(defaultEnabledRestrictionsAlreadySet);
-            pw.print("isParent=");
-                    pw.println(isParent);
-            if (parentAdmin != null) {
-                pw.println("parentAdmin:");
-                pw.increaseIndent();
-                parentAdmin.dump(pw);
-                pw.decreaseIndent();
-            }
-            if (mCrossProfileCalendarPackages != null) {
-                pw.print("mCrossProfileCalendarPackages=");
-                pw.println(mCrossProfileCalendarPackages);
-            }
-            pw.print("mCrossProfilePackages=");
-                pw.println(mCrossProfilePackages);
-            pw.print("mSuspendPersonalApps=");
-                pw.println(mSuspendPersonalApps);
-            pw.print("mProfileMaximumTimeOffMillis=");
-                pw.println(mProfileMaximumTimeOffMillis);
-            pw.print("mProfileOffDeadline=");
-                pw.println(mProfileOffDeadline);
-            pw.print("mAlwaysOnVpnPackage=");
-            pw.println(mAlwaysOnVpnPackage);
-            pw.print("mAlwaysOnVpnLockdown=");
-            pw.println(mAlwaysOnVpnLockdown);
-            pw.print("mCommonCriteriaMode=");
-            pw.println(mCommonCriteriaMode);
-        }
-    }
-
     private void handlePackagesChanged(@Nullable String packageName, int userHandle) {
         boolean removedAdmin = false;
         if (VERBOSE_LOG) {
@@ -2073,7 +934,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
             if (removedAdmin) {
-                validatePasswordOwnerLocked(policy);
+                policy.validatePasswordOwner();
             }
 
             boolean removedDelegate = false;
@@ -3514,13 +2375,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-
-    public DeviceAdminInfo findAdmin(final ComponentName adminName, final int userHandle,
+    private DeviceAdminInfo findAdmin(final ComponentName adminName, final int userHandle,
             boolean throwForMissingPermission) {
-        if (!mHasFeature) {
-            return null;
-        }
-        enforceFullCrossUsersPermission(userHandle);
         final ActivityInfo ai = mInjector.binderWithCleanCallingIdentity(() -> {
             try {
                 return mIPackageManager.getReceiverInfo(adminName,
@@ -3583,213 +2439,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void saveSettingsLocked(int userHandle) {
-        DevicePolicyData policy = getUserData(userHandle);
-        JournaledFile journal = makeJournaledFile(userHandle);
-        FileOutputStream stream = null;
-        try {
-            stream = new FileOutputStream(journal.chooseForWrite(), false);
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
-            out.startDocument(null, true);
-
-            out.startTag(null, "policies");
-            if (policy.mRestrictionsProvider != null) {
-                out.attribute(null, ATTR_PERMISSION_PROVIDER,
-                        policy.mRestrictionsProvider.flattenToString());
-            }
-            if (policy.mUserSetupComplete) {
-                out.attribute(null, ATTR_SETUP_COMPLETE,
-                        Boolean.toString(true));
-            }
-            if (policy.mPaired) {
-                out.attribute(null, ATTR_DEVICE_PAIRED,
-                        Boolean.toString(true));
-            }
-            if (policy.mDeviceProvisioningConfigApplied) {
-                out.attribute(null, ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED,
-                        Boolean.toString(true));
-            }
-            if (policy.mUserProvisioningState != DevicePolicyManager.STATE_USER_UNMANAGED) {
-                out.attribute(null, ATTR_PROVISIONING_STATE,
-                        Integer.toString(policy.mUserProvisioningState));
-            }
-            if (policy.mPermissionPolicy != DevicePolicyManager.PERMISSION_POLICY_PROMPT) {
-                out.attribute(null, ATTR_PERMISSION_POLICY,
-                        Integer.toString(policy.mPermissionPolicy));
-            }
-
-            // Serialize delegations.
-            for (int i = 0; i < policy.mDelegationMap.size(); ++i) {
-                final String delegatePackage = policy.mDelegationMap.keyAt(i);
-                final List<String> scopes = policy.mDelegationMap.valueAt(i);
-
-                // Every "delegation" tag serializes the information of one delegate-scope pair.
-                for (String scope : scopes) {
-                    out.startTag(null, "delegation");
-                    out.attribute(null, "delegatePackage", delegatePackage);
-                    out.attribute(null, "scope", scope);
-                    out.endTag(null, "delegation");
-                }
-            }
-
-            final int N = policy.mAdminList.size();
-            for (int i=0; i<N; i++) {
-                ActiveAdmin ap = policy.mAdminList.get(i);
-                if (ap != null) {
-                    out.startTag(null, "admin");
-                    out.attribute(null, "name", ap.info.getComponent().flattenToString());
-                    ap.writeToXml(out);
-                    out.endTag(null, "admin");
-                }
-            }
-
-            if (policy.mPasswordOwner >= 0) {
-                out.startTag(null, "password-owner");
-                out.attribute(null, "value", Integer.toString(policy.mPasswordOwner));
-                out.endTag(null, "password-owner");
-            }
-
-            if (policy.mFailedPasswordAttempts != 0) {
-                out.startTag(null, "failed-password-attempts");
-                out.attribute(null, "value", Integer.toString(policy.mFailedPasswordAttempts));
-                out.endTag(null, "failed-password-attempts");
-            }
-
-            // For FDE devices only, we save this flag so we can report on password sufficiency
-            // before the user enters their password for the first time after a reboot.  For
-            // security reasons, we don't want to store the full set of active password metrics.
-            if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
-                out.startTag(null, TAG_PASSWORD_VALIDITY);
-                out.attribute(null, ATTR_VALUE,
-                        Boolean.toString(policy.mPasswordValidAtLastCheckpoint));
-                out.endTag(null, TAG_PASSWORD_VALIDITY);
-            }
-
-            for (int i = 0; i < policy.mAcceptedCaCertificates.size(); i++) {
-                out.startTag(null, TAG_ACCEPTED_CA_CERTIFICATES);
-                out.attribute(null, ATTR_NAME, policy.mAcceptedCaCertificates.valueAt(i));
-                out.endTag(null, TAG_ACCEPTED_CA_CERTIFICATES);
-            }
-
-            for (int i=0; i<policy.mLockTaskPackages.size(); i++) {
-                String component = policy.mLockTaskPackages.get(i);
-                out.startTag(null, TAG_LOCK_TASK_COMPONENTS);
-                out.attribute(null, "name", component);
-                out.endTag(null, TAG_LOCK_TASK_COMPONENTS);
-            }
-
-            if (policy.mLockTaskFeatures != DevicePolicyManager.LOCK_TASK_FEATURE_NONE) {
-                out.startTag(null, TAG_LOCK_TASK_FEATURES);
-                out.attribute(null, ATTR_VALUE, Integer.toString(policy.mLockTaskFeatures));
-                out.endTag(null, TAG_LOCK_TASK_FEATURES);
-            }
-
-            if (policy.mSecondaryLockscreenEnabled) {
-                out.startTag(null, TAG_SECONDARY_LOCK_SCREEN);
-                out.attribute(null, ATTR_VALUE, Boolean.toString(true));
-                out.endTag(null, TAG_SECONDARY_LOCK_SCREEN);
-            }
-
-            if (policy.mStatusBarDisabled) {
-                out.startTag(null, TAG_STATUS_BAR);
-                out.attribute(null, ATTR_DISABLED, Boolean.toString(policy.mStatusBarDisabled));
-                out.endTag(null, TAG_STATUS_BAR);
-            }
-
-            if (policy.doNotAskCredentialsOnBoot) {
-                out.startTag(null, DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML);
-                out.endTag(null, DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML);
-            }
-
-            for (String id : policy.mAffiliationIds) {
-                out.startTag(null, TAG_AFFILIATION_ID);
-                out.attribute(null, ATTR_ID, id);
-                out.endTag(null, TAG_AFFILIATION_ID);
-            }
-
-            if (policy.mLastSecurityLogRetrievalTime >= 0) {
-                out.startTag(null, TAG_LAST_SECURITY_LOG_RETRIEVAL);
-                out.attribute(null, ATTR_VALUE,
-                        Long.toString(policy.mLastSecurityLogRetrievalTime));
-                out.endTag(null, TAG_LAST_SECURITY_LOG_RETRIEVAL);
-            }
-
-            if (policy.mLastBugReportRequestTime >= 0) {
-                out.startTag(null, TAG_LAST_BUG_REPORT_REQUEST);
-                out.attribute(null, ATTR_VALUE,
-                        Long.toString(policy.mLastBugReportRequestTime));
-                out.endTag(null, TAG_LAST_BUG_REPORT_REQUEST);
-            }
-
-            if (policy.mLastNetworkLogsRetrievalTime >= 0) {
-                out.startTag(null, TAG_LAST_NETWORK_LOG_RETRIEVAL);
-                out.attribute(null, ATTR_VALUE,
-                        Long.toString(policy.mLastNetworkLogsRetrievalTime));
-                out.endTag(null, TAG_LAST_NETWORK_LOG_RETRIEVAL);
-            }
-
-            if (policy.mAdminBroadcastPending) {
-                out.startTag(null, TAG_ADMIN_BROADCAST_PENDING);
-                out.attribute(null, ATTR_VALUE,
-                        Boolean.toString(policy.mAdminBroadcastPending));
-                out.endTag(null, TAG_ADMIN_BROADCAST_PENDING);
-            }
-
-            if (policy.mInitBundle != null) {
-                out.startTag(null, TAG_INITIALIZATION_BUNDLE);
-                policy.mInitBundle.saveToXml(out);
-                out.endTag(null, TAG_INITIALIZATION_BUNDLE);
-            }
-
-            if (policy.mPasswordTokenHandle != 0) {
-                out.startTag(null, TAG_PASSWORD_TOKEN_HANDLE);
-                out.attribute(null, ATTR_VALUE,
-                        Long.toString(policy.mPasswordTokenHandle));
-                out.endTag(null, TAG_PASSWORD_TOKEN_HANDLE);
-            }
-
-            if (policy.mCurrentInputMethodSet) {
-                out.startTag(null, TAG_CURRENT_INPUT_METHOD_SET);
-                out.endTag(null, TAG_CURRENT_INPUT_METHOD_SET);
-            }
-
-            for (final String cert : policy.mOwnerInstalledCaCerts) {
-                out.startTag(null, TAG_OWNER_INSTALLED_CA_CERT);
-                out.attribute(null, ATTR_ALIAS, cert);
-                out.endTag(null, TAG_OWNER_INSTALLED_CA_CERT);
-            }
-
-            for (int i = 0, size = policy.mUserControlDisabledPackages.size(); i < size; i++) {
-                String packageName = policy.mUserControlDisabledPackages.get(i);
-                out.startTag(null, TAG_PROTECTED_PACKAGES);
-                out.attribute(null, ATTR_NAME, packageName);
-                out.endTag(null, TAG_PROTECTED_PACKAGES);
-            }
-
-            if (policy.mAppsSuspended) {
-                out.startTag(null, TAG_APPS_SUSPENDED);
-                out.attribute(null, ATTR_VALUE, Boolean.toString(policy.mAppsSuspended));
-                out.endTag(null, TAG_APPS_SUSPENDED);
-            }
-
-            out.endTag(null, "policies");
-
-            out.endDocument();
-            stream.flush();
-            FileUtils.sync(stream);
-            stream.close();
-            journal.commit();
+        if (DevicePolicyData.store(
+                getUserData(userHandle),
+                makeJournaledFile(userHandle),
+                !mInjector.storageManagerIsFileBasedEncryptionEnabled())) {
             sendChangedNotification(userHandle);
-        } catch (XmlPullParserException | IOException e) {
-            Slog.w(LOG_TAG, "failed writing file", e);
-            try {
-                if (stream != null) {
-                    stream.close();
-                }
-            } catch (IOException ex) {
-                // Ignore
-            }
-            journal.rollback();
         }
     }
 
@@ -3801,225 +2455,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void loadSettingsLocked(DevicePolicyData policy, int userHandle) {
-        JournaledFile journal = makeJournaledFile(userHandle);
-        FileInputStream stream = null;
-        File file = journal.chooseForRead();
-        boolean needsRewrite = false;
-        try {
-            stream = new FileInputStream(file);
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
-
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                    && type != XmlPullParser.START_TAG) {
-            }
-            String tag = parser.getName();
-            if (!"policies".equals(tag)) {
-                throw new XmlPullParserException(
-                        "Settings do not start with policies tag: found " + tag);
-            }
-
-            // Extract the permission provider component name if available
-            String permissionProvider = parser.getAttributeValue(null, ATTR_PERMISSION_PROVIDER);
-            if (permissionProvider != null) {
-                policy.mRestrictionsProvider = ComponentName.unflattenFromString(permissionProvider);
-            }
-            String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
-            if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
-                policy.mUserSetupComplete = true;
-            }
-            String paired = parser.getAttributeValue(null, ATTR_DEVICE_PAIRED);
-            if (paired != null && Boolean.toString(true).equals(paired)) {
-                policy.mPaired = true;
-            }
-            String deviceProvisioningConfigApplied = parser.getAttributeValue(null,
-                    ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED);
-            if (deviceProvisioningConfigApplied != null
-                    && Boolean.toString(true).equals(deviceProvisioningConfigApplied)) {
-                policy.mDeviceProvisioningConfigApplied = true;
-            }
-            String provisioningState = parser.getAttributeValue(null, ATTR_PROVISIONING_STATE);
-            if (!TextUtils.isEmpty(provisioningState)) {
-                policy.mUserProvisioningState = Integer.parseInt(provisioningState);
-            }
-            String permissionPolicy = parser.getAttributeValue(null, ATTR_PERMISSION_POLICY);
-            if (!TextUtils.isEmpty(permissionPolicy)) {
-                policy.mPermissionPolicy = Integer.parseInt(permissionPolicy);
-            }
-            // Check for delegation compatibility with pre-O.
-            // TODO(edmanp) remove in P.
-            {
-                final String certDelegate = parser.getAttributeValue(null,
-                        ATTR_DELEGATED_CERT_INSTALLER);
-                if (certDelegate != null) {
-                    List<String> scopes = policy.mDelegationMap.get(certDelegate);
-                    if (scopes == null) {
-                        scopes = new ArrayList<>();
-                        policy.mDelegationMap.put(certDelegate, scopes);
-                    }
-                    if (!scopes.contains(DELEGATION_CERT_INSTALL)) {
-                        scopes.add(DELEGATION_CERT_INSTALL);
-                        needsRewrite = true;
-                    }
-                }
-                final String appRestrictionsDelegate = parser.getAttributeValue(null,
-                        ATTR_APPLICATION_RESTRICTIONS_MANAGER);
-                if (appRestrictionsDelegate != null) {
-                    List<String> scopes = policy.mDelegationMap.get(appRestrictionsDelegate);
-                    if (scopes == null) {
-                        scopes = new ArrayList<>();
-                        policy.mDelegationMap.put(appRestrictionsDelegate, scopes);
-                    }
-                    if (!scopes.contains(DELEGATION_APP_RESTRICTIONS)) {
-                        scopes.add(DELEGATION_APP_RESTRICTIONS);
-                        needsRewrite = true;
-                    }
-                }
-            }
-
-            type = parser.next();
-            int outerDepth = parser.getDepth();
-            policy.mLockTaskPackages.clear();
-            policy.mAdminList.clear();
-            policy.mAdminMap.clear();
-            policy.mAffiliationIds.clear();
-            policy.mOwnerInstalledCaCerts.clear();
-            policy.mUserControlDisabledPackages.clear();
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                   && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-                tag = parser.getName();
-                if ("admin".equals(tag)) {
-                    String name = parser.getAttributeValue(null, "name");
-                    try {
-                        DeviceAdminInfo dai = findAdmin(
-                                ComponentName.unflattenFromString(name), userHandle,
-                                /* throwForMissingPermission= */ false);
-                        if (VERBOSE_LOG
-                                && (UserHandle.getUserId(dai.getActivityInfo().applicationInfo.uid)
-                                != userHandle)) {
-                            Slog.w(LOG_TAG, "findAdmin returned an incorrect uid "
-                                    + dai.getActivityInfo().applicationInfo.uid + " for user "
-                                    + userHandle);
-                        }
-                        if (dai != null) {
-                            boolean shouldOverwritePolicies =
-                                    shouldOverwritePoliciesFromXml(dai.getComponent(), userHandle);
-                            ActiveAdmin ap = new ActiveAdmin(dai, /* parent */ false);
-                            ap.readFromXml(parser, shouldOverwritePolicies);
-                            policy.mAdminMap.put(ap.info.getComponent(), ap);
-                        }
-                    } catch (RuntimeException e) {
-                        Slog.w(LOG_TAG, "Failed loading admin " + name, e);
-                    }
-                } else if ("delegation".equals(tag)) {
-                    // Parse delegation info.
-                    final String delegatePackage = parser.getAttributeValue(null,
-                            "delegatePackage");
-                    final String scope = parser.getAttributeValue(null, "scope");
-
-                    // Get a reference to the scopes list for the delegatePackage.
-                    List<String> scopes = policy.mDelegationMap.get(delegatePackage);
-                    // Or make a new list if none was found.
-                    if (scopes == null) {
-                        scopes = new ArrayList<>();
-                        policy.mDelegationMap.put(delegatePackage, scopes);
-                    }
-                    // Add the new scope to the list of delegatePackage if it's not already there.
-                    if (!scopes.contains(scope)) {
-                        scopes.add(scope);
-                    }
-                } else if ("failed-password-attempts".equals(tag)) {
-                    policy.mFailedPasswordAttempts = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("password-owner".equals(tag)) {
-                    policy.mPasswordOwner = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if (TAG_ACCEPTED_CA_CERTIFICATES.equals(tag)) {
-                    policy.mAcceptedCaCertificates.add(parser.getAttributeValue(null, ATTR_NAME));
-                } else if (TAG_LOCK_TASK_COMPONENTS.equals(tag)) {
-                    policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
-                } else if (TAG_LOCK_TASK_FEATURES.equals(tag)) {
-                    policy.mLockTaskFeatures = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_SECONDARY_LOCK_SCREEN.equals(tag)) {
-                    policy.mSecondaryLockscreenEnabled = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_STATUS_BAR.equals(tag)) {
-                    policy.mStatusBarDisabled = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_DISABLED));
-                } else if (DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML.equals(tag)) {
-                    policy.doNotAskCredentialsOnBoot = true;
-                } else if (TAG_AFFILIATION_ID.equals(tag)) {
-                    policy.mAffiliationIds.add(parser.getAttributeValue(null, ATTR_ID));
-                } else if (TAG_LAST_SECURITY_LOG_RETRIEVAL.equals(tag)) {
-                    policy.mLastSecurityLogRetrievalTime = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_LAST_BUG_REPORT_REQUEST.equals(tag)) {
-                    policy.mLastBugReportRequestTime = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_LAST_NETWORK_LOG_RETRIEVAL.equals(tag)) {
-                    policy.mLastNetworkLogsRetrievalTime = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_ADMIN_BROADCAST_PENDING.equals(tag)) {
-                    String pending = parser.getAttributeValue(null, ATTR_VALUE);
-                    policy.mAdminBroadcastPending = Boolean.toString(true).equals(pending);
-                } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
-                    policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
-                } else if ("active-password".equals(tag)) {
-                    // Remove password metrics from saved settings, as we no longer wish to store
-                    // these on disk
-                    needsRewrite = true;
-                } else if (TAG_PASSWORD_VALIDITY.equals(tag)) {
-                    if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
-                        // This flag is only used for FDE devices
-                        policy.mPasswordValidAtLastCheckpoint = Boolean.parseBoolean(
-                                parser.getAttributeValue(null, ATTR_VALUE));
-                    }
-                } else if (TAG_PASSWORD_TOKEN_HANDLE.equals(tag)) {
-                    policy.mPasswordTokenHandle = Long.parseLong(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_CURRENT_INPUT_METHOD_SET.equals(tag)) {
-                    policy.mCurrentInputMethodSet = true;
-                } else if (TAG_OWNER_INSTALLED_CA_CERT.equals(tag)) {
-                    policy.mOwnerInstalledCaCerts.add(parser.getAttributeValue(null, ATTR_ALIAS));
-                } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
-                    policy.mUserControlDisabledPackages.add(
-                            parser.getAttributeValue(null, ATTR_NAME));
-                } else if (TAG_APPS_SUSPENDED.equals(tag)) {
-                    policy.mAppsSuspended =
-                            Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_VALUE));
-                } else {
-                    Slog.w(LOG_TAG, "Unknown tag: " + tag);
-                    XmlUtils.skipCurrentTag(parser);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            // Don't be noisy, this is normal if we haven't defined any policies.
-        } catch (NullPointerException | NumberFormatException | XmlPullParserException | IOException
-                | IndexOutOfBoundsException e) {
-            Slog.w(LOG_TAG, "failed parsing " + file, e);
-        }
-        try {
-            if (stream != null) {
-                stream.close();
-            }
-        } catch (IOException e) {
-            // Ignore
-        }
-
-        // Generate a list of admins from the admin map
-        policy.mAdminList.addAll(policy.mAdminMap.values());
+        boolean needsRewrite = DevicePolicyData.load(policy,
+                !mInjector.storageManagerIsFileBasedEncryptionEnabled(),
+                makeJournaledFile(userHandle),
+                component -> findAdmin(
+                        component, userHandle, /* throwForMissingPermission= */ false),
+                getOwnerComponent(userHandle));
 
         // Might need to upgrade the file by rewriting it
         if (needsRewrite) {
             saveSettingsLocked(userHandle);
         }
 
-        validatePasswordOwnerLocked(policy);
+        policy.validatePasswordOwner();
         updateMaximumTimeToLockLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
@@ -4027,14 +2475,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
-    }
-
-    private boolean shouldOverwritePoliciesFromXml(
-            ComponentName deviceAdminComponent, int userHandle) {
-        // http://b/123415062: If DA, overwrite with the stored policies that were agreed by the
-        // user to prevent apps from sneaking additional policies into updates.
-        return !isProfileOwner(deviceAdminComponent, userHandle)
-                && !isDeviceOwner(deviceAdminComponent, userHandle);
     }
 
     private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
@@ -4096,23 +2536,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         throw new IllegalArgumentException("Invalid quality constant: 0x"
                 + Integer.toHexString(quality));
-    }
-
-    void validatePasswordOwnerLocked(DevicePolicyData policy) {
-        if (policy.mPasswordOwner >= 0) {
-            boolean haveOwner = false;
-            for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
-                if (policy.mAdminList.get(i).getUid() == policy.mPasswordOwner) {
-                    haveOwner = true;
-                    break;
-                }
-            }
-            if (!haveOwner) {
-                Slog.w(LOG_TAG, "Previous password owner " + policy.mPasswordOwner
-                        + " no longer active; disabling");
-                policy.mPasswordOwner = -1;
-            }
-        }
     }
 
     @VisibleForTesting
@@ -5842,8 +4265,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void setDoNotAskCredentialsOnBoot() {
         synchronized (getLockObject()) {
             DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
-            if (!policyData.doNotAskCredentialsOnBoot) {
-                policyData.doNotAskCredentialsOnBoot = true;
+            if (!policyData.mDoNotAskCredentialsOnBoot) {
+                policyData.mDoNotAskCredentialsOnBoot = true;
                 saveSettingsLocked(UserHandle.USER_SYSTEM);
             }
         }
@@ -5855,7 +4278,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 android.Manifest.permission.QUERY_DO_NOT_ASK_CREDENTIALS_ON_BOOT, null);
         synchronized (getLockObject()) {
             DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
-            return policyData.doNotAskCredentialsOnBoot;
+            return policyData.mDoNotAskCredentialsOnBoot;
         }
     }
 
@@ -14363,7 +12786,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
             policy.mAdminList.remove(admin);
             policy.mAdminMap.remove(adminReceiver);
-            validatePasswordOwnerLocked(policy);
+            policy.validatePasswordOwner();
             if (doProxyCleanup) {
                 resetGlobalProxyLocked(policy);
             }
