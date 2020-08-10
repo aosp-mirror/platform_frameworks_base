@@ -14501,7 +14501,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageSetting ps;
         int appId = -1;
         long ceDataInode = -1;
-        synchronized (mSettings) {
+        synchronized (mLock) {
             ps = mSettings.getPackageLPr(packageName);
             if (ps != null) {
                 appId = ps.appId;
