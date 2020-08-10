@@ -30,7 +30,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,9 +40,8 @@ import java.util.Set;
  */
 class MicrophoneForegroundServicesObserver extends AudioActivityObserver {
     private static final String TAG = "MicrophoneForegroundServicesObserver";
-    private static final boolean ENABLED = true;
 
-    private final IActivityManager mActivityManager;
+    private IActivityManager mActivityManager;
     /**
      * A dictionary that maps PIDs to the package names. We only keep track of the PIDs that are
      * "active" (those that are running FGS with FOREGROUND_SERVICE_TYPE_MICROPHONE flag).
@@ -60,7 +58,10 @@ class MicrophoneForegroundServicesObserver extends AudioActivityObserver {
     MicrophoneForegroundServicesObserver(Context context,
             OnAudioActivityStateChangeListener listener) {
         super(context, listener);
+    }
 
+    @Override
+    void start() {
         mActivityManager = ActivityManager.getService();
         try {
             mActivityManager.registerProcessObserver(mProcessObserver);
@@ -70,8 +71,19 @@ class MicrophoneForegroundServicesObserver extends AudioActivityObserver {
     }
 
     @Override
+    void stop() {
+        try {
+            mActivityManager.unregisterProcessObserver(mProcessObserver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't unregister process observer", e);
+        }
+        mActivityManager = null;
+        mPackageToProcessCount.clear();
+    }
+
+    @Override
     Set<String> getActivePackages() {
-        return ENABLED ? mPackageToProcessCount.keySet() : Collections.emptySet();
+        return mPackageToProcessCount.keySet();
     }
 
     @UiThread
@@ -141,13 +153,12 @@ class MicrophoneForegroundServicesObserver extends AudioActivityObserver {
 
     @UiThread
     private void notifyPackageStateChanged(String packageName, boolean active) {
-        if (active) {
-            if (DEBUG) Log.d(TAG, "New microphone fgs detected, package=" + packageName);
-        } else {
-            if (DEBUG) Log.d(TAG, "Microphone fgs is gone, package=" + packageName);
+        if (DEBUG) {
+            Log.d(TAG, (active ? "New microphone fgs detected" : "Microphone fgs is gone")
+                    + ", package=" + packageName);
         }
 
-        if (ENABLED) mListener.onAudioActivityStateChange(active, packageName);
+        mListener.onAudioActivityStateChange(active, packageName);
     }
 
     @UiThread
