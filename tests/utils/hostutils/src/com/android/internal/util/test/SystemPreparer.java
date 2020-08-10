@@ -62,12 +62,22 @@ public class SystemPreparer extends ExternalResource {
     private final RebootStrategy mRebootStrategy;
     private final TearDownRule mTearDownRule;
 
+    // When debugging, it may be useful to run a test case without rebooting the device afterwards,
+    // to manually verify the device state.
+    private boolean mDebugSkipAfterReboot;
+
     public SystemPreparer(TemporaryFolder hostTempFolder, DeviceProvider deviceProvider) {
         this(hostTempFolder, RebootStrategy.FULL, null, deviceProvider);
     }
 
     public SystemPreparer(TemporaryFolder hostTempFolder, RebootStrategy rebootStrategy,
             @Nullable TestRuleDelegate testRuleDelegate, DeviceProvider deviceProvider) {
+        this(hostTempFolder, rebootStrategy, testRuleDelegate, false, deviceProvider);
+    }
+
+    public SystemPreparer(TemporaryFolder hostTempFolder, RebootStrategy rebootStrategy,
+            @Nullable TestRuleDelegate testRuleDelegate, boolean debugSkipAfterReboot,
+            DeviceProvider deviceProvider) {
         mHostTempFolder = hostTempFolder;
         mDeviceProvider = deviceProvider;
         mRebootStrategy = rebootStrategy;
@@ -75,6 +85,7 @@ public class SystemPreparer extends ExternalResource {
         if (testRuleDelegate != null) {
             testRuleDelegate.setDelegate(mTearDownRule);
         }
+        mDebugSkipAfterReboot = debugSkipAfterReboot;
     }
 
     /** Copies a file within the host test jar to a path on device. */
@@ -172,7 +183,9 @@ public class SystemPreparer extends ExternalResource {
             case USERSPACE_UNTIL_ONLINE:
                 device.rebootUserspaceUntilOnline();
                 break;
-            case START_STOP:
+            // TODO(b/159540015): Make this START_STOP instead of default once it's fixed. Can't
+            //  currently be done because START_STOP is commented out.
+            default:
                 device.executeShellCommand("stop");
                 device.executeShellCommand("start");
                 ITestDevice.RecoveryMode cachedRecoveryMode = device.getRecoveryMode();
@@ -228,7 +241,9 @@ public class SystemPreparer extends ExternalResource {
             for (final String packageName : mInstalledPackages) {
                 device.uninstallPackage(packageName);
             }
-            reboot();
+            if (!mDebugSkipAfterReboot) {
+                reboot();
+            }
         } catch (DeviceNotAvailableException e) {
             Assert.fail(e.toString());
         }
@@ -355,6 +370,7 @@ public class SystemPreparer extends ExternalResource {
     /**
      * How to reboot the device. Ordered from slowest to fastest.
      */
+    @SuppressWarnings("DanglingJavadoc")
     public enum RebootStrategy {
         /** @see ITestDevice#reboot() */
         FULL,
@@ -374,7 +390,15 @@ public class SystemPreparer extends ExternalResource {
          *
          * TODO(b/159540015): There's a bug with this causing unnecessary disk space usage, which
          *  can eventually lead to an insufficient storage space error.
+         *
+         * This can be uncommented for local development, but should be left out when merging.
+         * It is done this way to hopefully be caught by code review, since merging this will
+         * break all of postsubmit. But the nearly 50% reduction in test runtime is worth having
+         * this option exist.
+         *
+         * @deprecated do not use this in merged code until bug is resolved
          */
-        START_STOP
+//        @Deprecated
+//        START_STOP
     }
 }

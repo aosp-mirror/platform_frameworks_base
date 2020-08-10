@@ -110,7 +110,8 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
             SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
-    @get:Rule
+    @Rule
+    @JvmField
     val rules = RuleChain.outerRule(tempFolder).let {
         if (DEBUG_NO_REBOOT) {
             it!!
