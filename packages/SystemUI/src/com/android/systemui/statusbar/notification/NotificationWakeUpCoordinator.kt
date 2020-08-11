@@ -22,7 +22,7 @@ import com.android.systemui.Interpolators
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.min
 
 @Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
@@ -53,7 +54,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
             return coordinator.mLinearVisibilityAmount
         }
     }
-    private lateinit var mStackScroller: NotificationStackScrollLayout
+    private lateinit var mStackScrollerController: NotificationStackScrollLayoutController
     private var mVisibilityInterpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
 
     private var mLinearDozeAmount: Float = 0.0f
@@ -79,7 +80,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 if (mNotificationsVisible && !mNotificationsVisibleForExpansion &&
                     !bypassController.bypassEnabled) {
                     // We're waking up while pulsing, let's make sure the animation looks nice
-                    mStackScroller.wakeUpFromPulse()
+                    mStackScrollerController.wakeUpFromPulse()
                 }
                 if (bypassController.bypassEnabled && !mNotificationsVisible) {
                     // Let's make sure our huns become visible once we are waking up in case
@@ -156,10 +157,10 @@ class NotificationWakeUpCoordinator @Inject constructor(
         })
     }
 
-    fun setStackScroller(stackScroller: NotificationStackScrollLayout) {
-        mStackScroller = stackScroller
-        pulseExpanding = stackScroller.isPulseExpanding
-        stackScroller.setOnPulseHeightChangedListener {
+    fun setStackScroller(stackScrollerController: NotificationStackScrollLayoutController) {
+        mStackScrollerController = stackScrollerController
+        pulseExpanding = stackScrollerController.isPulseExpanding
+        stackScrollerController.setOnPulseHeightChangedListener {
             val nowExpanding = isPulseExpanding()
             val changed = nowExpanding != pulseExpanding
             pulseExpanding = nowExpanding
@@ -169,7 +170,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
     }
 
-    fun isPulseExpanding(): Boolean = mStackScroller.isPulseExpanding
+    fun isPulseExpanding(): Boolean = mStackScrollerController.isPulseExpanding
 
     /**
      * @param visible should notifications be visible
@@ -249,7 +250,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         val changed = linear != mLinearDozeAmount
         mLinearDozeAmount = linear
         mDozeAmount = eased
-        mStackScroller.setDozeAmount(mDozeAmount)
+        mStackScrollerController.setDozeAmount(mDozeAmount)
         updateHideAmount()
         if (changed && linear == 0.0f) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
@@ -330,18 +331,18 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     fun getWakeUpHeight(): Float {
-        return mStackScroller.wakeUpHeight
+        return mStackScrollerController.wakeUpHeight
     }
 
     private fun updateHideAmount() {
-        val linearAmount = Math.min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
-        val amount = Math.min(1.0f - mVisibilityAmount, mDozeAmount)
-        mStackScroller.setHideAmount(linearAmount, amount)
+        val linearAmount = min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
+        val amount = min(1.0f - mVisibilityAmount, mDozeAmount)
+        mStackScrollerController.setHideAmount(linearAmount, amount)
         notificationsFullyHidden = linearAmount == 1.0f
     }
 
     private fun notifyAnimationStart(awake: Boolean) {
-        mStackScroller.notifyHideAnimationStart(!awake)
+        mStackScrollerController.notifyHideAnimationStart(!awake)
     }
 
     override fun onDozingChanged(isDozing: Boolean) {
@@ -355,7 +356,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
      * from a pulse and determines how much the notifications are expanded.
      */
     fun setPulseHeight(height: Float): Float {
-        val overflow = mStackScroller.setPulseHeight(height)
+        val overflow = mStackScrollerController.setPulseHeight(height)
         //  no overflow for the bypass experience
         return if (bypassController.bypassEnabled) 0.0f else overflow
     }

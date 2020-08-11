@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -186,6 +187,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
+    private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController =
+            new NotificationStackScrollLayoutController();
     private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -244,7 +247,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
-                () -> mKeyguardClockSwitchController);
+                () -> mKeyguardClockSwitchController,
+                mNotificationStackScrollLayoutController);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelfController, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);

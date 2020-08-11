@@ -44,7 +44,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 
@@ -69,7 +69,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mHiddenShelfIconSize;
     private int mStatusBarHeight;
     private AmbientState mAmbientState;
-    private NotificationStackScrollLayout mHostLayout;
+    private NotificationStackScrollLayoutController mHostLayoutController;
     private int mMaxLayoutHeight;
     private int mPaddingBetweenElements;
     private int mNotGoneIndex;
@@ -114,9 +114,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
         initDimens();
     }
 
-    public void bind(AmbientState ambientState, NotificationStackScrollLayout hostLayout) {
+    public void bind(AmbientState ambientState,
+            NotificationStackScrollLayoutController hostLayoutController) {
         mAmbientState = ambientState;
-        mHostLayout = hostLayout;
+        mHostLayoutController = hostLayoutController;
     }
 
     private void initDimens() {
@@ -248,8 +249,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float firstElementRoundness = 0.0f;
         ActivatableNotificationView previousAnv = null;
 
-        for (int i = 0; i < mHostLayout.getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
+        for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) mHostLayoutController.getChildAt(i);
 
             if (!child.needsClippingToShelf() || child.getVisibility() == GONE) {
                 continue;
@@ -354,8 +355,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
-        for (int i = 0; i < mHostLayout.getChildCount(); i++) {
-            View child = mHostLayout.getChildAt(i);
+        for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
+            View child = mHostLayoutController.getChildAt(i);
             if (!(child instanceof ExpandableNotificationRow)
                     || child.getVisibility() == GONE) {
                 continue;
@@ -378,8 +379,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
      * swipes quickly.
      */
     private void clipTransientViews() {
-        for (int i = 0; i < mHostLayout.getTransientViewCount(); i++) {
-            View transientView = mHostLayout.getTransientView(i);
+        for (int i = 0; i < mHostLayoutController.getTransientViewCount(); i++) {
+            View transientView = mHostLayoutController.getTransientView(i);
             if (transientView instanceof ExpandableView) {
                 ExpandableView transientExpandableView = (ExpandableView) transientView;
                 updateNotificationClipHeight(transientExpandableView, getTranslationY(), -1);
@@ -618,7 +619,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // We need to persist this, since after the expansion, the behavior should still be the
             // same.
             float position = mAmbientState.getIntrinsicPadding()
-                    + mHostLayout.getPositionInLinearLayout(view);
+                    + mHostLayoutController.getPositionInLinearLayout(view);
             int maxShelfStart = mMaxLayoutHeight - getIntrinsicHeight();
             if (position < maxShelfStart && position + view.getIntrinsicHeight() >= maxShelfStart
                     && view.getTranslationY() < position) {
