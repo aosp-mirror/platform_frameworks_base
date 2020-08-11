@@ -168,7 +168,11 @@ enum ItemId {
     // Google Assistant > Personal results (toggle)
     ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT_PERSONAL_RESULTS = 0x12134000;
 
-    // Reserving [0x12140000, 0x12190000] for possible future settings
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Apps only mode (toggle)
+    ACCOUNT_SLICE_REG_ACCOUNT_APPS_ONLY_MODE = 0x12140000;
+
+    // Reserving [0x12150000, 0x12190000] for possible future settings
 
     // TvSettings > Account & Sign In (Slice) > [A regular account] > Remove
     ACCOUNT_SLICE_REG_ACCOUNT_REMOVE = 0x121A0000;
