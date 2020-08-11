@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.protolog.common;
+package com.android.internal.protolog.common;
 
 import static org.junit.Assert.assertEquals;
 

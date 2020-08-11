@@ -34,7 +34,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
-import com.android.server.protolog.ProtoLogImpl;
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.util.TraceBuffer;
 
 import java.io.File;
