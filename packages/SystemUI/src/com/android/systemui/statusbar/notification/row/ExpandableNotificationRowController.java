@@ -62,7 +62,6 @@ public class ExpandableNotificationRowController {
 
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
-    private final ExpandableNotificationRow.CoordinateOnClickListener mOnAppOpsClickListener;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnDismissCallback mOnDismissCallback;
@@ -101,7 +100,6 @@ public class ExpandableNotificationRowController {
         mStatusBarStateController = statusBarStateController;
         mNotificationGutsManager = notificationGutsManager;
         mOnDismissCallback = onDismissCallback;
-        mOnAppOpsClickListener = mNotificationGutsManager::openGuts;
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
         mFalsingManager = falsingManager;
@@ -123,7 +121,6 @@ public class ExpandableNotificationRowController {
                 mRowContentBindStage,
                 mOnExpandClickListener,
                 mMediaManager,
-                mOnAppOpsClickListener,
                 mOnFeedbackClickListener,
                 mFalsingManager,
                 mStatusBarStateController,
