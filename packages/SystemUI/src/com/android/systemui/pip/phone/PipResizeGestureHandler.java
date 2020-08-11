@@ -53,12 +53,12 @@ import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Helper on top of PipTouchHandler that handles inputs OUTSIDE of the PIP window, which is used to
@@ -110,13 +110,15 @@ public class PipResizeGestureHandler {
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
     private PipTaskOrganizer mPipTaskOrganizer;
+    private PipUiEventLogger mPipUiEventLogger;
 
     private int mCtrlType;
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
             PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
-            Runnable updateMovementBoundsRunnable, SysUiState sysUiState) {
+            Runnable updateMovementBoundsRunnable, SysUiState sysUiState,
+            PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
@@ -126,6 +128,7 @@ public class PipResizeGestureHandler {
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mSysUiState = sysUiState;
+        mPipUiEventLogger = pipUiEventLogger;
 
         context.getDisplay().getRealSize(mMaxSize);
         reloadResources();
@@ -338,6 +341,8 @@ public class PipResizeGestureHandler {
                                         resetState();
                                     });
                                 });
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
                     } else {
                         resetState();
                     }
