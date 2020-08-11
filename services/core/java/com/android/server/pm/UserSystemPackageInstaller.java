@@ -28,15 +28,14 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -723,13 +722,7 @@ class UserSystemPackageInstaller {
         return userTypeList;
     }
 
-    void dump(PrintWriter pw) {
-        try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ")) {
-            dumpIndented(ipw);
-        }
-    }
-
-    private void dumpIndented(IndentingPrintWriter pw) {
+    void dump(IndentingPrintWriter pw) {
         final int mode = getWhitelistMode();
         pw.println("Whitelisted packages per user type");
 
