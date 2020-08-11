@@ -130,6 +130,10 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
                         service.handleAutoTimeZoneConfigChanged();
                     }
                 });
+        // TODO(b/149014708) Listen for changes to geolocation time zone detection enabled config.
+        //  This should also include listening to the current user and the current user's location
+        //  toggle since the config is user-scoped and the location toggle overrides the geolocation
+        //  time zone enabled setting.
         return service;
     }
 
@@ -280,7 +284,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     void handleConfigurationChanged() {
         // Note: we could trigger an async time zone detection operation here via a call to
-        // handleAutoTimeZoneDetectionChanged(), but that is triggered in response to the underlying
+        // handleAutoTimeZoneConfigChanged(), but that is triggered in response to the underlying
         // setting value changing so it is currently unnecessary. If we get to a point where all
         // configuration changes are guaranteed to happen in response to an updateConfiguration()
         // call, then we can remove that path and call it here instead.
@@ -288,7 +292,6 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         // Configuration has changed, but each user may have a different view of the configuration.
         // It's possible that this will cause unnecessary notifications but that shouldn't be a
         // problem.
-
         synchronized (mConfigurationListeners) {
             final int userCount = mConfigurationListeners.size();
             for (int userIndex = 0; userIndex < userCount; userIndex++) {

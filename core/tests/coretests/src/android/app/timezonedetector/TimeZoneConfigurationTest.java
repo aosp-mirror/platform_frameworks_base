@@ -29,8 +29,9 @@ public class TimeZoneConfigurationTest {
 
     @Test
     public void testBuilder_copyConstructor() {
-        TimeZoneConfiguration.Builder builder1 =
-                new TimeZoneConfiguration.Builder().setAutoDetectionEnabled(true);
+        TimeZoneConfiguration.Builder builder1 = new TimeZoneConfiguration.Builder()
+                .setAutoDetectionEnabled(true)
+                .setGeoDetectionEnabled(true);
         TimeZoneConfiguration configuration1 = builder1.build();
 
         TimeZoneConfiguration configuration2 =
@@ -41,16 +42,15 @@ public class TimeZoneConfigurationTest {
 
     @Test
     public void testIsComplete() {
-        TimeZoneConfiguration incompleteConfiguration =
-                new TimeZoneConfiguration.Builder()
-                        .build();
-        assertFalse(incompleteConfiguration.isComplete());
+        TimeZoneConfiguration.Builder builder =
+                new TimeZoneConfiguration.Builder();
+        assertFalse(builder.build().isComplete());
 
-        TimeZoneConfiguration completeConfiguration =
-                new TimeZoneConfiguration.Builder()
-                        .setAutoDetectionEnabled(true)
-                        .build();
-        assertTrue(completeConfiguration.isComplete());
+        builder.setAutoDetectionEnabled(true);
+        assertFalse(builder.build().isComplete());
+
+        builder.setGeoDetectionEnabled(true);
+        assertTrue(builder.build().isComplete());
     }
 
     @Test
@@ -122,6 +122,27 @@ public class TimeZoneConfigurationTest {
             TimeZoneConfiguration two = builder2.build();
             assertEquals(one, two);
         }
+
+        builder1.setGeoDetectionEnabled(true);
+        {
+            TimeZoneConfiguration one = builder1.build();
+            TimeZoneConfiguration two = builder2.build();
+            assertNotEquals(one, two);
+        }
+
+        builder2.setGeoDetectionEnabled(false);
+        {
+            TimeZoneConfiguration one = builder1.build();
+            TimeZoneConfiguration two = builder2.build();
+            assertNotEquals(one, two);
+        }
+
+        builder1.setGeoDetectionEnabled(false);
+        {
+            TimeZoneConfiguration one = builder1.build();
+            TimeZoneConfiguration two = builder2.build();
+            assertEquals(one, two);
+        }
     }
 
     @Test
@@ -134,6 +155,12 @@ public class TimeZoneConfigurationTest {
         assertRoundTripParcelable(builder.build());
 
         builder.setAutoDetectionEnabled(false);
+        assertRoundTripParcelable(builder.build());
+
+        builder.setGeoDetectionEnabled(false);
+        assertRoundTripParcelable(builder.build());
+
+        builder.setGeoDetectionEnabled(true);
         assertRoundTripParcelable(builder.build());
     }
 }

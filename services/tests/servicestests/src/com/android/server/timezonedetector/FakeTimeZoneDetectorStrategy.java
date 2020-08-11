@@ -27,6 +27,9 @@ import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
 import android.util.IndentingPrintWriter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
     private StrategyListener mListener;
@@ -41,6 +44,7 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     private TelephonyTimeZoneSuggestion mLastTelephonySuggestion;
     private boolean mHandleAutoTimeZoneConfigChangedCalled;
     private boolean mDumpCalled;
+    private final List<Dumpable> mDumpables = new ArrayList<>();
 
     @Override
     public void setStrategyListener(@NonNull StrategyListener listener) {
@@ -105,7 +109,7 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
     @Override
     public void addDumpable(Dumpable dumpable) {
-        // Stubbed
+        mDumpables.add(dumpable);
     }
 
     @Override
@@ -148,5 +152,9 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
     void verifyDumpCalled() {
         assertTrue(mDumpCalled);
+    }
+
+    void verifyHasDumpable(Dumpable expected) {
+        assertTrue(mDumpables.contains(expected));
     }
 }
