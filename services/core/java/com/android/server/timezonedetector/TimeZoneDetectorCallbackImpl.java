@@ -72,6 +72,10 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
             builder.setConfigureAutoDetectionEnabled(CAPABILITY_POSSESSED);
         }
 
+        // TODO(b/149014708) Replace this with real logic when the settings storage is fully
+        // implemented.
+        builder.setConfigureGeoDetectionEnabled(CAPABILITY_NOT_SUPPORTED);
+
         // The ability to make manual time zone suggestions can also be restricted by policy. With
         // the current logic above, this could lead to a situation where a device hardware does not
         // support auto detection, the device has been forced into "auto" mode by an admin and the
@@ -90,6 +94,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     public TimeZoneConfiguration getConfiguration(@UserIdInt int userId) {
         return new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(isAutoDetectionEnabled())
+                .setGeoDetectionEnabled(isGeoDetectionEnabled())
                 .build();
     }
 
@@ -105,8 +110,11 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         // detection: if we wrote it down then we'd set the default explicitly. That might influence
         // what happens on later releases that do support auto detection on the same hardware.
         if (isAutoDetectionSupported()) {
-            final int value = configuration.isAutoDetectionEnabled() ? 1 : 0;
-            Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, value);
+            final int autoEnabledValue = configuration.isAutoDetectionEnabled() ? 1 : 0;
+            Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, autoEnabledValue);
+
+            final boolean geoTzDetectionEnabledValue = configuration.isGeoDetectionEnabled();
+            // TODO(b/149014708) Write this down to user-scoped settings once implemented.
         }
     }
 
@@ -122,6 +130,14 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         if (isAutoDetectionSupported()) {
             return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
         }
+        return false;
+    }
+
+    @Override
+    public boolean isGeoDetectionEnabled() {
+        // TODO(b/149014708) Read this from user-scoped settings once implemented. The user's
+        //  location toggle will act as an override for this setting, i.e. so that the setting will
+        //  return false if the location toggle is disabled.
         return false;
     }
 

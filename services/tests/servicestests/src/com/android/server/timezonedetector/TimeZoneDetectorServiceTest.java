@@ -52,6 +52,7 @@ import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorServiceTest {
@@ -253,6 +254,39 @@ public class TimeZoneDetectorServiceTest {
     }
 
     @Test(expected = SecurityException.class)
+    public void testSuggestGeolocationTimeZone_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+        GeolocationTimeZoneSuggestion timeZoneSuggestion = createGeolocationTimeZoneSuggestion();
+
+        try {
+            mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion);
+            fail();
+        } finally {
+            verify(mMockContext).enforceCallingOrSelfPermission(
+                    eq(android.Manifest.permission.SET_TIME_ZONE),
+                    anyString());
+        }
+    }
+
+    @Test
+    public void testSuggestGeolocationTimeZone() throws Exception {
+        doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+
+        GeolocationTimeZoneSuggestion timeZoneSuggestion = createGeolocationTimeZoneSuggestion();
+
+        mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        verify(mMockContext).enforceCallingOrSelfPermission(
+                eq(android.Manifest.permission.SET_TIME_ZONE),
+                anyString());
+
+        mTestHandler.waitForMessagesToBeProcessed();
+        mFakeTimeZoneDetectorStrategy.verifySuggestGeolocationTimeZoneCalled(timeZoneSuggestion);
+    }
+
+    @Test(expected = SecurityException.class)
     public void testSuggestManualTimeZone_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
@@ -346,7 +380,7 @@ public class TimeZoneDetectorServiceTest {
     }
 
     @Test
-    public void testAutoTimeZoneDetectionChanged() throws Exception {
+    public void testHandleAutoTimeZoneConfigChanged() throws Exception {
         mTimeZoneDetectorService.handleAutoTimeZoneConfigChanged();
         mTestHandler.assertTotalMessagesEnqueued(1);
         mTestHandler.waitForMessagesToBeProcessed();
@@ -370,8 +404,13 @@ public class TimeZoneDetectorServiceTest {
     private static TimeZoneCapabilities createTimeZoneCapabilities() {
         return new TimeZoneCapabilities.Builder(ARBITRARY_USER_ID)
                 .setConfigureAutoDetectionEnabled(CAPABILITY_POSSESSED)
+                .setConfigureGeoDetectionEnabled(CAPABILITY_POSSESSED)
                 .setSuggestManualTimeZone(CAPABILITY_POSSESSED)
                 .build();
+    }
+
+    private static GeolocationTimeZoneSuggestion createGeolocationTimeZoneSuggestion() {
+        return new GeolocationTimeZoneSuggestion(Arrays.asList("TestZoneId"));
     }
 
     private static ManualTimeZoneSuggestion createManualTimeZoneSuggestion() {

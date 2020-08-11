@@ -33,9 +33,11 @@ public class TimeZoneCapabilitiesTest {
     public void testEquals() {
         TimeZoneCapabilities.Builder builder1 = new TimeZoneCapabilities.Builder(ARBITRARY_USER_ID)
                 .setConfigureAutoDetectionEnabled(CAPABILITY_POSSESSED)
+                .setConfigureGeoDetectionEnabled(CAPABILITY_POSSESSED)
                 .setSuggestManualTimeZone(CAPABILITY_POSSESSED);
         TimeZoneCapabilities.Builder builder2 = new TimeZoneCapabilities.Builder(ARBITRARY_USER_ID)
                 .setConfigureAutoDetectionEnabled(CAPABILITY_POSSESSED)
+                .setConfigureGeoDetectionEnabled(CAPABILITY_POSSESSED)
                 .setSuggestManualTimeZone(CAPABILITY_POSSESSED);
         {
             TimeZoneCapabilities one = builder1.build();
@@ -51,6 +53,20 @@ public class TimeZoneCapabilitiesTest {
         }
 
         builder1.setConfigureAutoDetectionEnabled(CAPABILITY_NOT_ALLOWED);
+        {
+            TimeZoneCapabilities one = builder1.build();
+            TimeZoneCapabilities two = builder2.build();
+            assertEquals(one, two);
+        }
+
+        builder2.setConfigureGeoDetectionEnabled(CAPABILITY_NOT_ALLOWED);
+        {
+            TimeZoneCapabilities one = builder1.build();
+            TimeZoneCapabilities two = builder2.build();
+            assertNotEquals(one, two);
+        }
+
+        builder1.setConfigureGeoDetectionEnabled(CAPABILITY_NOT_ALLOWED);
         {
             TimeZoneCapabilities one = builder1.build();
             TimeZoneCapabilities two = builder2.build();
@@ -76,10 +92,14 @@ public class TimeZoneCapabilitiesTest {
     public void testParcelable() {
         TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder(ARBITRARY_USER_ID)
                 .setConfigureAutoDetectionEnabled(CAPABILITY_POSSESSED)
+                .setConfigureGeoDetectionEnabled(CAPABILITY_POSSESSED)
                 .setSuggestManualTimeZone(CAPABILITY_POSSESSED);
         assertRoundTripParcelable(builder.build());
 
         builder.setConfigureAutoDetectionEnabled(CAPABILITY_NOT_ALLOWED);
+        assertRoundTripParcelable(builder.build());
+
+        builder.setConfigureGeoDetectionEnabled(CAPABILITY_NOT_ALLOWED);
         assertRoundTripParcelable(builder.build());
 
         builder.setSuggestManualTimeZone(CAPABILITY_NOT_ALLOWED);
