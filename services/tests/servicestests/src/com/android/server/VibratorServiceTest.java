@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -310,7 +309,7 @@ public class VibratorServiceTest {
         verify(mNativeWrapperMock).vibratorPerformEffect(
                 eq((long) VibrationEffect.EFFECT_CLICK),
                 eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG),
-                any(VibratorService.Vibration.class), eq(false));
+                any(VibratorService.Vibration.class));
     }
 
     @Test
@@ -387,21 +386,26 @@ public class VibratorServiceTest {
     }
 
     @Test
-    public void vibrate_withOneShotAndNativeCallbackNotTriggered_finishesVibrationViaFallback() {
+    public void vibrate_withPrebakedAndNativeCallbackTriggered_finishesVibration() {
+        when(mNativeWrapperMock.vibratorGetSupportedEffects())
+                .thenReturn(new int[]{VibrationEffect.EFFECT_CLICK});
+        doAnswer(invocation -> {
+            ((VibratorService.Vibration) invocation.getArgument(2)).onComplete();
+            return 10_000L; // 10s
+        }).when(mNativeWrapperMock).vibratorPerformEffect(
+                anyLong(), anyLong(), any(VibratorService.Vibration.class));
         VibratorService service = createService();
         Mockito.clearInvocations(mNativeWrapperMock);
 
-        vibrate(service, VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+        vibrate(service, VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
 
-        verify(mNativeWrapperMock).vibratorOff();
-        verify(mNativeWrapperMock).vibratorOn(eq(100L), any(VibratorService.Vibration.class));
-        Mockito.clearInvocations(mNativeWrapperMock);
-
-        // Run the scheduled callback to finish one-shot vibration.
-        mTestLooper.moveTimeForward(200);
-        mTestLooper.dispatchAll();
-
-        verify(mNativeWrapperMock).vibratorOff();
+        InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorPerformEffect(
+                eq((long) VibrationEffect.EFFECT_CLICK),
+                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG),
+                any(VibratorService.Vibration.class));
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
     }
 
     @Test
@@ -444,30 +448,6 @@ public class VibratorServiceTest {
                 any(VibrationEffect.Composition.PrimitiveEffect[].class),
                 any(VibratorService.Vibration.class));
         inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
-    }
-
-    @Test
-    public void vibrate_withComposedAndNativeCallbackNotTriggered_finishesVibrationViaFallback() {
-        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
-        VibratorService service = createService();
-        Mockito.clearInvocations(mNativeWrapperMock);
-
-        VibrationEffect effect = VibrationEffect.startComposition()
-                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 10)
-                .compose();
-        vibrate(service, effect);
-
-        verify(mNativeWrapperMock).vibratorOff();
-        verify(mNativeWrapperMock).vibratorPerformComposedEffect(
-                any(VibrationEffect.Composition.PrimitiveEffect[].class),
-                any(VibratorService.Vibration.class));
-        Mockito.clearInvocations(mNativeWrapperMock);
-
-        // Run the scheduled callback to finish one-shot vibration.
-        mTestLooper.moveTimeForward(10000); // 10s
-        mTestLooper.dispatchAll();
-
-        verify(mNativeWrapperMock).vibratorOff();
     }
 
     @Test
@@ -574,15 +554,15 @@ public class VibratorServiceTest {
 
         verify(mNativeWrapperMock).vibratorPerformEffect(
                 eq((long) VibrationEffect.EFFECT_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG), any(), anyBoolean());
+                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG), any());
         verify(mNativeWrapperMock).vibratorPerformEffect(
                 eq((long) VibrationEffect.EFFECT_TICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_MEDIUM), any(), anyBoolean());
+                eq((long) VibrationEffect.EFFECT_STRENGTH_MEDIUM), any());
         verify(mNativeWrapperMock).vibratorPerformEffect(
                 eq((long) VibrationEffect.EFFECT_DOUBLE_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_LIGHT), any(), anyBoolean());
+                eq((long) VibrationEffect.EFFECT_STRENGTH_LIGHT), any());
         verify(mNativeWrapperMock, never()).vibratorPerformEffect(
-                eq((long) VibrationEffect.EFFECT_HEAVY_CLICK), anyLong(), any(), anyBoolean());
+                eq((long) VibrationEffect.EFFECT_HEAVY_CLICK), anyLong(), any());
     }
 
     @Test
