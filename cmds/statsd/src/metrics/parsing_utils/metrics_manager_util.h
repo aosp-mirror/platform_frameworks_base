@@ -20,15 +20,27 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../anomaly/AlarmTracker.h"
-#include "../condition/ConditionTracker.h"
-#include "../external/StatsPullerManager.h"
-#include "../matchers/LogMatchingTracker.h"
-#include "../metrics/MetricProducer.h"
+#include "anomaly/AlarmTracker.h"
+#include "condition/ConditionTracker.h"
+#include "external/StatsPullerManager.h"
+#include "matchers/LogMatchingTracker.h"
+#include "metrics/MetricProducer.h"
 
 namespace android {
 namespace os {
 namespace statsd {
+
+// Helper functions for creating individual config components from StatsdConfig.
+// Should only be called from metrics_manager_util and config_update_utils.
+
+// Create a LogMatchingTracker.
+// input:
+// [logMatcher]: the input AtomMatcher from the StatsdConfig
+// [index]: the index of the matcher
+// output:
+// new LogMatchingTracker, or null if the tracker is unable to be created
+sp<LogMatchingTracker> createLogTracker(const AtomMatcher& logMatcher, const int index,
+                                        const sp<UidMap>& uidMap);
 
 // Helper functions for MetricsManager to initialize from StatsdConfig.
 // *Note*: only initStatsdConfig() should be called from outside.
@@ -44,8 +56,7 @@ namespace statsd {
 // [logTrackerMap]: this map should contain matcher name to index mapping
 // [allAtomMatchers]: should store the sp to all the LogMatchingTracker
 // [allTagIds]: contains the set of all interesting tag ids to this config.
-bool initLogTrackers(const StatsdConfig& config,
-                     const UidMap& uidMap,
+bool initLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
                      std::unordered_map<int64_t, int>& logTrackerMap,
                      std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                      std::set<int>& allTagIds);
@@ -97,7 +108,7 @@ bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAt
 // [trackerToMetricMap]: contains the mapping from log tracker to MetricProducer index.
 bool initMetrics(
         const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
-        const int64_t currentTimeNs, UidMap& uidMap, const sp<StatsPullerManager>& pullerManager,
+        const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
         const std::unordered_map<int64_t, int>& logTrackerMap,
         const std::unordered_map<int64_t, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
@@ -116,12 +127,13 @@ bool initMetrics(
 
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
-bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp<UidMap>& uidMap,
                       const sp<StatsPullerManager>& pullerManager,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& periodicAlarmMonitor, const int64_t timeBaseNs,
                       const int64_t currentTimeNs, std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
+                      std::unordered_map<int64_t, int>& logTrackerMap,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
@@ -132,8 +144,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
                       std::unordered_map<int64_t, int>& alertTrackerMap,
-                      vector<int>& metricsWithActivation,
-                      std::set<int64_t>& noReportMetricIds);
+                      vector<int>& metricsWithActivation, std::set<int64_t>& noReportMetricIds);
 
 }  // namespace statsd
 }  // namespace os
