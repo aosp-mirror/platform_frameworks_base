@@ -2232,7 +2232,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
                             installerPackageName, null /*finishedReceiver*/,
-                            updateUserIds, instantUserIds, null /* broadcastWhitelist */);
+                            updateUserIds, instantUserIds, null /* broadcastAllowList */);
                 }
                 // if the required verifier is defined, but, is not the installer of record
                 // for the package, it gets notified
@@ -2242,7 +2242,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
                             mRequiredVerifierPackage, null /*finishedReceiver*/,
-                            updateUserIds, instantUserIds, null /* broadcastWhitelist */);
+                            updateUserIds, instantUserIds, null /* broadcastAllowList */);
                 }
                 // If package installer is defined, notify package installer about new
                 // app installed
@@ -2250,7 +2250,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND /*flags*/,
                             mRequiredInstallerPackage, null /*finishedReceiver*/,
-                            firstUserIds, instantUserIds, null /* broadcastWhitelist */);
+                            firstUserIds, instantUserIds, null /* broadcastAllowList */);
                 }
 
                 // Send replaced for users that don't see the package for the first time
@@ -2263,19 +2263,19 @@ public class PackageManagerService extends IPackageManager.Stub
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
                                 installerPackageName, null /*finishedReceiver*/,
-                                updateUserIds, instantUserIds, null /*broadcastWhitelist*/);
+                                updateUserIds, instantUserIds, null /*broadcastAllowList*/);
                     }
                     if (notifyVerifier) {
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
                                 mRequiredVerifierPackage, null /*finishedReceiver*/,
-                                updateUserIds, instantUserIds, null /*broadcastWhitelist*/);
+                                updateUserIds, instantUserIds, null /*broadcastAllowList*/);
                     }
                     sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                             null /*package*/, null /*extras*/, 0 /*flags*/,
                             packageName /*targetPackage*/,
                             null /*finishedReceiver*/, updateUserIds, instantUserIds,
-                            null /*broadcastWhitelist*/);
+                            null /*broadcastAllowList*/);
                 } else if (launchedForRestore && !res.pkg.isSystem()) {
                     // First-install and we did a restore, so we're responsible for the
                     // first-launch broadcast.
@@ -14627,7 +14627,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void sendFirstLaunchBroadcast(String pkgName, String installerPkg,
             int[] userIds, int[] instantUserIds) {
         sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH, pkgName, null, 0,
-                installerPkg, null, userIds, instantUserIds, null /* broadcastWhitelist */);
+                installerPkg, null, userIds, instantUserIds, null /* broadcastAllowList */);
     }
 
     private abstract class HandlerParams {
@@ -18730,14 +18730,14 @@ public class PackageManagerService extends IPackageManager.Stub
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, removedPackage,
                     extras, 0, null /*targetPackage*/, null, null, null, broadcastAllowList);
             packageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
-                    removedPackage, null, null, null, null /* broadcastWhitelist */);
+                    removedPackage, null, null, null, null /* broadcastAllowList */);
             if (installerPackageName != null) {
                 packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                         removedPackage, extras, 0 /*flags*/,
-                        installerPackageName, null, null, null, null /* broadcastWhitelist */);
+                        installerPackageName, null, null, null, null /* broadcastAllowList */);
                 packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                         removedPackage, extras, 0 /*flags*/,
-                        installerPackageName, null, null, null, null /* broadcastWhitelist */);
+                        installerPackageName, null, null, null, null /* broadcastAllowList */);
             }
         }
 
@@ -25700,9 +25700,9 @@ interface PackageSender {
      * @param instantUserIds User IDs where the action occurred on an instant application
      */
     void sendPackageBroadcast(final String action, final String pkg,
-        final Bundle extras, final int flags, final String targetPkg,
-        final IIntentReceiver finishedReceiver, final int[] userIds, int[] instantUserIds,
-        @Nullable SparseArray<int[]> broadcastWhitelist);
+            final Bundle extras, final int flags, final String targetPkg,
+            final IIntentReceiver finishedReceiver, final int[] userIds, int[] instantUserIds,
+            @Nullable SparseArray<int[]> broadcastAllowList);
     void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
             boolean includeStopped, int appId, int[] userIds, int[] instantUserIds,
             int dataLoaderType);
