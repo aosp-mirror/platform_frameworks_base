@@ -161,7 +161,9 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ActivityManager.getService().resumeAppSwitches();
             } catch (RemoteException e) {
             }
-            return mCallback.handleRemoteViewClick(view, pendingIntent, () -> {
+            Notification.Action action = getActionFromView(view, entry, pendingIntent);
+            return mCallback.handleRemoteViewClick(view, pendingIntent,
+                    action == null ? false : action.isAuthenticationRequired(), () -> {
                 Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
                 options.second.setLaunchWindowingMode(
                         WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
@@ -170,23 +172,45 @@ public class NotificationRemoteInputManager implements Dumpable {
             });
         }
 
+        private @Nullable Notification.Action getActionFromView(View view,
+                NotificationEntry entry, PendingIntent actionIntent) {
+            Integer actionIndex = (Integer)
+                    view.getTag(com.android.internal.R.id.notification_action_index_tag);
+            if (actionIndex == null) {
+                return null;
+            }
+            if (entry == null) {
+                Log.w(TAG, "Couldn't determine notification for click.");
+                return null;
+            }
+
+            // Notification may be updated before this function is executed, and thus play safe
+            // here and verify that the action object is still the one that where the click happens.
+            StatusBarNotification statusBarNotification = entry.getSbn();
+            Notification.Action[] actions = statusBarNotification.getNotification().actions;
+            if (actions == null || actionIndex >= actions.length) {
+                Log.w(TAG, "statusBarNotification.getNotification().actions is null or invalid");
+                return null ;
+            }
+            final Notification.Action action =
+                    statusBarNotification.getNotification().actions[actionIndex];
+            if (!Objects.equals(action.actionIntent, actionIntent)) {
+                Log.w(TAG, "actionIntent does not match");
+                return null;
+            }
+            return action;
+        }
+
         private void logActionClick(
                 View view,
                 NotificationEntry entry,
                 PendingIntent actionIntent) {
-            Integer actionIndex = (Integer)
-                    view.getTag(com.android.internal.R.id.notification_action_index_tag);
-            if (actionIndex == null) {
-                // Custom action button, not logging.
+            Notification.Action action = getActionFromView(view, entry, actionIntent);
+            if (action == null) {
                 return;
             }
             ViewParent parent = view.getParent();
-            if (entry == null) {
-                Log.w(TAG, "Couldn't determine notification for click.");
-                return;
-            }
-            StatusBarNotification statusBarNotification = entry.getSbn();
-            String key = statusBarNotification.getKey();
+            String key = entry.getSbn().getKey();
             int buttonIndex = -1;
             // If this is a default template, determine the index of the button.
             if (view.getId() == com.android.internal.R.id.action0 &&
@@ -198,19 +222,6 @@ public class NotificationRemoteInputManager implements Dumpable {
             final int rank = mEntryManager
                     .getActiveNotificationUnfiltered(key).getRanking().getRank();
 
-            // Notification may be updated before this function is executed, and thus play safe
-            // here and verify that the action object is still the one that where the click happens.
-            Notification.Action[] actions = statusBarNotification.getNotification().actions;
-            if (actions == null || actionIndex >= actions.length) {
-                Log.w(TAG, "statusBarNotification.getNotification().actions is null or invalid");
-                return;
-            }
-            final Notification.Action action =
-                    statusBarNotification.getNotification().actions[actionIndex];
-            if (!Objects.equals(action.actionIntent, actionIntent)) {
-                Log.w(TAG, "actionIntent does not match");
-                return;
-            }
             NotificationVisibility.NotificationLocation location =
                     NotificationLogger.getNotificationLocation(
                             mEntryManager.getActiveNotificationUnfiltered(key));
@@ -813,11 +824,12 @@ public class NotificationRemoteInputManager implements Dumpable {
          *
          * @param view
          * @param pendingIntent
+         * @param appRequestedAuth
          * @param defaultHandler
          * @return  true iff the click was handled
          */
         boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
-                ClickHandler defaultHandler);
+                boolean appRequestedAuth, ClickHandler defaultHandler);
     }
 
     /**
