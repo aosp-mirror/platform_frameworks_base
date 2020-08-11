@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+
 import android.graphics.PointF;
 import android.view.Display;
 import android.view.View;
@@ -29,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -41,21 +44,32 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Controller for {@link NotificationStackScrollLayout}.
  */
 @StatusBarComponent.StatusBarScope
 public class NotificationStackScrollLayoutController {
+    private final boolean mAllowLongPress;
+    private final NotificationGutsManager mNotificationGutsManager;
     private NotificationStackScrollLayout mView;
 
     @Inject
-    public NotificationStackScrollLayoutController() {
+    public NotificationStackScrollLayoutController(
+            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
+            NotificationGutsManager notificationGutsManager) {
+        mAllowLongPress = allowLongPress;
+        mNotificationGutsManager = notificationGutsManager;
     }
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
         mView.setController(this);
+
+        if (mAllowLongPress) {
+            mView.setLongPressListener(mNotificationGutsManager::openGuts);
+        }
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {

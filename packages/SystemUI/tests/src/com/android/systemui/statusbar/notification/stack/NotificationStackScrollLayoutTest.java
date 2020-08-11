@@ -212,7 +212,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // holds a copy of the CUT's instances of these KeyguardBypassController, so they still
         // refer to the CUT's member variables, not the spy's member variables.
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null,
-                true /* allowLongPress */, mNotificationRoundnessManager,
+                mNotificationRoundnessManager,
                 mock(DynamicPrivacyController.class),
                 mock(SysuiStatusBarStateController.class),
                 mHeadsUpManager,

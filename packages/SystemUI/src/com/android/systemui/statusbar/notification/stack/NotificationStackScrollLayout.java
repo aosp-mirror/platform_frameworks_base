@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
@@ -210,7 +209,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final Paint mBackgroundPaint = new Paint();
     private final boolean mShouldDrawNotificationBackground;
     private boolean mHighPriorityBeforeSpeedBump;
-    private final boolean mAllowLongPress;
     private boolean mDismissRtl;
 
     private float mExpandedHeight;
@@ -551,7 +549,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationRoundnessManager notificationRoundnessManager,
             DynamicPrivacyController dynamicPrivacyController,
             SysuiStatusBarStateController statusBarStateController,
@@ -573,8 +570,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-
-        mAllowLongPress = allowLongPress;
 
         mRoundnessManager = notificationRoundnessManager;
 
@@ -716,9 +711,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         inflateEmptyShadeView();
         inflateFooterView();
         mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
-        if (mAllowLongPress) {
-            setLongPressListener(mNotificationGutsManager::openGuts);
-        }
     }
 
     /**
