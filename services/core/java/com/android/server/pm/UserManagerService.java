@@ -4786,6 +4786,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
 
+            pw.println();
             pw.println("Device properties:");
             pw.println("  Device owner id:" + mDeviceOwnerUserId);
             pw.println();
@@ -4814,12 +4815,9 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 pw.println(']');
             }
-
             synchronized (mUsersLock) {
-                pw.println();
-                pw.print("Cached user IDs: ");
+                pw.print("  Cached user IDs: ");
                 pw.println(Arrays.toString(mUserIds));
-                pw.println();
             }
 
         } // synchronized (mPackagesLock)

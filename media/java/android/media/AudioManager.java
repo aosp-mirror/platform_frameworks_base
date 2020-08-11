@@ -4413,6 +4413,18 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_FM = AudioSystem.DEVICE_OUT_FM;
     /** @hide
+     * The audio output device code for echo reference injection point.
+     */
+    public static final int DEVICE_OUT_ECHO_CANCELLER = AudioSystem.DEVICE_OUT_ECHO_CANCELLER;
+    /** @hide
+     * The audio output device code for a BLE audio headset.
+     */
+    public static final int DEVICE_OUT_BLE_HEADSET = AudioSystem.DEVICE_OUT_BLE_HEADSET;
+    /** @hide
+     * The audio output device code for a BLE audio speaker.
+     */
+    public static final int DEVICE_OUT_BLE_SPEAKER = AudioSystem.DEVICE_OUT_BLE_SPEAKER;
+    /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
@@ -4496,6 +4508,14 @@ public class AudioManager {
      * The audio input device code for audio loopback
      */
     public static final int DEVICE_IN_LOOPBACK = AudioSystem.DEVICE_IN_LOOPBACK;
+    /** @hide
+     * The audio input device code for an echo reference capture point.
+     */
+    public static final int DEVICE_IN_ECHO_REFERENCE = AudioSystem.DEVICE_IN_ECHO_REFERENCE;
+    /** @hide
+     * The audio input device code for a BLE audio headset.
+     */
+    public static final int DEVICE_IN_BLE_HEADSET = AudioSystem.DEVICE_IN_BLE_HEADSET;
 
     /**
      * Return true if the device code corresponds to an output device.

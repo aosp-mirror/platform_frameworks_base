@@ -43,4 +43,7 @@
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.onehanded.OneHandedUI</item>
     </string-array>
+
+    <!-- Show a separate icon for low and high volume on the volume dialog -->
+    <bool name="config_showLowMediaVolumeIcon">true</bool>
 </resources>

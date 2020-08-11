@@ -151,8 +151,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
         final Task stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord activity1 =
-                WindowTestUtils.createTestActivityRecord(dc1);
+        final ActivityRecord activity1 = createTestActivityRecord(dc1);
         task1.addChild(activity1, 0);
 
         // Simulate same app is during opening / closing transition set stage.

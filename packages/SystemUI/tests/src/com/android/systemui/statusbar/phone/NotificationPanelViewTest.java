@@ -63,7 +63,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -115,7 +115,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private HeadsUpManagerPhone mHeadsUpManager;
     @Mock
-    private NotificationShelf mNotificationShelf;
+    private NotificationShelfController mNotificationShelfController;
     @Mock
     private NotificationGroupManager mGroupManager;
     @Mock
@@ -246,7 +246,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 () -> mKeyguardClockSwitchController);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
-                mNotificationShelf, mNotificationAreaController, mScrimController);
+                mNotificationShelfController, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelViewController.setBar(mPanelBar);
 
