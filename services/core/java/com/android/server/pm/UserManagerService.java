@@ -87,6 +87,7 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -103,7 +104,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -4842,9 +4842,17 @@ public class UserManagerService extends IUserManager.Stub {
             mUserTypes.valueAt(i).dump(pw, "        ");
         }
 
-        // Dump package whitelist
-        pw.println();
-        mSystemPackageInstaller.dump(pw);
+        // TODO: create IndentingPrintWriter at the beginning of dump() and use the proper
+        // indentation methods instead of explicit printing "  "
+        try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw)) {
+
+            // Dump SystemPackageInstaller info
+            ipw.println();
+            mSystemPackageInstaller.dump(ipw);
+
+            // NOTE: pw's not available after this point as it's auto-closed by ipw, so new dump
+            // statements should use ipw below
+        }
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
