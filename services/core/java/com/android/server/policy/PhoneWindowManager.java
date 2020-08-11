@@ -450,7 +450,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile int mPendingWakeKey = PENDING_KEY_NULL;
 
     int mRecentAppsHeldModifiers;
-    boolean mLanguageSwitchKeyPressed;
 
     int mCameraLensCoverState = CAMERA_LENS_COVER_ABSENT;
     boolean mHaveBuiltInKeyboard;
@@ -2936,12 +2935,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH || isCtrlOrMetaSpace)) {
             int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
             mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
-            return -1;
-        }
-        if (mLanguageSwitchKeyPressed && !down
-                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
-                        || keyCode == KeyEvent.KEYCODE_SPACE)) {
-            mLanguageSwitchKeyPressed = false;
             return -1;
         }
 

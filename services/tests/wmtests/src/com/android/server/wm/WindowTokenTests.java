@@ -58,8 +58,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAddWindow() {
-        final WindowTestUtils.TestWindowToken token =
-                WindowTestUtils.createTestWindowToken(0, mDisplayContent);
+        final TestWindowToken token = createTestWindowToken(0, mDisplayContent);
 
         assertEquals(0, token.getWindowsCount());
 
@@ -93,7 +92,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testChildRemoval() {
         final DisplayContent dc = mDisplayContent;
-        final WindowTestUtils.TestWindowToken token = WindowTestUtils.createTestWindowToken(0, dc);
+        final TestWindowToken token = createTestWindowToken(0, dc);
 
         assertEquals(token, dc.getWindowToken(token.token));
 
@@ -116,7 +115,7 @@ public class WindowTokenTests extends WindowTestsBase {
      */
     @Test
     public void testTokenRemovalProcess() {
-        final WindowTestUtils.TestWindowToken token = WindowTestUtils.createTestWindowToken(
+        final TestWindowToken token = createTestWindowToken(
                 TYPE_TOAST, mDisplayContent, true /* persistOnEmpty */);
 
         // Verify that the token is on the display

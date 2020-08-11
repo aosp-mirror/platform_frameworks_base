@@ -731,11 +731,11 @@
     <string name="see_more_title" msgid="7409317011708185729">"थप हेर्नुहोस्"</string>
     <string name="appops_camera" msgid="5215967620896725715">"यो अनुप्रयोगले क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"यो अनुप्रयोगले माइक्रोफोनको प्रयोग गर्दै छ।"</string>
-    <string name="appops_overlay" msgid="4822261562576558490">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्दै छ।"</string>
+    <string name="appops_overlay" msgid="4822261562576558490">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्दै छ।"</string>
     <string name="appops_camera_mic" msgid="7032239823944420431">"यो अनुप्रयोगले माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
-    <string name="appops_camera_overlay" msgid="6466845606058816484">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
-    <string name="appops_mic_overlay" msgid="4609326508944233061">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
-    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_overlay" msgid="6466845606058816484">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_mic_overlay" msgid="4609326508944233061">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"सेटिङहरू"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ठिक छ"</string>
     <string name="feedback_silenced" msgid="5382212321253328247">"सिस्टमले यो सूचना आउँदा बज्ने ध्वनि बन्द गरेको छ।"</string>
@@ -1069,7 +1069,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मिडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"हालको सत्र लुकाउनुहोस्।"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"लुकाउनुहोस्"</string>
+    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"सुचारु गर्नुहोस्"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिङ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
@@ -1084,8 +1085,6 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नयाँ नियन्त्रण सुविधाहरू हेर्न पावर बटन थिचिराख्नुहोस्"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"नियन्त्रण सुविधाहरू सम्पादन गर्नु…"</string>
-    <!-- no translation found for one_handed_tutorial_title (6312198435090726656) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (7674850272340517174) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"एक हाते मोड प्रयोग गरिँदै छ"</string>
+    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"बाहिर निस्कन, स्क्रिनको पुछारबाट माथितिर स्वाइप गर्नुहोस् वा एपभन्दा माथि जुनसुकै ठाउँमा ट्याप गर्नुहोस्"</string>
 </resources>

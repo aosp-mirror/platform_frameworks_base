@@ -50,6 +50,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -556,11 +557,18 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private void takeScreenshotInternal(Consumer<Uri> finisher, Rect crop) {
         // copy the input Rect, since SurfaceControl.screenshot can mutate it
         Rect screenRect = new Rect(crop);
-        int rot = mDisplay.getRotation();
         int width = crop.width();
         int height = crop.height();
-        saveScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher, screenRect,
-                Insets.NONE, true);
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        final SurfaceControl.DisplayCaptureArgs captureArgs =
+                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                        .setSourceCrop(crop)
+                        .setSize(width, height)
+                        .build();
+        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                SurfaceControl.captureDisplay(captureArgs);
+        final Bitmap screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, true);
     }
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,

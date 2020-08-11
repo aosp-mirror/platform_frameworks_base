@@ -85,8 +85,9 @@ public class BinderInternal {
         long timeStarted;
         // Should be set to one when an exception is thrown.
         boolean exceptionThrown;
+        // Detailed information should be recorded for this call when it ends.
+        public boolean recordedCall;
     }
-
 
     /**
      * Responsible for resolving a work source.

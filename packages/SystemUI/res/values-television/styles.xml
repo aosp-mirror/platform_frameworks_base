@@ -22,4 +22,8 @@
         <item name="android:windowEnterAnimation">@null</item>
         <item name="android:windowExitAnimation">@null</item>
     </style>
+
+    <style name="volume_dialog_theme" parent="qs_theme">
+        <item name="android:colorAccent">@color/tv_volume_dialog_accent</item>
+    </style>
 </resources>

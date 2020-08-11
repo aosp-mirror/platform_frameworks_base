@@ -24,7 +24,11 @@
 
     <!-- Background color for audio recording indicator (G800) -->
     <color name="tv_audio_recording_indicator_background">#FF3C4043</color>
-    <color name="tv_audio_recording_indicator_pulse">#4DFFFFFF</color>
+    <color name="tv_audio_recording_indicator_icon_background">#CC000000</color>
+    <color name="tv_audio_recording_indicator_stroke">#33FFFFFF</color>
 
     <color name="red">#FFCC0000</color>
+    <color name="tv_volume_dialog_background">#E61F232B</color>
+    <color name="tv_volume_dialog_circle">#08FFFFFF</color>
+    <color name="tv_volume_dialog_accent">#FFDADCE0</color>
 </resources>

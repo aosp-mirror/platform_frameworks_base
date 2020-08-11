@@ -179,7 +179,6 @@ import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -189,7 +188,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
-import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.ScrimView;
@@ -1029,7 +1028,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStatusBarStateController);
         mWakeUpCoordinator.setIconAreaController(mNotificationIconAreaController);
         inflateShelf();
-        mNotificationIconAreaController.setupShelf(mNotificationShelf);
+        mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mNotificationPanelViewController.setOnReinflationListener(
                 mNotificationIconAreaController::initAodIcons);
         mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
@@ -1147,7 +1146,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         });
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
-        mNotificationPanelViewController.initDependencies(this, mGroupManager, mNotificationShelf,
+        mNotificationPanelViewController.initDependencies(this, mGroupManager,
+                mNotificationShelfController,
                 mNotificationIconAreaController, mScrimController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
@@ -1310,7 +1310,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 this /* statusBar */, mShadeController, mCommandQueue, mInitController,
                 mNotificationInterruptStateProvider);
 
-        mNotificationShelf.setOnActivatedListener(mPresenter);
+        mNotificationShelfController.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mNotificationShadeWindowController);
 
         mNotificationActivityStarter =
@@ -1386,8 +1386,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void inflateShelf() {
-        mNotificationShelf = mSuperStatusBarViewFactory.getNotificationShelf(mStackScroller);
-        mNotificationShelf.setOnClickListener(mGoToLockedShadeListener);
+        mNotificationShelfController = mSuperStatusBarViewFactory
+                .getNotificationShelfController(mStackScroller);
+        mNotificationShelfController.setOnClickListener(mGoToLockedShadeListener);
     }
 
     @Override
@@ -4085,8 +4086,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final Optional<Recents> mRecentsOptional;
 
-    protected NotificationShelf mNotificationShelf;
-    protected EmptyShadeView mEmptyShadeView;
+    protected NotificationShelfController mNotificationShelfController;
 
     private final Lazy<AssistManager> mAssistManagerLazy;
 

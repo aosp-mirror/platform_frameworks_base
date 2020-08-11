@@ -1506,7 +1506,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
         params.width = params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
+        final TestWindowState w = new TestWindowState(
                 mAtm.mWindowManager, mock(Session.class), new TestIWindow(), params, mActivity);
         mActivity.addWindow(w);
 

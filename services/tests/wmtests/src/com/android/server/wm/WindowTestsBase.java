@@ -47,6 +47,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -66,6 +67,7 @@ import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
@@ -239,7 +241,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     private WindowToken createWindowToken(
             DisplayContent dc, int windowingMode, int activityType, int type) {
         if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
-            return WindowTestUtils.createTestWindowToken(type, dc);
+            return createTestWindowToken(type, dc);
         }
 
         return createActivityRecord(dc, windowingMode, activityType);
@@ -249,10 +251,39 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return createTestActivityRecord(dc, windowingMode, activityType);
     }
 
-    ActivityRecord createTestActivityRecord(DisplayContent dc, int
-            windowingMode, int activityType) {
+    ActivityRecord createTestActivityRecord(DisplayContent dc, int windowingMode,
+            int activityType) {
         final Task stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
-        return WindowTestUtils.createTestActivityRecord(stack);
+        return createTestActivityRecord(stack);
+    }
+
+    /** Creates an {@link ActivityRecord} and adds it to the specified {@link Task}. */
+    static ActivityRecord createActivityRecordInTask(DisplayContent dc, Task task) {
+        final ActivityRecord activity = createTestActivityRecord(dc);
+        task.addChild(activity, POSITION_TOP);
+        return activity;
+    }
+
+    static ActivityRecord createTestActivityRecord(DisplayContent dc) {
+        final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService).build();
+        postCreateActivitySetup(activity, dc);
+        return activity;
+    }
+
+    static ActivityRecord createTestActivityRecord(Task stack) {
+        final ActivityRecord activity = new ActivityBuilder(stack.mAtmService)
+                .setStack(stack)
+                .setCreateTask(true)
+                .build();
+        postCreateActivitySetup(activity, stack.getDisplayContent());
+        return activity;
+    }
+
+    private static void postCreateActivitySetup(ActivityRecord activity, DisplayContent dc) {
+        activity.onDisplayChanged(dc);
+        activity.setOccludesParent(true);
+        activity.setVisible(true);
+        activity.mVisibleRequested = true;
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
@@ -274,8 +305,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     WindowState createAppWindow(Task task, int type, String name) {
-        final ActivityRecord activity =
-                WindowTestUtils.createTestActivityRecord(task.getDisplayContent());
+        final ActivityRecord activity = createTestActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
         return createWindow(null, type, activity, name);
     }
@@ -390,7 +420,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link Task} and adds it to the specified {@link Task}. */
     Task createTaskInStack(Task stack, int userId) {
-        return WindowTestUtils.createTaskInStack(mWm, stack, userId);
+        final Task task = new TaskBuilder(stack.mStackSupervisor)
+                .setUserId(userId)
+                .setStack(stack)
+                .build();
+        return task;
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
@@ -432,12 +466,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return createNewDisplay(displayInfo, true /* supportIme */);
     }
 
-    /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */
-    WindowTestUtils.TestWindowState createWindowState(WindowManager.LayoutParams attrs,
-            WindowToken token) {
+    /** Creates a {@link TestWindowState} */
+    TestWindowState createWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
-        return new WindowTestUtils.TestWindowState(mWm, mMockSession, mIWindow, attrs, token);
+        return new TestWindowState(mWm, mMockSession, mIWindow, attrs, token);
     }
 
     /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
@@ -1053,6 +1086,68 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         @Override
         public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+        }
+    }
+
+    static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {
+        return createTestWindowToken(type, dc, false /* persistOnEmpty */);
+    }
+
+    static TestWindowToken createTestWindowToken(int type, DisplayContent dc,
+            boolean persistOnEmpty) {
+        SystemServicesTestRule.checkHoldsLock(dc.mWmService.mGlobalLock);
+
+        return new TestWindowToken(type, dc, persistOnEmpty);
+    }
+
+    /** Used so we can gain access to some protected members of the {@link WindowToken} class */
+    static class TestWindowToken extends WindowToken {
+
+        private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
+            super(dc.mWmService, mock(IBinder.class), type, persistOnEmpty, dc,
+                    false /* ownerCanManageAppTokens */);
+        }
+
+        int getWindowsCount() {
+            return mChildren.size();
+        }
+
+        boolean hasWindow(WindowState w) {
+            return mChildren.contains(w);
+        }
+    }
+
+    /** Used to track resize reports. */
+    static class TestWindowState extends WindowState {
+        boolean mResizeReported;
+
+        TestWindowState(WindowManagerService service, Session session, IWindow window,
+                WindowManager.LayoutParams attrs, WindowToken token) {
+            super(service, session, window, token, null, OP_NONE, 0, attrs, 0, 0, 0,
+                    false /* ownerCanAddInternalSystemWindow */);
+        }
+
+        @Override
+        void reportResized() {
+            super.reportResized();
+            mResizeReported = true;
+        }
+
+        @Override
+        public boolean isGoneForLayoutLw() {
+            return false;
+        }
+
+        @Override
+        void updateResizingWindowIfNeeded() {
+            // Used in AppWindowTokenTests#testLandscapeSeascapeRotationRelayout to deceive
+            // the system that it can actually update the window.
+            boolean hadSurface = mHasSurface;
+            mHasSurface = true;
+
+            super.updateResizingWindowIfNeeded();
+
+            mHasSurface = hadSurface;
         }
     }
 }

@@ -26,7 +26,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -160,9 +160,9 @@ public class NotificationIconAreaController implements DarkReceiver,
         }
     }
 
-    public void setupShelf(NotificationShelf shelf) {
-        mShelfIcons = shelf.getShelfIcons();
-        shelf.setCollapsedIcons(mNotificationIcons);
+    public void setupShelf(NotificationShelfController notificationShelfController) {
+        mShelfIcons = notificationShelfController.getShelfIcons();
+        notificationShelfController.setCollapsedIcons(mNotificationIcons);
     }
 
     public void onDensityOrFontScaleChanged(Context context) {

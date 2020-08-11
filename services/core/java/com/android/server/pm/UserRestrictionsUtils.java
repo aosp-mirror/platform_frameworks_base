@@ -139,6 +139,11 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_CONFIG_PRIVATE_DNS
     });
 
+    public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+            UserManager.DISALLOW_REMOVE_MANAGED_PROFILE
+    );
+
     /**
      * Set of user restriction which we don't want to persist.
      */

@@ -1201,7 +1201,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
             final Task rootTask = r.getRootTask();
             if (rootTask != null) {
-                rootTask.handleAppDied(this);
+                // There may be a pausing activity that hasn't shown any window and was requested
+                // to be hidden. But pausing is also a visible state, it should be regarded as
+                // visible, so the caller can know the next activity should be resumed.
+                hasVisibleActivities |= rootTask.handleAppDied(this);
             }
             r.handleAppDied();
         }
