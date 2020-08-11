@@ -546,7 +546,8 @@ void StatsLogProcessor::OnConfigUpdatedLocked(const int64_t timestampNs, const C
         }
     } else {
         // Preserve the existing MetricsManager, update necessary components and metadata in place.
-        configValid = it->second->updateConfig(timestampNs, config);
+        configValid = it->second->updateConfig(config, mTimeBaseNs, timestampNs,
+                                               mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
         if (configValid) {
             // TODO(b/162323476): refresh TTL, ensure init() is handled properly.
             mUidMap->OnConfigUpdated(key);

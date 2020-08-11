@@ -25,6 +25,7 @@
 #include "src/StatsLogProcessor.h"
 #include "src/hash.h"
 #include "src/logd/LogEvent.h"
+#include "src/matchers/EventMatcherWizard.h"
 #include "src/packages/UidMap.h"
 #include "src/stats_log_util.h"
 #include "stats_event.h"
@@ -334,6 +335,9 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const in
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
 
 int64_t StringToId(const string& str);
+
+sp<EventMatcherWizard> createEventMatcherWizard(
+        int tagId, int matcherIndex, const std::vector<FieldValueMatcher>& fieldValueMatchers = {});
 
 void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value, const int atomId,
                                                    const int uid, const string& tag);
