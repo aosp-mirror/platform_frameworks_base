@@ -24,7 +24,7 @@
              android:clipChildren="false"
              android:clipToPadding="false"
              >
-    <com.android.systemui.statusbar.policy.KeyButtonView
+    <com.android.systemui.navigationbar.buttons.KeyButtonView
         android:id="@+id/menu"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
              android:layout_height="match_parent"
              android:visibility="invisible"
     />
-    <com.android.systemui.statusbar.policy.KeyButtonView
+    <com.android.systemui.navigationbar.buttons.KeyButtonView
         android:id="@+id/accessibility_button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

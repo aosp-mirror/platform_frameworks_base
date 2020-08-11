@@ -40,7 +40,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 

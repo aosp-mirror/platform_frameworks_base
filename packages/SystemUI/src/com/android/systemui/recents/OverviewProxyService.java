@@ -81,10 +81,10 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.phone.NavigationBarFragment;
-import com.android.systemui.statusbar.phone.NavigationBarView;
-import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBar;
+import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
@@ -124,7 +124,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Optional<Divider> mDividerOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
-    private final NavigationBarController mNavBarController;
+    private final Lazy<NavigationBarController> mNavBarControllerLazy;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
     private final ComponentName mRecentsComponentName;
@@ -598,7 +598,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyService(Context context, CommandQueue commandQueue,
-            NavigationBarController navBarController, NavigationModeController navModeController,
+            Lazy<NavigationBarController> navBarControllerLazy, NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             PipUI pipUI, Optional<Divider> dividerOptional,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy, OneHandedUI oneHandedUI,
@@ -608,7 +608,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mPipUI = pipUI;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mHandler = new Handler();
-        mNavBarController = navBarController;
+        mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
         mConnectionBackoffAttempts = 0;
         mDividerOptional = dividerOptional;
@@ -677,10 +677,10 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     private void updateSystemUiStateFlags() {
-        final NavigationBarFragment navBarFragment =
-                mNavBarController.getDefaultNavigationBarFragment();
+        final NavigationBar navBarFragment =
+                mNavBarControllerLazy.get().getDefaultNavigationBar();
         final NavigationBarView navBarView =
-                mNavBarController.getNavigationBarView(mContext.getDisplayId());
+                mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
                     + " navBarView=" + navBarView);

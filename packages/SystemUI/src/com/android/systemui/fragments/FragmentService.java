@@ -22,7 +22,6 @@ import android.view.View;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.qs.QSFragment;
-import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
@@ -125,10 +124,6 @@ public class FragmentService implements Dumpable {
         interface Factory {
             FragmentCreator build();
         }
-        /**
-         * Inject a NavigationBarFragment.
-         */
-        NavigationBarFragment createNavigationBarFragment();
         /**
          * Inject a QSFragment.
          */
