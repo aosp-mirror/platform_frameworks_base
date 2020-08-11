@@ -34,7 +34,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Size;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
@@ -55,13 +54,13 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DismissCircleView;
@@ -94,6 +93,8 @@ public class PipTouchHandler {
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final PipBoundsHandler mPipBoundsHandler;
+    private final PipUiEventLogger mPipUiEventLogger;
+
     private PipResizeGestureHandler mPipResizeGestureHandler;
     private IPinnedStackController mPinnedStackController;
 
@@ -198,11 +199,7 @@ public class PipTouchHandler {
 
         @Override
         public void onPipDismiss() {
-            Pair<ComponentName, Integer> topPipActivity = PipUtils.getTopPipActivity(mContext,
-                    mActivityManager);
-            if (topPipActivity.first != null) {
-                MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext, topPipActivity);
-            }
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_TAP_TO_REMOVE);
             mTouchState.removeDoubleTapTimeoutCallback();
             mMotionHelper.dismissPip();
         }
@@ -223,7 +220,8 @@ public class PipTouchHandler {
             FloatingContentCoordinator floatingContentCoordinator,
             DeviceConfigProxy deviceConfig,
             PipSnapAlgorithm pipSnapAlgorithm,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            PipUiEventLogger pipUiEventLogger) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -238,7 +236,7 @@ public class PipTouchHandler {
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, sysUiState);
+                        this::updateMovementBounds, sysUiState, pipUiEventLogger);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()),
@@ -258,6 +256,8 @@ public class PipTouchHandler {
         mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
                 pipTaskOrganizer, pipSnapAlgorithm, this::onAccessibilityShowMenu,
                 this::updateMovementBounds, mHandler);
+
+        mPipUiEventLogger = pipUiEventLogger;
 
         mTargetView = new DismissCircleView(context);
         mTargetViewContainer = new FrameLayout(context);
@@ -303,11 +303,8 @@ public class PipTouchHandler {
                     hideDismissTarget();
                 });
 
-                Pair<ComponentName, Integer> topPipActivity = PipUtils.getTopPipActivity(mContext,
-                        mActivityManager);
-                if (topPipActivity.first != null) {
-                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext, topPipActivity);
-                }
+                mPipUiEventLogger.log(
+                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
             }
         });
 
@@ -852,8 +849,10 @@ public class PipTouchHandler {
         // If pip menu has dismissed, we should register the A11y ActionReplacingConnection for pip
         // as well, or it can't handle a11y focus and pip menu can't perform any action.
         onRegistrationChanged(menuState == MENU_STATE_NONE);
-        if (menuState != MENU_STATE_CLOSE) {
-            MetricsLoggerWrapper.logPictureInPictureMenuVisible(mContext, menuState == MENU_STATE_FULL);
+        if (menuState == MENU_STATE_NONE) {
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_HIDE_MENU);
+        } else if (menuState == MENU_STATE_FULL) {
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_SHOW_MENU);
         }
     }
 
