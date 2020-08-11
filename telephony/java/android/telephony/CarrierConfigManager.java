@@ -1087,7 +1087,7 @@ public class CarrierConfigManager {
 
     /**
      * Flag specifying if we should interpret all signal strength as one bar higher
-     * This is a replacement for the resource config_inflateSignalStrength
+     * This is a replacement for the former resource config_inflateSignalStrength
      * The default value is false.
      * @hide
      */
