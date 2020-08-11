@@ -2076,7 +2076,7 @@ public class PackageInstaller {
                 STAGED_SESSION_VERIFICATION_FAILED,
                 STAGED_SESSION_ACTIVATION_FAILED,
                 STAGED_SESSION_UNKNOWN,
-                STAGED_SESSION_OTHER_ERROR})
+                STAGED_SESSION_CONFLICT})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StagedSessionErrorCode{}
         /**
@@ -2103,10 +2103,10 @@ public class PackageInstaller {
         public static final int STAGED_SESSION_UNKNOWN = 3;
 
         /**
-         * Constant indicating that a known error occurred while processing this staged session, but
-         * the error could not be matched to other categories.
+         * Constant indicating that the session was in conflict with another staged session and had
+         * to be sacrificed for resolution.
          */
-        public static final int STAGED_SESSION_OTHER_ERROR = 4;
+        public static final int STAGED_SESSION_CONFLICT = 4;
 
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
