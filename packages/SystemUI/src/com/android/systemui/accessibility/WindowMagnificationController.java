@@ -17,6 +17,8 @@
 package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -117,6 +119,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
 
+    private int mNavBarMode;
+    private int mNavGestureHeight;
+
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
     private Locale mLocale;
@@ -195,6 +200,19 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 R.dimen.magnification_drag_view_size);
         mOuterBorderSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_outer_border_margin);
+        updateNavigationBarDimensions();
+    }
+
+    private void updateNavigationBarDimensions() {
+        if (!supportsSwipeUpGesture()) {
+            mNavGestureHeight = 0;
+            return;
+        }
+        mNavGestureHeight = (mDisplaySize.x > mDisplaySize.y)
+                ? mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_height_landscape)
+                : mResources.getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_gesture_height);
     }
 
     /**
@@ -239,6 +257,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
     }
 
+    /** Handles MirrorWindow position when the navigation bar mode changed. */
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
+        updateNavigationBarDimensions();
+        updateMirrorViewLayout();
+    }
+
     /** Handles MirrorWindow position when the device rotation changed. */
     private void onRotate() {
         final Display display = mContext.getDisplay();
@@ -246,6 +271,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         display.getRealSize(mDisplaySize);
         setMagnificationFrameBoundary();
         mRotation = display.getRotation();
+        updateNavigationBarDimensions();
 
         if (!isWindowVisible()) {
             return;
@@ -401,15 +427,23 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * moved close to the screen edges.
      */
     private void updateMirrorViewLayout() {
+        if (!isWindowVisible()) {
+            return;
+        }
+        final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();
+        final int maxMirrorViewY = mDisplaySize.y - mMirrorView.getHeight() - mNavGestureHeight;
         WindowManager.LayoutParams params =
                 (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
         params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
         params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
+        // If nav bar mode supports swipe-up gesture, the Y position of mirror view should not
+        // overlap nav bar window to prevent window-dragging obscured.
+        if (supportsSwipeUpGesture()) {
+            params.y = Math.min(params.y, maxMirrorViewY);
+        }
 
         // Translates MirrorView position to make MirrorSurfaceView that is inside MirrorView
         // able to move close to the screen edges.
-        final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();
-        final int maxMirrorViewY = mDisplaySize.y - mMirrorView.getHeight();
         final float translationX;
         final float translationY;
         if (params.x < 0) {
@@ -619,6 +653,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     //The window is visible when it is existed.
     private boolean isWindowVisible() {
         return mMirrorView != null;
+    }
+
+    private boolean supportsSwipeUpGesture() {
+        return mNavBarMode == NAV_BAR_MODE_2BUTTON || mNavBarMode == NAV_BAR_MODE_GESTURAL;
     }
 
     private CharSequence formatStateDescription(float scale) {
