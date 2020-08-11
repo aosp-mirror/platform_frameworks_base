@@ -70,6 +70,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import kotlin.sequences.Sequence;
+import kotlin.sequences.SequencesKt;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -98,30 +104,31 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private int mDoubleLinePaddingHorizontal;
     private int mSpacing;
 
-    @Mock private SmartReplyController mLogger;
     private NotificationEntry mEntry;
     private Notification mNotification;
-    @Mock private SmartReplyConstants mConstants;
 
-    @Mock ActivityStarter mActivityStarter;
-    @Mock HeadsUpManager mHeadsUpManager;
+    private SmartReplyInflaterImpl mSmartReplyInflater;
+    private SmartActionInflaterImpl mSmartActionInflater;
+
+    @Mock private SmartReplyConstants mConstants;
+    @Mock private ActivityStarter mActivityStarter;
+    @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
+    @Mock private SmartReplyController mSmartReplyController;
+
+    private final KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil();
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
-        mDependency.get(KeyguardDismissUtil.class).setDismissHandler((action, unused) -> {
-            action.onDismiss();
-        });
+        mKeyguardDismissUtil.setDismissHandler((action, unused) -> action.onDismiss());
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationRemoteInputManager.class);
         mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
         mDependency.injectTestDependency(SmartReplyConstants.class, mConstants);
-
-        mContainer = new View(mContext, null);
-        mView = SmartReplyView.inflate(mContext);
 
         // Any number of replies are fine.
         when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(0);
@@ -129,6 +136,9 @@ public class SmartReplyViewTest extends SysuiTestCase {
         when(mConstants.getMaxNumActions()).thenReturn(-1);
         // Ensure there's no delay before we can click smart suggestions.
         when(mConstants.getOnClickInitDelay()).thenReturn(0L);
+
+        mContainer = new View(mContext, null);
+        mView = SmartReplyView.inflate(mContext, mConstants);
 
         final Resources res = mContext.getResources();
         mSingleLinePaddingHorizontal = res.getDimensionPixelSize(
@@ -147,6 +157,18 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 .build();
 
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
+
+        mSmartReplyInflater = new SmartReplyInflaterImpl(
+                mConstants,
+                mKeyguardDismissUtil,
+                mNotificationRemoteInputManager,
+                mSmartReplyController,
+                mContext);
+        mSmartActionInflater = new SmartActionInflaterImpl(
+                mConstants,
+                mActivityStarter,
+                mSmartReplyController,
+                mHeadsUpManager);
     }
 
     @After
@@ -168,7 +190,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     @Test
     public void testSendSmartReply_keyguardCancelled() throws InterruptedException {
-        mDependency.get(KeyguardDismissUtil.class).setDismissHandler((action, unused) -> {});
+        mKeyguardDismissUtil.setDismissHandler((action, unused) -> { });
         setSmartReplies(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
@@ -179,9 +201,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     @Test
     public void testSendSmartReply_waitsForKeyguard() throws InterruptedException {
         AtomicReference<OnDismissAction> actionRef = new AtomicReference<>();
-        mDependency.get(KeyguardDismissUtil.class).setDismissHandler((action, unused) -> {
-            actionRef.set(action);
-        });
+
+        mKeyguardDismissUtil.setDismissHandler((action, unused) -> actionRef.set(action));
         setSmartReplies(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
@@ -202,7 +223,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     public void testSendSmartReply_controllerCalled() {
         setSmartReplies(TEST_CHOICES);
         mView.getChildAt(2).performClick();
-        verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
+        verify(mSmartReplyController).smartReplySent(mEntry, 2, TEST_CHOICES[2],
                 MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
     }
 
@@ -461,24 +482,28 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private void setSmartReplies(CharSequence[] choices, boolean useDelayedOnClickListener) {
         mView.resetSmartSuggestions(mContainer);
-        List<Button> replyButtons = inflateSmartReplies(choices, false /* fromAssistant */,
-                useDelayedOnClickListener);
+        List<Button> replyButtons =
+                inflateSmartReplies(
+                        choices, false /* fromAssistant */, useDelayedOnClickListener)
+                .collect(Collectors.toList());
         mView.addPreInflatedButtons(replyButtons);
     }
 
-    private List<Button> inflateSmartReplies(CharSequence[] choices, boolean fromAssistant,
-            boolean useDelayedOnClickListener) {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), 0);
+    private SmartReplyView.SmartReplies createSmartReplies(CharSequence[] choices,
+            boolean fromAssistant) {
+        PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(mContext, 0, new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
-        SmartReplyView.SmartReplies smartReplies =
-                new SmartReplyView.SmartReplies(
-                        Arrays.asList(choices),
-                        input,
-                        pendingIntent,
-                        fromAssistant);
-        return mView.inflateRepliesFromRemoteInput(smartReplies, mLogger, mEntry,
-                useDelayedOnClickListener);
+        return new SmartReplyView.SmartReplies(
+                Arrays.asList(choices), input, pendingIntent, fromAssistant);
+    }
+
+    private Stream<Button> inflateSmartReplies(CharSequence[] choices, boolean fromAssistant,
+            boolean useDelayedOnClickListener) {
+        SmartReplyView.SmartReplies smartReplies = createSmartReplies(choices, fromAssistant);
+        return IntStream.range(0, choices.length).mapToObj(idx ->
+                mSmartReplyInflater.inflateReplyButton(
+                        mView, mEntry, smartReplies, idx, choices[idx], useDelayedOnClickListener));
     }
 
     private Notification.Action createAction(String actionTitle) {
@@ -501,14 +526,20 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private void setSmartActions(String[] actionTitles, boolean useDelayedOnClickListener) {
         mView.resetSmartSuggestions(mContainer);
-        List<Button> actions = mView.inflateSmartActions(
-                getContext(),
-                new SmartReplyView.SmartActions(createActions(actionTitles), false),
-                mLogger,
-                mEntry,
-                mHeadsUpManager,
-                useDelayedOnClickListener);
-        mView.addPreInflatedButtons(actions);
+        SmartReplyView.SmartActions smartActions = new SmartReplyView.SmartActions(
+                createActions(actionTitles), false);
+
+        Stream<Button> buttons = IntStream.range(0, smartActions.actions.size()).mapToObj(idx ->
+                mSmartActionInflater.inflateActionButton(
+                        mView,
+                        mEntry,
+                        smartActions,
+                        idx,
+                        smartActions.actions.get(idx),
+                        useDelayedOnClickListener,
+                        getContext()));
+
+        mView.addPreInflatedButtons(buttons.collect(Collectors.toList()));
     }
 
     private void setSmartRepliesAndActions(CharSequence[] choices, String[] actionTitles) {
@@ -520,16 +551,25 @@ public class SmartReplyViewTest extends SysuiTestCase {
             CharSequence[] choices, String[] actionTitles, boolean fromAssistant,
             boolean useDelayedOnClickListener) {
         mView.resetSmartSuggestions(mContainer);
-        List<Button> smartSuggestions = inflateSmartReplies(choices, fromAssistant,
-                useDelayedOnClickListener);
-        smartSuggestions.addAll(mView.inflateSmartActions(
-                getContext(),
-                new SmartReplyView.SmartActions(createActions(actionTitles), fromAssistant),
-                mLogger,
-                mEntry,
-                mHeadsUpManager,
-                useDelayedOnClickListener));
-        mView.addPreInflatedButtons(smartSuggestions);
+        Sequence<Button> inflatedReplies = SequencesKt.asSequence(
+                inflateSmartReplies(choices, fromAssistant, useDelayedOnClickListener)
+                        .iterator());
+        SmartReplyView.SmartActions smartActions = new SmartReplyView.SmartActions(
+                createActions(actionTitles), fromAssistant);
+        Sequence<Button> inflatedSmartActions = SequencesKt.asSequence(
+                IntStream.range(0, smartActions.actions.size())
+                        .mapToObj(idx -> mSmartActionInflater.inflateActionButton(
+                                mView,
+                                mEntry,
+                                smartActions,
+                                idx,
+                                smartActions.actions.get(idx),
+                                useDelayedOnClickListener,
+                                getContext()))
+                        .iterator());
+        mView.addPreInflatedButtons(
+                SequencesKt.toList(SequencesKt.plus(inflatedReplies, inflatedSmartActions)));
+        mView.setSmartRepliesGeneratedByAssistant(fromAssistant);
     }
 
     private ViewGroup buildExpectedView(CharSequence[] choices, int lineCount) {
@@ -564,10 +604,18 @@ public class SmartReplyViewTest extends SysuiTestCase {
         Button previous = null;
         SmartReplyView.SmartReplies smartReplies =
                 new SmartReplyView.SmartReplies(Arrays.asList(choices), null, null, false);
-        for (int i = 0; i < choices.length; ++i) {
-            Button current = SmartReplyView.inflateReplyButton(mView, mContext, i, smartReplies,
-                    null /* SmartReplyController */, null /* NotificationEntry */,
-                    true /* useDelayedOnClickListener */);
+
+        Iterable<Button> inflatedReplies = SequencesKt.asIterable(SequencesKt.asSequence(
+                IntStream.range(0, smartReplies.choices.size()).mapToObj(
+                        idx -> mSmartReplyInflater.inflateReplyButton(
+                                mView,
+                                mEntry,
+                                smartReplies,
+                                idx,
+                                smartReplies.choices.get(idx),
+                                true /* delayOnClickListener */))
+                        .iterator()));
+        for (Button current : inflatedReplies) {
             current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
                     current.getPaddingBottom());
             if (previous != null) {
@@ -583,9 +631,21 @@ public class SmartReplyViewTest extends SysuiTestCase {
             previous = current;
         }
 
+        SmartReplyView.SmartActions smartActions = new SmartReplyView.SmartActions(actions, false);
+        Iterable<Button> inflatedSmartActions = SequencesKt.asIterable(SequencesKt.asSequence(
+                IntStream.range(0, smartActions.actions.size())
+                        .mapToObj(idx -> mSmartActionInflater.inflateActionButton(
+                                mView,
+                                mEntry,
+                                smartActions,
+                                idx,
+                                smartActions.actions.get(idx),
+                                true /* delayOnClickListener */,
+                                getContext()))
+                        .iterator()));
+
         // Add smart actions
-        for (int i = 0; i < actions.size(); ++i) {
-            Button current = inflateActionButton(actions.get(i));
+        for (Button current : inflatedSmartActions) {
             current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
                     current.getPaddingBottom());
             if (previous != null) {
@@ -672,8 +732,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
         Thread.sleep(delayMs);
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any(),
-                any());
+        verify(mActivityStarter, times(1))
+                .startPendingIntentDismissingKeyguard(any(), any(), any());
     }
 
     @Test
@@ -684,8 +744,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any(),
-                any());
+        verify(mActivityStarter, times(1))
+                .startPendingIntentDismissingKeyguard(any(), any(), any());
     }
 
     @Test
@@ -869,18 +929,26 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertReplyButtonHidden(mView.getChildAt(2));
     }
 
-    private Button inflateActionButton(Notification.Action action) {
-        return SmartReplyView.inflateActionButton(mView, getContext(), getContext(), 0,
-                new SmartReplyView.SmartActions(Collections.singletonList(action), false),
-                mLogger, mEntry, mHeadsUpManager, true /* useDelayedOnClickListener */);
-    }
-
     @Test
     public void testInflateActionButton_smartActionIconSingleLineSizeForTwoLineButton() {
         // Ensure smart action icons are the same size regardless of the number of text rows in the
         // button.
-        Button singleLineButton = inflateActionButton(createAction("One line"));
-        Button doubleLineButton = inflateActionButton(createAction("Two\nlines"));
+        List<Notification.Action> actions = Stream.of("One line", "Two\nlines")
+                .map(this::createAction)
+                .collect(Collectors.toList());
+        SmartReplyView.SmartActions smartActions = new SmartReplyView.SmartActions(actions, false);
+        List<Button> buttons = IntStream.range(0, smartActions.actions.size())
+                .mapToObj(idx -> mSmartActionInflater.inflateActionButton(
+                        mView,
+                        mEntry,
+                        smartActions,
+                        idx,
+                        smartActions.actions.get(idx),
+                        true /* delayOnClickListener */,
+                        getContext()))
+                .collect(Collectors.toList());
+        Button singleLineButton = buttons.get(0);
+        Button doubleLineButton = buttons.get(1);
         Drawable singleLineDrawable = singleLineButton.getCompoundDrawables()[0]; // left drawable
         Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawables()[0]; // left drawable
         assertEquals(singleLineDrawable.getBounds().width(),
@@ -1068,7 +1136,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     @Test
     public void testMeasure_minNumSystemGeneratedSmartReplies_notEnoughReplies() {
-        when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(3);
+        mView.setMinNumSystemGeneratedReplies(3);
 
         // Add 2 replies when the minimum is 3 -> we should end up with 0 replies.
         String[] choices = new String[] {"reply1", "reply2"};
@@ -1082,7 +1150,9 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 choices, actions, true /* fromAssistant */, true /* useDelayedOnClickListener */);
         mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
+        // 395, 168
         assertEqualMeasures(expectedView, mView);
+
         // smart replies
         assertReplyButtonHidden(mView.getChildAt(0));
         assertReplyButtonHidden(mView.getChildAt(1));
@@ -1121,7 +1191,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
      */
     @Test
     public void testMeasure_minNumSystemGeneratedSmartReplies_unSqueezeActions() {
-        when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(2);
+        mView.setMinNumSystemGeneratedReplies(2);
 
         // Add 2 replies when the minimum is 3 -> we should end up with 0 replies.
         String[] choices = new String[] {"This is a very long two-line reply."};

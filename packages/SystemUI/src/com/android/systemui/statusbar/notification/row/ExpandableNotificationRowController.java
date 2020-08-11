@@ -81,21 +81,27 @@ public class ExpandableNotificationRowController implements NodeController {
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     @Inject
-    public ExpandableNotificationRowController(ExpandableNotificationRow view,
+    public ExpandableNotificationRowController(
+            ExpandableNotificationRow view,
             NotificationListContainer listContainer,
             ActivatableNotificationViewController activatableNotificationViewController,
-            NotificationMediaManager mediaManager, PluginManager pluginManager,
-            SystemClock clock, @AppName String appName, @NotificationKey String notificationKey,
+            NotificationMediaManager mediaManager,
+            PluginManager pluginManager,
+            SystemClock clock,
+            @AppName String appName,
+            @NotificationKey String notificationKey,
             KeyguardBypassController keyguardBypassController,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
             RowContentBindStage rowContentBindStage,
-            NotificationLogger notificationLogger, HeadsUpManager headsUpManager,
+            NotificationLogger notificationLogger,
+            HeadsUpManager headsUpManager,
             ExpandableNotificationRow.OnExpandClickListener onExpandClickListener,
             StatusBarStateController statusBarStateController,
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            OnUserInteractionCallback onUserInteractionCallback, FalsingManager falsingManager,
+            OnUserInteractionCallback onUserInteractionCallback,
+            FalsingManager falsingManager,
             PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mView = view;
         mListContainer = listContainer;

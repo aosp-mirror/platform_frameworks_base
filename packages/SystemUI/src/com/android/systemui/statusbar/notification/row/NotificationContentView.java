@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
 import com.android.systemui.statusbar.policy.RemoteInputView;
+import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 
@@ -1191,15 +1192,23 @@ public class NotificationContentView extends FrameLayout {
 
         View bigContentView = mExpandedChild;
         if (bigContentView != null && (bigContentView instanceof ViewGroup)) {
-            mMediaTransferManager.applyMediaTransferView((ViewGroup) bigContentView,
-                    entry);
+            mMediaTransferManager.applyMediaTransferView((ViewGroup) bigContentView, entry);
         }
 
         View smallContentView = mContractedChild;
         if (smallContentView != null && (smallContentView instanceof ViewGroup)) {
-            mMediaTransferManager.applyMediaTransferView((ViewGroup) smallContentView,
-                    entry);
+            mMediaTransferManager.applyMediaTransferView((ViewGroup) smallContentView, entry);
         }
+    }
+
+    /**
+     * Returns whether the {@link Notification} represented by entry has a free-form remote input.
+     * Such an input can be used e.g. to implement smart reply buttons - by passing the replies
+     * through the remote input.
+     */
+    public static boolean hasFreeformRemoteInput(NotificationEntry entry) {
+        Notification notification = entry.getSbn().getNotification();
+        return null != notification.findRemoteInputActionPair(true /* freeform */);
     }
 
     private void applyRemoteInputAndSmartReply(final NotificationEntry entry) {
@@ -1207,7 +1216,7 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
 
-        applyRemoteInput(entry, InflatedSmartReplies.hasFreeformRemoteInput(entry));
+        applyRemoteInput(entry, hasFreeformRemoteInput(entry));
 
         if (mExpandedInflatedSmartReplies == null && mHeadsUpInflatedSmartReplies == null) {
             if (DEBUG) {
@@ -1438,7 +1447,8 @@ public class NotificationContentView extends FrameLayout {
         }
 
         LinearLayout smartReplyContainer = (LinearLayout) smartReplyContainerCandidate;
-        if (!InflatedSmartReplies.shouldShowSmartReplyView(entry, smartRepliesAndActions)) {
+        if (!SmartRepliesAndActionsInflaterKt
+                .shouldShowSmartReplyView(entry, smartRepliesAndActions)) {
             smartReplyContainer.setVisibility(View.GONE);
             return null;
         }
