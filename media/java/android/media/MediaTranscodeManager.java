@@ -244,13 +244,28 @@ public final class MediaTranscodeManager {
             }
 
             // Updates the job progress.
-            job.setJobProgress(newProgress);
+            job.updateProgress(newProgress);
 
             // Notifies client the progress update.
             if (job.mProgressUpdateExecutor != null && job.mProgressUpdateListener != null) {
                 job.mProgressUpdateExecutor.execute(
                         () -> job.mProgressUpdateListener.onProgressUpdate(newProgress));
             }
+        }
+    }
+
+    private void updateStatus(int jobId, int status) {
+        synchronized (mPendingTranscodingJobs) {
+            final TranscodingJob job = mPendingTranscodingJobs.get(jobId);
+
+            if (job == null) {
+                // This should not happen in reality.
+                Log.e(TAG, "Job " + jobId + " is not in PendingJobs");
+                return;
+            }
+
+            // Updates the job status.
+            job.updateStatus(status);
         }
     }
 
@@ -285,17 +300,17 @@ public final class MediaTranscodeManager {
 
                 @Override
                 public void onTranscodingStarted(int jobId) throws RemoteException {
-
+                    updateStatus(jobId, TranscodingJob.STATUS_RUNNING);
                 }
 
                 @Override
                 public void onTranscodingPaused(int jobId) throws RemoteException {
-
+                    updateStatus(jobId, TranscodingJob.STATUS_PAUSED);
                 }
 
                 @Override
                 public void onTranscodingResumed(int jobId) throws RemoteException {
-
+                    updateStatus(jobId, TranscodingJob.STATUS_RUNNING);
                 }
 
                 @Override
@@ -683,11 +698,14 @@ public final class MediaTranscodeManager {
         public static final int STATUS_RUNNING = 2;
         /** The job is finished. */
         public static final int STATUS_FINISHED = 3;
+        /** The job is paused. */
+        public static final int STATUS_PAUSED = 4;
 
         @IntDef(prefix = { "STATUS_" }, value = {
                 STATUS_PENDING,
                 STATUS_RUNNING,
                 STATUS_FINISHED,
+                STATUS_PAUSED,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Status {}
@@ -843,8 +861,12 @@ public final class MediaTranscodeManager {
             return mResult;
         }
 
-        private synchronized void setJobProgress(int newProgress) {
+        private synchronized void updateProgress(int newProgress) {
             mProgress = newProgress;
+        }
+
+        private synchronized void updateStatus(int newStatus) {
+            mStatus = newStatus;
         }
     }
 
