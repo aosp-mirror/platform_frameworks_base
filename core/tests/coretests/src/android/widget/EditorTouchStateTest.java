@@ -165,7 +165,7 @@ public class EditorTouchStateTest {
         long event2Time = 1001;
         MotionEvent event2 = moveEvent(event1Time, event2Time, 200f, 31f);
         mTouchState.update(event2, mConfig);
-        assertDrag(mTouchState, 20f, 30f, 0, 0, false);
+        assertDrag(mTouchState, 20f, 30f, 0, 0, 180f);
 
         // Simulate an ACTION_UP event with a delay that's longer than the double-tap timeout.
         long event3Time = 5000;
@@ -280,7 +280,7 @@ public class EditorTouchStateTest {
         long event3Time = 1002;
         MotionEvent event3 = moveEvent(event3Time, event3Time, newX, newY);
         mTouchState.update(event3, mConfig);
-        assertDrag(mTouchState, 20f, 30f, 0, 0, false);
+        assertDrag(mTouchState, 20f, 30f, 0, 0, Float.MAX_VALUE);
 
         // Simulate an ACTION_UP event.
         long event4Time = 1003;
@@ -301,15 +301,15 @@ public class EditorTouchStateTest {
         long event2Time = 1002;
         MotionEvent event2 = moveEvent(event1Time, event2Time, 100f, 174f);
         mTouchState.update(event2, mConfig);
-        assertDrag(mTouchState, 0f, 0f, 0, 0, true);
+        assertDrag(mTouchState, 0f, 0f, 0, 0, 100f / 174f);
 
         // Simulate another ACTION_MOVE event that is horizontal from the original down event.
-        // The value of `isDragCloseToVertical` should NOT change since it should only reflect the
-        // initial direction of movement.
+        // The drag direction ratio should NOT change since it should only reflect the initial
+        // direction of movement.
         long event3Time = 1003;
         MotionEvent event3 = moveEvent(event1Time, event3Time, 200f, 0f);
         mTouchState.update(event3, mConfig);
-        assertDrag(mTouchState, 0f, 0f, 0, 0, true);
+        assertDrag(mTouchState, 0f, 0f, 0, 0, 100f / 174f);
 
         // Simulate an ACTION_UP event.
         long event4Time = 1004;
@@ -330,15 +330,15 @@ public class EditorTouchStateTest {
         long event2Time = 1002;
         MotionEvent event2 = moveEvent(event1Time, event2Time, 100f, 90f);
         mTouchState.update(event2, mConfig);
-        assertDrag(mTouchState, 0f, 0f, 0, 0, false);
+        assertDrag(mTouchState, 0f, 0f, 0, 0, 100f / 90f);
 
         // Simulate another ACTION_MOVE event that is vertical from the original down event.
-        // The value of `isDragCloseToVertical` should NOT change since it should only reflect the
-        // initial direction of movement.
+        // The drag direction ratio should NOT change since it should only reflect the initial
+        // direction of movement.
         long event3Time = 1003;
         MotionEvent event3 = moveEvent(event1Time, event3Time, 0f, 200f);
         mTouchState.update(event3, mConfig);
-        assertDrag(mTouchState, 0f, 0f, 0, 0, false);
+        assertDrag(mTouchState, 0f, 0f, 0, 0, 100f / 90f);
 
         // Simulate an ACTION_UP event.
         long event4Time = 1004;
@@ -374,7 +374,7 @@ public class EditorTouchStateTest {
         long event2Time = 1002;
         MotionEvent event2 = moveEvent(event2Time, event2Time, 200f, 30f);
         mTouchState.update(event2, mConfig);
-        assertDrag(mTouchState, 20f, 30f, 0, 0, false);
+        assertDrag(mTouchState, 20f, 30f, 0, 0, Float.MAX_VALUE);
 
         // Simulate an ACTION_CANCEL event.
         long event3Time = 1003;
@@ -411,6 +411,84 @@ public class EditorTouchStateTest {
         assertSingleTap(mTouchState, 22f, 33f, 20f, 30f);
     }
 
+    @Test
+    public void testGetXYRatio() throws Exception {
+        doTestGetXYRatio(-1, 0.0f);
+        doTestGetXYRatio(0, 0.0f);
+        doTestGetXYRatio(30, 0.58f);
+        doTestGetXYRatio(45, 1.0f);
+        doTestGetXYRatio(60, 1.73f);
+        doTestGetXYRatio(90, Float.MAX_VALUE);
+        doTestGetXYRatio(91, Float.MAX_VALUE);
+    }
+
+    private void doTestGetXYRatio(int angleFromVerticalInDegrees, float expectedXYRatioRounded) {
+        float result = EditorTouchState.getXYRatio(angleFromVerticalInDegrees);
+        String msg = String.format(
+                "%d deg should give an x/y ratio of %f; actual unrounded result is %f",
+                angleFromVerticalInDegrees, expectedXYRatioRounded, result);
+        float roundedResult = (result == 0.0f || result == Float.MAX_VALUE) ? result :
+                Math.round(result * 100) / 100f;
+        assertThat(msg, roundedResult, is(expectedXYRatioRounded));
+    }
+
+    @Test
+    public void testUpdate_dragDirection() throws Exception {
+        // Simulate moving straight up.
+        doTestDragDirection(100f, 100f, 100f, 50f, 0f);
+
+        // Simulate moving straight down.
+        doTestDragDirection(100f, 100f, 100f, 150f, 0f);
+
+        // Simulate moving straight left.
+        doTestDragDirection(100f, 100f, 50f, 100f, Float.MAX_VALUE);
+
+        // Simulate moving straight right.
+        doTestDragDirection(100f, 100f, 150f, 100f, Float.MAX_VALUE);
+
+        // Simulate moving up and right, < 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 110f, 50f, 10f / 50f);
+
+        // Simulate moving up and right, > 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 150f, 90f, 50f / 10f);
+
+        // Simulate moving down and right, < 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 110f, 150f, 10f / 50f);
+
+        // Simulate moving down and right, > 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 150f, 110f, 50f / 10f);
+
+        // Simulate moving down and left, < 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 90f, 150f, 10f / 50f);
+
+        // Simulate moving down and left, > 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 50f, 110f, 50f / 10f);
+
+        // Simulate moving up and left, < 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 90f, 50f, 10f / 50f);
+
+        // Simulate moving up and left, > 45 deg from vertical.
+        doTestDragDirection(100f, 100f, 50f, 90f, 50f / 10f);
+    }
+
+    private void doTestDragDirection(float downX, float downY, float moveX, float moveY,
+            float expectedInitialDragDirectionXYRatio) {
+        EditorTouchState touchState = new EditorTouchState();
+
+        // Simulate an ACTION_DOWN event.
+        long event1Time = 1001;
+        MotionEvent event1 = downEvent(event1Time, event1Time, downX, downY);
+        touchState.update(event1, mConfig);
+
+        // Simulate an ACTION_MOVE event.
+        long event2Time = 1002;
+        MotionEvent event2 = moveEvent(event1Time, event2Time, moveX, moveY);
+        touchState.update(event2, mConfig);
+        String msg = String.format("(%.0f,%.0f)=>(%.0f,%.0f)", downX, downY, moveX, moveY);
+        assertThat(msg, touchState.getInitialDragDirectionXYRatio(),
+                is(expectedInitialDragDirectionXYRatio));
+    }
+
     private static MotionEvent downEvent(long downTime, long eventTime, float x, float y) {
         return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_DOWN, x, y, 0);
     }
@@ -441,7 +519,7 @@ public class EditorTouchStateTest {
     }
 
     private static void assertDrag(EditorTouchState touchState, float lastDownX,
-            float lastDownY, float lastUpX, float lastUpY, boolean isDragCloseToVertical) {
+            float lastDownY, float lastUpX, float lastUpY, float initialDragDirectionXYRatio) {
         assertThat(touchState.getLastDownX(), is(lastDownX));
         assertThat(touchState.getLastDownY(), is(lastDownY));
         assertThat(touchState.getLastUpX(), is(lastUpX));
@@ -451,7 +529,7 @@ public class EditorTouchStateTest {
         assertThat(touchState.isMultiTap(), is(false));
         assertThat(touchState.isMultiTapInSameArea(), is(false));
         assertThat(touchState.isMovedEnoughForDrag(), is(true));
-        assertThat(touchState.isDragCloseToVertical(), is(isDragCloseToVertical));
+        assertThat(touchState.getInitialDragDirectionXYRatio(), is(initialDragDirectionXYRatio));
     }
 
     private static void assertMultiTap(EditorTouchState touchState,
@@ -467,6 +545,5 @@ public class EditorTouchStateTest {
                 || multiTapStatus == MultiTapStatus.TRIPLE_CLICK));
         assertThat(touchState.isMultiTapInSameArea(), is(isMultiTapInSameArea));
         assertThat(touchState.isMovedEnoughForDrag(), is(false));
-        assertThat(touchState.isDragCloseToVertical(), is(false));
     }
 }
