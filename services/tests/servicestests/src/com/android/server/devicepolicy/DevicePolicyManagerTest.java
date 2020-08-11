@@ -149,6 +149,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public static final String NOT_PROFILE_OWNER_MSG = "does not own the profile";
     public static final String NOT_ORG_OWNED_PROFILE_OWNER_MSG =
             "not the profile owner on organization-owned device";
+    public static final String INVALID_CALLING_IDENTITY_MSG = "Calling identity is not authorized";
     public static final String ONGOING_CALL_MSG = "ongoing call on the device";
 
     // TODO replace all instances of this with explicit {@link #mServiceContext}.
@@ -2404,13 +2405,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Set admin1 as DA.
         dpm.setActiveAdmin(admin1, false);
         assertTrue(dpm.isAdminActive(admin1));
-        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
-                () -> dpm.reboot(admin1));
+        assertExpectException(SecurityException.class, /* messageRegex= */
+                INVALID_CALLING_IDENTITY_MSG, () -> dpm.reboot(admin1));
 
         // Set admin1 as PO.
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
-        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
-                () -> dpm.reboot(admin1));
+        assertExpectException(SecurityException.class, /* messageRegex= */
+                INVALID_CALLING_IDENTITY_MSG, () -> dpm.reboot(admin1));
 
         // Remove PO and add DO.
         dpm.clearProfileOwner(admin1);
