@@ -5040,6 +5040,10 @@
     <permission android:name="android.permission.RESET_APP_ERRORS"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows an application to create/destroy input consumer. -->
+    <permission android:name="android.permission.INPUT_CONSUMER"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
