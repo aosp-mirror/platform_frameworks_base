@@ -186,20 +186,23 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private class PipManagerPinnedStackListener extends PinnedStackListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            if (mState == STATE_PIP) {
-                if (mImeVisible != imeVisible) {
-                    if (imeVisible) {
-                        // Save the IME height adjustment, and offset to not occlude the IME
-                        mPipBounds.offset(0, -imeHeight);
-                        mImeHeightAdjustment = imeHeight;
-                    } else {
-                        // Apply the inverse adjustment when the IME is hidden
-                        mPipBounds.offset(0, mImeHeightAdjustment);
+            mHandler.post(() -> {
+                mPipBoundsHandler.onImeVisibilityChanged(imeVisible, imeHeight);
+                if (mState == STATE_PIP) {
+                    if (mImeVisible != imeVisible) {
+                        if (imeVisible) {
+                            // Save the IME height adjustment, and offset to not occlude the IME
+                            mPipBounds.offset(0, -imeHeight);
+                            mImeHeightAdjustment = imeHeight;
+                        } else {
+                            // Apply the inverse adjustment when the IME is hidden
+                            mPipBounds.offset(0, mImeHeightAdjustment);
+                        }
+                        mImeVisible = imeVisible;
+                        resizePinnedStack(STATE_PIP);
                     }
-                    mImeVisible = imeVisible;
-                    resizePinnedStack(STATE_PIP);
                 }
-            }
+            });
         }
 
         @Override
