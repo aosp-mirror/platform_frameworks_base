@@ -3827,6 +3827,12 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             finishAfterTransition();
         }
+
+        // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
+        // be restored now.
+        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
+            restoreAutofillSaveUi();
+        }
     }
 
     /**
