@@ -17,12 +17,12 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
-        <option name="test-file-name" value="WindowManagerShellTests.apk" />
+        <option name="test-file-name" value="WMShellUnitTests.apk" />
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="framework-base-presubmit" />
-    <option name="test-tag" value="WindowManagerShellTests" />
+    <option name="test-tag" value="WMShellUnitTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.wm.shell.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
