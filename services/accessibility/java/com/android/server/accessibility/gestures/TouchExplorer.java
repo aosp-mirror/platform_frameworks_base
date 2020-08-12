@@ -539,24 +539,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
             // stream consistent.
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         }
-        if (mGestureDetector.isMultiFingerGesturesEnabled()
-                && mGestureDetector.isTwoFingerPassthroughEnabled()) {
-            if (event.getPointerCount() == 3) {
-                boolean isOnBottomEdge = false;
-                // If three fingers go down on the bottom edge of the screen, delegate immediately.
-                final long screenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
-                for (int i = 0; i < TouchState.MAX_POINTER_COUNT; ++i) {
-                    if (mReceivedPointerTracker.getReceivedPointerDownY(i)
-                            > (screenHeight - mEdgeSwipeHeightPixels)) {
-                        isOnBottomEdge = true;
-                    }
-                }
-                if (isOnBottomEdge) {
-                    mState.startDelegating();
-                    mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
-                }
-            }
-        }
     }
 
     /**
@@ -638,12 +620,34 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 break;
             default:
                 if (mGestureDetector.isMultiFingerGesturesEnabled()) {
-                    return;
+                    if (mGestureDetector.isTwoFingerPassthroughEnabled()) {
+                        if (event.getPointerCount() == 3) {
+                            boolean isOnBottomEdge = true;
+                            // If three fingers went down on the bottom edge of the screen, delegate
+                            // immediately.
+                            final long screenHeight =
+                                    mContext.getResources().getDisplayMetrics().heightPixels;
+                            for (int i = 0; i < TouchState.MAX_POINTER_COUNT; ++i) {
+                                if (mReceivedPointerTracker.getReceivedPointerDownY(i)
+                                        < (screenHeight - mEdgeSwipeHeightPixels)) {
+                                    isOnBottomEdge = false;
+                                }
+                            }
+                            if (isOnBottomEdge) {
+                                if (DEBUG) {
+                                    Slog.d(LOG_TAG, "Three-finger edge swipe detected.");
+                                }
+                                mState.startDelegating();
+                                mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
+                            }
+                        }
+                    }
+                } else {
+                    // More than two pointers are delegated to the view hierarchy.
+                    mState.startDelegating();
+                    event = MotionEvent.obtainNoHistory(event);
+                    mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
                 }
-                // More than two pointers are delegated to the view hierarchy.
-                mState.startDelegating();
-                event = MotionEvent.obtainNoHistory(event);
-                mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
                 break;
         }
     }
