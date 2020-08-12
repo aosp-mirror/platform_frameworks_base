@@ -560,9 +560,9 @@ class WindowStateAnimator {
             }
         }
 
-        // Something is wrong and SurfaceFlinger will not like this, try to revert to sane values.
-        // This doesn't necessarily mean that there is an error in the system. The sizes might be
-        // incorrect, because it is before the first layout or draw.
+        // Something is wrong and SurfaceFlinger will not like this, try to revert to reasonable
+        // values. This doesn't necessarily mean that there is an error in the system. The sizes
+        // might be incorrect, because it is before the first layout or draw.
         if (outSize.width() < 1) {
             outSize.right = 1;
         }
