@@ -461,7 +461,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     Rect getTaskBounds(int taskId);
     @UnsupportedAppUsage
-    boolean setProcessMemoryTrimLevel(in String process, int uid, int level);
+    boolean setProcessMemoryTrimLevel(in String process, int userId, int level);
 
 
     // Start of L transactions
