@@ -270,13 +270,13 @@ public class VpnIkev2Utils {
         @Override
         public void onClosed() {
             Log.d(mTag, "IkeClosed for network " + mNetwork);
-            mCallback.onSessionLost(mNetwork); // Server requested session closure. Retry?
+            mCallback.onSessionLost(mNetwork, null); // Server requested session closure. Retry?
         }
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
             Log.d(mTag, "IkeClosedExceptionally for network " + mNetwork, exception);
-            mCallback.onSessionLost(mNetwork);
+            mCallback.onSessionLost(mNetwork, exception);
         }
 
         @Override
@@ -306,13 +306,13 @@ public class VpnIkev2Utils {
         @Override
         public void onClosed() {
             Log.d(mTag, "ChildClosed for network " + mNetwork);
-            mCallback.onSessionLost(mNetwork);
+            mCallback.onSessionLost(mNetwork, null);
         }
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
             Log.d(mTag, "ChildClosedExceptionally for network " + mNetwork, exception);
-            mCallback.onSessionLost(mNetwork);
+            mCallback.onSessionLost(mNetwork, exception);
         }
 
         @Override
@@ -349,7 +349,7 @@ public class VpnIkev2Utils {
         @Override
         public void onLost(@NonNull Network network) {
             Log.d(mTag, "Tearing down; lost network: " + network);
-            mCallback.onSessionLost(network);
+            mCallback.onSessionLost(network, null);
         }
     }
 
