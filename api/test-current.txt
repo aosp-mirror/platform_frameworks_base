@@ -5580,6 +5580,11 @@ package android.widget {
     method public void disableClockTick();
   }
 
+  @android.widget.RemoteViews.RemoteView public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
+    method public void onActivityResult(int, int, @Nullable android.content.Intent);
+    field public static final int PROCESS_TEXT_REQUEST_CODE = 100; // 0x64
+  }
+
   public class TimePicker extends android.widget.FrameLayout {
     method public android.view.View getAmView();
     method public android.view.View getHourView();
