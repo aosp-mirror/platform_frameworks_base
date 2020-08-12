@@ -29,7 +29,7 @@ import android.view.accessibility.IWindowMagnificationConnectionCallback;
 oneway interface IWindowMagnificationConnection {
 
     /**
-     * Enables window magnification on specifed display with specified center and scale.
+     * Enables window magnification on specified display with given center and scale and animation.
      *
      * @param displayId The logical display id.
      * @param scale magnification scale.
@@ -41,7 +41,7 @@ oneway interface IWindowMagnificationConnection {
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY);
 
     /**
-     * Sets the scale of the window magnifier on specifed display.
+     * Sets the scale of the window magnifier on specified display.
      *
      * @param displayId The logical display id.
      * @param scale magnification scale.
@@ -49,14 +49,14 @@ oneway interface IWindowMagnificationConnection {
     void setScale(int displayId, float scale);
 
      /**
-     * Disables window magnification on specifed display.
+     * Disables window magnification on specified display with animation.
      *
      * @param displayId The logical display id.
      */
     void disableWindowMagnification(int displayId);
 
     /**
-     * Moves the window magnifier on the specifed display.
+     * Moves the window magnifier on the specified display. It has no effect while animating.
      *
      * @param offsetX the amount in pixels to offset the window magnifier in the X direction, in
      *                current screen pixels.

@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -238,6 +239,7 @@ public class MediaTranscodeManagerTest
         Log.d(TAG, "Starting: testMediaTranscodeManager");
 
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
+        final CountDownLatch statusLatch = new CountDownLatch(1);
 
         // Create a file Uri: file:///data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
         // The full path of this file is:
@@ -276,11 +278,20 @@ public class MediaTranscodeManagerTest
                     public void onProgressUpdate(int newProgress) {
                         assertTrue("Invalid proress update", newProgress > mPreviousProgress);
                         assertTrue("Invalid proress update", newProgress <= 100);
+                        if (newProgress > 0) {
+                            statusLatch.countDown();
+                        }
                         mPreviousProgress = newProgress;
                         progressUpdateCount.getAndIncrement();
                         Log.i(TAG, "Get progress update " + newProgress);
                     }
                 });
+
+        try {
+            statusLatch.await();
+            // The transcoding should not be finished yet as the clip is long.
+            assertTrue("Invalid status", job.getStatus() == TranscodingJob.STATUS_RUNNING);
+        } catch (InterruptedException e) { }
 
         Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to cancel.");
         boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(

@@ -27,7 +27,6 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -46,7 +45,6 @@ import org.junit.runner.RunWith;
  * <p>This test class is a part of Window Manager Service tests and specified in
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
-@FlakyTest(bugId = 148789183, detail = "Remove after confirmed it's stable.")
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit

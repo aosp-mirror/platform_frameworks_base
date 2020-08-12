@@ -146,6 +146,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
 
+    // allow the service becomes foreground service? Service started from background may not be
+    // allowed to become a foreground service.
+    boolean mAllowStartForeground;
+    String mInfoAllowStartForeground;
+    boolean mLoggedInfoAllowStartForeground;
+
     String stringName;      // caching of toString
 
     private int lastStartId;    // identifier of most recent start request.
@@ -408,6 +414,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 pw.println(mAllowWhileInUsePermissionInFgs);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
+        pw.print(prefix); pw.print("allowStartForeground=");
+        pw.println(mAllowStartForeground);
+        pw.print(prefix); pw.print("infoAllowStartForeground=");
+        pw.println(mInfoAllowStartForeground);
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
         }

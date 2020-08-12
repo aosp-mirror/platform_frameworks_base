@@ -21,8 +21,8 @@ import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
 import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -40,7 +40,7 @@ import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 

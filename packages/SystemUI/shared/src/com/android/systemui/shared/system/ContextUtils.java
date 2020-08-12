@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.server.protolog.common;
+package com.android.systemui.shared.system;
 
-/**
- * Error while converting a bitmask representing a list of LogDataTypes.
- */
-public class BitmaskConversionException extends RuntimeException {
-    BitmaskConversionException(String msg) {
-        super(msg);
+import android.annotation.UserIdInt;
+import android.content.Context;
+
+public class ContextUtils {
+
+    /** Get the user associated with this context */
+    public static @UserIdInt int getUserId(Context context) {
+        return context.getUserId();
     }
 }

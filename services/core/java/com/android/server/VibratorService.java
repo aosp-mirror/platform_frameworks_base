@@ -114,9 +114,6 @@ public class VibratorService extends IVibratorService.Stub
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
 
-    // If HAL supports callbacks set the timeout to ASYNC_TIMEOUT_MULTIPLIER * duration.
-    private static final long ASYNC_TIMEOUT_MULTIPLIER = 2;
-
     // A mapping from the intensity adjustment to the scaling to apply, where the intensity
     // adjustment is defined as the delta between the default intensity level and the user selected
     // intensity level. It's important that we apply the scaling on the delta between the two so
@@ -187,8 +184,8 @@ public class VibratorService extends IVibratorService.Stub
 
     static native int[] vibratorGetSupportedEffects(long controllerPtr);
 
-    static native long vibratorPerformEffect(long effect, long strength, Vibration vibration,
-            boolean withCallback);
+    static native long vibratorPerformEffect(
+            long controllerPtr, long effect, long strength, Vibration vibration);
 
     static native void vibratorPerformComposedEffect(long controllerPtr,
             VibrationEffect.Composition.PrimitiveEffect[] effect, Vibration vibration);
@@ -898,19 +895,11 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
-    private final Runnable mVibrationEndRunnable = new Runnable() {
-        @Override
-        public void run() {
-            onVibrationFinished();
-        }
-    };
-
     @GuardedBy("mLock")
     private void doCancelVibrateLocked() {
         Trace.asyncTraceEnd(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doCancelVibrateLocked");
         try {
-            mH.removeCallbacks(mVibrationEndRunnable);
             if (mThread != null) {
                 mThread.cancel();
                 mThread = null;
@@ -958,13 +947,11 @@ public class VibratorService extends IVibratorService.Stub
     private void startVibrationInnerLocked(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationInnerLocked");
         try {
-            long timeout = 0;
             mCurrentVibration = vib;
             if (vib.effect instanceof VibrationEffect.OneShot) {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
                 VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
                 doVibratorOn(oneShot.getDuration(), oneShot.getAmplitude(), vib);
-                timeout = oneShot.getDuration() * ASYNC_TIMEOUT_MULTIPLIER;
             } else if (vib.effect instanceof VibrationEffect.Waveform) {
                 // mThread better be null here. doCancelVibrate should always be
                 // called before startNextVibrationLocked or startVibrationLocked.
@@ -973,23 +960,12 @@ public class VibratorService extends IVibratorService.Stub
                 mThread.start();
             } else if (vib.effect instanceof VibrationEffect.Prebaked) {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
-                timeout = doVibratorPrebakedEffectLocked(vib);
+                doVibratorPrebakedEffectLocked(vib);
             } else if (vib.effect instanceof  VibrationEffect.Composed) {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
                 doVibratorComposedEffectLocked(vib);
-                // FIXME: We rely on the completion callback here, but I don't think we require that
-                // devices which support composition also support the completion callback. If we
-                // ever get a device that supports the former but not the latter, then we have no
-                // real way of knowing how long a given effect should last.
-                timeout = 10_000;
             } else {
                 Slog.e(TAG, "Unknown vibration type, ignoring");
-            }
-            // Post extra runnable to ensure vibration will end even if the HAL or native controller
-            // never triggers the callback.
-            // TODO: Move ASYNC_TIMEOUT_MULTIPLIER here once native controller is fully integrated.
-            if (timeout > 0) {
-                mH.postDelayed(mVibrationEndRunnable, timeout);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -1354,7 +1330,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     @GuardedBy("mLock")
-    private long doVibratorPrebakedEffectLocked(Vibration vib) {
+    private void doVibratorPrebakedEffectLocked(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorPrebakedEffectLocked");
         try {
             final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
@@ -1364,25 +1340,20 @@ public class VibratorService extends IVibratorService.Stub
             }
             // Input devices don't support prebaked effect, so skip trying it with them.
             if (!usingInputDeviceVibrators) {
-                long duration = mNativeWrapper.vibratorPerformEffect(prebaked.getId(),
-                        prebaked.getEffectStrength(), vib,
-                        hasCapability(IVibrator.CAP_PERFORM_CALLBACK));
-                long timeout = duration;
-                if (hasCapability(IVibrator.CAP_PERFORM_CALLBACK)) {
-                    timeout *= ASYNC_TIMEOUT_MULTIPLIER;
-                }
-                if (timeout > 0) {
+                long duration = mNativeWrapper.vibratorPerformEffect(
+                        prebaked.getId(), prebaked.getEffectStrength(), vib);
+                if (duration > 0) {
                     noteVibratorOnLocked(vib.uid, duration);
-                    return timeout;
+                    return;
                 }
             }
             if (!prebaked.shouldFallback()) {
-                return 0;
+                return;
             }
             VibrationEffect effect = getFallbackEffect(prebaked.getId());
             if (effect == null) {
                 Slog.w(TAG, "Failed to play prebaked effect, no fallback");
-                return 0;
+                return;
             }
             Vibration fallbackVib = new Vibration(vib.token, effect, vib.attrs, vib.uid,
                     vib.opPkg, vib.reason + " (fallback)");
@@ -1390,7 +1361,7 @@ public class VibratorService extends IVibratorService.Stub
             linkVibration(fallbackVib);
             applyVibrationIntensityScalingLocked(fallbackVib, intensity);
             startVibrationInnerLocked(fallbackVib);
-            return 0;
+            return;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
@@ -1789,9 +1760,9 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         /** Turns vibrator on to perform one of the supported effects. */
-        public long vibratorPerformEffect(long effect, long strength, Vibration vibration,
-                boolean withCallback) {
-            return VibratorService.vibratorPerformEffect(effect, strength, vibration, withCallback);
+        public long vibratorPerformEffect(long effect, long strength, Vibration vibration) {
+            return VibratorService.vibratorPerformEffect(
+                    mNativeControllerPtr, effect, strength, vibration);
         }
 
         /** Turns vibrator on to perform one of the supported composed effects. */

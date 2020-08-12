@@ -58,6 +58,7 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
             @NonNull GeolocationTimeZoneSuggestion timeZoneSuggestion) {
         Objects.requireNonNull(timeZoneSuggestion);
 
+        // All strategy calls must take place on the mHandler thread.
         mHandler.post(
                 () -> mTimeZoneDetectorStrategy.suggestGeolocationTimeZone(timeZoneSuggestion));
     }

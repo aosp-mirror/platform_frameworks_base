@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -52,7 +52,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     public static final int CONTENT_FADE_DELAY = 100;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final HeadsUpManagerPhone mHeadsUpManager;
-    private final NotificationStackScrollLayout mStackScroller;
+    private final NotificationStackScrollLayoutController mStackScrollerController;
     private final HeadsUpStatusBarView mHeadsUpStatusBarView;
     private final View mCenteredIconView;
     private final View mClockView;
@@ -93,7 +93,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
             HeadsUpManagerPhone headsUpManager,
-            View notificationShadeView,
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardBypassController keyguardBypassController,
             KeyguardStateController keyguardStateController,
@@ -101,10 +101,9 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             NotificationPanelViewController notificationPanelViewController, View statusBarView) {
         this(notificationIconAreaController, headsUpManager, statusBarStateController,
                 keyguardBypassController, wakeUpCoordinator, keyguardStateController,
-                commandQueue,
-                statusBarView.findViewById(R.id.heads_up_status_bar_view),
-                notificationShadeView.findViewById(R.id.notification_stack_scroller),
+                commandQueue, notificationStackScrollLayoutController,
                 notificationPanelViewController,
+                statusBarView.findViewById(R.id.heads_up_status_bar_view),
                 statusBarView.findViewById(R.id.clock),
                 statusBarView.findViewById(R.id.operator_name_frame),
                 statusBarView.findViewById(R.id.centered_icon_area));
@@ -119,9 +118,9 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             KeyguardStateController keyguardStateController,
             CommandQueue commandQueue,
-            HeadsUpStatusBarView headsUpStatusBarView,
-            NotificationStackScrollLayout stackScroller,
+            NotificationStackScrollLayoutController stackScrollerController,
             NotificationPanelViewController notificationPanelViewController,
+            HeadsUpStatusBarView headsUpStatusBarView,
             View clockView,
             View operatorNameView,
             View centeredIconView) {
@@ -132,14 +131,14 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mCenteredIconView = centeredIconView;
         headsUpStatusBarView.setOnDrawingRectChangedListener(
                 () -> updateIsolatedIconLocation(true /* requireUpdate */));
-        mStackScroller = stackScroller;
+        mStackScrollerController = stackScrollerController;
         mNotificationPanelViewController = notificationPanelViewController;
         notificationPanelViewController.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
         notificationPanelViewController.addVerticalTranslationListener(mUpdatePanelTranslation);
         notificationPanelViewController.setHeadsUpAppearanceController(this);
-        mStackScroller.addOnExpandedHeightChangedListener(mSetExpandedHeight);
-        mStackScroller.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
-        mStackScroller.setHeadsUpAppearanceController(this);
+        mStackScrollerController.addOnExpandedHeightChangedListener(mSetExpandedHeight);
+        mStackScrollerController.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
+        mStackScrollerController.setHeadsUpAppearanceController(this);
         mClockView = clockView;
         mOperatorNameView = operatorNameView;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
@@ -153,7 +152,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
                     updateTopEntry();
 
                     // trigger scroller to notify the latest panel translation
-                    mStackScroller.requestLayout();
+                    mStackScrollerController.requestLayout();
                 }
                 mHeadsUpStatusBarView.removeOnLayoutChangeListener(this);
             }
@@ -174,8 +173,8 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mNotificationPanelViewController.removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
         mNotificationPanelViewController.removeVerticalTranslationListener(mUpdatePanelTranslation);
         mNotificationPanelViewController.setHeadsUpAppearanceController(null);
-        mStackScroller.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
-        mStackScroller.removeOnLayoutChangeListener(mStackScrollLayoutChangeListener);
+        mStackScrollerController.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
+        mStackScrollerController.removeOnLayoutChangeListener(mStackScrollLayoutChangeListener);
         mDarkIconDispatcher.removeDarkReceiver(this);
     }
 
@@ -219,12 +218,12 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         }
 
         int realDisplaySize = 0;
-        if (mStackScroller.getDisplay() != null) {
-            mStackScroller.getDisplay().getRealSize(mPoint);
+        if (mStackScrollerController.getDisplay() != null) {
+            mStackScrollerController.getDisplay().getRealSize(mPoint);
             realDisplaySize = mPoint.x;
         }
 
-        WindowInsets windowInset = mStackScroller.getRootWindowInsets();
+        WindowInsets windowInset = mStackScrollerController.getRootWindowInsets();
         DisplayCutout cutout = (windowInset != null) ? windowInset.getDisplayCutout() : null;
         int sysWinLeft = (windowInset != null) ? windowInset.getStableInsetLeft() : 0;
         int sysWinRight = (windowInset != null) ? windowInset.getStableInsetRight() : 0;
@@ -233,17 +232,17 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         int leftInset = Math.max(sysWinLeft, cutoutLeft);
         int rightInset = Math.max(sysWinRight, cutoutRight);
 
-        return leftInset + mStackScroller.getRight() + rightInset - realDisplaySize;
+        return leftInset + mStackScrollerController.getRight() + rightInset - realDisplaySize;
     }
 
     public void updatePanelTranslation() {
         float newTranslation;
-        if (mStackScroller.isLayoutRtl()) {
+        if (mStackScrollerController.isLayoutRtl()) {
             newTranslation = getRtlTranslation();
         } else {
-            newTranslation = mStackScroller.getLeft();
+            newTranslation = mStackScrollerController.getLeft();
         }
-        newTranslation += mStackScroller.getTranslationX();
+        newTranslation += mStackScrollerController.getTranslationX();
         mHeadsUpStatusBarView.setPanelTranslation(newTranslation);
     }
 

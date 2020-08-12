@@ -46,7 +46,6 @@ namespace {
 const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
-const int64_t atomMatcherId = 678;
 const int logEventMatcherIndex = 0;
 const int64_t bucketStartTimeNs = 10000000000;
 const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
@@ -99,12 +98,8 @@ class ValueMetricProducerTestHelper {
 public:
     static sp<ValueMetricProducer> createValueProducerNoConditions(
             sp<MockStatsPullerManager>& pullerManager, ValueMetric& metric) {
-        UidMap uidMap;
-        SimpleAtomMatcher atomMatcher;
-        atomMatcher.set_atom_id(tagId);
         sp<EventMatcherWizard> eventMatcherWizard =
-                new EventMatcherWizard({new SimpleLogMatchingTracker(
-                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+                createEventMatcherWizard(tagId, logEventMatcherIndex);
         sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
         EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _))
                 .WillOnce(Return());
@@ -122,12 +117,8 @@ public:
     static sp<ValueMetricProducer> createValueProducerWithCondition(
             sp<MockStatsPullerManager>& pullerManager, ValueMetric& metric,
             ConditionState conditionAfterFirstBucketPrepared) {
-        UidMap uidMap;
-        SimpleAtomMatcher atomMatcher;
-        atomMatcher.set_atom_id(tagId);
         sp<EventMatcherWizard> eventMatcherWizard =
-                new EventMatcherWizard({new SimpleLogMatchingTracker(
-                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+                createEventMatcherWizard(tagId, logEventMatcherIndex);
         sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
         EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _))
                 .WillOnce(Return());
@@ -147,12 +138,8 @@ public:
             sp<MockStatsPullerManager>& pullerManager, ValueMetric& metric,
             vector<int32_t> slicedStateAtoms,
             unordered_map<int, unordered_map<int, int64_t>> stateGroupMap) {
-        UidMap uidMap;
-        SimpleAtomMatcher atomMatcher;
-        atomMatcher.set_atom_id(tagId);
         sp<EventMatcherWizard> eventMatcherWizard =
-                new EventMatcherWizard({new SimpleLogMatchingTracker(
-                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+                createEventMatcherWizard(tagId, logEventMatcherIndex);
         sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
         EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _))
                 .WillOnce(Return());
@@ -172,12 +159,8 @@ public:
             vector<int32_t> slicedStateAtoms,
             unordered_map<int, unordered_map<int, int64_t>> stateGroupMap,
             ConditionState conditionAfterFirstBucketPrepared) {
-        UidMap uidMap;
-        SimpleAtomMatcher atomMatcher;
-        atomMatcher.set_atom_id(tagId);
         sp<EventMatcherWizard> eventMatcherWizard =
-                new EventMatcherWizard({new SimpleLogMatchingTracker(
-                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+                createEventMatcherWizard(tagId, logEventMatcherIndex);
         sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
         EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _))
                 .WillOnce(Return());
@@ -237,12 +220,8 @@ TEST(ValueMetricProducerTest, TestCalcPreviousBucketEndTime) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     int64_t startTimeBase = 11;
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -267,12 +246,8 @@ TEST(ValueMetricProducerTest, TestCalcPreviousBucketEndTime) {
 TEST(ValueMetricProducerTest, TestFirstBucket) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -421,15 +396,11 @@ TEST_P(ValueMetricProducerTest_PartialBucket, TestPartialBucketCreated) {
 TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
-    auto keyValue = atomMatcher.add_field_value_matcher();
-    keyValue->set_field(1);
-    keyValue->set_eq_int(3);
+    FieldValueMatcher fvm;
+    fvm.set_field(1);
+    fvm.set_eq_int(3);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex, {fvm});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
@@ -698,12 +669,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 TEST_P(ValueMetricProducerTest_PartialBucket, TestPushedEvents) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -759,12 +726,8 @@ TEST_P(ValueMetricProducerTest_PartialBucket, TestPushedEvents) {
 TEST_P(ValueMetricProducerTest_PartialBucket, TestPulledValue) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     int64_t partialBucketSplitTimeNs = bucket2StartTimeNs + 150;
@@ -820,12 +783,8 @@ TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     metric.set_split_bucket_for_app_upgrade(false);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
@@ -900,12 +859,8 @@ TEST_P(ValueMetricProducerTest_PartialBucket, TestPulledValueWhileConditionFalse
 TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -944,12 +899,8 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1015,12 +966,8 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
 
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1360,12 +1307,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     metric.set_aggregation_type(ValueMetric::MIN);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1404,12 +1347,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     metric.set_aggregation_type(ValueMetric::MAX);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1447,12 +1386,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     metric.set_aggregation_type(ValueMetric::AVG);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1495,12 +1430,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     metric.set_aggregation_type(ValueMetric::SUM);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1539,12 +1470,8 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     metric.set_aggregation_type(ValueMetric::MIN);
     metric.set_use_diff(true);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -1611,12 +1538,8 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
     metric.set_aggregation_type(ValueMetric::MIN);
     metric.set_use_diff(true);
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
@@ -2140,12 +2063,8 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded) {
 TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
@@ -2963,12 +2882,8 @@ TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet) {
 TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
@@ -3001,12 +2916,8 @@ TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
 TEST(ValueMetricProducerTest, TestFastDumpWithoutCurrentBucket) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
@@ -3045,12 +2956,8 @@ TEST(ValueMetricProducerTest, TestFastDumpWithoutCurrentBucket) {
 TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
-    UidMap uidMap;
-    SimpleAtomMatcher atomMatcher;
-    atomMatcher.set_atom_id(tagId);
     sp<EventMatcherWizard> eventMatcherWizard =
-            new EventMatcherWizard({new SimpleLogMatchingTracker(
-                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+            createEventMatcherWizard(tagId, logEventMatcherIndex);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());

@@ -41,7 +41,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.TaskSnapshotController.getSystemBarInsets;
 import static com.android.server.wm.TaskSnapshotController.mergeInsetsSources;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -83,9 +83,9 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DecorView;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.view.BaseIWindow;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
-import com.android.server.protolog.common.ProtoLog;
 
 /**
  * This class represents a starting window that shows a snapshot.

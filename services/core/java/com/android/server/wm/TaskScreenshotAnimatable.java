@@ -15,14 +15,14 @@
  */
 package com.android.server.wm;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 
 import android.hardware.HardwareBuffer;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.function.Function;
 

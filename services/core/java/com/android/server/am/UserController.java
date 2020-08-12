@@ -1630,7 +1630,7 @@ class UserController implements Handler.Callback {
             UserInfo currentUserInfo = getUserInfo(currentUserId);
             Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
             mUiHandler.removeMessages(START_USER_SWITCH_UI_MSG);
-            mUiHandler.sendMessage(mHandler.obtainMessage(
+            mUiHandler.sendMessage(mUiHandler.obtainMessage(
                     START_USER_SWITCH_UI_MSG, userNames));
         } else {
             mHandler.removeMessages(START_USER_SWITCH_FG_MSG);
@@ -2887,13 +2887,18 @@ class UserController implements Handler.Callback {
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
                 String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
-            if (!mService.mContext.getPackageManager()
+            if (mService.mContext.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
-                final Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser,
-                        toUser, true /* above system */, switchingFromSystemUserMessage,
-                        switchingToSystemUserMessage);
-                d.show();
+                // config_customUserSwitchUi is set to true on Automotive as CarSystemUI is
+                // responsible to show the UI; OEMs should not change that, but if they do, we
+                // should at least warn the user...
+                Slog.w(TAG, "Showing user switch dialog on UserController, it could cause a race "
+                        + "condition if it's shown by CarSystemUI as well");
             }
+            final Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser,
+                    toUser, true /* above system */, switchingFromSystemUserMessage,
+                    switchingToSystemUserMessage);
+            d.show();
         }
 
         void reportGlobalUsageEventLocked(int event) {

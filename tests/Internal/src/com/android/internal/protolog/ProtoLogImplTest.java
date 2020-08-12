@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.protolog;
+package com.android.internal.protolog;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.server.protolog.ProtoLogImpl.PROTOLOG_VERSION;
+import static com.android.internal.protolog.ProtoLogImpl.PROTOLOG_VERSION;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -42,7 +42,7 @@ import android.util.proto.ProtoInputStream;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.protolog.common.IProtoLogGroup;
+import com.android.internal.protolog.common.IProtoLogGroup;
 
 import org.junit.After;
 import org.junit.Before;

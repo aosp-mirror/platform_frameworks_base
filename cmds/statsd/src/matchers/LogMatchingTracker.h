@@ -33,8 +33,8 @@ namespace statsd {
 
 class LogMatchingTracker : public virtual RefBase {
 public:
-    LogMatchingTracker(const int64_t& id, const int index)
-        : mId(id), mIndex(index), mInitialized(false){};
+    LogMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash)
+        : mId(id), mIndex(index), mInitialized(false), mProtoHash(protoHash){};
 
     virtual ~LogMatchingTracker(){};
 
@@ -69,8 +69,12 @@ public:
         return mAtomIds;
     }
 
-    const int64_t& getId() const {
+    int64_t getId() const {
         return mId;
+    }
+
+    uint64_t getProtoHash() const {
+        return mProtoHash;
     }
 
 protected:
@@ -87,6 +91,14 @@ protected:
     // return kNotMatched when we receive an event with an id not in the list. This is especially
     // useful when we have a complex CombinationLogMatcherTracker.
     std::set<int> mAtomIds;
+
+    // Hash of the AtomMatcher's proto bytes from StatsdConfig.
+    // Used to determine if the definition of this matcher has changed across a config update.
+    const uint64_t mProtoHash;
+
+    FRIEND_TEST(MetricsManagerTest, TestCreateLogTrackerSimple);
+    FRIEND_TEST(MetricsManagerTest, TestCreateLogTrackerCombination);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateMatchers);
 };
 
 }  // namespace statsd

@@ -1130,7 +1130,9 @@ public class WifiConfiguration implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"RANDOMIZATION_"}, value = {
             RANDOMIZATION_NONE,
-            RANDOMIZATION_PERSISTENT})
+            RANDOMIZATION_PERSISTENT,
+            RANDOMIZATION_ENHANCED,
+            RANDOMIZATION_AUTO})
     public @interface MacRandomizationSetting {}
 
     /**
@@ -1147,14 +1149,30 @@ public class WifiConfiguration implements Parcelable {
     public static final int RANDOMIZATION_PERSISTENT = 1;
 
     /**
+     * Use a randomly generated MAC address for connections to this network.
+     * This option does not persist the randomized MAC address.
+     * @hide
+     */
+    @SystemApi
+    public static final int RANDOMIZATION_ENHANCED = 2;
+
+    /**
+     * Let the wifi framework automatically decide the MAC randomization strategy.
+     * @hide
+     */
+    @SystemApi
+    public static final int RANDOMIZATION_AUTO = 3;
+
+    /**
      * Level of MAC randomization for this network.
-     * One of {@link #RANDOMIZATION_NONE} or {@link #RANDOMIZATION_PERSISTENT}.
-     * By default this field is set to {@link #RANDOMIZATION_PERSISTENT}.
+     * One of {@link #RANDOMIZATION_NONE}, {@link #RANDOMIZATION_AUTO},
+     * {@link #RANDOMIZATION_PERSISTENT} or {@link #RANDOMIZATION_ENHANCED}.
+     * By default this field is set to {@link #RANDOMIZATION_AUTO}.
      * @hide
      */
     @SystemApi
     @MacRandomizationSetting
-    public int macRandomizationSetting = RANDOMIZATION_PERSISTENT;
+    public int macRandomizationSetting = RANDOMIZATION_AUTO;
 
     /**
      * @hide

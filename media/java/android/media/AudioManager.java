@@ -4413,6 +4413,10 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_FM = AudioSystem.DEVICE_OUT_FM;
     /** @hide
+     * The audio output device code for echo reference injection point.
+     */
+    public static final int DEVICE_OUT_ECHO_CANCELLER = AudioSystem.DEVICE_OUT_ECHO_CANCELLER;
+    /** @hide
      * The audio output device code for a BLE audio headset.
      */
     public static final int DEVICE_OUT_BLE_HEADSET = AudioSystem.DEVICE_OUT_BLE_HEADSET;
@@ -4504,6 +4508,10 @@ public class AudioManager {
      * The audio input device code for audio loopback
      */
     public static final int DEVICE_IN_LOOPBACK = AudioSystem.DEVICE_IN_LOOPBACK;
+    /** @hide
+     * The audio input device code for an echo reference capture point.
+     */
+    public static final int DEVICE_IN_ECHO_REFERENCE = AudioSystem.DEVICE_IN_ECHO_REFERENCE;
     /** @hide
      * The audio input device code for a BLE audio headset.
      */

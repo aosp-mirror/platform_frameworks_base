@@ -26,11 +26,11 @@ namespace statsd {
 using std::unordered_map;
 using std::vector;
 
-
 SimpleLogMatchingTracker::SimpleLogMatchingTracker(const int64_t& id, const int index,
+                                                   const uint64_t protoHash,
                                                    const SimpleAtomMatcher& matcher,
-                                                   const UidMap& uidMap)
-    : LogMatchingTracker(id, index), mMatcher(matcher), mUidMap(uidMap) {
+                                                   const sp<UidMap>& uidMap)
+    : LogMatchingTracker(id, index, protoHash), mMatcher(matcher), mUidMap(uidMap) {
     if (!matcher.has_atom_id()) {
         mInitialized = false;
     } else {

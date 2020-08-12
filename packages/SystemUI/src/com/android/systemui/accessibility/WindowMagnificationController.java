@@ -150,7 +150,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         mMirrorViewGeometryVsyncCallback =
                 l -> {
-                    if (mMirrorView != null && mMirrorSurface != null) {
+                    if (isWindowVisible() && mMirrorSurface != null) {
                         calculateSourceBounds(mMagnificationFrame, mScale);
                         // The final destination for the magnification surface should be at 0,0
                         // since the ViewRootImpl's position will change
@@ -203,13 +203,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * @param configDiff a bit mask of the differences between the configurations
      */
     void onConfigurationChanged(int configDiff) {
+        if (!isWindowVisible()) {
+            return;
+        }
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             updateDimensions();
-            // TODO(b/145780606): update toggle button UI.
-            if (mMirrorView != null) {
-                mWm.removeView(mMirrorView);
-                createMirrorWindow();
-            }
+            mWm.removeView(mMirrorView);
+            createMirrorWindow();
         } else if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
             onRotate();
         }
@@ -502,7 +502,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     /**
      * Enables window magnification with specified parameters.
      *
-     * @param scale   the target scale
+     * @param scale   the target scale, or {@link Float#NaN} to leave unchanged
      * @param centerX the screen-relative X coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
      * @param centerY the screen-relative Y coordinate around which to center,
@@ -513,10 +513,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 : centerX - mMagnificationFrame.exactCenterX();
         final float offsetY = Float.isNaN(centerY) ? 0
                 : centerY - mMagnificationFrame.exactCenterY();
-        mScale = scale;
+        mScale = Float.isNaN(scale) ? mScale : scale;
         setMagnificationFrameBoundary();
         updateMagnificationFramePosition((int) offsetX, (int) offsetY);
-        if (mMirrorView == null) {
+        if (!isWindowVisible()) {
             createMirrorWindow();
             showControls();
         } else {
@@ -527,10 +527,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     /**
      * Sets the scale of the magnified region if it's visible.
      *
-     * @param scale the target scale
+     * @param scale the target scale, or {@link Float#NaN} to leave unchanged
      */
     void setScale(float scale) {
-        if (mMirrorView == null || mScale == scale) {
+        if (!isWindowVisible() || mScale == scale) {
             return;
         }
         enableWindowMagnification(scale, Float.NaN, Float.NaN);
@@ -551,5 +551,36 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (updateMagnificationFramePosition((int) offsetX, (int) offsetY)) {
             modifyWindowMagnification(mTransaction);
         }
+    }
+
+    /**
+     * Gets the scale.
+     * @return {@link Float#NaN} if the window is invisible.
+     */
+    float getScale() {
+        return isWindowVisible() ? mScale : Float.NaN;
+    }
+
+    /**
+     * Returns the screen-relative X coordinate of the center of the magnified bounds.
+     *
+     * @return the X coordinate. {@link Float#NaN} if the window is invisible.
+     */
+    float getCenterX() {
+        return isWindowVisible() ? mMagnificationFrame.exactCenterX() : Float.NaN;
+    }
+
+    /**
+     * Returns the screen-relative Y coordinate of the center of the magnified bounds.
+     *
+     * @return the Y coordinate. {@link Float#NaN} if the window is invisible.
+     */
+    float getCenterY() {
+        return isWindowVisible() ? mMagnificationFrame.exactCenterY() : Float.NaN;
+    }
+
+    //The window is visible when it is existed.
+    private boolean isWindowVisible() {
+        return mMirrorView != null;
     }
 }

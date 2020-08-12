@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import static android.view.Choreographer.FrameCallback;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
@@ -26,8 +27,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.view.Display;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.test.InstrumentationRegistry;
@@ -41,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -57,12 +63,14 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     WindowMagnifierCallback mWindowMagnifierCallback;
     @Mock
     SurfaceControl.Transaction mTransaction;
+    private Context mContext;
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mContext  = Mockito.spy(getContext());
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         doAnswer(invocation -> {
             FrameCallback callback = invocation.getArgument(0);
@@ -73,8 +81,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         when(mTransaction.remove(any())).thenReturn(mTransaction);
         when(mTransaction.setGeometry(any(), any(), any(),
                 anyInt())).thenReturn(mTransaction);
-
-        mWindowMagnificationController = new WindowMagnificationController(getContext(),
+        mWindowMagnificationController = new WindowMagnificationController(mContext,
                 mHandler, mSfVsyncFrameProvider,
                 mMirrorWindowControl, mTransaction, mWindowMagnifierCallback);
         verify(mMirrorWindowControl).setWindowDelegate(
@@ -83,9 +90,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.deleteWindowMagnification();
-        });
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification());
     }
 
     @Test
@@ -120,5 +126,28 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
+    }
+
+    @Test
+    public void setScale_enabled_expectedValue() {
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                        Float.NaN));
+
+        mInstrumentation.runOnMainSync(() -> mWindowMagnificationController.setScale(3.0f));
+
+        assertEquals(3.0f, mWindowMagnificationController.getScale(), 0);
+    }
+
+    @Test
+    public void onConfigurationChanged_disabled_withoutException() {
+        Display display = Mockito.spy(mContext.getDisplay());
+        when(display.getRotation()).thenReturn(Surface.ROTATION_90);
+        when(mContext.getDisplay()).thenReturn(display);
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
+        });
     }
 }

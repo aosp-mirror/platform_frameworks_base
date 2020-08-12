@@ -1415,3 +1415,30 @@ filegroup {
     name: "framework-telephony-jarjar-rules",
     srcs: ["telephony/framework-telephony-jarjar-rules.txt"],
 }
+
+// protolog start
+filegroup {
+    name: "protolog-common-src",
+    srcs: [
+        "core/java/com/android/internal/protolog/common/**/*.java",
+    ],
+}
+
+java_library {
+    name: "protolog-lib",
+    platform_apis: true,
+    srcs: [
+        "core/java/com/android/internal/protolog/ProtoLogImpl.java",
+        "core/java/com/android/internal/protolog/ProtoLogViewerConfigReader.java",
+        ":protolog-common-src",
+    ],
+}
+
+java_library {
+    name: "protolog-groups",
+    srcs: [
+        "core/java/com/android/internal/protolog/ProtoLogGroup.java",
+        ":protolog-common-src",
+    ],
+}
+// protolog end

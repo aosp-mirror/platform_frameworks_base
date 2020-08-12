@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.protolog.common;
+package com.android.internal.protolog.common;
 
 /**
- * Unsupported/invalid message format string error.
+ * Error while converting a bitmask representing a list of LogDataTypes.
  */
-public class InvalidFormatStringException extends RuntimeException {
-    public InvalidFormatStringException(String message) {
-        super(message);
-    }
-
-    public InvalidFormatStringException(String message, Throwable cause) {
-        super(message, cause);
+public class BitmaskConversionException extends RuntimeException {
+    BitmaskConversionException(String msg) {
+        super(msg);
     }
 }

@@ -867,6 +867,8 @@ public class AudioSystem
     /** @hide */
     public static final int DEVICE_OUT_HEARING_AID = 0x8000000;
     /** @hide */
+    public static final int DEVICE_OUT_ECHO_CANCELLER = 0x10000000;
+    /** @hide */
     public static final int DEVICE_OUT_BLE_HEADSET = 0x20000000;
     /** @hide */
     public static final int DEVICE_OUT_BLE_SPEAKER = 0x20000001;
@@ -926,6 +928,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_PROXY);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HEARING_AID);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_ECHO_CANCELLER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_SPEAKER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DEFAULT);
@@ -1133,6 +1136,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     /** @hide */ public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
     /** @hide */ public static final String DEVICE_OUT_HEARING_AID_NAME = "hearing_aid_out";
+    /** @hide */ public static final String DEVICE_OUT_ECHO_CANCELLER_NAME = "echo_canceller";
     /** @hide */ public static final String DEVICE_OUT_BLE_HEADSET_NAME = "ble_headset";
     /** @hide */ public static final String DEVICE_OUT_BLE_SPEAKER_NAME = "ble_speaker";
 
@@ -1225,6 +1229,8 @@ public class AudioSystem
             return DEVICE_OUT_USB_HEADSET_NAME;
         case DEVICE_OUT_HEARING_AID:
             return DEVICE_OUT_HEARING_AID_NAME;
+        case DEVICE_OUT_ECHO_CANCELLER:
+            return DEVICE_OUT_ECHO_CANCELLER_NAME;
         case DEVICE_OUT_BLE_HEADSET:
             return DEVICE_OUT_BLE_HEADSET_NAME;
         case DEVICE_OUT_BLE_SPEAKER:

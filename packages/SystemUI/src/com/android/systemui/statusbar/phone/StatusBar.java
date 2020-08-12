@@ -209,6 +209,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -1075,7 +1076,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     // TODO (b/136993073) Separate notification shade and status bar
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager,
-                            mNotificationShadeWindowView,
+                            mStackScroller.getController(),
                             mStatusBarStateController, mKeyguardBypassController,
                             mKeyguardStateController, mWakeUpCoordinator, mCommandQueue,
                             mNotificationPanelViewController, mStatusBarView);
@@ -4050,7 +4051,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected IStatusBarService mBarService;
 
     // all notifications
-    protected ViewGroup mStackScroller;
+    protected NotificationStackScrollLayout mStackScroller;
 
     private final NotificationGroupManager mGroupManager;
 

@@ -402,7 +402,7 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
         FullBackup.BackupScheme backupScheme = FullBackup.getBackupScheme(this);
-        if (!backupScheme.isFullBackupContentEnabled()) {
+        if (!isDeviceToDeviceMigration() && !backupScheme.isFullBackupContentEnabled()) {
             return;
         }
 
@@ -430,24 +430,18 @@ public abstract class BackupAgent extends ContextWrapper {
         final Context ceContext = createCredentialProtectedStorageContext();
         final String rootDir = ceContext.getDataDir().getCanonicalPath();
         final String filesDir = ceContext.getFilesDir().getCanonicalPath();
-        final String noBackupDir = ceContext.getNoBackupFilesDir().getCanonicalPath();
         final String databaseDir = ceContext.getDatabasePath("foo").getParentFile()
                 .getCanonicalPath();
         final String sharedPrefsDir = ceContext.getSharedPreferencesPath("foo").getParentFile()
                 .getCanonicalPath();
-        final String cacheDir = ceContext.getCacheDir().getCanonicalPath();
-        final String codeCacheDir = ceContext.getCodeCacheDir().getCanonicalPath();
 
         final Context deContext = createDeviceProtectedStorageContext();
         final String deviceRootDir = deContext.getDataDir().getCanonicalPath();
         final String deviceFilesDir = deContext.getFilesDir().getCanonicalPath();
-        final String deviceNoBackupDir = deContext.getNoBackupFilesDir().getCanonicalPath();
         final String deviceDatabaseDir = deContext.getDatabasePath("foo").getParentFile()
                 .getCanonicalPath();
         final String deviceSharedPrefsDir = deContext.getSharedPreferencesPath("foo")
                 .getParentFile().getCanonicalPath();
-        final String deviceCacheDir = deContext.getCacheDir().getCanonicalPath();
-        final String deviceCodeCacheDir = deContext.getCodeCacheDir().getCanonicalPath();
 
         final String libDir = (appInfo.nativeLibraryDir != null)
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
@@ -460,33 +454,36 @@ public abstract class BackupAgent extends ContextWrapper {
 
         // Add the directories we always exclude.
         traversalExcludeSet.add(filesDir);
-        traversalExcludeSet.add(noBackupDir);
         traversalExcludeSet.add(databaseDir);
         traversalExcludeSet.add(sharedPrefsDir);
-        traversalExcludeSet.add(cacheDir);
-        traversalExcludeSet.add(codeCacheDir);
 
         traversalExcludeSet.add(deviceFilesDir);
-        traversalExcludeSet.add(deviceNoBackupDir);
         traversalExcludeSet.add(deviceDatabaseDir);
         traversalExcludeSet.add(deviceSharedPrefsDir);
-        traversalExcludeSet.add(deviceCacheDir);
-        traversalExcludeSet.add(deviceCodeCacheDir);
 
         if (libDir != null) {
             traversalExcludeSet.add(libDir);
         }
+
+        Set<String> extraExcludedDirs = getExtraExcludeDirsIfAny(ceContext);
+        Set<String> extraExcludedDeviceDirs = getExtraExcludeDirsIfAny(deContext);
+        traversalExcludeSet.addAll(extraExcludedDirs);
+        traversalExcludeSet.addAll(extraExcludedDeviceDirs);
 
         // Root dir first.
         applyXmlFiltersAndDoFullBackupForDomain(
                 packageName, FullBackup.ROOT_TREE_TOKEN, manifestIncludeMap,
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(rootDir);
+        // Exclude the extra directories anyway, since we've already covered them if it was needed.
+        traversalExcludeSet.addAll(extraExcludedDirs);
 
         applyXmlFiltersAndDoFullBackupForDomain(
                 packageName, FullBackup.DEVICE_ROOT_TREE_TOKEN, manifestIncludeMap,
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(deviceRootDir);
+        // Exclude the extra directories anyway, since we've already covered them if it was needed.
+        traversalExcludeSet.addAll(extraExcludedDeviceDirs);
 
         // Data dir next.
         traversalExcludeSet.remove(filesDir);
@@ -545,11 +542,28 @@ public abstract class BackupAgent extends ContextWrapper {
         }
     }
 
+    private Set<String> getExtraExcludeDirsIfAny(Context context) throws IOException {
+        if (isDeviceToDeviceMigration()) {
+            return Collections.emptySet();
+        }
+
+        // If this is not a migration, also exclude no-backup and cache dirs.
+        Set<String> excludedDirs = new HashSet<>();
+        excludedDirs.add(context.getCacheDir().getCanonicalPath());
+        excludedDirs.add(context.getCodeCacheDir().getCanonicalPath());
+        excludedDirs.add(context.getNoBackupFilesDir().getCanonicalPath());
+        return Collections.unmodifiableSet(excludedDirs);
+    }
+
+    private boolean isDeviceToDeviceMigration() {
+        return mOperationType == OperationType.MIGRATION;
+    }
+
     /** @hide */
     @VisibleForTesting
     public IncludeExcludeRules getIncludeExcludeRules(FullBackup.BackupScheme backupScheme)
             throws IOException, XmlPullParserException {
-        if (mOperationType == OperationType.MIGRATION) {
+        if (isDeviceToDeviceMigration()) {
             return IncludeExcludeRules.emptyRules();
         }
 
@@ -892,6 +906,11 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean isFileEligibleForRestore(File destination) throws IOException {
+        if (isDeviceToDeviceMigration()) {
+            // Everything is eligible for device-to-device migration.
+            return true;
+        }
+
         FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this);
         if (!bs.isFullBackupContentEnabled()) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {

@@ -25,9 +25,12 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.protolog.ProtoLogImpl;
+import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.ProtoLogImpl;
+import com.android.internal.protolog.common.ProtoLog;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -35,6 +38,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@Ignore("b/163095037")
 public class ProtoLogIntegrationTest {
     @After
     public void tearDown() {
@@ -44,15 +48,19 @@ public class ProtoLogIntegrationTest {
     @Test
     public void testProtoLogToolIntegration() {
         ProtoLogImpl mockedProtoLog = mock(ProtoLogImpl.class);
-        runWith(mockedProtoLog, () -> {
-            ProtoLogGroup.testProtoLog();
-        });
+        runWith(mockedProtoLog, this::testProtoLog);
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.ERROR), eq(ProtoLogGroup.TEST_GROUP),
                 anyInt(), eq(0b0010101001010111),
-                eq(ProtoLogGroup.TEST_GROUP.isLogToLogcat()
+                eq(com.android.internal.protolog.ProtoLogGroup.TEST_GROUP.isLogToLogcat()
                         ? "Test completed successfully: %b %d %o %x %e %g %f %% %s"
                         : null),
                 eq(new Object[]{true, 1L, 2L, 3L, 0.4, 0.5, 0.6, "ok"}));
+    }
+
+    private void testProtoLog() {
+        ProtoLog.e(ProtoLogGroup.TEST_GROUP,
+                "Test completed successfully: %b %d %o %x %e %g %f %% %s.",
+                true, 1, 2, 3, 0.4, 0.5, 0.6, "ok");
     }
 
     /**

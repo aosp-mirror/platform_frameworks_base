@@ -48,7 +48,7 @@ public class PackageManagerServiceTest {
             public void sendPackageBroadcast(final String action, final String pkg,
                     final Bundle extras, final int flags, final String targetPkg,
                     final IIntentReceiver finishedReceiver, final int[] userIds,
-                    int[] instantUserIds, SparseArray<int[]> broadcastWhitelist) {
+                    int[] instantUserIds, SparseArray<int[]> broadcastAllowList) {
             }
 
             public void sendPackageAddedForNewUsers(String packageName,

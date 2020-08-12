@@ -17,7 +17,7 @@
 package com.android.protolog.tool
 
 import com.android.protolog.tool.Constants.ENUM_VALUES_METHOD
-import com.android.server.protolog.common.IProtoLogGroup
+import com.android.internal.protolog.common.IProtoLogGroup
 import java.io.File
 import java.net.URLClassLoader
 

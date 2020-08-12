@@ -46,7 +46,9 @@ public:
 
     virtual ~MetricsManager();
 
-    bool updateConfig(const int64_t currentTimeNs, const StatsdConfig& config);
+    bool updateConfig(const StatsdConfig& config, const int64_t timeBaseNs,
+                      const int64_t currentTimeNs, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor);
 
     // Return whether the configuration is valid.
     bool isConfigValid() const;
@@ -236,6 +238,12 @@ private:
 
     // Hold all periodic alarm trackers.
     std::vector<sp<AlarmTracker>> mAllPeriodicAlarmTrackers;
+
+    // To make updating configs faster, we map the id of a LogMatchingTracker, MetricProducer, and
+    // ConditionTracker to its index in the corresponding vector.
+
+    // Maps the id of an atom matcher to its index in mAllAtomMatchers.
+    std::unordered_map<int64_t, int> mLogTrackerMap;
 
     // To make the log processing more efficient, we want to do as much filtering as possible
     // before we go into individual trackers and conditions to match.

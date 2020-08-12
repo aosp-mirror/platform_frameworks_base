@@ -30,7 +30,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,8 +45,8 @@ import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowManager;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

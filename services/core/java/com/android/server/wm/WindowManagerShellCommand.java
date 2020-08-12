@@ -31,7 +31,7 @@ import android.view.Surface;
 import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
-import com.android.server.protolog.ProtoLogImpl;
+import com.android.internal.protolog.ProtoLogImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
