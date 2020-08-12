@@ -81,7 +81,7 @@ public abstract class InputMethodManagerInternal {
             };
 
     /**
-     * @return Global instance if exists.  Otherwise, a dummy no-op instance.
+     * @return Global instance if exists.  Otherwise, a fallback no-op instance.
      */
     @NonNull
     public static InputMethodManagerInternal get() {

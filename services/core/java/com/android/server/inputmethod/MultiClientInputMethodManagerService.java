@@ -1590,7 +1590,7 @@ public final class MultiClientInputMethodManagerService {
                 }
 
                 if (editorInfo == null) {
-                    // So-called dummy InputConnection scenario.  For app compatibility, we still
+                    // So-called fallback InputConnection scenario.  For app compatibility, we still
                     // notify this to the IME.
                     switch (clientInfo.mState) {
                         case InputMethodClientState.READY_TO_SEND_FIRST_BIND_RESULT:
