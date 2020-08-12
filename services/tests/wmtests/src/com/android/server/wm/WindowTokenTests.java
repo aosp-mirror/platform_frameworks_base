@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -145,29 +146,40 @@ public class WindowTokenTests extends WindowTestsBase {
         assertEquals(0, token.getWindowsCount());
     }
 
-    @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER })
     @Test
     public void testFinishFixedRotationTransform() {
-        final WindowToken appToken = mAppWindow.mToken;
-        final WindowToken wallpaperToken = mWallpaperWindow.mToken;
+        final WindowToken[] tokens = new WindowToken[3];
+        for (int i = 0; i < tokens.length; i++) {
+            tokens[i] = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        }
+
         final Configuration config = new Configuration(mDisplayContent.getConfiguration());
         final int originalRotation = config.windowConfiguration.getRotation();
         final int targetRotation = (originalRotation + 1) % 4;
 
         config.windowConfiguration.setRotation(targetRotation);
-        appToken.applyFixedRotationTransform(mDisplayInfo, mDisplayContent.mDisplayFrames, config);
-        wallpaperToken.linkFixedRotationTransform(appToken);
+        tokens[0].applyFixedRotationTransform(mDisplayInfo, mDisplayContent.mDisplayFrames, config);
+        tokens[1].linkFixedRotationTransform(tokens[0]);
 
         // The window tokens should apply the rotation by the transformation.
-        assertEquals(targetRotation, appToken.getWindowConfiguration().getRotation());
-        assertEquals(targetRotation, wallpaperToken.getWindowConfiguration().getRotation());
+        assertEquals(targetRotation, tokens[0].getWindowConfiguration().getRotation());
+        assertEquals(targetRotation, tokens[1].getWindowConfiguration().getRotation());
 
-        // The display doesn't rotate, the transformation will be canceled.
-        mAppWindow.mToken.finishFixedRotationTransform();
+        tokens[2].applyFixedRotationTransform(mDisplayInfo, mDisplayContent.mDisplayFrames, config);
+        // The tokens[1] was linked to tokens[0], this should make tokens[1] link to tokens[2].
+        tokens[1].linkFixedRotationTransform(tokens[2]);
 
-        // The window tokens should restore to the original rotation.
-        assertEquals(originalRotation, appToken.getWindowConfiguration().getRotation());
-        assertEquals(originalRotation, wallpaperToken.getWindowConfiguration().getRotation());
+        // Assume the display doesn't rotate, the transformation will be canceled.
+        tokens[0].finishFixedRotationTransform();
+
+        // The tokens[0] should restore to the original rotation.
+        assertEquals(originalRotation, tokens[0].getWindowConfiguration().getRotation());
+        // The tokens[1] is linked to tokens[2], it should keep the target rotation.
+        assertNotEquals(originalRotation, tokens[1].getWindowConfiguration().getRotation());
+
+        tokens[2].finishFixedRotationTransform();
+        // The rotation of tokens[1] should be restored because its linked state is finished.
+        assertEquals(originalRotation, tokens[1].getWindowConfiguration().getRotation());
     }
 
     /**
