@@ -2549,7 +2549,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final Task stack = getRootTask();
         final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
-                && stack.isFocusedStackOnDisplay();
+                && stack.isFocusedStackOnDisplay()
+                // Do not adjust focus task because the task will be reused to launch new activity.
+                && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
