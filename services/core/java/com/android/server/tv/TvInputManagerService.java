@@ -87,6 +87,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
@@ -715,7 +716,8 @@ public final class TvInputManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    private void releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
+    @Nullable
+    private SessionState releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
         SessionState sessionState = null;
         try {
             sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
@@ -738,6 +740,7 @@ public final class TvInputManagerService extends SystemService {
             }
         }
         removeSessionStateLocked(sessionToken, userId);
+        return sessionState;
     }
 
     @GuardedBy("mLock")
@@ -1248,7 +1251,22 @@ public final class TvInputManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
                     userId, "createSession");
             final long identity = Binder.clearCallingIdentity();
-            // Generate a unique session id with a random UUID.
+            /**
+             * A randomly generated id for this this session.
+             *
+             * <p>This field contains no user or device reference and is large enough to be
+             * effectively globally unique.
+             *
+             * <p><b>WARNING</b> Any changes to this field should be carefully reviewed for privacy.
+             * Inspect the code at:
+             *
+             * <ul>
+             *   <li>framework/base/cmds/statsd/src/atoms.proto#TifTuneState
+             *   <li>{@link #logTuneStateChanged}
+             *   <li>{@link TvInputManagerService.BinderService#createSession}
+             *   <li>{@link SessionState#sessionId}
+             * </ul>
+             */
             String uniqueSessionId = UUID.randomUUID().toString();
             try {
                 synchronized (mLock) {
@@ -1301,6 +1319,8 @@ public final class TvInputManagerService extends SystemService {
                     } else {
                         updateServiceConnectionLocked(info.getComponent(), resolvedUserId);
                     }
+                    logTuneStateChanged(FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__CREATED,
+                            sessionState);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1317,8 +1337,13 @@ public final class TvInputManagerService extends SystemService {
                     userId, "releaseSession");
             final long identity = Binder.clearCallingIdentity();
             try {
+                SessionState sessionState = null;
                 synchronized (mLock) {
-                    releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
+                    sessionState = releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
+                }
+                if (sessionState != null) {
+                    logTuneStateChanged(FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__RELEASED,
+                            sessionState);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1372,10 +1397,11 @@ public final class TvInputManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "setSurface");
             final long identity = Binder.clearCallingIdentity();
+            SessionState sessionState = null;
             try {
                 synchronized (mLock) {
                     try {
-                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 resolvedUserId);
                         if (sessionState.hardwareSessionToken == null) {
                             getSessionLocked(sessionState).setSurface(surface);
@@ -1391,6 +1417,13 @@ public final class TvInputManagerService extends SystemService {
                 if (surface != null) {
                     // surface is not used in TvInputManagerService.
                     surface.release();
+                }
+                if (sessionState != null) {
+                    int state = surface == null
+                            ?
+                            FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_ATTACHED
+                            : FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_DETACHED;
+                    logTuneStateChanged(state, sessionState);
                 }
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1479,6 +1512,9 @@ public final class TvInputManagerService extends SystemService {
                             return;
                         }
 
+                        logTuneStateChanged(
+                                FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__TUNE_STARTED,
+                                sessionState);
                         // Log the start of watch.
                         SomeArgs args = SomeArgs.obtain();
                         args.arg1 = sessionState.componentName.getPackageName();
@@ -2367,6 +2403,27 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    /**
+     * Log Tune state changes to {@link FrameworkStatsLog}.
+     *
+     * <p><b>WARNING</b> Any changes to this field should be carefully reviewed for privacy.
+     * Inspect the code at:
+     *
+     * <ul>
+     *   <li>framework/base/cmds/statsd/src/atoms.proto#TifTuneState
+     *   <li>{@link #logTuneStateChanged}
+     *   <li>{@link TvInputManagerService.BinderService#createSession}
+     *   <li>{@link SessionState#sessionId}
+     * </ul>
+     */
+    private void logTuneStateChanged(int state, SessionState sessionState) {
+        // TODO(b/165372105): log the tis uid.
+        // TODO(b/173536904): log input type and id
+        FrameworkStatsLog.write(FrameworkStatsLog.TIF_TUNE_CHANGED,
+                new int[]{sessionState.callingUid},
+                new String[]{"tif_player"}, state, sessionState.sessionId);
+    }
+
     private static final class UserState {
         // A mapping from the TV input id to its TvInputState.
         private Map<String, TvInputState> inputMap = new HashMap<>();
@@ -2478,6 +2535,23 @@ public final class TvInputManagerService extends SystemService {
 
     private final class SessionState implements IBinder.DeathRecipient {
         private final String inputId;
+
+        /**
+         * A randomly generated id for this this session.
+         *
+         * <p>This field contains no user or device reference and is large enough to be
+         * effectively globally unique.
+         *
+         * <p><b>WARNING</b> Any changes to this field should be carefully reviewed for privacy.
+         * Inspect the code at:
+         *
+         * <ul>
+         *   <li>framework/base/cmds/statsd/src/atoms.proto#TifTuneState
+         *   <li>{@link #logTuneStateChanged}
+         *   <li>{@link TvInputManagerService.BinderService#createSession}
+         *   <li>{@link SessionState#sessionId}
+         * </ul>
+         */
         private final String sessionId;
         private final ComponentName componentName;
         private final boolean isRecordingSession;
@@ -2817,6 +2891,9 @@ public final class TvInputManagerService extends SystemService {
                 }
                 try {
                     mSessionState.client.onVideoAvailable(mSessionState.seq);
+                    logTuneStateChanged(
+                            FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__VIDEO_AVAILABLE,
+                            mSessionState);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoAvailable", e);
                 }
@@ -2834,6 +2911,16 @@ public final class TvInputManagerService extends SystemService {
                 }
                 try {
                     mSessionState.client.onVideoUnavailable(reason, mSessionState.seq);
+                    int loggedReason = reason + FrameworkStatsLog
+                            .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
+                    if (loggedReason < FrameworkStatsLog
+                            .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN
+                            || loggedReason > FrameworkStatsLog
+                            .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN) {
+                        loggedReason = FrameworkStatsLog
+                                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
+                    }
+                    logTuneStateChanged(loggedReason, mSessionState);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoUnavailable", e);
                 }

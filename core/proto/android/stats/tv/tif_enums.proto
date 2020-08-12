@@ -1,0 +1,56 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.stats.tv;
+option java_multiple_files = true;
+
+// Enums for TV Input Framework
+option java_outer_classname = "TifStatsEnums";
+
+// Tune State of a TV Input Service Framework
+enum TifTuneState {
+  TIF_TUNE_STATE_UNKNOWN = 0;
+  CREATED = 1;
+  SURFACE_ATTACHED = 2;
+  SURFACE_DETACHED = 3;
+  RELEASED = 4;
+  TUNE_STARTED = 5;
+  VIDEO_AVAILABLE = 6;
+
+  // Keep in sync with TvInputManager
+  // Use the TvInputManager value + 100
+  VIDEO_UNAVAILABLE_REASON_UNKNOWN = 100;
+  VIDEO_UNAVAILABLE_REASON_TUNING = 101;
+  VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 102;
+  VIDEO_UNAVAILABLE_REASON_BUFFERING = 103;
+  VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = 104;
+  VIDEO_UNAVAILABLE_REASON_NOT_CONNECTED = 105;
+  VIDEO_UNAVAILABLE_REASON_INSUFFICIENT_RESOURCE = 106;
+  VIDEO_UNAVAILABLE_REASON_CAS_INSUFFICIENT_OUTPUT_PROTECTION=107;
+  VIDEO_UNAVAILABLE_REASON_CAS_PVR_RECORDING_NOT_ALLOWED=108;
+  VIDEO_UNAVAILABLE_REASON_CAS_NO_LICENSE=109;
+  VIDEO_UNAVAILABLE_REASON_CAS_LICENSE_EXPIRED=110;
+  VIDEO_UNAVAILABLE_REASON_CAS_NEED_ACTIVATION=111;
+  VIDEO_UNAVAILABLE_REASON_CAS_NEED_PAIRING=112;
+  VIDEO_UNAVAILABLE_REASON_CAS_NO_CARD=113;
+  VIDEO_UNAVAILABLE_REASON_CAS_CARD_MUTE=114;
+  VIDEO_UNAVAILABLE_REASON_CAS_CARD_INVALID=115;
+  VIDEO_UNAVAILABLE_REASON_CAS_BLACKOUT=116;
+  VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING=117;
+  VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN=118;
+}
