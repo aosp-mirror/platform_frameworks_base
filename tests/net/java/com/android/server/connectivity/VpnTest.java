@@ -270,12 +270,12 @@ public class VpnTest {
     }
 
     @Test
-    public void testUidWhiteAndBlacklist() throws Exception {
+    public void testUidAllowAndDenylist() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
         final String[] packages = {PKGS[0], PKGS[1], PKGS[2]};
 
-        // Whitelist
+        // Allowed list
         final Set<UidRange> allow = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
                 Arrays.asList(packages), null);
         assertEquals(new ArraySet<>(Arrays.asList(new UidRange[] {
@@ -283,7 +283,7 @@ public class VpnTest {
             new UidRange(user.start + PKG_UIDS[1], user.start + PKG_UIDS[2])
         })), allow);
 
-        // Blacklist
+        // Denied list
         final Set<UidRange> disallow = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
                 null, Arrays.asList(packages));
         assertEquals(new ArraySet<>(Arrays.asList(new UidRange[] {
@@ -354,11 +354,11 @@ public class VpnTest {
     }
 
     @Test
-    public void testLockdownWhitelist() throws Exception {
+    public void testLockdownAllowlist() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
 
-        // Set always-on with lockdown and whitelist app PKGS[2] from lockdown.
+        // Set always-on with lockdown and allow app PKGS[2] from lockdown.
         assertTrue(vpn.setAlwaysOnPackage(
                 PKGS[1], true, Collections.singletonList(PKGS[2]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
@@ -368,7 +368,7 @@ public class VpnTest {
         assertBlocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[3]);
         assertUnblocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
 
-        // Change whitelisted app to PKGS[3].
+        // Change allowed app list to PKGS[3].
         assertTrue(vpn.setAlwaysOnPackage(
                 PKGS[1], true, Collections.singletonList(PKGS[3]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
@@ -395,7 +395,7 @@ public class VpnTest {
         assertBlocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[3]);
 
-        // Remove the whitelist.
+        // Remove the list of allowed packages.
         assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, null, mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
                 new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[3] - 1),
@@ -408,7 +408,7 @@ public class VpnTest {
                 user.start + PKG_UIDS[3]);
         assertUnblocked(vpn, user.start + PKG_UIDS[0]);
 
-        // Add the whitelist.
+        // Add the list of allowed packages.
         assertTrue(vpn.setAlwaysOnPackage(
                 PKGS[0], true, Collections.singletonList(PKGS[1]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
@@ -421,12 +421,12 @@ public class VpnTest {
         assertBlocked(vpn, user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1]);
 
-        // Try whitelisting a package with a comma, should be rejected.
+        // Try allowing a package with a comma, should be rejected.
         assertFalse(vpn.setAlwaysOnPackage(
                 PKGS[0], true, Collections.singletonList("a.b,c.d"), mKeyStore));
 
-        // Pass a non-existent packages in the whitelist, they (and only they) should be ignored.
-        // Whitelisted package should change from PGKS[1] to PKGS[2].
+        // Pass a non-existent packages in the allowlist, they (and only they) should be ignored.
+        // allowed package should change from PGKS[1] to PKGS[2].
         assertTrue(vpn.setAlwaysOnPackage(
                 PKGS[0], true, Arrays.asList("com.foo.app", PKGS[2], "com.bar.app"), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[]{
