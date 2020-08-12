@@ -50,6 +50,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -218,7 +219,7 @@ public class ContentProviderHelper {
                     // of being published...  but it is also allowed to run
                     // in the caller's process, so don't make a connection
                     // and just let the caller instantiate its own instance.
-                    ContentProviderHolder holder = cpr.newHolder(null);
+                    ContentProviderHolder holder = cpr.newHolder(null, true);
                     // don't give caller the provider object, it needs to make its own.
                     holder.provider = null;
                     return holder;
@@ -415,7 +416,7 @@ public class ContentProviderHelper {
                     // info and allow the caller to instantiate it.  Only do
                     // this if the provider is the same user as the caller's
                     // process, or can run as root (so can be in any process).
-                    return cpr.newHolder(null);
+                    return cpr.newHolder(null, true);
                 }
 
                 if (ActivityManagerDebugConfig.DEBUG_PROVIDER) {
@@ -513,6 +514,38 @@ public class ContentProviderHelper {
                     UserHandle.getAppId(cpi.applicationInfo.uid));
         }
 
+        if (caller != null) {
+            // The client will be waiting, and we'll notify it when the provider is ready.
+            synchronized (cpr) {
+                if (cpr.provider == null) {
+                    if (cpr.launchingApp == null) {
+                        Slog.w(TAG, "Unable to launch app "
+                                + cpi.applicationInfo.packageName + "/"
+                                + cpi.applicationInfo.uid + " for provider "
+                                + name + ": launching app became null");
+                        EventLogTags.writeAmProviderLostProcess(
+                                UserHandle.getUserId(cpi.applicationInfo.uid),
+                                cpi.applicationInfo.packageName,
+                                cpi.applicationInfo.uid, name);
+                        return null;
+                    }
+
+                    if (conn != null) {
+                        conn.waiting = true;
+                    }
+                    Message msg = mService.mHandler.obtainMessage(
+                            ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG);
+                    msg.obj = cpr;
+                    mService.mHandler.sendMessageDelayed(msg,
+                            ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
+                }
+            }
+            // Return a holder instance even if we are waiting for the publishing of the provider,
+            // client will check for the holder.provider to see if it needs to wait for it.
+            return cpr.newHolder(conn, false);
+        }
+
+        // Because of the provider's external client (i.e., SHELL), we'll have to wait right here.
         // Wait for the provider to be published...
         final long timeout =
                 SystemClock.uptimeMillis() + ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS;
@@ -569,7 +602,7 @@ public class ContentProviderHelper {
                     + " caller=" + callerName + "/" + Binder.getCallingUid());
             return null;
         }
-        return cpr.newHolder(conn);
+        return cpr.newHolder(conn, false);
     }
 
     void publishContentProviders(IApplicationThread caller, List<ContentProviderHolder> providers) {
@@ -622,6 +655,8 @@ public class ContentProviderHelper {
                 }
                 if (wasInLaunchingProviders) {
                     mService.mHandler.removeMessages(
+                            ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG, dst);
+                    mService.mHandler.removeMessages(
                             ActivityManagerService.CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG, r);
                 }
                 // Make sure the package is associated with the process.
@@ -635,6 +670,7 @@ public class ContentProviderHelper {
                     dst.provider = src.provider;
                     dst.setProcess(r);
                     dst.notifyAll();
+                    dst.onProviderPublishStatusLocked(true);
                 }
                 dst.mRestartCount = 0;
                 mService.updateOomAdjLocked(r, true, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
@@ -1504,6 +1540,9 @@ public class ContentProviderHelper {
             synchronized (cpr) {
                 cpr.launchingApp = null;
                 cpr.notifyAll();
+                cpr.onProviderPublishStatusLocked(false);
+                mService.mHandler.removeMessages(
+                        ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG, cpr);
             }
             final int userId = UserHandle.getUserId(cpr.uid);
             // Don't remove from provider map if it doesn't match

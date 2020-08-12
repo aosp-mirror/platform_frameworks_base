@@ -424,9 +424,14 @@ public final class ActivityThread extends ClientTransactionHandler {
         final String authority;
         final int userId;
 
+        @GuardedBy("mLock")
+        ContentProviderHolder mHolder; // Temp holder to be used between notifier and waiter
+        Object mLock; // The lock to be used to get notified when the provider is ready
+
         public ProviderKey(String authority, int userId) {
             this.authority = authority;
             this.userId = userId;
+            this.mLock = new Object();
         }
 
         @Override
@@ -440,7 +445,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         @Override
         public int hashCode() {
-            return ((authority != null) ? authority.hashCode() : 0) ^ userId;
+            return hashCode(authority, userId);
+        }
+
+        public static int hashCode(final String auth, final int userIdent) {
+            return ((auth != null) ? auth.hashCode() : 0) ^ userIdent;
         }
     }
 
@@ -461,9 +470,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     // Mitigation for b/74523247: Used to serialize calls to AM.getContentProvider().
     // Note we never removes items from this map but that's okay because there are only so many
     // users and so many authorities.
-    // TODO Remove it once we move CPR.wait() from AMS to the client side.
-    @GuardedBy("mGetProviderLocks")
-    final ArrayMap<ProviderKey, Object> mGetProviderLocks = new ArrayMap<>();
+    @GuardedBy("mGetProviderKeys")
+    final SparseArray<ProviderKey> mGetProviderKeys = new SparseArray<>();
 
     final ArrayMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
         = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
@@ -1755,6 +1763,16 @@ public final class ActivityThread extends ClientTransactionHandler {
             mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handlePerformDirectAction,
                     ActivityThread.this, activityToken, actionId, arguments,
                     cancellationSignal, resultCallback));
+        }
+
+        @Override
+        public void notifyContentProviderPublishStatus(@NonNull ContentProviderHolder holder,
+                @NonNull String auth, int userId, boolean published) {
+            final ProviderKey key = getGetProviderKey(auth, userId);
+            synchronized (key.mLock) {
+                key.mHolder = holder;
+                key.mLock.notifyAll();
+            }
         }
     }
 
@@ -6807,13 +6825,33 @@ public final class ActivityThread extends ClientTransactionHandler {
         // provider since it might take a long time to run and it could also potentially
         // be re-entrant in the case where the provider is in the same process.
         ContentProviderHolder holder = null;
+        final ProviderKey key = getGetProviderKey(auth, userId);
         try {
-            synchronized (getGetProviderLock(auth, userId)) {
+            synchronized (key) {
                 holder = ActivityManager.getService().getContentProvider(
                         getApplicationThread(), c.getOpPackageName(), auth, userId, stable);
+                // If the returned holder is non-null but its provider is null and it's not
+                // local, we'll need to wait for the publishing of the provider.
+                if (holder != null && holder.provider == null && !holder.mLocal) {
+                    synchronized (key.mLock) {
+                        key.mLock.wait(ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
+                        holder = key.mHolder;
+                    }
+                    if (holder != null && holder.provider == null) {
+                        // probably timed out
+                        holder = null;
+                    }
+                }
             }
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        } catch (InterruptedException e) {
+            holder = null;
+        } finally {
+            // Clear the holder from the key since the key itself is never cleared.
+            synchronized (key.mLock) {
+                key.mHolder = null;
+            }
         }
         if (holder == null) {
             if (UserManager.get(c).isUserUnlocked(userId)) {
@@ -6831,13 +6869,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         return holder.provider;
     }
 
-    private Object getGetProviderLock(String auth, int userId) {
-        final ProviderKey key = new ProviderKey(auth, userId);
-        synchronized (mGetProviderLocks) {
-            Object lock = mGetProviderLocks.get(key);
+    private ProviderKey getGetProviderKey(String auth, int userId) {
+        final int key = ProviderKey.hashCode(auth, userId);
+        synchronized (mGetProviderKeys) {
+            ProviderKey lock = mGetProviderKeys.get(key);
             if (lock == null) {
-                lock = key;
-                mGetProviderLocks.put(key, lock);
+                lock = new ProviderKey(auth, userId);
+                mGetProviderKeys.put(key, lock);
             }
             return lock;
         }
