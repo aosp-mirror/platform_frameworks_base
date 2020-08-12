@@ -20,9 +20,10 @@ android_test {
         "androidx.test.rules",
         "androidx.annotation_annotation",
         "apct-perftests-utils",
-        "collector-device-lib-platform",
+        "collector-device-lib",
         "compatibility-device-util-axt",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],
+    data: [":perfetto_artifacts"],
 }
