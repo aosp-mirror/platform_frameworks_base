@@ -3074,7 +3074,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public boolean hasPulsingNotifications() {
-        return mNotificationStackScrollLayoutController.hasPulsingNotifications();
+        return mNotificationStackScrollLayoutController
+                .getNotificationListContainer().hasPulsingNotifications();
     }
 
     public ActivatableNotificationView getActivatedChild() {
@@ -3257,6 +3258,10 @@ public class NotificationPanelViewController extends PanelViewController {
     protected PanelViewController.OnConfigurationChangedListener
             createOnConfigurationChangedListener() {
         return new OnConfigurationChangedListener();
+    }
+
+    public NotificationStackScrollLayoutController getNotificationStackScrollLayoutController() {
+        return mNotificationStackScrollLayoutController;
     }
 
     private class OnHeightChangedListener implements ExpandableView.OnHeightChangedListener {

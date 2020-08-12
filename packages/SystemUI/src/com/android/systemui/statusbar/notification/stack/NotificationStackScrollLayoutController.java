@@ -17,22 +17,29 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 
 import android.graphics.PointF;
+import android.provider.Settings;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -40,6 +47,7 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.tuner.TunerService;
 
 import java.util.function.BiConsumer;
 
@@ -53,14 +61,25 @@ import javax.inject.Named;
 public class NotificationStackScrollLayoutController {
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
+    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final NotificationRoundnessManager mNotificationRoundnessManager;
+    private final TunerService mTunerService;
+    private final NotificationListContainerImpl mNotificationListContainer =
+            new NotificationListContainerImpl();
     private NotificationStackScrollLayout mView;
 
     @Inject
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            NotificationGutsManager notificationGutsManager) {
+            NotificationGutsManager notificationGutsManager,
+            HeadsUpManagerPhone headsUpManager,
+            NotificationRoundnessManager notificationRoundnessManager,
+            TunerService tunerService) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
+        mHeadsUpManager = headsUpManager;
+        mNotificationRoundnessManager = notificationRoundnessManager;
+        mTunerService = tunerService;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -70,6 +89,17 @@ public class NotificationStackScrollLayoutController {
         if (mAllowLongPress) {
             mView.setLongPressListener(mNotificationGutsManager::openGuts);
         }
+
+        mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
+
+        mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
+        mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
+
+        mTunerService.addTunable((key, newValue) -> {
+            if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
+                mView.updateDismissRtlSetting("1".equals(newValue));
+            }
+        }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
@@ -457,10 +487,6 @@ public class NotificationStackScrollLayoutController {
         mView.onUpdateRowStates();
     }
 
-    public boolean hasPulsingNotifications() {
-        return mView.hasPulsingNotifications();
-    }
-
     public ActivatableNotificationView getActivatedChild() {
         return mView.getActivatedChild();
     }
@@ -536,5 +562,152 @@ public class NotificationStackScrollLayoutController {
 
     public float calculateGapHeight(ExpandableView previousView, ExpandableView child, int count) {
         return mView.calculateGapHeight(previousView, child, count);
+    }
+
+    public NotificationRoundnessManager getNoticationRoundessManager() {
+        return mNotificationRoundnessManager;
+    }
+
+    public NotificationListContainer getNotificationListContainer() {
+        return mNotificationListContainer;
+    }
+
+    private class NotificationListContainerImpl implements NotificationListContainer {
+        @Override
+        public void setChildTransferInProgress(boolean childTransferInProgress) {
+            mView.setChildTransferInProgress(childTransferInProgress);
+        }
+
+        @Override
+        public void changeViewPosition(ExpandableView child, int newIndex) {
+            mView.changeViewPosition(child, newIndex);
+        }
+
+        @Override
+        public void notifyGroupChildAdded(ExpandableView row) {
+            mView.onViewAddedInternal(row);
+        }
+
+        @Override
+        public void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer) {
+            mView.notifyGroupChildRemoved(row, childrenContainer);
+        }
+
+        @Override
+        public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
+            mView.generateAddAnimation(child, fromMoreCard);
+        }
+
+        @Override
+        public void generateChildOrderChangedEvent() {
+            mView.generateChildOrderChangedEvent();
+        }
+
+        @Override
+        public int getContainerChildCount() {
+            return mView.getContainerChildCount();
+        }
+
+        @Override
+        public void setNotificationActivityStarter(
+                NotificationActivityStarter notificationActivityStarter) {
+            mView.setNotificationActivityStarter(notificationActivityStarter);
+        }
+
+        @Override
+        public View getContainerChildAt(int i) {
+            return mView.getContainerChildAt(i);
+        }
+
+        @Override
+        public void removeContainerView(View v) {
+            mView.removeContainerView(v);
+        }
+
+        @Override
+        public void addContainerView(View v) {
+            mView.addContainerView(v);
+        }
+
+        @Override
+        public void addContainerViewAt(View v, int index) {
+            mView.addContainerViewAt(v, index);
+        }
+
+        @Override
+        public void setMaxDisplayedNotifications(int maxNotifications) {
+            mView.setMaxDisplayedNotifications(maxNotifications);
+        }
+
+        @Override
+        public ViewGroup getViewParentForNotification(NotificationEntry entry) {
+            return mView.getViewParentForNotification(entry);
+        }
+
+        @Override
+        public void resetExposedMenuView(boolean animate, boolean force) {
+            mView.resetExposedMenuView(animate, force);
+        }
+
+        @Override
+        public NotificationSwipeActionHelper getSwipeActionHelper() {
+            return mView.getSwipeActionHelper();
+        }
+
+        @Override
+        public void cleanUpViewStateForEntry(NotificationEntry entry) {
+            mView.cleanUpViewStateForEntry(entry);
+        }
+
+        @Override
+        public void setChildLocationsChangedListener(
+                NotificationLogger.OnChildLocationsChangedListener listener) {
+
+        }
+
+        public boolean hasPulsingNotifications() {
+            return mView.hasPulsingNotifications();
+        }
+
+        @Override
+        public boolean isInVisibleLocation(NotificationEntry entry) {
+            return mView.isInVisibleLocation(entry);
+        }
+
+        @Override
+        public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
+            mView.onChildHeightChanged(view, needsAnimation);
+        }
+
+        @Override
+        public void onReset(ExpandableView view) {
+            mView.onChildHeightReset(view);
+        }
+
+        @Override
+        public void bindRow(ExpandableNotificationRow row) {
+            mView.bindRow(row);
+        }
+
+        @Override
+        public void applyExpandAnimationParams(
+                ActivityLaunchAnimator.ExpandAnimationParameters params) {
+            mView.applyExpandAnimationParams(params);
+        }
+
+        @Override
+        public void setExpandingNotification(ExpandableNotificationRow row) {
+            mView.setExpandingNotification(row);
+        }
+
+        @Override
+        public boolean containsView(View v) {
+            return mView.containsView(v);
+        }
+
+        @Override
+        public void setWillExpand(boolean willExpand) {
+            mView.setWillExpand(willExpand);
+        }
     }
 }

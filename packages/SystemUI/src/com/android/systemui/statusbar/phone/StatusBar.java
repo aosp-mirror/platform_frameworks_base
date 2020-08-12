@@ -210,6 +210,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -646,6 +647,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final BubbleController.BubbleExpandListener mBubbleExpandListener;
 
     private ActivityIntentHelper mActivityIntentHelper;
+    private NotificationStackScrollLayoutController mStackScrollerController;
 
     /**
      * Public constructor for StatusBar.
@@ -1016,9 +1018,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        mStackScroller = mNotificationShadeWindowView.findViewById(
-                R.id.notification_stack_scroller);
-        NotificationListContainer notifListContainer = (NotificationListContainer) mStackScroller;
+        mStackScrollerController =
+                mNotificationPanelViewController.getNotificationStackScrollLayoutController();
+        mStackScroller = mStackScrollerController.getView();
+        NotificationListContainer notifListContainer =
+                mStackScrollerController.getNotificationListContainer();
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         // TODO: make this injectable. Currently that would create a circular dependency between
@@ -1301,13 +1305,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         mActivityLaunchAnimator = new ActivityLaunchAnimator(
                 mNotificationShadeWindowViewController, this, mNotificationPanelViewController,
                 mNotificationShadeDepthControllerLazy.get(),
-                (NotificationListContainer) mStackScroller, mContext.getMainExecutor());
+                mStackScrollerController.getNotificationListContainer(),
+                mContext.getMainExecutor());
 
         // TODO: inject this.
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
-                mHeadsUpManager, mNotificationShadeWindowView, mStackScroller, mDozeScrimController,
-                mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
-                mKeyguardStateController, mKeyguardIndicationController,
+                mHeadsUpManager, mNotificationShadeWindowView, mStackScrollerController,
+                mDozeScrimController, mScrimController, mActivityLaunchAnimator,
+                mDynamicPrivacyController, mKeyguardStateController,
+                mKeyguardIndicationController,
                 this /* statusBar */, mShadeController, mCommandQueue, mInitController,
                 mNotificationInterruptStateProvider);
 
@@ -1321,16 +1327,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                         .setNotificationPresenter(mPresenter)
                         .setNotificationPanelViewController(mNotificationPanelViewController)
                         .build();
-
-        ((NotificationListContainer) mStackScroller)
-                .setNotificationActivityStarter(mNotificationActivityStarter);
-
+        mStackScroller.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
         mNotificationsController.initialize(
                 this,
                 mPresenter,
-                (NotificationListContainer) mStackScroller,
+                mStackScrollerController.getNotificationListContainer(),
                 mNotificationActivityStarter,
                 mPresenter);
     }
