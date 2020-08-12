@@ -362,6 +362,11 @@ public class Tuner implements AutoCloseable  {
      */
     @Override
     public void close() {
+        releaseAll();
+        TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
+    }
+
+    private void releaseAll() {
         if (mFrontendHandle != null) {
             int res = nativeCloseFrontend(mFrontendHandle);
             if (res != Tuner.RESULT_SUCCESS) {
@@ -396,9 +401,9 @@ public class Tuner implements AutoCloseable  {
                 TunerUtils.throwExceptionForResult(res, "failed to close demux");
             }
             mTunerResourceManager.releaseDemux(mDemuxHandle, mClientId);
-            mFrontendHandle = null;
+            mDemuxHandle = null;
         }
-        TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
+
     }
 
     /**
@@ -495,6 +500,7 @@ public class Tuner implements AutoCloseable  {
                     break;
                 }
                 case MSG_RESOURCE_LOST: {
+                    releaseAll();
                     if (mOnResourceLostListener != null
                                 && mOnResourceLostListenerExecutor != null) {
                         mOnResourceLostListenerExecutor.execute(
