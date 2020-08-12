@@ -79,8 +79,15 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
-@Module(includes = {DividerModule.class, QSModule.class})
-public abstract class CarSystemUIModule {
+@Module(
+        includes = {
+                DividerModule.class,
+                QSModule.class
+        },
+        subcomponents = {
+                CarSysUIComponent.class
+        })
+abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
