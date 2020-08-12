@@ -707,12 +707,12 @@ public class AccessibilityWindowManager {
                 case WindowManager.LayoutParams.TYPE_PHONE:
                 case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
                 case WindowManager.LayoutParams.TYPE_TOAST:
-                case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG: {
+                case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG:
+                case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG: {
                     return AccessibilityWindowInfo.TYPE_APPLICATION;
                 }
 
-                case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
-                case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG: {
+                case WindowManager.LayoutParams.TYPE_INPUT_METHOD: {
                     return AccessibilityWindowInfo.TYPE_INPUT_METHOD;
                 }
 
