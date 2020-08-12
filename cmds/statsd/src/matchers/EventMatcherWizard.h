@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "LogMatchingTracker.h"
+#include "AtomMatchingTracker.h"
 
 namespace android {
 namespace os {
@@ -25,7 +25,7 @@ namespace statsd {
 class EventMatcherWizard : public virtual android::RefBase {
 public:
     EventMatcherWizard(){};  // for testing
-    EventMatcherWizard(const std::vector<sp<LogMatchingTracker>>& eventTrackers)
+    EventMatcherWizard(const std::vector<sp<AtomMatchingTracker>>& eventTrackers)
         : mAllEventMatchers(eventTrackers){};
 
     virtual ~EventMatcherWizard(){};
@@ -33,7 +33,7 @@ public:
     MatchingState matchLogEvent(const LogEvent& event, int matcher_index);
 
 private:
-    std::vector<sp<LogMatchingTracker>> mAllEventMatchers;
+    std::vector<sp<AtomMatchingTracker>> mAllEventMatchers;
 };
 
 }  // namespace statsd

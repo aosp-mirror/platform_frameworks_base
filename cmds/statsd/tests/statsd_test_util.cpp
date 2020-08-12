@@ -16,7 +16,7 @@
 
 #include <aidl/android/util/StatsEventParcel.h>
 
-#include "matchers/SimpleLogMatchingTracker.h"
+#include "matchers/SimpleAtomMatchingTracker.h"
 #include "stats_event.h"
 
 using aidl::android::util::StatsEventParcel;
@@ -1008,8 +1008,8 @@ sp<EventMatcherWizard> createEventMatcherWizard(
     }
     uint64_t matcherHash = 0x12345678;
     int64_t matcherId = 678;
-    return new EventMatcherWizard({new SimpleLogMatchingTracker(matcherId, matcherIndex,
-                                                                matcherHash, atomMatcher, uidMap)});
+    return new EventMatcherWizard({new SimpleAtomMatchingTracker(
+            matcherId, matcherIndex, matcherHash, atomMatcher, uidMap)});
 }
 
 void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value, const int atomId,

@@ -92,8 +92,8 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
             mUnSlicedChildren.push_back(childIndex);
         }
         mChildren.push_back(childIndex);
-        mTrackerIndex.insert(childTracker->getLogTrackerIndex().begin(),
-                             childTracker->getLogTrackerIndex().end());
+        mTrackerIndex.insert(childTracker->getAtomMatchingTrackerIndex().begin(),
+                             childTracker->getAtomMatchingTrackerIndex().end());
     }
 
     mUnSlicedPartCondition = evaluateCombinationCondition(mUnSlicedChildren, mLogicalOperation,
