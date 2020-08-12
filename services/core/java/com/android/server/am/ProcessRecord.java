@@ -1079,8 +1079,8 @@ class ProcessRecord implements WindowProcessListener {
      */
     public void resetPackageList(ProcessStatsService tracker) {
         final int N = pkgList.size();
-        if (baseProcessTracker != null) {
-            synchronized (tracker.mLock) {
+        synchronized (tracker.mLock) {
+            if (baseProcessTracker != null) {
                 long now = SystemClock.uptimeMillis();
                 baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), now, pkgList.mPkgList);
@@ -1108,10 +1108,11 @@ class ProcessRecord implements WindowProcessListener {
                         holder.state.makeActive();
                     }
                 }
+            } else if (N != 1) {
+                pkgList.clear();
+                pkgList.put(info.packageName,
+                        new ProcessStats.ProcessStateHolder(info.longVersionCode));
             }
-        } else if (N != 1) {
-            pkgList.clear();
-            pkgList.put(info.packageName, new ProcessStats.ProcessStateHolder(info.longVersionCode));
         }
     }
 
