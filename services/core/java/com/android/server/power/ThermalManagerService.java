@@ -200,7 +200,7 @@ public class ThermalManagerService extends SystemService {
         final int count = mTemperatureMap.size();
         for (int i = 0; i < count; i++) {
             Temperature t = mTemperatureMap.valueAt(i);
-            if (t.getStatus() >= newStatus) {
+            if (t.getType() == Temperature.TYPE_SKIN && t.getStatus() >= newStatus) {
                 newStatus = t.getStatus();
             }
         }
