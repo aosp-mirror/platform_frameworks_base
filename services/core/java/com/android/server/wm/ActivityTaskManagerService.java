@@ -251,7 +251,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
@@ -4058,6 +4057,60 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 && r.getRootTask().isInTask(r) != null;
     }
 
+    /**
+     * Puts the given activity in picture in picture mode if possible.
+     *
+     * @return true if the activity is now in picture-in-picture mode, or false if it could not
+     * enter picture-in-picture mode.
+     */
+    boolean enterPictureInPictureMode(ActivityRecord r, final PictureInPictureParams params) {
+        // If the activity is already in picture in picture mode, then just return early
+        if (isInPictureInPictureMode(r)) {
+            return true;
+        }
+
+        // Activity supports picture-in-picture, now check that we can enter PiP at this
+        // point, if it is
+        if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
+                false /* beforeStopping */)) {
+            return false;
+        }
+
+        final Runnable enterPipRunnable = () -> {
+            synchronized (mGlobalLock) {
+                if (r.getParent() == null) {
+                    Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
+                    return;
+                }
+                // Only update the saved args from the args that are set
+                r.setPictureInPictureParams(params);
+                final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
+                final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
+                mRootWindowContainer.moveActivityToPinnedStack(
+                        r, "enterPictureInPictureMode");
+                final Task stack = r.getRootTask();
+                stack.setPictureInPictureAspectRatio(aspectRatio);
+                stack.setPictureInPictureActions(actions);
+            }
+        };
+
+        if (isKeyguardLocked()) {
+            // If the keyguard is showing or occluded, then try and dismiss it before
+            // entering picture-in-picture (this will prompt the user to authenticate if the
+            // device is currently locked).
+            dismissKeyguard(r.appToken, new KeyguardDismissCallback() {
+                @Override
+                public void onDismissSucceeded() {
+                    mH.post(enterPipRunnable);
+                }
+            }, null /* message */);
+        } else {
+            // Enter picture in picture immediately otherwise
+            enterPipRunnable.run();
+        }
+        return true;
+    }
+
     @Override
     public boolean enterPictureInPictureMode(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
@@ -4065,52 +4118,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParamsLocked(
                         "enterPictureInPictureMode", token, params);
-
-                // If the activity is already in picture in picture mode, then just return early
-                if (isInPictureInPictureMode(r)) {
-                    return true;
-                }
-
-                // Activity supports picture-in-picture, now check that we can enter PiP at this
-                // point, if it is
-                if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
-                        false /* beforeStopping */)) {
-                    return false;
-                }
-
-                final Runnable enterPipRunnable = () -> {
-                    synchronized (mGlobalLock) {
-                        if (r.getParent() == null) {
-                            Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
-                            return;
-                        }
-                        // Only update the saved args from the args that are set
-                        r.setPictureInPictureParams(params);
-                        final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
-                        final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                        mRootWindowContainer.moveActivityToPinnedStack(
-                                r, "enterPictureInPictureMode");
-                        final Task stack = r.getRootTask();
-                        stack.setPictureInPictureAspectRatio(aspectRatio);
-                        stack.setPictureInPictureActions(actions);
-                    }
-                };
-
-                if (isKeyguardLocked()) {
-                    // If the keyguard is showing or occluded, then try and dismiss it before
-                    // entering picture-in-picture (this will prompt the user to authenticate if the
-                    // device is currently locked).
-                    dismissKeyguard(token, new KeyguardDismissCallback() {
-                        @Override
-                        public void onDismissSucceeded() {
-                            mH.post(enterPipRunnable);
-                        }
-                    }, null /* message */);
-                } else {
-                    // Enter picture in picture immediately otherwise
-                    enterPipRunnable.run();
-                }
-                return true;
+                return enterPictureInPictureMode(r, params);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4854,6 +4862,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (!canEnterPictureInPicture) {
                     throw new IllegalStateException(
                             "Requested PIP on an activity that doesn't support it");
+                }
+
+                if (activity.pictureInPictureArgs.isAutoEnterAllowed()) {
+                    enterPictureInPictureMode(activity, activity.pictureInPictureArgs);
+                    return;
                 }
 
                 try {

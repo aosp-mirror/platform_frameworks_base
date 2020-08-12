@@ -5448,6 +5448,7 @@ class Task extends WindowContainer<WindowContainer> {
         mAtmService.updateCpuStats();
 
         boolean pauseImmediately = false;
+        boolean shouldAutoPip = false;
         if (resuming != null && (resuming.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0) {
             // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
             // activity to be paused, while at the same time resuming the new resume activity
@@ -5455,26 +5456,39 @@ class Task extends WindowContainer<WindowContainer> {
             // activities a chance to enter Pip before resuming the next activity.
             final boolean lastResumedCanPip = prev != null && prev.checkEnterPictureInPictureState(
                     "shouldResumeWhilePausing", userLeaving);
-            if (!lastResumedCanPip) {
+            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterAllowed()) {
+                shouldAutoPip = true;
+            } else if (!lastResumedCanPip) {
                 pauseImmediately = true;
+            } else {
+                // The previous activity may still enter PIP even though it did not allow auto-PIP.
             }
         }
 
+        boolean didAutoPip = false;
         if (prev.attachedToProcess()) {
-            if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
-            try {
-                EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
-                        prev.shortComponentName, "userLeaving=" + userLeaving);
-
-                mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                        prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
-                                prev.configChangeFlags, pauseImmediately));
-            } catch (Exception e) {
-                // Ignore exception, if process died other code will cleanup.
-                Slog.w(TAG, "Exception thrown during pause", e);
+            if (shouldAutoPip) {
+                if (DEBUG_PAUSE) {
+                    Slog.d(TAG_PAUSE, "Auto-PIP allowed, entering PIP mode directly: " + prev);
+                }
+                didAutoPip = mAtmService.enterPictureInPictureMode(prev, prev.pictureInPictureArgs);
                 mPausingActivity = null;
-                mLastPausedActivity = null;
-                mLastNoHistoryActivity = null;
+            } else {
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
+                try {
+                    EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
+                            prev.shortComponentName, "userLeaving=" + userLeaving);
+
+                    mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
+                            prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
+                                    prev.configChangeFlags, pauseImmediately));
+                } catch (Exception e) {
+                    // Ignore exception, if process died other code will cleanup.
+                    Slog.w(TAG, "Exception thrown during pause", e);
+                    mPausingActivity = null;
+                    mLastPausedActivity = null;
+                    mLastNoHistoryActivity = null;
+                }
             }
         } else {
             mPausingActivity = null;
@@ -5486,6 +5500,11 @@ class Task extends WindowContainer<WindowContainer> {
         // awake until the next activity is started.
         if (!uiSleeping && !mAtmService.isSleepingOrShuttingDownLocked()) {
             mStackSupervisor.acquireLaunchWakelock();
+        }
+
+        if (didAutoPip) {
+            // Already entered PIP mode, no need to keep pausing.
+            return true;
         }
 
         if (mPausingActivity != null) {
