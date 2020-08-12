@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 package com.android.systemui.dagger;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
+import dagger.Subcomponent;
 
 /**
- * Scope annotation for singleton items within the SysUIComponent.
+ * Dagger Subcomponent for Core SysUI.
  */
-@Documented
-@Retention(RUNTIME)
-@Scope
-public @interface SysUISingleton {
+@SysUISingleton
+@Subcomponent(modules = {})
+public interface SysUIComponent {
+
+    /**
+     * Builder for a SysUIComponent.
+     */
+    @Subcomponent.Builder
+    interface Builder {
+        SysUIComponent build();
+    }
 }

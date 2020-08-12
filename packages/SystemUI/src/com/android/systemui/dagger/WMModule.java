@@ -16,18 +16,11 @@
 
 package com.android.systemui.dagger;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
+import dagger.Module;
 
 /**
- * Scope annotation for singleton items within the SysUIComponent.
+ * Dagger module for including the WMComponent.
  */
-@Documented
-@Retention(RUNTIME)
-@Scope
-public @interface SysUISingleton {
+@Module(subcomponents = {WMComponent.class})
+public abstract class WMModule {
 }

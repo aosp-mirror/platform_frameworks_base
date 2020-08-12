@@ -24,10 +24,10 @@ import java.lang.annotation.Retention;
 import javax.inject.Scope;
 
 /**
- * Scope annotation for singleton items within the SysUIComponent.
+ * Scope annotation for singleton items within the WMComponent.
  */
 @Documented
 @Retention(RUNTIME)
 @Scope
-public @interface SysUISingleton {
+public @interface WMSingleton {
 }

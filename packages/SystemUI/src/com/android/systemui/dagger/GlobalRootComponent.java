@@ -42,6 +42,7 @@ import dagger.Component;
 /**
  * Root component for Dagger injection.
  */
+// TODO(b/162923491): Move most of these modules to SysUIComponent.
 @Singleton
 @Component(modules = {
         DefaultComponentBinder.class,
@@ -52,7 +53,8 @@ import dagger.Component;
         SystemServicesModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
-        SystemUIDefaultModule.class})
+        SystemUIDefaultModule.class,
+        WMModule.class})
 public interface GlobalRootComponent {
 
     /**
@@ -65,6 +67,16 @@ public interface GlobalRootComponent {
 
         GlobalRootComponent build();
     }
+
+    /**
+     * Builder for a WMComponent.
+     */
+    WMComponent.Builder getWMComponentBuilder();
+
+    /**
+     * Builder for a SysuiComponent.
+     */
+    SysUIComponent.Builder getSysUIComponent();
 
     /**
      * Provides a BootCompleteCache.
