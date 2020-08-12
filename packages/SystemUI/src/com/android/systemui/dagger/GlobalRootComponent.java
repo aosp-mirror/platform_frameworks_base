@@ -53,17 +53,17 @@ import dagger.Component;
         SystemUIBinder.class,
         SystemUIModule.class,
         SystemUIDefaultModule.class})
-public interface SystemUIRootComponent {
+public interface GlobalRootComponent {
 
     /**
-     * Builder for a SystemUIRootComponent.
+     * Builder for a GlobalRootComponent.
      */
     @Component.Builder
     interface Builder {
         @BindsInstance
         Builder context(Context context);
 
-        SystemUIRootComponent build();
+        GlobalRootComponent build();
     }
 
     /**

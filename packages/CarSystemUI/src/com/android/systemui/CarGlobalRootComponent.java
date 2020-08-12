@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui;
 
-import com.android.systemui.dagger.DefaultComponentBinder;
 import com.android.systemui.dagger.DependencyBinder;
 import com.android.systemui.dagger.DependencyProvider;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SystemServicesModule;
-import com.android.systemui.dagger.SystemUIBinder;
-import com.android.systemui.dagger.SystemUIDefaultModule;
 import com.android.systemui.dagger.SystemUIModule;
-import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.onehanded.dagger.OneHandedModule;
+import com.android.systemui.pip.phone.dagger.PipModule;
 
 import javax.inject.Singleton;
 
 import dagger.Component;
 
-/**
- * Root component for Dagger injection.
- */
+/** Car subclass for GlobalRootComponent. */
 @Singleton
-@Component(modules = {
-        DefaultComponentBinder.class,
-        DependencyProvider.class,
-        DependencyBinder.class,
-        OneHandedModule.class,
-        SystemServicesModule.class,
-        SystemUIBinder.class,
-        SystemUIModule.class,
-        SystemUIDefaultModule.class,
-        TvSystemUIBinder.class})
-public interface TvSystemUIRootComponent extends SystemUIRootComponent {
+@Component(
+        modules = {
+                CarComponentBinder.class,
+                DependencyProvider.class,
+                DependencyBinder.class,
+                PipModule.class,
+                OneHandedModule.class,
+                SystemServicesModule.class,
+                SystemUIModule.class,
+                CarSystemUIModule.class,
+                CarSystemUIBinder.class
+        })
+public interface CarGlobalRootComponent extends GlobalRootComponent {
     /**
-     * Component Builder interface. This allows to bind Context instance in the component
+     * Builder for a CarGlobalRootComponent.
      */
     @Component.Builder
-    interface Builder extends SystemUIRootComponent.Builder {
-        TvSystemUIRootComponent build();
+    interface Builder extends GlobalRootComponent.Builder {
+        CarGlobalRootComponent build();
     }
 }

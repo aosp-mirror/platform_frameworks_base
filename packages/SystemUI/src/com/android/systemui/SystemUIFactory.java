@@ -28,8 +28,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.dagger.DaggerSystemUIRootComponent;
-import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dagger.DaggerGlobalRootComponent;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -53,7 +53,7 @@ public class SystemUIFactory {
     private static final String TAG = "SystemUIFactory";
 
     static SystemUIFactory mFactory;
-    private SystemUIRootComponent mRootComponent;
+    private GlobalRootComponent mRootComponent;
 
     public static <T extends SystemUIFactory> T getInstance() {
         return (T) mFactory;
@@ -88,7 +88,7 @@ public class SystemUIFactory {
     public SystemUIFactory() {}
 
     private void init(Context context) {
-        mRootComponent = buildSystemUIRootComponent(context);
+        mRootComponent = buildGlobalRootComponent(context);
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
@@ -96,13 +96,13 @@ public class SystemUIFactory {
         dependency.start();
     }
 
-    protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
-        return DaggerSystemUIRootComponent.builder()
+    protected GlobalRootComponent buildGlobalRootComponent(Context context) {
+        return DaggerGlobalRootComponent.builder()
                 .context(context)
                 .build();
     }
 
-    public SystemUIRootComponent getRootComponent() {
+    public GlobalRootComponent getRootComponent() {
         return mRootComponent;
     }
 

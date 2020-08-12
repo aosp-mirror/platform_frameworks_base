@@ -23,16 +23,14 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import java.lang.reflect.InvocationTargetException;
@@ -60,7 +58,7 @@ public class InjectionInflationController {
     private final LayoutInflater.Factory2 mFactory = new InjectionFactory();
 
     @Inject
-    public InjectionInflationController(SystemUIRootComponent rootComponent) {
+    public InjectionInflationController(GlobalRootComponent rootComponent) {
         mViewCreator = rootComponent.createViewCreator();
         initInjectionMap();
     }
@@ -107,7 +105,7 @@ public class InjectionInflationController {
      * Secondary sub-component that actually creates the views.
      *
      * Having two subcomponents lets us hide the complexity of providing the named context
-     * and AttributeSet from the SystemUIRootComponent, instead we have one subcomponent that
+     * and AttributeSet from the GlobalRootComponent, instead we have one subcomponent that
      * creates a new ViewInstanceCreator any time we need to inflate a view.
      */
     @Subcomponent(modules = ViewAttributeProvider.class)
