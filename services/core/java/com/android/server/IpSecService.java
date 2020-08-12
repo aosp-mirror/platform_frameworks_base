@@ -1477,7 +1477,7 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     /**
-     * Checks an IpSecConfig parcel to ensure that the contents are sane and throws an
+     * Checks an IpSecConfig parcel to ensure that the contents are valid and throws an
      * IllegalArgumentException if they are not.
      */
     private void checkIpSecConfig(IpSecConfig config) {
