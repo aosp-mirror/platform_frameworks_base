@@ -2464,7 +2464,28 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return null;
         }
         final PermissionsState permissionsState = ps.getPermissionsState();
-        return permissionsState.getPermissions(userId);
+        if (!ps.getInstantApp(userId)) {
+            return permissionsState.getPermissions(userId);
+        } else {
+            // Install permission state is shared among all users, but instant app state is
+            // per-user, so we can only filter it here unless we make install permission state
+            // per-user as well.
+            final Set<String> instantPermissions = new ArraySet<>(permissionsState.getPermissions(
+                    userId));
+            instantPermissions.removeIf(permissionName -> {
+                BasePermission permission = mSettings.getPermission(permissionName);
+                if (permission == null) {
+                    return true;
+                }
+                if (!permission.isInstant()) {
+                    EventLog.writeEvent(0x534e4554, "140256621", UserHandle.getUid(userId,
+                            ps.getAppId()), permissionName);
+                    return true;
+                }
+                return false;
+            });
+            return instantPermissions;
+        }
     }
 
     @Nullable
