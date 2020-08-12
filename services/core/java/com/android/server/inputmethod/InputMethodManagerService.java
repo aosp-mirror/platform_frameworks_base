@@ -2213,8 +2213,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
      *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
      *               process
-     * @param inputContext communication channel for the dummy
-     *                     {@link android.view.inputmethod.InputConnection}
+     * @param inputContext communication channel for the fallback {@link InputConnection}
      * @param selfReportedDisplayId self-reported display ID to which the client is associated.
      *                              Whether the client is still allowed to access to this display
      *                              or not needs to be evaluated every time the client interacts
