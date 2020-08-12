@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Spline;
@@ -85,6 +86,11 @@ class UdfpsController {
         public void hideUdfpsOverlay() {
             UdfpsController.this.hideUdfpsOverlay();
         }
+
+        @Override
+        public void setDebugMessage(String message) {
+            mView.setDebugMessage(message);
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -128,6 +134,8 @@ class UdfpsController {
         mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
         mHbmEnableCommand = context.getResources().getString(R.string.udfps_hbm_enable_command);
         mHbmDisableCommand = context.getResources().getString(R.string.udfps_hbm_disable_command);
+
+        mView.setHbmSupported(!TextUtils.isEmpty(mHbmPath));
 
         // This range only consists of the minimum and maximum values, which only cover
         // non-high-brightness mode.

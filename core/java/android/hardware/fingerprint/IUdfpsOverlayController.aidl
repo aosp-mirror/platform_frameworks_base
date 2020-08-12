@@ -25,4 +25,7 @@ oneway interface IUdfpsOverlayController {
 
     // Hides the overlay.
     void hideUdfpsOverlay();
+
+    // Shows debug messages on the UDFPS overlay.
+    void setDebugMessage(String message);
 }

@@ -144,6 +144,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      */
     public void start(@NonNull Callback callback) {
         mCallback = callback;
+        mCallback.onClientStarted(this);
     }
 
     /**

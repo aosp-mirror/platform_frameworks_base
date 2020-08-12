@@ -37,11 +37,14 @@ public class UdfpsView extends View {
     private static final String TAG = "UdfpsView";
 
     // Values in pixels.
-    private static final float SENSOR_SHADOW_OFFSET = 2.0f;
+    private static final float SENSOR_SHADOW_RADIUS = 2.0f;
     private static final float SENSOR_OUTLINE_WIDTH = 2.0f;
+
+    private static final int DEBUG_TEXT_SIZE_PX = 32;
 
     private final Rect mScrimRect;
     private final Paint mScrimPaint;
+    private final Paint mDebugTextPaint;
 
     private float mSensorX;
     private float mSensorY;
@@ -55,6 +58,8 @@ public class UdfpsView extends View {
     private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
 
     private boolean mIsScrimShowing;
+    private boolean mHbmSupported;
+    private String mDebugMessage;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -86,11 +91,17 @@ public class UdfpsView extends View {
 
         mSensorRect = new RectF();
         mSensorPaint = new Paint(0 /* flags */);
+        mSensorPaint.setAntiAlias(true);
         mSensorPaint.setColor(Color.WHITE);
         mSensorPaint.setStyle(Paint.Style.STROKE);
         mSensorPaint.setStrokeWidth(SENSOR_OUTLINE_WIDTH);
-        mSensorPaint.setShadowLayer(SENSOR_OUTLINE_WIDTH, 0, 0, Color.BLACK);
+        mSensorPaint.setShadowLayer(SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
         mSensorPaint.setAntiAlias(true);
+
+        mDebugTextPaint = new Paint();
+        mDebugTextPaint.setAntiAlias(true);
+        mDebugTextPaint.setColor(Color.BLUE);
+        mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
         mTouchableRegion = new Rect();
         mInsetsListener = internalInsetsInfo -> {
@@ -131,10 +142,23 @@ public class UdfpsView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mIsScrimShowing) {
+        if (mIsScrimShowing && mHbmSupported) {
+            // Only draw the scrim if HBM is supported.
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
+
+        canvas.drawText(mDebugMessage, 0, 60, mDebugTextPaint);
+
         canvas.drawOval(mSensorRect, mSensorPaint);
+    }
+
+    void setHbmSupported(boolean hbmSupported) {
+        mHbmSupported = hbmSupported;
+    }
+
+    void setDebugMessage(String message) {
+        mDebugMessage = message;
+        postInvalidate();
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
