@@ -21,7 +21,7 @@ import android.view.View;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.StatusBarNotificationPresenter;
@@ -90,8 +90,8 @@ public class NotificationShelfController {
     }
 
     public void bind(AmbientState ambientState,
-            NotificationStackScrollLayout notificationStackScrollLayout) {
-        mView.bind(ambientState, notificationStackScrollLayout);
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
+        mView.bind(ambientState, notificationStackScrollLayoutController);
         mAmbientState = ambientState;
     }
 

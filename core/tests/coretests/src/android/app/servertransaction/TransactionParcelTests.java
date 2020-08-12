@@ -24,6 +24,7 @@ import static android.app.servertransaction.TestUtils.resultInfoList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.app.ContentProviderHolder;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
@@ -664,6 +665,11 @@ public class TransactionParcelTests {
         @Override
         public void performDirectAction(IBinder activityToken, String actionId, Bundle arguments,
                 RemoteCallback cancellationCallback, RemoteCallback resultCallback) {
+        }
+
+        @Override
+        public void notifyContentProviderPublishStatus(ContentProviderHolder holder, String auth,
+                int userId, boolean published) {
         }
     }
 }

@@ -27,8 +27,9 @@ using std::set;
 using std::unordered_map;
 using std::vector;
 
-CombinationLogMatchingTracker::CombinationLogMatchingTracker(const int64_t& id, const int index)
-    : LogMatchingTracker(id, index) {
+CombinationLogMatchingTracker::CombinationLogMatchingTracker(const int64_t& id, const int index,
+                                                             const uint64_t protoHash)
+    : LogMatchingTracker(id, index, protoHash) {
 }
 
 CombinationLogMatchingTracker::~CombinationLogMatchingTracker() {

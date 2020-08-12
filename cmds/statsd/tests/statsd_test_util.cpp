@@ -15,6 +15,8 @@
 #include "statsd_test_util.h"
 
 #include <aidl/android/util/StatsEventParcel.h>
+
+#include "matchers/SimpleLogMatchingTracker.h"
 #include "stats_event.h"
 
 using aidl::android::util::StatsEventParcel;
@@ -994,6 +996,20 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events) {
 
 int64_t StringToId(const string& str) {
     return static_cast<int64_t>(std::hash<std::string>()(str));
+}
+
+sp<EventMatcherWizard> createEventMatcherWizard(
+        int tagId, int matcherIndex, const vector<FieldValueMatcher>& fieldValueMatchers) {
+    sp<UidMap> uidMap = new UidMap();
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    for (const FieldValueMatcher& fvm : fieldValueMatchers) {
+        *atomMatcher.add_field_value_matcher() = fvm;
+    }
+    uint64_t matcherHash = 0x12345678;
+    int64_t matcherId = 678;
+    return new EventMatcherWizard({new SimpleLogMatchingTracker(matcherId, matcherIndex,
+                                                                matcherHash, atomMatcher, uidMap)});
 }
 
 void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value, const int atomId,

@@ -26,8 +26,8 @@ import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_LEFT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_RIGHT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_TOP;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -59,7 +59,7 @@ import android.view.WindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.internal.policy.TaskResizingAlgorithm.CtrlType;
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 
 class TaskPositioner implements IBinder.DeathRecipient {
     private static final boolean DEBUG_ORIENTATION_VIOLATIONS = false;

@@ -28,7 +28,7 @@ namespace statsd {
 // Represents a AtomMatcher_Combination in the StatsdConfig.
 class CombinationLogMatchingTracker : public virtual LogMatchingTracker {
 public:
-    CombinationLogMatchingTracker(const int64_t& id, const int index);
+    CombinationLogMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash);
 
     bool init(const std::vector<AtomMatcher>& allLogMatchers,
               const std::vector<sp<LogMatchingTracker>>& allTrackers,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;
+package com.android.internal.protolog;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.protolog.common.IProtoLogGroup;
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.IProtoLogGroup;
 
 /**
  * Defines logging groups for ProtoLog.
@@ -116,16 +114,6 @@ public enum ProtoLogGroup implements IProtoLogGroup {
     @Override
     public void setLogToLogcat(boolean logToLogcat) {
         this.mLogToLogcat = logToLogcat;
-    }
-
-    /**
-     * Test function for automated integration tests. Can be also called manually from adb shell.
-     */
-    @VisibleForTesting
-    public static void testProtoLog() {
-        ProtoLog.e(ProtoLogGroup.TEST_GROUP,
-                "Test completed successfully: %b %d %o %x %e %g %f %% %s.",
-                true, 1, 2, 3, 0.4, 0.5, 0.6, "ok");
     }
 
     private static class Consts {

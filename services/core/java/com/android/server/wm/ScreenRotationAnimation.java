@@ -18,9 +18,9 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.AnimationSpecProto.ROTATE;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.RotationAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.RotationAnimationSpecProto.END_LUMA;
 import static com.android.server.wm.RotationAnimationSpecProto.START_LUMA;
@@ -50,7 +50,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
 import com.android.internal.R;
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.RotationAnimationUtils;

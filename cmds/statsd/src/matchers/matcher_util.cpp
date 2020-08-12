@@ -81,14 +81,15 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-bool tryMatchString(const UidMap& uidMap, const FieldValue& fieldValue, const string& str_match) {
+bool tryMatchString(const sp<UidMap>& uidMap, const FieldValue& fieldValue,
+                    const string& str_match) {
     if (isAttributionUidField(fieldValue) || isUidField(fieldValue)) {
         int uid = fieldValue.mValue.int_value;
         auto aidIt = UidMap::sAidToUidMapping.find(str_match);
         if (aidIt != UidMap::sAidToUidMapping.end()) {
             return ((int)aidIt->second) == uid;
         }
-        std::set<string> packageNames = uidMap.getAppNamesFromUid(uid, true /* normalize*/);
+        std::set<string> packageNames = uidMap->getAppNamesFromUid(uid, true /* normalize*/);
         return packageNames.find(str_match) != packageNames.end();
     } else if (fieldValue.mValue.getType() == STRING) {
         return fieldValue.mValue.str_value == str_match;
@@ -96,7 +97,7 @@ bool tryMatchString(const UidMap& uidMap, const FieldValue& fieldValue, const st
     return false;
 }
 
-bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
+bool matchesSimple(const sp<UidMap>& uidMap, const FieldValueMatcher& matcher,
                    const vector<FieldValue>& values, int start, int end, int depth) {
     if (depth > 2) {
         ALOGE("Depth > 3 not supported");
@@ -353,7 +354,7 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
     }
 }
 
-bool matchesSimple(const UidMap& uidMap, const SimpleAtomMatcher& simpleMatcher,
+bool matchesSimple(const sp<UidMap>& uidMap, const SimpleAtomMatcher& simpleMatcher,
                    const LogEvent& event) {
     if (event.GetTagId() != simpleMatcher.atom_id()) {
         return false;

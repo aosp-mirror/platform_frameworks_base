@@ -29,9 +29,8 @@ namespace statsd {
 
 class SimpleLogMatchingTracker : public virtual LogMatchingTracker {
 public:
-    SimpleLogMatchingTracker(const int64_t& id, const int index,
-                             const SimpleAtomMatcher& matcher,
-                             const UidMap& uidMap);
+    SimpleLogMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash,
+                             const SimpleAtomMatcher& matcher, const sp<UidMap>& uidMap);
 
     ~SimpleLogMatchingTracker();
 
@@ -46,7 +45,7 @@ public:
 
 private:
     const SimpleAtomMatcher mMatcher;
-    const UidMap& mUidMap;
+    const sp<UidMap> mUidMap;
 };
 
 }  // namespace statsd

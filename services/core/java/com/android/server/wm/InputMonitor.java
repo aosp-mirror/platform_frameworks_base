@@ -41,7 +41,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -60,8 +60,8 @@ import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.Set;

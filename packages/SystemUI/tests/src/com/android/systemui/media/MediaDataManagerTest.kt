@@ -13,6 +13,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
@@ -58,6 +59,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var mediaTimeoutListener: MediaTimeoutListener
     @Mock lateinit var mediaResumeListener: MediaResumeListener
     @Mock lateinit var pendingIntent: PendingIntent
+    @Mock lateinit var activityStarter: ActivityStarter
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     lateinit var mediaDataManager: MediaDataManager
     lateinit var mediaNotification: StatusBarNotification
@@ -68,8 +70,8 @@ class MediaDataManagerTest : SysuiTestCase() {
         backgroundExecutor = FakeExecutor(FakeSystemClock())
         mediaDataManager = MediaDataManager(context, backgroundExecutor, foregroundExecutor,
                 mediaControllerFactory, broadcastDispatcher, dumpManager,
-                mediaTimeoutListener, mediaResumeListener, useMediaResumption = true,
-                useQsMediaPlayer = true)
+                mediaTimeoutListener, mediaResumeListener, activityStarter,
+                useMediaResumption = true, useQsMediaPlayer = true)
         session = MediaSession(context, "MediaDataManagerTestSession")
         mediaNotification = SbnBuilder().run {
             setPkg(PACKAGE_NAME)

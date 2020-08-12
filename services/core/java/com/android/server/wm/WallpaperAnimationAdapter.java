@@ -15,8 +15,8 @@
  */
 package com.android.server.wm;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 
@@ -26,7 +26,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 
 import java.io.PrintWriter;

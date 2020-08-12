@@ -26,7 +26,8 @@
 #include "guardrail/StatsdStats.h"
 #include "matchers/CombinationLogMatchingTracker.h"
 #include "matchers/SimpleLogMatchingTracker.h"
-#include "metrics_manager_util.h"
+#include "parsing_utils/config_update_utils.h"
+#include "parsing_utils/metrics_manager_util.h"
 #include "state/StateManager.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
@@ -76,13 +77,14 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     // Init the ttl end timestamp.
     refreshTtl(timeBaseNs);
 
-    mConfigValid = initStatsdConfig(
-            key, config, *uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
-            timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
-            mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
-            mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
-            mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
-            mAlertTrackerMap, mMetricIndexesWithActivation, mNoReportMetricIds);
+    mConfigValid =
+            initStatsdConfig(key, config, uidMap, pullerManager, anomalyAlarmMonitor,
+                             periodicAlarmMonitor, timeBaseNs, currentTimeNs, mTagIds,
+                             mAllAtomMatchers, mLogTrackerMap, mAllConditionTrackers,
+                             mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
+                             mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
+                             mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
+                             mAlertTrackerMap, mMetricIndexesWithActivation, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
     mVersionStringsInReport = config.version_strings_in_metric_report();
@@ -195,7 +197,19 @@ MetricsManager::~MetricsManager() {
     VLOG("~MetricsManager()");
 }
 
-bool MetricsManager::updateConfig(const int64_t currentTimeNs, const StatsdConfig& config) {
+bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t timeBaseNs,
+                                  const int64_t currentTimeNs,
+                                  const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                                  const sp<AlarmMonitor>& periodicAlarmMonitor) {
+    vector<sp<LogMatchingTracker>> newAtomMatchers;
+    unordered_map<int64_t, int> newLogTrackerMap;
+    mTagIds.clear();
+    mConfigValid =
+            updateStatsdConfig(mConfigKey, config, mUidMap, mPullerManager, anomalyAlarmMonitor,
+                               periodicAlarmMonitor, timeBaseNs, currentTimeNs, mAllAtomMatchers,
+                               mLogTrackerMap, mTagIds, newAtomMatchers, newLogTrackerMap);
+    mAllAtomMatchers = newAtomMatchers;
+    mLogTrackerMap = newLogTrackerMap;
     return mConfigValid;
 }
 

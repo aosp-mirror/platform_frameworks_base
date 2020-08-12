@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.protolog;
-
-import static com.android.server.protolog.ProtoLogImpl.logAndPrintln;
+package com.android.internal.protolog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,16 +78,17 @@ public class ProtoLogViewerConfigReader {
                     // Not a messageHash - skip it
                 }
             }
-            logAndPrintln(pw, "Loaded " + mLogMessageMap.size() + " log definitions from "
-                    + viewerConfigFilename);
+            ProtoLogImpl.logAndPrintln(pw, "Loaded " + mLogMessageMap.size()
+                    + " log definitions from " + viewerConfigFilename);
         } catch (FileNotFoundException e) {
-            logAndPrintln(pw, "Unable to load log definitions: File "
+            ProtoLogImpl.logAndPrintln(pw, "Unable to load log definitions: File "
                     + viewerConfigFilename + " not found." + e);
         } catch (IOException e) {
-            logAndPrintln(pw, "Unable to load log definitions: IOException while reading "
+            ProtoLogImpl.logAndPrintln(pw,
+                    "Unable to load log definitions: IOException while reading "
                     + viewerConfigFilename + ". " + e);
         } catch (JSONException e) {
-            logAndPrintln(pw,
+            ProtoLogImpl.logAndPrintln(pw,
                     "Unable to load log definitions: JSON parsing exception while reading "
                             + viewerConfigFilename + ". " + e);
         }

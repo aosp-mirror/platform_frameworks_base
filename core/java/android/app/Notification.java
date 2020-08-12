@@ -1492,6 +1492,7 @@ public class Notification implements Parcelable
         private boolean mAllowGeneratedReplies = true;
         private final @SemanticAction int mSemanticAction;
         private final boolean mIsContextual;
+        private boolean mAuthenticationRequired;
 
         /**
          * Small icon representing the action.
@@ -1528,6 +1529,7 @@ public class Notification implements Parcelable
             mAllowGeneratedReplies = in.readInt() == 1;
             mSemanticAction = in.readInt();
             mIsContextual = in.readInt() == 1;
+            mAuthenticationRequired = in.readInt() == 1;
         }
 
         /**
@@ -1536,13 +1538,14 @@ public class Notification implements Parcelable
         @Deprecated
         public Action(int icon, CharSequence title, PendingIntent intent) {
             this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, true,
-                    SEMANTIC_ACTION_NONE, false /* isContextual */);
+                    SEMANTIC_ACTION_NONE, false /* isContextual */, false /* requireAuth */);
         }
 
         /** Keep in sync with {@link Notification.Action.Builder#Builder(Action)}! */
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs, boolean allowGeneratedReplies,
-                       @SemanticAction int semanticAction, boolean isContextual) {
+                @SemanticAction int semanticAction, boolean isContextual,
+                boolean requireAuth) {
             this.mIcon = icon;
             if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
                 this.icon = icon.getResId();
@@ -1554,6 +1557,7 @@ public class Notification implements Parcelable
             this.mAllowGeneratedReplies = allowGeneratedReplies;
             this.mSemanticAction = semanticAction;
             this.mIsContextual = isContextual;
+            this.mAuthenticationRequired = requireAuth;
         }
 
         /**
@@ -1624,6 +1628,17 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Returns whether the OS should only send this action's {@link PendingIntent} on an
+         * unlocked device.
+         *
+         * If the device is locked when the action is invoked, the OS should show the keyguard and
+         * require successful authentication before invoking the intent.
+         */
+        public boolean isAuthenticationRequired() {
+            return mAuthenticationRequired;
+        }
+
+        /**
          * Builder class for {@link Action} objects.
          */
         public static final class Builder {
@@ -1635,6 +1650,7 @@ public class Notification implements Parcelable
             @Nullable private ArrayList<RemoteInput> mRemoteInputs;
             private @SemanticAction int mSemanticAction;
             private boolean mIsContextual;
+            private boolean mAuthenticationRequired;
 
             /**
              * Construct a new builder for {@link Action} object.
@@ -1654,7 +1670,7 @@ public class Notification implements Parcelable
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
             public Builder(Icon icon, CharSequence title, PendingIntent intent) {
-                this(icon, title, intent, new Bundle(), null, true, SEMANTIC_ACTION_NONE);
+                this(icon, title, intent, new Bundle(), null, true, SEMANTIC_ACTION_NONE, false);
             }
 
             /**
@@ -1665,23 +1681,25 @@ public class Notification implements Parcelable
             public Builder(Action action) {
                 this(action.getIcon(), action.title, action.actionIntent,
                         new Bundle(action.mExtras), action.getRemoteInputs(),
-                        action.getAllowGeneratedReplies(), action.getSemanticAction());
+                        action.getAllowGeneratedReplies(), action.getSemanticAction(),
+                        action.isAuthenticationRequired());
             }
 
             private Builder(@Nullable Icon icon, @Nullable CharSequence title,
                     @Nullable PendingIntent intent, @NonNull Bundle extras,
                     @Nullable RemoteInput[] remoteInputs, boolean allowGeneratedReplies,
-                    @SemanticAction int semanticAction) {
+                    @SemanticAction int semanticAction, boolean authRequired) {
                 mIcon = icon;
                 mTitle = title;
                 mIntent = intent;
                 mExtras = extras;
                 if (remoteInputs != null) {
-                    mRemoteInputs = new ArrayList<RemoteInput>(remoteInputs.length);
+                    mRemoteInputs = new ArrayList<>(remoteInputs.length);
                     Collections.addAll(mRemoteInputs, remoteInputs);
                 }
                 mAllowGeneratedReplies = allowGeneratedReplies;
                 mSemanticAction = semanticAction;
+                mAuthenticationRequired = authRequired;
             }
 
             /**
@@ -1776,6 +1794,21 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Sets whether the OS should only send this action's {@link PendingIntent} on an
+             * unlocked device.
+             *
+             * If this is true and the device is locked when the action is invoked, the OS will
+             * show the keyguard and require successful authentication before invoking the intent.
+             * If this is false and the device is locked, the OS will decide whether authentication
+             * should be required.
+             */
+            @NonNull
+            public Builder setAuthenticationRequired(boolean authenticationRequired) {
+                mAuthenticationRequired = authenticationRequired;
+                return this;
+            }
+
+            /**
              * Throws an NPE if we are building a contextual action missing one of the fields
              * necessary to display the action.
              */
@@ -1827,7 +1860,8 @@ public class Notification implements Parcelable
                 RemoteInput[] textInputsArr = textInputs.isEmpty()
                         ? null : textInputs.toArray(new RemoteInput[textInputs.size()]);
                 return new Action(mIcon, mTitle, mIntent, mExtras, textInputsArr,
-                        mAllowGeneratedReplies, mSemanticAction, mIsContextual);
+                        mAllowGeneratedReplies, mSemanticAction, mIsContextual,
+                        mAuthenticationRequired);
             }
         }
 
@@ -1841,7 +1875,8 @@ public class Notification implements Parcelable
                     getRemoteInputs(),
                     getAllowGeneratedReplies(),
                     getSemanticAction(),
-                    isContextual());
+                    isContextual(),
+                    isAuthenticationRequired());
         }
 
         @Override
@@ -1870,6 +1905,7 @@ public class Notification implements Parcelable
             out.writeInt(mAllowGeneratedReplies ? 1 : 0);
             out.writeInt(mSemanticAction);
             out.writeInt(mIsContextual ? 1 : 0);
+            out.writeInt(mAuthenticationRequired ? 1 : 0);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<Action> CREATOR =

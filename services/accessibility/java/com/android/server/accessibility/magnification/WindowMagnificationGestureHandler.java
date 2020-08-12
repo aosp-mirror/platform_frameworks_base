@@ -25,10 +25,12 @@ import static java.util.Arrays.copyOfRange;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Point;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.view.Display;
 import android.view.MotionEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -90,6 +92,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     private MotionEventDispatcherDelegate mMotionEventDispatcherDelegate;
     private final int mDisplayId;
+    private final Context mContext;
+    private final Point mTempPoint = new Point();
 
     private final Queue<MotionEvent> mDebugOutputEventHistory;
 
@@ -107,7 +111,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(LOG_TAG,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");
         }
-
+        mContext = context;
         mWindowMagnificationMgr = windowMagnificationMgr;
         mDetectShortcutTrigger = detectShortcutTrigger;
         mDisplayId = displayId;
@@ -184,7 +188,14 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         if (!mDetectShortcutTrigger) {
             return;
         }
-        toggleMagnification(Float.NaN, Float.NaN);
+        final Point screenSize = mTempPoint;
+        getScreenSize(mTempPoint);
+        toggleMagnification(screenSize.x / 2.0f, screenSize.y / 2.0f);
+    }
+
+    private  void getScreenSize(Point outSize) {
+        final Display display = mContext.getDisplay();
+        display.getRealSize(outSize);
     }
 
     @Override

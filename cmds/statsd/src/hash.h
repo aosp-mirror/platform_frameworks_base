@@ -22,6 +22,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// Uses murmur2 hashing algorithm.
 extern uint32_t Hash32(const char *data, size_t n, uint32_t seed);
 extern uint64_t Hash64(const char* data, size_t n, uint64_t seed);
 

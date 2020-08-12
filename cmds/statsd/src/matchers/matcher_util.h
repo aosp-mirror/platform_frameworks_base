@@ -36,8 +36,8 @@ enum MatchingState {
 bool combinationMatch(const std::vector<int>& children, const LogicalOperation& operation,
                       const std::vector<MatchingState>& matcherResults);
 
-bool matchesSimple(const UidMap& uidMap,
-    const SimpleAtomMatcher& simpleMatcher, const LogEvent& wrapper);
+bool matchesSimple(const sp<UidMap>& uidMap, const SimpleAtomMatcher& simpleMatcher,
+                   const LogEvent& wrapper);
 
 }  // namespace statsd
 }  // namespace os

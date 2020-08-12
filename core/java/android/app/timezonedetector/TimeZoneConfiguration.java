@@ -67,6 +67,10 @@ public final class TimeZoneConfiguration implements Parcelable {
     @Property
     public static final String PROPERTY_AUTO_DETECTION_ENABLED = "autoDetectionEnabled";
 
+    /** See {@link TimeZoneConfiguration#isGeoDetectionEnabled()} for details. */
+    @Property
+    public static final String PROPERTY_GEO_DETECTION_ENABLED = "geoDetectionEnabled";
+
     private final Bundle mBundle;
 
     private TimeZoneConfiguration(Builder builder) {
@@ -86,7 +90,8 @@ public final class TimeZoneConfiguration implements Parcelable {
 
     /** Returns {@code true} if all known properties are set. */
     public boolean isComplete() {
-        return hasProperty(PROPERTY_AUTO_DETECTION_ENABLED);
+        return hasProperty(PROPERTY_AUTO_DETECTION_ENABLED)
+                && hasProperty(PROPERTY_GEO_DETECTION_ENABLED);
     }
 
     /** Returns true if the specified property is set. */
@@ -106,6 +111,28 @@ public final class TimeZoneConfiguration implements Parcelable {
             throw new IllegalStateException(PROPERTY_AUTO_DETECTION_ENABLED + " is not set");
         }
         return mBundle.getBoolean(PROPERTY_AUTO_DETECTION_ENABLED);
+    }
+
+    /**
+     * Returns the value of the {@link #PROPERTY_GEO_DETECTION_ENABLED} property. This
+     * controls whether a device can use location to determine time zone. Only used when
+     * {@link #isAutoDetectionEnabled()} is true.
+     *
+     * @throws IllegalStateException if the field has not been set
+     */
+    public boolean isGeoDetectionEnabled() {
+        if (!mBundle.containsKey(PROPERTY_GEO_DETECTION_ENABLED)) {
+            throw new IllegalStateException(PROPERTY_GEO_DETECTION_ENABLED + " is not set");
+        }
+        return mBundle.getBoolean(PROPERTY_GEO_DETECTION_ENABLED);
+    }
+
+    /**
+     * Convenience method to merge this with another. The argument configuration properties have
+     * precedence.
+     */
+    public TimeZoneConfiguration with(TimeZoneConfiguration other) {
+        return new Builder(this).mergeProperties(other).build();
     }
 
     @Override
@@ -171,6 +198,12 @@ public final class TimeZoneConfiguration implements Parcelable {
         /** Sets the desired state of the automatic time zone detection property. */
         public Builder setAutoDetectionEnabled(boolean enabled) {
             this.mBundle.putBoolean(PROPERTY_AUTO_DETECTION_ENABLED, enabled);
+            return this;
+        }
+
+        /** Sets the desired state of the geolocation time zone detection enabled property. */
+        public Builder setGeoDetectionEnabled(boolean enabled) {
+            this.mBundle.putBoolean(PROPERTY_GEO_DETECTION_ENABLED, enabled);
             return this;
         }
 

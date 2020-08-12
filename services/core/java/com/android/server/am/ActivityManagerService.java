@@ -1581,6 +1581,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int KILL_APP_ZYGOTE_MSG = 71;
     static final int BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG = 72;
+    static final int WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG = 73;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1916,6 +1917,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
                 case BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG: {
                     handleBinderHeavyHitterAutoSamplerTimeOut();
+                } break;
+                case WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG: {
+                    synchronized (ActivityManagerService.this) {
+                        ((ContentProviderRecord) msg.obj).onProviderPublishStatusLocked(false);
+                    }
                 } break;
             }
         }
@@ -14470,7 +14476,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 resolvedType, resultTo, resultCode, resultData, resultExtras, requiredPermissions,
                 appOp, bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
                 realCallingPid, userId, false /* allowBackgroundActivityStarts */,
-                null /* tokenNeededForBackgroundActivityStarts */, null /* broadcastWhitelist */);
+                null /* tokenNeededForBackgroundActivityStarts */, null /* broadcastAllowList */);
     }
 
     @GuardedBy("this")
@@ -15314,7 +15320,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         OP_NONE, bOptions, serialized, sticky, -1, uid, realCallingUid,
                         realCallingPid, userId, allowBackgroundActivityStarts,
                         backgroundActivityStartsToken,
-                        null /*broadcastWhitelist*/);
+                        null /* broadcastAllowList */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

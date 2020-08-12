@@ -24,7 +24,7 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
 import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED;
 
@@ -40,8 +40,8 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
-import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
