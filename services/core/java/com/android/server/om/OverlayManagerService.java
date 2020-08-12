@@ -288,7 +288,7 @@ public final class OverlayManagerService extends SystemService {
 
     private void initIfNeeded() {
         final UserManager um = getContext().getSystemService(UserManager.class);
-        final List<UserInfo> users = um.getUsers(true /*excludeDying*/);
+        final List<UserInfo> users = um.getAliveUsers();
         synchronized (mLock) {
             final int userCount = users.size();
             for (int i = 0; i < userCount; i++) {

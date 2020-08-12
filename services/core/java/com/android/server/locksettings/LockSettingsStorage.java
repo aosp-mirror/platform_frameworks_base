@@ -746,7 +746,7 @@ class LockSettingsStorage {
 
     public void dump(IndentingPrintWriter pw) {
         final UserManager um = UserManager.get(mContext);
-        for (UserInfo user : um.getUsers(false)) {
+        for (UserInfo user : um.getUsers()) {
             File userPath = getSyntheticPasswordDirectoryForUser(user.id);
             pw.println(String.format("User %d [%s]:", user.id, userPath.getAbsolutePath()));
             pw.increaseIndent();
