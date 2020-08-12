@@ -113,7 +113,8 @@ public final class DozeServiceHost implements DozeHost {
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             LockscreenLockIconController lockscreenLockIconController,
-            AuthController authController) {
+            AuthController authController,
+            NotificationIconAreaController notificationIconAreaController) {
         super();
         mDozeLog = dozeLog;
         mPowerManager = powerManager;
@@ -134,6 +135,7 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mLockscreenLockIconController = lockscreenLockIconController;
         mAuthController = authController;
+        mNotificationIconAreaController = notificationIconAreaController;
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -141,13 +143,13 @@ public final class DozeServiceHost implements DozeHost {
     /**
      * Initialize instance with objects only available later during execution.
      */
-    public void initialize(StatusBar statusBar,
-            NotificationIconAreaController notificationIconAreaController,
+    public void initialize(
+            StatusBar statusBar,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationShadeWindowViewController notificationShadeWindowViewController,
-            NotificationPanelViewController notificationPanel, View ambientIndicationContainer) {
+            NotificationPanelViewController notificationPanel,
+            View ambientIndicationContainer) {
         mStatusBar = statusBar;
-        mNotificationIconAreaController = notificationIconAreaController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationPanel = notificationPanel;
         mNotificationShadeWindowViewController = notificationShadeWindowViewController;

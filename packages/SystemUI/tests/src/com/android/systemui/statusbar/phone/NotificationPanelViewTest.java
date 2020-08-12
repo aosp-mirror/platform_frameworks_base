@@ -251,9 +251,13 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 () -> mKeyguardClockSwitchController,
-                mNotificationStackScrollLayoutController);
-        mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
-                mNotificationShelfController, mNotificationAreaController, mScrimController);
+                mNotificationStackScrollLayoutController,
+                mNotificationAreaController);
+        mNotificationPanelViewController.initDependencies(
+                mStatusBar,
+                mGroupManager,
+                mNotificationShelfController,
+                mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelViewController.setBar(mPanelBar);
 

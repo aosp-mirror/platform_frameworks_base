@@ -102,11 +102,14 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mVisualStabilityManager, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mLockscreenLockIconController, mAuthController);
+                mLockscreenLockIconController, mAuthController, mNotificationIconAreaController);
 
-        mDozeServiceHost.initialize(mStatusBar, mNotificationIconAreaController,
-                mStatusBarKeyguardViewManager, mNotificationShadeWindowViewController,
-                mNotificationPanel, mAmbientIndicationContainer);
+        mDozeServiceHost.initialize(
+                mStatusBar,
+                mStatusBarKeyguardViewManager,
+                mNotificationShadeWindowViewController,
+                mNotificationPanel,
+                mAmbientIndicationContainer);
     }
 
     @Test
