@@ -494,6 +494,13 @@ public final class ActiveServices {
 
         ServiceRecord r = res.record;
 
+        if (allowBackgroundActivityStarts) {
+            r.allowBgActivityStartsOnServiceStart();
+        }
+
+        setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r,
+                allowBackgroundActivityStarts);
+
         if (!mAm.mUserController.exists(r.userId)) {
             Slog.w(TAG, "Trying to start service with non-existent user! " + r.userId);
             return null;
@@ -514,6 +521,21 @@ public final class ActiveServices {
                         + " : bgLaunch=" + bgLaunch + " callerFg=" + callerFg);
             }
             forcedStandby = true;
+        }
+
+        if (fgRequired) {
+            if (!r.mAllowStartForeground) {
+                if (!r.mLoggedInfoAllowStartForeground) {
+                    Slog.wtf(TAG, "Background started FGS " + r.mInfoAllowStartForeground);
+                    r.mLoggedInfoAllowStartForeground = true;
+                }
+                if (mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
+                    Slog.w(TAG, "startForegroundService() not allowed due to "
+                                    + " mAllowStartForeground false: service "
+                                    + r.shortInstanceName);
+                    forcedStandby = true;
+                }
+            }
         }
 
         // If this is a direct-to-foreground start, make sure it is allowed as per the app op.
@@ -688,14 +710,7 @@ public final class ActiveServices {
                         "Not potential delay (user " + r.userId + " not started): " + r);
             }
         }
-
-        if (allowBackgroundActivityStarts) {
-            r.allowBgActivityStartsOnServiceStart();
-        }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
-
-        setFgsRestrictionLocked(callingPackage, callingPid,
-                callingUid, service, r, allowBackgroundActivityStarts);
         return cmp;
     }
 
@@ -1422,8 +1437,8 @@ public final class ActiveServices {
                         if (mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
                             Slog.w(TAG,
                                     "Service.startForeground() not allowed due to "
-                                    + " mAllowStartForeground false: service "
-                                    + r.shortInstanceName);
+                                            + "mAllowStartForeground false: service "
+                                            + r.shortInstanceName);
                             updateServiceForegroundLocked(r.app, true);
                             ignoreForeground = true;
                         }
