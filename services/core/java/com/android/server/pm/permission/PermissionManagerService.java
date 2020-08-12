@@ -884,7 +884,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public int checkPermission(String permName, String pkgName, int userId) {
+    public int checkPermission(String permName, String pkgName, @UserIdInt int userId) {
         // Not using Objects.requireNonNull() here for compatibility reasons.
         if (permName == null || pkgName == null) {
             return PackageManager.PERMISSION_DENIED;
