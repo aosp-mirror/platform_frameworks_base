@@ -29,6 +29,10 @@ import androidx.annotation.Nullable;
 import androidx.core.app.AppComponentFactory;
 
 import com.android.systemui.dagger.ContextComponentHelper;
+import com.android.systemui.dagger.GlobalRootComponent;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.inject.Inject;
 
@@ -81,8 +85,17 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
             ((ContextInitializer) contentProvider).setContextAvailableCallback(
                     context -> {
                         SystemUIFactory.createFromConfig(context);
-                        SystemUIFactory.getInstance().getRootComponent().inject(
-                                contentProvider);
+                        GlobalRootComponent rootComponent =
+                                SystemUIFactory.getInstance().getRootComponent();
+                        try {
+                            Method injectMethod = rootComponent.getClass()
+                                    .getMethod("inject", contentProvider.getClass());
+                            injectMethod.invoke(rootComponent, contentProvider);
+                        } catch (NoSuchMethodException
+                                | IllegalAccessException
+                                | InvocationTargetException e) {
+                            // no-op
+                        }
                     }
             );
         }

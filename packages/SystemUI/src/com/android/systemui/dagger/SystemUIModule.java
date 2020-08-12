@@ -26,6 +26,7 @@ import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -74,7 +75,8 @@ import dagger.Provides;
                 NotificationRowComponent.class,
                 DozeComponent.class,
                 ExpandableNotificationRowComponent.class,
-                NotificationShelfComponent.class})
+                NotificationShelfComponent.class,
+                FragmentService.FragmentCreator.class})
 public abstract class SystemUIModule {
 
     @Binds
