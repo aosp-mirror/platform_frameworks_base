@@ -120,9 +120,9 @@ public interface GlobalRootComponent {
     InitController getInitController();
 
     /**
-     * ViewCreator generates all Views that need injection.
+     * ViewInstanceCreator generates all Views that need injection.
      */
-    InjectionInflationController.ViewCreator createViewCreator();
+    InjectionInflationController.ViewInstanceCreator.Factory createViewInstanceCreatorFactory();
 
     /**
      * Whether notification long press is allowed.
