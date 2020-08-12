@@ -218,8 +218,15 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /** {@hide} */
-    private void enforceTree(Uri documentUri) {
-        if (isTreeUri(documentUri)) {
+    private void enforceTreeForExtraUris(Bundle extras) {
+        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_URI));
+        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI));
+        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI));
+    }
+
+    /** {@hide} */
+    private void enforceTree(@Nullable Uri documentUri) {
+        if (documentUri != null && isTreeUri(documentUri)) {
             final String parent = getTreeDocumentId(documentUri);
             final String child = getDocumentId(documentUri);
             if (Objects.equals(parent, child)) {
@@ -1080,6 +1087,9 @@ public abstract class DocumentsProvider extends ContentProvider {
         final Context context = getContext();
         final Bundle out = new Bundle();
 
+        // If the URI is a tree URI performs some validation.
+        enforceTreeForExtraUris(extras);
+
         final Uri extraUri = validateIncomingNullableUri(
                 extras.getParcelable(DocumentsContract.EXTRA_URI));
         final Uri extraTargetUri = validateIncomingNullableUri(
@@ -1109,9 +1119,6 @@ public abstract class DocumentsProvider extends ContentProvider {
             throw new SecurityException(
                     "Requested authority " + authority + " doesn't match provider " + mAuthority);
         }
-
-        // If the URI is a tree URI performs some validation.
-        enforceTree(documentUri);
 
         if (METHOD_IS_CHILD_DOCUMENT.equals(method)) {
             enforceReadPermissionInner(documentUri, getCallingPackage(),
