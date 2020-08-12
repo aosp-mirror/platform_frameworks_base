@@ -1383,7 +1383,7 @@ public class AppStandbyControllerTests {
                 getStandbyBucket(mController, PACKAGE_1));
 
         mController.postReportSyncScheduled(PACKAGE_1, USER_ID, false);
-        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        mStateChangedLatch.await(1000, TimeUnit.MILLISECONDS);
         assertEquals("Unexempted sync scheduled should bring the package out of the Never bucket",
                 STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
 
@@ -1391,7 +1391,7 @@ public class AppStandbyControllerTests {
 
         mStateChangedLatch = new CountDownLatch(1);
         mController.postReportSyncScheduled(PACKAGE_1, USER_ID, false);
-        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        mStateChangedLatch.await(1000, TimeUnit.MILLISECONDS);
         assertEquals("Unexempted sync scheduled should not elevate a non Never bucket",
                 STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
     }
@@ -1402,7 +1402,7 @@ public class AppStandbyControllerTests {
         mInjector.mDeviceIdleMode = true;
         mStateChangedLatch = new CountDownLatch(1);
         mController.postReportSyncScheduled(PACKAGE_1, USER_ID, true);
-        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        mStateChangedLatch.await(1000, TimeUnit.MILLISECONDS);
         assertEquals("Exempted sync scheduled in doze should set bucket to working set",
                 STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
 
@@ -1410,7 +1410,7 @@ public class AppStandbyControllerTests {
         mInjector.mDeviceIdleMode = false;
         mStateChangedLatch = new CountDownLatch(1);
         mController.postReportSyncScheduled(PACKAGE_1, USER_ID, true);
-        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        mStateChangedLatch.await(1000, TimeUnit.MILLISECONDS);
         assertEquals("Exempted sync scheduled while not in doze should set bucket to active",
                 STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
     }
