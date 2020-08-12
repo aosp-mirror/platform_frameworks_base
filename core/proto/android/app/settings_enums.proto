@@ -744,6 +744,41 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: R
     ACTION_CONFIRM_SIM_DELETION_OFF = 1739;
+
+    // ACTION: Settings > System > Gestures > Double tap > Toggle on Double tap
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_ENABLED = 1740;
+
+    // ACTION: Settings > System > Gestures > Double tap > Toggle off Double tap
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_DISABLED = 1741;
+
+    // ACTION: Settings > System > Gestures > Double tap > Invoke Assistant
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_ACTION_ASSISTANT = 1742;
+
+    // ACTION: Settings > System > Gestures > Double tap > Take screenshot
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_ACTION_SCREENSHOT = 1743;
+
+    // ACTION: Settings > System > Gestures > Double tap > Play and pause
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_ACTION_PLAY_PAUSE = 1744;
+
+    // ACTION: Settings > System > Gestures > Double tap > Open app overview
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_ACTION_OVERVIEW = 1745;
+
+    // ACTION: Settings > System > Gestures > Double tap > Open notification shade
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_ACTION_NOTIFICATION_SHADE = 1746;
 }
 
 /**
