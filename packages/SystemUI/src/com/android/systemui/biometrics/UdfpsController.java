@@ -21,11 +21,9 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -44,16 +42,15 @@ import java.io.IOException;
 class UdfpsController {
     private static final String TAG = "UdfpsController";
 
-    private final Context mContext;
     private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
     private final Handler mHandler;
+    private final UdfpsView mView;
+    private final WindowManager.LayoutParams mLayoutParams;
+    private final String mHbmPath;
+    private final String mHbmEnableCommand;
+    private final String mHbmDisableCommand;
 
-    private UdfpsView mView;
-    private WindowManager.LayoutParams mLayoutParams;
-    private String mHbmPath;
-    private String mHbmEnableCommand;
-    private String mHbmDisableCommand;
     private boolean mIsOverlayShowing;
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
@@ -70,22 +67,23 @@ class UdfpsController {
 
     @SuppressLint("ClickableViewAccessibility")
     private final UdfpsView.OnTouchListener mOnTouchListener = (v, event) -> {
+        UdfpsView view = (UdfpsView) v;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                boolean isValidTouch = mView.isValidTouch(event.getX(), event.getY(),
+                boolean isValidTouch = view.isValidTouch(event.getX(), event.getY(),
                         event.getPressure());
-                if (!mView.isFingerDown() && isValidTouch) {
+                if (!view.isFingerDown() && isValidTouch) {
                     onFingerDown((int) event.getX(), (int) event.getY(), event.getTouchMinor(),
                             event.getTouchMajor());
-                } else if (mView.isFingerDown() && !isValidTouch) {
+                } else if (view.isFingerDown() && !isValidTouch) {
                     onFingerUp();
                 }
                 return true;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (mView.isFingerDown()) {
+                if (view.isFingerDown()) {
                     onFingerUp();
                 }
                 return true;
@@ -95,43 +93,21 @@ class UdfpsController {
         }
     };
 
-    UdfpsController(Context context, WindowManager windowManager) {
-        mContext = context;
+    UdfpsController(Context context) {
         mFingerprintManager = context.getSystemService(FingerprintManager.class);
-        mWindowManager = windowManager;
+        mWindowManager = context.getSystemService(WindowManager.class);
         mHandler = new Handler(Looper.getMainLooper());
-        start();
-    }
 
-    private void start() {
-        Log.v(TAG, "start");
-
-        Point displaySize = new Point();
-        mWindowManager.getDefaultDisplay().getRealSize(displaySize);
-        // TODO(b/160025856): move to the "dump" method.
-        Log.v(TAG, "UdfpsController | display size: " + displaySize.x + "x"
-                + displaySize.y);
-
-        mLayoutParams = new WindowManager.LayoutParams(
-                displaySize.x,
-                displaySize.y,
-                // TODO(b/152419866): Use the UDFPS window type when it becomes available.
-                WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                PixelFormat.TRANSLUCENT);
-        mLayoutParams.setTitle(TAG);
-        mLayoutParams.windowAnimations = 0;
-
-        LinearLayout layout = new LinearLayout(mContext);
+        mLayoutParams = createLayoutParams(context);
+        LinearLayout layout = new LinearLayout(context);
         layout.setLayoutParams(mLayoutParams);
-        mView = (UdfpsView) LayoutInflater.from(mContext).inflate(R.layout.udfps_view, layout,
+        mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, layout,
                 false);
         mView.setOnTouchListener(mOnTouchListener);
 
-        mHbmPath = mContext.getResources().getString(R.string.udfps_hbm_sysfs_path);
-        mHbmEnableCommand = mContext.getResources().getString(R.string.udfps_hbm_enable_command);
-        mHbmDisableCommand = mContext.getResources().getString(R.string.udfps_hbm_disable_command);
+        mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
+        mHbmEnableCommand = context.getResources().getString(R.string.udfps_hbm_enable_command);
+        mHbmDisableCommand = context.getResources().getString(R.string.udfps_hbm_disable_command);
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
         mIsOverlayShowing = false;
@@ -184,5 +160,24 @@ class UdfpsController {
         } catch (IOException e) {
             Log.e(TAG, "onFingerUp | failed to disable HBM: " + e.getMessage());
         }
+    }
+
+    private static WindowManager.LayoutParams createLayoutParams(Context context) {
+        Point displaySize = new Point();
+        context.getDisplay().getRealSize(displaySize);
+        // TODO(b/160025856): move to the "dump" method.
+        Log.v(TAG, "createLayoutParams | display size: " + displaySize.x + "x"
+                + displaySize.y);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                displaySize.x,
+                displaySize.y,
+                // TODO(b/152419866): Use the UDFPS window type when it becomes available.
+                WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        lp.setTitle(TAG);
+        lp.windowAnimations = 0;
+        return lp;
     }
 }
