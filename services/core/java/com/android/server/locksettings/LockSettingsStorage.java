@@ -484,7 +484,7 @@ class LockSettingsStorage {
     public Map<Integer, List<Long>> listSyntheticPasswordHandlesForAllUsers(String stateName) {
         Map<Integer, List<Long>> result = new ArrayMap<>();
         final UserManager um = UserManager.get(mContext);
-        for (UserInfo user : um.getUsers(false)) {
+        for (UserInfo user : um.getUsers()) {
             result.put(user.id, listSyntheticPasswordHandlesForUser(stateName, user.id));
         }
         return result;
