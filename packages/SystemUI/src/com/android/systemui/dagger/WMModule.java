@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui.dagger;
 
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.pip.tv.dagger.PipModule;
-
-import dagger.Binds;
 import dagger.Module;
 
-@Module(includes = {PipModule.class})
-interface TvSystemUIBinder {
-    @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
+/**
+ * Dagger module for including the WMComponent.
+ */
+@Module(subcomponents = {WMComponent.class})
+public abstract class WMModule {
 }

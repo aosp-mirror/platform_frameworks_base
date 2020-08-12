@@ -1,4 +1,6 @@
 -keep class com.android.systemui.CarSystemUIFactory
 -keep class com.android.car.notification.headsup.animationhelper.**
 
+-keep class com.android.systemui.CarGlobalRootComponent { *; }
+
 -include ../SystemUI/proguard.flags

@@ -32,7 +32,7 @@ import android.util.Log;
 import android.util.TimingsTraceLog;
 
 import com.android.systemui.dagger.ContextComponentHelper;
-import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.NotificationChannels;
 
@@ -57,7 +57,7 @@ public class SystemUIApplication extends Application implements
     private SystemUI[] mServices;
     private boolean mServicesStarted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
-    private SystemUIRootComponent mRootComponent;
+    private GlobalRootComponent mRootComponent;
 
     public SystemUIApplication() {
         super();

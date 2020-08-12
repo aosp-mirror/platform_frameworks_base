@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui;
 
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.pip.tv.dagger.PipModule;
+import com.android.systemui.dagger.SysUIComponent;
+import com.android.systemui.dagger.SysUISingleton;
 
-import dagger.Binds;
-import dagger.Module;
+import dagger.Subcomponent;
 
-@Module(includes = {PipModule.class})
-interface TvSystemUIBinder {
-    @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
+/**
+ * Dagger Subcomponent for Core SysUI.
+ */
+@SysUISingleton
+@Subcomponent(modules = {})
+public interface CarSysUIComponent extends SysUIComponent {
+
+    /**
+     * Builder for a CarSysUIComponent.
+     */
+    @Subcomponent.Builder
+    interface Builder extends SysUIComponent.Builder {
+        CarSysUIComponent build();
+    }
 }

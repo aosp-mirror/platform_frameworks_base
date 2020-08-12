@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui.tv;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
@@ -78,9 +78,9 @@ import dagger.Provides;
             WindowManagerShellModule.class
         },
         subcomponents = {
-            SysUIComponent.class
+            TvSysUIComponent.class
         })
-public abstract class SystemUIDefaultModule {
+public abstract class TvSystemUIModule {
 
     @Singleton
     @Provides
@@ -111,7 +111,7 @@ public abstract class SystemUIDefaultModule {
 
     @Binds
     @Singleton
-    public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
+    abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);

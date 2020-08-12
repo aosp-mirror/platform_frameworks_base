@@ -16,9 +16,6 @@
 
 package com.android.systemui.dagger;
 
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-
-import android.content.ContentProvider;
 import android.content.Context;
 
 import com.android.systemui.BootCompleteCacheImpl;
@@ -26,14 +23,12 @@ import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.onehanded.dagger.OneHandedModule;
 import com.android.systemui.pip.phone.dagger.PipModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.BindsInstance;
@@ -42,6 +37,7 @@ import dagger.Component;
 /**
  * Root component for Dagger injection.
  */
+// TODO(b/162923491): Move most of these modules to SysUIComponent.
 @Singleton
 @Component(modules = {
         DefaultComponentBinder.class,
@@ -52,19 +48,30 @@ import dagger.Component;
         SystemServicesModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
-        SystemUIDefaultModule.class})
-public interface SystemUIRootComponent {
+        SystemUIDefaultModule.class,
+        WMModule.class})
+public interface GlobalRootComponent {
 
     /**
-     * Builder for a SystemUIRootComponent.
+     * Builder for a GlobalRootComponent.
      */
     @Component.Builder
     interface Builder {
         @BindsInstance
         Builder context(Context context);
 
-        SystemUIRootComponent build();
+        GlobalRootComponent build();
     }
+
+    /**
+     * Builder for a WMComponent.
+     */
+    WMComponent.Builder getWMComponentBuilder();
+
+    /**
+     * Builder for a SysuiComponent.
+     */
+    SysUIComponent.Builder getSysUIComponent();
 
     /**
      * Provides a BootCompleteCache.
@@ -95,38 +102,20 @@ public interface SystemUIRootComponent {
     DumpManager createDumpManager();
 
     /**
-     * FragmentCreator generates all Fragments that need injection.
-     */
-    @Singleton
-    FragmentService.FragmentCreator createFragmentCreator();
-
-
-    /**
      * Creates a InitController.
      */
     @Singleton
     InitController getInitController();
 
     /**
-     * ViewCreator generates all Views that need injection.
+     * ViewInstanceCreator generates all Views that need injection.
      */
-    InjectionInflationController.ViewCreator createViewCreator();
-
-    /**
-     * Whether notification long press is allowed.
-     */
-    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
-    boolean allowNotificationLongPressName();
+    InjectionInflationController.ViewInstanceCreator.Factory createViewInstanceCreatorFactory();
 
     /**
      * Member injection into the supplied argument.
      */
     void inject(SystemUIAppComponentFactory factory);
-
-    /**
-     * Member injection into the supplied argument.
-     */
-    void inject(ContentProvider contentProvider);
 
     /**
      * Member injection into the supplied argument.

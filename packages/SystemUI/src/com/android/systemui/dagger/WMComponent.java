@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui.dagger;
 
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.pip.tv.dagger.PipModule;
+import dagger.Subcomponent;
 
-import dagger.Binds;
-import dagger.Module;
+/**
+ * Dagger Subcomponent for WindowManager.
+ */
+@WMSingleton
+@Subcomponent(modules = {})
+public interface WMComponent {
 
-@Module(includes = {PipModule.class})
-interface TvSystemUIBinder {
-    @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
+    /**
+     * Builder for a WMComponent.
+     */
+    @Subcomponent.Builder
+    interface Builder {
+        WMComponent build();
+    }
 }
