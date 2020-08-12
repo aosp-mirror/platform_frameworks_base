@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaDescription
 import android.media.MediaMetadata
+import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.net.Uri
 import android.os.UserHandle
@@ -331,7 +332,8 @@ class MediaDataManager(
     ) {
         val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
                 as MediaSession.Token?
-        val metadata = mediaControllerFactory.create(token).metadata
+        val mediaController = mediaControllerFactory.create(token)
+        val metadata = mediaController.metadata
 
         // Foreground and Background colors computed from album art
         val notif: Notification = sbn.notification
@@ -426,6 +428,9 @@ class MediaDataManager(
             }
         }
 
+        val isLocalSession = mediaController.playbackInfo?.playbackType ==
+            MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL ?: true
+
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
@@ -433,8 +438,8 @@ class MediaDataManager(
             onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
                     smallIconDrawable, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
-                    active, resumeAction = resumeAction, notificationKey = key,
-                    hasCheckedForResume = hasCheckedForResume))
+                    active, resumeAction = resumeAction, isLocalSession = isLocalSession,
+                    notificationKey = key, hasCheckedForResume = hasCheckedForResume))
         }
     }
 
