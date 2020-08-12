@@ -4629,6 +4629,9 @@ public final class Settings {
             pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getCodePathString());
             pw.print(prefix); pw.print("  legacyNativeLibraryDir=");
             pw.println(ps.legacyNativeLibraryPathString);
+            pw.print(prefix); pw.print("  extractNativeLibs=");
+            pw.println((ps.pkgFlags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0
+                    ? "true" : "false");
             pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.primaryCpuAbiString);
             pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.secondaryCpuAbiString);
         }
