@@ -31,6 +31,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -42,12 +43,11 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
-@Singleton
+@SysUISingleton
 public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private static final String TAG = "OneHandedManager";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =

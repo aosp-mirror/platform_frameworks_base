@@ -26,14 +26,14 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 open class BlurUtils @Inject constructor(
     @Main private val resources: Resources,
     dumpManager: DumpManager

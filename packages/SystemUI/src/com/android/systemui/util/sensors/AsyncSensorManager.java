@@ -29,6 +29,7 @@ import android.os.MemoryFile;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -39,7 +40,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Wrapper around sensor manager that hides potential sources of latency.
@@ -48,7 +48,7 @@ import javax.inject.Singleton;
  * without blocking. Note that this means registering listeners now always appears successful even
  * if it is not.
  */
-@Singleton
+@SysUISingleton
 public class AsyncSensorManager extends SensorManager
         implements PluginListener<SensorManagerPlugin> {
 

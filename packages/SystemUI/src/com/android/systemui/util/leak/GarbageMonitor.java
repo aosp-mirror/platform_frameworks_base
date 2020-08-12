@@ -48,6 +48,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -63,14 +64,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Suite of tools to periodically inspect the System UI heap and possibly prompt the user to
  * capture heap dumps and report them. Includes the implementation of the "Dump SysUI Heap"
  * quick settings tile.
  */
-@Singleton
+@SysUISingleton
 public class GarbageMonitor implements Dumpable {
     // Feature switches
     // ================
@@ -552,7 +552,7 @@ public class GarbageMonitor implements Dumpable {
     }
 
     /** */
-    @Singleton
+    @SysUISingleton
     public static class Service extends SystemUI implements Dumpable {
         private final GarbageMonitor mGarbageMonitor;
 

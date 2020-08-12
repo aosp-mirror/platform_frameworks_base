@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
@@ -24,14 +25,13 @@ import com.android.systemui.statusbar.notification.row.NotifInflationErrorManage
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles notification inflating, rebinding, and inflation aborting.
  *
  * Currently a wrapper for NotificationRowBinderImpl.
  */
-@Singleton
+@SysUISingleton
 public class NotifInflaterImpl implements NotifInflater {
 
     private final IStatusBarService mStatusBarService;

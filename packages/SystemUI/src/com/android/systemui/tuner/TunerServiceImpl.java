@@ -33,6 +33,7 @@ import android.util.ArraySet;
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.qs.QSTileHost;
@@ -45,12 +46,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class TunerServiceImpl extends TunerService {
 
     private static final String TAG = "TunerService";

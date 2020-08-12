@@ -33,6 +33,7 @@ import com.android.systemui.car.notification.NotificationShadeWindowControllerIm
 import com.android.systemui.car.statusbar.DozeServiceHost;
 import com.android.systemui.car.volume.CarVolumeDialogComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
@@ -74,7 +75,6 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Module;
@@ -84,20 +84,17 @@ import dagger.Provides;
         includes = {
                 DividerModule.class,
                 QSModule.class
-        },
-        subcomponents = {
-                CarSysUIComponent.class
         })
 abstract class CarSystemUIModule {
 
-    @Singleton
+    @SysUISingleton
     @Provides
     @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
     static boolean provideAllowNotificationLongPress() {
         return false;
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static HeadsUpManagerPhone provideHeadsUpManagerPhone(
             Context context,
@@ -109,7 +106,7 @@ abstract class CarSystemUIModule {
                 groupManager, configurationController);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
     static String provideLeakReportEmail() {
@@ -117,33 +114,33 @@ abstract class CarSystemUIModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static Recents provideRecents(Context context, RecentsImplementation recentsImplementation,
             CommandQueue commandQueue) {
         return new Recents(context, recentsImplementation, commandQueue);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static TransactionPool provideTransactionPool() {
         return new TransactionPool();
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static DisplayController providerDisplayController(Context context, @Main Handler handler,
             IWindowManager wmService) {
         return new DisplayController(context, handler, wmService);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
         return new SystemWindows(displayController, wmService);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static DisplayImeController provideDisplayImeController(Context context,
             IWindowManager wmService, DisplayController displayController,
@@ -152,7 +149,7 @@ abstract class CarSystemUIModule {
                 mainHandler, transactionPool).build();
     }
 
-    @Singleton
+    @SysUISingleton
     @PipMenuActivityClass
     @Provides
     static Class<?> providePipMenuActivityClass() {
@@ -170,7 +167,7 @@ abstract class CarSystemUIModule {
             NotificationLockscreenUserManagerImpl notificationLockscreenUserManager);
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static BatteryController provideBatteryController(Context context,
             EnhancedEstimates enhancedEstimates, PowerManager powerManager,
             BroadcastDispatcher broadcastDispatcher, DemoModeController demoModeController,
@@ -183,7 +180,7 @@ abstract class CarSystemUIModule {
     }
 
     @Binds
-    @Singleton
+    @SysUISingleton
     public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds

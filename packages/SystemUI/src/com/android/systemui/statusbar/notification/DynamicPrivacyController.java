@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import android.util.ArraySet;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -25,12 +26,11 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A controller which dynamically controls the visibility of Notification content
  */
-@Singleton
+@SysUISingleton
 public class DynamicPrivacyController implements KeyguardStateController.Callback {
 
     private final KeyguardStateController mKeyguardStateController;

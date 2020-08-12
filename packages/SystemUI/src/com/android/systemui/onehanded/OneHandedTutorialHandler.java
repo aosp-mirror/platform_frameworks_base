@@ -35,12 +35,12 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages the user tutorial handling for One Handed operations, including animations synchronized
@@ -48,7 +48,7 @@ import javax.inject.Singleton;
  * Refer {@link OneHandedGestureHandler} and {@link OneHandedTouchHandler} to see start and stop
  * one handed gesture
  */
-@Singleton
+@SysUISingleton
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Dumpable {
     private static final String TAG = "OneHandedTutorialHandler";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =

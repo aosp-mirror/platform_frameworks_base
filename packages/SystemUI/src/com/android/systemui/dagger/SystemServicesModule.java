@@ -72,8 +72,6 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 
@@ -83,49 +81,49 @@ import dagger.Provides;
 @Module
 public class SystemServicesModule {
     @Provides
-    @Singleton
+    @SysUISingleton
     static AccessibilityManager provideAccessibilityManager(Context context) {
         return context.getSystemService(AccessibilityManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static ActivityManager provideActivityManager(Context context) {
         return context.getSystemService(ActivityManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static AlarmManager provideAlarmManager(Context context) {
         return context.getSystemService(AlarmManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static AudioManager provideAudioManager(Context context) {
         return context.getSystemService(AudioManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static ColorDisplayManager provideColorDisplayManager(Context context) {
         return context.getSystemService(ColorDisplayManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static ConnectivityManager provideConnectivityManagager(Context context) {
         return context.getSystemService(ConnectivityManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static ContentResolver provideContentResolver(Context context) {
         return context.getContentResolver();
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static DevicePolicyManager provideDevicePolicyManager(Context context) {
         return context.getSystemService(DevicePolicyManager.class);
     }
@@ -137,44 +135,44 @@ public class SystemServicesModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static IActivityManager provideIActivityManager() {
         return ActivityManager.getService();
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static IActivityTaskManager provideIActivityTaskManager() {
         return ActivityTaskManager.getService();
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static IBatteryStats provideIBatteryStats() {
         return IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static IDreamManager provideIDreamManager() {
         return IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static IPackageManager provideIPackageManager() {
         return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static IStatusBarService provideIStatusBarService() {
         return IStatusBarService.Stub.asInterface(
@@ -188,32 +186,32 @@ public class SystemServicesModule {
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static IWindowManager provideIWindowManager() {
         return WindowManagerGlobal.getWindowManagerService();
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static KeyguardManager provideKeyguardManager(Context context) {
         return context.getSystemService(KeyguardManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static LatencyTracker provideLatencyTracker(Context context) {
         return LatencyTracker.getInstance(context);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static LauncherApps provideLauncherApps(Context context) {
         return context.getSystemService(LauncherApps.class);
     }
 
     @SuppressLint("MissingPermission")
-    @Singleton
+    @SysUISingleton
     @Provides
     @Nullable
     static LocalBluetoothManager provideLocalBluetoothController(Context context,
@@ -232,31 +230,31 @@ public class SystemServicesModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static NetworkScoreManager provideNetworkScoreManager(Context context) {
         return context.getSystemService(NetworkScoreManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationManager provideNotificationManager(Context context) {
         return context.getSystemService(NotificationManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static PackageManager providePackageManager(Context context) {
         return context.getPackageManager();
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static PackageManagerWrapper providePackageManagerWrapper() {
         return PackageManagerWrapper.getInstance();
     }
 
     /** */
-    @Singleton
+    @SysUISingleton
     @Provides
     static PowerManager providePowerManager(Context context) {
         return context.getSystemService(PowerManager.class);
@@ -269,51 +267,51 @@ public class SystemServicesModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static SensorManager providesSensorManager(Context context) {
         return context.getSystemService(SensorManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static SensorPrivacyManager provideSensorPrivacyManager(Context context) {
         return context.getSystemService(SensorPrivacyManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static ShortcutManager provideShortcutManager(Context context) {
         return context.getSystemService(ShortcutManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     @Nullable
     static TelecomManager provideTelecomManager(Context context) {
         return context.getSystemService(TelecomManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static TelephonyManager provideTelephonyManager(Context context) {
         return context.getSystemService(TelephonyManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static TrustManager provideTrustManager(Context context) {
         return context.getSystemService(TrustManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     @Nullable
     static Vibrator provideVibrator(Context context) {
         return context.getSystemService(Vibrator.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static UserManager provideUserManager(Context context) {
         return context.getSystemService(UserManager.class);
     }
@@ -324,20 +322,20 @@ public class SystemServicesModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     @Nullable
     static WifiManager provideWifiManager(Context context) {
         return context.getSystemService(WifiManager.class);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static WindowManager provideWindowManager(Context context) {
         return context.getSystemService(WindowManager.class);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static RoleManager provideRoleManager(Context context) {
         return context.getSystemService(RoleManager.class);
     }

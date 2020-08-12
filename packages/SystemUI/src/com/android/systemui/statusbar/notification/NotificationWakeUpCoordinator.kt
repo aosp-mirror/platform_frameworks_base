@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification
 import android.animation.ObjectAnimator
 import android.util.FloatProperty
 import com.android.systemui.Interpolators
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -30,12 +31,10 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
-
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.min
 
-@Singleton
+@SysUISingleton
 class NotificationWakeUpCoordinator @Inject constructor(
     private val mHeadsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,

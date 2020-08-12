@@ -49,6 +49,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
@@ -63,12 +64,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
-@Singleton
+@SysUISingleton
 public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitionCallback {
     private static final String TAG = "PipManager";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);

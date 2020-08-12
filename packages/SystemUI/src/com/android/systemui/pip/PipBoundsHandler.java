@@ -39,19 +39,19 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.window.WindowContainerTransaction;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles bounds calculation for PIP on Phone and other form factors, it keeps tracking variant
  * state changes originated from Window Manager and is the source of truth for PiP window bounds.
  */
-@Singleton
+@SysUISingleton
 public class PipBoundsHandler {
 
     private static final String TAG = PipBoundsHandler.class.getSimpleName();

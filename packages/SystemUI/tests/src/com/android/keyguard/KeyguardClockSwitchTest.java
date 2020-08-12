@@ -80,7 +80,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
 
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance()
-                        .getRootComponent()
+                        .getSysUIComponent()
                         .createViewInstanceCreatorFactory());
         LayoutInflater layoutInflater = inflationController
                 .injectable(LayoutInflater.from(getContext()));

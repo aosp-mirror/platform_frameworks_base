@@ -31,6 +31,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -41,9 +42,8 @@ import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class PrivacyItemController @Inject constructor(
     private val appOpsController: AppOpsController,
     @Main uiExecutor: DelayableExecutor,

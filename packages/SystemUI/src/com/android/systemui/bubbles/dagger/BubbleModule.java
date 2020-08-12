@@ -25,6 +25,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.bubbles.BubbleDataRepository;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -40,8 +41,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 
@@ -51,7 +50,7 @@ public interface BubbleModule {
 
     /**
      */
-    @Singleton
+    @SysUISingleton
     @Provides
     static BubbleController newBubbleController(
             Context context,

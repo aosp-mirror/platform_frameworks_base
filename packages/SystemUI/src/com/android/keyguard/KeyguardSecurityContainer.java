@@ -256,7 +256,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
         mInjectionInflationController =  new InjectionInflationController(
-            SystemUIFactory.getInstance().getRootComponent().createViewInstanceCreatorFactory());
+            SystemUIFactory.getInstance().getSysUIComponent().createViewInstanceCreatorFactory());
         mViewConfiguration = ViewConfiguration.get(context);
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mSecondaryLockScreenController = new AdminSecondaryLockScreenController(context, this,

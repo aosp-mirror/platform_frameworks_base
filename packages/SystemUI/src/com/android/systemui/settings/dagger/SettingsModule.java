@@ -19,10 +19,9 @@ package com.android.systemui.settings.dagger;
 import android.content.Context;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.settings.CurrentUserContentResolverProvider;
 import com.android.systemui.settings.CurrentUserContextTracker;
-
-import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Module;
@@ -37,7 +36,7 @@ public abstract class SettingsModule {
     /**
      * Provides and initializes a CurrentUserContextTracker
      */
-    @Singleton
+    @SysUISingleton
     @Provides
     static CurrentUserContextTracker provideCurrentUserContextTracker(
             Context context,
@@ -49,7 +48,7 @@ public abstract class SettingsModule {
     }
 
     @Binds
-    @Singleton
+    @SysUISingleton
     abstract CurrentUserContentResolverProvider bindCurrentUserContentResolverTracker(
             CurrentUserContextTracker tracker);
 }

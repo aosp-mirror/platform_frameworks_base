@@ -52,8 +52,6 @@ import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
 
-import javax.inject.Singleton;
-
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -89,7 +87,7 @@ public abstract class SystemUIModule {
     public abstract ContextComponentHelper bindComponentHelper(
             ContextComponentResolver componentHelper);
 
-    @Singleton
+    @SysUISingleton
     @Provides
     @Nullable
     static KeyguardLiftController provideKeyguardLiftController(
@@ -110,7 +108,7 @@ public abstract class SystemUIModule {
     public abstract NotificationRowBinder bindNotificationRowBinder(
             NotificationRowBinderImpl notificationRowBinder);
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static SysUiState provideSysUiState() {
         return new SysUiState();
@@ -131,7 +129,7 @@ public abstract class SystemUIModule {
     @BindsOptionalOf
     abstract StatusBar optionalStatusBar();
 
-    @Singleton
+    @SysUISingleton
     @Binds
     abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
 }

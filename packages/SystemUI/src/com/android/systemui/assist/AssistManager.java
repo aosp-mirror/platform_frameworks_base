@@ -46,6 +46,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.assist.ui.DefaultUiController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
@@ -53,14 +54,13 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * Class to manage everything related to assist in SystemUI.
  */
-@Singleton
+@SysUISingleton
 public class AssistManager {
 
     /**

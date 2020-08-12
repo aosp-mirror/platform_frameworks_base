@@ -33,6 +33,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -105,7 +106,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 import dagger.Module;
@@ -120,7 +120,7 @@ public interface StatusBarPhoneModule {
      * Provides our instance of StatusBar which is considered optional.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     static StatusBar provideStatusBar(
             Context context,
             NotificationsController notificationsController,

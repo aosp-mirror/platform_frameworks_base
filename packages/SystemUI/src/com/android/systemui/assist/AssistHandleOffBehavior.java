@@ -19,12 +19,12 @@ package com.android.systemui.assist;
 import android.content.Context;
 
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Assistant handle behavior that hides the Assistant handles. */
-@Singleton
+@SysUISingleton
 final class AssistHandleOffBehavior implements BehaviorController {
 
     @Inject

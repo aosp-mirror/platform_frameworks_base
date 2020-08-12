@@ -27,17 +27,17 @@ import android.provider.Settings;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A controller that monitors the status of SUW progress for each user in addition to the
  * functionality provided by {@link DeviceProvisionedControllerImpl}.
  */
-@Singleton
+@SysUISingleton
 public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControllerImpl implements
         CarDeviceProvisionedController {
     private static final Uri USER_SETUP_IN_PROGRESS_URI = Settings.Secure.getUriFor(

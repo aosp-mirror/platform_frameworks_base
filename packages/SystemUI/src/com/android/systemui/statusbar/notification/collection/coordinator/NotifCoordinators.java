@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -31,13 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles the attachment of {@link Coordinator}s to the {@link NotifPipeline} so that the
  * Coordinators can register their respective callbacks.
  */
-@Singleton
+@SysUISingleton
 public class NotifCoordinators implements Dumpable {
     private static final String TAG = "NotifCoordinators";
     private final List<Coordinator> mCoordinators = new ArrayList<>();

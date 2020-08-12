@@ -21,13 +21,14 @@ import android.view.accessibility.AccessibilityManager.AccessibilityServicesStat
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * For mocking because AccessibilityManager is final for some reason...
  */
-@Singleton
+@SysUISingleton
 public class AccessibilityManagerWrapper implements
         CallbackController<AccessibilityServicesStateChangeListener> {
 

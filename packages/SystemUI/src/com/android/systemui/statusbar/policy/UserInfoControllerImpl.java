@@ -39,15 +39,15 @@ import androidx.annotation.NonNull;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class UserInfoControllerImpl implements UserInfoController {
 
     private static final String TAG = "UserInfoController";

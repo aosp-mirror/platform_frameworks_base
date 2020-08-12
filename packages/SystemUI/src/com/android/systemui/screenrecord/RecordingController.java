@@ -30,17 +30,17 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Helper class to initiate a screen recording
  */
-@Singleton
+@SysUISingleton
 public class RecordingController
         implements CallbackController<RecordingController.RecordingStateChangeCallback> {
     private static final String TAG = "RecordingController";

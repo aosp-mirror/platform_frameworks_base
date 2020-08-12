@@ -30,13 +30,13 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Some CarNavigationButtons can be associated to a {@link RoleManager} role. When they are, it is
@@ -46,7 +46,7 @@ import javax.inject.Singleton;
  * This class monitors the current role holders for each role type and updates the button icon for
  * this buttons with have this feature enabled.
  */
-@Singleton
+@SysUISingleton
 public class ButtonRoleHolderController {
     private static final String TAG = "ButtonRoleHolderController";
 

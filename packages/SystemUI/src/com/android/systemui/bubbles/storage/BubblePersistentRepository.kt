@@ -18,13 +18,13 @@ package com.android.systemui.bubbles.storage
 import android.content.Context
 import android.util.AtomicFile
 import android.util.Log
+import com.android.systemui.dagger.SysUISingleton
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class BubblePersistentRepository @Inject constructor(
     context: Context
 ) {

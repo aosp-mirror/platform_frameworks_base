@@ -42,6 +42,7 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.globalactions.GlobalActionsDialog
@@ -52,18 +53,17 @@ import java.util.Optional
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class ControlsControllerImpl @Inject constructor (
-    private val context: Context,
-    @Background private val executor: DelayableExecutor,
-    private val uiController: ControlsUiController,
-    private val bindingController: ControlsBindingController,
-    private val listingController: ControlsListingController,
-    private val broadcastDispatcher: BroadcastDispatcher,
-    optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
-    dumpManager: DumpManager
+        private val context: Context,
+        @Background private val executor: DelayableExecutor,
+        private val uiController: ControlsUiController,
+        private val bindingController: ControlsBindingController,
+        private val listingController: ControlsListingController,
+        private val broadcastDispatcher: BroadcastDispatcher,
+        optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
+        dumpManager: DumpManager
 ) : Dumpable, ControlsController {
 
     companion object {

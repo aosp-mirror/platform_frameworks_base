@@ -43,6 +43,7 @@ import android.view.WindowManager.LayoutParams;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -66,12 +67,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Encapsulates all logic for the notification shade window state management.
  */
-@Singleton
+@SysUISingleton
 public class NotificationShadeWindowControllerImpl implements NotificationShadeWindowController,
         Dumpable, ConfigurationListener {
 

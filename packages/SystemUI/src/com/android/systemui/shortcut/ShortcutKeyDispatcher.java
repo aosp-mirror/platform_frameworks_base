@@ -28,17 +28,17 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Dispatches shortcut to System UI components
  */
-@Singleton
+@SysUISingleton
 public class ShortcutKeyDispatcher extends SystemUI
         implements ShortcutKeyServiceProxy.Callbacks {
 

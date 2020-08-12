@@ -21,16 +21,17 @@ import android.hardware.SensorPrivacyManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls sensor privacy state and notification.
  */
-@Singleton
+@SysUISingleton
 public class SensorPrivacyControllerImpl implements SensorPrivacyController,
         SensorPrivacyManager.OnSensorPrivacyChangedListener {
     private SensorPrivacyManager mSensorPrivacyManager;

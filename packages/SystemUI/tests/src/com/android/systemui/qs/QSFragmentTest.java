@@ -152,7 +152,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                         commandQueue),
                 new InjectionInflationController(
                         SystemUIFactory.getInstance()
-                                .getRootComponent()
+                                .getSysUIComponent()
                                 .createViewInstanceCreatorFactory()),
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),

@@ -49,6 +49,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
@@ -79,7 +80,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -596,7 +596,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     /**
      * Public builder for {@link StatusBarNotificationActivityStarter}.
      */
-    @Singleton
+    @SysUISingleton
     public static class Builder {
         private final Context mContext;
         private final CommandQueue mCommandQueue;

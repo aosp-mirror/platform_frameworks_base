@@ -32,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
@@ -50,14 +51,13 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * Implementation of DozeHost for SystemUI.
  */
-@Singleton
+@SysUISingleton
 public final class DozeServiceHost implements DozeHost {
     private static final String TAG = "DozeServiceHost";
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();

@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.notification.interruption.HeadsUpCo
 
 import android.annotation.Nullable;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -37,7 +38,6 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Coordinates heads up notification (HUN) interactions with the notification pipeline based on
@@ -53,7 +53,7 @@ import javax.inject.Singleton;
  *
  * Note: The inflation callback in {@link PreparationCoordinator} handles showing HUNs.
  */
-@Singleton
+@SysUISingleton
 public class HeadsUpCoordinator implements Coordinator {
     private static final String TAG = "HeadsUpCoordinator";
 

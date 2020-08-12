@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.init;
 import android.util.Log;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
@@ -36,12 +37,11 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Initialization code for the new notification pipeline.
  */
-@Singleton
+@SysUISingleton
 public class NotifPipelineInitializer implements Dumpable {
     private final NotifPipeline mPipelineWrapper;
     private final GroupCoalescer mGroupCoalescer;

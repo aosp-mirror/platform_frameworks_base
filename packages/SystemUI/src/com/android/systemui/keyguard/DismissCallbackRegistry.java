@@ -17,18 +17,18 @@
 package com.android.systemui.keyguard;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Registry holding the current set of {@link IKeyguardDismissCallback}s.
  */
-@Singleton
+@SysUISingleton
 public class DismissCallbackRegistry {
 
     private final ArrayList<DismissCallbackWrapper> mDismissCallbacks = new ArrayList<>();

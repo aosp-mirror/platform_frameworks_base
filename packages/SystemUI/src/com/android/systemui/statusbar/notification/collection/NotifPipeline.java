@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -33,7 +34,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * The system that constructs the "shade list", the filtered, grouped, and sorted list of
@@ -68,7 +68,7 @@ import javax.inject.Singleton;
  *  9. OnBeforeRenderListListeners are fired ({@link #addOnBeforeRenderListListener})
  *  9. The list is handed off to the view layer to be rendered
  */
-@Singleton
+@SysUISingleton
 public class NotifPipeline implements CommonNotifCollection {
     private final NotifCollection mNotifCollection;
     private final ShadeListBuilder mShadeListBuilder;

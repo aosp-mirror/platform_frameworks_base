@@ -56,6 +56,7 @@ import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
 import com.android.internal.os.SomeArgs;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.phone.PipUpdateThread;
 import com.android.systemui.stackdivider.Divider;
 import com.android.wm.shell.R;
@@ -70,7 +71,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages PiP tasks such as resize and offset.
@@ -83,7 +83,7 @@ import javax.inject.Singleton;
  * This class is also responsible for general resize/offset PiP operations within SysUI component,
  * see also {@link com.android.systemui.pip.phone.PipMotionHelper}.
  */
-@Singleton
+@SysUISingleton
 public class PipTaskOrganizer extends TaskOrganizer implements
         DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();

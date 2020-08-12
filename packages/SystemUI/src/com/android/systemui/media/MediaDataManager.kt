@@ -42,6 +42,7 @@ import com.android.internal.graphics.ColorUtils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -56,9 +57,6 @@ import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashMap
 
 // URI fields to try loading album art from
 private val ART_URIS = arrayOf(
@@ -91,7 +89,7 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 /**
  * A class that facilitates management and loading of Media Data, ready for binding.
  */
-@Singleton
+@SysUISingleton
 class MediaDataManager(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,

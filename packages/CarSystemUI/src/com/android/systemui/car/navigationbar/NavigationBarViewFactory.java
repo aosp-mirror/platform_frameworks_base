@@ -26,12 +26,12 @@ import androidx.annotation.LayoutRes;
 
 import com.android.car.ui.FocusParkingView;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** A factory that creates and caches views for navigation bars. */
-@Singleton
+@SysUISingleton
 public class NavigationBarViewFactory {
 
     private static final String TAG = NavigationBarViewFactory.class.getSimpleName();

@@ -40,6 +40,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -58,12 +59,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller which coordinates all the biometric unlocking actions with the UI.
  */
-@Singleton
+@SysUISingleton
 public class BiometricUnlockController extends KeyguardUpdateMonitorCallback implements Dumpable {
 
     private static final String TAG = "BiometricUnlockCtrl";

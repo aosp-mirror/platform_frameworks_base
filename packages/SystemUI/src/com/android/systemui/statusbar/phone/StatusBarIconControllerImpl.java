@@ -29,6 +29,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -47,14 +48,13 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Receives the callbacks from CommandQueue related to icons and tracks the state of
  * all the icons. Dispatches this state to any IconManagers that are currently
  * registered with it.
  */
-@Singleton
+@SysUISingleton
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController, DemoMode {
 

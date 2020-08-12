@@ -20,13 +20,13 @@ import android.annotation.NonNull;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Class to manage simple DeviceConfig-based feature flags.
@@ -43,7 +43,7 @@ import javax.inject.Singleton;
  *  $ adb shell am restart com.android.systemui
  * }
  */
-@Singleton
+@SysUISingleton
 public class FeatureFlags {
     private final Map<String, Boolean> mCachedDeviceConfigFlags = new ArrayMap<>();
 

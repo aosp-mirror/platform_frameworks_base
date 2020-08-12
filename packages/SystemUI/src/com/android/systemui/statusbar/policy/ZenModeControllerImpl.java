@@ -42,6 +42,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -53,10 +54,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Platform implementation of the zen mode controller. **/
-@Singleton
+@SysUISingleton
 public class ZenModeControllerImpl extends CurrentUserTracker
         implements ZenModeController, Dumpable {
     private static final String TAG = "ZenModeController";

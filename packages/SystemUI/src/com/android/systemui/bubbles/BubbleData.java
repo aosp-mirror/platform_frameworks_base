@@ -34,7 +34,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
-import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -52,12 +52,11 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Keeps track of active bubbles.
  */
-@Singleton
+@SysUISingleton
 public class BubbleData {
 
     private BubbleLoggerImpl mLogger = new BubbleLoggerImpl();

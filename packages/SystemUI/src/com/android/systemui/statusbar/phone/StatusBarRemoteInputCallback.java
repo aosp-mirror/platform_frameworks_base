@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewParent;
 
 import com.android.systemui.ActivityIntentHelper;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.ActionClickLogger;
@@ -49,11 +50,10 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         StatusBarStateController.StateListener {
 

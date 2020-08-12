@@ -16,16 +16,16 @@
 
 package com.android.systemui.media
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.animation.MeasurementOutput
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A class responsible for managing all media host states of the various host locations and
  * coordinating the heights among different players. This class can be used to get the most up to
  * date state for any location.
  */
-@Singleton
+@SysUISingleton
 class MediaHostStatesManager @Inject constructor() {
 
     private val callbacks: MutableSet<Callback> = mutableSetOf()

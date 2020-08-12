@@ -30,6 +30,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -40,12 +41,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Tracks and reports on {@link StatusBarState}.
  */
-@Singleton
+@SysUISingleton
 public class StatusBarStateControllerImpl implements SysuiStatusBarStateController,
         CallbackController<StateListener>, Dumpable {
     private static final String TAG = "SbStateController";

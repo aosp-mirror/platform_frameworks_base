@@ -25,6 +25,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -32,12 +33,11 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls the picture-in-picture window.
  */
-@Singleton
+@SysUISingleton
 public class PipUI extends SystemUI implements CommandQueue.Callbacks {
 
     private final CommandQueue mCommandQueue;

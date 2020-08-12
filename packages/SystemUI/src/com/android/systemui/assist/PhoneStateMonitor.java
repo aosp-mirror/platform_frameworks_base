@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -42,12 +43,11 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /** Class to monitor and report the state of the phone. */
-@Singleton
+@SysUISingleton
 public final class PhoneStateMonitor {
 
     public static final int PHONE_STATE_AOD1 = 1;

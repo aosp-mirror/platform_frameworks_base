@@ -28,6 +28,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -71,7 +72,6 @@ import com.android.systemui.util.leak.LeakDetector;
 import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -84,7 +84,7 @@ import dagger.Provides;
 @Module
 public interface NotificationsModule {
     /** Provides an instance of {@link NotificationEntryManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationEntryManager provideNotificationEntryManager(
             NotificationEntryManagerLogger logger,
@@ -111,7 +111,7 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationGutsManager provideNotificationGutsManager(
             Context context,
@@ -150,7 +150,7 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static VisualStabilityManager provideVisualStabilityManager(
             NotificationEntryManager notificationEntryManager, Handler handler) {
@@ -158,7 +158,7 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link NotificationLogger} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationLogger provideNotificationLogger(
             NotificationListener notificationListener,
@@ -177,14 +177,14 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link NotificationPanelLogger} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationPanelLogger provideNotificationPanelLogger() {
         return new NotificationPanelLoggerImpl();
     }
 
     /** Provides an instance of {@link NotificationBlockingHelperManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationBlockingHelperManager provideNotificationBlockingHelperManager(
             Context context,
@@ -196,7 +196,7 @@ public interface NotificationsModule {
     }
 
     /** Initializes the notification data pipeline (can be disabled via config). */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationsController provideNotificationsController(
             Context context,
@@ -213,7 +213,7 @@ public interface NotificationsModule {
      * Provide the active notification collection managing the notifications to render.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     static CommonNotifCollection provideCommonNotifCollection(
             FeatureFlags featureFlags,
             Lazy<NotifPipeline> pipeline,
@@ -226,7 +226,7 @@ public interface NotificationsModule {
      * from the notification shade or it gets auto-cancelled by click.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     static OnDismissCallback provideOnDismissCallback(
             FeatureFlags featureFlags,
             HeadsUpManager headsUpManager,

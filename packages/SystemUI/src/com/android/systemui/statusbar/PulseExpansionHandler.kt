@@ -30,6 +30,7 @@ import android.view.ViewConfiguration
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
@@ -41,13 +42,12 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ShadeController
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.max
 
 /**
  * A utility class to enable the downward swipe on when pulsing.
  */
-@Singleton
+@SysUISingleton
 class PulseExpansionHandler @Inject
 constructor(
     context: Context,
