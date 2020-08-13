@@ -1489,53 +1489,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * Assert multipackage install has consistent sessions.
-     *
-     * @throws PackageManagerException if child sessions don't match parent session
-     *                                  in respect to staged and enable rollback parameters.
-     */
-    @GuardedBy("mLock")
-    private void assertMultiPackageConsistencyLocked(
-            @NonNull List<PackageInstallerSession> childSessions) throws PackageManagerException {
-        for (PackageInstallerSession childSession : childSessions) {
-            // It might be that the parent session is loaded before all of it's child sessions are,
-            // e.g. when reading sessions from XML. Those sessions will be null here, and their
-            // conformance with the multipackage params will be checked when they're loaded.
-            if (childSession == null) {
-                continue;
-            }
-            assertConsistencyWithLocked(childSession);
-        }
-    }
-
-    /**
-     * Assert consistency with the given session.
-     *
-     * @throws PackageManagerException if other sessions doesn't match this session
-     *                                  in respect to staged and enable rollback parameters.
-     */
-    @GuardedBy("mLock")
-    private void assertConsistencyWithLocked(PackageInstallerSession other)
-            throws PackageManagerException {
-        // Session groups must be consistent wrt to isStaged parameter. Non-staging session
-        // cannot be grouped with staging sessions.
-        if (this.params.isStaged != other.params.isStaged) {
-            throw new PackageManagerException(
-                PackageManager.INSTALL_FAILED_MULTIPACKAGE_INCONSISTENCY,
-                "Multipackage Inconsistency: session " + other.sessionId
-                    + " and session " + sessionId
-                    + " have inconsistent staged settings");
-        }
-        if (this.params.getEnableRollback() != other.params.getEnableRollback()) {
-            throw new PackageManagerException(
-                PackageManager.INSTALL_FAILED_MULTIPACKAGE_INCONSISTENCY,
-                "Multipackage Inconsistency: session " + other.sessionId
-                    + " and session " + sessionId
-                    + " have inconsistent rollback settings");
-        }
-    }
-
-    /**
      * Seal the session to prevent further modification.
      *
      * <p>The session will be sealed after calling this method even if it failed.
@@ -1549,14 +1502,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             assertNoWriteFileTransfersOpenLocked();
             assertPreparedAndNotDestroyedLocked("sealing of session");
-
             mSealed = true;
-            List<PackageInstallerSession> childSessions = getChildSessionsLocked();
-            if (childSessions != null) {
-                assertMultiPackageConsistencyLocked(childSessions);
-            }
-        } catch (PackageManagerException e) {
-            throw onSessionValidationFailure(e);
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above.
@@ -3189,6 +3135,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (childSession.params.isMultiPackage) {
             throw new IllegalStateException("Multi-session " + childSessionId
                     + " can't be a child.");
+        }
+        if (params.isStaged != childSession.params.isStaged) {
+            throw new IllegalStateException("Multipackage Inconsistency: session "
+                    + childSession.sessionId + " and session " + sessionId
+                    + " have inconsistent staged settings");
+        }
+        if (params.getEnableRollback() != childSession.params.getEnableRollback()) {
+            throw new IllegalStateException("Multipackage Inconsistency: session "
+                    + childSession.sessionId + " and session " + sessionId
+                    + " have inconsistent rollback settings");
         }
 
         try {
