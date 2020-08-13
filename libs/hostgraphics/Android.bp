@@ -5,6 +5,10 @@ cc_library_host_static {
         "-Wno-unused-parameter",
     ],
 
+    static_libs: [
+        "libbase",
+    ],
+
     srcs: [
         ":libui_host_common",
         "Fence.cpp",
