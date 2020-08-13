@@ -21,7 +21,7 @@ import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationLog
 import javax.inject.Inject
 
-class NotifViewManagerLogger @Inject constructor(
+class ShadeViewDifferLogger @Inject constructor(
     @NotificationLog private val buffer: LogBuffer
 ) {
     fun logDetachingChild(

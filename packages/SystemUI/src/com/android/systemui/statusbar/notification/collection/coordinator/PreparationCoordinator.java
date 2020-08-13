@@ -307,7 +307,7 @@ public class PreparationCoordinator implements Coordinator {
     private void onInflationFinished(NotificationEntry entry) {
         mLogger.logNotifInflated(entry.getKey());
         mInflatingNotifs.remove(entry);
-        mViewBarn.registerViewForEntry(entry, entry.getRow());
+        mViewBarn.registerViewForEntry(entry, entry.getRowController());
         mInflationStates.put(entry, STATE_INFLATED);
         mNotifInflatingFilter.invalidateList();
     }
