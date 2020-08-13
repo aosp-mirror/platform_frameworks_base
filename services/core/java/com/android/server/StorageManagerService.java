@@ -3282,7 +3282,7 @@ class StorageManagerService extends IStorageManager.Stub
         final UserManagerInternal umInternal =
                 LocalServices.getService(UserManagerInternal.class);
 
-        for (UserInfo user : um.getUsers(false /* includeDying */)) {
+        for (UserInfo user : um.getUsers()) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
