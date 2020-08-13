@@ -377,12 +377,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
      */
     public void updateReentryBounds() {
-        // On phones, the expansion animation that happens on pip tap before restoring
-        // to fullscreen makes it so that the last reported bounds are the expanded
-        // bounds. We want to restore to the unexpanded bounds when re-entering pip,
-        // so we use the bounds before expansion (normal) instead of the reported
-        // bounds.
-        Rect reentryBounds = mTouchHandler.getNormalBounds();
+        final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
         // Apply the snap fraction of the current bounds to the normal bounds.
         final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
         float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
