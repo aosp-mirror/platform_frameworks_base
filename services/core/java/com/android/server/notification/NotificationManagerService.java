@@ -7758,6 +7758,13 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void updateUriPermissions(@Nullable NotificationRecord newRecord,
             @Nullable NotificationRecord oldRecord, String targetPkg, int targetUserId) {
+        updateUriPermissions(newRecord, oldRecord, targetPkg, targetUserId, false);
+    }
+
+    @VisibleForTesting
+    void updateUriPermissions(@Nullable NotificationRecord newRecord,
+            @Nullable NotificationRecord oldRecord, String targetPkg, int targetUserId,
+            boolean onlyRevokeCurrentTarget) {
         final String key = (newRecord != null) ? newRecord.getKey() : oldRecord.getKey();
         if (DBG) Slog.d(TAG, key + ": updating permissions");
 
@@ -7785,7 +7792,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         // If we have no Uris to grant, but an existing owner, go destroy it
-        if (newUris == null && permissionOwner != null) {
+        // When revoking permissions of a single listener, destroying the owner will revoke
+        // permissions of other listeners who need to keep access.
+        if (newUris == null && permissionOwner != null && !onlyRevokeCurrentTarget) {
             destroyPermissionOwner(permissionOwner, UserHandle.getUserId(oldRecord.getUid()), key);
             permissionOwner = null;
         }
@@ -7808,9 +7817,20 @@ public class NotificationManagerService extends SystemService {
                 final Uri uri = oldUris.valueAt(i);
                 if (newUris == null || !newUris.contains(uri)) {
                     if (DBG) Slog.d(TAG, key + ": revoking " + uri);
-                    int userId = ContentProvider.getUserIdFromUri(
-                            uri, UserHandle.getUserId(oldRecord.getUid()));
-                    revokeUriPermission(permissionOwner, uri, userId);
+                    if (onlyRevokeCurrentTarget) {
+                        // We're revoking permission from one listener only; other listeners may
+                        // still need access because the notification may still exist
+                        revokeUriPermission(permissionOwner, uri,
+                                UserHandle.getUserId(oldRecord.getUid()), targetPkg, targetUserId);
+                    } else {
+                        // This is broad to unilaterally revoke permissions to this Uri as granted
+                        // by this notification.  But this code-path can only be used when the
+                        // reason for revoking is that the notification posted again without this
+                        // Uri, not when removing an individual listener.
+                        revokeUriPermission(permissionOwner, uri,
+                                UserHandle.getUserId(oldRecord.getUid()),
+                                null, UserHandle.USER_ALL);
+                    }
                 }
             }
         }
@@ -7839,8 +7859,10 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void revokeUriPermission(IBinder owner, Uri uri, int userId) {
+    private void revokeUriPermission(IBinder owner, Uri uri, int sourceUserId, String targetPkg,
+            int targetUserId) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+        int userId = ContentProvider.getUserIdFromUri(uri, sourceUserId);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -7848,7 +7870,7 @@ public class NotificationManagerService extends SystemService {
                     owner,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                    userId);
+                    userId, targetPkg, targetUserId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -9219,6 +9241,7 @@ public class NotificationManagerService extends SystemService {
             final NotificationRankingUpdate update;
             synchronized (mNotificationLock) {
                 update = makeRankingUpdateLocked(info);
+                updateUriPermissionsForActiveNotificationsLocked(info, true);
             }
             try {
                 listener.onListenerConnected(update);
@@ -9230,6 +9253,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         @GuardedBy("mNotificationLock")
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
+            updateUriPermissionsForActiveNotificationsLocked(removed, false);
             if (removeDisabledHints(removed)) {
                 updateListenerHintsLocked();
                 updateEffectsSuppressorLocked();
@@ -9296,8 +9320,7 @@ public class NotificationManagerService extends SystemService {
 
                 for (final ManagedServiceInfo info : getServices()) {
                     boolean sbnVisible = isVisibleToListener(sbn, info);
-                    boolean oldSbnVisible = oldSbn != null ? isVisibleToListener(oldSbn, info)
-                            : false;
+                    boolean oldSbnVisible = (oldSbn != null) && isVisibleToListener(oldSbn, info);
                     // This notification hasn't been and still isn't visible -> ignore.
                     if (!oldSbnVisible && !sbnVisible) {
                         continue;
@@ -9321,13 +9344,8 @@ public class NotificationManagerService extends SystemService {
                     // This notification became invisible -> remove the old one.
                     if (oldSbnVisible && !sbnVisible) {
                         final StatusBarNotification oldSbnLightClone = oldSbn.cloneLight();
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyRemoved(
-                                        info, oldSbnLightClone, update, null, REASON_USER_STOPPED);
-                            }
-                        });
+                        mHandler.post(() -> notifyRemoved(
+                                info, oldSbnLightClone, update, null, REASON_USER_STOPPED));
                         continue;
                     }
 
@@ -9337,15 +9355,50 @@ public class NotificationManagerService extends SystemService {
                     updateUriPermissions(r, old, info.component.getPackageName(), targetUserId);
 
                     final StatusBarNotification sbnToPost = trimCache.ForListener(info);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyPosted(info, sbnToPost, update);
-                        }
-                    });
+                    mHandler.post(() -> notifyPosted(info, sbnToPost, update));
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Could not notify listeners for " + r.getKey(), e);
+            }
+        }
+
+        /**
+         * Synchronously grant or revoke permissions to Uris for all active and visible
+         * notifications to just the NotificationListenerService provided.
+         */
+        @GuardedBy("mNotificationLock")
+        private void updateUriPermissionsForActiveNotificationsLocked(
+                ManagedServiceInfo info, boolean grant) {
+            try {
+                for (final NotificationRecord r : mNotificationList) {
+                    // When granting permissions, ignore notifications which are invisible.
+                    // When revoking permissions, all notifications are invisible, so process all.
+                    if (grant && !isVisibleToListener(r.getSbn(), info)) {
+                        continue;
+                    }
+                    // If the notification is hidden, permissions are not required by the listener.
+                    if (r.isHidden() && info.targetSdkVersion < Build.VERSION_CODES.P) {
+                        continue;
+                    }
+                    // Grant or revoke access synchronously
+                    final int targetUserId = (info.userid == UserHandle.USER_ALL)
+                            ? UserHandle.USER_SYSTEM : info.userid;
+                    if (grant) {
+                        // Grant permissions by passing arguments as if the notification is new.
+                        updateUriPermissions(/* newRecord */ r, /* oldRecord */ null,
+                                info.component.getPackageName(), targetUserId);
+                    } else {
+                        // Revoke permissions by passing arguments as if the notification was
+                        // removed, but set `onlyRevokeCurrentTarget` to avoid revoking permissions
+                        // granted to *other* targets by this notification's URIs.
+                        updateUriPermissions(/* newRecord */ null, /* oldRecord */ r,
+                                info.component.getPackageName(), targetUserId,
+                                /* onlyRevokeCurrentTarget */ true);
+                    }
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not " + (grant ? "grant" : "revoke") + " Uri permissions to "
+                        + info.component, e);
             }
         }
 
@@ -9384,18 +9437,11 @@ public class NotificationManagerService extends SystemService {
                 final NotificationStats stats = mAssistants.isServiceTokenValidLocked(info.service)
                         ? notificationStats : null;
                 final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyRemoved(info, sbnLight, update, stats, reason);
-                    }
-                });
+                mHandler.post(() -> notifyRemoved(info, sbnLight, update, stats, reason));
             }
 
             // Revoke access after all listeners have been updated
-            mHandler.post(() -> {
-                updateUriPermissions(null, r, null, UserHandle.USER_SYSTEM);
-            });
+            mHandler.post(() -> updateUriPermissions(null, r, null, UserHandle.USER_SYSTEM));
         }
 
         /**
