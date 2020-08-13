@@ -38,7 +38,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.AsyncChannel;
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +73,7 @@ public class NsdManagerTest {
 
     @After
     public void tearDown() throws Exception {
-        HandlerUtilsKt.waitForIdle(mServiceHandler, mTimeoutMs);
+        HandlerUtils.waitForIdle(mServiceHandler, mTimeoutMs);
         mServiceHandler.chan.disconnect();
         mServiceHandler.stop();
         if (mManager != null) {
@@ -333,7 +333,7 @@ public class NsdManagerTest {
     }
 
     int verifyRequest(int expectedMessageType) {
-        HandlerUtilsKt.waitForIdle(mServiceHandler, mTimeoutMs);
+        HandlerUtils.waitForIdle(mServiceHandler, mTimeoutMs);
         verify(mServiceHandler, timeout(mTimeoutMs)).handleMessage(any());
         reset(mServiceHandler);
         Message received = mServiceHandler.getLastMessage();

@@ -50,7 +50,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 import com.android.testutils.TapPacketReader;
 
 import org.junit.After;
@@ -366,7 +366,7 @@ public class EthernetTetheringTest {
     private TapPacketReader makePacketReader(FileDescriptor fd, int mtu) {
         final TapPacketReader reader = new TapPacketReader(mHandler, fd, mtu);
         mHandler.post(() -> reader.start());
-        HandlerUtilsKt.waitForIdle(mHandler, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mHandler, TIMEOUT_MS);
         return reader;
     }
 
