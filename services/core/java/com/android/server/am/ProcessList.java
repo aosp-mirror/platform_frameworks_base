@@ -2960,7 +2960,8 @@ public final class ProcessList {
                 // No more processes using this uid, tell clients it is gone.
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                         "No more processes in " + uidRecord);
-                mService.enqueueUidChangeLocked(uidRecord, -1, UidRecord.CHANGE_GONE);
+                mService.mUidObserverController.enqueueUidChangeLocked(uidRecord, -1,
+                        UidRecord.CHANGE_GONE);
                 EventLogTags.writeAmUidStopped(uid);
                 mActiveUids.remove(uid);
                 mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT,

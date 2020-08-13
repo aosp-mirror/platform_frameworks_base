@@ -32,7 +32,6 @@ import static android.util.DebugUtils.valueToString;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
-import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.Injector;
 import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
@@ -548,10 +547,10 @@ public class ActivityManagerServiceTest {
             pendingChange.processState = procStatesForPendingUidRecords[i];
             pendingChange.procStateSeq = i;
             changeItems.put(changesForPendingUidRecords[i], pendingChange);
-            mAms.mPendingUidChanges.add(pendingChange);
+            mAms.mUidObserverController.mPendingUidChanges.add(pendingChange);
         }
 
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.dispatchUidsChanged();
         // Verify the required changes have been dispatched to observers.
         for (int i = 0; i < observers.length; ++i) {
             final int changeToObserve = changesToObserve[i];
@@ -647,8 +646,8 @@ public class ActivityManagerServiceTest {
         changeItem.change = UidRecord.CHANGE_PROCSTATE;
         changeItem.processState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
         changeItem.procStateSeq = 111;
-        mAms.mPendingUidChanges.add(changeItem);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.add(changeItem);
+        mAms.mUidObserverController.dispatchUidsChanged();
         // First process state message is always delivered regardless of whether the process state
         // change is above or below the cutpoint (PROCESS_STATE_SERVICE).
         verify(observer).onUidStateChanged(TEST_UID,
@@ -657,15 +656,15 @@ public class ActivityManagerServiceTest {
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_RECEIVER;
-        mAms.mPendingUidChanges.add(changeItem);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.add(changeItem);
+        mAms.mUidObserverController.dispatchUidsChanged();
         // Previous process state change is below cutpoint (PROCESS_STATE_SERVICE) and
         // the current process state change is also below cutpoint, so no callback will be invoked.
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-        mAms.mPendingUidChanges.add(changeItem);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.add(changeItem);
+        mAms.mUidObserverController.dispatchUidsChanged();
         // Previous process state change is below cutpoint (PROCESS_STATE_SERVICE) and
         // the current process state change is above cutpoint, so callback will be invoked with the
         // current process state change.
@@ -675,15 +674,15 @@ public class ActivityManagerServiceTest {
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_TOP;
-        mAms.mPendingUidChanges.add(changeItem);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.add(changeItem);
+        mAms.mUidObserverController.dispatchUidsChanged();
         // Previous process state change is above cutpoint (PROCESS_STATE_SERVICE) and
         // the current process state change is also above cutpoint, so no callback will be invoked.
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
-        mAms.mPendingUidChanges.add(changeItem);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.add(changeItem);
+        mAms.mUidObserverController.dispatchUidsChanged();
         // Previous process state change is above cutpoint (PROCESS_STATE_SERVICE) and
         // the current process state change is below cutpoint, so callback will be invoked with the
         // current process state change.
@@ -720,20 +719,21 @@ public class ActivityManagerServiceTest {
 
         // Verify that when there no observers listening to uid state changes, then there will
         // be no changes to validateUids.
-        mAms.mPendingUidChanges.addAll(pendingItemsForUids);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.addAll(pendingItemsForUids);
+        mAms.mUidObserverController.dispatchUidsChanged();
         assertEquals("No observers registered, so validateUids should be empty",
-                0, mAms.mValidateUids.size());
+                0, mAms.mUidObserverController.mValidateUids.size());
 
         final IUidObserver observer = mock(IUidObserver.Stub.class);
         when(observer.asBinder()).thenReturn((IBinder) observer);
         mAms.registerUidObserver(observer, 0, 0, null);
         // Verify that when observers are registered, then validateUids is correctly updated.
-        mAms.mPendingUidChanges.addAll(pendingItemsForUids);
-        mAms.dispatchUidsChanged();
+        mAms.mUidObserverController.mPendingUidChanges.addAll(pendingItemsForUids);
+        mAms.mUidObserverController.dispatchUidsChanged();
         for (int i = 0; i < pendingItemsForUids.size(); ++i) {
             final UidRecord.ChangeItem item = pendingItemsForUids.get(i);
-            final UidRecord validateUidRecord = mAms.mValidateUids.get(item.uid);
+            final UidRecord validateUidRecord =
+                    mAms.mUidObserverController.mValidateUids.get(item.uid);
             if ((item.change & UidRecord.CHANGE_GONE) != 0) {
                 assertNull("validateUidRecord should be null since the change is either "
                         + "CHANGE_GONE or CHANGE_GONE_IDLE", validateUidRecord);
@@ -759,7 +759,7 @@ public class ActivityManagerServiceTest {
         // Verify that when uid state changes to CHANGE_GONE or CHANGE_GONE_IDLE, then it
         // will be removed from validateUids.
         assertNotEquals("validateUids should not be empty", 0,
-                mAms.mValidateUids.size());
+                mAms.mUidObserverController.mValidateUids.size());
         for (int i = 0; i < pendingItemsForUids.size(); ++i) {
             final UidRecord.ChangeItem item = pendingItemsForUids.get(i);
             // Assign CHANGE_GONE_IDLE to some items and CHANGE_GONE to the others, using even/odd
@@ -767,10 +767,11 @@ public class ActivityManagerServiceTest {
             item.change = (i % 2) == 0 ? (UidRecord.CHANGE_GONE | UidRecord.CHANGE_IDLE)
                     : UidRecord.CHANGE_GONE;
         }
-        mAms.mPendingUidChanges.addAll(pendingItemsForUids);
-        mAms.dispatchUidsChanged();
-        assertEquals("validateUids should be empty, size=" + mAms.mValidateUids.size(),
-                0, mAms.mValidateUids.size());
+        mAms.mUidObserverController.mPendingUidChanges.addAll(pendingItemsForUids);
+        mAms.mUidObserverController.dispatchUidsChanged();
+        assertEquals("validateUids should be empty, size="
+                + mAms.mUidObserverController.mValidateUids.size(),
+                        0, mAms.mUidObserverController.mValidateUids.size());
     }
 
     @Test
@@ -792,7 +793,7 @@ public class ActivityManagerServiceTest {
     @Test
     public void testEnqueueUidChangeLocked_nullUidRecord() {
         // Use "null" uidRecord to make sure there is no crash.
-        mAms.enqueueUidChangeLocked(null, TEST_UID, UidRecord.CHANGE_ACTIVE);
+        mAms.mUidObserverController.enqueueUidChangeLocked(null, TEST_UID, UidRecord.CHANGE_ACTIVE);
     }
 
     private void verifyLastProcStateSeqUpdated(UidRecord uidRecord, int uid, long curProcstateSeq) {
@@ -801,7 +802,7 @@ public class ActivityManagerServiceTest {
             final int changeToDispatch = UID_RECORD_CHANGES[i];
             // Reset lastProcStateSeqDispatchToObservers after every test.
             uidRecord.lastDispatchedProcStateSeq = 0;
-            mAms.enqueueUidChangeLocked(uidRecord, uid, changeToDispatch);
+            mAms.mUidObserverController.enqueueUidChangeLocked(uidRecord, uid, changeToDispatch);
             // Verify there is no effect on curProcStateSeq.
             assertEquals(curProcstateSeq, uidRecord.curProcStateSeq);
             if ((changeToDispatch & UidRecord.CHANGE_GONE) != 0) {
@@ -833,9 +834,9 @@ public class ActivityManagerServiceTest {
             // Reset the current state
             mHandler.reset();
             uidRecord.pendingChange = null;
-            mAms.mPendingUidChanges.clear();
+            mAms.mUidObserverController.mPendingUidChanges.clear();
 
-            mAms.enqueueUidChangeLocked(uidRecord, -1, changeToDispatch);
+            mAms.mUidObserverController.enqueueUidChangeLocked(uidRecord, -1, changeToDispatch);
 
             // Verify that UidRecord.pendingChange is updated correctly.
             assertNotNull(uidRecord.pendingChange);
@@ -843,8 +844,7 @@ public class ActivityManagerServiceTest {
             assertEquals(expectedProcState, uidRecord.pendingChange.processState);
             assertEquals(TEST_PROC_STATE_SEQ1, uidRecord.pendingChange.procStateSeq);
 
-            // Verify that DISPATCH_UIDS_CHANGED_UI_MSG is posted to handler.
-            mHandler.waitForMessage(DISPATCH_UIDS_CHANGED_UI_MSG);
+            // TODO: Verify that DISPATCH_UIDS_CHANGED_UI_MSG is posted to handler.
         }
     }
 
