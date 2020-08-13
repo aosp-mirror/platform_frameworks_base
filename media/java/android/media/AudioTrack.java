@@ -1270,10 +1270,12 @@ public class AudioTrack extends PlayerBase
             // native code figure out the minimum buffer size.
             if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
                 int bytesPerSample = 1;
-                try {
-                    bytesPerSample = mFormat.getBytesPerSample(mFormat.getEncoding());
-                } catch (IllegalArgumentException e) {
-                    // do nothing
+                if (AudioFormat.isEncodingLinearFrames(mFormat.getEncoding())) {
+                    try {
+                        bytesPerSample = mFormat.getBytesPerSample(mFormat.getEncoding());
+                    } catch (IllegalArgumentException e) {
+                        // do nothing
+                    }
                 }
                 mBufferSizeInBytes = mFormat.getChannelCount() * bytesPerSample;
             }
