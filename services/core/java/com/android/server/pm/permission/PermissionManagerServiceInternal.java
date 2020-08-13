@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
+import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.ArrayList;
@@ -263,6 +264,52 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
+
+    /**
+     * Read {@code PermissionsState} from package settings.
+     *
+     * TODO(zhanghai): This is a temporary method because we should not expose
+     * {@code PackageSetting} which is a implementation detail that permission should not know.
+     * Instead, it should retrieve the legacy state via a defined API.
+     */
+    public abstract void readPermissionsStateFromPackageSettingsTEMP();
+
+    /**
+     * Write {@code PermissionsState} from to settings.
+     *
+     * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
+     * for permission.
+     */
+    public abstract void writePermissionsStateToPackageSettingsTEMP();
+
+    /**
+     * Notify that a user has been removed and its permission state should be removed as well.
+     */
+    public abstract void onUserRemoved(@UserIdInt int userId);
+
+    /**
+     * Remove the {@code PermissionsState} associated with an app ID, called the same time as the
+     * removal of a {@code PackageSetitng}.
+     *
+     * TODO(zhanghai): This is a temporary method before we figure out a way to get notified of app
+     * ID removal via API.
+     */
+    public abstract void removePermissionsStateTEMP(int appId);
+
+    /**
+     * Update the shared user setting when a package with a shared user id is removed. The gids
+     * associated with each permission of the deleted package are removed from the shared user'
+     * gid list only if its not in use by other permissions of packages in the shared user setting.
+     *
+     * TODO(zhanghai): We should not need this when permission no longer sees an incomplete package
+     * state where the updated system package is uninstalled but the disabled system package is yet
+     * to be installed. Then we should handle this in restorePermissionState().
+     *
+     * @return the affected user id, may be a real user ID, USER_ALL, or USER_NULL when none.
+     */
+    @UserIdInt
+    public abstract int revokeSharedUserPermissionsForDeletedPackageTEMP(
+            @NonNull PackageSetting deletedPs, @UserIdInt int userId);
 
     /**
      * Get all the permissions granted to a package.
