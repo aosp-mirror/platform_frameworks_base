@@ -38,13 +38,13 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
-@Ignore("b/163095037")
 public class ProtoLogIntegrationTest {
     @After
     public void tearDown() {
         ProtoLogImpl.setSingleInstance(null);
     }
 
+    @Ignore("b/163095037")
     @Test
     public void testProtoLogToolIntegration() {
         ProtoLogImpl mockedProtoLog = mock(ProtoLogImpl.class);
