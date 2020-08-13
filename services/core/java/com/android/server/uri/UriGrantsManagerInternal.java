@@ -75,10 +75,31 @@ public interface UriGrantsManagerInternal {
     void removeUriPermissionsForPackage(
             String packageName, int userHandle, boolean persistable, boolean targetOnly);
     /**
-     * @param uri This uri must NOT contain an embedded userId.
+     * Remove any {@link UriPermission} associated with the owner whose values match the given
+     * filtering parameters.
+     *
+     * @param token An opaque owner token as returned by {@link #newUriPermissionOwner(String)}.
+     * @param uri This uri must NOT contain an embedded userId. {@code null} to apply to all Uris.
+     * @param mode The modes (as a bitmask) to revoke.
      * @param userId The userId in which the uri is to be resolved.
      */
     void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode, int userId);
+
+    /**
+     * Remove any {@link UriPermission} associated with the owner whose values match the given
+     * filtering parameters.
+     *
+     * @param token An opaque owner token as returned by {@link #newUriPermissionOwner(String)}.
+     * @param uri This uri must NOT contain an embedded userId. {@code null} to apply to all Uris.
+     * @param mode The modes (as a bitmask) to revoke.
+     * @param userId The userId in which the uri is to be resolved.
+     * @param targetPkg Calling package name to match, or {@code null} to apply to all packages.
+     * @param targetUserId Calling user to match, or {@link UserHandle#USER_ALL} to apply to all
+     *                     users.
+     */
+    void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode, int userId,
+            String targetPkg, int targetUserId);
+
     boolean checkAuthorityGrants(
             int callingUid, ProviderInfo cpi, int userId, boolean checkUser);
     void dump(PrintWriter pw, boolean dumpAll, String dumpPackage);
