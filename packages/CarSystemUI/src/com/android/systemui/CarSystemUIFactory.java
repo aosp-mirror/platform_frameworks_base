@@ -19,7 +19,7 @@ package com.android.systemui;
 import android.content.Context;
 import android.content.res.Resources;
 
-import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dagger.GlobalRootComponent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,8 +30,8 @@ import java.util.Set;
 public class CarSystemUIFactory extends SystemUIFactory {
 
     @Override
-    protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
-        return DaggerCarSystemUIRootComponent.builder()
+    protected GlobalRootComponent buildGlobalRootComponent(Context context) {
+        return DaggerCarGlobalRootComponent.builder()
                 .context(context)
                 .build();
     }

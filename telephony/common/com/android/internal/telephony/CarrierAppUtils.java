@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -74,7 +75,7 @@ public final class CarrierAppUtils {
      * privileged apps may have changed.
      */
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
-            TelephonyManager telephonyManager, int userId, Context context) {
+            TelephonyManager telephonyManager, @UserIdInt int userId, Context context) {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
@@ -101,7 +102,7 @@ public final class CarrierAppUtils {
      * Manager can kill it, and this can lead to crashes as the app is in an unexpected state.
      */
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
-            int userId, Context context) {
+            @UserIdInt int userId, Context context) {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
@@ -117,9 +118,9 @@ public final class CarrierAppUtils {
                 systemCarrierAssociatedAppsDisabledUntilUsed, context);
     }
 
-    private static ContentResolver getContentResolverForUser(Context context, int userId) {
-        Context userContext = context.createContextAsUser(UserHandle.getUserHandleForUid(userId),
-                0);
+    private static ContentResolver getContentResolverForUser(Context context,
+            @UserIdInt int userId) {
+        Context userContext = context.createContextAsUser(UserHandle.of(userId), 0);
         return userContext.getContentResolver();
     }
 

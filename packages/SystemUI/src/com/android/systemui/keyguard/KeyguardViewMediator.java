@@ -85,7 +85,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
@@ -229,6 +228,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
     /** TrustManager for letting it know when we change visibility */
     private final TrustManager mTrustManager;
+    private final InjectionInflationController mInjectionInflationController;
 
     /**
      * Used to keep the device awake while to ensure the keyguard finishes opening before
@@ -723,7 +723,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             @UiBackground Executor uiBgExecutor, PowerManager powerManager,
             TrustManager trustManager,
             DeviceConfigProxy deviceConfig,
-            NavigationModeController navigationModeController) {
+            NavigationModeController navigationModeController,
+            InjectionInflationController injectionInflationController) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
@@ -734,6 +735,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         mUpdateMonitor = keyguardUpdateMonitor;
         mPM = powerManager;
         mTrustManager = trustManager;
+        mInjectionInflationController = injectionInflationController;
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
@@ -773,10 +775,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
                 SYSTEMUI_PERMISSION, null /* scheduler */);
 
-        InjectionInflationController injectionInflationController =
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent());
         mKeyguardDisplayManager = new KeyguardDisplayManager(mContext,
-                injectionInflationController);
+                mInjectionInflationController);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 

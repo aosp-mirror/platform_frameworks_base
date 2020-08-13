@@ -27,6 +27,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERA
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
+import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -633,7 +634,11 @@ public class FullRestoreEngine extends RestoreEngine {
         setRunning(false);
     }
 
-    private static boolean isRestorableFile(FileMetadata info) {
+    private boolean isRestorableFile(FileMetadata info) {
+        if (mBackupEligibilityRules.getOperationType() == BackupManager.OperationType.MIGRATION) {
+            // Everything is eligible for device-to-device migration.
+            return true;
+        }
         if (FullBackup.CACHE_TREE_TOKEN.equals(info.domain)) {
             if (MORE_DEBUG) {
                 Slog.i(TAG, "Dropping cache file path " + info.path);

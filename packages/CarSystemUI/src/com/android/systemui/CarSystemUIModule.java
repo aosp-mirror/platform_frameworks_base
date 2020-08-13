@@ -32,7 +32,7 @@ import com.android.systemui.car.keyguard.CarKeyguardViewController;
 import com.android.systemui.car.statusbar.DozeServiceHost;
 import com.android.systemui.car.statusbar.DummyNotificationShadeWindowController;
 import com.android.systemui.car.volume.CarVolumeDialogComponent;
-import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
@@ -79,8 +79,15 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
-@Module(includes = {DividerModule.class, QSModule.class})
-public abstract class CarSystemUIModule {
+@Module(
+        includes = {
+                DividerModule.class,
+                QSModule.class
+        },
+        subcomponents = {
+                CarSysUIComponent.class
+        })
+abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
@@ -188,8 +195,8 @@ public abstract class CarSystemUIModule {
     abstract ShadeController provideShadeController(ShadeControllerImpl shadeController);
 
     @Binds
-    abstract SystemUIRootComponent bindSystemUIRootComponent(
-            CarSystemUIRootComponent systemUIRootComponent);
+    abstract GlobalRootComponent bindGlobalRootComponent(
+            CarGlobalRootComponent globalRootComponent);
 
     @Binds
     abstract VolumeDialogComponent bindVolumeDialogComponent(

@@ -1136,6 +1136,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         if (mIsSystemRestore && mPmAgent != null) {
             backupManagerService.setAncestralPackages(mPmAgent.getRestoredPackages());
             backupManagerService.setAncestralToken(mToken);
+            backupManagerService.setAncestralOperationType(
+                    mBackupEligibilityRules.getOperationType());
             backupManagerService.writeRestoreTokens();
         }
 

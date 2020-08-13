@@ -65,7 +65,9 @@ public class KeyguardPresentationTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         InjectionInflationController inflationController = new InjectionInflationController(
-                SystemUIFactory.getInstance().getRootComponent());
+                SystemUIFactory.getInstance()
+                        .getRootComponent()
+                        .createViewInstanceCreatorFactory());
         mLayoutInflater = inflationController.injectable(LayoutInflater.from(mContext));
         mLayoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
 

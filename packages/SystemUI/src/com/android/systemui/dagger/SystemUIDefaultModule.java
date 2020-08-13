@@ -72,7 +72,14 @@ import dagger.Provides;
  * A dagger module for injecting default implementations of components of System UI that may be
  * overridden by the System UI implementation.
  */
-@Module(includes = {DividerModule.class, QSModule.class, WindowManagerShellModule.class})
+@Module(includes = {
+            DividerModule.class,
+            QSModule.class,
+            WindowManagerShellModule.class
+        },
+        subcomponents = {
+            SysUIComponent.class
+        })
 public abstract class SystemUIDefaultModule {
 
     @Singleton

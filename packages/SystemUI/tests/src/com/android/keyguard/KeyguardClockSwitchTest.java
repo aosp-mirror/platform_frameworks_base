@@ -79,7 +79,9 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
                 .thenReturn(mMockKeyguardSliceView);
 
         InjectionInflationController inflationController = new InjectionInflationController(
-                SystemUIFactory.getInstance().getRootComponent());
+                SystemUIFactory.getInstance()
+                        .getRootComponent()
+                        .createViewInstanceCreatorFactory());
         LayoutInflater layoutInflater = inflationController
                 .injectable(LayoutInflater.from(getContext()));
         layoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {

@@ -153,8 +153,8 @@ public class Vpn {
     private static final boolean LOGD = true;
 
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
-    // the device idle whitelist during service launch and VPN bootstrap.
-    private static final long VPN_LAUNCH_IDLE_WHITELIST_DURATION_MS = 60 * 1000;
+    // the device idle allowlist during service launch and VPN bootstrap.
+    private static final long VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS = 60 * 1000;
 
     // Settings for how much of the address space should be routed so that Vpn considers
     // "most" of the address space is routed. This is used to determine whether this Vpn
@@ -180,7 +180,8 @@ public class Vpn {
     // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
     // is actually O(n²)+O(n²).
     private static final int MAX_ROUTES_TO_EVALUATE = 150;
-
+    private static final String LOCKDOWN_ALLOWLIST_SETTING_NAME =
+            Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST;
     /**
      * Largest profile size allowable for Platform VPNs.
      *
@@ -236,7 +237,7 @@ public class Vpn {
      * Set of packages in addition to the VPN app itself that can access the network directly when
      * VPN is not connected even if {@code mLockdown} is set.
      */
-    private @NonNull List<String> mLockdownWhitelist = Collections.emptyList();
+    private @NonNull List<String> mLockdownAllowlist = Collections.emptyList();
 
      /**
      * A memory of what UIDs this class told netd to block for the lockdown feature.
@@ -520,7 +521,7 @@ public class Vpn {
             }
         }
         if (!hadUnderlyingNetworks) {
-            // No idea what the underlying networks are; assume sane defaults
+            // No idea what the underlying networks are; assume the safer defaults
             metered = true;
             roaming = false;
             congested = false;
@@ -653,18 +654,18 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
-     * @param lockdownWhitelist packages to be whitelisted from lockdown.
+     * @param lockdownAllowlist packages to be allowed from lockdown.
      * @param keyStore the Keystore instance to use for checking of PlatformVpnProfile(s)
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
     public synchronized boolean setAlwaysOnPackage(
             @Nullable String packageName,
             boolean lockdown,
-            @Nullable List<String> lockdownWhitelist,
+            @Nullable List<String> lockdownAllowlist,
             @NonNull KeyStore keyStore) {
         enforceControlPermissionOrInternalCaller();
 
-        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownWhitelist, keyStore)) {
+        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist, keyStore)) {
             saveAlwaysOnPackage();
             return true;
         }
@@ -679,7 +680,7 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
-     * @param lockdownWhitelist packages to be whitelisted from lockdown. This is only used if
+     * @param lockdownAllowlist packages to be allowed to bypass lockdown. This is only used if
      *     {@code lockdown} is {@code true}. Packages must not contain commas.
      * @param keyStore the system keystore instance to check for profiles
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
@@ -687,16 +688,16 @@ public class Vpn {
     @GuardedBy("this")
     private boolean setAlwaysOnPackageInternal(
             @Nullable String packageName, boolean lockdown,
-            @Nullable List<String> lockdownWhitelist, @NonNull KeyStore keyStore) {
+            @Nullable List<String> lockdownAllowlist, @NonNull KeyStore keyStore) {
         if (VpnConfig.LEGACY_VPN.equals(packageName)) {
             Log.w(TAG, "Not setting legacy VPN \"" + packageName + "\" as always-on.");
             return false;
         }
 
-        if (lockdownWhitelist != null) {
-            for (String pkg : lockdownWhitelist) {
+        if (lockdownAllowlist != null) {
+            for (String pkg : lockdownAllowlist) {
                 if (pkg.contains(",")) {
-                    Log.w(TAG, "Not setting always-on vpn, invalid whitelisted package: " + pkg);
+                    Log.w(TAG, "Not setting always-on vpn, invalid allowed package: " + pkg);
                     return false;
                 }
             }
@@ -724,8 +725,8 @@ public class Vpn {
         }
 
         mLockdown = (mAlwaysOn && lockdown);
-        mLockdownWhitelist = (mLockdown && lockdownWhitelist != null)
-                ? Collections.unmodifiableList(new ArrayList<>(lockdownWhitelist))
+        mLockdownAllowlist = (mLockdown && lockdownAllowlist != null)
+                ? Collections.unmodifiableList(new ArrayList<>(lockdownAllowlist))
                 : Collections.emptyList();
 
         if (isCurrentPreparedPackage(packageName)) {
@@ -754,10 +755,10 @@ public class Vpn {
     }
 
     /**
-     * @return an immutable list of packages whitelisted from always-on VPN lockdown.
+     * @return an immutable list of packages allowed to bypass always-on VPN lockdown.
      */
-    public synchronized List<String> getLockdownWhitelist() {
-        return mLockdown ? mLockdownWhitelist : null;
+    public synchronized List<String> getLockdownAllowlist() {
+        return mLockdown ? mLockdownAllowlist : null;
     }
 
     /**
@@ -772,8 +773,8 @@ public class Vpn {
             mSystemServices.settingsSecurePutIntForUser(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
                     (mAlwaysOn && mLockdown ? 1 : 0), mUserHandle);
             mSystemServices.settingsSecurePutStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST,
-                    String.join(",", mLockdownWhitelist), mUserHandle);
+                    LOCKDOWN_ALLOWLIST_SETTING_NAME,
+                    String.join(",", mLockdownAllowlist), mUserHandle);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -788,12 +789,12 @@ public class Vpn {
                     Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
             final boolean alwaysOnLockdown = mSystemServices.settingsSecureGetIntForUser(
                     Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /*default*/, mUserHandle) != 0;
-            final String whitelistString = mSystemServices.settingsSecureGetStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST, mUserHandle);
-            final List<String> whitelistedPackages = TextUtils.isEmpty(whitelistString)
-                    ? Collections.emptyList() : Arrays.asList(whitelistString.split(","));
+            final String allowlistString = mSystemServices.settingsSecureGetStringForUser(
+                    LOCKDOWN_ALLOWLIST_SETTING_NAME, mUserHandle);
+            final List<String> allowedPackages = TextUtils.isEmpty(allowlistString)
+                    ? Collections.emptyList() : Arrays.asList(allowlistString.split(","));
             setAlwaysOnPackageInternal(
-                    alwaysOnPackage, alwaysOnLockdown, whitelistedPackages, keyStore);
+                    alwaysOnPackage, alwaysOnLockdown, allowedPackages, keyStore);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -849,7 +850,7 @@ public class Vpn {
             DeviceIdleInternal idleController =
                     LocalServices.getService(DeviceIdleInternal.class);
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(), alwaysOnPackage,
-                    VPN_LAUNCH_IDLE_WHITELIST_DURATION_MS, mUserHandle, false, "vpn");
+                    VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS, mUserHandle, false, "vpn");
 
             // Start the VPN service declared in the app's manifest.
             Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
@@ -1212,7 +1213,7 @@ public class Vpn {
         // applications have changed. Consider diffing UID ranges and only applying the delta.
         if (!Objects.equals(oldConfig.allowedApplications, mConfig.allowedApplications) ||
                 !Objects.equals(oldConfig.disallowedApplications, mConfig.disallowedApplications)) {
-            Log.i(TAG, "Handover not possible due to changes to whitelisted/blacklisted apps");
+            Log.i(TAG, "Handover not possible due to changes to allowed/denied apps");
             return false;
         }
 
@@ -1440,13 +1441,13 @@ public class Vpn {
      * associated with one user, and any restricted profiles attached to that user.
      *
      * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
-     * the UID ranges will match the app whitelist or blacklist specified there. Otherwise, all UIDs
+     * the UID ranges will match the app list specified there. Otherwise, all UIDs
      * in each user and profile will be included.
      *
      * @param userHandle The userId to create UID ranges for along with any of its restricted
      *                   profiles.
-     * @param allowedApplications (optional) whitelist of applications to include.
-     * @param disallowedApplications (optional) blacklist of applications to exclude.
+     * @param allowedApplications (optional) List of applications to allow.
+     * @param disallowedApplications (optional) List of applications to deny.
      */
     @VisibleForTesting
     Set<UidRange> createUserAndRestrictedProfilesRanges(@UserIdInt int userHandle,
@@ -1480,13 +1481,13 @@ public class Vpn {
      * associated with one user.
      *
      * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
-     * the UID ranges will match the app whitelist or blacklist specified there. Otherwise, all UIDs
+     * the UID ranges will match the app allowlist or denylist specified there. Otherwise, all UIDs
      * in the user will be included.
      *
      * @param ranges {@link Set} of {@link UidRange}s to which to add.
      * @param userHandle The userId to add to {@param ranges}.
-     * @param allowedApplications (optional) whitelist of applications to include.
-     * @param disallowedApplications (optional) blacklist of applications to exclude.
+     * @param allowedApplications (optional) allowlist of applications to include.
+     * @param disallowedApplications (optional) denylist of applications to exclude.
      */
     @VisibleForTesting
     void addUserToRanges(@NonNull Set<UidRange> ranges, @UserIdInt int userHandle,
@@ -1608,7 +1609,7 @@ public class Vpn {
 
     /**
      * Restricts network access from all UIDs affected by this {@link Vpn}, apart from the VPN
-     * service app itself and whitelisted packages, to only sockets that have had {@code protect()}
+     * service app itself and allowed packages, to only sockets that have had {@code protect()}
      * called on them. All non-VPN traffic is blocked via a {@code PROHIBIT} response from the
      * kernel.
      *
@@ -1630,7 +1631,7 @@ public class Vpn {
         if (isNullOrLegacyVpn(mPackage)) {
             exemptedPackages = null;
         } else {
-            exemptedPackages = new ArrayList<>(mLockdownWhitelist);
+            exemptedPackages = new ArrayList<>(mLockdownAllowlist);
             exemptedPackages.add(mPackage);
         }
         final Set<UidRange> rangesToTellNetdToRemove = new ArraySet<>(mBlockedUidsAsToldToNetd);
@@ -1675,7 +1676,7 @@ public class Vpn {
      * Tell netd to add or remove a list of {@link UidRange}s to the list of UIDs that are only
      * allowed to make connections through sockets that have had {@code protect()} called on them.
      *
-     * @param enforce {@code true} to add to the blacklist, {@code false} to remove.
+     * @param enforce {@code true} to add to the denylist, {@code false} to remove.
      * @param ranges {@link Collection} of {@link UidRange}s to add (if {@param enforce} is
      *               {@code true}) or to remove.
      * @return {@code true} if all of the UIDs were added/removed. {@code false} otherwise,

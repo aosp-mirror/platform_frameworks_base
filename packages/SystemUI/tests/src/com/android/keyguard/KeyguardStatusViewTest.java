@@ -51,7 +51,9 @@ public class KeyguardStatusViewTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         InjectionInflationController inflationController = new InjectionInflationController(
-                SystemUIFactory.getInstance().getRootComponent());
+                SystemUIFactory.getInstance()
+                        .getRootComponent()
+                        .createViewInstanceCreatorFactory());
         LayoutInflater layoutInflater = inflationController
                 .injectable(LayoutInflater.from(getContext()));
         mKeyguardStatusView =

@@ -3612,7 +3612,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG_WM, ">>> showStrictModeViolation");
-            // TODO: Modify this to use the surface trace once it is not going crazy.
+            // TODO: Modify this to use the surface trace once it is not going baffling.
             // b/31532461
             // TODO(multi-display): support multiple displays
             if (mStrictModeFlash == null) {

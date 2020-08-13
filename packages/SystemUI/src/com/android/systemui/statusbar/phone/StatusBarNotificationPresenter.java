@@ -30,7 +30,6 @@ import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
@@ -71,7 +70,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -133,7 +132,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationPanelViewController panel,
             HeadsUpManagerPhone headsUp,
             NotificationShadeWindowView statusBarWindow,
-            ViewGroup stackScroller,
+            NotificationStackScrollLayoutController stackScrollerController,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
             ActivityLaunchAnimator activityLaunchAnimator,
@@ -155,7 +154,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mStatusBar = statusBar;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
-        mAboveShelfObserver = new AboveShelfObserver(stackScroller);
+        mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
                 R.id.notification_container_parent));
@@ -190,7 +189,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         remoteInputManager.getController().addCallback(
                 Dependency.get(NotificationShadeWindowController.class));
 
-        NotificationListContainer notifListContainer = (NotificationListContainer) stackScroller;
         initController.addPostInitTask(() -> {
             NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {
                 @Override
@@ -207,7 +205,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
             };
 
-            mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
+            mViewHierarchyManager.setUpWithPresenter(this,
+                    stackScrollerController.getNotificationListContainer());
             mEntryManager.setUpWithPresenter(this);
             mEntryManager.addNotificationEntryListener(notificationEntryListener);
             mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
@@ -219,7 +218,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mMediaManager.setUpWithPresenter(this);
             mVisualStabilityManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(this,
-                    notifListContainer, mCheckSaveListener, mOnSettingsClickListener);
+                    stackScrollerController.getNotificationListContainer(), mCheckSaveListener,
+                    mOnSettingsClickListener);
             // ForegroundServiceNotificationListener adds its listener in its constructor
             // but we need to request it here in order for it to be instantiated.
             // TODO: figure out how to do this correctly once Dependency.get() is gone.

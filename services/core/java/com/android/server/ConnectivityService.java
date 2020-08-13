@@ -4966,7 +4966,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return null;
             }
-            return vpn.getLockdownWhitelist();
+            return vpn.getLockdownAllowlist();
         }
     }
 

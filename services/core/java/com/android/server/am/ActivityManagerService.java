@@ -4609,10 +4609,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     proc.lastMemInfoTime = SystemClock.uptimeMillis();
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
-                        proc.baseProcessTracker.addPss(infos[i].getTotalPss(),
-                                infos[i].getTotalUss(), infos[i].getTotalRss(), false,
-                                ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime - startTime,
-                                proc.pkgList.mPkgList);
+                        synchronized (mProcessStats.mLock) {
+                            proc.baseProcessTracker.addPss(infos[i].getTotalPss(),
+                                    infos[i].getTotalUss(), infos[i].getTotalRss(), false,
+                                    ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime - startTime,
+                                    proc.pkgList.mPkgList);
+                        }
                         for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
                             FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
@@ -4669,8 +4671,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
-                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], tmpUss[2], false,
-                                ProcessStats.ADD_PSS_EXTERNAL, endTime-startTime, proc.pkgList.mPkgList);
+                        synchronized (mProcessStats.mLock) {
+                            proc.baseProcessTracker.addPss(pss[i], tmpUss[0], tmpUss[2], false,
+                                    ProcessStats.ADD_PSS_EXTERNAL, endTime - startTime,
+                                    proc.pkgList.mPkgList);
+                        }
                         for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
                             FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
@@ -12107,8 +12112,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                         // Record this for posterity if the process has been stable.
-                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
-                                reportType, endTime-startTime, r.pkgList.mPkgList);
+                        synchronized (mProcessStats.mLock) {
+                            r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
+                                    reportType, endTime - startTime, r.pkgList.mPkgList);
+                        }
                         for (int ipkg = r.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = r.pkgList.valueAt(ipkg);
                             FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
@@ -12713,8 +12720,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                     // Record this for posterity if the process has been stable.
-                    r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
-                            reportType, endTime-startTime, r.pkgList.mPkgList);
+                    synchronized (mProcessStats.mLock) {
+                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
+                                reportType, endTime - startTime, r.pkgList.mPkgList);
+                    }
                     for (int ipkg = r.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                         ProcessStats.ProcessStateHolder holder = r.pkgList.valueAt(ipkg);
                         FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
@@ -15927,8 +15936,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss * 1024, uss * 1024,
                 swapPss * 1024, rss * 1024, statType, procState, pssDuration);
         proc.lastPssTime = now;
-        proc.baseProcessTracker.addPss(
-                pss, uss, rss, true, statType, pssDuration, proc.pkgList.mPkgList);
+        synchronized (mProcessStats.mLock) {
+            proc.baseProcessTracker.addPss(
+                    pss, uss, rss, true, statType, pssDuration, proc.pkgList.mPkgList);
+        }
         for (int ipkg = proc.pkgList.mPkgList.size() - 1; ipkg >= 0; ipkg--) {
             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
             FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
@@ -16289,7 +16300,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
                                 ApplicationExitInfo.SUBREASON_EXCESSIVE_CPU,
                                 true);
-                        app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
+                        synchronized (mProcessStats.mLock) {
+                            app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
+                        }
                         for (int ipkg = app.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = app.pkgList.valueAt(ipkg);
                             FrameworkStatsLog.write(FrameworkStatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
@@ -16401,11 +16414,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
-        if (proc.thread != null && proc.baseProcessTracker != null) {
-            final int procState = proc.getReportedProcState();
-            if (procState != PROCESS_STATE_NONEXISTENT) {
-                proc.baseProcessTracker.setState(
-                        procState, memFactor, now, proc.pkgList.mPkgList);
+        synchronized (mProcessStats.mLock) {
+            if (proc.thread != null && proc.baseProcessTracker != null) {
+                final int procState = proc.getReportedProcState();
+                if (procState != PROCESS_STATE_NONEXISTENT) {
+                    proc.baseProcessTracker.setState(
+                            procState, memFactor, now, proc.pkgList.mPkgList);
+                }
             }
         }
     }

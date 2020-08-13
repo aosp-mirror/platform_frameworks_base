@@ -18,9 +18,9 @@ package com.android.systemui;
 
 import com.android.systemui.dagger.DependencyBinder;
 import com.android.systemui.dagger.DependencyProvider;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SystemServicesModule;
 import com.android.systemui.dagger.SystemUIModule;
-import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.onehanded.dagger.OneHandedModule;
 import com.android.systemui.pip.phone.dagger.PipModule;
 
@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 
+/** Car subclass for GlobalRootComponent. */
 @Singleton
 @Component(
         modules = {
@@ -41,12 +42,15 @@ import dagger.Component;
                 CarSystemUIModule.class,
                 CarSystemUIBinder.class
         })
-public interface CarSystemUIRootComponent extends SystemUIRootComponent {
+public interface CarGlobalRootComponent extends GlobalRootComponent {
     /**
-     * Builder for a CarSystemUIRootComponent.
+     * Builder for a CarGlobalRootComponent.
      */
     @Component.Builder
-    interface Builder extends SystemUIRootComponent.Builder {
-        CarSystemUIRootComponent build();
+    interface Builder extends GlobalRootComponent.Builder {
+        CarGlobalRootComponent build();
     }
+
+    @Override
+    CarSysUIComponent.Builder getSysUIComponent();
 }
