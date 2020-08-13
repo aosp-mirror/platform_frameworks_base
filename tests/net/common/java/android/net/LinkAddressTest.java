@@ -27,10 +27,10 @@ import static android.system.OsConstants.RT_SCOPE_LINK;
 import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
-import static com.android.testutils.MiscAssertsKt.assertEqualBothWays;
-import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
-import static com.android.testutils.MiscAssertsKt.assertNotEqualEitherWay;
-import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+import static com.android.testutils.MiscAsserts.assertEqualBothWays;
+import static com.android.testutils.MiscAsserts.assertFieldCountEquals;
+import static com.android.testutils.MiscAsserts.assertNotEqualEitherWay;
+import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

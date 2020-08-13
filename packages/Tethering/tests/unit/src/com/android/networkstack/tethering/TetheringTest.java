@@ -143,7 +143,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.testutils.MiscAssertsKt;
+import com.android.testutils.MiscAsserts;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -1360,7 +1360,7 @@ public class TetheringTest {
         assertEquals(0, parcel.localOnlyList.length);
         assertEquals(0, parcel.erroredIfaceList.length);
         assertEquals(0, parcel.lastErrorList.length);
-        MiscAssertsKt.assertFieldCountEquals(5, TetherStatesParcel.class);
+        MiscAsserts.assertFieldCountEquals(5, TetherStatesParcel.class);
     }
 
     @Test
