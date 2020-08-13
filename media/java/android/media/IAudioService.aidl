@@ -330,4 +330,10 @@ interface IAudioService {
 
     oneway void unregisterCommunicationDeviceDispatcher(
             ICommunicationDeviceDispatcher dispatcher);
+
+    boolean setAdditionalOutputDeviceDelay(in AudioDeviceAttributes device, long delayMillis);
+
+    long getAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
+
+    long getMaxAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
 }
