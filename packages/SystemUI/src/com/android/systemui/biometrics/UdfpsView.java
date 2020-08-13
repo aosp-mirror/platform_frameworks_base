@@ -79,7 +79,7 @@ public class UdfpsView extends View {
 
         mScrimRect = new Rect();
         mScrimPaint = new Paint(0 /* flags */);
-        mScrimPaint.setARGB(110 /* a */, 0 /* r */, 0 /* g */, 0 /* b */);
+        mScrimPaint.setColor(Color.BLACK);
 
         mSensorRect = new RectF();
         mSensorPaint = new Paint(0 /* flags */);
@@ -134,6 +134,10 @@ public class UdfpsView extends View {
                 && x < (mSensorX + mSensorRadius * mSensorTouchAreaCoefficient)
                 && y > (mSensorY - mSensorRadius * mSensorTouchAreaCoefficient)
                 && y < (mSensorY + mSensorRadius * mSensorTouchAreaCoefficient);
+    }
+
+    void setScrimAlpha(int alpha) {
+        mScrimPaint.setAlpha(alpha);
     }
 
     boolean isFingerDown() {
