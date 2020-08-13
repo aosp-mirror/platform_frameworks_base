@@ -176,7 +176,6 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
-import android.app.backup.BackupManager;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
@@ -1795,12 +1794,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 } break;
             case CHECK_EXCESSIVE_POWER_USE_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    checkExcessivePowerUsageLocked();
-                    removeMessages(CHECK_EXCESSIVE_POWER_USE_MSG);
-                    Message nmsg = obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
-                    sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
-                }
+                checkExcessivePowerUsage();
+                removeMessages(CHECK_EXCESSIVE_POWER_USE_MSG);
+                Message nmsg = obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
+                sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
             } break;
             case REPORT_MEM_USAGE_MSG: {
                 final ArrayList<ProcessMemInfo> memInfos = (ArrayList<ProcessMemInfo>)msg.obj;
@@ -16241,79 +16238,82 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final void checkExcessivePowerUsageLocked() {
+    private void checkExcessivePowerUsage() {
         updateCpuStatsNow();
 
-        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        boolean doCpuKills = true;
-        if (mLastPowerCheckUptime == 0) {
-            doCpuKills = false;
-        }
-        final long curUptime = SystemClock.uptimeMillis();
-        final long uptimeSince = curUptime - mLastPowerCheckUptime;
-        mLastPowerCheckUptime = curUptime;
-        int i = mProcessList.mLruProcesses.size();
-        while (i > 0) {
-            i--;
-            ProcessRecord app = mProcessList.mLruProcesses.get(i);
-            if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
-                if (app.lastCpuTime <= 0) {
-                    continue;
-                }
-                long cputimeUsed = app.curCpuTime - app.lastCpuTime;
-                if (DEBUG_POWER) {
-                    StringBuilder sb = new StringBuilder(128);
-                    sb.append("CPU for ");
-                    app.toShortString(sb);
-                    sb.append(": over ");
-                    TimeUtils.formatDuration(uptimeSince, sb);
-                    sb.append(" used ");
-                    TimeUtils.formatDuration(cputimeUsed, sb);
-                    sb.append(" (");
-                    sb.append((cputimeUsed*100)/uptimeSince);
-                    sb.append("%)");
-                    Slog.i(TAG_POWER, sb.toString());
-                }
-                // If the process has used too much CPU over the last duration, the
-                // user probably doesn't want this, so kill!
-                if (doCpuKills && uptimeSince > 0) {
-                    // What is the limit for this process?
-                    int cpuLimit;
-                    long checkDur = curUptime - app.getWhenUnimportant();
-                    if (checkDur <= mConstants.POWER_CHECK_INTERVAL) {
-                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_1;
-                    } else if (checkDur <= (mConstants.POWER_CHECK_INTERVAL*2)
-                            || app.setProcState <= ActivityManager.PROCESS_STATE_HOME) {
-                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_2;
-                    } else if (checkDur <= (mConstants.POWER_CHECK_INTERVAL*3)) {
-                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_3;
-                    } else {
-                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_4;
+        synchronized (this) {
+            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+            boolean doCpuKills = true;
+            if (mLastPowerCheckUptime == 0) {
+                doCpuKills = false;
+            }
+            final long curUptime = SystemClock.uptimeMillis();
+            final long uptimeSince = curUptime - mLastPowerCheckUptime;
+            mLastPowerCheckUptime = curUptime;
+            int i = mProcessList.mLruProcesses.size();
+            while (i > 0) {
+                i--;
+                ProcessRecord app = mProcessList.mLruProcesses.get(i);
+                if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
+                    if (app.lastCpuTime <= 0) {
+                        continue;
                     }
-                    if (((cputimeUsed*100)/uptimeSince) >= cpuLimit) {
-                        synchronized (stats) {
-                            stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
-                                    uptimeSince, cputimeUsed);
+                    long cputimeUsed = app.curCpuTime - app.lastCpuTime;
+                    if (DEBUG_POWER) {
+                        StringBuilder sb = new StringBuilder(128);
+                        sb.append("CPU for ");
+                        app.toShortString(sb);
+                        sb.append(": over ");
+                        TimeUtils.formatDuration(uptimeSince, sb);
+                        sb.append(" used ");
+                        TimeUtils.formatDuration(cputimeUsed, sb);
+                        sb.append(" (");
+                        sb.append((cputimeUsed * 100) / uptimeSince);
+                        sb.append("%)");
+                        Slog.i(TAG_POWER, sb.toString());
+                    }
+                    // If the process has used too much CPU over the last duration, the
+                    // user probably doesn't want this, so kill!
+                    if (doCpuKills && uptimeSince > 0) {
+                        // What is the limit for this process?
+                        int cpuLimit;
+                        long checkDur = curUptime - app.getWhenUnimportant();
+                        if (checkDur <= mConstants.POWER_CHECK_INTERVAL) {
+                            cpuLimit = mConstants.POWER_CHECK_MAX_CPU_1;
+                        } else if (checkDur <= (mConstants.POWER_CHECK_INTERVAL * 2)
+                                || app.setProcState <= ActivityManager.PROCESS_STATE_HOME) {
+                            cpuLimit = mConstants.POWER_CHECK_MAX_CPU_2;
+                        } else if (checkDur <= (mConstants.POWER_CHECK_INTERVAL * 3)) {
+                            cpuLimit = mConstants.POWER_CHECK_MAX_CPU_3;
+                        } else {
+                            cpuLimit = mConstants.POWER_CHECK_MAX_CPU_4;
                         }
-                        app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince
-                                + " dur=" + checkDur + " limit=" + cpuLimit,
-                                ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
-                                ApplicationExitInfo.SUBREASON_EXCESSIVE_CPU,
-                                true);
-                        synchronized (mProcessStats.mLock) {
-                            app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
-                        }
-                        for (int ipkg = app.pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                            ProcessStats.ProcessStateHolder holder = app.pkgList.valueAt(ipkg);
-                            FrameworkStatsLog.write(FrameworkStatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
-                                    app.info.uid,
-                                    holder.state.getName(),
-                                    holder.state.getPackage(),
-                                    holder.appVersion);
+                        if (((cputimeUsed * 100) / uptimeSince) >= cpuLimit) {
+                            synchronized (stats) {
+                                stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
+                                        uptimeSince, cputimeUsed);
+                            }
+                            app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince
+                                    + " dur=" + checkDur + " limit=" + cpuLimit,
+                                    ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
+                                    ApplicationExitInfo.SUBREASON_EXCESSIVE_CPU,
+                                    true);
+                            synchronized (mProcessStats.mLock) {
+                                app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
+                            }
+                            for (int ipkg = app.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                                ProcessStats.ProcessStateHolder holder = app.pkgList.valueAt(ipkg);
+                                FrameworkStatsLog.write(
+                                        FrameworkStatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
+                                        app.info.uid,
+                                        holder.state.getName(),
+                                        holder.state.getPackage(),
+                                        holder.appVersion);
+                            }
                         }
                     }
+                    app.lastCpuTime = app.curCpuTime;
                 }
-                app.lastCpuTime = app.curCpuTime;
             }
         }
     }
