@@ -3274,6 +3274,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     boolean hideCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
+        if (mCurClient == null || mCurClient.curSession == null) {
+            return false;
+        }
         if ((flags&InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
                 && (mShowExplicitlyRequested || mShowForced)) {
             if (DEBUG) Slog.v(TAG, "Not hiding: explicit show not cancelled by non-explicit hide");
@@ -3458,7 +3461,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // pre-rendering not supported on low-ram devices.
         cs.shouldPreRenderIme = DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() && !mIsLowRam;
 
-        if (mCurFocusedWindow == windowToken) {
+        final boolean sameWindowFocused = mCurFocusedWindow == windowToken;
+        final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
+        if (sameWindowFocused && isTextEditor) {
             if (DEBUG) {
                 Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
                         + " attribute=" + attribute + ", token = " + windowToken
@@ -3473,6 +3478,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
                     null, null, null, -1, null);
         }
+
         mCurFocusedWindow = windowToken;
         mCurFocusedWindowSoftInputMode = softInputMode;
         mCurFocusedWindowClient = cs;
@@ -3490,7 +3496,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         == LayoutParams.SOFT_INPUT_ADJUST_RESIZE
                 || mRes.getConfiguration().isLayoutSizeAtLeast(
                         Configuration.SCREENLAYOUT_SIZE_LARGE);
-        final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
 
         // We want to start input before showing the IME, but after closing
         // it.  We want to do this after closing it to help the IME disappear
@@ -3550,9 +3555,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                if (DEBUG) Slog.v(TAG, "Window asks to hide input");
-                hideCurrentInputLocked(mCurFocusedWindow, 0, null,
-                        SoftInputShowHideReason.HIDE_ALWAYS_HIDDEN_STATE);
+                if (isImeVisible()) {
+                    if (DEBUG) Slog.v(TAG, "Window asks to hide input");
+                    hideCurrentInputLocked(mCurFocusedWindow, 0, null,
+                            SoftInputShowHideReason.HIDE_ALWAYS_HIDDEN_STATE);
+                }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
                 if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
@@ -3577,13 +3584,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) Slog.v(TAG, "Window asks to always show input");
                 if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                         unverifiedTargetSdkVersion, startInputFlags)) {
-                    if (attribute != null) {
-                        res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                attribute, startInputFlags, startInputReason);
-                        didStart = true;
+                    if (!isImeVisible()) {
+                        if (attribute != null) {
+                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                    attribute, startInputFlags, startInputReason);
+                            didStart = true;
+                        }
+                        showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                                SoftInputShowHideReason.SHOW_STATE_ALWAYS_VISIBLE);
                     }
-                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
-                            SoftInputShowHideReason.SHOW_STATE_ALWAYS_VISIBLE);
                 } else {
                     Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
                             + " there is no focused view that also returns true from"
@@ -3601,11 +3610,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } else {
                     res = InputBindResult.NO_EDITOR;
                 }
+            } else if (sameWindowFocused) {
+                return new InputBindResult(
+                        InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
+                        null, null, null, -1, null);
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
             }
         }
         return res;
+    }
+
+    private boolean isImeVisible() {
+        return (mImeWindowVis & InputMethodService.IME_VISIBLE) != 0;
     }
 
     private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
