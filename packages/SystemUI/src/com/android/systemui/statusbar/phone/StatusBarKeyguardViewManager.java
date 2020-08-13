@@ -49,6 +49,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;

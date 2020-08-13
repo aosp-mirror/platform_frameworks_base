@@ -41,7 +41,7 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.navigationbar.NavigationModeController;
 
 import org.junit.After;
 import org.junit.Before;
