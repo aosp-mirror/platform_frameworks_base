@@ -24,11 +24,14 @@ import static org.junit.Assume.assumeTrue;
 
 import android.cts.install.lib.host.InstallUtilsHost;
 
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tests.util.ModuleTestUtils;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
+import com.android.tradefed.util.CommandResult;
+import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.ProcessInfo;
 
 import org.junit.After;
@@ -49,6 +52,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
     private static final String SHIM_V2 = "com.android.apex.cts.shim.v2.apex";
     private static final String APK_A = "TestAppAv1.apk";
+    private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
 
     private final ModuleTestUtils mTestUtils = new ModuleTestUtils(this);
     private final InstallUtilsHost mHostUtils = new InstallUtilsHost(this);
@@ -74,6 +78,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         } catch (AssertionError e) {
             Log.e(TAG, e);
         }
+        deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
     }
 
     @Before
@@ -84,6 +90,55 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @After
     public void tearDown() throws Exception {
         cleanUp();
+    }
+
+    /**
+     * Deletes files and reboots the device if necessary.
+     * @param files the paths of files which might contain wildcards
+     */
+    private void deleteFiles(String... files) throws Exception {
+        boolean found = false;
+        for (String file : files) {
+            CommandResult result = getDevice().executeShellV2Command("ls " + file);
+            if (result.getStatus() == CommandStatus.SUCCESS) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            if (!getDevice().isAdbRoot()) {
+                getDevice().enableAdbRoot();
+            }
+            getDevice().remountSystemWritable();
+            for (String file : files) {
+                getDevice().executeShellCommand("rm -rf " + file);
+            }
+            getDevice().reboot();
+        }
+    }
+
+    private void pushTestApex() throws Exception {
+        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
+        final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
+        final File apex = buildHelper.getTestFile(fileName);
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+        getDevice().reboot();
+    }
+
+    /**
+     * Tests that duplicate packages in apk-in-apex and apk should fail to install.
+     */
+    @Test
+    public void testDuplicateApkInApexShouldFail() throws Exception {
+        pushTestApex();
+        runPhase("testDuplicateApkInApexShouldFail_Commit");
+        getDevice().reboot();
+        runPhase("testDuplicateApkInApexShouldFail_Verify");
     }
 
     @Test
