@@ -99,7 +99,7 @@ public class UserPackage {
 
     private static List<UserInfo> getAllUsers(Context context) {
         UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        return userManager.getUsers(false);
+        return userManager.getUsers();
     }
 
 }
