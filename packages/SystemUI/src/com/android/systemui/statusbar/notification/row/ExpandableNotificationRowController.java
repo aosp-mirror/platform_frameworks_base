@@ -22,20 +22,26 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.time.SystemClock;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,8 +50,9 @@ import javax.inject.Named;
  * Controller for {@link ExpandableNotificationRow}.
  */
 @NotificationRowScope
-public class ExpandableNotificationRowController {
+public class ExpandableNotificationRowController implements NodeController {
     private final ExpandableNotificationRow mView;
+    private final NotificationListContainer mListContainer;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
     private final NotificationMediaManager mMediaManager;
     private final PluginManager mPluginManager;
@@ -72,6 +79,7 @@ public class ExpandableNotificationRowController {
 
     @Inject
     public ExpandableNotificationRowController(ExpandableNotificationRow view,
+            NotificationListContainer listContainer,
             ActivatableNotificationViewController activatableNotificationViewController,
             NotificationMediaManager mediaManager, PluginManager pluginManager,
             SystemClock clock, @AppName String appName, @NotificationKey String notificationKey,
@@ -86,6 +94,7 @@ public class ExpandableNotificationRowController {
             OnDismissCallback onDismissCallback, FalsingManager falsingManager,
             PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mView = view;
+        mListContainer = listContainer;
         mActivatableNotificationViewController = activatableNotificationViewController;
         mMediaManager = mediaManager;
         mPluginManager = pluginManager;
@@ -161,5 +170,53 @@ public class ExpandableNotificationRowController {
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
         mNotificationLogger.onExpansionChanged(key, userAction, expanded);
+    }
+
+    @Override
+    @NonNull
+    public String getNodeLabel() {
+        return mView.getEntry().getKey();
+    }
+
+    @Override
+    @NonNull
+    public View getView() {
+        return mView;
+    }
+
+    @Override
+    public View getChildAt(int index) {
+        return mView.getChildNotificationAt(index);
+    }
+
+    @Override
+    public void addChildAt(NodeController child, int index) {
+        ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
+
+        mView.addChildNotification((ExpandableNotificationRow) child.getView());
+        mListContainer.notifyGroupChildAdded(childView);
+    }
+
+    @Override
+    public void moveChildTo(NodeController child, int index) {
+        ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
+        mView.removeChildNotification(childView);
+        mView.addChildNotification(childView, index);
+    }
+
+    @Override
+    public void removeChild(NodeController child, boolean isTransfer) {
+        ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
+
+        mView.removeChildNotification(childView);
+        if (!isTransfer) {
+            mListContainer.notifyGroupChildRemoved(childView, mView);
+        }
+    }
+
+    @Override
+    public int getChildCount() {
+        final List<ExpandableNotificationRow> mChildren = mView.getAttachedChildren();
+        return mChildren != null ? mChildren.size() : 0;
     }
 }
