@@ -42,6 +42,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
@@ -274,7 +276,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     }
 
     @Override
-    public void removeCallback(SecurityControllerCallback callback) {
+    public void removeCallback(@NonNull SecurityControllerCallback callback) {
         synchronized (mCallbacks) {
             if (callback == null) return;
             if (DEBUG) Log.d(TAG, "removeCallback " + callback);
@@ -283,7 +285,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     }
 
     @Override
-    public void addCallback(SecurityControllerCallback callback) {
+    public void addCallback(@NonNull SecurityControllerCallback callback) {
         synchronized (mCallbacks) {
             if (callback == null || mCallbacks.contains(callback)) return;
             if (DEBUG) Log.d(TAG, "addCallback " + callback);

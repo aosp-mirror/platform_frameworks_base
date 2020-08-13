@@ -28,8 +28,8 @@ import android.widget.TextView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.WirelessUtils;
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
+import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -40,7 +40,8 @@ import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.List;
 
-public class OperatorNameView extends TextView implements DemoMode, DarkReceiver,
+/** Shows the operator name */
+public class OperatorNameView extends TextView implements DemoModeCommandReceiver, DarkReceiver,
         SignalCallback, Tunable {
 
     private static final String KEY_SHOW_OPERATOR_NAME = "show_operator_name";
@@ -103,14 +104,18 @@ public class OperatorNameView extends TextView implements DemoMode, DarkReceiver
 
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mDemoMode = true;
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            update();
-        } else if (mDemoMode && command.equals(COMMAND_OPERATOR)) {
-            setText(args.getString("name"));
-        }
+        setText(args.getString("name"));
+    }
+
+    @Override
+    public void onDemoModeStarted() {
+        mDemoMode = true;
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        mDemoMode = false;
+        update();
     }
 
     private void update() {

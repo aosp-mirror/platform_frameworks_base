@@ -40,11 +40,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -62,7 +62,10 @@ import java.util.TimeZone;
 /**
  * Digital clock for the status bar.
  */
-public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.Callbacks,
+public class Clock extends TextView implements
+        DemoModeCommandReceiver,
+        Tunable,
+        CommandQueue.Callbacks,
         DarkReceiver, ConfigurationListener {
 
     public static final String CLOCK_SECONDS = "clock_seconds";
@@ -467,30 +470,35 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mDemoMode = true;
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            updateClock();
-        } else if (mDemoMode && command.equals(COMMAND_CLOCK)) {
-            String millis = args.getString("millis");
-            String hhmm = args.getString("hhmm");
-            if (millis != null) {
-                mCalendar.setTimeInMillis(Long.parseLong(millis));
-            } else if (hhmm != null && hhmm.length() == 4) {
-                int hh = Integer.parseInt(hhmm.substring(0, 2));
-                int mm = Integer.parseInt(hhmm.substring(2));
-                boolean is24 = DateFormat.is24HourFormat(getContext(), mCurrentUserId);
-                if (is24) {
-                    mCalendar.set(Calendar.HOUR_OF_DAY, hh);
-                } else {
-                    mCalendar.set(Calendar.HOUR, hh);
-                }
-                mCalendar.set(Calendar.MINUTE, mm);
+        // Only registered for COMMAND_CLOCK
+        String millis = args.getString("millis");
+        String hhmm = args.getString("hhmm");
+        if (millis != null) {
+            mCalendar.setTimeInMillis(Long.parseLong(millis));
+        } else if (hhmm != null && hhmm.length() == 4) {
+            int hh = Integer.parseInt(hhmm.substring(0, 2));
+            int mm = Integer.parseInt(hhmm.substring(2));
+            boolean is24 = DateFormat.is24HourFormat(getContext(), mCurrentUserId);
+            if (is24) {
+                mCalendar.set(Calendar.HOUR_OF_DAY, hh);
+            } else {
+                mCalendar.set(Calendar.HOUR, hh);
             }
-            setText(getSmallTime());
-            setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
+            mCalendar.set(Calendar.MINUTE, mm);
         }
+        setText(getSmallTime());
+        setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
+    }
+
+    @Override
+    public void onDemoModeStarted() {
+        mDemoMode = true;
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        mDemoMode = false;
+        updateClock();
     }
 
     private final BroadcastReceiver mScreenReceiver = new BroadcastReceiver() {

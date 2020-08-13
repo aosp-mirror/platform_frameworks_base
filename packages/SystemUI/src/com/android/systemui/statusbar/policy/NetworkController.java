@@ -22,7 +22,7 @@ import android.telephony.SubscriptionInfo;
 
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
-import com.android.systemui.DemoMode;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.List;
@@ -30,8 +30,6 @@ import java.util.List;
 public interface NetworkController extends CallbackController<SignalCallback>, DemoMode {
 
     boolean hasMobileDataFeature();
-    void addCallback(SignalCallback cb);
-    void removeCallback(SignalCallback cb);
     void setWifiEnabled(boolean enabled);
     AccessPointController getAccessPointController();
     DataUsageController getMobileDataController();

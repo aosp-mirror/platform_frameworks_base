@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +62,7 @@ public class SensorPrivacyControllerImpl implements SensorPrivacyController,
     /**
      * Adds the provided listener for callbacks when sensor privacy state changes.
      */
-    public void addCallback(OnSensorPrivacyChangedListener listener) {
+    public void addCallback(@NonNull OnSensorPrivacyChangedListener listener) {
         synchronized (mLock) {
             mListeners.add(listener);
             notifyListenerLocked(listener);
@@ -70,7 +72,7 @@ public class SensorPrivacyControllerImpl implements SensorPrivacyController,
     /**
      * Removes the provided listener from callbacks when sensor privacy state changes.
      */
-    public void removeCallback(OnSensorPrivacyChangedListener listener) {
+    public void removeCallback(@NonNull OnSensorPrivacyChangedListener listener) {
         synchronized (mLock) {
             mListeners.remove(listener);
         }

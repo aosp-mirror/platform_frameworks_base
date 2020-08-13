@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.BootCompleteCache;
@@ -87,12 +88,14 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     /**
      * Add a callback to listen for changes in location settings.
      */
-    public void addCallback(LocationChangeCallback cb) {
+    @Override
+    public void addCallback(@NonNull LocationChangeCallback cb) {
         mHandler.obtainMessage(H.MSG_ADD_CALLBACK, cb).sendToTarget();
         mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
     }
 
-    public void removeCallback(LocationChangeCallback cb) {
+    @Override
+    public void removeCallback(@NonNull LocationChangeCallback cb) {
         mHandler.obtainMessage(H.MSG_REMOVE_CALLBACK, cb).sendToTarget();
     }
 
