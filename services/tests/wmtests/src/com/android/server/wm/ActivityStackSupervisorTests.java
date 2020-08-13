@@ -192,6 +192,8 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
                 virtualDisplay.getDisplay().getDisplayId(), unresizableActivity.info);
 
         assertThat(allowed).isTrue();
+
+        virtualDisplay.release();
     }
 
     @Test
@@ -206,6 +208,8 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
                 virtualDisplay.getDisplay().getDisplayId(), unresizableActivity.info);
 
         assertThat(allowed).isFalse();
+
+        virtualDisplay.release();
     }
 
     private VirtualDisplay createVirtualDisplay(boolean trusted) {
