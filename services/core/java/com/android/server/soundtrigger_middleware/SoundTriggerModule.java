@@ -184,11 +184,13 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
     @Override
     public void serviceDied(long cookie) {
         Log.w(TAG, String.format("Underlying HAL driver died."));
-        List<ISoundTriggerCallback> callbacks = new ArrayList<>(mActiveSessions.size());
+        List<ISoundTriggerCallback> callbacks;
         synchronized (this) {
+            callbacks = new ArrayList<>(mActiveSessions.size());
             for (Session session : mActiveSessions) {
                 callbacks.add(session.moduleDied());
             }
+            mActiveSessions.clear();
             reset();
         }
         // Trigger the callbacks outside of the lock to avoid deadlocks.
@@ -431,7 +433,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
          */
         private ISoundTriggerCallback moduleDied() {
             ISoundTriggerCallback callback = mCallback;
-            removeSession(this);
             mCallback = null;
             return callback;
         }
