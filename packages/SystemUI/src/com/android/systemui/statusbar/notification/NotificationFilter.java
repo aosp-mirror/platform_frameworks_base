@@ -34,7 +34,6 @@ import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import javax.inject.Inject;
@@ -46,8 +45,6 @@ import javax.inject.Inject;
 @SysUISingleton
 public class NotificationFilter {
 
-    private final NotificationGroupManager mGroupManager = Dependency.get(
-            NotificationGroupManager.class);
     private final StatusBarStateController mStatusBarStateController;
     private final Boolean mIsMediaFlagEnabled;
 

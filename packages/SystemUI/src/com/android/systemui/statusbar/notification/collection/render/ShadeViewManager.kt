@@ -24,7 +24,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import java.lang.RuntimeException
 import javax.inject.Inject
 
 /**

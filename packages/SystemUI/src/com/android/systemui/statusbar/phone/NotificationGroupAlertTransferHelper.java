@@ -31,11 +31,11 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
-import com.android.systemui.statusbar.phone.NotificationGroupManager.NotificationGroup;
-import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -44,8 +44,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * A helper class dealing with the alert interactions between {@link NotificationGroupManager} and
- * {@link HeadsUpManager}. In particular, this class deals with keeping
+ * A helper class dealing with the alert interactions between {@link NotificationGroupManagerLegacy}
+ * and {@link HeadsUpManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression.
  */
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
@@ -66,8 +66,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private HeadsUpManager mHeadsUpManager;
     private final RowContentBindStage mRowContentBindStage;
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
+    private final NotificationGroupManagerLegacy mGroupManager =
+            Dependency.get(NotificationGroupManagerLegacy.class);
 
     private NotificationEntryManager mEntryManager;
 
@@ -83,7 +83,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     /** Causes the TransferHelper to register itself as a listener to the appropriate classes. */
     public void bind(NotificationEntryManager entryManager,
-            NotificationGroupManager groupManager) {
+            NotificationGroupManagerLegacy groupManager) {
         if (mEntryManager != null) {
             throw new IllegalStateException("Already bound.");
         }
@@ -95,7 +95,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         mEntryManager = entryManager;
 
         mEntryManager.addNotificationEntryListener(mNotificationEntryListener);
-        groupManager.addOnGroupChangeListener(mOnGroupChangeListener);
+        groupManager.registerGroupChangeListener(mOnGroupChangeListener);
     }
 
     /**
@@ -128,7 +128,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         mIsDozing = isDozing;
     }
 
-    private final OnGroupChangeListener mOnGroupChangeListener = new OnGroupChangeListener() {
+    private final NotificationGroupManagerLegacy.OnGroupChangeListener mOnGroupChangeListener =
+            new NotificationGroupManagerLegacy.OnGroupChangeListener() {
         @Override
         public void onGroupCreated(NotificationGroup group, String groupKey) {
             mGroupAlertEntries.put(groupKey, new GroupAlertEntry(group));

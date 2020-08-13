@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -117,6 +118,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     private StatusBar mStatusBar;
     @Mock
     private ScrimController mScrimController;
+    @Mock
+    private NotificationGroupManagerLegacy mLegacyGroupManager;
 
     @Captor
     ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -149,7 +152,9 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mResources,
                 mNotificationSwipeHelperBuilder,
                 mStatusBar,
-                mScrimController
+                mScrimController,
+                mLegacyGroupManager,
+                mLegacyGroupManager
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

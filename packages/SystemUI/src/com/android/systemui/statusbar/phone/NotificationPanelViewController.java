@@ -107,6 +107,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -361,7 +362,8 @@ public class NotificationPanelViewController extends PanelViewController {
         setHeadsUpAnimatingAway(false);
         notifyBarPanelExpansionChanged();
     };
-    private NotificationGroupManager mGroupManager;
+    // TODO (b/162832756): once migrated to the new pipeline, delete legacy group manager
+    private NotificationGroupManagerLegacy mGroupManager;
     private boolean mShowIconsWhenExpanded;
     private int mIndicationBottomPadding;
     private int mAmbientIndicationBottomPadding;
@@ -508,8 +510,9 @@ public class NotificationPanelViewController extends PanelViewController {
             BiometricUnlockController biometricUnlockController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            NotificationIconAreaController notificationIconAreaController,
-            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
+            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
+            NotificationGroupManagerLegacy groupManager,
+            NotificationIconAreaController notificationIconAreaController) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -521,6 +524,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mMediaHierarchyManager = mediaHierarchyManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
+        mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mView.setWillNotDraw(!DEBUG);
@@ -2852,10 +2856,6 @@ public class NotificationPanelViewController extends PanelViewController {
         return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }
 
-    private void setGroupManager(NotificationGroupManager groupManager) {
-        mGroupManager = groupManager;
-    }
-
     public boolean hideStatusBarIconsWhenExpanded() {
         if (mLaunchingNotification) {
             return mHideIconsDuringNotificationLaunch;
@@ -3117,13 +3117,9 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     public void initDependencies(
             StatusBar statusBar,
-            NotificationGroupManager groupManager,
             NotificationShelfController notificationShelfController) {
         setStatusBar(statusBar);
-        setGroupManager(mGroupManager);
         mNotificationStackScrollLayoutController.setNotificationPanelController(this);
-        mNotificationStackScrollLayoutController.setStatusBar(statusBar);
-        mNotificationStackScrollLayoutController.setGroupManager(groupManager);
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
         mNotificationShelfController = notificationShelfController;
         updateMaxDisplayedNotifications(true);

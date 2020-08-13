@@ -33,6 +33,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -55,7 +56,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     @VisibleForTesting
     final int mExtensionTime;
     private final KeyguardBypassController mBypassController;
-    private final NotificationGroupManager mGroupManager;
+    private final GroupMembershipManager mGroupMembershipManager;
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
     private final int mAutoHeadsUpNotificationDecay;
     // TODO (b/162832756): remove visual stability manager when migrating to new pipeline
@@ -101,7 +102,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     public HeadsUpManagerPhone(@NonNull final Context context,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
-            NotificationGroupManager groupManager,
+            GroupMembershipManager groupMembershipManager,
             ConfigurationController configurationController) {
         super(context);
         Resources resources = mContext.getResources();
@@ -110,7 +111,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 R.integer.auto_heads_up_notification_decay);
         statusBarStateController.addCallback(mStatusBarStateListener);
         mBypassController = bypassController;
-        mGroupManager = groupManager;
+        mGroupMembershipManager = groupMembershipManager;
 
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
@@ -166,7 +167,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         } else {
             if (topEntry.isChildInGroup()) {
                 final NotificationEntry groupSummary =
-                        mGroupManager.getGroupSummary(topEntry.getSbn());
+                        mGroupMembershipManager.getGroupSummary(topEntry);
                 if (groupSummary != null) {
                     topEntry = groupSummary;
                 }

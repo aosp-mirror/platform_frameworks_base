@@ -57,6 +57,10 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -68,7 +72,6 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -518,7 +521,9 @@ public class NotificationStackScrollLayoutController {
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             StatusBar statusBar,
-            ScrimController scrimController) {
+            ScrimController scrimController,
+            NotificationGroupManagerLegacy legacyGroupManager,
+            GroupExpansionManager groupManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -539,12 +544,28 @@ public class NotificationStackScrollLayoutController {
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
         mScrimController = scrimController;
+        groupManager.registerGroupExpansionChangeListener((changedRow, expanded) -> {
+            mView.onGroupExpandChanged(changedRow, expanded);
+        });
+
+        legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
+            @Override
+            public void onGroupCreatedFromChildren(NotificationGroup group) {
+                mStatusBar.requestNotificationUpdate("onGroupCreatedFromChildren");
+            }
+
+            @Override
+            public void onGroupsChanged() {
+                mStatusBar.requestNotificationUpdate("onGroupsChanged");
+            }
+        });
     }
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
         mView.setController(this);
         mView.setTouchHandler(new TouchHandler());
+        mView.setStatusBar(mStatusBar);
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
@@ -1043,14 +1064,6 @@ public class NotificationStackScrollLayoutController {
         mView.setNotificationPanelController(notificationPanelViewController);
     }
 
-    public void setStatusBar(StatusBar statusBar) {
-        mView.setStatusBar(statusBar);
-    }
-
-    public void setGroupManager(NotificationGroupManager groupManager) {
-        mView.setGroupManager(groupManager);
-    }
-
     public void setShelfController(NotificationShelfController notificationShelfController) {
         mView.setShelfController(notificationShelfController);
     }
@@ -1126,6 +1139,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     private class NotificationListContainerImpl implements NotificationListContainer {
+
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {
             mView.setChildTransferInProgress(childTransferInProgress);
