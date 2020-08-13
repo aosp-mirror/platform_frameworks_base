@@ -229,7 +229,7 @@ class LocationProviderManager extends
         // we cache these values because checking/calculating on the fly is more expensive
         private boolean mPermitted;
         private boolean mForeground;
-        @Nullable private LocationRequest mProviderLocationRequest;
+        private LocationRequest mProviderLocationRequest;
         private boolean mIsUsingHighPower;
 
         protected Registration(LocationRequest request, CallerIdentity identity,
@@ -244,6 +244,8 @@ class LocationProviderManager extends
             } else {
                 mWorkSource = identity.addToWorkSource(null);
             }
+
+            mProviderLocationRequest = super.getRequest();
         }
 
         @GuardedBy("mLock")
@@ -313,7 +315,7 @@ class LocationProviderManager extends
 
         @Override
         public final LocationRequest getRequest() {
-            return Objects.requireNonNull(mProviderLocationRequest);
+            return mProviderLocationRequest;
         }
 
         public final boolean isForeground() {

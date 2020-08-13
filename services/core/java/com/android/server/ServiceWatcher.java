@@ -238,24 +238,13 @@ public class ServiceWatcher implements ServiceConnection {
 
         new PackageMonitor() {
             @Override
-            public void onPackageUpdateFinished(String packageName, int uid) {
-                ServiceWatcher.this.onPackageChanged(packageName);
-            }
-
-            @Override
-            public void onPackageAdded(String packageName, int uid) {
-                ServiceWatcher.this.onPackageChanged(packageName);
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                ServiceWatcher.this.onPackageChanged(packageName);
-            }
-
-            @Override
             public boolean onPackageChanged(String packageName, int uid, String[] components) {
-                ServiceWatcher.this.onPackageChanged(packageName);
-                return super.onPackageChanged(packageName, uid, components);
+                return true;
+            }
+
+            @Override
+            public void onSomePackagesChanged() {
+                onBestServiceChanged(false);
             }
         }.register(mContext, UserHandle.ALL, true, mHandler);
 
@@ -320,7 +309,7 @@ public class ServiceWatcher implements ServiceConnection {
 
         if (!mTargetService.equals(ServiceInfo.NONE)) {
             if (D) {
-                Log.i(TAG, "[" + mIntent.getAction() + "] unbinding from " + mTargetService);
+                Log.d(TAG, "[" + mIntent.getAction() + "] unbinding from " + mTargetService);
             }
 
             mContext.unbindService(this);
@@ -335,9 +324,7 @@ public class ServiceWatcher implements ServiceConnection {
 
         Preconditions.checkState(mTargetService.component != null);
 
-        if (D) {
-            Log.i(TAG, getLogPrefix() + " binding to " + mTargetService);
-        }
+        Log.i(TAG, getLogPrefix() + " binding to " + mTargetService);
 
         Intent bindIntent = new Intent(mIntent).setComponent(mTargetService.component);
         if (!mContext.bindServiceAsUser(bindIntent, this,
@@ -355,7 +342,7 @@ public class ServiceWatcher implements ServiceConnection {
         Preconditions.checkState(mBinder == null);
 
         if (D) {
-            Log.i(TAG, getLogPrefix() + " connected to " + component.toShortString());
+            Log.d(TAG, getLogPrefix() + " connected to " + component.toShortString());
         }
 
         mBinder = binder;
@@ -379,7 +366,7 @@ public class ServiceWatcher implements ServiceConnection {
         }
 
         if (D) {
-            Log.i(TAG, getLogPrefix() + " disconnected from " + component.toShortString());
+            Log.d(TAG, getLogPrefix() + " disconnected from " + component.toShortString());
         }
 
         mBinder = null;
@@ -392,11 +379,14 @@ public class ServiceWatcher implements ServiceConnection {
     public final void onBindingDied(ComponentName component) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
-        if (D) {
-            Log.i(TAG, getLogPrefix() + " " + component.toShortString() + " died");
-        }
+        Log.i(TAG, getLogPrefix() + " " + component.toShortString() + " died");
 
         onBestServiceChanged(true);
+    }
+
+    @Override
+    public final void onNullBinding(ComponentName component) {
+        Log.e(TAG, getLogPrefix() + " " + component.toShortString() + " has null binding");
     }
 
     void onUserSwitched(@UserIdInt int userId) {
@@ -408,11 +398,6 @@ public class ServiceWatcher implements ServiceConnection {
         if (userId == mCurrentUserId) {
             onBestServiceChanged(false);
         }
-    }
-
-    void onPackageChanged(String packageName) {
-        // force a rebind if the changed package was the currently connected package
-        onBestServiceChanged(packageName.equals(mTargetService.getPackageName()));
     }
 
     /**
