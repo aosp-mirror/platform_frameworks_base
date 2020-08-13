@@ -4420,15 +4420,12 @@ message PrivacyIndicatorsInteracted {
         UNKNOWN = 0;
         CHIP_VIEWED = 1;
         CHIP_CLICKED = 2;
-        DIALOG_PRIVACY_SETTINGS = 3;
+        reserved 3; // Used only in beta builds, never shipped 
         DIALOG_DISMISS = 4;
         DIALOG_LINE_ITEM = 5;
     }
 
     optional Type type = 1 [(state_field_option).exclusive_state = true];
-
-    // Used if the type is LINE_ITEM
-    optional string package_name = 2;
 }
 
 /**
