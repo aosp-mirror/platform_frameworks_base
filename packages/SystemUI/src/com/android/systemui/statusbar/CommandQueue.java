@@ -49,6 +49,8 @@ import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsetsController.Appearance;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -391,7 +393,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                 && !ONLY_CORE_APPS;
     }
 
-    public void addCallback(Callbacks callbacks) {
+    @Override
+    public void addCallback(@NonNull Callbacks callbacks) {
         mCallbacks.add(callbacks);
         // TODO(b/117478341): find a better way to pass disable flags by display.
         for (int i = 0; i < mDisplayDisabled.size(); i++) {
@@ -402,7 +405,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         }
     }
 
-    public void removeCallback(Callbacks callbacks) {
+    @Override
+    public void removeCallback(@NonNull Callbacks callbacks) {
         mCallbacks.remove(callbacks);
     }
 

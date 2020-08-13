@@ -37,6 +37,8 @@ import android.service.notification.ZenModeConfig.ZenRule;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -124,14 +126,14 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     }
 
     @Override
-    public void addCallback(Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
             mCallbacks.add(callback);
         }
     }
 
     @Override
-    public void removeCallback(Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
             mCallbacks.remove(callback);
         }

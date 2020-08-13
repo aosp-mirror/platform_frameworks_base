@@ -32,6 +32,7 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -151,12 +152,14 @@ public class SystemUIFactory {
             StatusBar statusBar,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            DemoModeController demoModeController) {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
                 wakeUpCoordinator, keyguardBypassController,
                 Dependency.get(NotificationMediaManager.class),
                 Dependency.get(NotificationListener.class),
                 Dependency.get(DozeParameters.class),
-                Dependency.get(BubbleController.class));
+                Dependency.get(BubbleController.class),
+                demoModeController);
     }
 }

@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.os.UserHandle;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.view.RotationPolicy;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,12 +49,14 @@ public final class RotationLockControllerImpl implements RotationLockController 
         setListening(true);
     }
 
-    public void addCallback(RotationLockControllerCallback callback) {
+    @Override
+    public void addCallback(@NonNull RotationLockControllerCallback callback) {
         mCallbacks.add(callback);
         notifyChanged(callback);
     }
 
-    public void removeCallback(RotationLockControllerCallback callback) {
+    @Override
+    public void removeCallback(@NonNull RotationLockControllerCallback callback) {
         mCallbacks.remove(callback);
     }
 

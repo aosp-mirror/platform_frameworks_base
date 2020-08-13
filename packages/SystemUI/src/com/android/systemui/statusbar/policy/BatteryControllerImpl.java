@@ -27,6 +27,7 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,11 +37,14 @@ import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.demomode.DemoMode;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.power.EnhancedEstimates;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,6 +67,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mChangeCallbacks = new ArrayList<>();
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
+    private final DemoModeController mDemoModeController;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     protected final Context mContext;
@@ -82,15 +87,21 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @VisibleForTesting
     @Inject
-    public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
-            PowerManager powerManager, BroadcastDispatcher broadcastDispatcher,
-            @Main Handler mainHandler, @Background Handler bgHandler) {
+    public BatteryControllerImpl(
+            Context context,
+            EnhancedEstimates enhancedEstimates,
+            PowerManager powerManager,
+            BroadcastDispatcher broadcastDispatcher,
+            DemoModeController demoModeController,
+            @Main Handler mainHandler,
+            @Background Handler bgHandler) {
         mContext = context;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mPowerManager = powerManager;
         mEstimates = enhancedEstimates;
         mBroadcastDispatcher = broadcastDispatcher;
+        mDemoModeController = demoModeController;
     }
 
     private void registerReceiver() {
@@ -114,6 +125,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                 onReceive(mContext, intent);
             }
         }
+        mDemoModeController.addCallback(this);
         updatePowerSave();
         updateEstimate();
     }
@@ -134,7 +146,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void addCallback(BatteryController.BatteryStateChangeCallback cb) {
+    public void addCallback(@NonNull BatteryController.BatteryStateChangeCallback cb) {
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.add(cb);
         }
@@ -144,7 +156,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void removeCallback(BatteryController.BatteryStateChangeCallback cb) {
+    public void removeCallback(@NonNull BatteryController.BatteryStateChangeCallback cb) {
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.remove(cb);
         }
@@ -325,32 +337,43 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
-    private boolean mDemoMode;
-
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mDemoMode = true;
-            mBroadcastDispatcher.unregisterReceiver(this);
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            registerReceiver();
-            updatePowerSave();
-        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
-            String level = args.getString("level");
-            String plugged = args.getString("plugged");
-            String powerSave = args.getString("powersave");
-            if (level != null) {
-                mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
-            }
-            if (plugged != null) {
-                mPluggedIn = Boolean.parseBoolean(plugged);
-            }
-            if (powerSave != null) {
-                mPowerSave = powerSave.equals("true");
-                firePowerSaveChanged();
-            }
-            fireBatteryLevelChanged();
+        if (!mDemoModeController.isInDemoMode()) {
+            return;
         }
+
+        String level = args.getString("level");
+        String plugged = args.getString("plugged");
+        String powerSave = args.getString("powersave");
+        if (level != null) {
+            mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
+        }
+        if (plugged != null) {
+            mPluggedIn = Boolean.parseBoolean(plugged);
+        }
+        if (powerSave != null) {
+            mPowerSave = powerSave.equals("true");
+            firePowerSaveChanged();
+        }
+        fireBatteryLevelChanged();
+    }
+
+    @Override
+    public List<String> demoCommands() {
+        List<String> s = new ArrayList<>();
+        s.add(DemoMode.COMMAND_BATTERY);
+        return s;
+    }
+
+    @Override
+    public void onDemoModeStarted() {
+        mBroadcastDispatcher.unregisterReceiver(this);
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        registerReceiver();
+        updatePowerSave();
     }
 }
