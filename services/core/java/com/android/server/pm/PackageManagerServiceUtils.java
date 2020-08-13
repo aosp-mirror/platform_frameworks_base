@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
@@ -67,6 +68,7 @@ import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionsState;
 
 import dalvik.system.VMRuntime;
 
@@ -963,6 +965,20 @@ public class PackageManagerServiceUtils {
         } finally {
             IoUtils.closeQuietly(source);
         }
+    }
+
+    /**
+     * Returns the {@link PermissionsState} for the given package. If the {@link PermissionsState}
+     * could not be found, {@code null} will be returned.
+     */
+    public static PermissionsState getPermissionsState(
+            PackageManagerInternal packageManagerInternal, AndroidPackage pkg) {
+        final PackageSetting packageSetting = packageManagerInternal.getPackageSetting(
+                pkg.getPackageName());
+        if (packageSetting == null) {
+            return null;
+        }
+        return packageSetting.getPermissionsState();
     }
 
     /**
