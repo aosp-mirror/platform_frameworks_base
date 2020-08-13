@@ -2488,6 +2488,42 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Ask some other {@code ConnectionService} to create a {@code RemoteConference} given an
+     * incoming request. This is used by {@code ConnectionService}s that are registered with
+     * {@link PhoneAccount#CAPABILITY_ADHOC_CONFERENCE_CALLING}.
+     *
+     * @param connectionManagerPhoneAccount See description at
+     *          {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the incoming conference call.
+     * @return The {@code RemoteConference} object to satisfy this call, or {@code null} to not
+     *         handle the call.
+     */
+    public final @Nullable RemoteConference createRemoteIncomingConference(
+            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
+            @Nullable ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConference(connectionManagerPhoneAccount,
+                request, true);
+    }
+
+    /**
+     * Ask some other {@code ConnectionService} to create a {@code RemoteConference} given an
+     * outgoing request. This is used by {@code ConnectionService}s that are registered with
+     * {@link PhoneAccount#CAPABILITY_ADHOC_CONFERENCE_CALLING}.
+     *
+     * @param connectionManagerPhoneAccount See description at
+     *          {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the outgoing conference call.
+     * @return The {@code RemoteConference} object to satisfy this call, or {@code null} to not
+     *         handle the call.
+     */
+    public final @Nullable RemoteConference createRemoteOutgoingConference(
+            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
+            @Nullable ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConference(connectionManagerPhoneAccount,
+                request, false);
+    }
+
+    /**
      * Indicates to the relevant {@code RemoteConnectionService} that the specified
      * {@link RemoteConnection}s should be merged into a conference call.
      * <p>
