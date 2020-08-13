@@ -1328,12 +1328,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (PackageInstaller.STATUS_SUCCESS == status) {
                     mChildSessionsRemaining.removeAt(sessionIndex);
                     if (mChildSessionsRemaining.size() == 0) {
-                        try {
-                            intent.putExtra(PackageInstaller.EXTRA_SESSION_ID,
-                                    PackageInstallerSession.this.sessionId);
-                            mStatusReceiver.sendIntent(mContext, 0, intent, null, null);
-                        } catch (IntentSender.SendIntentException ignore) {
-                        }
+                        destroyInternal();
+                        dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED,
+                                "Session installed", null);
                     }
                 } else if (PackageInstaller.STATUS_PENDING_USER_ACTION == status) {
                     try {
