@@ -159,6 +159,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
@@ -182,7 +183,7 @@ import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
-import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -1505,7 +1506,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mStatusBarWindowController.getStatusBarHeight();
     }
 
-    protected boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
+    public boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
         if (!mRecentsOptional.isPresent()) {
             return false;
         }
@@ -2438,7 +2439,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mNotificationShadeWindowViewController.getBarTransitions();
     }
 
-    void checkBarModes() {
+    public void checkBarModes() {
         if (mDemoMode) return;
         if (mNotificationShadeWindowViewController != null && getStatusBarTransitions() != null) {
             checkBarMode(mStatusBarMode, mStatusBarWindowState, getStatusBarTransitions());
@@ -2448,7 +2449,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     // Called by NavigationBarFragment
-    void setQsScrimEnabled(boolean scrimEnabled) {
+    public void setQsScrimEnabled(boolean scrimEnabled) {
         mNotificationPanelViewController.setQsScrimEnabled(scrimEnabled);
     }
 
@@ -2621,7 +2622,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
+    public static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
         pw.print("  "); pw.print(var); pw.print(".BarTransitions.mMode=");
         pw.println(BarTransitions.modeToString(transitions.getMode()));
     }
@@ -4135,7 +4136,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         toggleSplitScreenMode(-1 /* metricsDockAction */, -1 /* metricsUndockAction */);
     }
 
-    void awakenDreams() {
+    public void awakenDreams() {
         mUiBgExecutor.execute(() -> {
             try {
                 mDreamManager.awaken();

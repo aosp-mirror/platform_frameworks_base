@@ -25,7 +25,7 @@
     android:paddingEnd="@dimen/nav_content_padding"
     android:id="@+id/horizontal">
 
-    <com.android.systemui.statusbar.phone.NearestTouchFrame
+    <com.android.systemui.navigationbar.buttons.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -50,6 +50,6 @@
             android:clipToPadding="false"
             android:clipChildren="false" />
 
-    </com.android.systemui.statusbar.phone.NearestTouchFrame>
+    </com.android.systemui.navigationbar.buttons.NearestTouchFrame>
 
 </FrameLayout>

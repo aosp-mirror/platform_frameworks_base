@@ -41,7 +41,7 @@ import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistLogger;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.assist.AssistantSessionEvent;
-import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarController;
 
 import java.util.Locale;
 

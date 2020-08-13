@@ -31,6 +31,7 @@ import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -40,6 +41,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Prefs;
 import com.android.systemui.accessibility.ModeSwitchesController;
+import com.android.systemui.accessibility.SystemActions;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -47,25 +50,38 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.PluginInitializerImpl;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.leak.LeakDetector;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -159,8 +175,49 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public NavigationBarController provideNavigationBarController(Context context,
-            @Main Handler mainHandler, CommandQueue commandQueue) {
-        return new NavigationBarController(context, mainHandler, commandQueue);
+            WindowManager windowManager,
+            Lazy<AssistManager> assistManagerLazy,
+            AccessibilityManager accessibilityManager,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            DeviceProvisionedController deviceProvisionedController,
+            MetricsLogger metricsLogger,
+            OverviewProxyService overviewProxyService,
+            NavigationModeController navigationModeController,
+            StatusBarStateController statusBarStateController,
+            SysUiState sysUiFlagsContainer,
+            BroadcastDispatcher broadcastDispatcher,
+            CommandQueue commandQueue,
+            Divider divider,
+            Optional<Recents> recentsOptional,
+            Lazy<StatusBar> statusBarLazy,
+            ShadeController shadeController,
+            NotificationRemoteInputManager notificationRemoteInputManager,
+            SystemActions systemActions,
+            @Main Handler mainHandler,
+            UiEventLogger uiEventLogger,
+            ConfigurationController configurationController) {
+        return new NavigationBarController(context,
+                windowManager,
+                assistManagerLazy,
+                accessibilityManager,
+                accessibilityManagerWrapper,
+                deviceProvisionedController,
+                metricsLogger,
+                overviewProxyService,
+                navigationModeController,
+                statusBarStateController,
+                sysUiFlagsContainer,
+                broadcastDispatcher,
+                commandQueue,
+                divider,
+                recentsOptional,
+                statusBarLazy,
+                shadeController,
+                notificationRemoteInputManager,
+                systemActions,
+                mainHandler,
+                uiEventLogger,
+                configurationController);
     }
 
     @Singleton
@@ -227,6 +284,12 @@ public class DependencyProvider {
     @Provides
     public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
+    }
+
+    /** */
+    @Provides
+    public SystemActions providesSystemActions(Context context) {
+        return new SystemActions(context);
     }
 
     /** */
