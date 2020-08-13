@@ -6444,20 +6444,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
 
-            // Clean up orphaned packages for which the code path doesn't exist
-            // and they are an update to a system app - caused by bug/32321269
-            final WatchedArrayMap<String, PackageSetting> packageSettings =
-                mSettings.getPackagesLocked();
-            final int packageSettingCount = packageSettings.size();
-            for (int i = packageSettingCount - 1; i >= 0; i--) {
-                PackageSetting ps = packageSettings.valueAt(i);
-                if (!isExternal(ps) && (ps.getPath() == null || !ps.getPath().exists())
-                        && mSettings.getDisabledSystemPkgLPr(ps.name) != null) {
-                    packageSettings.removeAt(i);
-                    mSettings.enableSystemPackageLPw(ps.name);
-                }
-            }
-
             if (!mOnlyCore && mFirstBoot) {
                 requestCopyPreoptedFiles(mInjector);
             }
@@ -6505,6 +6491,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
+
+            final WatchedArrayMap<String, PackageSetting> packageSettings =
+                mSettings.getPackagesLocked();
 
             // Save the names of pre-existing packages prior to scanning, so we can determine
             // which system packages are completely new due to an upgrade.
