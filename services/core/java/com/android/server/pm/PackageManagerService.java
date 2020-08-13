@@ -418,6 +418,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -3481,6 +3482,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
                 int count = 0;
+                final Installer.Batch batch = new Installer.Batch();
                 for (String pkgName : deferPackages) {
                     AndroidPackage pkg = null;
                     synchronized (mLock) {
@@ -3490,12 +3492,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                     if (pkg != null) {
-                        synchronized (mInstallLock) {
-                            prepareAppDataAndMigrateLIF(pkg, UserHandle.USER_SYSTEM, storageFlags,
-                                    true /* maybeMigrateAppData */);
-                        }
+                        prepareAppDataAndMigrate(batch, pkg, UserHandle.USER_SYSTEM, storageFlags,
+                                true /* maybeMigrateAppData */);
                         count++;
                     }
+                }
+                synchronized (mInstallLock) {
+                    executeBatchLI(batch);
                 }
                 traceLog.traceEnd();
                 Slog.i(TAG, "Deferred reconcileAppsData finished " + count + " packages");
@@ -22736,6 +22739,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    private void executeBatchLI(@NonNull Installer.Batch batch) {
+        try {
+            batch.execute(mInstaller);
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to execute pending operations", e);
+        }
+    }
+
     /**
      * Examine all apps present on given mounted volume, and destroy apps that
      * aren't expected, either due to uninstallation or reinstallation on
@@ -22875,6 +22886,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Ensure that data directories are ready to roll for all packages
         // installed for this volume and user
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "prepareAppDataAndMigrate");
+        Installer.Batch batch = new Installer.Batch();
         final List<PackageSetting> packages;
         synchronized (mLock) {
             packages = mSettings.getVolumePackagesLPr(volumeUuid);
@@ -22895,10 +22908,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (ps.getInstalled(userId)) {
-                prepareAppDataAndMigrateLIF(ps.pkg, userId, flags, migrateAppData);
+                prepareAppDataAndMigrate(batch, ps.pkg, userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
+        executeBatchLI(batch);
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         Slog.v(TAG, "reconcileAppsData finished " + preparedCount + " packages");
         return result;
@@ -22923,6 +22938,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.writeKernelMappingLPr(ps);
         }
 
+        Installer.Batch batch = new Installer.Batch();
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         StorageManagerInternal smInternal = mInjector.getStorageManagerInternal();
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
@@ -22937,16 +22953,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (ps.getInstalled(user.id)) {
                 // TODO: when user data is locked, mark that we're still dirty
-                prepareAppDataLIF(pkg, user.id, flags);
-
-                if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
-                    // Prepare app data on external storage; currently this is used to
-                    // setup any OBB dirs that were created by the installer correctly.
-                    int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));
-                    smInternal.prepareAppDataAfterInstall(pkg.getPackageName(), uid);
-                }
+                prepareAppData(batch, pkg, user.id, flags).thenRun(() -> {
+                    // Note: this code block is executed with the Installer lock
+                    // already held, since it's invoked as a side-effect of
+                    // executeBatchLI()
+                    if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+                        // Prepare app data on external storage; currently this is used to
+                        // setup any OBB dirs that were created by the installer correctly.
+                        int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));
+                        smInternal.prepareAppDataAfterInstall(pkg.getPackageName(), uid);
+                    }
+                });
             }
         }
+        executeBatchLI(batch);
     }
 
     /**
@@ -22957,26 +22977,33 @@ public class PackageManagerService extends IPackageManager.Stub
      * will try recovering system apps by wiping data; third-party app data is
      * left intact.
      */
-    private void prepareAppDataLIF(AndroidPackage pkg, int userId, int flags) {
+    private @NonNull CompletableFuture<?> prepareAppData(@NonNull Installer.Batch batch,
+            @Nullable AndroidPackage pkg, int userId, int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        prepareAppDataLeafLIF(pkg, userId, flags);
+        return prepareAppDataLeaf(batch, pkg, userId, flags);
     }
 
-    private void prepareAppDataAndMigrateLIF(AndroidPackage pkg, int userId, int flags,
-            boolean maybeMigrateAppData) {
-        prepareAppDataLIF(pkg, userId, flags);
-
-        if (maybeMigrateAppData && maybeMigrateAppDataLIF(pkg, userId)) {
-            // We may have just shuffled around app data directories, so
-            // prepare them one more time
-            prepareAppDataLIF(pkg, userId, flags);
-        }
+    private @NonNull CompletableFuture<?> prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
+            @NonNull AndroidPackage pkg, int userId, int flags, boolean maybeMigrateAppData) {
+        return prepareAppData(batch, pkg, userId, flags).thenRun(() -> {
+            // Note: this code block is executed with the Installer lock
+            // already held, since it's invoked as a side-effect of
+            // executeBatchLI()
+            if (maybeMigrateAppData && maybeMigrateAppDataLIF(pkg, userId)) {
+                // We may have just shuffled around app data directories, so
+                // prepare them one more time
+                final Installer.Batch batchInner = new Installer.Batch();
+                prepareAppData(batchInner, pkg, userId, flags);
+                executeBatchLI(batchInner);
+            }
+        });
     }
 
-    private void prepareAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
+    private @NonNull CompletableFuture<?> prepareAppDataLeaf(@NonNull Installer.Batch batch,
+            @NonNull AndroidPackage pkg, int userId, int flags) {
         if (DEBUG_APP_DATA) {
             Slog.v(TAG, "prepareAppData for " + pkg.getPackageName() + " u" + userId + " 0x"
                     + Integer.toHexString(flags));
@@ -22996,57 +23023,67 @@ public class PackageManagerService extends IPackageManager.Stub
         Preconditions.checkNotNull(pkgSeInfo);
 
         final String seInfo = pkgSeInfo + (pkg.getSeInfoUser() != null ? pkg.getSeInfoUser() : "");
-        long ceDataInode = -1;
-        try {
-            ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                    appId, seInfo, pkg.getTargetSdkVersion());
-        } catch (InstallerException e) {
-            if (pkg.isSystem()) {
-                logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
-                        + ", but trying to recover: " + e);
-                destroyAppDataLeafLIF(pkg, userId, flags);
-                try {
-                    ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                            appId, seInfo, pkg.getTargetSdkVersion());
-                    logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
-                } catch (InstallerException e2) {
-                    logCriticalInfo(Log.DEBUG, "Recovery failed!");
-                }
-            } else {
-                Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
-            }
-        }
-        // Prepare the application profiles only for upgrades and first boot (so that we don't
-        // repeat the same operation at each boot).
-        // We only have to cover the upgrade and first boot here because for app installs we
-        // prepare the profiles before invoking dexopt (in installPackageLI).
-        //
-        // We also have to cover non system users because we do not call the usual install package
-        // methods for them.
-        //
-        // NOTE: in order to speed up first boot time we only create the current profile and do not
-        // update the content of the reference profile. A system image should already be configured
-        // with the right profile keys and the profiles for the speed-profile prebuilds should
-        // already be copied. That's done in #performDexOptUpgrade.
-        //
-        // TODO(calin, mathieuc): We should use .dm files for prebuilds profiles instead of
-        // manually copying them in #performDexOptUpgrade. When we do that we should have a more
-        // granular check here and only update the existing profiles.
-        if (mIsUpgrade || mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
-            mArtManagerService.prepareAppProfiles(pkg, userId,
-                /* updateReferenceProfileContent= */ false);
-        }
+        final int targetSdkVersion = pkg.getTargetSdkVersion();
 
-        if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
-            // TODO: mark this structure as dirty so we persist it!
-            synchronized (mLock) {
-                if (ps != null) {
-                    ps.setCeDataInode(ceDataInode, userId);
-                }
-            }
-        }
+        return batch.createAppData(volumeUuid, packageName, userId, flags, appId, seInfo,
+                targetSdkVersion).whenComplete((ceDataInode, e) -> {
+                    // Note: this code block is executed with the Installer lock
+                    // already held, since it's invoked as a side-effect of
+                    // executeBatchLI()
+                    if ((e != null) && pkg.isSystem()) {
+                        logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
+                                + ", but trying to recover: " + e);
+                        destroyAppDataLeafLIF(pkg, userId, flags);
+                        try {
+                            ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId,
+                                    flags, appId, seInfo, pkg.getTargetSdkVersion());
+                            logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
+                        } catch (InstallerException e2) {
+                            logCriticalInfo(Log.DEBUG, "Recovery failed!");
+                        }
+                    } else if (e != null) {
+                        Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
+                    }
 
-        prepareAppDataContentsLeafLIF(pkg, ps, userId, flags);
+                    // Prepare the application profiles only for upgrades and
+                    // first boot (so that we don't repeat the same operation at
+                    // each boot).
+                    //
+                    // We only have to cover the upgrade and first boot here
+                    // because for app installs we prepare the profiles before
+                    // invoking dexopt (in installPackageLI).
+                    //
+                    // We also have to cover non system users because we do not
+                    // call the usual install package methods for them.
+                    //
+                    // NOTE: in order to speed up first boot time we only create
+                    // the current profile and do not update the content of the
+                    // reference profile. A system image should already be
+                    // configured with the right profile keys and the profiles
+                    // for the speed-profile prebuilds should already be copied.
+                    // That's done in #performDexOptUpgrade.
+                    //
+                    // TODO(calin, mathieuc): We should use .dm files for
+                    // prebuilds profiles instead of manually copying them in
+                    // #performDexOptUpgrade. When we do that we should have a
+                    // more granular check here and only update the existing
+                    // profiles.
+                    if (mIsUpgrade || mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
+                        mArtManagerService.prepareAppProfiles(pkg, userId,
+                            /* updateReferenceProfileContent= */ false);
+                    }
+
+                    if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
+                        // TODO: mark this structure as dirty so we persist it!
+                        synchronized (mLock) {
+                            if (ps != null) {
+                                ps.setCeDataInode(ceDataInode, userId);
+                            }
+                        }
+                    }
+
+                    prepareAppDataContentsLeafLIF(pkg, ps, userId, flags);
+                });
     }
 
     private void prepareAppDataContentsLIF(AndroidPackage pkg, @Nullable PackageSetting pkgSetting,

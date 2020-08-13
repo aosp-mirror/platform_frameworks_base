@@ -102,6 +102,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
+import com.android.server.pm.Installer.Batch;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -4148,24 +4149,12 @@ public final class Settings {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         t.traceBegin("createNewUser-" + userHandle);
-        String[] volumeUuids;
-        String[] names;
-        int[] appIds;
-        String[] seinfos;
-        int[] targetSdkVersions;
-        int packagesCount;
+        Installer.Batch batch = new Installer.Batch();
         final boolean skipPackageWhitelist = userTypeInstallablePackages == null;
         synchronized (mLock) {
-            Collection<PackageSetting> packages = mPackages.values();
-            packagesCount = packages.size();
-            volumeUuids = new String[packagesCount];
-            names = new String[packagesCount];
-            appIds = new int[packagesCount];
-            seinfos = new String[packagesCount];
-            targetSdkVersions = new int[packagesCount];
-            Iterator<PackageSetting> packagesIterator = packages.iterator();
-            for (int i = 0; i < packagesCount; i++) {
-                PackageSetting ps = packagesIterator.next();
+            final int size = mPackages.size();
+            for (int i = 0; i < size; i++) {
+                final PackageSetting ps = mPackages.valueAt(i);
                 if (ps.pkg == null) {
                     continue;
                 }
@@ -4187,18 +4176,15 @@ public final class Settings {
                 }
                 // Need to create a data directory for all apps under this user. Accumulate all
                 // required args and call the installer after mPackages lock has been released
-                volumeUuids[i] = ps.volumeUuid;
-                names[i] = ps.name;
-                appIds[i] = ps.appId;
-                seinfos[i] = AndroidPackageUtils.getSeInfo(ps.pkg, ps);
-                targetSdkVersions[i] = ps.pkg.getTargetSdkVersion();
+                final String seInfo = AndroidPackageUtils.getSeInfo(ps.pkg, ps);
+                batch.createAppData(ps.volumeUuid, ps.name, userHandle,
+                        StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE, ps.appId,
+                        seInfo, ps.pkg.getTargetSdkVersion());
             }
         }
         t.traceBegin("createAppData");
-        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
         try {
-            installer.createAppDataBatched(volumeUuids, names, userHandle, flags, appIds, seinfos,
-                    targetSdkVersions);
+            batch.execute(installer);
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to prepare app data", e);
         }
