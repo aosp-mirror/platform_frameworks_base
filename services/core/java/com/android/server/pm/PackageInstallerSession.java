@@ -1637,7 +1637,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * If session should be sealed, then it's sealed to prevent further modification.
      * If the session can't be sealed then it's destroyed.
      *
-     * Additionally for staged APEX sessions read+validate the package and populate req'd fields.
+     * Additionally for staged APEX/APK sessions read+validate the package and populate req'd
+     * fields.
      *
      * <p> This is meant to be called after all of the sessions are loaded and added to
      * PackageInstallerService
@@ -1670,6 +1671,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     // APEX installations rely on certain fields to be populated after reboot.
                     // E.g. mPackageName.
                     validateApexInstallLocked();
+                } else {
+                    // Populate mPackageName for this APK session which is required by the staging
+                    // manager to check duplicate apk-in-apex.
+                    PackageInstallerSession parent = allSessions.get(mParentSessionId);
+                    if (parent != null && parent.isStagedSessionReady()) {
+                        validateApkInstallLocked();
+                    }
                 }
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Package not valid", e);
