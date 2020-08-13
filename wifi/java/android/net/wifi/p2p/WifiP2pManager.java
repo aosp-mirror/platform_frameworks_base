@@ -1156,8 +1156,8 @@ public class WifiP2pManager {
      */
     public Channel initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
         Binder binder = new Binder();
-        Channel channel = initalizeChannel(srcContext, srcLooper, listener, getMessenger(binder),
-                binder);
+        Channel channel = initializeChannel(srcContext, srcLooper, listener,
+                getMessenger(binder, srcContext.getOpPackageName()), binder);
         return channel;
     }
 
@@ -1167,12 +1167,12 @@ public class WifiP2pManager {
      */
     public Channel initializeInternal(Context srcContext, Looper srcLooper,
                                       ChannelListener listener) {
-        return initalizeChannel(srcContext, srcLooper, listener, getP2pStateMachineMessenger(),
+        return initializeChannel(srcContext, srcLooper, listener, getP2pStateMachineMessenger(),
                 null);
     }
 
-    private Channel initalizeChannel(Context srcContext, Looper srcLooper, ChannelListener listener,
-                                     Messenger messenger, Binder binder) {
+    private Channel initializeChannel(Context srcContext, Looper srcLooper,
+            ChannelListener listener, Messenger messenger, Binder binder) {
         if (messenger == null) return null;
 
         Channel c = new Channel(srcContext, srcLooper, listener, binder, this);
@@ -1814,6 +1814,14 @@ public class WifiP2pManager {
         }
     }
 
+    private Messenger getMessenger(@NonNull Binder binder, @Nullable String packageName) {
+        try {
+            return mService.getMessenger(binder, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Get a reference to WifiP2pService handler. This is used to establish
      * an AsyncChannel communication with WifiService
@@ -1824,11 +1832,8 @@ public class WifiP2pManager {
      * @hide
      */
     public Messenger getMessenger(Binder binder) {
-        try {
-            return mService.getMessenger(binder);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        // No way to determine package name in this case.
+        return getMessenger(binder, null);
     }
 
     /**
