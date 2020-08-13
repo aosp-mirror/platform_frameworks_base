@@ -17563,9 +17563,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 synchronized (mLock) {
                     pkgSetting = mSettings.getPackageLPr(pkgName);
                 }
-                String abiOverride =
-                        (pkgSetting == null || TextUtils.isEmpty(pkgSetting.cpuAbiOverrideString)
-                        ? args.abiOverride : pkgSetting.cpuAbiOverrideString);
                 boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
                         && pkgSetting.getPkgState().isUpdatedSystemApp();
                 AndroidPackage oldPackage = mPackages.get(pkgName);
@@ -17573,7 +17570,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
                         derivedAbi = mInjector.getAbiHelper().derivePackageAbi(parsedPackage,
                         isUpdatedSystemAppFromExistingSetting || isUpdatedSystemAppInferred,
-                        abiOverride);
+                        args.abiOverride);
                 derivedAbi.first.applyTo(parsedPackage);
                 derivedAbi.second.applyTo(parsedPackage);
             } catch (PackageManagerException pme) {
