@@ -493,11 +493,6 @@ public final class ActiveServices {
         }
 
         ServiceRecord r = res.record;
-
-        if (allowBackgroundActivityStarts) {
-            r.allowBgActivityStartsOnServiceStart();
-        }
-
         setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r,
                 allowBackgroundActivityStarts);
 
@@ -709,6 +704,9 @@ public final class ActiveServices {
                 Slog.v(TAG_SERVICE,
                         "Not potential delay (user " + r.userId + " not started): " + r);
             }
+        }
+        if (allowBackgroundActivityStarts) {
+            r.allowBgActivityStartsOnServiceStart();
         }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
         return cmp;
