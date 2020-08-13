@@ -498,13 +498,11 @@ public class AudioRecordingDisclosureBar implements
 
         mState = STATE_MINIMIZED;
 
-        if (mRevealRecordingPackages) {
-            if (!mPendingNotificationPackages.isEmpty()) {
-                // There is a new application that started recording, tell the user about it.
-                expand(mPendingNotificationPackages.poll());
-            } else {
-                hideIndicatorIfNeeded();
-            }
+        if (mRevealRecordingPackages && !mPendingNotificationPackages.isEmpty()) {
+            // There is a new application that started recording, tell the user about it.
+            expand(mPendingNotificationPackages.poll());
+        } else {
+            hideIndicatorIfNeeded();
         }
     }
 
