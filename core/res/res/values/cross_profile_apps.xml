@@ -17,7 +17,7 @@
 <resources>
     <!--
     A collection of apps that have been pre-approved for cross-profile communication.
-    These will not require admin consent, but will still require user consent during provisioning.
+    These will not require admin or user consent.
     -->
     <string-array translatable="false" name="cross_profile_apps">
     </string-array>
