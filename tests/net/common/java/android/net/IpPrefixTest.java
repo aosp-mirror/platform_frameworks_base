@@ -16,10 +16,10 @@
 
 package android.net;
 
-import static com.android.testutils.MiscAssertsKt.assertEqualBothWays;
-import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
-import static com.android.testutils.MiscAssertsKt.assertNotEqualEitherWay;
-import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+import static com.android.testutils.MiscAsserts.assertEqualBothWays;
+import static com.android.testutils.MiscAsserts.assertFieldCountEquals;
+import static com.android.testutils.MiscAsserts.assertNotEqualEitherWay;
+import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
