@@ -33630,6 +33630,35 @@ HSPLjava/math/BigInteger;-><init>([B)V
 HSPLjava/math/BigInteger;->abs()Ljava/math/BigInteger;
 HSPLjava/math/BigInteger;->add(Ljava/math/BigInteger;)Ljava/math/BigInteger;
 HSPLjava/math/BigInteger;->bitLength()I
+#Temporary manual additions to avoid slowing tests down too much
+#Carefully positioned for clean merge
+HSPLjava/math/BigInteger;->add([IJ)[I
+HSPLjava/math/BigInteger;->add([I[I)[I
+HSPLjava/math/BigInteger;->subtract([IJ)[I
+HSPLjava/math/BigInteger;->subtract([I[I)[I
+HSPLjava/math/BigInteger;->jacobiSymbol(ILjava/math/BigInteger;)I
+HSPLjava/math/BigInteger;->lucasLehmerSequence(ILjava/math/BigInteger;Ljava/math/BigInteger;)Ljava/math/BigInteger;
+HSPLjava/math/BigInteger;->multiplyToLen([II[II[I)[I
+HSPLjava/math/MutableBigInteger;->add(Ljava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->addShifted(Ljava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->subtract(Ljava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->difference(Ljava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->divideKnuth(Ljava/math/MutableBigInteger;Ljava/math/MutableBigInteger;Z)Ljava/math/MutableBigInteger;
+HSPLjava/math/MutableBigInteger;->divideMagnitude(Ljava/math/MutableBigInteger;Ljava/math/MutableBigInteger;Z)Ljava/math/MutableBigInteger;
+HSPLjava/math/MutableBigInteger;->divideLongMagnitude(JLjava/math/MutableBigInteger;)Ljava/math/MutableBigInteger;
+HSPLjava/math/MutableBigInteger;->divideOneWord(ILjava/math/MutableBigInteger;)I
+HSPLjava/math/MutableBigInteger;->divadd([I[II)I
+HSPLjava/math/MutableBigInteger;->mulsub([I[IIII)I
+HSPLjava/math/MutableBigInteger;->mulsubBorrow([I[IIII)I
+HSPLjava/math/MutableBigInteger;->copyAndShift([III[III)V
+HSPLjava/math/MutableBigInteger;->multiply(Ljava/math/MutableBigInteger;Ljava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->mul(ILjava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->multiply(ILjava/math/MutableBigInteger;)V
+HSPLjava/math/MutableBigInteger;->primitiveRightShift(I)I
+HSPLjava/math/MutableBigInteger;->primitiveLeftShift(I)I
+HSPLjava/math/MutableBigInteger;->binaryGCD(Ljava/math/MutableBigInteger;)Ljava/math/MutableBigInteger;
+HSPLjava/math/MutableBigInteger;->binaryGCD(II)I
+#End of maual additions
 HSPLjava/math/BigInteger;->compareTo(Ljava/math/BigInteger;)I
 HSPLjava/math/BigInteger;->divide(Ljava/math/BigInteger;)Ljava/math/BigInteger;
 HSPLjava/math/BigInteger;->divideAndRemainder(Ljava/math/BigInteger;)[Ljava/math/BigInteger;
