@@ -168,7 +168,9 @@ public final class SearchSpec {
         /** Sets the maximum number of results to retrieve from the query */
         @NonNull
         public SearchSpec.Builder setNumToRetrieve(int numToRetrieve) {
-            mResultSpecBuilder.setNumToRetrieve(numToRetrieve);
+            // Just retrieve everything in one page.
+            // TODO(b/152359656): Realign these two apis properly.
+            mResultSpecBuilder.setNumPerPage(numToRetrieve);
             return this;
         }
 
