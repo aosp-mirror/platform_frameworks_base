@@ -49,7 +49,6 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
@@ -93,7 +92,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     private final CommandQueue mCommandQueue;
     private final Handler mMainThreadHandler;
-    private final Handler mBackgroundHandler;
     private final Executor mUiBgExecutor;
 
     private final NotificationEntryManager mEntryManager;
@@ -134,7 +132,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             Context context,
             CommandQueue commandQueue,
             Handler mainThreadHandler,
-            Handler backgroundHandler,
             Executor uiBgExecutor,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
@@ -170,7 +167,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mContext = context;
         mCommandQueue = commandQueue;
         mMainThreadHandler = mainThreadHandler;
-        mBackgroundHandler = backgroundHandler;
         mUiBgExecutor = uiBgExecutor;
         mEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
@@ -307,7 +303,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
             mShadeController.collapsePanel();
         } else {
-            mBackgroundHandler.postAtFrontOfQueue(runnable);
+            runnable.run();
         }
         return !mNotificationPanel.isFullyCollapsed();
     }
@@ -605,7 +601,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final Context mContext;
         private final CommandQueue mCommandQueue;
         private final Handler mMainThreadHandler;
-        private final Handler mBackgroundHandler;
+
         private final Executor mUiBgExecutor;
         private final NotificationEntryManager mEntryManager;
         private final NotifPipeline mNotifPipeline;
@@ -644,7 +640,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 Context context,
                 CommandQueue commandQueue,
                 @Main Handler mainThreadHandler,
-                @Background Handler backgroundHandler,
                 @UiBackground Executor uiBgExecutor,
                 NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
@@ -676,7 +671,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mContext = context;
             mCommandQueue = commandQueue;
             mMainThreadHandler = mainThreadHandler;
-            mBackgroundHandler = backgroundHandler;
             mUiBgExecutor = uiBgExecutor;
             mEntryManager = entryManager;
             mNotifPipeline = notifPipeline;
@@ -734,7 +728,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mContext,
                     mCommandQueue,
                     mMainThreadHandler,
-                    mBackgroundHandler,
                     mUiBgExecutor,
                     mEntryManager,
                     mNotifPipeline,

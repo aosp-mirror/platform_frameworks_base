@@ -184,7 +184,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         getContext(),
                         mock(CommandQueue.class),
                         mHandler,
-                        mHandler,
                         mUiBgExecutor,
                         mEntryManager,
                         mNotifPipeline,
@@ -234,9 +233,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // set up Handler to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))
                 .when(mHandler).post(any(Runnable.class));
-
-        doAnswer(answerVoid(Runnable::run))
-                .when(mHandler).postAtFrontOfQueue(any(Runnable.class));
     }
 
     @Test
