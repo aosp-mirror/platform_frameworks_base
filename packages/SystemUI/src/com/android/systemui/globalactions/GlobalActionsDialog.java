@@ -130,7 +130,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -252,7 +252,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final RingerModeTracker mRingerModeTracker;
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     private Handler mMainHandler;
-    private CurrentUserContextTracker mCurrentUserContextTracker;
+    private UserContextProvider mUserContextProvider;
     @VisibleForTesting
     boolean mShowLockScreenCardsAndControls = false;
 
@@ -313,7 +313,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             UiEventLogger uiEventLogger,
             RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
             ControlsComponent controlsComponent,
-            CurrentUserContextTracker currentUserContextTracker) {
+            UserContextProvider userContextProvider) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -342,7 +342,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mControlsControllerOptional = controlsComponent.getControlsController();
         mSysUiState = sysUiState;
         mMainHandler = handler;
-        mCurrentUserContextTracker = currentUserContextTracker;
+        mUserContextProvider = userContextProvider;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -436,7 +436,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         String[] preferredControlsPackages = mContext.getResources()
                 .getStringArray(com.android.systemui.R.array.config_controlsPreferredPackages);
 
-        SharedPreferences prefs = mCurrentUserContextTracker.getCurrentUserContext()
+        SharedPreferences prefs = mUserContextProvider.getUserContext()
                 .getSharedPreferences(PREFS_CONTROLS_FILE, Context.MODE_PRIVATE);
         Set<String> seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
                 Collections.emptySet());

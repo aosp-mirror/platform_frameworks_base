@@ -16,12 +16,18 @@
 
 package com.android.systemui.settings.dagger;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.UserManager;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.settings.CurrentUserContentResolverProvider;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserContentResolverProvider;
+import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.settings.UserTrackerImpl;
 
 import dagger.Binds;
 import dagger.Module;
@@ -33,22 +39,27 @@ import dagger.Provides;
 @Module
 public abstract class SettingsModule {
 
-    /**
-     * Provides and initializes a CurrentUserContextTracker
-     */
-    @SysUISingleton
-    @Provides
-    static CurrentUserContextTracker provideCurrentUserContextTracker(
-            Context context,
-            BroadcastDispatcher broadcastDispatcher) {
-        CurrentUserContextTracker tracker =
-                new CurrentUserContextTracker(context, broadcastDispatcher);
-        tracker.initialize();
-        return tracker;
-    }
 
     @Binds
     @SysUISingleton
-    abstract CurrentUserContentResolverProvider bindCurrentUserContentResolverTracker(
-            CurrentUserContextTracker tracker);
+    abstract UserContextProvider bindUserContextProvider(UserTracker tracker);
+
+    @Binds
+    @SysUISingleton
+    abstract UserContentResolverProvider bindUserContentResolverProvider(
+            UserTracker tracker);
+
+    @SysUISingleton
+    @Provides
+    static UserTracker provideUserTracker(
+            Context context,
+            UserManager userManager,
+            DumpManager dumpManager,
+            @Background Handler handler
+    ) {
+        int startingUser = ActivityManager.getCurrentUser();
+        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, dumpManager, handler);
+        tracker.initialize(startingUser);
+        return tracker;
+    }
 }

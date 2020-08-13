@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,7 +38,7 @@ import java.util.Set;
  *
  * NOTE: Clients of this class should take care to pass in the correct user context when querying
  * settings, otherwise you will always read/write for user 0 which is almost never what you want.
- * See {@link CurrentUserContextTracker} for a simple way to get the current context
+ * See {@link UserContextProvider} for a simple way to get the current context
  */
 public final class Prefs {
     private Prefs() {} // no instantation
