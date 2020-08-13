@@ -987,7 +987,7 @@ public final class OomAdjuster {
                 uidRec.setWhitelist = uidRec.curWhitelist;
                 uidRec.setIdle = uidRec.idle;
                 mService.mAtmInternal.onUidProcStateChanged(uidRec.uid, uidRec.setProcState);
-                mService.enqueueUidChangeLocked(uidRec, -1, uidChange);
+                mService.mUidObserverController.enqueueUidChangeLocked(uidRec, -1, uidChange);
                 mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState(),
                         uidRec.curCapability);
                 if (uidRec.foregroundServices) {
