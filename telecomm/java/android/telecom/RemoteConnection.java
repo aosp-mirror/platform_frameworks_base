@@ -16,10 +16,6 @@
 
 package android.telecom;
 
-import com.android.internal.telecom.IConnectionService;
-import com.android.internal.telecom.IVideoCallback;
-import com.android.internal.telecom.IVideoProvider;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -32,6 +28,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.telecom.Logging.Session;
 import android.view.Surface;
+
+import com.android.internal.telecom.IConnectionService;
+import com.android.internal.telecom.IVideoCallback;
+import com.android.internal.telecom.IVideoProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1110,6 +1110,23 @@ public final class RemoteConnection {
         } catch (RemoteException ignored) {
         } finally {
             Log.endSession();
+        }
+    }
+
+    /**
+     * Instructs this {@link RemoteConnection} to initiate a conference with a list of
+     * participants.
+     * <p>
+     *
+     * @param participants with which conference call will be formed.
+     */
+    public void addConferenceParticipants(@NonNull List<Uri> participants) {
+        try {
+            if (mConnected) {
+                mConnectionService.addConferenceParticipants(mConnectionId, participants,
+                        null /*Session.Info*/);
+            }
+        } catch (RemoteException ignored) {
         }
     }
 
