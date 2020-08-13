@@ -20,7 +20,7 @@
 <device name="Android">
   <!-- Most values are the incremental current used by a feature,
        in mA (measured at nominal voltage).
-       The default values are deliberately incorrect dummy values.
+       The default values are deliberately incorrect values.
        OEM's must measure and provide actual values before
        shipping a device.
        Example real-world values are given in comments, but they

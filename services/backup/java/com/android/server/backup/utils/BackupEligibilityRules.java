@@ -85,12 +85,15 @@ public class BackupEligibilityRules {
      *     <li>they run as a system-level uid but do not supply their own backup agent
      *     <li>it is the special shared-storage backup package used for 'adb backup'
      * </ol>
+     *
+     * However, the above eligibility rules are ignored for non-system apps in in case of
+     * device-to-device migration, see {@link OperationType}.
      */
     @VisibleForTesting
     public boolean appIsEligibleForBackup(ApplicationInfo app) {
-        // 1. their manifest states android:allowBackup="false"
-        boolean appAllowsBackup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
-        if (!appAllowsBackup && !forceFullBackup(app.uid, mOperationType)) {
+        // 1. their manifest states android:allowBackup="false" and this is not a device-to-device
+        // migration
+        if (!isAppBackupAllowed(app)) {
             return false;
         }
 
@@ -120,6 +123,23 @@ public class BackupEligibilityRules {
         }
 
         return !appIsDisabled(app);
+    }
+
+    /**
+    * Check if this app allows backup. Apps can opt out of backup by stating
+    * android:allowBackup="false" in their manifest. However, this flag is ignored for non-system
+    * apps during device-to-device migrations, see {@link OperationType}.
+    *
+    * @param app The app under check.
+    * @return boolean indicating whether backup is allowed.
+    */
+    public boolean isAppBackupAllowed(ApplicationInfo app) {
+        if (mOperationType == OperationType.MIGRATION && !UserHandle.isCore(app.uid)) {
+            // Backup / restore of all apps is force allowed during device-to-device migration.
+            return true;
+        }
+
+        return (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
     }
 
     /**

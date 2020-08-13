@@ -19,11 +19,10 @@ package com.android.systemui.tv;
 import com.android.systemui.dagger.DefaultComponentBinder;
 import com.android.systemui.dagger.DependencyBinder;
 import com.android.systemui.dagger.DependencyProvider;
+import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SystemServicesModule;
 import com.android.systemui.dagger.SystemUIBinder;
-import com.android.systemui.dagger.SystemUIDefaultModule;
 import com.android.systemui.dagger.SystemUIModule;
-import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.onehanded.dagger.OneHandedModule;
 
 import javax.inject.Singleton;
@@ -42,14 +41,17 @@ import dagger.Component;
         SystemServicesModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
-        SystemUIDefaultModule.class,
+        TvSystemUIModule.class,
         TvSystemUIBinder.class})
-public interface TvSystemUIRootComponent extends SystemUIRootComponent {
+public interface TvGlobalRootComponent extends GlobalRootComponent {
     /**
      * Component Builder interface. This allows to bind Context instance in the component
      */
     @Component.Builder
-    interface Builder extends SystemUIRootComponent.Builder {
-        TvSystemUIRootComponent build();
+    interface Builder extends GlobalRootComponent.Builder {
+        TvGlobalRootComponent build();
     }
+
+    @Override
+    TvSysUIComponent.Builder getSysUIComponent();
 }

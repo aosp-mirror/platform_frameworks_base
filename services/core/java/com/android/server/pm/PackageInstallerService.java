@@ -613,6 +613,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 throw new IllegalArgumentException(
                     "APEX files can only be installed as part of a staged session.");
             }
+            if (params.isMultiPackage) {
+                throw new IllegalArgumentException("A multi-session can't be set as APEX.");
+            }
         }
 
         if (params.isStaged && !isCalledBySystemOrShell(callingUid)) {

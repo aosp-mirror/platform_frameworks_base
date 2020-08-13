@@ -737,7 +737,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 winAnimator.mSession.mPid, operation);
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            // There was some problem...first, do a sanity check of the window list to make sure
+            // There was some problem...first, do a validity check of the window list to make sure
             // we haven't left any dangling surfaces around.
 
             Slog.i(TAG_WM, "Out of memory for surface!  Looking for leaks...");
@@ -811,7 +811,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     // "Something has changed!  Let's make it correct now."
-    // TODO: Super crazy long method that should be broken down...
+    // TODO: Super long method that should be broken down...
     void performSurfacePlacementNoTrace() {
         if (DEBUG_WINDOW_TRACE) Slog.v(TAG, "performSurfacePlacementInner: entry. Called by "
                 + Debug.getCallers(3));

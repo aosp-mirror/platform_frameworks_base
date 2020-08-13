@@ -52,7 +52,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -72,6 +71,9 @@ import javax.inject.Inject;
 
 /**
  * Simple Slice provider that shows the current date.
+ *
+ * Injection is handled by {@link SystemUIAppComponentFactory} +
+ * {@link com.android.systemui.dagger.GlobalRootComponent#inject(KeyguardSliceProvider)}.
  */
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
@@ -298,7 +300,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @Override
     public boolean onCreateSliceProvider() {
         mContextAvailableCallback.onContextAvailable(getContext());
-        inject();
+        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
+                "media");
         synchronized (KeyguardSliceProvider.sInstanceLock) {
             KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;
             if (oldInstance != null) {
@@ -316,13 +319,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
             updateClockLocked();
         }
         return true;
-    }
-
-    @VisibleForTesting
-    protected void inject() {
-        SystemUIFactory.getInstance().getRootComponent().inject(this);
-        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
-                "media");
     }
 
     @VisibleForTesting

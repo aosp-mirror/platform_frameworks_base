@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -71,6 +72,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock PowerManager mPowerManager;
     private @Mock TrustManager mTrustManager;
     private @Mock NavigationModeController mNavigationModeController;
+    private @Mock InjectionInflationController mInjectionInflationController;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -88,7 +90,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
                 () -> mStatusBarKeyguardViewManager,
                 mDismissCallbackRegistry, mUpdateMonitor, mDumpManager, mUiBgExecutor,
-                mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController);
+                mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController,
+                mInjectionInflationController);
         mViewMediator.start();
     }
 

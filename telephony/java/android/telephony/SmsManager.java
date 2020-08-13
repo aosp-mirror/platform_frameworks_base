@@ -46,6 +46,7 @@ import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.SmsRawData;
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1953,7 +1954,6 @@ public final class SmsManager {
     public boolean enableCellBroadcastRange(int startMessageId, int endMessageId,
             @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
-
         if (endMessageId < startMessageId) {
             throw new IllegalArgumentException("endMessageId < startMessageId");
         }
@@ -1962,10 +1962,14 @@ public final class SmsManager {
             if (iSms != null) {
                 // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
                 // the default phone internally.
-                success = iSms.enableCellBroadcastRangeForSubscriber(getSubscriptionId(),
+                int subId = getSubscriptionId();
+                success = iSms.enableCellBroadcastRangeForSubscriber(subId,
                         startMessageId, endMessageId, ranType);
+                Rlog.d(TAG, "enableCellBroadcastRange: " + (success ? "succeeded" : "failed")
+                        + " at calling enableCellBroadcastRangeForSubscriber. subId = " + subId);
             }
         } catch (RemoteException ex) {
+            Rlog.d(TAG, "enableCellBroadcastRange: " + ex.getStackTrace());
             // ignore it
         }
 
@@ -2019,10 +2023,14 @@ public final class SmsManager {
             if (iSms != null) {
                 // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
                 // the default phone internally.
-                success = iSms.disableCellBroadcastRangeForSubscriber(getSubscriptionId(),
+                int subId = getSubscriptionId();
+                success = iSms.disableCellBroadcastRangeForSubscriber(subId,
                         startMessageId, endMessageId, ranType);
+                Rlog.d(TAG, "disableCellBroadcastRange: " + (success ? "succeeded" : "failed")
+                        + " at calling disableCellBroadcastRangeForSubscriber. subId = " + subId);
             }
         } catch (RemoteException ex) {
+            Rlog.d(TAG, "disableCellBroadcastRange: " + ex.getStackTrace());
             // ignore it
         }
 

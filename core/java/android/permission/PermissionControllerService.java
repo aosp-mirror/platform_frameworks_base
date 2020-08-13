@@ -35,6 +35,8 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager.PermissionGrantState;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -81,6 +83,15 @@ public abstract class PermissionControllerService extends Service {
      * presenter service.
      */
     public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
+
+    /**
+     * A ChangeId indicating that this device supports camera and mic indicators. Will be "false"
+     * if present, because the CompatChanges#isChangeEnabled method returns true if the change id
+     * is not present.
+     */
+    @ChangeId
+    @Disabled
+    private static final long CAMERA_MIC_INDICATORS_NOT_PRESENT = 162547999L;
 
     /**
      * Revoke a set of runtime permissions for various apps.

@@ -72,7 +72,6 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -188,6 +187,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
+    @Mock
+    private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
+
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
 
@@ -205,8 +207,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
-        when(mNotificationStackScrollLayout.getHeight()).thenReturn(1000);
-        when(mNotificationStackScrollLayout.getHeadsUpCallback()).thenReturn(mHeadsUpCallback);
+        when(mNotificationStackScrollLayout.getController())
+                .thenReturn(mNotificationStackScrollLayoutController);
+        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(1000);
+        when(mNotificationStackScrollLayoutController.getHeadsUpCallback())
+                .thenReturn(mHeadsUpCallback);
         when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
         when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
@@ -233,11 +238,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mock(NotificationRoundnessManager.class),
                 mStatusBarStateController,
                 new FalsingManagerFake());
-        NotificationStackScrollLayoutController notificationStackScrollLayoutController =
-                new NotificationStackScrollLayoutController(
-                        true /* allowLongPress */,
-                        mock(NotificationGutsManager.class)
-                );
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mInjectionInflationController,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
@@ -251,7 +251,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 () -> mKeyguardClockSwitchController,
-                notificationStackScrollLayoutController);
+                mNotificationStackScrollLayoutController);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelfController, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
@@ -267,8 +267,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     public void testSetDozing_notifiesNsslAndStateController() {
         mNotificationPanelViewController.setDozing(true /* dozing */, true /* animate */,
                 null /* touch */);
-        InOrder inOrder = inOrder(mNotificationStackScrollLayout, mStatusBarStateController);
-        inOrder.verify(mNotificationStackScrollLayout).setDozing(eq(true), eq(true), eq(null));
+        InOrder inOrder = inOrder(
+                mNotificationStackScrollLayoutController, mStatusBarStateController);
+        inOrder.verify(mNotificationStackScrollLayoutController)
+                .setDozing(eq(true), eq(true), eq(null));
         inOrder.verify(mStatusBarStateController).setDozeAmount(eq(1f), eq(true));
     }
 

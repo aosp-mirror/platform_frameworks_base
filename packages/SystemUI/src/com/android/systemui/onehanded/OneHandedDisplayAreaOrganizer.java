@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
@@ -61,6 +62,8 @@ import javax.inject.Inject;
  */
 public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implements Dumpable {
     private static final String TAG = "OneHandedDisplayAreaOrganizer";
+    private static final String ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION =
+            "persist.debug.one_handed_translate_animation_duration";
 
     @VisibleForTesting
     static final int MSG_RESET_IMMEDIATE = 1;
@@ -156,8 +159,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         mDisplayController = displayController;
         mDefaultDisplayBounds.set(getDisplayBounds());
         mLastVisualDisplayBounds.set(getDisplayBounds());
-        mEnterExitAnimationDurationMs = context.getResources().getInteger(
-                com.android.systemui.R.integer.config_one_handed_translate_animation_duration);
+        mEnterExitAnimationDurationMs =
+                SystemProperties.getInt(ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION, 300);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mTutorialHandler = tutorialHandler;
     }

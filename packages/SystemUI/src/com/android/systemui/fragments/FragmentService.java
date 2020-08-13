@@ -21,7 +21,6 @@ import android.util.ArrayMap;
 import android.view.View;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -61,9 +60,9 @@ public class FragmentService implements Dumpable {
             };
 
     @Inject
-    public FragmentService(SystemUIRootComponent rootComponent,
+    public FragmentService(FragmentCreator.Factory fragmentCreatorFactory,
             ConfigurationController configurationController) {
-        mFragmentCreator = rootComponent.createFragmentCreator();
+        mFragmentCreator = fragmentCreatorFactory.build();
         initInjectionMap();
         configurationController.addCallback(mConfigurationListener);
     }
@@ -121,6 +120,11 @@ public class FragmentService implements Dumpable {
      */
     @Subcomponent
     public interface FragmentCreator {
+        /** Factory for creating a FragmentCreator. */
+        @Subcomponent.Factory
+        interface Factory {
+            FragmentCreator build();
+        }
         /**
          * Inject a NavigationBarFragment.
          */

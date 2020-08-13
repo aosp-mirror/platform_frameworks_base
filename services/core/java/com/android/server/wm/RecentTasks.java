@@ -1627,8 +1627,8 @@ class RecentTasks {
         }
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: adding affilliates starting at "
                 + topIndex + " from intial " + taskIndex);
-        // Find the end of the chain, doing a sanity check along the way.
-        boolean sane = top.mAffiliatedTaskId == task.mAffiliatedTaskId;
+        // Find the end of the chain, doing a validity check along the way.
+        boolean isValid = top.mAffiliatedTaskId == task.mAffiliatedTaskId;
         int endIndex = topIndex;
         Task prev = top;
         while (endIndex < recentsCount) {
@@ -1640,7 +1640,7 @@ class RecentTasks {
                 if (cur.mNextAffiliate != null || cur.mNextAffiliateTaskId != INVALID_TASK_ID) {
                     Slog.wtf(TAG, "Bad chain @" + endIndex
                             + ": first task has next affiliate: " + prev);
-                    sane = false;
+                    isValid = false;
                     break;
                 }
             } else {
@@ -1652,7 +1652,7 @@ class RecentTasks {
                             + " has bad next affiliate "
                             + cur.mNextAffiliate + " id " + cur.mNextAffiliateTaskId
                             + ", expected " + prev);
-                    sane = false;
+                    isValid = false;
                     break;
                 }
             }
@@ -1662,7 +1662,7 @@ class RecentTasks {
                     Slog.wtf(TAG, "Bad chain @" + endIndex
                             + ": last task " + cur + " has previous affiliate "
                             + cur.mPrevAffiliate);
-                    sane = false;
+                    isValid = false;
                 }
                 if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: end of chain @" + endIndex);
                 break;
@@ -1673,7 +1673,7 @@ class RecentTasks {
                             + ": task " + cur + " has previous affiliate "
                             + cur.mPrevAffiliate + " but should be id "
                             + cur.mPrevAffiliate);
-                    sane = false;
+                    isValid = false;
                     break;
                 }
             }
@@ -1682,7 +1682,7 @@ class RecentTasks {
                         + ": task " + cur + " has affiliated id "
                         + cur.mAffiliatedTaskId + " but should be "
                         + task.mAffiliatedTaskId);
-                sane = false;
+                isValid = false;
                 break;
             }
             prev = cur;
@@ -1690,18 +1690,18 @@ class RecentTasks {
             if (endIndex >= recentsCount) {
                 Slog.wtf(TAG, "Bad chain ran off index " + endIndex
                         + ": last task " + prev);
-                sane = false;
+                isValid = false;
                 break;
             }
         }
-        if (sane) {
+        if (isValid) {
             if (endIndex < taskIndex) {
                 Slog.wtf(TAG, "Bad chain @" + endIndex
                         + ": did not extend to task " + task + " @" + taskIndex);
-                sane = false;
+                isValid = false;
             }
         }
-        if (sane) {
+        if (isValid) {
             // All looks good, we can just move all of the affiliated tasks
             // to the top.
             for (int i=topIndex; i<=endIndex; i++) {

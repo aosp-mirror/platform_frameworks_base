@@ -42,3 +42,5 @@
 }
 
 -keep class com.android.wm.shell.*
+
+-keep class com.android.systemui.dagger.GlobalRootComponent { *; }

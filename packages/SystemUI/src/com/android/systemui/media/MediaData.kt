@@ -82,6 +82,10 @@ data class MediaData(
      */
     var resumeAction: Runnable?,
     /**
+     * Local or remote playback
+     */
+    var isLocalSession: Boolean = true,
+    /**
      * Indicates that this player is a resumption player (ie. It only shows a play actions which
      * will start the app and start playing).
      */

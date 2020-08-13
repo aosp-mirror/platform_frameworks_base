@@ -124,7 +124,9 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -171,6 +173,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private NotificationStackScrollLayout mStackScroller;
+    @Mock private NotificationStackScrollLayoutController mStackScrollerController;
+    @Mock private NotificationListContainer mNotificationListContainer;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationPanelView mNotificationPanelView;
@@ -283,6 +287,10 @@ public class StatusBarTest extends SysuiTestCase {
 
         mContext.setTheme(R.style.Theme_SystemUI_Light);
 
+        when(mStackScroller.getController()).thenReturn(mStackScrollerController);
+        when(mStackScrollerController.getView()).thenReturn(mStackScroller);
+        when(mStackScrollerController.getNotificationListContainer()).thenReturn(
+                mNotificationListContainer);
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelViewController.getView()).thenReturn(mNotificationPanelView);
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
@@ -429,7 +437,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.startKeyguard();
         mInitController.executePostInitTasks();
-        notificationLogger.setUpWithContainer(mStackScroller);
+        notificationLogger.setUpWithContainer(mNotificationListContainer);
     }
 
     @Test

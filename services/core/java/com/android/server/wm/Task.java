@@ -1836,14 +1836,25 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTask("clear-task-all");
-        mReuseTask = false;
+        mStackSupervisor.beginDeferResume();
+        try {
+            performClearTask("clear-task-all");
+        } finally {
+            mStackSupervisor.endDeferResume();
+            mReuseTask = false;
+        }
     }
 
     ActivityRecord performClearTaskForReuseLocked(ActivityRecord newR, int launchFlags) {
         mReuseTask = true;
-        final ActivityRecord result = performClearTaskLocked(newR, launchFlags);
-        mReuseTask = false;
+        mStackSupervisor.beginDeferResume();
+        final ActivityRecord result;
+        try {
+            result = performClearTaskLocked(newR, launchFlags);
+        } finally {
+            mStackSupervisor.endDeferResume();
+            mReuseTask = false;
+        }
         return result;
     }
 

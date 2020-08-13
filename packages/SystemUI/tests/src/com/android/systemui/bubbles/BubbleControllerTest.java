@@ -211,7 +211,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
         mSuperStatusBarViewFactory = new SuperStatusBarViewFactory(mContext,
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
+                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()
+                        .createViewInstanceCreatorFactory()),
                 new NotificationShelfComponent.Builder() {
                     @Override
                     public NotificationShelfComponent.Builder notificationShelf(

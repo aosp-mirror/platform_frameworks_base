@@ -24,13 +24,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.SystemProperties;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -50,6 +50,8 @@ import javax.inject.Singleton;
 @Singleton
 public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private static final String TAG = "OneHandedManager";
+    private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
+            "persist.debug.one_handed_offset_percentage";
 
     private boolean mIsOneHandedEnabled;
     private boolean mIsSwipeToNotificationEnabled;
@@ -117,8 +119,8 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
         mDisplayController = displayController;
         mDisplayController.addDisplayChangingController(mRotationController);
         mSysUiFlagContainer = sysUiState;
-        mOffSetFraction =
-                context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);
+        mOffSetFraction = SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50) / 100.0f;
+
         mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 context.getContentResolver());
         mIsSwipeToNotificationEnabled = OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(

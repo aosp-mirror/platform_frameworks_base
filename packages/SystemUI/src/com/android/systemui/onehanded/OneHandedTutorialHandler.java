@@ -22,6 +22,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -50,6 +51,8 @@ import javax.inject.Singleton;
 @Singleton
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Dumpable {
     private static final String TAG = "OneHandedTutorialHandler";
+    private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
+            "persist.debug.one_handed_offset_percentage";
     private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
     private final Rect mLastUpdatedBounds = new Rect();
     private final WindowManager mWindowManager;
@@ -81,8 +84,8 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
         mWindowManager = context.getSystemService(WindowManager.class);
         mTargetViewContainer = new FrameLayout(context);
         mTargetViewContainer.setClipChildren(false);
-        mTutorialAreaHeight = Math.round(mDisplaySize.y * context.getResources().getFraction(
-                R.fraction.config_one_handed_offset, 1, 1));
+        mTutorialAreaHeight = Math.round(mDisplaySize.y
+                * (SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50) / 100.0f));
         mTutorialView = LayoutInflater.from(context).inflate(R.xml.one_handed_tutorial, null);
         mTargetViewContainer.addView(mTutorialView);
         mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,

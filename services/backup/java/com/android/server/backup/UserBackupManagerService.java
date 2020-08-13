@@ -441,6 +441,7 @@ public class UserBackupManagerService {
     private long mAncestralToken = 0;
     private long mCurrentToken = 0;
     @Nullable private File mAncestralSerialNumberFile;
+    @OperationType private volatile long mAncestralOperationType;
 
     private final ContentObserver mSetupObserver;
     private final BroadcastReceiver mRunInitReceiver;
@@ -879,6 +880,10 @@ public class UserBackupManagerService {
 
     public void setAncestralToken(long ancestralToken) {
         mAncestralToken = ancestralToken;
+    }
+
+    public void setAncestralOperationType(@OperationType int operationType) {
+        mAncestralOperationType = operationType;
     }
 
     public long getCurrentToken() {
@@ -1805,6 +1810,16 @@ public class UserBackupManagerService {
                         addUserIdToLogMessage(
                                 mUserId, "Clearing app data for " + packageName + " timed out"));
             }
+        }
+    }
+
+    private BackupEligibilityRules getEligibilityRulesForRestoreAtInstall(long restoreToken) {
+        if (mAncestralOperationType == OperationType.MIGRATION && restoreToken == mAncestralToken) {
+            return getEligibilityRulesForOperation(OperationType.MIGRATION);
+        } else {
+            // If we're not using the ancestral data set, it means we're restoring from a backup
+            // that happened on this device.
+            return mScheduledBackupEligibility;
         }
     }
 
@@ -3976,7 +3991,7 @@ public class UserBackupManagerService {
                                 packageName,
                                 token,
                                 listener,
-                                mScheduledBackupEligibility);
+                                getEligibilityRulesForRestoreAtInstall(restoreSet));
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
