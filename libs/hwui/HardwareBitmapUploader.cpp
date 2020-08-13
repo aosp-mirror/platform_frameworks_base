@@ -56,12 +56,6 @@ class AHBUploader : public RefBase {
 public:
     virtual ~AHBUploader() {}
 
-    // Called to start creation of the Vulkan and EGL contexts on another thread before we actually
-    // need to do an upload.
-    void initialize() {
-        onInitialize();
-    }
-
     void destroy() {
         std::lock_guard _lock{mLock};
         LOG_ALWAYS_FATAL_IF(mPendingUploads, "terminate called while uploads in progress");
@@ -91,7 +85,6 @@ protected:
     sp<ThreadBase> mUploadThread = nullptr;
 
 private:
-    virtual void onInitialize() = 0;
     virtual void onIdle() = 0;
     virtual void onDestroy() = 0;
 
@@ -141,7 +134,6 @@ private:
 
 class EGLUploader : public AHBUploader {
 private:
-    void onInitialize() override {}
     void onDestroy() override {
         mEglManager.destroy();
     }
@@ -231,62 +223,67 @@ private:
 
 class VkUploader : public AHBUploader {
 private:
-    void onInitialize() override {
-        std::lock_guard _lock{mLock};
-        if (!mUploadThread) {
-            mUploadThread = new ThreadBase{};
-        }
-        if (!mUploadThread->isRunning()) {
-            mUploadThread->start("GrallocUploadThread");
-        }
-
-        mUploadThread->queue().post([this]() {
-            std::lock_guard _lock{mVkLock};
-            if (!mVulkanManager.hasVkContext()) {
-                mVulkanManager.initialize();
-            }
-        });
-    }
     void onDestroy() override {
+        std::lock_guard _lock{mVkLock};
         mGrContext.reset();
-        mVulkanManager.destroy();
+        mVulkanManagerStrong.clear();
     }
     void onIdle() override {
-        mGrContext.reset();
+        onDestroy();
     }
 
-    void onBeginUpload() override {
-        {
-            std::lock_guard _lock{mVkLock};
-            if (!mVulkanManager.hasVkContext()) {
-                LOG_ALWAYS_FATAL_IF(mGrContext,
-                    "GrContext exists with no VulkanManager for vulkan uploads");
-                mUploadThread->queue().runSync([this]() {
-                    mVulkanManager.initialize();
-                });
-            }
-        }
-        if (!mGrContext) {
-            GrContextOptions options;
-            mGrContext = mVulkanManager.createContext(options);
-            LOG_ALWAYS_FATAL_IF(!mGrContext, "failed to create GrContext for vulkan uploads");
-            this->postIdleTimeoutCheck();
-        }
-    }
+    void onBeginUpload() override {}
 
     bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
                                 AHardwareBuffer* ahb) override {
-        ATRACE_CALL();
+        bool uploadSucceeded = false;
+        mUploadThread->queue().runSync([this, &uploadSucceeded, bitmap, ahb]() {
+          ATRACE_CALL();
+          std::lock_guard _lock{mVkLock};
 
-        std::lock_guard _lock{mLock};
+          renderthread::VulkanManager* vkManager = getVulkanManager();
+          if (!vkManager->hasVkContext()) {
+              LOG_ALWAYS_FATAL_IF(mGrContext,
+                                  "GrContext exists with no VulkanManager for vulkan uploads");
+              vkManager->initialize();
+          }
 
-        sk_sp<SkImage> image =
-                SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(), ahb);
-        return (image.get() != nullptr);
+          if (!mGrContext) {
+              GrContextOptions options;
+              mGrContext = vkManager->createContext(options,
+                      renderthread::VulkanManager::ContextType::kUploadThread);
+              LOG_ALWAYS_FATAL_IF(!mGrContext, "failed to create GrContext for vulkan uploads");
+              this->postIdleTimeoutCheck();
+          }
+
+          sk_sp<SkImage> image =
+              SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(), ahb);
+          mGrContext->submit(true);
+
+          uploadSucceeded = (image.get() != nullptr);
+        });
+        return uploadSucceeded;
+    }
+
+    /* must be called on the upload thread after the vkLock has been acquired  */
+    renderthread::VulkanManager* getVulkanManager() {
+        if (!mVulkanManagerStrong) {
+            mVulkanManagerStrong = mVulkanManagerWeak.promote();
+
+            // create a new manager if we couldn't promote the weak ref
+            if (!mVulkanManagerStrong) {
+                mVulkanManagerStrong = renderthread::VulkanManager::getInstance();
+                mGrContext.reset();
+                mVulkanManagerWeak = mVulkanManagerStrong;
+            }
+        }
+
+        return mVulkanManagerStrong.get();
     }
 
     sk_sp<GrDirectContext> mGrContext;
-    renderthread::VulkanManager mVulkanManager;
+    sp<renderthread::VulkanManager> mVulkanManagerStrong;
+    wp<renderthread::VulkanManager> mVulkanManagerWeak;
     std::mutex mVkLock;
 };
 
@@ -428,7 +425,6 @@ void HardwareBitmapUploader::initialize() {
     bool usingGL = uirenderer::Properties::getRenderPipelineType() ==
             uirenderer::RenderPipelineType::SkiaGL;
     createUploader(usingGL);
-    sUploader->initialize();
 }
 
 void HardwareBitmapUploader::terminate() {

@@ -57,12 +57,22 @@ static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& fe
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
 #define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
 
-void VulkanManager::destroy() {
-    if (VK_NULL_HANDLE != mCommandPool) {
-        mDestroyCommandPool(mDevice, mCommandPool, nullptr);
-        mCommandPool = VK_NULL_HANDLE;
+sp<VulkanManager> VulkanManager::getInstance() {
+    // cache a weakptr to the context to enable a second thread to share the same vulkan state
+    static wp<VulkanManager> sWeakInstance = nullptr;
+    static std::mutex sLock;
+
+    std::lock_guard _lock{sLock};
+    sp<VulkanManager> vulkanManager = sWeakInstance.promote();
+    if (!vulkanManager.get()) {
+        vulkanManager = new VulkanManager();
+        sWeakInstance = vulkanManager;
     }
 
+    return vulkanManager;
+}
+
+VulkanManager::~VulkanManager() {
     if (mDevice != VK_NULL_HANDLE) {
         mDeviceWaitIdle(mDevice);
         mDestroyDevice(mDevice, nullptr);
@@ -73,6 +83,7 @@ void VulkanManager::destroy() {
     }
 
     mGraphicsQueue = VK_NULL_HANDLE;
+    mAHBUploadQueue = VK_NULL_HANDLE;
     mPresentQueue = VK_NULL_HANDLE;
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
@@ -175,6 +186,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     for (uint32_t i = 0; i < queueCount; i++) {
         if (queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             mGraphicsQueueIndex = i;
+            LOG_ALWAYS_FATAL_IF(queueProps[i].queueCount < 2);
             break;
         }
     }
@@ -283,7 +295,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
                     queueNextPtr,                                // pNext
                     0,                                           // VkDeviceQueueCreateFlags
                     mGraphicsQueueIndex,                         // queueFamilyIndex
-                    1,                                           // queueCount
+                    2,                                           // queueCount
                     queuePriorities,                             // pQueuePriorities
             },
             {
@@ -347,6 +359,7 @@ void VulkanManager::initialize() {
     this->setupDevice(mExtensions, mPhysicalDeviceFeatures2);
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
+    mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
 
     // create the command pool for the command buffers
     if (VK_NULL_HANDLE == mCommandPool) {
@@ -369,7 +382,8 @@ void VulkanManager::initialize() {
     }
 }
 
-sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options) {
+sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options,
+                                                    ContextType contextType) {
     auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
         if (device != VK_NULL_HANDLE) {
             return vkGetDeviceProcAddr(device, proc_name);
@@ -381,7 +395,8 @@ sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& opti
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
     backendContext.fDevice = mDevice;
-    backendContext.fQueue = mGraphicsQueue;
+    backendContext.fQueue = (contextType == ContextType::kRenderThread) ? mGraphicsQueue
+                                                                        : mAHBUploadQueue;
     backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
     backendContext.fMaxAPIVersion = mAPIVersion;
     backendContext.fVkExtensions = &mExtensions;

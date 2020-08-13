@@ -110,7 +110,7 @@ public:
     void setGrContext(sk_sp<GrDirectContext> cxt);
 
     CacheManager& cacheManager() { return *mCacheManager; }
-    VulkanManager& vulkanManager() { return *mVkManager; }
+    VulkanManager& vulkanManager();
 
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
     void dumpGraphicsMemory(int fd);
@@ -188,7 +188,7 @@ private:
 
     sk_sp<GrDirectContext> mGrContext;
     CacheManager* mCacheManager;
-    VulkanManager* mVkManager;
+    sp<VulkanManager> mVkManager;
 };
 
 } /* namespace renderthread */
