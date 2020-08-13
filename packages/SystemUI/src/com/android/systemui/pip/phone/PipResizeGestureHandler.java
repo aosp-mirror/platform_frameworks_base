@@ -89,6 +89,7 @@ public class PipResizeGestureHandler {
     private final Point mMaxSize = new Point();
     private final Point mMinSize = new Point();
     private final Rect mLastResizeBounds = new Rect();
+    private final Rect mUserResizeBounds = new Rect();
     private final Rect mLastDownBounds = new Rect();
     private final Rect mDragCornerSize = new Rect();
     private final Rect mTmpTopLeftCorner = new Rect();
@@ -185,6 +186,7 @@ public class PipResizeGestureHandler {
 
     void onActivityUnpinned() {
         mIsAttached = false;
+        mUserResizeBounds.setEmpty();
         updateIsEnabled();
     }
 
@@ -333,6 +335,7 @@ public class PipResizeGestureHandler {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     if (!mLastResizeBounds.isEmpty()) {
+                        mUserResizeBounds.set(mLastResizeBounds);
                         mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
                                 (Rect bounds) -> {
                                     new Handler(Looper.getMainLooper()).post(() -> {
@@ -355,6 +358,14 @@ public class PipResizeGestureHandler {
         mCtrlType = CTRL_NONE;
         mAllowGesture = false;
         mThresholdCrossed = false;
+    }
+
+    void setUserResizeBounds(Rect bounds) {
+        mUserResizeBounds.set(bounds);
+    }
+
+    Rect getUserResizeBounds() {
+        return mUserResizeBounds;
     }
 
     void updateMaxSize(int maxX, int maxY) {
