@@ -176,7 +176,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(LOG_TAG, "onDestroy(); delayed = "
                     + mDetectingState.toString());
         }
-        mWindowMagnificationMgr.disableWindowMagnifier(mDisplayId, true);
+        mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
         resetToDetectState();
     }
 
@@ -211,14 +211,14 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         final float scale = MathUtils.constrain(
                 mWindowMagnificationMgr.getPersistedScale(),
                 MIN_SCALE, MAX_SCALE);
-        mWindowMagnificationMgr.enableWindowMagnifier(mDisplayId, scale, centerX, centerY);
+        mWindowMagnificationMgr.enableWindowMagnification(mDisplayId, scale, centerX, centerY);
     }
 
     private void disableWindowMagnifier() {
         if (DEBUG_ALL) {
             Slog.i(LOG_TAG, "disableWindowMagnifier()");
         }
-        mWindowMagnificationMgr.disableWindowMagnifier(mDisplayId, false);
+        mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, false);
     }
 
     private void toggleMagnification(float centerX, float centerY) {
