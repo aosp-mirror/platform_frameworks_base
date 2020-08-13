@@ -780,7 +780,7 @@ public class AlarmManagerServiceTest {
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 2, alarmPi);
         assertEquals(mNowElapsedTest + 2, mTestTimer.getElapsed());
 
-        final SparseArray<ArrayList<AlarmManagerService.Alarm>> restrictedAlarms =
+        final SparseArray<ArrayList<Alarm>> restrictedAlarms =
                 mService.mPendingBackgroundAlarms;
         assertNull(restrictedAlarms.get(TEST_CALLING_UID));
 
@@ -993,7 +993,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void alarmCountOnRemoveFromPendingWhileIdle() {
-        mService.mPendingIdleUntil = mock(AlarmManagerService.Alarm.class);
+        mService.mPendingIdleUntil = mock(Alarm.class);
         final int numAlarms = 15;
         final PendingIntent[] pis = new PendingIntent[numAlarms];
         for (int i = 0; i < numAlarms; i++) {

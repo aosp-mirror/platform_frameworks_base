@@ -27,7 +27,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ObjectUtils;
-import com.android.server.alarm.AlarmManagerService.Alarm;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
