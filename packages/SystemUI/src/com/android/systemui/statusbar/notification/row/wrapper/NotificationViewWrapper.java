@@ -97,14 +97,6 @@ public abstract class NotificationViewWrapper implements TransformableView {
     }
 
     /**
-     * Show a set of app opp icons in the layout.
-     *
-     * @param appOps which app ops to show
-     */
-    public void showAppOpsIcons(ArraySet<Integer> appOps) {
-    }
-
-    /**
      * Shows or hides feedback icon.
      */
     public void showFeedbackIcon(boolean show) {

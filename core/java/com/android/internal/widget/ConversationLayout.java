@@ -168,8 +168,6 @@ public class ConversationLayout extends FrameLayout
     private int mFacePileProtectionWidthExpanded;
     private boolean mImportantConversation;
     private TextView mUnreadBadge;
-    private ViewGroup mAppOps;
-    private Rect mAppOpsTouchRect = new Rect();
     private View mFeedbackIcon;
     private float mMinTouchSize;
     private Icon mConversationIcon;
@@ -214,7 +212,6 @@ public class ConversationLayout extends FrameLayout
         mConversationIconView = findViewById(R.id.conversation_icon);
         mConversationIconContainer = findViewById(R.id.conversation_icon_container);
         mIcon = findViewById(R.id.icon);
-        mAppOps = findViewById(com.android.internal.R.id.app_ops);
         mFeedbackIcon = findViewById(com.android.internal.R.id.feedback);
         mMinTouchSize = 48 * getResources().getDisplayMetrics().density;
         mImportanceRingView = findViewById(R.id.conversation_icon_badge_ring);
@@ -1174,43 +1171,6 @@ public class ConversationLayout extends FrameLayout
             });
         }
         mTouchDelegate.clear();
-        if (mAppOps.getWidth() > 0) {
-
-            // Let's increase the touch size of the app ops view if it's here
-            mAppOpsTouchRect.set(
-                    mAppOps.getLeft(),
-                    mAppOps.getTop(),
-                    mAppOps.getRight(),
-                    mAppOps.getBottom());
-            for (int i = 0; i < mAppOps.getChildCount(); i++) {
-                View child = mAppOps.getChildAt(i);
-                if (child.getVisibility() == GONE) {
-                    continue;
-                }
-                // Make sure each child has at least a minTouchSize touch target around it
-                float childTouchLeft = child.getLeft() + child.getWidth() / 2.0f
-                        - mMinTouchSize / 2.0f;
-                float childTouchRight = childTouchLeft + mMinTouchSize;
-                mAppOpsTouchRect.left = (int) Math.min(mAppOpsTouchRect.left,
-                        mAppOps.getLeft() + childTouchLeft);
-                mAppOpsTouchRect.right = (int) Math.max(mAppOpsTouchRect.right,
-                        mAppOps.getLeft() + childTouchRight);
-            }
-
-            // Increase the height
-            int heightIncrease = 0;
-            if (mAppOpsTouchRect.height() < mMinTouchSize) {
-                heightIncrease = (int) Math.ceil((mMinTouchSize - mAppOpsTouchRect.height())
-                        / 2.0f);
-            }
-            mAppOpsTouchRect.inset(0, -heightIncrease);
-
-            getRelativeTouchRect(mAppOpsTouchRect, mAppOps);
-
-            // Extend the size of the app opps to be at least 48dp
-            mTouchDelegate.add(new TouchDelegate(mAppOpsTouchRect, mAppOps));
-
-        }
         if (mFeedbackIcon.getVisibility() == VISIBLE) {
             updateFeedbackIconMargins();
             float width = Math.max(mMinTouchSize, mFeedbackIcon.getWidth());
@@ -1240,13 +1200,7 @@ public class ConversationLayout extends FrameLayout
 
     private void updateFeedbackIconMargins() {
         MarginLayoutParams lp = (MarginLayoutParams) mFeedbackIcon.getLayoutParams();
-        if (mAppOps.getWidth() == 0) {
-            lp.setMarginStart(mNotificationHeaderSeparatingMargin);
-        } else {
-            float width = Math.max(mMinTouchSize, mFeedbackIcon.getWidth());
-            int horizontalMargin = (int) ((width - mFeedbackIcon.getWidth()) / 2);
-            lp.setMarginStart(horizontalMargin);
-        }
+        lp.setMarginStart(mNotificationHeaderSeparatingMargin);
         mFeedbackIcon.setLayoutParams(lp);
     }
 
