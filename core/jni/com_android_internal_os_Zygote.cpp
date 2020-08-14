@@ -1248,8 +1248,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 #ifdef ANDROID_EXPERIMENTAL_MTE
       SetTagCheckingLevel(PR_MTE_TCF_SYNC);
 #endif
-      // TODO(pcc): Use SYNC here once the allocator supports it.
-      heap_tagging_level = M_HEAP_TAGGING_LEVEL_ASYNC;
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_SYNC;
       break;
     default:
 #ifdef ANDROID_EXPERIMENTAL_MTE
