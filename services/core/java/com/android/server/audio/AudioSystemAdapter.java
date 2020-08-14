@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 
+import java.util.List;
+
 /**
  * Provides an adapter to access functionality of the android.media.AudioSystem class for device
  * related functionality.
@@ -77,22 +79,25 @@ public class AudioSystemAdapter {
     }
 
     /**
-     * Same as {@link AudioSystem#setPreferredDeviceForStrategy(int, AudioDeviceAttributes)}
+     * Same as {@link AudioSystem#setDevicesRoleForStrategy(int, int, List)}
      * @param strategy
-     * @param device
+     * @param role
+     * @param devices
      * @return
      */
-    public int setPreferredDeviceForStrategy(int strategy, @NonNull AudioDeviceAttributes device) {
-        return AudioSystem.setPreferredDeviceForStrategy(strategy, device);
+    public int setDevicesRoleForStrategy(int strategy, int role,
+                                         @NonNull List<AudioDeviceAttributes> devices) {
+        return AudioSystem.setDevicesRoleForStrategy(strategy, role, devices);
     }
 
     /**
-     * Same as {@link AudioSystem#removePreferredDeviceForStrategy(int)}
+     * Same as {@link AudioSystem#removeDevicesRoleForStrategy(int, int)}
      * @param strategy
+     * @param role
      * @return
      */
-    public int removePreferredDeviceForStrategy(int strategy) {
-        return AudioSystem.removePreferredDeviceForStrategy(strategy);
+    public int removeDevicesRoleForStrategy(int strategy, int role) {
+        return AudioSystem.removeDevicesRoleForStrategy(strategy, role);
     }
 
     /**

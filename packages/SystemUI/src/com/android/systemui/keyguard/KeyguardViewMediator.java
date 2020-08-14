@@ -93,7 +93,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;

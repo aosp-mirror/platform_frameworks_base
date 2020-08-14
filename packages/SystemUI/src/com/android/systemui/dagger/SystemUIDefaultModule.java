@@ -29,6 +29,7 @@ import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
@@ -99,12 +100,22 @@ public abstract class SystemUIDefaultModule {
 
     @Provides
     @Singleton
-    static BatteryController provideBatteryController(Context context,
-            EnhancedEstimates enhancedEstimates, PowerManager powerManager,
-            BroadcastDispatcher broadcastDispatcher, @Main Handler mainHandler,
+    static BatteryController provideBatteryController(
+            Context context,
+            EnhancedEstimates enhancedEstimates,
+            PowerManager powerManager,
+            BroadcastDispatcher broadcastDispatcher,
+            DemoModeController demoModeController,
+            @Main Handler mainHandler,
             @Background Handler bgHandler) {
-        BatteryController bC = new BatteryControllerImpl(context, enhancedEstimates, powerManager,
-                broadcastDispatcher, mainHandler, bgHandler);
+        BatteryController bC = new BatteryControllerImpl(
+                context,
+                enhancedEstimates,
+                powerManager,
+                broadcastDispatcher,
+                demoModeController,
+                mainHandler,
+                bgHandler);
         bC.init();
         return bC;
     }

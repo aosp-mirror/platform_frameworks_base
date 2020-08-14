@@ -16,7 +16,7 @@
 
 package com.android.internal.net;
 
-import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
+import static com.android.testutils.ParcelUtils.assertParcelSane;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

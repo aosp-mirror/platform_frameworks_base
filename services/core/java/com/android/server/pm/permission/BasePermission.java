@@ -38,6 +38,7 @@ import android.util.Slog;
 
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.PackageSetting;
 import com.android.server.pm.PackageSettingBase;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -419,7 +420,8 @@ public final class BasePermission {
     }
 
     public void enforceDeclaredUsedAndRuntimeOrDevelopment(AndroidPackage pkg,
-            PermissionsState permsState) {
+            PackageSetting pkgSetting) {
+        final PermissionsState permsState = pkgSetting.getPermissionsState();
         int index = pkg.getRequestedPermissions().indexOf(name);
         if (!permsState.hasRequestedPermission(name) && index == -1) {
             throw new SecurityException("Package " + pkg.getPackageName()

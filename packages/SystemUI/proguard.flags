@@ -1,9 +1,9 @@
--keep class com.android.systemui.statusbar.policy.KeyButtonView {
+-keep class com.android.systemui.navigationbar.buttons.KeyButtonView {
   public float getDrawingAlpha();
   public void setDrawingAlpha(float);
 }
 
--keep class com.android.systemui.statusbar.policy.KeyButtonRipple {
+-keep class com.android.systemui.navigationbar.buttons.KeyButtonRipple {
   public float getGlowAlpha();
   public float getGlowScale();
   public void setGlowAlpha(float);

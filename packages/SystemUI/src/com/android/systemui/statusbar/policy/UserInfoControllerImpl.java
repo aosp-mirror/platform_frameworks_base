@@ -34,6 +34,8 @@ import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
@@ -75,12 +77,14 @@ public class UserInfoControllerImpl implements UserInfoController {
                 null, null);
     }
 
-    public void addCallback(OnUserInfoChangedListener callback) {
+    @Override
+    public void addCallback(@NonNull OnUserInfoChangedListener callback) {
         mCallbacks.add(callback);
         callback.onUserInfoChanged(mUserName, mUserDrawable, mUserAccount);
     }
 
-    public void removeCallback(OnUserInfoChangedListener callback) {
+    @Override
+    public void removeCallback(@NonNull OnUserInfoChangedListener callback) {
         mCallbacks.remove(callback);
     }
 

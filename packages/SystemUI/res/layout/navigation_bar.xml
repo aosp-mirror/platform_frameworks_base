@@ -17,9 +17,10 @@
 */
 -->
 
-<com.android.systemui.statusbar.phone.NavigationBarView
+<com.android.systemui.navigationbar.NavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_bar_view"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:background="@drawable/system_bar_background">
@@ -39,9 +40,9 @@
         android:rotation="180"
         android:visibility="gone"/>
 
-    <com.android.systemui.statusbar.phone.NavigationBarInflaterView
+    <com.android.systemui.navigationbar.NavigationBarInflaterView
         android:id="@+id/navigation_inflater"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</com.android.systemui.statusbar.phone.NavigationBarView>
+</com.android.systemui.navigationbar.NavigationBarView>

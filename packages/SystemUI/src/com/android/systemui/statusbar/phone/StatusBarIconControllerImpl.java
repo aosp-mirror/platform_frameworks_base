@@ -29,6 +29,8 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.demomode.DemoMode;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
@@ -54,22 +56,20 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
-        ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController {
+        ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController, DemoMode {
 
     private static final String TAG = "StatusBarIconController";
 
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconHideList = new ArraySet<>();
 
-    // Points to light or dark context depending on the... context?
     private Context mContext;
-    private Context mLightContext;
-    private Context mDarkContext;
-
-    private boolean mIsDark = false;
 
     @Inject
-    public StatusBarIconControllerImpl(Context context, CommandQueue commandQueue) {
+    public StatusBarIconControllerImpl(
+            Context context,
+            CommandQueue commandQueue,
+            DemoModeController demoModeController) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -80,6 +80,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
         commandQueue.addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, ICON_HIDE_LIST);
+        demoModeController.addCallback(this);
     }
 
     @Override
@@ -339,12 +340,38 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         super.dump(pw);
     }
 
+    @Override
+    public void onDemoModeStarted() {
+        for (IconManager manager : mIconGroups) {
+            if (manager.isDemoable()) {
+                manager.onDemoModeStarted();
+            }
+        }
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        for (IconManager manager : mIconGroups) {
+            if (manager.isDemoable()) {
+                manager.onDemoModeFinished();
+            }
+        }
+    }
+
+    @Override
     public void dispatchDemoCommand(String command, Bundle args) {
         for (IconManager manager : mIconGroups) {
             if (manager.isDemoable()) {
                 manager.dispatchDemoCommand(command, args);
             }
         }
+    }
+
+    @Override
+    public List<String> demoCommands() {
+        List<String> s = new ArrayList<>();
+        s.add(DemoMode.COMMAND_STATUS);
+        return s;
     }
 
     @Override

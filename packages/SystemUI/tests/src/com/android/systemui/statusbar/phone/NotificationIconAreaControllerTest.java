@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +28,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -66,6 +66,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     private NotificationIconAreaController mController;
     @Mock
     private BubbleController mBubbleController;
+    @Mock private DemoModeController mDemoModeController;
 
     @Before
     public void setup() {
@@ -77,7 +78,8 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
 
         mController = new NotificationIconAreaController(mContext, mStatusBar,
                 mStatusBarStateController, mWakeUpCoordinator, mKeyguardBypassController,
-                mNotificationMediaManager, mListener, mDozeParameters, mBubbleController);
+                mNotificationMediaManager, mListener, mDozeParameters, mBubbleController,
+                mDemoModeController);
     }
 
     @Test

@@ -30,7 +30,7 @@ import android.view.animation.PathInterpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CornerHandleView;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.NavigationBarTransitions;
+import com.android.systemui.navigationbar.NavigationBarTransitions;
 
 /**
  * A class for managing Assistant handle show, hide and animation.

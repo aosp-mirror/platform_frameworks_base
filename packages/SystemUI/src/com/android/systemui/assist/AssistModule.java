@@ -25,7 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.slice.Clock;
 
 import com.android.internal.app.AssistUtils;
-import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarController;
 
 import java.util.EnumMap;
 import java.util.Map;

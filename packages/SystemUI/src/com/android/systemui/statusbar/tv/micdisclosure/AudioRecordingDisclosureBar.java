@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.tv.micdisclosure;
 
+import static android.provider.DeviceConfig.NAMESPACE_PRIVACY;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.animation.Animator;
@@ -27,9 +28,8 @@ import android.annotation.UiThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
 import android.graphics.PixelFormat;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -46,7 +46,9 @@ import com.android.systemui.statusbar.tv.TvStatusBar;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -65,9 +67,9 @@ public class AudioRecordingDisclosureBar implements
     // CtsSystemUiHostTestCases:TvMicrophoneCaptureIndicatorTest
     private static final String LAYOUT_PARAMS_TITLE = "MicrophoneCaptureIndicator";
 
-    private static final String ENABLE_FLAG = "sysui_mic_disclosure_enable";
-    private static final String EXEMPT_PACKAGES_LIST = "sysui_mic_disclosure_exempt";
-    private static final String FORCED_PACKAGES_LIST = "sysui_mic_disclosure_forced";
+    private static final String ENABLED_FLAG = "mic_disclosure_enabled";
+    private static final String EXEMPT_PACKAGES_LIST = "mic_disclosure_exempt_packages";
+    private static final String FORCED_PACKAGES_LIST = "mic_disclosure_forced_packages";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"STATE_"}, value = {
@@ -95,7 +97,7 @@ public class AudioRecordingDisclosureBar implements
     private static final int MAXIMIZED_DURATION = 3000;
 
     private final Context mContext;
-    private boolean mIsEnabledInSettings;
+    private boolean mIsEnabled;
 
     private View mIndicatorView;
     private View mIconTextsContainer;
@@ -141,26 +143,37 @@ public class AudioRecordingDisclosureBar implements
      * Set of applications for which we make an exception and do not show the indicator. This gets
      * populated once - in {@link #AudioRecordingDisclosureBar(Context)}.
      */
-    private final Set<String> mExemptPackages;
+    private final Set<String> mExemptPackages = new ArraySet<>();
 
     public AudioRecordingDisclosureBar(Context context) {
         mContext = context;
 
-        // Loading configs
+        // Load configs
         mRevealRecordingPackages = mContext.getResources().getBoolean(
                 R.bool.audio_recording_disclosure_reveal_packages);
-        mExemptPackages = new ArraySet<>(
-                Arrays.asList(mContext.getResources().getStringArray(
-                        R.array.audio_recording_disclosure_exempt_apps)));
-        mExemptPackages.addAll(Arrays.asList(getGlobalStringArray(EXEMPT_PACKAGES_LIST)));
-        mExemptPackages.removeAll(Arrays.asList(getGlobalStringArray(FORCED_PACKAGES_LIST)));
+        reloadExemptPackages();
 
-        // Check setting, and start if enabled
-        mIsEnabledInSettings = checkIfEnabledInSettings();
-        registerSettingsObserver();
-        if (mIsEnabledInSettings) {
+        mIsEnabled = DeviceConfig.getBoolean(NAMESPACE_PRIVACY, ENABLED_FLAG, true);
+        // Start if enabled
+        if (mIsEnabled) {
             start();
         }
+
+        // Set up a config change listener
+        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_PRIVACY, mContext.getMainExecutor(),
+                mConfigChangeListener);
+    }
+
+    private void reloadExemptPackages() {
+        mExemptPackages.clear();
+        mExemptPackages.addAll(Arrays.asList(mContext.getResources().getStringArray(
+                R.array.audio_recording_disclosure_exempt_apps)));
+        mExemptPackages.addAll(
+                splitByComma(
+                        DeviceConfig.getString(NAMESPACE_PRIVACY, EXEMPT_PACKAGES_LIST, null)));
+        mExemptPackages.removeAll(
+                splitByComma(
+                        DeviceConfig.getString(NAMESPACE_PRIVACY, FORCED_PACKAGES_LIST, null)));
     }
 
     @UiThread
@@ -485,13 +498,11 @@ public class AudioRecordingDisclosureBar implements
 
         mState = STATE_MINIMIZED;
 
-        if (mRevealRecordingPackages) {
-            if (!mPendingNotificationPackages.isEmpty()) {
-                // There is a new application that started recording, tell the user about it.
-                expand(mPendingNotificationPackages.poll());
-            } else {
-                hideIndicatorIfNeeded();
-            }
+        if (mRevealRecordingPackages && !mPendingNotificationPackages.isEmpty()) {
+            // There is a new application that started recording, tell the user about it.
+            expand(mPendingNotificationPackages.poll());
+        } else {
+            hideIndicatorIfNeeded();
         }
     }
 
@@ -525,11 +536,6 @@ public class AudioRecordingDisclosureBar implements
         mBgEnd = null;
     }
 
-    private String[] getGlobalStringArray(String setting) {
-        String result = Settings.Global.getString(mContext.getContentResolver(), setting);
-        return TextUtils.isEmpty(result) ? new String[0] : result.split(",");
-    }
-
     private String getApplicationLabel(String packageName) {
         assertRevealingRecordingPackages();
 
@@ -550,32 +556,26 @@ public class AudioRecordingDisclosureBar implements
         }
     }
 
-    private boolean checkIfEnabledInSettings() {
-        // 0 = disabled, everything else = enabled. Enabled by default.
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                ENABLE_FLAG, 1) != 0;
+    private static List<String> splitByComma(String string) {
+        return TextUtils.isEmpty(string) ? Collections.emptyList() : Arrays.asList(
+                string.split(","));
     }
 
-    private void registerSettingsObserver() {
-        final ContentObserver contentObserver = new ContentObserver(
-                mContext.getMainThreadHandler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                if (mIsEnabledInSettings == checkIfEnabledInSettings()) {
-                    // Nothing changed as we know it - ignore.
-                    return;
-                }
+    private final DeviceConfig.OnPropertiesChangedListener mConfigChangeListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    reloadExemptPackages();
 
-                // Things changed: flip the flag.
-                mIsEnabledInSettings = !mIsEnabledInSettings;
-                if (mIsEnabledInSettings) {
-                    start();
-                } else {
-                    stop();
+                    // Check if was enabled/disabled
+                    if (mIsEnabled != properties.getBoolean(ENABLED_FLAG, true)) {
+                        mIsEnabled = !mIsEnabled;
+                        if (mIsEnabled) {
+                            start();
+                        } else {
+                            stop();
+                        }
+                    }
                 }
-            }
-        };
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(ENABLE_FLAG), false, contentObserver);
-    }
+            };
 }

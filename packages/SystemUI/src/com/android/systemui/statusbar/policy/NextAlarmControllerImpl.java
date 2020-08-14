@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 
+import androidx.annotation.NonNull;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -59,12 +61,14 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
         pw.print("  mNextAlarm="); pw.println(mNextAlarm);
     }
 
-    public void addCallback(NextAlarmChangeCallback cb) {
+    @Override
+    public void addCallback(@NonNull NextAlarmChangeCallback cb) {
         mChangeCallbacks.add(cb);
         cb.onNextAlarmChanged(mNextAlarm);
     }
 
-    public void removeCallback(NextAlarmChangeCallback cb) {
+    @Override
+    public void removeCallback(@NonNull NextAlarmChangeCallback cb) {
         mChangeCallbacks.remove(cb);
     }
 

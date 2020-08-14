@@ -1564,6 +1564,39 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
+     * Creates a new {@link CallerIdentity} object to represent the caller's identity.
+     */
+    private CallerIdentity getCallerIdentity(String callerPackage) {
+        final int callerUid = mInjector.binderGetCallingUid();
+
+        if (!isCallingFromPackage(callerPackage, callerUid)) {
+            throw new SecurityException(
+                    String.format("Caller with uid %d is not %s", callerUid, callerPackage));
+        }
+
+        return new CallerIdentity(callerUid, callerPackage, null);
+    }
+
+    /**
+     * Creates a new {@link CallerIdentity} object to represent the caller's identity.
+     */
+    private CallerIdentity getCallerIdentity(@NonNull ComponentName componentName) {
+        final int callerUid = mInjector.binderGetCallingUid();
+        final DevicePolicyData policy = getUserData(UserHandle.getUserId(callerUid));
+        ActiveAdmin admin = policy.mAdminMap.get(componentName);
+
+        if (admin == null) {
+            throw new SecurityException(String.format("No active admin for %s", componentName));
+        }
+        if (admin.getUid() != callerUid) {
+            throw new SecurityException(
+                    String.format("Admin %s is not owned by uid %d", componentName, callerUid));
+        }
+
+        return new CallerIdentity(callerUid, componentName.getPackageName(), componentName);
+    }
+
+    /**
      * Checks if the device is in COMP mode, and if so migrates it to managed profile on a
      * corporate owned device.
      */
@@ -7171,6 +7204,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean isDeviceOwner(CallerIdentity identity) {
+        synchronized (getLockObject()) {
+            return mOwners.hasDeviceOwner()
+                    && mOwners.getDeviceOwnerUserId() == identity.getUserId()
+                    && mOwners.getDeviceOwnerComponent().equals(identity.getComponentName());
+        }
+    }
+
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -10427,20 +10468,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setLocationEnabled(ComponentName who, boolean locationEnabled) {
-        enforceDeviceOwner(Objects.requireNonNull(who));
-
-        UserHandle user = mInjector.binderGetCallingUserHandle();
+        CallerIdentity identity = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
 
         mInjector.binderWithCleanCallingIdentity(() -> {
             boolean wasLocationEnabled = mInjector.getLocationManager().isLocationEnabledForUser(
-                    user);
-            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled, user);
+                    identity.getUserHandle());
+            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
+                    identity.getUserHandle());
 
             // make a best effort to only show the notification if the admin is actually enabling
             // location. this is subject to race conditions with settings changes, but those are
             // unlikely to realistically interfere
-            if (locationEnabled && (wasLocationEnabled != locationEnabled)) {
-                showLocationSettingsEnabledNotification(user);
+            if (locationEnabled && !wasLocationEnabled) {
+                showLocationSettingsEnabledNotification(identity.getUserHandle());
             }
         });
 

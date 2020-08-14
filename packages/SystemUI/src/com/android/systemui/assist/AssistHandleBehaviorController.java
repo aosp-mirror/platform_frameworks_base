@@ -35,7 +35,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.navigationbar.NavigationModeController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

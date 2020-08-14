@@ -25,7 +25,7 @@ import android.os.Messenger;
  */
 interface IWifiP2pManager
 {
-    Messenger getMessenger(in IBinder binder);
+    Messenger getMessenger(in IBinder binder, in String packageName);
     Messenger getP2pStateMachineMessenger();
     oneway void close(in IBinder binder);
     void setMiracastMode(int mode);

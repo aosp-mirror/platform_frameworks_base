@@ -24,6 +24,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
@@ -65,6 +66,7 @@ import dagger.Provides;
 @Module(includes = {
             AssistModule.class,
             ConcurrencyModule.class,
+            DemoModeModule.class,
             LogModule.class,
             PeopleHubModule.class,
             SensorModule.class,

@@ -33,9 +33,9 @@ import android.view.View;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.phone.NavigationBarFragment;
-import com.android.systemui.statusbar.phone.NavigationBarTransitions;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBar;
+import com.android.systemui.navigationbar.NavigationBarTransitions;
 
 import java.util.ArrayList;
 
@@ -284,7 +284,7 @@ public class InvocationLightsView extends View
                 return;
             }
 
-            NavigationBarFragment navBar = controller.getDefaultNavigationBarFragment();
+            NavigationBar navBar = controller.getDefaultNavigationBar();
             if (navBar == null) {
                 return;
             }
@@ -301,7 +301,7 @@ public class InvocationLightsView extends View
                 return;
             }
 
-            NavigationBarFragment navBar = controller.getDefaultNavigationBarFragment();
+            NavigationBar navBar = controller.getDefaultNavigationBar();
             if (navBar == null) {
                 return;
             }
