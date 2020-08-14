@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
+import android.net.TransportInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,8 +41,17 @@ import java.util.Locale;
 /**
  * Describes the state of any Wi-Fi connection that is active or
  * is in the process of being set up.
+ *
+ * In the connected state, access to location sensitive fields requires
+ * the same permissions as {@link WifiManager#getScanResults}. If such access is not allowed,
+ * {@link #getSSID} will return {@link WifiManager#UNKNOWN_SSID} and
+ * {@link #getBSSID} will return {@code "02:00:00:00:00:00"}.
+ * {@link #getNetworkId()} will return {@code -1}.
+ * {@link #getPasspointFqdn()} will return null.
+ * {@link #getPasspointProviderFriendlyName()} will return null.
  */
-public class WifiInfo implements Parcelable {
+public class WifiInfo implements TransportInfo, Parcelable {
+    // TODO(b/162602799): Implement equals/hahscode methods.
     private static final String TAG = "WifiInfo";
     /**
      * This is the map described in the Javadoc comment above. The positions
