@@ -589,11 +589,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             if (mDestroyed) {
                 return;
             }
+            ParceledListSlice<QueueItem> parcelableQueue;
+            if (mQueue == null) {
+                parcelableQueue = null;
+            } else {
+                parcelableQueue = new ParceledListSlice<>(mQueue);
+                // Limit the size of initial Parcel to prevent binder buffer overflow
+                // as onQueueChanged is an async binder call.
+                parcelableQueue.setInlineCountLimit(1);
+            }
             for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
                 ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    holder.mCallback.onQueueChanged(mQueue == null ? null :
-                            new ParceledListSlice<>(mQueue));
+                    holder.mCallback.onQueueChanged(parcelableQueue);
                 } catch (DeadObjectException e) {
                     mControllerCallbackHolders.remove(i);
                     logCallbackException("Removing dead callback in pushQueueUpdate", holder, e);
