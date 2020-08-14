@@ -239,7 +239,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
-    private View.OnClickListener mOnAppOpsClickListener;
+    private View.OnClickListener mOnAppClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
 
     // Listener will be called when receiving a long click event.
@@ -1139,7 +1139,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             items.add(NotificationMenuRow.createPartialConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
-            items.add(NotificationMenuRow.createAppOpsItem(mContext));
             mMenuRow.setMenuItems(items);
         }
         if (existed) {
@@ -1598,7 +1597,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             RowContentBindStage rowContentBindStage,
             OnExpandClickListener onExpandClickListener,
             NotificationMediaManager notificationMediaManager,
-            CoordinateOnClickListener onAppOpsClickListener,
             CoordinateOnClickListener onFeedbackClickListener,
             FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
@@ -1619,7 +1617,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mRowContentBindStage = rowContentBindStage;
         mOnExpandClickListener = onExpandClickListener;
         mMediaManager = notificationMediaManager;
-        setAppOpsOnClickListener(onAppOpsClickListener);
         setOnFeedbackClickListener(onFeedbackClickListener);
         mFalsingManager = falsingManager;
         mStatusbarStateController = statusBarStateController;
@@ -1677,14 +1674,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
-    public void showAppOpsIcons(ArraySet<Integer> activeOps) {
-        if (mIsSummaryWithChildren) {
-            mChildrenContainer.showAppOpsIcons(activeOps);
-        }
-        mPrivateLayout.showAppOpsIcons(activeOps);
-        mPublicLayout.showAppOpsIcons(activeOps);
-    }
-
     public void showFeedbackIcon(boolean show) {
         if (mIsSummaryWithChildren) {
             mChildrenContainer.showFeedbackIcon(show);
@@ -1719,24 +1708,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mPrivateLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
         mPublicLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
-    }
-
-    public View.OnClickListener getAppOpsOnClickListener() {
-        return mOnAppOpsClickListener;
-    }
-
-    void setAppOpsOnClickListener(CoordinateOnClickListener l) {
-        mOnAppOpsClickListener = v -> {
-            createMenu();
-            NotificationMenuRowPlugin provider = getProvider();
-            if (provider == null) {
-                return;
-            }
-            MenuItem menuItem = provider.getAppOpsMenuItem(mContext);
-            if (menuItem != null) {
-                l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
-            }
-        };
     }
 
     public View.OnClickListener getFeedbackOnClickListener() {

@@ -52,14 +52,12 @@ public class NotificationHeaderView extends ViewGroup {
     private View mHeaderText;
     private View mSecondaryHeaderText;
     private OnClickListener mExpandClickListener;
-    private OnClickListener mAppOpsListener;
     private OnClickListener mFeedbackListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private LinearLayout mTransferChip;
     private NotificationExpandButton mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
-    private View mAppOps;
     private View mFeedbackIcon;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
@@ -117,7 +115,6 @@ public class NotificationHeaderView extends ViewGroup {
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
-        mAppOps = findViewById(com.android.internal.R.id.app_ops);
         mFeedbackIcon = findViewById(com.android.internal.R.id.feedback);
     }
 
@@ -146,7 +143,6 @@ public class NotificationHeaderView extends ViewGroup {
             // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps
                     || child == mFeedbackIcon
                     || child == mTransferChip) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
@@ -212,7 +208,6 @@ public class NotificationHeaderView extends ViewGroup {
             // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps
                     || child == mFeedbackIcon
                     || child == mTransferChip) {
                 if (end == getMeasuredWidth()) {
@@ -282,20 +277,12 @@ public class NotificationHeaderView extends ViewGroup {
     }
 
     private void updateTouchListener() {
-        if (mExpandClickListener == null && mAppOpsListener == null && mFeedbackListener == null) {
+        if (mExpandClickListener == null && mFeedbackListener == null) {
             setOnTouchListener(null);
             return;
         }
         setOnTouchListener(mTouchListener);
         mTouchListener.bindTouchRects();
-    }
-
-    /**
-     * Sets onclick listener for app ops icons.
-     */
-    public void setAppOpsOnClickListener(OnClickListener l) {
-        mAppOpsListener = l;
-        updateTouchListener();
     }
 
     /**
@@ -394,7 +381,6 @@ public class NotificationHeaderView extends ViewGroup {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
         private Rect mExpandButtonRect;
-        private Rect mAppOpsRect;
         private Rect mFeedbackRect;
         private int mTouchSlop;
         private boolean mTrackGesture;
@@ -408,9 +394,7 @@ public class NotificationHeaderView extends ViewGroup {
             mTouchRects.clear();
             addRectAroundView(mIcon);
             mExpandButtonRect = addRectAroundView(mExpandButton);
-            mAppOpsRect = addRectAroundView(mAppOps);
             mFeedbackRect = addRectAroundView(mFeedbackIcon);
-            setTouchDelegate(new TouchDelegate(mAppOpsRect, mAppOps));
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
@@ -471,11 +455,7 @@ public class NotificationHeaderView extends ViewGroup {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (mTrackGesture) {
-                        if (mAppOps.isVisibleToUser() && (mAppOpsRect.contains((int) x, (int) y)
-                                || mAppOpsRect.contains((int) mDownX, (int) mDownY))) {
-                            mAppOps.performClick();
-                            return true;
-                        } else if (mFeedbackIcon.isVisibleToUser()
+                        if (mFeedbackIcon.isVisibleToUser()
                                 && (mFeedbackRect.contains((int) x, (int) y))
                                 || mFeedbackRect.contains((int) mDownX, (int) mDownY)) {
                             mFeedbackIcon.performClick();
