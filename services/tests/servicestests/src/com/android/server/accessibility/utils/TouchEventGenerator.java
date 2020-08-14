@@ -43,9 +43,9 @@ public class TouchEventGenerator {
         return generateSingleTouchEvent(displayId, ACTION_UP, x, y);
     }
 
-    public static MotionEvent pointerDownEvent(int displayId, PointerCoords defPointerCoords,
+    public static MotionEvent twoPointersDownEvent(int displayId, PointerCoords defPointerCoords,
             PointerCoords pointerCoords) {
-        return generatePointerEvent(displayId, ACTION_POINTER_DOWN, defPointerCoords,
+        return generateTwoPointersEvent(displayId, ACTION_POINTER_DOWN, defPointerCoords,
                 pointerCoords);
     }
 
@@ -59,7 +59,7 @@ public class TouchEventGenerator {
         return ev;
     }
 
-    private static MotionEvent generatePointerEvent(int displayId, int action,
+    private static MotionEvent generateTwoPointersEvent(int displayId, int action,
             PointerCoords defPointerCoords, PointerCoords pointerCoords) {
         final long  downTime = SystemClock.uptimeMillis();
         MotionEvent.PointerProperties defPointerProperties = new MotionEvent.PointerProperties();

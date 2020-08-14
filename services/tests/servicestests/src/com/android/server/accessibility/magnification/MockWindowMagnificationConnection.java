@@ -17,23 +17,33 @@
 package com.android.server.accessibility.magnification;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.Display;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
+/**
+ * Mocks the basic logic of window magnification in System UI. We assume the screen size is
+ * unlimited, so source bounds is always on the center of the mirror window bounds.
+ */
 class MockWindowMagnificationConnection  {
 
+    public static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     private final IWindowMagnificationConnection mConnection;
     private final Binder mBinder;
     private IBinder.DeathRecipient mDeathRecipient;
     private IWindowMagnificationConnectionCallback mIMirrorWindowCallback;
+    private Rect mMirrorWindowFrame = new Rect(0, 0, 500, 500);
 
     MockWindowMagnificationConnection() throws RemoteException {
         mConnection = mock(IWindowMagnificationConnection.class);
@@ -50,6 +60,30 @@ class MockWindowMagnificationConnection  {
             return null;
         }).when(mBinder).linkToDeath(
                 any(IBinder.DeathRecipient.class), eq(0));
+        stubConnection();
+    }
+
+    private void stubConnection() throws RemoteException {
+        doAnswer((invocation) -> {
+            final int displayId = invocation.getArgument(0);
+            if (displayId != TEST_DISPLAY) {
+                throw new IllegalArgumentException("only support default display :" + displayId);
+            }
+            computeMirrorWindowFrame(invocation.getArgument(1), invocation.getArgument(2));
+
+            mIMirrorWindowCallback.onWindowMagnifierBoundsChanged(TEST_DISPLAY,
+                    mMirrorWindowFrame);
+            return null;
+        }).when(mConnection).enableWindowMagnification(anyInt(),
+                anyFloat(), anyFloat(), anyFloat());
+    }
+
+    private void computeMirrorWindowFrame(float centerX, float centerY) {
+        final float offsetX = Float.isNaN(centerX) ? 0
+                : centerX - mMirrorWindowFrame.exactCenterX();
+        final float offsetY = Float.isNaN(centerY) ? 0
+                : centerY - mMirrorWindowFrame.exactCenterY();
+        mMirrorWindowFrame.offset((int) offsetX, (int) offsetY);
     }
 
     IWindowMagnificationConnection getConnection() {
@@ -60,12 +94,16 @@ class MockWindowMagnificationConnection  {
         return mBinder;
     }
 
-    public IBinder.DeathRecipient getDeathRecipient() {
+    IBinder.DeathRecipient getDeathRecipient() {
         return mDeathRecipient;
     }
 
-    public IWindowMagnificationConnectionCallback getConnectionCallback() {
+    IWindowMagnificationConnectionCallback getConnectionCallback() {
         return mIMirrorWindowCallback;
+    }
+
+    public Rect getMirrorWindowFrame() {
+        return new Rect(mMirrorWindowFrame);
     }
 }
 
