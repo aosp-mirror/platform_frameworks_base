@@ -1276,7 +1276,8 @@ public class SoundTriggerService extends SystemService {
          * @return The initialized AudioRecord
          */
         private @NonNull AudioRecord createAudioRecordForEvent(
-                @NonNull SoundTrigger.GenericRecognitionEvent event) {
+                @NonNull SoundTrigger.GenericRecognitionEvent event)
+                throws IllegalArgumentException, UnsupportedOperationException {
             AudioAttributes.Builder attributesBuilder = new AudioAttributes.Builder();
             attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
             AudioAttributes attributes = attributesBuilder.build();
@@ -1285,21 +1286,15 @@ public class SoundTriggerService extends SystemService {
 
             sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
 
-            try {
-                return (new AudioRecord.Builder())
-                            .setAudioAttributes(attributes)
-                            .setAudioFormat((new AudioFormat.Builder())
-                                .setChannelMask(originalFormat.getChannelMask())
-                                .setEncoding(originalFormat.getEncoding())
-                                .setSampleRate(originalFormat.getSampleRate())
-                                .build())
-                            .setSessionId(event.getCaptureSession())
-                            .build();
-            } catch (IllegalArgumentException | UnsupportedOperationException e) {
-                Slog.w(TAG, mPuuid + ": createAudioRecordForEvent(" + event
-                        + "), failed to create AudioRecord");
-                return null;
-            }
+            return (new AudioRecord.Builder())
+                        .setAudioAttributes(attributes)
+                        .setAudioFormat((new AudioFormat.Builder())
+                            .setChannelMask(originalFormat.getChannelMask())
+                            .setEncoding(originalFormat.getEncoding())
+                            .setSampleRate(originalFormat.getSampleRate())
+                            .build())
+                        .setSessionId(event.getCaptureSession())
+                        .build();
         }
 
         @Override
@@ -1325,13 +1320,13 @@ public class SoundTriggerService extends SystemService {
                     // execute if throttled:
                     () -> {
                         if (event.isCaptureAvailable()) {
-                            AudioRecord capturedData = createAudioRecordForEvent(event);
-
-                            // Currently we need to start and release the audio record to reset
-                            // the DSP even if we don't want to process the event
-                            if (capturedData != null) {
+                            try {
+                                AudioRecord capturedData = createAudioRecordForEvent(event);
                                 capturedData.startRecording();
                                 capturedData.release();
+                            } catch (IllegalArgumentException | UnsupportedOperationException e) {
+                                Slog.w(TAG, mPuuid + ": createAudioRecordForEvent(" + event
+                                        + "), failed to create AudioRecord");
                             }
                         }
                     }));
