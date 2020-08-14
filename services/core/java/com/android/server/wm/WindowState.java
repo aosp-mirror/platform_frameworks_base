@@ -5009,9 +5009,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // on the new one. This prevents blinking when we change elevation of freeform and
             // pinned windows.
             if (!mWinAnimator.tryChangeFormatInPlaceLocked()) {
-                mWinAnimator.preserveSurfaceLocked();
+                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED
                         | RELAYOUT_RES_FIRST_TIME;
+                scheduleAnimation();
             }
         }
 
@@ -5027,9 +5028,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // to preserve and destroy windows which are attached to another, they
             // will keep their surface and its size may change over time.
             if (mHasSurface && !isChildWindow()) {
-                mWinAnimator.preserveSurfaceLocked();
+                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED |
                     RELAYOUT_RES_FIRST_TIME;
+                scheduleAnimation();
             }
         }
         final boolean freeformResizing = isDragResizing()

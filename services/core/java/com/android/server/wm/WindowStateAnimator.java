@@ -349,7 +349,7 @@ class WindowStateAnimator {
         return result;
     }
 
-    void preserveSurfaceLocked() {
+    void preserveSurfaceLocked(SurfaceControl.Transaction t) {
         if (mDestroyPreservedSurfaceUponRedraw) {
             // This could happen when switching the surface mode very fast. For example,
             // we preserved a surface when dragResizing changed to true. Then before the
@@ -376,7 +376,7 @@ class WindowStateAnimator {
             // Our SurfaceControl is always at layer 0 within the parent Surface managed by
             // window-state. We want this old Surface to stay on top of the new one
             // until we do the swap, so we place it at a positive layer.
-            mSurfaceController.mSurfaceControl.setLayer(PRESERVED_SURFACE_LAYER);
+            t.setLayer(mSurfaceController.getClientViewRootSurface(), PRESERVED_SURFACE_LAYER);
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
