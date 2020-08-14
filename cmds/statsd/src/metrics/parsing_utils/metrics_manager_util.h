@@ -42,6 +42,17 @@ namespace statsd {
 sp<AtomMatchingTracker> createAtomMatchingTracker(const AtomMatcher& logMatcher, const int index,
                                                   const sp<UidMap>& uidMap);
 
+// Create a ConditionTracker.
+// input:
+// [predicate]: the input Predicate from the StatsdConfig
+// [index]: the index of the condition tracker
+// [atomMatchingTrackerMap]: map of atom matcher id to its index in allAtomMatchingTrackers
+// output:
+// new ConditionTracker, or null if the tracker is unable to be created
+sp<ConditionTracker> createConditionTracker(
+        const ConfigKey& key, const Predicate& predicate, const int index,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap);
+
 // Helper functions for MetricsManager to initialize from StatsdConfig.
 // *Note*: only initStatsdConfig() should be called from outside.
 // All other functions are intermediate
@@ -77,7 +88,6 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     std::unordered_map<int64_t, int>& conditionTrackerMap,
                     std::vector<sp<ConditionTracker>>& allConditionTrackers,
                     std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                    std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
                     std::vector<ConditionState>& initialConditionCache);
 
 // Initialize State maps using State protos in the config. These maps will
@@ -111,7 +121,6 @@ bool initMetrics(
         const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
         const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
         const std::unordered_map<int64_t, int>& conditionTrackerMap,
-        const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
         const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
         const unordered_map<int64_t, int>& stateAtomIdMap,
         const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
@@ -135,6 +144,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
                       std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
+                      std::unordered_map<int64_t, int>& conditionTrackerMap,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
                       vector<sp<AlarmTracker>>& allPeriodicAlarmTrackers,

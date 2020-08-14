@@ -24,9 +24,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class CombinationConditionTracker : public virtual ConditionTracker {
+class CombinationConditionTracker : public ConditionTracker {
 public:
-    CombinationConditionTracker(const int64_t& id, const int index);
+    CombinationConditionTracker(const int64_t& id, const int index, const uint64_t protoHash);
 
     ~CombinationConditionTracker();
 
@@ -34,6 +34,11 @@ public:
               const std::vector<sp<ConditionTracker>>& allConditionTrackers,
               const std::unordered_map<int64_t, int>& conditionIdIndexMap, std::vector<bool>& stack,
               std::vector<ConditionState>& conditionCache) override;
+
+    bool onConfigUpdated(const std::vector<Predicate>& allConditionProtos, const int index,
+                         const std::vector<sp<ConditionTracker>>& allConditionTrackers,
+                         const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
+                         const std::unordered_map<int64_t, int>& conditionTrackerMap) override;
 
     void evaluateCondition(const LogEvent& event,
                            const std::vector<MatchingState>& eventMatcherValues,
@@ -102,6 +107,7 @@ private:
     std::vector<int> mSlicedChildren;
     std::vector<int> mUnSlicedChildren;
 
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateConditions);
 };
 
 }  // namespace statsd
