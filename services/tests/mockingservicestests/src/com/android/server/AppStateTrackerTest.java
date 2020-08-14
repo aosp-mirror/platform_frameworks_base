@@ -48,6 +48,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -282,7 +283,7 @@ public class AppStateTrackerTest {
                 eq(ServiceType.FORCE_ALL_APPS_STANDBY),
                 powerSaveObserverCaptor.capture());
 
-        verify(mMockContext).registerReceiver(
+        verify(mMockContext, times(2)).registerReceiver(
                 receiverCaptor.capture(), any(IntentFilter.class));
         verify(mMockAppStandbyInternal).addListener(
                 appIdleStateChangeListenerCaptor.capture());
@@ -1240,6 +1241,67 @@ public class AppStateTrackerTest {
         // When battery stops plugged in, force app standby is unaffected
         mReceiver.onReceive(mMockContext, new Intent(Intent.ACTION_BATTERY_CHANGED));
         assertTrue(instance.isForceAllAppsStandbyEnabled());
+    }
+
+    @Test
+    public void testStateClearedOnPackageRemoved() throws Exception {
+        final AppStateTrackerTestable instance = newInstance();
+        callStart(instance);
+
+        instance.mActiveUids.put(UID_1, true);
+        instance.mForegroundUids.put(UID_2, true);
+        instance.mRunAnyRestrictedPackages.add(Pair.create(UID_1, PACKAGE_1));
+        instance.mExemptedBucketPackages.add(UserHandle.getUserId(UID_2), PACKAGE_2);
+
+        // Replace PACKAGE_1, nothing should change
+        Intent packageRemoved = new Intent(Intent.ACTION_PACKAGE_REMOVED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(UID_1))
+                .putExtra(Intent.EXTRA_UID, UID_1)
+                .putExtra(Intent.EXTRA_REPLACING, true)
+                .setData(Uri.fromParts(IntentFilter.SCHEME_PACKAGE, PACKAGE_1, null));
+        mReceiver.onReceive(mMockContext, packageRemoved);
+
+        assertEquals(1, instance.mActiveUids.size());
+        assertEquals(1, instance.mForegroundUids.size());
+        assertEquals(1, instance.mRunAnyRestrictedPackages.size());
+        assertEquals(1, instance.mExemptedBucketPackages.size());
+
+        // Replace PACKAGE_2, nothing should change
+        packageRemoved = new Intent(Intent.ACTION_PACKAGE_REMOVED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(UID_2))
+                .putExtra(Intent.EXTRA_UID, UID_2)
+                .putExtra(Intent.EXTRA_REPLACING, true)
+                .setData(Uri.fromParts(IntentFilter.SCHEME_PACKAGE, PACKAGE_2, null));
+        mReceiver.onReceive(mMockContext, packageRemoved);
+
+        assertEquals(1, instance.mActiveUids.size());
+        assertEquals(1, instance.mForegroundUids.size());
+        assertEquals(1, instance.mRunAnyRestrictedPackages.size());
+        assertEquals(1, instance.mExemptedBucketPackages.size());
+
+        // Remove PACKAGE_1
+        packageRemoved = new Intent(Intent.ACTION_PACKAGE_REMOVED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(UID_1))
+                .putExtra(Intent.EXTRA_UID, UID_1)
+                .setData(Uri.fromParts(IntentFilter.SCHEME_PACKAGE, PACKAGE_1, null));
+        mReceiver.onReceive(mMockContext, packageRemoved);
+
+        assertEquals(0, instance.mActiveUids.size());
+        assertEquals(1, instance.mForegroundUids.size());
+        assertEquals(0, instance.mRunAnyRestrictedPackages.size());
+        assertEquals(1, instance.mExemptedBucketPackages.size());
+
+        // Remove PACKAGE_2
+        packageRemoved = new Intent(Intent.ACTION_PACKAGE_REMOVED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(UID_2))
+                .putExtra(Intent.EXTRA_UID, UID_2)
+                .setData(Uri.fromParts(IntentFilter.SCHEME_PACKAGE, PACKAGE_2, null));
+        mReceiver.onReceive(mMockContext, packageRemoved);
+
+        assertEquals(0, instance.mActiveUids.size());
+        assertEquals(0, instance.mForegroundUids.size());
+        assertEquals(0, instance.mRunAnyRestrictedPackages.size());
+        assertEquals(0, instance.mExemptedBucketPackages.size());
     }
 
     static int[] array(int... appIds) {
