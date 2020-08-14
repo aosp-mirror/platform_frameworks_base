@@ -188,7 +188,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final Configuration mLastReportedConfiguration = new Configuration();
     // Configuration that is waiting to be dispatched to the process.
     private Configuration mPendingConfiguration;
-    private final Configuration mNewOverrideConfig = new Configuration();
     // Registered display id as a listener to override config change
     private int mDisplayId;
     private ActivityRecord mConfigActivityRecord;
@@ -1168,11 +1167,26 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @Override
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        super.onRequestedOverrideConfigurationChanged(
+                sanitizeProcessConfiguration(overrideConfiguration));
+    }
+
+    @Override
     public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
+        super.onRequestedOverrideConfigurationChanged(
+                sanitizeProcessConfiguration(mergedOverrideConfig));
+    }
+
+    private static Configuration sanitizeProcessConfiguration(Configuration config) {
         // Make sure that we don't accidentally override the activity type.
-        mNewOverrideConfig.setTo(mergedOverrideConfig);
-        mNewOverrideConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
-        super.onRequestedOverrideConfigurationChanged(mNewOverrideConfig);
+        if (config.windowConfiguration.getActivityType() != ACTIVITY_TYPE_UNDEFINED) {
+            final Configuration sanitizedConfig = new Configuration(config);
+            sanitizedConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+            return sanitizedConfig;
+        }
+
+        return config;
     }
 
     private void updateConfiguration() {
