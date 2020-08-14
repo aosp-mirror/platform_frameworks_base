@@ -431,18 +431,6 @@ applications that come with the platform
         <permission name="android.permission.CAPTURE_AUDIO_OUTPUT" />
         <!-- Permissions required for CTS test - AdbManagerTest -->
         <permission name="android.permission.MANAGE_DEBUGGING" />
-        <!-- Permissions required for ATS tests - AtsCarHostTestCases, AtsCarDeviceApp -->
-        <permission name="android.car.permission.CAR_DRIVING_STATE" />
-        <!-- Permissions required for ATS tests - AtsDeviceInfo, AtsAudioDeviceTestCases -->
-        <permission name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
-        <!-- Permissions required for ATS tests - AtsDeviceInfo -->
-        <permission name="android.car.permission.CAR_DIAGNOSTICS" />
-        <!-- Permissions required for ATS tests - AtsDeviceInfo -->
-        <permission name="android.car.permission.CLEAR_CAR_DIAGNOSTICS" />
-        <!-- Permissions required for ATS tests - AtsCarHostTestCases -->
-        <permission name="android.car.permission.CONTROL_APP_BLOCKING" />
-        <!-- Permissions required for ATS tests - AtsCarHostTestCases -->
-        <permission name="android.car.permission.CAR_UX_RESTRICTIONS_CONFIGURATION" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
