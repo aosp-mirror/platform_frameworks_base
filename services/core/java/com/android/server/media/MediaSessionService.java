@@ -32,14 +32,15 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioPlaybackConfiguration;
@@ -58,7 +59,6 @@ import android.media.session.ISessionManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -138,7 +138,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private KeyguardManager mKeyguardManager;
     private AudioManagerInternal mAudioManagerInternal;
     private ContentResolver mContentResolver;
-    private SettingsObserver mSettingsObserver;
     private boolean mHasFeatureLeanback;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
@@ -192,8 +191,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 }, null /* handler */);
         mContentResolver = mContext.getContentResolver();
-        mSettingsObserver = new SettingsObserver();
-        mSettingsObserver.observe();
         mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
 
@@ -202,7 +199,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         instantiateCustomProvider(null);
         instantiateCustomDispatcher(null);
         mRecordThread.start();
+
+        final IntentFilter filter = new IntentFilter(
+                NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED);
+        mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
     }
+
+    private final BroadcastReceiver mNotificationListenerEnabledChangedReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    updateActiveSessionListeners();
+                }
+    };
 
     private boolean isGlobalPriorityActiveLocked() {
         return mGlobalPrioritySession != null && mGlobalPrioritySession.isActive();
@@ -1079,25 +1088,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 mSession2TokensListenerRecords.remove(this);
             }
-        }
-    }
-
-    final class SettingsObserver extends ContentObserver {
-        private final Uri mSecureSettingsUri = Settings.Secure.getUriFor(
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
-
-        private SettingsObserver() {
-            super(null);
-        }
-
-        private void observe() {
-            mContentResolver.registerContentObserver(mSecureSettingsUri,
-                    false, this, ALL.getIdentifier());
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updateActiveSessionListeners();
         }
     }
 
@@ -2710,5 +2700,4 @@ public class MediaSessionService extends SystemService implements Monitor {
             obtainMessage(msg, userIdInteger).sendToTarget();
         }
     }
-
 }
