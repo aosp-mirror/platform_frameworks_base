@@ -271,8 +271,7 @@ final class InputMonitor {
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutMillis = child.getInputDispatchingTimeoutMillis();
         inputWindowHandle.visible = isVisible;
-        inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
-        inputWindowHandle.hasFocus = hasFocus;
+        inputWindowHandle.focusable = hasFocus;
         inputWindowHandle.hasWallpaper = hasWallpaper;
         inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
         inputWindowHandle.ownerPid = child.mSession.mPid;
@@ -572,8 +571,7 @@ final class InputMonitor {
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutMillis = 0; // it should never receive input
         inputWindowHandle.visible = isVisible;
-        inputWindowHandle.canReceiveKeys = false;
-        inputWindowHandle.hasFocus = false;
+        inputWindowHandle.focusable = false;
         inputWindowHandle.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL;
         inputWindowHandle.scaleFactor = 1;
         inputWindowHandle.layoutParamsFlags =

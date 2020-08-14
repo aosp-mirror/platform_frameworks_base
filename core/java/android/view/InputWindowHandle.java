@@ -70,11 +70,8 @@ public final class InputWindowHandle {
     // Window is visible.
     public boolean visible;
 
-    // Window can receive keys.
-    public boolean canReceiveKeys;
-
-    // Window has focus.
-    public boolean hasFocus;
+    // Window can be focused.
+    public boolean focusable;
 
     // Window has wallpaper.  (window is the current wallpaper target)
     public boolean hasWallpaper;
