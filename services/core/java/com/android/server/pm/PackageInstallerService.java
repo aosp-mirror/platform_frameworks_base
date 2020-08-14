@@ -592,10 +592,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
-        if (callingUid != Process.SYSTEM_UID
-                && (params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
-            // Only system_server or tools under specific conditions (test app installed
-            // through ADB, and verification disabled flag specified) can disable verification.
+        if ((params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
+            // Only tools under specific conditions (test app installed through ADB, and
+            // verification disabled flag specified) can disable verification.
             params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
 
