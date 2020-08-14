@@ -92,7 +92,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -103,7 +103,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -131,7 +131,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         // 1) Authenticated == true
         // 2) Error occurred
         // 3) Authenticated == false
-        mFinishCallback.onClientFinished(this, true /* success */);
+        mCallback.onClientFinished(this, true /* success */);
     }
 
     @Override

@@ -116,12 +116,12 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
             }
             if (status != Status.OK) {
                 onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
-                mFinishCallback.onClientFinished(this, false /* success */);
+                mCallback.onClientFinished(this, false /* success */);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -132,7 +132,7 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

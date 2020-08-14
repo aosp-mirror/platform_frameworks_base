@@ -36,10 +36,10 @@ public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         startHalOperation();
-        mFinishCallback.onClientFinished(this, true /* success */);
+        mCallback.onClientFinished(this, true /* success */);
     }
 }

@@ -68,13 +68,13 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
         startHalOperation();
     }
 
@@ -88,7 +88,7 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
             UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
