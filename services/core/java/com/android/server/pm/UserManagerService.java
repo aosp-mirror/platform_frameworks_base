@@ -499,19 +499,22 @@ public class UserManagerService extends IUserManager.Stub {
             states = new SparseIntArray();
             invalidateIsUserUnlockedCache();
         }
-        public int get(int userId) {
+        public int get(@UserIdInt int userId) {
             return states.get(userId);
         }
-        public int get(int userId, int fallback) {
+        public int get(@UserIdInt int userId, int fallback) {
             return states.indexOfKey(userId) >= 0 ? states.get(userId) : fallback;
         }
-        public void put(int userId, int state) {
+        public void put(@UserIdInt int userId, int state) {
             states.put(userId, state);
             invalidateIsUserUnlockedCache();
         }
-        public void delete(int userId) {
+        public void delete(@UserIdInt int userId) {
             states.delete(userId);
             invalidateIsUserUnlockedCache();
+        }
+        public boolean has(@UserIdInt int userId) {
+            return states.get(userId, UserHandle.USER_NULL) != UserHandle.USER_NULL;
         }
         @Override
         public String toString() {
@@ -3561,6 +3564,13 @@ public class UserManagerService extends IUserManager.Stub {
         if (preCreatedUserData == null) {
             return null;
         }
+        synchronized (mUserStates) {
+            if (mUserStates.has(preCreatedUserData.info.id)) {
+                Slog.w(LOG_TAG, "Cannot reuse pre-created user "
+                        + preCreatedUserData.info.id + " because it didn't stop yet");
+                return null;
+            }
+        }
         final UserInfo preCreatedUser = preCreatedUserData.info;
         final int newFlags = preCreatedUser.flags | flags;
         if (!checkUserTypeConsistency(newFlags)) {
@@ -5225,6 +5235,7 @@ public class UserManagerService extends IUserManager.Stub {
             return userData == null ? null : userData.info;
         }
 
+        @Override
         public @NonNull UserInfo[] getUserInfos() {
             synchronized (mUsersLock) {
                 int userSize = mUsers.size();
