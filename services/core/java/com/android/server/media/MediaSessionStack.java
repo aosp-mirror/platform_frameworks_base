@@ -20,7 +20,6 @@ import static com.android.server.media.SessionPolicyProvider.SESSION_POLICY_IGNO
 
 import android.media.Session2Token;
 import android.media.session.MediaSession;
-import android.os.Debug;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -187,7 +186,7 @@ class MediaSessionStack {
      */
     public void updateMediaButtonSessionIfNeeded() {
         if (DEBUG) {
-            Log.d(TAG, "updateMediaButtonSessionIfNeeded, callers=" + Debug.getCallers(2));
+            Log.d(TAG, "updateMediaButtonSessionIfNeeded, callers=" + getCallers(2));
         }
         List<Integer> audioPlaybackUids =
                 mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
@@ -412,5 +411,25 @@ class MediaSessionStack {
         // mCachedActiveLists may also include the list of sessions for UserHandle.USER_ALL,
         // so they also need to be cleared.
         mCachedActiveLists.remove(UserHandle.USER_ALL);
+    }
+
+    // Code copied from android.os.Debug#getCallers(int)
+    private static String getCallers(final int depth) {
+        final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < depth; i++) {
+            sb.append(getCaller(callStack, i)).append(" ");
+        }
+        return sb.toString();
+    }
+
+    // Code copied from android.os.Debug#getCaller(StackTraceElement[], int)
+    private static String getCaller(StackTraceElement[] callStack, int depth) {
+        // callStack[4] is the caller of the method that called getCallers()
+        if (4 + depth >= callStack.length) {
+            return "<bottom of call stack>";
+        }
+        StackTraceElement caller = callStack[4 + depth];
+        return caller.getClassName() + "." + caller.getMethodName() + ":" + caller.getLineNumber();
     }
 }
