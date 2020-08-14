@@ -4427,7 +4427,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param checkShell whether to prevent shell from access if there's a debugging restriction
      * @param message the message to log on security exception
      */
-    private void enforceCrossUserPermission(int callingUid, int userId,
+    private void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell,
             boolean requirePermissionWhenSameUser, String message) {
         if (userId < 0) {
@@ -4444,7 +4444,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return;
         }
         String errorMessage = buildInvalidCrossUserPermissionMessage(
-                message, requireFullPermission);
+                callingUid, userId, message, requireFullPermission);
         Slog.w(TAG, errorMessage);
         throw new SecurityException(errorMessage);
     }
@@ -4463,7 +4463,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param checkShell whether to prevent shell from access if there's a debugging restriction
      * @param message the message to log on security exception
      */
-    private void enforceCrossUserOrProfilePermission(int callingUid, int userId,
+    private void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell,
             String message) {
         if (userId < 0) {
@@ -4489,7 +4489,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return;
         }
         String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
-                message, requireFullPermission, isSameProfileGroup);
+                callingUid, userId, message, requireFullPermission, isSameProfileGroup);
         Slog.w(TAG, errorMessage);
         throw new SecurityException(errorMessage);
     }
@@ -4524,44 +4524,48 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private static String buildInvalidCrossUserPermissionMessage(
-            String message, boolean requireFullPermission) {
+    private static String buildInvalidCrossUserPermissionMessage(int callingUid,
+            @UserIdInt int userId, String message, boolean requireFullPermission) {
         StringBuilder builder = new StringBuilder();
         if (message != null) {
             builder.append(message);
             builder.append(": ");
         }
-        builder.append("Requires ");
+        builder.append("UID ");
+        builder.append(callingUid);
+        builder.append(" requires ");
         builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
-        if (requireFullPermission) {
-            builder.append(".");
-            return builder.toString();
+        if (!requireFullPermission) {
+            builder.append(" or ");
+            builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
         }
-        builder.append(" or ");
-        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
+        builder.append(" to access user ");
+        builder.append(userId);
         builder.append(".");
         return builder.toString();
     }
 
-    private static String buildInvalidCrossUserOrProfilePermissionMessage(
-            String message, boolean requireFullPermission, boolean isSameProfileGroup) {
+    private static String buildInvalidCrossUserOrProfilePermissionMessage(int callingUid,
+            @UserIdInt int userId, String message, boolean requireFullPermission,
+            boolean isSameProfileGroup) {
         StringBuilder builder = new StringBuilder();
         if (message != null) {
             builder.append(message);
             builder.append(": ");
         }
-        builder.append("Requires ");
+        builder.append("UID ");
+        builder.append(callingUid);
+        builder.append(" requires ");
         builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
-        if (requireFullPermission) {
-            builder.append(".");
-            return builder.toString();
-        }
-        builder.append(" or ");
-        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
-        if (isSameProfileGroup) {
+        if (!requireFullPermission) {
             builder.append(" or ");
-            builder.append(android.Manifest.permission.INTERACT_ACROSS_PROFILES);
+            builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
+            if (isSameProfileGroup) {
+                builder.append(" or ");
+                builder.append(android.Manifest.permission.INTERACT_ACROSS_PROFILES);
+            }
         }
+        builder.append(" to access user ");
         builder.append(".");
         return builder.toString();
     }
