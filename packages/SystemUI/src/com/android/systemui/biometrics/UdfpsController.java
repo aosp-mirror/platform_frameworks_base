@@ -90,22 +90,23 @@ class UdfpsController {
     @SuppressLint("ClickableViewAccessibility")
     private final UdfpsView.OnTouchListener mOnTouchListener = (v, event) -> {
         UdfpsView view = (UdfpsView) v;
+        final boolean isFingerDown = view.isScrimShowing();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                boolean isValidTouch = view.isValidTouch(event.getX(), event.getY(),
+                final boolean isValidTouch = view.isValidTouch(event.getX(), event.getY(),
                         event.getPressure());
-                if (!view.isFingerDown() && isValidTouch) {
+                if (!isFingerDown && isValidTouch) {
                     onFingerDown((int) event.getX(), (int) event.getY(), event.getTouchMinor(),
                             event.getTouchMajor());
-                } else if (view.isFingerDown() && !isValidTouch) {
+                } else if (isFingerDown && !isValidTouch) {
                     onFingerUp();
                 }
                 return true;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (view.isFingerDown()) {
+                if (isFingerDown) {
                     onFingerUp();
                 }
                 return true;
@@ -123,7 +124,6 @@ class UdfpsController {
         mLayoutParams = createLayoutParams(context);
 
         mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, null, false);
-        mView.setOnTouchListener(mOnTouchListener);
 
         mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
         mHbmEnableCommand = context.getResources().getString(R.string.udfps_hbm_enable_command);
@@ -164,25 +164,32 @@ class UdfpsController {
 
     private void showUdfpsOverlay() {
         mHandler.post(() -> {
-            Log.v(TAG, "showUdfpsOverlay | adding window");
             if (!mIsOverlayShowing) {
                 try {
+                    Log.v(TAG, "showUdfpsOverlay | adding window");
                     mWindowManager.addView(mView, mLayoutParams);
                     mIsOverlayShowing = true;
+                    mView.setOnTouchListener(mOnTouchListener);
                 } catch (RuntimeException e) {
                     Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
                 }
+            } else {
+                Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
             }
         });
     }
 
     private void hideUdfpsOverlay() {
-        onFingerUp();
         mHandler.post(() -> {
-            Log.v(TAG, "hideUdfpsOverlay | removing window");
             if (mIsOverlayShowing) {
+                Log.v(TAG, "hideUdfpsOverlay | removing window");
+                mView.setOnTouchListener(null);
+                // Reset the controller back to its starting state.
+                onFingerUp();
                 mWindowManager.removeView(mView);
                 mIsOverlayShowing = false;
+            } else {
+                Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
             }
         });
     }
@@ -215,25 +222,28 @@ class UdfpsController {
 
     private void onFingerDown(int x, int y, float minor, float major) {
         mView.setScrimAlpha(computeScrimOpacity());
+        mView.showScrimAndDot();
         try {
             FileWriter fw = new FileWriter(mHbmPath);
             fw.write(mHbmEnableCommand);
             fw.close();
+            mFingerprintManager.onFingerDown(x, y, minor, major);
         } catch (IOException e) {
+            mView.hideScrimAndDot();
             Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
         }
-        mView.onFingerDown();
-        mFingerprintManager.onFingerDown(x, y, minor, major);
     }
 
     private void onFingerUp() {
         mFingerprintManager.onFingerUp();
-        mView.onFingerUp();
+        // Hiding the scrim before disabling HBM results in less noticeable flicker.
+        mView.hideScrimAndDot();
         try {
             FileWriter fw = new FileWriter(mHbmPath);
             fw.write(mHbmDisableCommand);
             fw.close();
         } catch (IOException e) {
+            mView.showScrimAndDot();
             Log.e(TAG, "onFingerUp | failed to disable HBM: " + e.getMessage());
         }
     }
