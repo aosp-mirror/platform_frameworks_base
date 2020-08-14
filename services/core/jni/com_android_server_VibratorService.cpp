@@ -181,6 +181,24 @@ static jintArray vibratorGetSupportedEffects(JNIEnv* env, jclass /* clazz */, jl
     return effects;
 }
 
+static jintArray vibratorGetSupportedPrimitives(JNIEnv* env, jclass /* clazz */,
+                                                jlong controllerPtr) {
+    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
+    if (controller == nullptr) {
+        ALOGE("vibratorGetSupportedPrimitives failed because controller was not initialized");
+        return nullptr;
+    }
+    auto result = controller->getSupportedPrimitives();
+    if (!result.isOk()) {
+        return nullptr;
+    }
+    std::vector<aidl::CompositePrimitive> supportedPrimitives = result.value();
+    jintArray primitives = env->NewIntArray(supportedPrimitives.size());
+    env->SetIntArrayRegion(primitives, 0, supportedPrimitives.size(),
+                           reinterpret_cast<jint*>(supportedPrimitives.data()));
+    return primitives;
+}
+
 static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
                                    jlong effect, jlong strength, jobject vibration) {
     vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
@@ -259,6 +277,7 @@ static const JNINativeMethod method_table[] = {
          "VibratorService$Vibration;)V",
          (void*)vibratorPerformComposedEffect},
         {"vibratorGetSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
+        {"vibratorGetSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
         {"vibratorSetExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
         {"vibratorGetCapabilities", "(J)J", (void*)vibratorGetCapabilities},
         {"vibratorAlwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
