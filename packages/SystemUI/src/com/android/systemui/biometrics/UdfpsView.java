@@ -36,6 +36,10 @@ import com.android.systemui.R;
 public class UdfpsView extends View {
     private static final String TAG = "UdfpsView";
 
+    // Values in pixels.
+    private static final float SENSOR_SHADOW_OFFSET = 2.0f;
+    private static final float SENSOR_OUTLINE_WIDTH = 2.0f;
+
     private final Rect mScrimRect;
     private final Paint mScrimPaint;
 
@@ -76,7 +80,6 @@ public class UdfpsView extends View {
             a.recycle();
         }
 
-
         mScrimRect = new Rect();
         mScrimPaint = new Paint(0 /* flags */);
         mScrimPaint.setColor(Color.BLACK);
@@ -85,6 +88,9 @@ public class UdfpsView extends View {
         mSensorPaint = new Paint(0 /* flags */);
         mSensorPaint.setColor(Color.WHITE);
         mSensorPaint.setStyle(Paint.Style.STROKE);
+        mSensorPaint.setStrokeWidth(SENSOR_OUTLINE_WIDTH);
+        mSensorPaint.setShadowLayer(SENSOR_OUTLINE_WIDTH, 0, 0, Color.BLACK);
+        mSensorPaint.setAntiAlias(true);
 
         mTouchableRegion = new Rect();
         mInsetsListener = internalInsetsInfo -> {
@@ -108,6 +114,8 @@ public class UdfpsView extends View {
         mSensorY = h - mSensorMarginBottom - mSensorRadius;
         mSensorRect.set(mSensorX - mSensorRadius, mSensorY - mSensorRadius,
                 mSensorX + mSensorRadius, mSensorY + mSensorRadius);
+
+        // Sets mTouchableRegion with rounded up values from mSensorRect.
         mSensorRect.roundOut(mTouchableRegion);
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
