@@ -2762,15 +2762,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // do it now.
                 return;
             }
+            mDestroyed = true;
             if (mCommitted) {
-                mDestroyed = true;
                 if (!mStagingManager.abortCommittedSessionLocked(this)) {
                     // Do not clean up the staged session from system. It is not safe yet.
                     mCallback.onStagedSessionChanged(this);
                     return;
                 }
-                cleanStageDir(getChildSessionsLocked());
             }
+            cleanStageDir(getChildSessionsLocked());
             destroyInternal();
         }
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
