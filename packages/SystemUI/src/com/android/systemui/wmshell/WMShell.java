@@ -27,7 +27,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.wm.shell.common.DisplayImeController;
 
 import java.util.Optional;
@@ -41,16 +41,16 @@ import javax.inject.Inject;
 public final class WMShell extends SystemUI {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DisplayImeController mDisplayImeController;
-    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
 
     @Inject
     WMShell(Context context, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DisplayImeController displayImeController,
-            Optional<SplitScreenController> splitScreenControllerOptional) {
+            Optional<SplitScreen> splitScreenOptional) {
         super(context);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDisplayImeController = displayImeController;
-        mSplitScreenControllerOptional = splitScreenControllerOptional;
+        mSplitScreenOptional = splitScreenOptional;
     }
 
     @Override
@@ -60,10 +60,10 @@ public final class WMShell extends SystemUI {
         // specific feature anymore.
         mDisplayImeController.startMonitorDisplays();
 
-        mSplitScreenControllerOptional.ifPresent(this::initSplitScreenController);
+        mSplitScreenOptional.ifPresent(this::initSplitScreen);
     }
 
-    private void initSplitScreenController(SplitScreenController splitScreenController) {
+    private void initSplitScreen(SplitScreen splitScreen) {
         mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
@@ -71,7 +71,7 @@ public final class WMShell extends SystemUI {
                 // above everything, it is actually transparent except for notifications, so
                 // we still need to hide any surfaces that are below it.
                 // TODO(b/148906453): Figure out keyguard dismiss animation for divider view.
-                splitScreenController.onKeyguardVisibilityChanged(showing);
+                splitScreen.onKeyguardVisibilityChanged(showing);
             }
         });
 
@@ -82,30 +82,29 @@ public final class WMShell extends SystemUI {
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
                         if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
                                 != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                                || !splitScreenController.isSplitScreenSupported()) {
+                                || !splitScreen.isSplitScreenSupported()) {
                             return;
                         }
 
-                        if (splitScreenController.isMinimized()) {
-                            splitScreenController.onUndockingTask();
+                        if (splitScreen.isMinimized()) {
+                            splitScreen.onUndockingTask();
                         }
                     }
 
                     @Override
                     public void onActivityForcedResizable(String packageName, int taskId,
                             int reason) {
-                        splitScreenController
-                                .onActivityForcedResizable(packageName, taskId, reason);
+                        splitScreen.onActivityForcedResizable(packageName, taskId, reason);
                     }
 
                     @Override
                     public void onActivityDismissingDockedStack() {
-                        splitScreenController.onActivityDismissingSplitScreen();
+                        splitScreen.onActivityDismissingSplitScreen();
                     }
 
                     @Override
                     public void onActivityLaunchOnSecondaryDisplayFailed() {
-                        splitScreenController.onActivityLaunchOnSecondaryDisplayFailed();
+                        splitScreen.onActivityLaunchOnSecondaryDisplayFailed();
                     }
                 });
     }

@@ -46,7 +46,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -180,7 +180,7 @@ public interface StatusBarPhoneModule {
             Optional<Recents> recentsOptional,
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
-            Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<SplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
@@ -260,7 +260,7 @@ public interface StatusBarPhoneModule {
                 recentsOptional,
                 statusBarComponentBuilder,
                 pluginManager,
-                splitScreenControllerOptional,
+                splitScreenOptional,
                 lightsOutNotifController,
                 statusBarNotificationActivityStarterBuilder,
                 shadeController,
