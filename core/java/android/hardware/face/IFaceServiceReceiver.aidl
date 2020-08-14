@@ -32,4 +32,6 @@ oneway interface IFaceServiceReceiver {
     void onFeatureSet(boolean success, int feature);
     void onFeatureGet(boolean success, int feature, boolean value);
     void onChallengeGenerated(long challenge);
+    void onChallengeInterrupted(int sensorId);
+    void onChallengeInterruptFinished(int sensorId);
 }
