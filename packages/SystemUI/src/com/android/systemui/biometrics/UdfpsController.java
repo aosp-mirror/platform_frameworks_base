@@ -35,7 +35,6 @@ import android.util.Spline;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import com.android.internal.BrightnessSynchronizer;
 import com.android.systemui.R;
@@ -56,8 +55,8 @@ class UdfpsController {
     private final WindowManager mWindowManager;
     private final ContentResolver mContentResolver;
     private final Handler mHandler;
-    private final UdfpsView mView;
     private final WindowManager.LayoutParams mLayoutParams;
+    private final UdfpsView mView;
     // Debugfs path to control the high-brightness mode.
     private final String mHbmPath;
     private final String mHbmEnableCommand;
@@ -121,12 +120,9 @@ class UdfpsController {
         mWindowManager = context.getSystemService(WindowManager.class);
         mContentResolver = context.getContentResolver();
         mHandler = new Handler(Looper.getMainLooper());
-
         mLayoutParams = createLayoutParams(context);
-        LinearLayout layout = new LinearLayout(context);
-        layout.setLayoutParams(mLayoutParams);
-        mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, layout,
-                false);
+
+        mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, null, false);
         mView.setOnTouchListener(mOnTouchListener);
 
         mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
@@ -254,11 +250,12 @@ class UdfpsController {
                 // TODO(b/152419866): Use the UDFPS window type when it becomes available.
                 WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
         lp.setTitle(TAG);
-        lp.windowAnimations = 0;
+        lp.setFitInsetsTypes(0);
         return lp;
     }
 
