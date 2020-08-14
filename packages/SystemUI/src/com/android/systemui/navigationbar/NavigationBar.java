@@ -860,10 +860,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         final int barMode = barMode(mTransientShown, mAppearance);
         mNavigationBarMode = barMode;
         checkNavBarModes();
-        mAutoHideController.touchAutoHide();
-
-        mLightBarController.onNavigationBarAppearanceChanged(mAppearance, true /* nbModeChanged */,
-                barMode, false /* navbarColorManagedByIme */);
+        if (mAutoHideController != null) {
+            mAutoHideController.touchAutoHide();
+        }
+        if (mLightBarController != null) {
+            mLightBarController.onNavigationBarAppearanceChanged(mAppearance,
+                    true /* nbModeChanged */, barMode, false /* navbarColorManagedByIme */);
+        }
     }
 
     @Override
@@ -880,8 +883,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             }
             nbModeChanged = updateBarMode(barMode(mTransientShown, appearance));
         }
-        mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
-                mNavigationBarMode, navbarColorManagedByIme);
+        if (mLightBarController != null) {
+            mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
+                    mNavigationBarMode, navbarColorManagedByIme);
+        }
     }
 
     @Override
@@ -924,7 +929,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mNavigationBarView.onTransientStateChanged(mTransientShown);
         }
         final int barMode = barMode(mTransientShown, mAppearance);
-        if (updateBarMode(barMode)) {
+        if (updateBarMode(barMode) && mLightBarController != null) {
             mLightBarController.onNavigationBarModeChanged(barMode);
         }
     }
@@ -938,7 +943,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             }
             mNavigationBarMode = barMode;
             checkNavBarModes();
-            mAutoHideController.touchAutoHide();
+            if (mAutoHideController != null) {
+                mAutoHideController.touchAutoHide();
+            }
             return true;
         }
         return false;
@@ -1097,7 +1104,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {
-        mAutoHideController.checkUserAutoHide(event);
+        if (mAutoHideController != null) {
+            mAutoHideController.checkUserAutoHide(event);
+        }
         return false;
     }
 
@@ -1356,7 +1365,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     public void setLightBarController(LightBarController lightBarController) {
         mLightBarController = lightBarController;
-        mLightBarController.setNavigationBar(mNavigationBarView.getLightTransitionsController());
+        if (mLightBarController != null) {
+            mLightBarController.setNavigationBar(
+                    mNavigationBarView.getLightTransitionsController());
+        }
     }
 
     /** Sets {@link AutoHideController} to the navigation bar. */
