@@ -22,6 +22,7 @@ java_test_host {
     ],
     static_libs: [
         "frameworks-base-hostutils",
+        "PackageManagerServiceHostTestsIntentVerifyUtils",
     ],
     test_suites: ["general-tests"],
     java_resources: [
@@ -33,7 +34,15 @@ java_test_host {
         ":PackageManagerTestAppVersion4",
         ":PackageManagerTestAppOriginalOverride",
         ":PackageManagerServiceDeviceSideTests",
-    ],
+        ":PackageManagerTestIntentVerifier",
+        ":PackageManagerTestIntentVerifierTarget1",
+        ":PackageManagerTestIntentVerifierTarget2",
+        ":PackageManagerTestIntentVerifierTarget3",
+        ":PackageManagerTestIntentVerifierTarget4Base",
+        ":PackageManagerTestIntentVerifierTarget4NoAutoVerify",
+        ":PackageManagerTestIntentVerifierTarget4Wildcard",
+        ":PackageManagerTestIntentVerifierTarget4WildcardNoAutoVerify",
+    ]
 }
 
 genrule {

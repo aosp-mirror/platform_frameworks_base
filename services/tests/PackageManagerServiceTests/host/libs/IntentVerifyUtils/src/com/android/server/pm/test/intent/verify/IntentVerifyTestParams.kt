@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.test
+package com.android.server.pm.test.intent.verify
 
-import java.nio.file.Path
-import java.nio.file.Paths
+interface IntentVerifyTestParams {
 
-// Unfortunately no easy way to access PMS SystemPartitions, so mock them here
-internal enum class Partition(val baseAppFolder: Path) {
-    SYSTEM("/system/app"),
-    SYSTEM_PRIVILEGED("/system/priv-app"),
-    VENDOR("/vendor/app"),
-    PRODUCT("/product/app"),
-    SYSTEM_EXT("/system_ext/app")
-    ;
+    val methodName: String
 
-    constructor(baseFolder: String) : this(Paths.get(baseFolder))
+    fun toArgsMap(): Map<String, String>
 }

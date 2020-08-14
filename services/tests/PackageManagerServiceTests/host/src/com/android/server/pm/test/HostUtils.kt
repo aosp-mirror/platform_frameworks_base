@@ -18,6 +18,7 @@ package com.android.server.pm.test
 
 import com.android.internal.util.test.SystemPreparer
 import com.android.tradefed.device.ITestDevice
+import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.FileOutputStream
 
@@ -33,6 +34,19 @@ internal fun SystemPreparer.deleteApkFolders(
         deleteFile(partition.baseAppFolder.resolve(it.removeSuffix(".apk")).toString())
     }
 }
+
+internal fun ITestDevice.installJavaResourceApk(
+    tempFolder: TemporaryFolder,
+    javaResource: String,
+    reinstall: Boolean = true,
+    extraArgs: Array<String> = emptyArray()
+): String? {
+    val file = HostUtils.copyResourceToHostFile(javaResource, tempFolder.newFile())
+    return installPackage(file, reinstall, *extraArgs)
+}
+
+internal fun ITestDevice.uninstallPackages(vararg pkgNames: String) =
+        pkgNames.forEach { uninstallPackage(it) }
 
 internal object HostUtils {
 
