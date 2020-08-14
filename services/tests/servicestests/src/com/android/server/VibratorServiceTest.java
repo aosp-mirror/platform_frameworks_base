@@ -223,9 +223,24 @@ public class VibratorServiceTest {
     }
 
     @Test
-    public void arePrimitivesSupported_withComposeCapability_returnsAlwaysTrue() {
+    public void arePrimitivesSupported_withNullResultFromNative_returnsAlwaysFalse() {
         mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
-        assertArrayEquals(new boolean[]{true, true},
+        when(mNativeWrapperMock.vibratorGetSupportedPrimitives()).thenReturn(null);
+
+        assertArrayEquals(new boolean[]{false, false},
+                createService().arePrimitivesSupported(new int[]{
+                        VibrationEffect.Composition.PRIMITIVE_CLICK,
+                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE
+                }));
+    }
+
+    @Test
+    public void arePrimitivesSupported_withSomeSupportedPrimitives_returnsBasedOnNativeResult() {
+        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        when(mNativeWrapperMock.vibratorGetSupportedPrimitives())
+                .thenReturn(new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
+
+        assertArrayEquals(new boolean[]{true, false},
                 createService().arePrimitivesSupported(new int[]{
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
                         VibrationEffect.Composition.PRIMITIVE_QUICK_RISE
