@@ -43,6 +43,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -76,7 +77,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private ScrimController mScrimController;
     @Mock
-    private StatusBar mStatusBar;
+    private BiometricUnlockController.BiometricModeListener mBiometricModeListener;
     @Mock
     private ShadeController mShadeController;
     @Mock
@@ -105,11 +106,12 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         res.addOverride(com.android.internal.R.integer.config_wakeUpDelayDoze, 0);
         mBiometricUnlockController = new BiometricUnlockController(mContext, mDozeScrimController,
-                mKeyguardViewMediator, mScrimController, mStatusBar, mShadeController,
+                mKeyguardViewMediator, mScrimController, mShadeController,
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
                 mUpdateMonitor, res.getResources(), mKeyguardBypassController, mDozeParameters,
                 mMetricsLogger, mDumpManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
+        mBiometricUnlockController.setBiometricModeListener(mBiometricModeListener);
     }
 
     @Test

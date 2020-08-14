@@ -83,7 +83,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -153,7 +153,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<NotifCollectionListener> mNotifListenerCaptor;
     private TestableBubbleController mBubbleController;
-    private NotificationShadeWindowController mNotificationShadeWindowController;
+    private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
     private NotifCollectionListener mEntryListener;
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
@@ -218,7 +218,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mLockIconController);
 
         // Bubbles get added to status bar window view
-        mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager);

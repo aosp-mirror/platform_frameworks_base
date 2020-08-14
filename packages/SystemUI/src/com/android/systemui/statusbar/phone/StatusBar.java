@@ -191,6 +191,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
@@ -1473,6 +1474,34 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected void startKeyguard() {
         Trace.beginSection("StatusBar#startKeyguard");
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
+        mBiometricUnlockController.setBiometricModeListener(
+                new BiometricUnlockController.BiometricModeListener() {
+                    @Override
+                    public void onResetMode() {
+                        setWakeAndUnlocking(false);
+                    }
+
+                    @Override
+                    public void onModeChanged(int mode) {
+                        switch (mode) {
+                            case BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM:
+                            case BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING:
+                            case BiometricUnlockController.MODE_WAKE_AND_UNLOCK:
+                                setWakeAndUnlocking(true);
+                        }
+                    }
+
+                    @Override
+                    public void notifyBiometricAuthModeChanged() {
+                        StatusBar.this.notifyBiometricAuthModeChanged();
+                    }
+
+                    private void setWakeAndUnlocking(boolean wakeAndUnlocking) {
+                        if (getNavigationBarView() != null) {
+                            getNavigationBarView().setWakeAndUnlocking(wakeAndUnlocking);
+                        }
+                    }
+                });
         mStatusBarKeyguardViewManager.registerStatusBar(
                 /* statusBar= */ this, getBouncerContainer(),
                 mNotificationPanelViewController, mBiometricUnlockController,

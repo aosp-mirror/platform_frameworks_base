@@ -47,7 +47,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.RemoteInputController.Callback;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -72,8 +72,8 @@ import javax.inject.Singleton;
  * Encapsulates all logic for the notification shade window state management.
  */
 @Singleton
-public class NotificationShadeWindowController implements Callback, Dumpable,
-        ConfigurationListener {
+public class NotificationShadeWindowControllerImpl implements NotificationShadeWindowController,
+        Dumpable, ConfigurationListener {
 
     private static final String TAG = "NotificationShadeWindowController";
     private static final boolean DEBUG = false;
@@ -103,7 +103,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     private final SysuiColorExtractor mColorExtractor;
 
     @Inject
-    public NotificationShadeWindowController(Context context, WindowManager windowManager,
+    public NotificationShadeWindowControllerImpl(Context context, WindowManager windowManager,
             IActivityManager activityManager, DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
@@ -147,6 +147,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     /**
      * Register to receive notifications about status bar window state changes.
      */
+    @Override
     public void registerCallback(StatusBarWindowCallback callback) {
         // Prevent adding duplicate callbacks
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -161,6 +162,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
      * Register a listener to monitor scrims visibility
      * @param listener A listener to monitor scrims visibility
      */
+    @Override
     public void setScrimsVisibilityListener(Consumer<Integer> listener) {
         if (listener != null && mScrimsVisibilityListener != listener) {
             mScrimsVisibilityListener = listener;
@@ -176,6 +178,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     /**
      * Adds the notification shade view to the window manager.
      */
+    @Override
     public void attach() {
         // Now that the notification shade encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
@@ -214,14 +217,17 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         }
     }
 
+    @Override
     public void setNotificationShadeView(ViewGroup view) {
         mNotificationShadeView = view;
     }
 
+    @Override
     public ViewGroup getNotificationShadeView() {
         return mNotificationShadeView;
     }
 
+    @Override
     public void setDozeScreenBrightness(int value) {
         mScreenBrightnessDoze = value / 255f;
     }
@@ -406,6 +412,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         notifyStateChangedCallbacks();
     }
 
+    @Override
     public void notifyStateChangedCallbacks() {
         for (int i = 0; i < mCallbacks.size(); i++) {
             StatusBarWindowCallback cb = mCallbacks.get(i).get();
@@ -445,62 +452,74 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         }
     }
 
+    @Override
     public void setKeyguardShowing(boolean showing) {
         mCurrentState.mKeyguardShowing = showing;
         apply(mCurrentState);
     }
 
+    @Override
     public void setKeyguardOccluded(boolean occluded) {
         mCurrentState.mKeyguardOccluded = occluded;
         apply(mCurrentState);
     }
 
+    @Override
     public void setKeyguardNeedsInput(boolean needsInput) {
         mCurrentState.mKeyguardNeedsInput = needsInput;
         apply(mCurrentState);
     }
 
+    @Override
     public void setPanelVisible(boolean visible) {
         mCurrentState.mPanelVisible = visible;
         mCurrentState.mNotificationShadeFocusable = visible;
         apply(mCurrentState);
     }
 
+    @Override
     public void setNotificationShadeFocusable(boolean focusable) {
         mCurrentState.mNotificationShadeFocusable = focusable;
         apply(mCurrentState);
     }
 
+    @Override
     public void setBouncerShowing(boolean showing) {
         mCurrentState.mBouncerShowing = showing;
         apply(mCurrentState);
     }
 
+    @Override
     public void setBackdropShowing(boolean showing) {
         mCurrentState.mBackdropShowing = showing;
         apply(mCurrentState);
     }
 
+    @Override
     public void setKeyguardFadingAway(boolean keyguardFadingAway) {
         mCurrentState.mKeyguardFadingAway = keyguardFadingAway;
         apply(mCurrentState);
     }
 
+    @Override
     public void setQsExpanded(boolean expanded) {
         mCurrentState.mQsExpanded = expanded;
         apply(mCurrentState);
     }
 
+    @Override
     public void setForceUserActivity(boolean forceUserActivity) {
         mCurrentState.mForceUserActivity = forceUserActivity;
         apply(mCurrentState);
     }
 
-    void setLaunchingActivity(boolean launching) {
+    @Override
+    public void setLaunchingActivity(boolean launching) {
         mCurrentState.mLaunchingActivity = launching;
         apply(mCurrentState);
     }
 
+    @Override
     public void setScrimsVisibility(int scrimsVisibility) {
         mCurrentState.mScrimsVisibility = scrimsVisibility;
         apply(mCurrentState);
@@ -512,6 +531,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
      * {@link com.android.systemui.statusbar.NotificationShadeDepthController}.
      * @param backgroundBlurRadius Radius in pixels.
      */
+    @Override
     public void setBackgroundBlurRadius(int backgroundBlurRadius) {
         if (mCurrentState.mBackgroundBlurRadius == backgroundBlurRadius) {
             return;
@@ -520,11 +540,13 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         apply(mCurrentState);
     }
 
+    @Override
     public void setHeadsUpShowing(boolean showing) {
         mCurrentState.mHeadsUpShowing = showing;
         apply(mCurrentState);
     }
 
+    @Override
     public void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {
         mCurrentState.mWallpaperSupportsAmbientMode = supportsAmbientMode;
         apply(mCurrentState);
@@ -543,11 +565,13 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
      * Used for when a heads-up comes in but we still need to wait for the touchable regions to
      * be computed.
      */
+    @Override
     public void setForceWindowCollapsed(boolean force) {
         mCurrentState.mForceCollapsed = force;
         apply(mCurrentState);
     }
 
+    @Override
     public void setPanelExpanded(boolean isExpanded) {
         mCurrentState.mPanelExpanded = isExpanded;
         apply(mCurrentState);
@@ -563,16 +587,19 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
      * Set whether the screen brightness is forced to the value we use for doze mode by the status
      * bar window.
      */
+    @Override
     public void setForceDozeBrightness(boolean forceDozeBrightness) {
         mCurrentState.mForceDozeBrightness = forceDozeBrightness;
         apply(mCurrentState);
     }
 
+    @Override
     public void setDozing(boolean dozing) {
         mCurrentState.mDozing = dozing;
         apply(mCurrentState);
     }
 
+    @Override
     public void setForcePluginOpen(boolean forcePluginOpen) {
         mCurrentState.mForcePluginOpen = forcePluginOpen;
         apply(mCurrentState);
@@ -584,10 +611,12 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     /**
      * The forcePluginOpen state for the status bar.
      */
+    @Override
     public boolean getForcePluginOpen() {
         return mCurrentState.mForcePluginOpen;
     }
 
+    @Override
     public void setNotTouchable(boolean notTouchable) {
         mCurrentState.mNotTouchable = notTouchable;
         apply(mCurrentState);
@@ -596,24 +625,29 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     /**
      * Whether the status bar panel is expanded or not.
      */
+    @Override
     public boolean getPanelExpanded() {
         return mCurrentState.mPanelExpanded;
     }
 
+    @Override
     public void setStateListener(OtherwisedCollapsedListener listener) {
         mListener = listener;
     }
 
+    @Override
     public void setForcePluginOpenListener(ForcePluginOpenListener listener) {
         mForcePluginOpenListener = listener;
     }
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG + ":");
         pw.println("  mKeyguardDisplayMode=" + mKeyguardDisplayMode);
         pw.println(mCurrentState);
     }
 
+    @Override
     public boolean isShowingWallpaper() {
         return !mCurrentState.mBackdropShowing;
     }
@@ -632,6 +666,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     /**
      * When keyguard will be dismissed but didn't start animation yet.
      */
+    @Override
     public void setKeyguardGoingAway(boolean goingAway) {
         mCurrentState.mKeyguardGoingAway = goingAway;
         apply(mCurrentState);
@@ -642,6 +677,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
      * animation is performed, the component should remove itself from the list of features that
      * are forcing SystemUI to be top-ui.
      */
+    @Override
     public void setRequestTopUi(boolean requestTopUi, String componentTag) {
         if (requestTopUi) {
             mCurrentState.mComponentsForcingTopUi.add(componentTag);
@@ -725,23 +761,4 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
             setDozing(isDozing);
         }
     };
-
-    /**
-     * Custom listener to pipe data back to plugins about whether or not the status bar would be
-     * collapsed if not for the plugin.
-     * TODO: Find cleaner way to do this.
-     */
-    public interface OtherwisedCollapsedListener {
-        void setWouldOtherwiseCollapse(boolean otherwiseCollapse);
-    }
-
-    /**
-     * Listener to indicate forcePluginOpen has changed
-     */
-    public interface ForcePluginOpenListener {
-        /**
-         * Called when mState.forcePluginOpen is changed
-         */
-        void onChange(boolean forceOpen);
-    }
 }
