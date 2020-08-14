@@ -277,6 +277,14 @@ public class IntentFilter implements Parcelable {
     public static final String SCHEME_HTTPS = "https";
 
     /**
+     * Package scheme
+     *
+     * @see #addDataScheme(String)
+     * @hide
+     */
+    public static final String SCHEME_PACKAGE = "package";
+
+    /**
      * The value to indicate a wildcard for incoming match arguments.
      * @hide
      */
