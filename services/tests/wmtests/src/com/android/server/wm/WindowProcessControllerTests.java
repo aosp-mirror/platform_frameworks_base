@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.INVALID_DISPLAY;
@@ -251,6 +253,19 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         mWpc.addActivityIfNeeded(activity);
         // Voice interaction service processes should not be registered for activity config changes.
         assertFalse(mWpc.registeredForActivityConfigChanges());
+    }
+
+    @Test
+    public void testProcessLevelConfiguration() {
+        Configuration config = new Configuration();
+        config.windowConfiguration.setActivityType(ACTIVITY_TYPE_HOME);
+        mWpc.onRequestedOverrideConfigurationChanged(config);
+        assertEquals(ACTIVITY_TYPE_HOME, config.windowConfiguration.getActivityType());
+        assertEquals(ACTIVITY_TYPE_UNDEFINED, mWpc.getActivityType());
+
+        mWpc.onMergedOverrideConfigurationChanged(config);
+        assertEquals(ACTIVITY_TYPE_HOME, config.windowConfiguration.getActivityType());
+        assertEquals(ACTIVITY_TYPE_UNDEFINED, mWpc.getActivityType());
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {
