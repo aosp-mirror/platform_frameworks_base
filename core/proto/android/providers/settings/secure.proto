@@ -211,6 +211,7 @@ message SecureSettingsProto {
 
     message EmergencyResponse {
         optional SettingProto panic_gesture_enabled = 1  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto panic_sound_enabled = 2  [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
 
     optional EmergencyResponse emergency_response = 83;

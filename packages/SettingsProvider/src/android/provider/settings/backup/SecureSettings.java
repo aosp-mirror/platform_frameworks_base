@@ -174,5 +174,6 @@ public class SecureSettings {
         Settings.Secure.TAPS_APP_TO_EXIT,
         Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
         Settings.Secure.PANIC_GESTURE_ENABLED,
+        Settings.Secure.PANIC_SOUND_ENABLED,
     };
 }
