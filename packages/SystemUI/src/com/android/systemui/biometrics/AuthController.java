@@ -280,7 +280,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     fpm.getSensorProperties();
             for (FingerprintSensorProperties props : fingerprintSensorProperties) {
                 if (props.sensorType == FingerprintSensorProperties.TYPE_UDFPS) {
-                    mUdfpsController = new UdfpsController(mContext, mWindowManager);
+                    mUdfpsController = new UdfpsController(mContext);
                     break;
                 }
             }

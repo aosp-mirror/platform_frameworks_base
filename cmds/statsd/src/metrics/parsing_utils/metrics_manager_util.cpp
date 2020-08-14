@@ -148,8 +148,6 @@ bool handleMetricWithConditions(
             ALOGW("cannot find Predicate \"%lld\" in the config", (long long)link.condition());
             return false;
         }
-        allConditionTrackers[condition_it->second]->setSliced(true);
-        allConditionTrackers[it->second]->setSliced(true);
     }
     conditionIndex = condition_it->second;
 

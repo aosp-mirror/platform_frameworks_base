@@ -238,12 +238,8 @@ EGLConfig EglManager::loadFP16Config(EGLDisplay display, SwapBehavior swapBehavi
     return config;
 }
 
-extern "C" EGLAPI const char* eglQueryStringImplementationANDROID(EGLDisplay dpy, EGLint name);
-
 void EglManager::initExtensions() {
     auto extensions = StringUtils::split(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
-    auto extensionsAndroid =
-            StringUtils::split(eglQueryStringImplementationANDROID(mEglDisplay, EGL_EXTENSIONS));
 
     // For our purposes we don't care if EGL_BUFFER_AGE is a result of
     // EGL_EXT_buffer_age or EGL_KHR_partial_update as our usage is covered
@@ -265,10 +261,7 @@ void EglManager::initExtensions() {
     EglExtensions.surfacelessContext = extensions.has("EGL_KHR_surfaceless_context");
     EglExtensions.fenceSync = extensions.has("EGL_KHR_fence_sync");
     EglExtensions.waitSync = extensions.has("EGL_KHR_wait_sync");
-
-    // EGL_ANDROID_native_fence_sync is not exposed to applications, so access
-    // this through the private Android-specific query instead.
-    EglExtensions.nativeFenceSync = extensionsAndroid.has("EGL_ANDROID_native_fence_sync");
+    EglExtensions.nativeFenceSync = extensions.has("EGL_ANDROID_native_fence_sync");
 }
 
 bool EglManager::hasEglContext() {

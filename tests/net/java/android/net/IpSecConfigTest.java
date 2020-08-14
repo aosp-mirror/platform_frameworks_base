@@ -16,8 +16,8 @@
 
 package android.net;
 
-import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
-import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+import static com.android.testutils.ParcelUtils.assertParcelSane;
+import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;

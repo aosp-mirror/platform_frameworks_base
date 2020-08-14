@@ -65,6 +65,33 @@
         {
             "name": "CtsInstantAppTests",
             "file_patterns": ["(/|^)InstantAppResolve[^/]*"]
+        },
+        {
+            "name": "CtsAutoFillServiceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.autofillservice.cts.PreSimpleSaveActivityTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)Activity.java"]
+        },
+        {
+            "name": "CtsAutoFillServiceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.autofillservice.cts.SimpleSaveActivityTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+                }
+            ],
+            "file_patterns": ["(/|^)Activity.java"]
         }
     ],
     "postsubmit": [

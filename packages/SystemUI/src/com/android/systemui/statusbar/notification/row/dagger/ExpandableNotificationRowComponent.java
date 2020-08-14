@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import dagger.Binds;
@@ -55,6 +56,8 @@ public interface ExpandableNotificationRowComponent {
         Builder notificationEntry(NotificationEntry entry);
         @BindsInstance
         Builder onExpandClickListener(ExpandableNotificationRow.OnExpandClickListener presenter);
+        @BindsInstance
+        Builder listContainer(NotificationListContainer listContainer);
         ExpandableNotificationRowComponent build();
     }
 

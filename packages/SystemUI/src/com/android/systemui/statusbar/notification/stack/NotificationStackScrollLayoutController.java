@@ -662,7 +662,7 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setChildLocationsChangedListener(
                 NotificationLogger.OnChildLocationsChangedListener listener) {
-
+            mView.setChildLocationsChangedListener(listener);
         }
 
         public boolean hasPulsingNotifications() {

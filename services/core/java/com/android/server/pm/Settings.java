@@ -954,6 +954,93 @@ public final class Settings {
         }
     }
 
+    /*
+     * Update the shared user setting when a package with a shared user id is removed. The gids
+     * associated with each permission of the deleted package are removed from the shared user'
+     * gid list only if its not in use by other permissions of packages in the shared user setting.
+     *
+     * @return the affected user id
+     */
+    @UserIdInt
+    int updateSharedUserPermsLPw(PackageSetting deletedPs, int userId) {
+        if ((deletedPs == null) || (deletedPs.pkg == null)) {
+            Slog.i(PackageManagerService.TAG,
+                    "Trying to update info for null package. Just ignoring");
+            return UserHandle.USER_NULL;
+        }
+
+        // No sharedUserId
+        if (deletedPs.sharedUser == null) {
+            return UserHandle.USER_NULL;
+        }
+
+        SharedUserSetting sus = deletedPs.sharedUser;
+
+        int affectedUserId = UserHandle.USER_NULL;
+        // Update permissions
+        for (String eachPerm : deletedPs.pkg.getRequestedPermissions()) {
+            BasePermission bp = mPermissions.getPermission(eachPerm);
+            if (bp == null) {
+                continue;
+            }
+
+            // Check if another package in the shared user needs the permission.
+            boolean used = false;
+            for (PackageSetting pkg : sus.packages) {
+                if (pkg.pkg != null
+                        && !pkg.pkg.getPackageName().equals(deletedPs.pkg.getPackageName())
+                        && pkg.pkg.getRequestedPermissions().contains(eachPerm)) {
+                    used = true;
+                    break;
+                }
+            }
+            if (used) {
+                continue;
+            }
+
+            PermissionsState permissionsState = sus.getPermissionsState();
+            PackageSetting disabledPs = getDisabledSystemPkgLPr(deletedPs.pkg.getPackageName());
+
+            // If the package is shadowing is a disabled system package,
+            // do not drop permissions that the shadowed package requests.
+            if (disabledPs != null) {
+                boolean reqByDisabledSysPkg = false;
+                for (String permission : disabledPs.pkg.getRequestedPermissions()) {
+                    if (permission.equals(eachPerm)) {
+                        reqByDisabledSysPkg = true;
+                        break;
+                    }
+                }
+                if (reqByDisabledSysPkg) {
+                    continue;
+                }
+            }
+
+            // Try to revoke as an install permission which is for all users.
+            // The package is gone - no need to keep flags for applying policy.
+            permissionsState.updatePermissionFlags(bp, userId,
+                    PackageManager.MASK_PERMISSION_FLAGS_ALL, 0);
+
+            if (permissionsState.revokeInstallPermission(bp) ==
+                    PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
+                affectedUserId = UserHandle.USER_ALL;
+            }
+
+            // Try to revoke as an install permission which is per user.
+            if (permissionsState.revokeRuntimePermission(bp, userId) ==
+                    PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
+                if (affectedUserId == UserHandle.USER_NULL) {
+                    affectedUserId = userId;
+                } else if (affectedUserId != userId) {
+                    // Multiple users affected.
+                    affectedUserId = UserHandle.USER_ALL;
+                }
+            }
+        }
+
+        return affectedUserId;
+    }
+
     int removePackageLPw(String name) {
         final PackageSetting p = mPackages.get(name);
         if (p != null) {
@@ -4560,6 +4647,9 @@ public final class Settings {
             pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getCodePathString());
             pw.print(prefix); pw.print("  legacyNativeLibraryDir=");
             pw.println(ps.legacyNativeLibraryPathString);
+            pw.print(prefix); pw.print("  extractNativeLibs=");
+            pw.println((ps.pkgFlags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0
+                    ? "true" : "false");
             pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.primaryCpuAbiString);
             pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.secondaryCpuAbiString);
         }
@@ -5457,9 +5547,30 @@ public final class Settings {
             // Make sure we do not
             mHandler.removeMessages(userId);
 
+            for (SettingBase sb : mPackages.values()) {
+                revokeRuntimePermissionsAndClearFlags(sb, userId);
+            }
+
+            for (SettingBase sb : mSharedUsers.values()) {
+                revokeRuntimePermissionsAndClearFlags(sb, userId);
+            }
+
             mPermissionUpgradeNeeded.delete(userId);
             mVersions.delete(userId);
             mFingerprints.remove(userId);
+        }
+
+        private void revokeRuntimePermissionsAndClearFlags(SettingBase sb, int userId) {
+            PermissionsState permissionsState = sb.getPermissionsState();
+            for (PermissionState permissionState
+                    : permissionsState.getRuntimePermissionStates(userId)) {
+                BasePermission bp = mPermissions.getPermission(permissionState.getName());
+                if (bp != null) {
+                    permissionsState.revokeRuntimePermission(bp, userId);
+                    permissionsState.updatePermissionFlags(bp, userId,
+                            PackageManager.MASK_PERMISSION_FLAGS_ALL, 0);
+                }
+            }
         }
 
         public void deleteUserRuntimePermissionsFile(int userId) {

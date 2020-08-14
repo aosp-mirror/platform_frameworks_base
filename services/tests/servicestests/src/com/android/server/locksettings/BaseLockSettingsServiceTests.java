@@ -19,7 +19,6 @@ package com.android.server.locksettings;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -169,7 +168,7 @@ public abstract class BaseLockSettingsServiceTests {
 
         final ArrayList<UserInfo> allUsers = new ArrayList<>(mPrimaryUserProfiles);
         allUsers.add(SECONDARY_USER_INFO);
-        when(mUserManager.getUsers(anyBoolean())).thenReturn(allUsers);
+        when(mUserManager.getUsers()).thenReturn(allUsers);
 
         when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
                 new Answer<Boolean>() {

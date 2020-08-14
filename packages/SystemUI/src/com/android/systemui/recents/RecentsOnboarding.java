@@ -466,23 +466,22 @@ public class RecentsOnboarding {
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("RecentsOnboarding {");
-        pw.println("      mTaskListenerRegistered: " + mTaskListenerRegistered);
-        pw.println("      mOverviewProxyListenerRegistered: " + mOverviewProxyListenerRegistered);
-        pw.println("      mLayoutAttachedToWindow: " + mLayoutAttachedToWindow);
-        pw.println("      mHasDismissedSwipeUpTip: " + mHasDismissedSwipeUpTip);
-        pw.println("      mHasDismissedQuickScrubTip: " + mHasDismissedQuickScrubTip);
-        pw.println("      mNumAppsLaunchedSinceSwipeUpTipDismiss: "
+        pw.println("RecentsOnboarding");
+        pw.println("  mTaskListenerRegistered: " + mTaskListenerRegistered);
+        pw.println("  mOverviewProxyListenerRegistered: " + mOverviewProxyListenerRegistered);
+        pw.println("  mLayoutAttachedToWindow: " + mLayoutAttachedToWindow);
+        pw.println("  mHasDismissedSwipeUpTip: " + mHasDismissedSwipeUpTip);
+        pw.println("  mHasDismissedQuickScrubTip: " + mHasDismissedQuickScrubTip);
+        pw.println("  mNumAppsLaunchedSinceSwipeUpTipDismiss: "
                 + mNumAppsLaunchedSinceSwipeUpTipDismiss);
-        pw.println("      hasSeenSwipeUpOnboarding: " + hasSeenSwipeUpOnboarding());
-        pw.println("      hasSeenQuickScrubOnboarding: " + hasSeenQuickScrubOnboarding());
-        pw.println("      getDismissedSwipeUpOnboardingCount: "
+        pw.println("  hasSeenSwipeUpOnboarding: " + hasSeenSwipeUpOnboarding());
+        pw.println("  hasSeenQuickScrubOnboarding: " + hasSeenQuickScrubOnboarding());
+        pw.println("  getDismissedSwipeUpOnboardingCount: "
                 + getDismissedSwipeUpOnboardingCount());
-        pw.println("      hasDismissedQuickScrubOnboardingOnce: "
+        pw.println("  hasDismissedQuickScrubOnboardingOnce: "
                 + hasDismissedQuickScrubOnboardingOnce());
-        pw.println("      getOpenedOverviewCount: " + getOpenedOverviewCount());
-        pw.println("      getOpenedOverviewFromHomeCount: " + getOpenedOverviewFromHomeCount());
-        pw.println("    }");
+        pw.println("  getOpenedOverviewCount: " + getOpenedOverviewCount());
+        pw.println("  getOpenedOverviewFromHomeCount: " + getOpenedOverviewFromHomeCount());
     }
 
     private WindowManager.LayoutParams getWindowLayoutParams(int gravity, int x) {
