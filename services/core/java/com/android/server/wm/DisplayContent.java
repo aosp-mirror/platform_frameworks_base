@@ -117,7 +117,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
-import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_STACKS;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
@@ -467,12 +466,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * The last focused window that we've notified the client that the focus is changed.
      */
     WindowState mLastFocus = null;
-
-    /**
-     * Windows that have lost input focus and are waiting for the new focus window to be displayed
-     * before they are told about this.
-     */
-    ArrayList<WindowState> mLosingFocus = new ArrayList<>();
 
     /**
      * The foreground app of this display. Windows below this app cannot be the focused window. If
@@ -897,10 +890,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (updateAllDrawn && !mTmpUpdateAllDrawn.contains(activity)) {
                 mTmpUpdateAllDrawn.add(activity);
             }
-        }
-
-        if (!mLosingFocus.isEmpty() && w.isFocused() && w.isDisplayedLw()) {
-            mWmService.mH.obtainMessage(REPORT_LOSING_FOCUS, this).sendToTarget();
         }
 
         w.updateResizingWindowIfNeeded();
@@ -2924,21 +2913,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mLastFocus != mCurrentFocus) {
             pw.print("  mLastFocus="); pw.println(mLastFocus);
         }
-        if (mLosingFocus.size() > 0) {
-            pw.println();
-            pw.println("  Windows losing focus:");
-            for (int i = mLosingFocus.size() - 1; i >= 0; i--) {
-                final WindowState w = mLosingFocus.get(i);
-                pw.print("  Losing #"); pw.print(i); pw.print(' ');
-                pw.print(w);
-                if (dumpAll) {
-                    pw.println(":");
-                    w.dump(pw, "    ", true);
-                } else {
-                    pw.println();
-                }
-            }
-        }
         pw.print("  mFocusedApp="); pw.println(mFocusedApp);
         if (mLastStatusBarVisibility != 0) {
             pw.print("  mLastStatusBarVisibility=0x");
@@ -3157,7 +3131,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mCurrentFocus, newFocus, getDisplayId(), Debug.getCallers(4));
         final WindowState oldFocus = mCurrentFocus;
         mCurrentFocus = newFocus;
-        mLosingFocus.remove(newFocus);
 
         if (newFocus != null) {
             mWinAddedSinceNullFocus.clear();
