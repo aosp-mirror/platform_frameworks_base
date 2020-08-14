@@ -45,12 +45,14 @@ import com.android.systemui.stackdivider.DividerModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -170,6 +172,10 @@ public abstract class SystemUIDefaultModule {
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(
             StatusBarKeyguardViewManager statusBarKeyguardViewManager);
+
+    @Binds
+    abstract NotificationShadeWindowController bindNotificationShadeController(
+            NotificationShadeWindowControllerImpl notificationShadeWindowController);
 
     @Binds
     abstract DozeHost provideDozeHost(DozeServiceHost dozeServiceHost);

@@ -56,6 +56,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;

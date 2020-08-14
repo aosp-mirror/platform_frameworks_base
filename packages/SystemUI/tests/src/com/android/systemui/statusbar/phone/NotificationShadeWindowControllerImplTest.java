@@ -57,7 +57,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-public class NotificationShadeWindowControllerTest extends SysuiTestCase {
+public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
     @Mock private WindowManager mWindowManager;
     @Mock private DozeParameters mDozeParameters;
@@ -72,7 +72,7 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
     @Mock private DumpManager mDumpManager;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
-    private NotificationShadeWindowController mNotificationShadeWindowController;
+    private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
 
     @Before
     public void setUp() {
@@ -80,7 +80,7 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager);

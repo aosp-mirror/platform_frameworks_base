@@ -60,7 +60,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
@@ -71,9 +70,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -87,7 +84,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -95,7 +92,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.systemui.util.InjectionInflationController;
 
 import com.google.common.collect.ImmutableList;
 
@@ -159,7 +155,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     private ArgumentCaptor<NotificationRemoveInterceptor> mRemoveInterceptorCaptor;
 
     private TestableBubbleController mBubbleController;
-    private NotificationShadeWindowController mNotificationShadeWindowController;
+    private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
     private NotificationEntryListener mEntryListener;
     private NotificationRemoveInterceptor mRemoveInterceptor;
 
@@ -199,8 +195,6 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
 
-    private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -210,25 +204,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        mSuperStatusBarViewFactory = new SuperStatusBarViewFactory(mContext,
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()
-                        .createViewInstanceCreatorFactory()),
-                new NotificationShelfComponent.Builder() {
-                    @Override
-                    public NotificationShelfComponent.Builder notificationShelf(
-                            NotificationShelf view) {
-                        return this;
-                    }
-
-                    @Override
-                    public NotificationShelfComponent build() {
-                        return mNotificationShelfComponent;
-                    }
-                },
-                mLockIconController);
-
         // Bubbles get added to status bar window view
-        mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager);
