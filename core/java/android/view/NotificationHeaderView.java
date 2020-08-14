@@ -52,13 +52,11 @@ public class NotificationHeaderView extends ViewGroup {
     private View mHeaderText;
     private View mSecondaryHeaderText;
     private OnClickListener mExpandClickListener;
-    private OnClickListener mAppOpsListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private LinearLayout mTransferChip;
     private NotificationExpandButton mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
-    private View mAppOps;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
@@ -115,7 +113,6 @@ public class NotificationHeaderView extends ViewGroup {
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
-        mAppOps = findViewById(com.android.internal.R.id.app_ops);
     }
 
     @Override
@@ -143,7 +140,6 @@ public class NotificationHeaderView extends ViewGroup {
             // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps
                     || child == mTransferChip) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             } else {
@@ -208,7 +204,6 @@ public class NotificationHeaderView extends ViewGroup {
             // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps
                     || child == mTransferChip) {
                 if (end == getMeasuredWidth()) {
                     layoutRight = end - mContentEndMargin;
@@ -277,20 +272,8 @@ public class NotificationHeaderView extends ViewGroup {
     }
 
     private void updateTouchListener() {
-        if (mExpandClickListener == null && mAppOpsListener == null) {
-            setOnTouchListener(null);
-            return;
-        }
         setOnTouchListener(mTouchListener);
         mTouchListener.bindTouchRects();
-    }
-
-    /**
-     * Sets onclick listener for app ops icons.
-     */
-    public void setAppOpsOnClickListener(OnClickListener l) {
-        mAppOpsListener = l;
-        updateTouchListener();
     }
 
     @Override
@@ -380,7 +363,6 @@ public class NotificationHeaderView extends ViewGroup {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
         private Rect mExpandButtonRect;
-        private Rect mAppOpsRect;
         private int mTouchSlop;
         private boolean mTrackGesture;
         private float mDownX;
@@ -393,8 +375,6 @@ public class NotificationHeaderView extends ViewGroup {
             mTouchRects.clear();
             addRectAroundView(mIcon);
             mExpandButtonRect = addRectAroundView(mExpandButton);
-            mAppOpsRect = addRectAroundView(mAppOps);
-            setTouchDelegate(new TouchDelegate(mAppOpsRect, mAppOps));
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
@@ -455,11 +435,6 @@ public class NotificationHeaderView extends ViewGroup {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (mTrackGesture) {
-                        if (mAppOps.isVisibleToUser() && (mAppOpsRect.contains((int) x, (int) y)
-                                || mAppOpsRect.contains((int) mDownX, (int) mDownY))) {
-                            mAppOps.performClick();
-                            return true;
-                        }
                         mExpandButton.performClick();
                     }
                     break;

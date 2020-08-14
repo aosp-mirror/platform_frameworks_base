@@ -421,7 +421,6 @@ public class NotificationTestHelper {
                 mBindStage,
                 mock(OnExpandClickListener.class),
                 mock(NotificationMediaManager.class),
-                mock(ExpandableNotificationRow.OnAppOpsClickListener.class),
                 mock(FalsingManager.class),
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier);
