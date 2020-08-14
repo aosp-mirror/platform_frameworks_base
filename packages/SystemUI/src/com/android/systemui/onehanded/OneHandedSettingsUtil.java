@@ -22,19 +22,13 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * APIs for querying or updating one handed settings .
  */
-@Singleton
 public final class OneHandedSettingsUtil {
     private static final String TAG = "OneHandedSettingsUtil";
 
@@ -64,11 +58,6 @@ public final class OneHandedSettingsUtil {
      * Auto stop one handed in {@link OneHandedSettingsUtil#ONE_HANDED_TIMEOUT_LONG_IN_SECONDS}
      */
     public static final int ONE_HANDED_TIMEOUT_LONG_IN_SECONDS = 12;
-
-    @VisibleForTesting
-    @Inject
-    OneHandedSettingsUtil() {
-    }
 
     /**
      * Register one handed preference settings observer
@@ -150,4 +139,6 @@ public final class OneHandedSettingsUtil {
         pw.print(innerPrefix + "tapsAppToExit=");
         pw.println(getSettingsTapsAppToExit(resolver));
     }
+
+    private OneHandedSettingsUtil() {}
 }

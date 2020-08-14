@@ -16,8 +16,7 @@
 
 package com.android.systemui.onehanded;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.verify;
 
 import android.os.SystemProperties;
@@ -44,7 +43,6 @@ import org.mockito.MockitoAnnotations;
 public class OneHandedUITest extends OneHandedTestCase {
     private static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
-    boolean mIsSupportOneHandedMode;
     CommandQueue mCommandQueue;
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     OneHandedUI mOneHandedUI;
@@ -52,110 +50,58 @@ public class OneHandedUITest extends OneHandedTestCase {
     @Mock
     OneHandedManagerImpl mMockOneHandedManagerImpl;
     @Mock
-    OneHandedSettingsUtil mMockSettingsUtil;
-    @Mock
     OneHandedTimeoutHandler mMockTimeoutHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mIsSupportOneHandedMode = SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false);
         mCommandQueue = new CommandQueue(mContext);
         mScreenLifecycle = new ScreenLifecycle();
         mOneHandedUI = new OneHandedUI(mContext,
                 mCommandQueue,
                 mMockOneHandedManagerImpl,
-                mMockSettingsUtil,
                 mScreenLifecycle);
         mOneHandedUI.start();
         mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
     }
 
+    @Before
+    public void assumeOneHandedModeSupported() {
+        assumeTrue(SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false));
+    }
+
     @Test
     public void testStartOneHanded() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         mOneHandedUI.startOneHanded();
 
-        verify(mMockOneHandedManagerImpl, times(1)).startOneHanded();
+        verify(mMockOneHandedManagerImpl).startOneHanded();
     }
 
     @Test
     public void testStopOneHanded() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         mOneHandedUI.stopOneHanded();
 
-        verify(mMockOneHandedManagerImpl, times(1)).stopOneHanded();
-    }
-
-    @Test
-    public void testRegisterSettingsObserver_forEnabled() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
-        final String key = Settings.Secure.ONE_HANDED_MODE_ENABLED;
-
-        verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
-    }
-
-    @Test
-    public void testRegisterSettingsObserver_forTimeout() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
-        final String key = Settings.Secure.ONE_HANDED_MODE_TIMEOUT;
-
-        verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
-    }
-
-    @Test
-    public void testRegisterSettingsObserver_forTapAppExit() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
-        final String key = Settings.Secure.TAPS_APP_TO_EXIT;
-
-        verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
+        verify(mMockOneHandedManagerImpl).stopOneHanded();
     }
 
     @Test
     public void tesSettingsObserver_updateTapAppToExit() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.TAPS_APP_TO_EXIT, 1);
 
-        verify(mMockOneHandedManagerImpl, times(1)).setTaskChangeToExit(true);
+        verify(mMockOneHandedManagerImpl).setTaskChangeToExit(true);
     }
 
     @Test
     public void tesSettingsObserver_updateEnabled() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
 
-        verify(mMockOneHandedManagerImpl, times(1)).setOneHandedEnabled(true);
+        verify(mMockOneHandedManagerImpl).setOneHandedEnabled(true);
     }
 
     @Test
     public void tesSettingsObserver_updateTimeout() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
                 OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
@@ -166,10 +112,6 @@ public class OneHandedUITest extends OneHandedTestCase {
 
     @Test
     public void tesSettingsObserver_updateSwipeToNotification() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
 
@@ -179,24 +121,16 @@ public class OneHandedUITest extends OneHandedTestCase {
     @Ignore("Clarifying do not receive callback")
     @Test
     public void testKeyguardBouncerShowing_shouldStopOneHanded() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
 
-        verify(mMockOneHandedManagerImpl, times(1)).stopOneHanded();
+        verify(mMockOneHandedManagerImpl).stopOneHanded();
     }
 
     @Test
     public void testScreenTurningOff_shouldStopOneHanded() {
-        // Bypass test if device not support one-handed mode
-        if (!mIsSupportOneHandedMode) {
-            return;
-        }
         mScreenLifecycle.dispatchScreenTurningOff();
 
-        verify(mMockOneHandedManagerImpl, times(1)).stopOneHanded();
+        verify(mMockOneHandedManagerImpl).stopOneHanded();
     }
 
 }
