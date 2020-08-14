@@ -389,6 +389,14 @@ class MediaHierarchyManager @Inject constructor(
         if (isCurrentlyInGuidedTransformation()) {
             return false
         }
+        // This is an invalid transition, and can happen when using the camera gesture from the
+        // lock screen. Disallow.
+        if (previousLocation == LOCATION_LOCKSCREEN &&
+            desiredLocation == LOCATION_QQS &&
+            statusbarState == StatusBarState.SHADE) {
+            return false
+        }
+
         if (currentLocation == LOCATION_QQS &&
                 previousLocation == LOCATION_LOCKSCREEN &&
                 (statusBarStateController.leaveOpenOnKeyguardHide() ||
@@ -604,8 +612,8 @@ class MediaHierarchyManager @Inject constructor(
             // When collapsing on the lockscreen, we want to remain in QS
             return LOCATION_QS
         }
-        if (location != LOCATION_LOCKSCREEN && desiredLocation == LOCATION_LOCKSCREEN
-                && !fullyAwake) {
+        if (location != LOCATION_LOCKSCREEN && desiredLocation == LOCATION_LOCKSCREEN &&
+                !fullyAwake) {
             // When unlocking from dozing / while waking up, the media shouldn't be transitioning
             // in an animated way. Let's keep it in the lockscreen until we're fully awake and
             // reattach it without an animation
