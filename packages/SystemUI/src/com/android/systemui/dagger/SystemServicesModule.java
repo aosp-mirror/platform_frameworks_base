@@ -43,6 +43,7 @@ import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.media.MediaRouter2Manager;
+import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
@@ -223,6 +224,11 @@ public class SystemServicesModule {
     @Provides
     static MediaRouter2Manager provideMediaRouter2Manager(Context context) {
         return MediaRouter2Manager.getInstance(context);
+    }
+
+    @Provides
+    static MediaSessionManager provideMediaSessionManager(Context context) {
+        return context.getSystemService(MediaSessionManager.class);
     }
 
     @Provides

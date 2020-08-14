@@ -68,7 +68,6 @@ private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 public class MediaDeviceManagerTest : SysuiTestCase() {
 
     private lateinit var manager: MediaDeviceManager
-    @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
@@ -91,7 +90,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
         fakeBgExecutor = FakeExecutor(FakeSystemClock())
         manager = MediaDeviceManager(context, lmmFactory, mr2, fakeFgExecutor, fakeBgExecutor,
-                mediaDataManager, dumpster)
+                dumpster)
         manager.addListener(listener)
 
         // Configure mocks.
