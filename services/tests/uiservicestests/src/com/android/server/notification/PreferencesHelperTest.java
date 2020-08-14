@@ -2633,6 +2633,96 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testLockChannelsForOEM_onlyGivenPkg_appDoesNotExistYet() {
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, 30, b, false, false);
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+        assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, 30, b.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet() {
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        // different uids, same package
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+        mHelper.createNotificationChannel(PKG_O, 3, b, false, false);
+        mHelper.createNotificationChannel(PKG_O, 30, c, true, true);
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, c.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_onlyGivenPkg_appDoesNotExistYet_restoreData()
+            throws Exception {
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
+                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
+                + "</package>"
+                + "<package name=\"" + PKG_N_MR1 + "\" uid=\"" + UID_N_MR1 + "\" >\n"
+                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
+                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, "a", false)
+                .isImportanceLockedByOEM());
+        assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, "b", false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet_restoreData()
+            throws Exception {
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + 3 + "\" >\n"
+                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
+                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
+                + "</package>"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + 30 + "\" >\n"
+                + "<channel id=\"c\" name=\"c\" importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, "a", false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, "b", false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, "c", false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
     public void testLockChannelsForOEM_channelSpecific_clearData() {
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         mHelper.getImportance(PKG_O, UID_O);
