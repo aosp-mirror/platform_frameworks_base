@@ -2143,7 +2143,11 @@ public class Vpn {
                 break;
         }
 
-        // Prepare arguments for mtpd.
+        // Prepare arguments for mtpd. MTU/MRU calculated conservatively. Only IPv4 supported
+        // because LegacyVpn.
+        // 1500 - 60 (Carrier-internal IPv6 + UDP + GTP) - 10 (PPP) - 16 (L2TP) - 8 (UDP)
+        //   - 77 (IPsec w/ SHA-2 512, 256b trunc-len, AES-CBC) - 8 (UDP encap) - 20 (IPv4)
+        //   - 28 (464xlat)
         String[] mtpd = null;
         switch (profile.type) {
             case VpnProfile.TYPE_PPTP:
@@ -2151,7 +2155,7 @@ public class Vpn {
                     iface, "pptp", profile.server, "1723",
                     "name", profile.username, "password", profile.password,
                     "linkname", "vpn", "refuse-eap", "nodefaultroute",
-                    "usepeerdns", "idle", "1800", "mtu", "1400", "mru", "1400",
+                    "usepeerdns", "idle", "1800", "mtu", "1270", "mru", "1270",
                     (profile.mppe ? "+mppe" : "nomppe"),
                 };
                 break;
@@ -2161,7 +2165,7 @@ public class Vpn {
                     iface, "l2tp", profile.server, "1701", profile.l2tpSecret,
                     "name", profile.username, "password", profile.password,
                     "linkname", "vpn", "refuse-eap", "nodefaultroute",
-                    "usepeerdns", "idle", "1800", "mtu", "1400", "mru", "1400",
+                    "usepeerdns", "idle", "1800", "mtu", "1270", "mru", "1270",
                 };
                 break;
         }

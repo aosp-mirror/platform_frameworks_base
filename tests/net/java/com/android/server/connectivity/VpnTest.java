@@ -1090,7 +1090,7 @@ public class VpnTest {
                     new String[] { EGRESS_IFACE, "l2tp", expectedAddr, "1701", profile.l2tpSecret,
                             "name", profile.username, "password", profile.password,
                             "linkname", "vpn", "refuse-eap", "nodefaultroute", "usepeerdns",
-                            "idle", "1800", "mtu", "1400", "mru", "1400" },
+                            "idle", "1800", "mtu", "1270", "mru", "1270" },
                     deps.mtpdArgs.get(10, TimeUnit.SECONDS));
             // Now wait for the runner to be ready before testing for the route.
             legacyRunnerReady.block(10_000);
