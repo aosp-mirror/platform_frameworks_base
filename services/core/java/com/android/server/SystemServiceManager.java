@@ -27,7 +27,10 @@ import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.utils.TimingsTraceAndSlog;
 
@@ -73,6 +76,13 @@ public class SystemServiceManager {
     private int mCurrentPhase = -1;
 
     private UserManagerInternal mUserManagerInternal;
+
+    /**
+     * Map of started {@link TargetUser TargetUsers} by user id; users are added on start and
+     * removed after they're completely shut down.
+     */
+    @GuardedBy("mTargetUsers")
+    private final SparseArray<TargetUser> mTargetUsers = new SparseArray<>();
 
     SystemServiceManager(Context context) {
         mContext = context;
@@ -240,21 +250,26 @@ public class SystemServiceManager {
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
-    private @NonNull UserInfo getUserInfo(@UserIdInt int userHandle) {
-        if (mUserManagerInternal == null) {
-            throw new IllegalStateException("mUserManagerInternal not set yet");
+    private @NonNull TargetUser getTargetUser(@UserIdInt int userHandle) {
+        final TargetUser targetUser;
+        synchronized (mTargetUsers) {
+            targetUser = mTargetUsers.get(userHandle);
         }
-        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userHandle);
-        if (userInfo == null) {
-            throw new IllegalStateException("No UserInfo for " + userHandle);
-        }
-        return userInfo;
+        Preconditions.checkState(targetUser != null, "No TargetUser for " + userHandle);
+        return targetUser;
     }
 
     /**
      * Starts the given user.
      */
     public void startUser(final @NonNull TimingsTraceAndSlog t, final @UserIdInt int userHandle) {
+        // Create cached TargetUser
+        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userHandle);
+        Preconditions.checkState(userInfo != null, "No UserInfo for " + userHandle);
+        synchronized (mTargetUsers) {
+            mTargetUsers.put(userHandle, new TargetUser(userInfo));
+        }
+
         onUser(t, START, userHandle);
     }
 
@@ -291,6 +306,11 @@ public class SystemServiceManager {
      */
     public void cleanupUser(final @UserIdInt int userHandle) {
         onUser(CLEANUP, userHandle);
+
+        // Remove cached TargetUser
+        synchronized (mTargetUsers) {
+            mTargetUsers.remove(userHandle);
+        }
     }
 
     private void onUser(@NonNull String onWhat, @UserIdInt int userHandle) {
@@ -306,9 +326,9 @@ public class SystemServiceManager {
             @UserIdInt int curUserId, @UserIdInt int prevUserId) {
         t.traceBegin("ssm." + onWhat + "User-" + curUserId);
         Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId);
-        final TargetUser curUser = new TargetUser(getUserInfo(curUserId));
+        final TargetUser curUser = getTargetUser(curUserId);
         final TargetUser prevUser = prevUserId == UserHandle.USER_NULL ? null
-                : new TargetUser(getUserInfo(prevUserId));
+                : getTargetUser(prevUserId);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -437,7 +457,7 @@ public class SystemServiceManager {
      */
     public void dump() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Current phase: ").append(mCurrentPhase).append("\n");
+        builder.append("Current phase: ").append(mCurrentPhase).append('\n');
         builder.append("Services:\n");
         final int startedLen = mServices.size();
         for (int i = 0; i < startedLen; i++) {
@@ -446,6 +466,14 @@ public class SystemServiceManager {
                     .append(service.getClass().getSimpleName())
                     .append("\n");
         }
+
+        builder.append("Target users: ");
+        final int targetUsersSize = mTargetUsers.size();
+        for (int i = 0; i < targetUsersSize; i++) {
+            mTargetUsers.valueAt(i).dump(builder);
+            if (i != targetUsersSize - 1) builder.append(',');
+        }
+        builder.append('\n');
 
         Slog.e(TAG, builder.toString());
     }

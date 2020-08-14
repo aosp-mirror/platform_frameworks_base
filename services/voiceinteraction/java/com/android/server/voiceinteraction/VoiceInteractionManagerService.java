@@ -164,13 +164,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
     }
 
-    private boolean isSupported(UserInfo user) {
+    @Override
+    public boolean isUserSupported(@NonNull TargetUser user) {
         return user.isFull();
     }
 
-    @Override
-    public boolean isUserSupported(TargetUser user) {
-        return isSupported(user.getUserInfo());
+    private boolean isUserSupported(@NonNull UserInfo user) {
+        return user.isFull();
     }
 
     @Override
@@ -461,7 +461,7 @@ public class VoiceInteractionManagerService extends SystemService {
         private void setCurrentUserLocked(@UserIdInt int userHandle) {
             mCurUser = userHandle;
             final UserInfo userInfo = mUserManagerInternal.getUserInfo(mCurUser);
-            mCurUserSupported = isSupported(userInfo);
+            mCurUserSupported = isUserSupported(userInfo);
         }
 
         public void switchUser(@UserIdInt int userHandle) {
