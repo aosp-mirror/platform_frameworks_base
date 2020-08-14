@@ -282,6 +282,16 @@ public class NotificationManager {
             = "android.app.action.INTERRUPTION_FILTER_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of
+     * {@link #hasEnabledNotificationListener(String, UserHandle)} changes.
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED =
+            "android.app.action.NOTIFICATION_LISTENER_ENABLED_CHANGED";
+
+    /**
      * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
      * @hide
      */
