@@ -26,8 +26,6 @@ import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
@@ -47,9 +45,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -77,9 +73,6 @@ public class AudioRecordingDisclosureBar implements
             STATE_NOT_SHOWN,
             STATE_APPEARING,
             STATE_SHOWN,
-            STATE_MINIMIZING,
-            STATE_MINIMIZED,
-            STATE_MAXIMIZING,
             STATE_DISAPPEARING
     })
     public @interface State {}
@@ -88,13 +81,9 @@ public class AudioRecordingDisclosureBar implements
     private static final int STATE_NOT_SHOWN = 0;
     private static final int STATE_APPEARING = 1;
     private static final int STATE_SHOWN = 2;
-    private static final int STATE_MINIMIZING = 3;
-    private static final int STATE_MINIMIZED = 4;
-    private static final int STATE_MAXIMIZING = 5;
-    private static final int STATE_DISAPPEARING = 6;
+    private static final int STATE_DISAPPEARING = 3;
 
     private static final int ANIMATION_DURATION = 600;
-    private static final int MAXIMIZED_DURATION = 3000;
 
     private final Context mContext;
     private boolean mIsEnabled;
@@ -116,30 +105,6 @@ public class AudioRecordingDisclosureBar implements
      */
     private AudioActivityObserver[] mAudioActivityObservers;
     /**
-     * Whether the indicator should expand and show the recording application's label.
-     * If disabled ({@code false}) the "minimized" ({@link #STATE_MINIMIZED}) indicator would appear
-     * on the screen whenever an application is recording, but will not reveal to the user what
-     * application this is.
-     */
-    private final boolean mRevealRecordingPackages;
-    /**
-     * Set of applications that we've notified the user about since the indicator came up. Meaning
-     * that if an application is in this list then at some point since the indicator came up, it
-     * was expanded showing this application's title.
-     * Used not to notify the user about the same application again while the indicator is shown.
-     * We empty this set every time the indicator goes off the screen (we always call {@code
-     * mSessionNotifiedPackages.clear()} before calling {@link #hide()}).
-     */
-    private final Set<String> mSessionNotifiedPackages = new ArraySet<>();
-    /**
-     * If an application starts recording while the TV indicator is neither in {@link
-     * #STATE_NOT_SHOWN} nor in {@link #STATE_MINIMIZED}, then we add the application's package
-     * name to the queue, from which we take packages names one by one to disclose the
-     * corresponding applications' titles to the user, whenever the indicator eventually comes to
-     * one of the two aforementioned states.
-     */
-    private final Queue<String> mPendingNotificationPackages = new LinkedList<>();
-    /**
      * Set of applications for which we make an exception and do not show the indicator. This gets
      * populated once - in {@link #AudioRecordingDisclosureBar(Context)}.
      */
@@ -149,8 +114,6 @@ public class AudioRecordingDisclosureBar implements
         mContext = context;
 
         // Load configs
-        mRevealRecordingPackages = mContext.getResources().getBoolean(
-                R.bool.audio_recording_disclosure_reveal_packages);
         reloadExemptPackages();
 
         mIsEnabled = DeviceConfig.getBoolean(NAMESPACE_PRIVACY, ENABLED_FLAG, true);
@@ -210,10 +173,6 @@ public class AudioRecordingDisclosureBar implements
         if (mState != STATE_NOT_SHOWN) {
             removeIndicatorView();
         }
-
-        // Clean up the state.
-        mSessionNotifiedPackages.clear();
-        mPendingNotificationPackages.clear();
     }
 
     @UiThread
@@ -231,68 +190,29 @@ public class AudioRecordingDisclosureBar implements
         }
 
         if (active) {
-            showIndicatorForPackageIfNeeded(packageName);
+            showIfNotShown();
         } else {
             hideIndicatorIfNeeded();
         }
     }
 
     @UiThread
-    private void showIndicatorForPackageIfNeeded(String packageName) {
-        if (DEBUG) Log.d(TAG, "showIndicatorForPackageIfNeeded, packageName=" + packageName);
-        if (!mSessionNotifiedPackages.add(packageName)) {
-            // We've already notified user about this app, no need to do it again.
-            if (DEBUG) Log.d(TAG, "   - already notified");
-            return;
-        }
-
-        switch (mState) {
-            case STATE_NOT_SHOWN:
-                show(packageName);
-                break;
-
-            case STATE_MINIMIZED:
-                if (mRevealRecordingPackages) {
-                    expand(packageName);
-                }
-                break;
-
-            case STATE_DISAPPEARING:
-            case STATE_APPEARING:
-            case STATE_MAXIMIZING:
-            case STATE_SHOWN:
-            case STATE_MINIMIZING:
-                // Currently animating or expanded. Thus add to the pending notifications, and it
-                // will be picked up once the indicator comes to the STATE_MINIMIZED.
-                mPendingNotificationPackages.add(packageName);
-                break;
-        }
-    }
-
-    @UiThread
     private void hideIndicatorIfNeeded() {
-        // If not MINIMIZED, will check whether the indicator should be hidden when the indicator
-        // comes to the STATE_MINIMIZED eventually.
-        if (mState != STATE_MINIMIZED) return;
+        // If not STATE_APPEARING, will check whether the indicator should be hidden when the
+        // indicator comes to the STATE_SHOWN.
+        // If STATE_DISAPPEARING or STATE_SHOWN - nothing else for us to do here.
+        if (mState != STATE_SHOWN) return;
 
-        // If is in the STATE_MINIMIZED, but there are other active recorders - simply ignore.
-        for (int index = mAudioActivityObservers.length - 1; index >= 0; index--) {
-            for (String activePackage : mAudioActivityObservers[index].getActivePackages()) {
-                if (mExemptPackages.contains(activePackage)) continue;
-                return;
-            }
+        // If is in the STATE_SHOWN and there are no active recorders - hide.
+        if (!hasActiveRecorders()) {
+            hide();
         }
-
-        // Clear the state and hide the indicator.
-        mSessionNotifiedPackages.clear();
-        hide();
     }
 
     @UiThread
-    private void show(String packageName) {
-        if (DEBUG) {
-            Log.d(TAG, "Showing indicator");
-        }
+    private void showIfNotShown() {
+        if (mState != STATE_NOT_SHOWN) return;
+        if (DEBUG) Log.d(TAG, "Showing indicator");
 
         mIsLtr = mContext.getResources().getConfiguration().getLayoutDirection()
                 == View.LAYOUT_DIRECTION_LTR;
@@ -308,30 +228,14 @@ public class AudioRecordingDisclosureBar implements
         mTextView = mTextsContainers.findViewById(R.id.text);
         mBgEnd = mIndicatorView.findViewById(R.id.bg_end);
 
-        // Set up the notification text
-        if (mRevealRecordingPackages) {
-            // Swap background drawables depending on layout directions (both drawables have rounded
-            // corners only on one side)
-            if (mIsLtr) {
-                mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
-                mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
-            } else {
-                mBgEnd.setBackgroundResource(R.drawable.tv_rect_dark_left_rounded);
-                mIconContainerBg.setBackgroundResource(R.drawable.tv_rect_dark_right_rounded);
-            }
-
-            final String label = getApplicationLabel(packageName);
-            mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
-        } else {
-            mTextsContainers.setVisibility(View.GONE);
-            mIconContainerBg.setVisibility(View.GONE);
-            mTextView.setVisibility(View.GONE);
-            mBgEnd.setVisibility(View.GONE);
-            mTextsContainers = null;
-            mIconContainerBg = null;
-            mTextView = null;
-            mBgEnd = null;
-        }
+        mTextsContainers.setVisibility(View.GONE);
+        mIconContainerBg.setVisibility(View.GONE);
+        mTextView.setVisibility(View.GONE);
+        mBgEnd.setVisibility(View.GONE);
+        mTextsContainers = null;
+        mIconContainerBg = null;
+        mTextView = null;
+        mBgEnd = null;
 
         // Initially change the visibility to INVISIBLE, wait until and receives the size and
         // then animate it moving from "off" the screen correctly
@@ -366,9 +270,7 @@ public class AudioRecordingDisclosureBar implements
                                             @Override
                                             public void onAnimationStart(Animator animation,
                                                     boolean isReverse) {
-                                                if (mState == STATE_STOPPED) {
-                                                    return;
-                                                }
+                                                if (mState == STATE_STOPPED) return;
 
                                                 // Indicator is INVISIBLE at the moment, change it.
                                                 mIndicatorView.setVisibility(View.VISIBLE);
@@ -376,11 +278,7 @@ public class AudioRecordingDisclosureBar implements
 
                                             @Override
                                             public void onAnimationEnd(Animator animation) {
-                                                if (mRevealRecordingPackages) {
-                                                    onExpanded();
-                                                } else {
-                                                    onMinimized();
-                                                }
+                                                onAppeared();
                                             }
                                         });
                                 set.start();
@@ -404,60 +302,9 @@ public class AudioRecordingDisclosureBar implements
     }
 
     @UiThread
-    private void expand(String packageName) {
-        assertRevealingRecordingPackages();
-
-        final String label = getApplicationLabel(packageName);
-        mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
-
-        final AnimatorSet set = new AnimatorSet();
-        set.playTogether(
-                ObjectAnimator.ofFloat(mIconTextsContainer, View.TRANSLATION_X, 0),
-                ObjectAnimator.ofFloat(mIconContainerBg, View.ALPHA, 1f),
-                ObjectAnimator.ofFloat(mTextsContainers, View.ALPHA, 1f),
-                ObjectAnimator.ofFloat(mBgEnd, View.ALPHA, 1f));
-        set.setDuration(ANIMATION_DURATION);
-        set.addListener(
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        onExpanded();
-                    }
-                });
-        set.start();
-
-        mState = STATE_MAXIMIZING;
-    }
-
-    @UiThread
-    private void minimize() {
-        assertRevealingRecordingPackages();
-
-        final int targetOffset = (mIsLtr ? 1 : -1) * mTextsContainers.getWidth();
-        final AnimatorSet set = new AnimatorSet();
-        set.playTogether(
-                ObjectAnimator.ofFloat(mIconTextsContainer, View.TRANSLATION_X, targetOffset),
-                ObjectAnimator.ofFloat(mIconContainerBg, View.ALPHA, 0f),
-                ObjectAnimator.ofFloat(mTextsContainers, View.ALPHA, 0f),
-                ObjectAnimator.ofFloat(mBgEnd, View.ALPHA, 0f));
-        set.setDuration(ANIMATION_DURATION);
-        set.addListener(
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        onMinimized();
-                    }
-                });
-        set.start();
-
-        mState = STATE_MINIMIZING;
-    }
-
-    @UiThread
     private void hide() {
-        if (DEBUG) {
-            Log.d(TAG, "Hide indicator");
-        }
+        if (DEBUG) Log.d(TAG, "Hide indicator");
+
         final int targetOffset = (mIsLtr ? 1 : -1) * (mIndicatorView.getWidth()
                 - (int) mIconTextsContainer.getTranslationX());
         final AnimatorSet set = new AnimatorSet();
@@ -477,49 +324,37 @@ public class AudioRecordingDisclosureBar implements
         mState = STATE_DISAPPEARING;
     }
 
-    @UiThread
-    private void onExpanded() {
-        if (mState == STATE_STOPPED) {
-            return;
-        }
 
-        assertRevealingRecordingPackages();
+    @UiThread
+    private void onAppeared() {
+        if (mState == STATE_STOPPED) return;
 
         mState = STATE_SHOWN;
 
-        mIndicatorView.postDelayed(this::minimize, MAXIMIZED_DURATION);
-    }
-
-    @UiThread
-    private void onMinimized() {
-        if (mState == STATE_STOPPED) {
-            return;
-        }
-
-        mState = STATE_MINIMIZED;
-
-        if (mRevealRecordingPackages && !mPendingNotificationPackages.isEmpty()) {
-            // There is a new application that started recording, tell the user about it.
-            expand(mPendingNotificationPackages.poll());
-        } else {
-            hideIndicatorIfNeeded();
-        }
+        hideIndicatorIfNeeded();
     }
 
     @UiThread
     private void onHidden() {
-        if (mState == STATE_STOPPED) {
-            return;
-        }
+        if (mState == STATE_STOPPED) return;
 
         removeIndicatorView();
         mState = STATE_NOT_SHOWN;
 
-        // Check if anybody started recording while we were in STATE_DISAPPEARING
-        if (!mPendingNotificationPackages.isEmpty()) {
-            // There is a new application that started recording, tell the user about it.
-            show(mPendingNotificationPackages.poll());
+        if (hasActiveRecorders()) {
+            // Got new recorders, show again.
+            showIfNotShown();
         }
+    }
+
+    private boolean hasActiveRecorders() {
+        for (int index = mAudioActivityObservers.length - 1; index >= 0; index--) {
+            for (String activePackage : mAudioActivityObservers[index].getActivePackages()) {
+                if (mExemptPackages.contains(activePackage)) continue;
+                return true;
+            }
+        }
+        return false;
     }
 
     private void removeIndicatorView() {
@@ -534,26 +369,6 @@ public class AudioRecordingDisclosureBar implements
         mTextsContainers = null;
         mTextView = null;
         mBgEnd = null;
-    }
-
-    private String getApplicationLabel(String packageName) {
-        assertRevealingRecordingPackages();
-
-        final PackageManager pm = mContext.getPackageManager();
-        final ApplicationInfo appInfo;
-        try {
-            appInfo = pm.getApplicationInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return packageName;
-        }
-        return pm.getApplicationLabel(appInfo).toString();
-    }
-
-    private void assertRevealingRecordingPackages() {
-        if (!mRevealRecordingPackages) {
-            Log.e(TAG, "Not revealing recording packages",
-                    DEBUG ? new RuntimeException("Should not be called") : null);
-        }
     }
 
     private static List<String> splitByComma(String string) {
