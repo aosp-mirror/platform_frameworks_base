@@ -44,7 +44,7 @@ TEST(UidMapTest, TestIsolatedUID) {
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> subscriberAlarmMonitor;
-    // Construct the processor with a dummy sendBroadcast function that does nothing.
+    // Construct the processor with a no-op sendBroadcast function that does nothing.
     StatsLogProcessor p(
             m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
             [](const ConfigKey& key) { return true; },

@@ -97,7 +97,7 @@ bool parseProtoOutputStream(ProtoOutputStream& protoOutput, T* message) {
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }
 
-// Checks the truncate timestamp annotation as well as the blacklisted range of 300,000 - 304,999.
+// Checks the truncate timestamp annotation as well as the restricted range of 300,000 - 304,999.
 // Returns the truncated timestamp to the nearest 5 minutes if needed.
 int64_t truncateTimestampIfNecessary(const LogEvent& event);
 
