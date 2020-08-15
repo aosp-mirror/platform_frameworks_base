@@ -23,6 +23,8 @@ import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
+import android.os.CreateAppDataArgs;
+import android.os.CreateAppDataResult;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.IInstalld;
@@ -39,7 +41,10 @@ import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
 import java.io.FileDescriptor;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -176,37 +181,140 @@ public class Installer extends SystemService {
         }
     }
 
+    private static CreateAppDataArgs buildCreateAppDataArgs(String uuid, String packageName,
+            int userId, int flags, int appId, String seInfo, int targetSdkVersion) {
+        final CreateAppDataArgs args = new CreateAppDataArgs();
+        args.uuid = uuid;
+        args.packageName = packageName;
+        args.userId = userId;
+        args.flags = flags;
+        args.appId = appId;
+        args.seInfo = seInfo;
+        args.targetSdkVersion = targetSdkVersion;
+        return args;
+    }
+
+    private static CreateAppDataResult buildPlaceholderCreateAppDataResult() {
+        final CreateAppDataResult result = new CreateAppDataResult();
+        result.ceDataInode = -1;
+        result.exceptionCode = 0;
+        result.exceptionMessage = null;
+        return result;
+    }
+
+    /**
+     * @deprecated callers are encouraged to migrate to using {@link Batch} to
+     *             more efficiently handle operations in bulk.
+     */
+    @Deprecated
     public long createAppData(String uuid, String packageName, int userId, int flags, int appId,
             String seInfo, int targetSdkVersion) throws InstallerException {
-        if (!checkBeforeRemote()) return -1;
+        final CreateAppDataArgs args = buildCreateAppDataArgs(uuid, packageName, userId, flags,
+                appId, seInfo, targetSdkVersion);
+        final CreateAppDataResult result = createAppData(args);
+        if (result.exceptionCode == 0) {
+            return result.ceDataInode;
+        } else {
+            throw new InstallerException(result.exceptionMessage);
+        }
+    }
+
+    public @NonNull CreateAppDataResult createAppData(@NonNull CreateAppDataArgs args)
+            throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return buildPlaceholderCreateAppDataResult();
+        }
         try {
-            return mInstalld.createAppData(uuid, packageName, userId, flags, appId, seInfo,
-                    targetSdkVersion);
+            return mInstalld.createAppData(args);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public @NonNull CreateAppDataResult[] createAppDataBatched(@NonNull CreateAppDataArgs[] args)
+            throws InstallerException {
+        if (!checkBeforeRemote()) {
+            final CreateAppDataResult[] results = new CreateAppDataResult[args.length];
+            Arrays.fill(results, buildPlaceholderCreateAppDataResult());
+            return results;
+        }
+        try {
+            return mInstalld.createAppDataBatched(args);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
     /**
-     * Batched version of createAppData for use with multiple packages.
+     * Class that collects multiple {@code installd} operations together in an
+     * attempt to more efficiently execute them in bulk.
+     * <p>
+     * Instead of returning results immediately, {@link CompletableFuture}
+     * instances are returned which can be used to chain follow-up work for each
+     * request.
+     * <p>
+     * The creator of this object <em>must</em> invoke {@link #execute()}
+     * exactly once to begin execution of all pending operations. Once execution
+     * has been kicked off, no additional events can be enqueued into this
+     * instance, but multiple instances can safely exist in parallel.
      */
-    public void createAppDataBatched(String[] uuids, String[] packageNames, int userId, int flags,
-            int[] appIds, String[] seInfos, int[] targetSdkVersions) throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        final int batchSize = 256;
-        for (int i = 0; i < uuids.length; i += batchSize) {
-            int to = i + batchSize;
-            if (to > uuids.length) {
-                to = uuids.length;
-            }
+    public static class Batch {
+        private static final int CREATE_APP_DATA_BATCH_SIZE = 256;
 
-            try {
-                mInstalld.createAppDataBatched(Arrays.copyOfRange(uuids, i, to),
-                        Arrays.copyOfRange(packageNames, i, to), userId, flags,
-                        Arrays.copyOfRange(appIds, i, to), Arrays.copyOfRange(seInfos, i, to),
-                        Arrays.copyOfRange(targetSdkVersions, i, to));
-            } catch (Exception e) {
-                throw InstallerException.from(e);
+        private boolean mExecuted;
+
+        private final List<CreateAppDataArgs> mArgs = new ArrayList<>();
+        private final List<CompletableFuture<Long>> mFutures = new ArrayList<>();
+
+        /**
+         * Enqueue the given {@code installd} operation to be executed in the
+         * future when {@link #execute(Installer)} is invoked.
+         * <p>
+         * Callers of this method are not required to hold a monitor lock on an
+         * {@link Installer} object.
+         */
+        public synchronized @NonNull CompletableFuture<Long> createAppData(String uuid,
+                String packageName, int userId, int flags, int appId, String seInfo,
+                int targetSdkVersion) {
+            if (mExecuted) throw new IllegalStateException();
+
+            final CreateAppDataArgs args = buildCreateAppDataArgs(uuid, packageName, userId, flags,
+                    appId, seInfo, targetSdkVersion);
+            final CompletableFuture<Long> future = new CompletableFuture<>();
+            mArgs.add(args);
+            mFutures.add(future);
+            return future;
+        }
+
+        /**
+         * Execute all pending {@code installd} operations that have been
+         * collected by this batch in a blocking fashion.
+         * <p>
+         * Callers of this method <em>must</em> hold a monitor lock on the given
+         * {@link Installer} object.
+         */
+        public synchronized void execute(@NonNull Installer installer) throws InstallerException {
+            if (mExecuted) throw new IllegalStateException();
+            mExecuted = true;
+
+            final int size = mArgs.size();
+            for (int i = 0; i < size; i += CREATE_APP_DATA_BATCH_SIZE) {
+                final CreateAppDataArgs[] args = new CreateAppDataArgs[Math.min(size - i,
+                        CREATE_APP_DATA_BATCH_SIZE)];
+                for (int j = 0; j < args.length; j++) {
+                    args[j] = mArgs.get(i + j);
+                }
+                final CreateAppDataResult[] results = installer.createAppDataBatched(args);
+                for (int j = 0; j < args.length; j++) {
+                    final CreateAppDataResult result = results[j];
+                    final CompletableFuture<Long> future = mFutures.get(i + j);
+                    if (result.exceptionCode == 0) {
+                        future.complete(result.ceDataInode);
+                    } else {
+                        future.completeExceptionally(
+                                new InstallerException(result.exceptionMessage));
+                    }
+                }
             }
         }
     }
