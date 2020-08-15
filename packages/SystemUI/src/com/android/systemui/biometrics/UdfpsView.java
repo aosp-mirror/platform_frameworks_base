@@ -54,7 +54,7 @@ public class UdfpsView extends View {
     private final Rect mTouchableRegion;
     private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
 
-    private boolean mIsFingerDown;
+    private boolean mIsScrimShowing;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,7 +99,7 @@ public class UdfpsView extends View {
             internalInsetsInfo.touchableRegion.set(mTouchableRegion);
         };
 
-        mIsFingerDown = false;
+        mIsScrimShowing = false;
     }
 
     @Override
@@ -131,7 +131,7 @@ public class UdfpsView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mIsFingerDown) {
+        if (mIsScrimShowing) {
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
         canvas.drawOval(mSensorRect, mSensorPaint);
@@ -148,19 +148,19 @@ public class UdfpsView extends View {
         mScrimPaint.setAlpha(alpha);
     }
 
-    boolean isFingerDown() {
-        return mIsFingerDown;
+    boolean isScrimShowing() {
+        return mIsScrimShowing;
     }
 
-    void onFingerDown() {
-        mIsFingerDown = true;
+    void showScrimAndDot() {
+        mIsScrimShowing = true;
         mSensorPaint.setStyle(Paint.Style.FILL);
-        postInvalidate();
+        invalidate();
     }
 
-    void onFingerUp() {
-        mIsFingerDown = false;
+    void hideScrimAndDot() {
+        mIsScrimShowing = false;
         mSensorPaint.setStyle(Paint.Style.STROKE);
-        postInvalidate();
+        invalidate();
     }
 }
