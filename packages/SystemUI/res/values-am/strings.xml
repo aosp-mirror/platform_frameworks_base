@@ -73,7 +73,7 @@
     <string name="usb_contaminant_message" msgid="7730476585174719805">"መሣሪያዎን ከፈሳሽ ወይም ፍርስራሽ ለመጠበቅ ሲባል የዩኤስቢ ወደቡ ተሰናክሏል፣ እና ማናቸውም ተቀጥላዎችን አያገኝም።\n\nየዩኤስቢ ወደቡን እንደገና መጠቀም ችግር በማይኖረው ጊዜ ማሳወቂያ ይደርሰዎታል።"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ዩኤስቢ አንቃ"</string>
-    <string name="learn_more" msgid="4690632085667273811">"የበለጠ መረዳት"</string>
+    <string name="learn_more" msgid="4690632085667273811">"የበለጠ ለመረዳት"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ማያ ለመሙለት ሳብ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገጽ እይታ"</string>
@@ -1075,7 +1075,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ምክሮችን በመጫን ላይ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ሚዲያ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"የአሁኑን ክፍለ-ጊዜ ደብቅ።"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ደብቅ"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"አሰናብት"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ከቆመበት ቀጥል"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ቅንብሮች"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
