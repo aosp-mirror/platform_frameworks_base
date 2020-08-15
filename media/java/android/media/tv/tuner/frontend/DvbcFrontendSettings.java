@@ -119,7 +119,11 @@ public class DvbcFrontendSettings extends FrontendSettings {
     public static final int ANNEX_C = Constants.FrontendDvbcAnnex.C;
 
 
-    /** @hide */
+    /**
+     * @deprecated Use the {@link FrontendSettings#FrontendSpectralInversion} instead.
+     * @hide
+     */
+    @Deprecated
     @IntDef(prefix = "SPECTRAL_INVERSION_",
             value = {SPECTRAL_INVERSION_UNDEFINED, SPECTRAL_INVERSION_NORMAL,
                     SPECTRAL_INVERSION_INVERTED})
@@ -128,17 +132,26 @@ public class DvbcFrontendSettings extends FrontendSettings {
 
     /**
      * Spectral Inversion Type undefined.
+     *
+     * @deprecated Use the {@link FrontendSettings#FRONTEND_SPECTRAL_INVERSION_UNDEFINED} instead.
      */
+    @Deprecated
     public static final int SPECTRAL_INVERSION_UNDEFINED =
             Constants.FrontendDvbcSpectralInversion.UNDEFINED;
     /**
      * Normal Spectral Inversion.
+     *
+     * @deprecated Use the {@link FrontendSettings#FRONTEND_SPECTRAL_INVERSION_NORMAL} instead.
      */
+    @Deprecated
     public static final int SPECTRAL_INVERSION_NORMAL =
             Constants.FrontendDvbcSpectralInversion.NORMAL;
     /**
      * Inverted Spectral Inversion.
+     *
+     * @deprecated Use the {@link FrontendSettings#FRONTEND_SPECTRAL_INVERSION_INVERTED} instead.
      */
+    @Deprecated
     public static final int SPECTRAL_INVERSION_INVERTED =
             Constants.FrontendDvbcSpectralInversion.INVERTED;
 
