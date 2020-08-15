@@ -233,7 +233,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onAspectRatioChanged(float aspectRatio) {
-            mHandler.post(() -> mPipBoundsHandler.onAspectRatioChanged(aspectRatio));
+            mHandler.post(() -> {
+                mPipBoundsHandler.onAspectRatioChanged(aspectRatio);
+                mTouchHandler.onAspectRatioChanged();
+            });
         }
     }
 
