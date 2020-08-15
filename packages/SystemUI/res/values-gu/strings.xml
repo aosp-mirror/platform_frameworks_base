@@ -125,7 +125,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ઍક્સેસિબિલિટી"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"સ્ક્રીન ફેરવો"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ઝલક"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"શોધો"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"શોધ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરો"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
@@ -1069,8 +1069,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
-    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
-    <skip />
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"છોડી દો"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>

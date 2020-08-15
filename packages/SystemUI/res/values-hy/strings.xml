@@ -1069,8 +1069,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Մեդիա"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Թաքցրեք ընթացիկ աշխատաշրջանը"</string>
-    <!-- no translation found for controls_media_dismiss_button (9081375542265132213) -->
-    <skip />
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Փակել"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Շարունակել"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Կարգավորումներ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ակտիվ չէ, ստուգեք հավելվածը"</string>
