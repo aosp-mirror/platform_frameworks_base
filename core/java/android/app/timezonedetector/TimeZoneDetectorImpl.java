@@ -57,19 +57,6 @@ public final class TimeZoneDetectorImpl implements TimeZoneDetector {
     }
 
     @Override
-    @NonNull
-    public TimeZoneConfiguration getConfiguration() {
-        if (DEBUG) {
-            Log.d(TAG, "getConfiguration called");
-        }
-        try {
-            return mITimeZoneDetectorService.getConfiguration();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @Override
     public boolean updateConfiguration(@NonNull TimeZoneConfiguration configuration) {
         if (DEBUG) {
             Log.d(TAG, "updateConfiguration called: " + configuration);
@@ -94,8 +81,8 @@ public final class TimeZoneDetectorImpl implements TimeZoneDetector {
                 ITimeZoneConfigurationListener iListener =
                         new ITimeZoneConfigurationListener.Stub() {
                     @Override
-                    public void onChange(@NonNull TimeZoneConfiguration configuration) {
-                        notifyConfigurationListeners(configuration);
+                    public void onChange() {
+                        notifyConfigurationListeners();
                     }
                 };
                 mConfigurationReceiver = iListener;
@@ -116,14 +103,14 @@ public final class TimeZoneDetectorImpl implements TimeZoneDetector {
         }
     }
 
-    private void notifyConfigurationListeners(@NonNull TimeZoneConfiguration configuration) {
+    private void notifyConfigurationListeners() {
         final ArraySet<TimeZoneConfigurationListener> configurationListeners;
         synchronized (this) {
             configurationListeners = new ArraySet<>(mConfigurationListeners);
         }
         int size = configurationListeners.size();
         for (int i = 0; i < size; i++) {
-            configurationListeners.valueAt(i).onChange(configuration);
+            configurationListeners.valueAt(i).onChange();
         }
     }
 
