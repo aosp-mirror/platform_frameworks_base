@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "metrics_test_helper.h"
-#include "src/matchers/SimpleLogMatchingTracker.h"
+#include "src/matchers/SimpleAtomMatchingTracker.h"
 #include "src/metrics/MetricProducer.h"
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
