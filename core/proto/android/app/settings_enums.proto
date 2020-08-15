@@ -2743,4 +2743,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: S
     DIALOG_MAGNIFICATION_SWITCH_SHORTCUT = 1849;
+
+    // OPEN: Settings > Network & internet > Adaptive connectivity
+    // CATEGORY: SETTINGS
+    // OS: R QPR
+    ADAPTIVE_CONNECTIVITY_CATEGORY = 1850;
 }
