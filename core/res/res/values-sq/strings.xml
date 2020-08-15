@@ -751,7 +751,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Faks shtëpie"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Biper"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"Tjetër"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"Ri-telefono"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"Kthim telefonate"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"Numri i telefonit të makinës"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Numri kryesor i telefonit të kompanisë"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
