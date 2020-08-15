@@ -1075,7 +1075,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ezkutatu uneko saioa."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ezkutatu"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Baztertu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ezarpenak"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktibo; egiaztatu aplikazioa"</string>
