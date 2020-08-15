@@ -81,6 +81,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Debug;
 import android.os.Handler;
@@ -94,6 +95,8 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -103,10 +106,13 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.compat.CompatChange;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -209,12 +215,99 @@ public final class OomAdjuster {
     private final ProcessList mProcessList;
 
     private final int mNumSlots;
-    private ArrayList<ProcessRecord> mTmpProcessList = new ArrayList<ProcessRecord>();
-    private ArrayList<UidRecord> mTmpBecameIdle = new ArrayList<UidRecord>();
-    private ActiveUids mTmpUidRecords;
-    private ArrayDeque<ProcessRecord> mTmpQueue;
+    private final ArrayList<ProcessRecord> mTmpProcessList = new ArrayList<ProcessRecord>();
+    private final ArrayList<UidRecord> mTmpBecameIdle = new ArrayList<UidRecord>();
+    private final ActiveUids mTmpUidRecords;
+    private final ArrayDeque<ProcessRecord> mTmpQueue;
+    private final ArraySet<ProcessRecord> mPendingProcessSet = new ArraySet<>();
 
-    private final IPlatformCompat mPlatformCompat;
+    private final PlatformCompatCache mPlatformCompatCache;
+
+    private static class PlatformCompatCache {
+        private final PlatformCompat mPlatformCompat;
+        private final IPlatformCompat mIPlatformCompatProxy;
+        private final LongSparseArray<CacheItem> mCaches = new LongSparseArray<>();
+        private final boolean mCacheEnabled;
+
+        PlatformCompatCache(long[] compatChanges) {
+            IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+            if (b instanceof PlatformCompat) {
+                mPlatformCompat = (PlatformCompat) ServiceManager.getService(
+                        Context.PLATFORM_COMPAT_SERVICE);
+                for (long changeId: compatChanges) {
+                    mCaches.put(changeId, new CacheItem(mPlatformCompat, changeId));
+                }
+                mIPlatformCompatProxy = null;
+                mCacheEnabled = true;
+            } else {
+                // we are in UT where the platform_compat is not running within the same process
+                mIPlatformCompatProxy = IPlatformCompat.Stub.asInterface(b);
+                mPlatformCompat = null;
+                mCacheEnabled = false;
+            }
+        }
+
+        boolean isChangeEnabled(long changeId, ApplicationInfo app) throws RemoteException {
+            return mCacheEnabled ? mCaches.get(changeId).isChangeEnabled(app)
+                    : mIPlatformCompatProxy.isChangeEnabled(changeId, app);
+        }
+
+        void invalidate(ApplicationInfo app) {
+            for (int i = mCaches.size() - 1; i >= 0; i--) {
+                mCaches.valueAt(i).invalidate(app);
+            }
+        }
+
+        static class CacheItem implements CompatChange.ChangeListener {
+            private final PlatformCompat mPlatformCompat;
+            private final long mChangeId;
+            private final Object mLock = new Object();
+
+            private final ArrayMap<String, Pair<Boolean, WeakReference<ApplicationInfo>>> mCache =
+                    new ArrayMap<>();
+
+            CacheItem(PlatformCompat platformCompat, long changeId) {
+                mPlatformCompat = platformCompat;
+                mChangeId = changeId;
+                mPlatformCompat.registerListener(changeId, this);
+            }
+
+            boolean isChangeEnabled(ApplicationInfo app) {
+                synchronized (mLock) {
+                    final int index = mCache.indexOfKey(app.packageName);
+                    Pair<Boolean, WeakReference<ApplicationInfo>> p;
+                    if (index < 0) {
+                        p = new Pair<>(mPlatformCompat.isChangeEnabled(mChangeId, app),
+                                new WeakReference<>(app));
+                        mCache.put(app.packageName, p);
+                        return p.first;
+                    }
+                    p = mCache.valueAt(index);
+                    if (p.second.get() == app) {
+                        return p.first;
+                    }
+                    // Cache is invalid, regenerate it
+                    p = new Pair<>(mPlatformCompat.isChangeEnabled(mChangeId, app),
+                            new WeakReference<>(app));
+                    mCache.setValueAt(index, p);
+                    return p.first;
+                }
+            }
+
+            void invalidate(ApplicationInfo app) {
+                synchronized (mLock) {
+                    mCache.remove(app.packageName);
+                }
+            }
+
+            @Override
+            public void onCompatChange(String packageName) {
+                synchronized (mLock) {
+                    mCache.remove(packageName);
+                }
+            }
+        }
+    }
 
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
         this(service, processList, activeUids, createAdjusterThread());
@@ -263,8 +356,9 @@ public final class OomAdjuster {
         mTmpQueue = new ArrayDeque<ProcessRecord>(mConstants.CUR_MAX_CACHED_PROCESSES << 1);
         mNumSlots = ((ProcessList.CACHED_APP_MAX_ADJ - ProcessList.CACHED_APP_MIN_ADJ + 1) >> 1)
                 / ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
-        IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
-        mPlatformCompat = IPlatformCompat.Stub.asInterface(b);
+        mPlatformCompatCache = new PlatformCompatCache(new long[] {
+                PROCESS_CAPABILITY_CHANGE_ID, CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID
+        });
     }
 
     void initSettings() {
@@ -333,6 +427,8 @@ public final class OomAdjuster {
         // need to do a complete oom adj.
         final int cachedAdj = app.getCurRawAdj() >= ProcessList.CACHED_APP_MIN_ADJ
                 ? app.getCurRawAdj() : ProcessList.UNKNOWN_ADJ;
+        // Check if this process is in the pending list too, remove from pending list if so.
+        mPendingProcessSet.remove(app);
         boolean success = updateOomAdjLocked(app, cachedAdj, TOP_APP, false,
                 SystemClock.uptimeMillis());
         if (oomAdjAll
@@ -359,6 +455,9 @@ public final class OomAdjuster {
             }
             uidRec.reset();
         }
+
+        // Check if this process is in the pending list too, remove from pending list if so.
+        mPendingProcessSet.remove(app);
 
         computeOomAdjLocked(app, cachedAdj, TOP_APP, doingAll, now, false, true);
 
@@ -401,6 +500,8 @@ public final class OomAdjuster {
     @GuardedBy("mService")
     void updateOomAdjLocked(String oomAdjReason) {
         final ProcessRecord topApp = mService.getTopAppLocked();
+        // Clear any pending ones because we are doing a full update now.
+        mPendingProcessSet.clear();
         updateOomAdjLockedInner(oomAdjReason, topApp , null, null, true, true);
     }
 
@@ -434,6 +535,8 @@ public final class OomAdjuster {
         app.containsCycle = false;
         app.procStateChanged = false;
         app.resetCachedInfo();
+        // Check if this process is in the pending list too, remove from pending list if so.
+        mPendingProcessSet.remove(app);
         boolean success = updateOomAdjLocked(app, cachedAdj, topApp, false,
                 SystemClock.uptimeMillis());
         if (!success || (wasCached == app.isCached() && oldAdj != ProcessList.INVALID_ADJ
@@ -486,6 +589,10 @@ public final class OomAdjuster {
                 }
                 queue.offer(service);
                 service.mReachable = true;
+                // During scanning the reachable dependants, remove them from the pending oomadj
+                // targets list if it's possible, as they've been added into the immediate
+                // oomadj targets list 'processes' above.
+                mPendingProcessSet.remove(service);
             }
             for (int i = pr.conProviders.size() - 1; i >= 0; i--) {
                 ContentProviderConnection cpc = pr.conProviders.get(i);
@@ -499,6 +606,10 @@ public final class OomAdjuster {
                 }
                 queue.offer(provider);
                 provider.mReachable = true;
+                // During scanning the reachable dependants, remove them from the pending oomadj
+                // targets list if it's possible, as they've been added into the immediate
+                // oomadj targets list 'processes' above.
+                mPendingProcessSet.remove(provider);
             }
         }
 
@@ -523,9 +634,64 @@ public final class OomAdjuster {
             applyOomAdjLocked(app, false, SystemClock.uptimeMillis(),
                     SystemClock.elapsedRealtime());
         }
+        mTmpProcessList.clear();
         mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         return true;
+    }
+
+    /**
+     * Enqueue the given process for a later oom adj update
+     */
+    @GuardedBy("mService")
+    void enqueueOomAdjTargetLocked(ProcessRecord app) {
+        if (app != null) {
+            mPendingProcessSet.add(app);
+        }
+    }
+
+    @GuardedBy("mService")
+    void removeOomAdjTargetLocked(ProcessRecord app, boolean procDied) {
+        if (app != null) {
+            mPendingProcessSet.remove(app);
+            if (procDied) {
+                mPlatformCompatCache.invalidate(app.info);
+            }
+        }
+    }
+
+    /**
+     * Kick off an oom adj update pass for the pending targets which are enqueued via
+     * {@link #enqueueOomAdjTargetLocked}.
+     */
+    @GuardedBy("mService")
+    void updateOomAdjPendingTargetsLocked(String oomAdjReason) {
+        if (mPendingProcessSet.isEmpty()) {
+            return;
+        }
+        final ProcessRecord topApp = mService.getTopAppLocked();
+
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReason);
+        mService.mOomAdjProfiler.oomAdjStarted();
+
+        final ArrayList<ProcessRecord> processes = mTmpProcessList;
+        final ActiveUids uids = mTmpUidRecords;
+        uids.clear();
+        processes.clear();
+        for (int i = mPendingProcessSet.size() - 1; i >= 0; i--) {
+            final ProcessRecord app = mPendingProcessSet.valueAt(i);
+            if (app.uidRecord != null) {
+                uids.put(app.uidRecord.uid, app.uidRecord);
+            }
+            processes.add(app);
+        }
+
+        updateOomAdjLockedInner(oomAdjReason, topApp, processes, uids, true, false);
+        processes.clear();
+        mPendingProcessSet.clear();
+
+        mService.mOomAdjProfiler.oomAdjEnded();
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /**
@@ -1555,7 +1721,7 @@ public final class OomAdjuster {
 
                     boolean enabled = false;
                     try {
-                        enabled = mPlatformCompat.isChangeEnabled(
+                        enabled = mPlatformCompatCache.isChangeEnabled(
                                 CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID, s.appInfo);
                     } catch (RemoteException e) {
                     }
@@ -1742,7 +1908,7 @@ public final class OomAdjuster {
                                 clientProcState = PROCESS_STATE_BOUND_TOP;
                                 boolean enabled = false;
                                 try {
-                                    enabled = mPlatformCompat.isChangeEnabled(
+                                    enabled = mPlatformCompatCache.isChangeEnabled(
                                             PROCESS_CAPABILITY_CHANGE_ID, client.info);
                                 } catch (RemoteException e) {
                                 }
