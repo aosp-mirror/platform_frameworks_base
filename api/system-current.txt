@@ -5790,7 +5790,8 @@ package android.media.tv.tuner.frontend {
 
   public class DvbcFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
     method public int getAnnexCapability();
-    method public int getFecCapability();
+    method public long getCodeRateCapability();
+    method @Deprecated public int getFecCapability();
     method public int getModulationCapability();
   }
 
