@@ -128,6 +128,8 @@ android_app {
         "CarSystemUI-core",
     ],
 
+    export_package_resources: true,
+
     libs: [
         "android.car",
     ],

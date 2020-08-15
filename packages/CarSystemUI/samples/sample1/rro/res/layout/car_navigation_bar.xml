@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -12,23 +12,22 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License
+  ~ limitations under the License.
   -->
-
 <com.android.systemui.car.navigationbar.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/system_bar_background"
-    android:orientation="vertical">
+    android:background="@android:color/transparent"
+    android:orientation="horizontal">
     <!--The 20dp padding is the difference between the background selected icon size and the ripple
         that was chosen, thus it's a hack to make it look pretty and not an official margin value-->
     <LinearLayout
         android:id="@+id/nav_buttons"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:background="@drawable/system_bar_background"
         android:gravity="center"
         android:layoutDirection="ltr"
         android:paddingEnd="20dp"
@@ -44,11 +43,6 @@
             systemui:highlightWhenSelected="true"
         />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
         <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/maps_nav"
             style="@style/NavigationBarButton"
@@ -58,11 +52,6 @@
             systemui:selectedIcon="@drawable/car_ic_navigation_selected"
             systemui:highlightWhenSelected="true"
         />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
 
         <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/music_nav"
@@ -75,11 +64,6 @@
             systemui:highlightWhenSelected="true"
         />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
         <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/phone_nav"
             style="@style/NavigationBarButton"
@@ -89,11 +73,6 @@
             systemui:selectedIcon="@drawable/car_ic_phone_selected"
             systemui:highlightWhenSelected="true"
         />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
 
         <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/grid_nav"
@@ -105,42 +84,5 @@
             systemui:highlightWhenSelected="true"
         />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-        <com.android.systemui.car.navigationbar.CarNavigationButton
-            android:id="@+id/notifications"
-            style="@style/NavigationBarButton"
-            systemui:icon="@drawable/car_ic_notification"
-            systemui:longIntent="intent:#Intent;component=com.android.car.bugreport/.BugReportActivity;end"
-        />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-        <com.android.systemui.car.navigationbar.AssitantButton
-            android:id="@+id/assist"
-            style="@style/NavigationBarButton"
-            systemui:icon="@drawable/ic_mic_white"
-            systemui:useDefaultAppIconForRole="true"
-        />
-
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/lock_screen_nav_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:layoutDirection="ltr"
-        android:paddingEnd="@dimen/car_keyline_1"
-        android:paddingStart="@dimen/car_keyline_1"
-        android:visibility="gone"
-    />
-
 </com.android.systemui.car.navigationbar.CarNavigationBarView>

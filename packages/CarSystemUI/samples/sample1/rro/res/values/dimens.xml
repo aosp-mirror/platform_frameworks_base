@@ -14,8 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
 <resources>
-    <!-- Values used for finding elements on the system ui nav bars -->
-    <item type="id" name="lock_screen_nav_buttons"/>
+    <dimen name="car_right_navigation_bar_width">280dp</dimen>
 </resources>
