@@ -275,7 +275,7 @@ final class InputMonitor {
 
     void populateInputWindowHandle(final InputWindowHandle inputWindowHandle,
             final WindowState child, int flags, final int type, final boolean isVisible,
-            final boolean hasFocus, final boolean hasWallpaper) {
+            final boolean focusable, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
         flags = child.getSurfaceTouchableRegion(inputWindowHandle, flags);
@@ -283,7 +283,7 @@ final class InputMonitor {
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutMillis = child.getInputDispatchingTimeoutMillis();
         inputWindowHandle.visible = isVisible;
-        inputWindowHandle.focusable = hasFocus;
+        inputWindowHandle.focusable = focusable;
         inputWindowHandle.hasWallpaper = hasWallpaper;
         inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
         inputWindowHandle.ownerPid = child.mSession.mPid;
@@ -472,8 +472,9 @@ final class InputMonitor {
 
             resetInputConsumers(mInputTransaction);
 
-            mDisplayContent.forAllWindows(this,
-                    true /* traverseTopToBottom */);
+            mDisplayContent.forAllWindows(this, true /* traverseTopToBottom */);
+
+            updateInputFocusRequest();
 
             if (!mUpdateInputWindowsImmediately) {
                 mDisplayContent.getPendingTransaction().merge(mInputTransaction);
@@ -481,6 +482,29 @@ final class InputMonitor {
             }
 
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        private void updateInputFocusRequest() {
+            if (mDisplayContent.mLastRequestedFocus == mDisplayContent.mCurrentFocus) {
+                return;
+            }
+
+            final WindowState focus = mDisplayContent.mCurrentFocus;
+            if (focus == null || focus.mInputWindowHandle.token == null) {
+                mDisplayContent.mLastRequestedFocus = focus;
+                return;
+            }
+
+            if (!focus.mWinAnimator.hasSurface()) {
+                ProtoLog.d(WM_DEBUG_FOCUS_LIGHT,
+                        "Focus not requested for window=%s because it has no surface",
+                        focus);
+                return;
+            }
+
+            mInputTransaction.setFocusedWindow(focus.mInputWindowHandle.token, mDisplayId);
+            mDisplayContent.mLastRequestedFocus = focus;
+            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus requested for window=%s", focus);
         }
 
         @Override
@@ -510,11 +534,12 @@ final class InputMonitor {
 
             final int flags = w.mAttrs.flags;
             final int privateFlags = w.mAttrs.privateFlags;
-            final boolean hasFocus = w.isFocused();
+            final boolean focusable = w.canReceiveKeys()
+                    && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());
 
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
-                        mRecentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
+                        mRecentsAnimationInputConsumer.mWindowHandle, focusable)) {
                     mRecentsAnimationInputConsumer.show(mInputTransaction, w);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
@@ -559,7 +584,7 @@ final class InputMonitor {
             }
 
             populateInputWindowHandle(
-                    inputWindowHandle, w, flags, type, isVisible, hasFocus, hasWallpaper);
+                    inputWindowHandle, w, flags, type, isVisible, focusable, hasWallpaper);
 
             // register key interception info
             mService.mKeyInterceptionInfoForToken.put(inputWindowHandle.token,

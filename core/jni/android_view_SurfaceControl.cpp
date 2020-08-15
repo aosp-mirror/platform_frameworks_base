@@ -1505,9 +1505,24 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return reinterpret_cast<jlong>(surfaceControl->getHandle().get());
 }
 
+static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                   jobject toTokenObj, jobject focusedTokenObj, jint displayId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    if (toTokenObj == NULL) return;
+
+    sp<IBinder> toToken(ibinderForJavaObject(env, toTokenObj));
+    sp<IBinder> focusedToken;
+    if (focusedTokenObj != NULL) {
+        focusedToken = ibinderForJavaObject(env, focusedTokenObj);
+    }
+    transaction->setFocusedWindow(toToken, focusedToken, systemTime(SYSTEM_TIME_MONOTONIC),
+                                  displayId);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
+        // clang-format off
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
             (void*)nativeCreate },
     {"nativeReadFromParcel", "(Landroid/os/Parcel;)J",
@@ -1686,7 +1701,11 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGlobalShadowSettings },
     {"nativeGetHandle", "(J)J",
             (void*)nativeGetHandle },
-    {"nativeSetFixedTransformHint", "(JJI)V", (void*)nativeSetFixedTransformHint},
+    {"nativeSetFixedTransformHint", "(JJI)V",
+            (void*)nativeSetFixedTransformHint},
+    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Landroid/os/IBinder;I)V",
+            (void*)nativeSetFocusedWindow},
+        // clang-format on
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

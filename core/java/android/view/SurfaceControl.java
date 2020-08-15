@@ -221,6 +221,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReleaseFrameRateFlexibilityToken(long token);
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
             int transformHint);
+    private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
+                                                      IBinder focusedToken, int displayId);
 
     @Nullable
     @GuardedBy("mLock")
@@ -3184,6 +3186,39 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Sets focus on the window identified by the input {@code token} if the window is focusable
+         * otherwise the request is dropped.
+         *
+         * If the window is not visible, the request will be queued until the window becomes
+         * visible or the request is overrriden by another request. The currently focused window
+         * will lose focus immediately. This is to send the newly focused window any focus
+         * dispatched events that occur while it is completing its first draw.
+         *
+         * @hide
+         */
+        public Transaction setFocusedWindow(@NonNull IBinder token, int displayId) {
+            nativeSetFocusedWindow(mNativeObject, token,  null /* focusedToken */, displayId);
+            return this;
+        }
+
+        /**
+         * Set focus on the window identified by the input {@code token} if the window identified by
+         * the input {@code focusedToken} is currently focused. If the {@code focusedToken} does not
+         * have focus, the request is dropped.
+         *
+         * This is used by forward focus transfer requests from clients that host embedded windows,
+         * and want to transfer focus to/from them.
+         *
+         * @hide
+         */
+        public Transaction requestFocusTransfer(@NonNull IBinder token,
+                                                @NonNull IBinder focusedToken,
+                                                int displayId) {
+            nativeSetFocusedWindow(mNativeObject, token, focusedToken, displayId);
+            return this;
+        }
+
+         /**
          * Merge the other transaction into this transaction, clearing the
          * other transaction as if it had been applied.
          *
