@@ -661,14 +661,14 @@ public class WindowStateTests extends WindowTestsBase {
         RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
         when(recentsController.shouldApplyInputConsumer(win0.mActivityRecord)).thenReturn(true);
         mWm.setRecentsAnimationController(recentsController);
-        assertTrue(win0.cantReceiveTouchInput());
+        assertFalse(win0.canReceiveTouchInput());
     }
 
     @Test
     public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
         win0.mActivityRecord.mVisibleRequested = false;
-        assertTrue(win0.cantReceiveTouchInput());
+        assertFalse(win0.canReceiveTouchInput());
     }
 
     @Test
@@ -676,7 +676,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
         win0.mActivityRecord.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         win0.mActivityRecord.getStack().setFocusable(false);
-        assertTrue(win0.cantReceiveTouchInput());
+        assertFalse(win0.canReceiveTouchInput());
     }
 
     @UseTestDisplay(addWindows = W_ACTIVITY)

@@ -2884,12 +2884,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return canReceiveKeys(false /* fromUserTouch */);
     }
 
+    public String canReceiveKeysReason(boolean fromUserTouch) {
+        return "fromTouch= " + fromUserTouch
+                + " isVisibleOrAdding=" + isVisibleOrAdding()
+                + " mViewVisibility=" + mViewVisibility
+                + " mRemoveOnExit=" + mRemoveOnExit
+                + " flags=" + mAttrs.flags
+                + " appWindowsAreFocusable="
+                + (mActivityRecord == null || mActivityRecord.windowsAreFocusable(fromUserTouch))
+                + " canReceiveTouchInput=" + canReceiveTouchInput()
+                + " displayIsOnTop=" + getDisplayContent().isOnTop()
+                + " displayIsTrusted=" + getDisplayContent().isTrusted();
+    }
+
     public boolean canReceiveKeys(boolean fromUserTouch) {
         final boolean canReceiveKeys = isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mActivityRecord == null || mActivityRecord.windowsAreFocusable(fromUserTouch))
-                && !cantReceiveTouchInput();
+                && canReceiveTouchInput();
         if (!canReceiveKeys) {
             return false;
         }
@@ -2907,15 +2920,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return showBecauseOfActivity || showBecauseOfWindow;
     }
 
-    /** @return {@code false} if this window desires touch events. */
-    boolean cantReceiveTouchInput() {
-        if (mActivityRecord == null || mActivityRecord.getTask() == null) {
-            return false;
+    /**
+     * @return {@code true} if this window can receive touches based on among other things,
+     * windowing state and recents animation state.
+     **/
+    boolean canReceiveTouchInput() {
+        if (mActivityRecord == null  || mActivityRecord.getTask() == null) {
+            return true;
         }
 
-        return mActivityRecord.getTask().getRootTask().shouldIgnoreInput()
-                || !mActivityRecord.mVisibleRequested
-                || isRecentsAnimationConsumingAppInput();
+        return !mActivityRecord.getTask().getRootTask().shouldIgnoreInput()
+                && mActivityRecord.mVisibleRequested
+                && !isRecentsAnimationConsumingAppInput();
     }
 
     /**

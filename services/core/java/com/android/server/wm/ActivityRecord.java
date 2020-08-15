@@ -401,7 +401,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     final ActivityTaskManagerService mAtmService;
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
-    // Non-null only for application tokens.
     // TODO: rename to mActivityToken
     final ActivityRecord.Token appToken;
     // Which user is this running for?
@@ -5480,10 +5479,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void updateReportedVisibilityLocked() {
-        if (appToken == null) {
-            return;
-        }
-
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Update reported visibility: " + this);
         final int count = mChildren.size();
 
@@ -6330,8 +6325,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private void setOrientation(int requestedOrientation, boolean freezeScreenIfNeeded) {
-        final IBinder binder =
-                (freezeScreenIfNeeded && appToken != null) ? appToken.asBinder() : null;
+        final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
         setOrientation(requestedOrientation, binder, this);
 
         // Push the new configuration to the requested app in case where it's not pushed, e.g. when
@@ -7713,9 +7707,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void writeNameToProto(ProtoOutputStream proto, long fieldId) {
-        if (appToken != null) {
-            proto.write(fieldId, appToken.getName());
-        }
+        proto.write(fieldId, appToken.getName());
     }
 
     @Override

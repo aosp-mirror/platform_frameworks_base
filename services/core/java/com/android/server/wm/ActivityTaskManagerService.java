@@ -125,6 +125,7 @@ import static com.android.server.wm.Task.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -5465,8 +5466,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
-        r.getDisplay().setFocusedApp(r, true);
-
+        final boolean changed = r.getDisplay().setFocusedApp(r);
+        if (changed) {
+            mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                    true /*updateInputWindows*/);
+        }
         if (prevTask == null || task != prevTask) {
             if (prevTask != null) {
                 mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);

@@ -114,7 +114,7 @@ class DragDropController {
 
                     final WindowState callingWin = mService.windowForClientLocked(
                             null, window, false);
-                    if (callingWin == null || callingWin.cantReceiveTouchInput()) {
+                    if (callingWin == null || !callingWin.canReceiveTouchInput()) {
                         Slog.w(TAG_WM, "Bad requesting window " + window);
                         return null;  // !!! TODO: throw here?
                     }
