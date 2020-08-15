@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
+import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -131,45 +132,89 @@ public abstract class SystemService {
      */
     @SystemApi(client = Client.SYSTEM_SERVER)
     public static final class TargetUser {
-        @NonNull
-        private final UserInfo mUserInfo;
+
+        // NOTE: attributes below must be immutable while ther user is running (i.e., from the
+        // moment it's started until after it's shutdown).
+        private final @UserIdInt int mUserId;
+        private final boolean mFull;
+        private final boolean mManagedProfile;
+        private final boolean mPreCreated;
 
         /** @hide */
         public TargetUser(@NonNull UserInfo userInfo) {
-            mUserInfo = userInfo;
+            mUserId = userInfo.id;
+            mFull = userInfo.isFull();
+            mManagedProfile = userInfo.isManagedProfile();
+            mPreCreated = userInfo.preCreated;
         }
 
         /**
-         * @return The information about the user. <b>NOTE: </b> this is a "live" object
-         * referenced by {@link UserManagerService} and hence should not be modified.
+         * Checks if the target user is {@link UserInfo#isFull() full}.
          *
          * @hide
          */
-        @NonNull
-        public UserInfo getUserInfo() {
-            return mUserInfo;
+        public boolean isFull() {
+            return mFull;
         }
 
         /**
-         * @return the target {@link UserHandle}.
+         * Checks if the target user is a managed profile.
+         *
+         * @hide
+         */
+        public boolean isManagedProfile() {
+            return mManagedProfile;
+        }
+
+        /**
+         * Checks if the target user is a pre-created user.
+         *
+         * @hide
+         */
+        public boolean isPreCreated() {
+            return mPreCreated;
+        }
+
+        /**
+         * Gets the target user's {@link UserHandle}.
          */
         @NonNull
         public UserHandle getUserHandle() {
-            return mUserInfo.getUserHandle();
+            return UserHandle.of(mUserId);
         }
 
         /**
-         * @return the integer user id
+         * Gets the target user's id.
          *
          * @hide
          */
-        public int getUserIdentifier() {
-            return mUserInfo.id;
+        public @UserIdInt int getUserIdentifier() {
+            return mUserId;
         }
 
         @Override
         public String toString() {
-            return Integer.toString(getUserIdentifier());
+            return Integer.toString(mUserId);
+        }
+
+        /**
+         * @hide
+         */
+        public void dump(@NonNull StringBuilder builder) {
+            builder.append(getUserIdentifier());
+
+            if (!isFull() && !isManagedProfile()) return;
+
+            builder.append('(');
+            boolean addComma = false;
+            if (isFull()) {
+                builder.append("full");
+            }
+            if (isManagedProfile()) {
+                if (addComma) builder.append(',');
+                builder.append("mp");
+            }
+            builder.append(')');
         }
     }
 

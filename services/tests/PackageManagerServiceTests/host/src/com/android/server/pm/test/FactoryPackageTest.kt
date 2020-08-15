@@ -31,7 +31,8 @@ class FactoryPackageTest : BaseHostJUnit4Test() {
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
             SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
-    @get:Rule
+    @Rule
+    @JvmField
     val rules = RuleChain.outerRule(tempFolder).around(preparer)!!
     private val filePath =
             HostUtils.makePathForApk("PackageManagerTestApp.apk", Partition.SYSTEM)

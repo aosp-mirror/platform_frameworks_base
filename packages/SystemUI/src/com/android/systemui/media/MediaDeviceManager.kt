@@ -32,26 +32,23 @@ import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Provides information about the route (ie. device) where playback is occurring.
  */
-@Singleton
 class MediaDeviceManager @Inject constructor(
     private val context: Context,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
-    private val mediaDataManager: MediaDataManager,
-    private val dumpManager: DumpManager
+    dumpManager: DumpManager
 ) : MediaDataManager.Listener, Dumpable {
+
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val entries: MutableMap<String, Entry> = mutableMapOf()
 
     init {
-        mediaDataManager.addListener(this)
         dumpManager.registerDumpable(javaClass.name, this)
     }
 

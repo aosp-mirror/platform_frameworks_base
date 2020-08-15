@@ -50,8 +50,8 @@ public class FaceUpdateActiveUserClient extends ClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         if (mCurrentUserId == getTargetUserId()) {
             Slog.d(TAG, "Already user: " + mCurrentUserId + ", refreshing authenticatorId");
@@ -61,7 +61,7 @@ public class FaceUpdateActiveUserClient extends ClientMonitor<IBiometricsFace> {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to refresh authenticatorId", e);
             }
-            finishCallback.onClientFinished(this, true /* success */);
+            callback.onClientFinished(this, true /* success */);
             return;
         }
 
@@ -79,16 +79,16 @@ public class FaceUpdateActiveUserClient extends ClientMonitor<IBiometricsFace> {
                 FACE_DATA_DIR);
         if (!storePath.exists()) {
             Slog.e(TAG, "vold has not created the directory?");
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
             return;
         }
 
         try {
             getFreshDaemon().setActiveUser(getTargetUserId(), storePath.getAbsolutePath());
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to setActiveUser: " + e);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

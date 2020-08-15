@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
 
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.FileDescriptor;

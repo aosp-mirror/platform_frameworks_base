@@ -63,7 +63,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
                 mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd);
+                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
+                mDemoModeController);
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -81,7 +82,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
                 mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd);
+                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
+                mDemoModeController);
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -147,7 +149,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
                 mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd);
+                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
+                mDemoModeController);
         setupNetworkController();
 
         // No Subscriptions.

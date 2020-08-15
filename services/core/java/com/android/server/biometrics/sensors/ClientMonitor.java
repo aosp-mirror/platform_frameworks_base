@@ -42,7 +42,15 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     /**
      * Interface that ClientMonitor holders should use to receive callbacks.
      */
-    public interface FinishCallback {
+    public interface Callback {
+        /**
+         * Invoked when the ClientMonitor operation has been started (e.g. reached the head of
+         * the queue and becomes the current operation).
+         *
+         * @param clientMonitor Reference of the ClientMonitor that is starting.
+         */
+        default void onClientStarted(@NonNull ClientMonitor<?> clientMonitor) {}
+
         /**
          * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
          * (i.e. Authenticate, Enroll, Enumerate, Remove) and synchronous (i.e. generateChallenge,
@@ -52,7 +60,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
          * @param clientMonitor Reference of the ClientMonitor that finished.
          * @param success True if the operation completed successfully.
          */
-        void onClientFinished(ClientMonitor<?> clientMonitor, boolean success);
+        default void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {}
     }
 
     /**
@@ -79,7 +87,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     private final int mCookie;
     boolean mAlreadyDone;
 
-    @NonNull protected FinishCallback mFinishCallback;
+    @NonNull protected Callback mCallback;
 
     /**
      * @param context    system_server context
@@ -125,17 +133,17 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     /**
      * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
      * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(FinishCallback)}.
+     * {@link #start(Callback)}.
      */
     public abstract void unableToStart();
 
     /**
      * Starts the ClientMonitor's lifecycle. Invokes {@link #startHalOperation()} when internal book
      * keeping is complete.
-     * @param finishCallback invoked when the operation is complete (succeeds, fails, etc)
+     * @param callback invoked when the operation is complete (succeeds, fails, etc)
      */
-    public void start(@NonNull FinishCallback finishCallback) {
-        mFinishCallback = finishCallback;
+    public void start(@NonNull Callback callback) {
+        mCallback = callback;
     }
 
     /**

@@ -72,6 +72,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private static final int MSG_SET_FEATURE_COMPLETED = 107;
     private static final int MSG_CHALLENGE_GENERATED = 108;
     private static final int MSG_FACE_DETECTED = 109;
+    private static final int MSG_CHALLENGE_INTERRUPTED = 110;
+    private static final int MSG_CHALLENGE_INTERRUPT_FINISHED = 111;
 
     private final IFaceService mService;
     private final Context mContext;
@@ -149,6 +151,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             } else {
                 mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, challenge).sendToTarget();
             }
+        }
+
+        @Override
+        public void onChallengeInterrupted(int sensorId) {
+            mHandler.obtainMessage(MSG_CHALLENGE_INTERRUPTED, sensorId).sendToTarget();
+        }
+
+        @Override
+        public void onChallengeInterruptFinished(int sensorId) {
+            mHandler.obtainMessage(MSG_CHALLENGE_INTERRUPT_FINISHED, sensorId).sendToTarget();
         }
     };
 
@@ -1071,10 +1083,25 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
+     * Callback structure provided to {@link #generateChallenge(GenerateChallengeCallback)}.
      * @hide
      */
     public interface GenerateChallengeCallback {
+        /**
+         * Invoked when a challenge has been generated.
+         */
         void onGenerateChallengeResult(long challenge);
+
+        /**
+         * Invoked if the challenge has not been revoked and a subsequent caller/owner invokes
+         * {@link #generateChallenge(GenerateChallengeCallback)}, but
+         */
+        default void onChallengeInterrupted(int sensorId) {}
+
+        /**
+         * Invoked when the interrupting client has finished (e.g. revoked its challenge).
+         */
+        default void onChallengeInterruptFinished(int sensorId) {}
     }
 
     private abstract static class InternalGenerateChallengeCallback
@@ -1157,6 +1184,12 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                     sendFaceDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
                             (boolean) msg.obj /* isStrongBiometric */);
                     break;
+                case MSG_CHALLENGE_INTERRUPTED:
+                    sendChallengeInterrupted((int) msg.obj /* sensorId */);
+                    break;
+                case MSG_CHALLENGE_INTERRUPT_FINISHED:
+                    sendChallengeInterruptFinished((int) msg.obj /* sensorId */);
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
             }
@@ -1191,6 +1224,22 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             return;
         }
         mFaceDetectionCallback.onFaceDetected(sensorId, userId, isStrongBiometric);
+    }
+
+    private void sendChallengeInterrupted(int sensorId) {
+        if (mGenerateChallengeCallback == null) {
+            Slog.e(TAG, "sendChallengeInterrupted, callback null");
+            return;
+        }
+        mGenerateChallengeCallback.onChallengeInterrupted(sensorId);
+    }
+
+    private void sendChallengeInterruptFinished(int sensorId) {
+        if (mGenerateChallengeCallback == null) {
+            Slog.e(TAG, "sendChallengeInterruptFinished, callback null");
+            return;
+        }
+        mGenerateChallengeCallback.onChallengeInterruptFinished(sensorId);
     }
 
     private void sendRemovedResult(Face face, int remaining) {

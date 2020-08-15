@@ -61,7 +61,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutServiceInternal;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Environment;
@@ -306,25 +305,25 @@ public class UsageStatsService extends SystemService implements
 
     @Override
     public void onUserStopping(@NonNull TargetUser user) {
-        final UserInfo userInfo = user.getUserInfo();
+        final int userId = user.getUserIdentifier();
 
         synchronized (mLock) {
             // User was started but never unlocked so no need to report a user stopped event
-            if (!mUserUnlockedStates.get(userInfo.id)) {
-                persistPendingEventsLocked(userInfo.id);
+            if (!mUserUnlockedStates.get(userId)) {
+                persistPendingEventsLocked(userId);
                 return;
             }
 
             // Report a user stopped event before persisting all stats to disk via the user service
             final Event event = new Event(USER_STOPPED, SystemClock.elapsedRealtime());
             event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
-            reportEvent(event, userInfo.id);
-            final UserUsageStatsService userService = mUserState.get(userInfo.id);
+            reportEvent(event, userId);
+            final UserUsageStatsService userService = mUserState.get(userId);
             if (userService != null) {
                 userService.userStopped();
             }
-            mUserUnlockedStates.put(userInfo.id, false);
-            mUserState.put(userInfo.id, null); // release the service (mainly for GC)
+            mUserUnlockedStates.put(userId, false);
+            mUserState.put(userId, null); // release the service (mainly for GC)
         }
     }
 

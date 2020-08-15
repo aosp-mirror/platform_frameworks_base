@@ -86,15 +86,17 @@ public class UidObserverController {
                 }
                 mService.mUiHandler.post(this::dispatchUidsChanged);
             }
-            final int NA = mAvailUidChanges.size();
-            if (NA > 0) {
-                pendingChange = mAvailUidChanges.remove(NA-1);
-                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                        "Retrieving available item: " + pendingChange);
+            final int size = mAvailUidChanges.size();
+            if (size > 0) {
+                pendingChange = mAvailUidChanges.remove(size - 1);
+                if (DEBUG_UID_OBSERVERS) {
+                    Slog.i(TAG_UID_OBSERVERS, "Retrieving available item: " + pendingChange);
+                }
             } else {
                 pendingChange = new UidRecord.ChangeItem();
-                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                        "Allocating new item: " + pendingChange);
+                if (DEBUG_UID_OBSERVERS) {
+                    Slog.i(TAG_UID_OBSERVERS, "Allocating new item: " + pendingChange);
+                }
             }
             if (uidRec != null) {
                 uidRec.pendingChange = pendingChange;
@@ -134,7 +136,8 @@ public class UidObserverController {
             }
         }
         pendingChange.change = change;
-        pendingChange.processState = uidRec != null ? uidRec.setProcState : PROCESS_STATE_NONEXISTENT;
+        pendingChange.processState = uidRec != null
+                ? uidRec.setProcState : PROCESS_STATE_NONEXISTENT;
         pendingChange.capability = uidRec != null ? uidRec.setCapability : 0;
         pendingChange.ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
         pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
@@ -165,13 +168,13 @@ public class UidObserverController {
 
     @VisibleForTesting
     void dispatchUidsChanged() {
-        int N;
+        int numUidChanges;
         synchronized (mService) {
-            N = mPendingUidChanges.size();
-            if (mActiveUidChanges.length < N) {
-                mActiveUidChanges = new UidRecord.ChangeItem[N];
+            numUidChanges = mPendingUidChanges.size();
+            if (mActiveUidChanges.length < numUidChanges) {
+                mActiveUidChanges = new UidRecord.ChangeItem[numUidChanges];
             }
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < numUidChanges; i++) {
                 final UidRecord.ChangeItem change = mPendingUidChanges.get(i);
                 mActiveUidChanges[i] = change;
                 if (change.uidRecord != null) {
@@ -180,21 +183,22 @@ public class UidObserverController {
                 }
             }
             mPendingUidChanges.clear();
-            if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                    "*** Delivering " + N + " uid changes");
+            if (DEBUG_UID_OBSERVERS) {
+                Slog.i(TAG_UID_OBSERVERS, "*** Delivering " + numUidChanges + " uid changes");
+            }
         }
 
-        mUidChangeDispatchCount += N;
+        mUidChangeDispatchCount += numUidChanges;
         int i = mUidObservers.beginBroadcast();
         while (i > 0) {
             i--;
             dispatchUidsChangedForObserver(mUidObservers.getBroadcastItem(i),
-                    (UidObserverRegistration) mUidObservers.getBroadcastCookie(i), N);
+                    (UidObserverRegistration) mUidObservers.getBroadcastCookie(i), numUidChanges);
         }
         mUidObservers.finishBroadcast();
 
         if (VALIDATE_UID_STATES && mUidObservers.getRegisteredCallbackCount() > 0) {
-            for (int j = 0; j < N; ++j) {
+            for (int j = 0; j < numUidChanges; ++j) {
                 final UidRecord.ChangeItem item = mActiveUidChanges[j];
                 if ((item.change & UidRecord.CHANGE_GONE) != 0) {
                     mValidateUids.remove(item.uid);
@@ -217,7 +221,7 @@ public class UidObserverController {
         }
 
         synchronized (mService) {
-            for (int j = 0; j < N; j++) {
+            for (int j = 0; j < numUidChanges; j++) {
                 mAvailUidChanges.add(mActiveUidChanges[j]);
             }
         }
@@ -232,66 +236,72 @@ public class UidObserverController {
             for (int j = 0; j < changesSize; j++) {
                 UidRecord.ChangeItem item = mActiveUidChanges[j];
                 final int change = item.change;
-                if (change == UidRecord.CHANGE_PROCSTATE &&
-                        (reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) == 0) {
+                if (change == UidRecord.CHANGE_PROCSTATE
+                        && (reg.mWhich & ActivityManager.UID_OBSERVER_PROCSTATE) == 0) {
                     // No-op common case: no significant change, the observer is not
                     // interested in all proc state changes.
                     continue;
                 }
                 final long start = SystemClock.uptimeMillis();
                 if ((change & UidRecord.CHANGE_IDLE) != 0) {
-                    if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
-                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                "UID idle uid=" + item.uid);
+                    if ((reg.mWhich & ActivityManager.UID_OBSERVER_IDLE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID idle uid=" + item.uid);
+                        }
                         observer.onUidIdle(item.uid, item.ephemeral);
                     }
                 } else if ((change & UidRecord.CHANGE_ACTIVE) != 0) {
-                    if ((reg.which & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
-                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                "UID active uid=" + item.uid);
+                    if ((reg.mWhich & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID active uid=" + item.uid);
+                        }
                         observer.onUidActive(item.uid);
                     }
                 }
-                if ((reg.which & ActivityManager.UID_OBSERVER_CACHED) != 0) {
+                if ((reg.mWhich & ActivityManager.UID_OBSERVER_CACHED) != 0) {
                     if ((change & UidRecord.CHANGE_CACHED) != 0) {
-                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                "UID cached uid=" + item.uid);
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID cached uid=" + item.uid);
+                        }
                         observer.onUidCachedChanged(item.uid, true);
                     } else if ((change & UidRecord.CHANGE_UNCACHED) != 0) {
-                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                "UID active uid=" + item.uid);
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID active uid=" + item.uid);
+                        }
                         observer.onUidCachedChanged(item.uid, false);
                     }
                 }
                 if ((change & UidRecord.CHANGE_GONE) != 0) {
-                    if ((reg.which & ActivityManager.UID_OBSERVER_GONE) != 0) {
-                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                "UID gone uid=" + item.uid);
+                    if ((reg.mWhich & ActivityManager.UID_OBSERVER_GONE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID gone uid=" + item.uid);
+                        }
                         observer.onUidGone(item.uid, item.ephemeral);
                     }
-                    if (reg.lastProcStates != null) {
-                        reg.lastProcStates.delete(item.uid);
+                    if (reg.mLastProcStates != null) {
+                        reg.mLastProcStates.delete(item.uid);
                     }
                 } else {
-                    if ((reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
-                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                "UID CHANGED uid=" + item.uid
-                                        + ": " + item.processState + ": " + item.capability);
+                    if ((reg.mWhich & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID CHANGED uid=" + item.uid
+                                    + ": " + item.processState + ": " + item.capability);
+                        }
                         boolean doReport = true;
-                        if (reg.cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
-                            final int lastState = reg.lastProcStates.get(item.uid,
+                        if (reg.mCutpoint >= ActivityManager.MIN_PROCESS_STATE) {
+                            final int lastState = reg.mLastProcStates.get(item.uid,
                                     ActivityManager.PROCESS_STATE_UNKNOWN);
                             if (lastState != ActivityManager.PROCESS_STATE_UNKNOWN) {
-                                final boolean lastAboveCut = lastState <= reg.cutpoint;
-                                final boolean newAboveCut = item.processState <= reg.cutpoint;
+                                final boolean lastAboveCut = lastState <= reg.mCutpoint;
+                                final boolean newAboveCut = item.processState <= reg.mCutpoint;
                                 doReport = lastAboveCut != newAboveCut;
                             } else {
                                 doReport = item.processState != PROCESS_STATE_NONEXISTENT;
                             }
                         }
                         if (doReport) {
-                            if (reg.lastProcStates != null) {
-                                reg.lastProcStates.put(item.uid, item.processState);
+                            if (reg.mLastProcStates != null) {
+                                reg.mLastProcStates.put(item.uid, item.processState);
                             }
                             observer.onUidStateChanged(item.uid, item.processState,
                                     item.procStateSeq, item.capability);
@@ -311,7 +321,7 @@ public class UidObserverController {
     }
 
     private boolean isEphemeralLocked(int uid) {
-        String packages[] = mService.mContext.getPackageManager().getPackagesForUid(uid);
+        final String[] packages = mService.mContext.getPackageManager().getPackagesForUid(uid);
         if (packages == null || packages.length != 1) { // Ephemeral apps cannot share uid
             return false;
         }
@@ -321,41 +331,41 @@ public class UidObserverController {
 
     @GuardedBy("mService")
     void dump(PrintWriter pw, String dumpPackage) {
-        final int NI = mUidObservers.getRegisteredCallbackCount();
+        final int count = mUidObservers.getRegisteredCallbackCount();
         boolean printed = false;
-        for (int i=0; i<NI; i++) {
+        for (int i = 0; i < count; i++) {
             final UidObserverRegistration reg = (UidObserverRegistration)
                     mUidObservers.getRegisteredCallbackCookie(i);
-            if (dumpPackage == null || dumpPackage.equals(reg.pkg)) {
+            if (dumpPackage == null || dumpPackage.equals(reg.mPkg)) {
                 if (!printed) {
                     pw.println("  mUidObservers:");
                     printed = true;
                 }
-                pw.print("    "); UserHandle.formatUid(pw, reg.uid);
-                pw.print(" "); pw.print(reg.pkg);
+                pw.print("    "); UserHandle.formatUid(pw, reg.mUid);
+                pw.print(" "); pw.print(reg.mPkg);
                 final IUidObserver observer = mUidObservers.getRegisteredCallbackItem(i);
                 pw.print(" "); pw.print(observer.getClass().getTypeName()); pw.print(":");
-                if ((reg.which&ActivityManager.UID_OBSERVER_IDLE) != 0) {
+                if ((reg.mWhich & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                     pw.print(" IDLE");
                 }
-                if ((reg.which&ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
-                    pw.print(" ACT" );
+                if ((reg.mWhich & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
+                    pw.print(" ACT");
                 }
-                if ((reg.which&ActivityManager.UID_OBSERVER_GONE) != 0) {
+                if ((reg.mWhich & ActivityManager.UID_OBSERVER_GONE) != 0) {
                     pw.print(" GONE");
                 }
-                if ((reg.which&ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
+                if ((reg.mWhich & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
                     pw.print(" STATE");
-                    pw.print(" (cut="); pw.print(reg.cutpoint);
+                    pw.print(" (cut="); pw.print(reg.mCutpoint);
                     pw.print(")");
                 }
                 pw.println();
-                if (reg.lastProcStates != null) {
-                    final int NJ = reg.lastProcStates.size();
-                    for (int j=0; j<NJ; j++) {
+                if (reg.mLastProcStates != null) {
+                    final int size = reg.mLastProcStates.size();
+                    for (int j = 0; j < size; j++) {
                         pw.print("      Last ");
-                        UserHandle.formatUid(pw, reg.lastProcStates.keyAt(j));
-                        pw.print(": "); pw.println(reg.lastProcStates.valueAt(j));
+                        UserHandle.formatUid(pw, reg.mLastProcStates.keyAt(j));
+                        pw.print(": "); pw.println(reg.mLastProcStates.valueAt(j));
                     }
                 }
             }
@@ -366,8 +376,8 @@ public class UidObserverController {
         pw.print(mUidChangeDispatchCount);
         pw.println();
         pw.println("  Slow UID dispatches:");
-        final int N = mUidObservers.beginBroadcast();
-        for (int i = 0; i < N; i++) {
+        final int size = mUidObservers.beginBroadcast();
+        for (int i = 0; i < size; i++) {
             UidObserverRegistration r =
                     (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
             pw.print("    ");
@@ -383,21 +393,21 @@ public class UidObserverController {
 
     @GuardedBy("mService")
     void dumpDebug(ProtoOutputStream proto, String dumpPackage) {
-        final int NI = mUidObservers.getRegisteredCallbackCount();
-        for (int i=0; i<NI; i++) {
+        final int count = mUidObservers.getRegisteredCallbackCount();
+        for (int i = 0; i < count; i++) {
             final UidObserverRegistration reg = (UidObserverRegistration)
                     mUidObservers.getRegisteredCallbackCookie(i);
-            if (dumpPackage == null || dumpPackage.equals(reg.pkg)) {
+            if (dumpPackage == null || dumpPackage.equals(reg.mPkg)) {
                 reg.dumpDebug(proto, ActivityManagerServiceDumpProcessesProto.UID_OBSERVERS);
             }
         }
     }
 
-    static final class UidObserverRegistration {
-        final int uid;
-        final String pkg;
-        final int which;
-        final int cutpoint;
+    private static final class UidObserverRegistration {
+        final int mUid;
+        final String mPkg;
+        final int mWhich;
+        final int mCutpoint;
 
         /**
          * Total # of callback calls that took more than {@link #SLOW_UID_OBSERVER_THRESHOLD_MS}.
@@ -408,49 +418,49 @@ public class UidObserverController {
         /** Max time it took for each dispatch. */
         int mMaxDispatchTime;
 
-        final SparseIntArray lastProcStates;
+        final SparseIntArray mLastProcStates;
 
         // Please keep the enum lists in sync
-        private static int[] ORIG_ENUMS = new int[]{
+        private static final int[] ORIG_ENUMS = new int[]{
                 ActivityManager.UID_OBSERVER_IDLE,
                 ActivityManager.UID_OBSERVER_ACTIVE,
                 ActivityManager.UID_OBSERVER_GONE,
                 ActivityManager.UID_OBSERVER_PROCSTATE,
         };
-        private static int[] PROTO_ENUMS = new int[]{
+        private static final int[] PROTO_ENUMS = new int[]{
                 ActivityManagerProto.UID_OBSERVER_FLAG_IDLE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_ACTIVE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_GONE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_PROCSTATE,
         };
 
-        UidObserverRegistration(int _uid, String _pkg, int _which, int _cutpoint) {
-            uid = _uid;
-            pkg = _pkg;
-            which = _which;
-            cutpoint = _cutpoint;
+        UidObserverRegistration(int uid, String pkg, int which, int cutpoint) {
+            this.mUid = uid;
+            this.mPkg = pkg;
+            this.mWhich = which;
+            this.mCutpoint = cutpoint;
             if (cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
-                lastProcStates = new SparseIntArray();
+                mLastProcStates = new SparseIntArray();
             } else {
-                lastProcStates = null;
+                mLastProcStates = null;
             }
         }
 
         void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
-            proto.write(UidObserverRegistrationProto.UID, uid);
-            proto.write(UidObserverRegistrationProto.PACKAGE, pkg);
+            proto.write(UidObserverRegistrationProto.UID, mUid);
+            proto.write(UidObserverRegistrationProto.PACKAGE, mPkg);
             ProtoUtils.writeBitWiseFlagsToProtoEnum(proto, UidObserverRegistrationProto.FLAGS,
-                    which, ORIG_ENUMS, PROTO_ENUMS);
-            proto.write(UidObserverRegistrationProto.CUT_POINT, cutpoint);
-            if (lastProcStates != null) {
-                final int NI = lastProcStates.size();
-                for (int i=0; i<NI; i++) {
+                    mWhich, ORIG_ENUMS, PROTO_ENUMS);
+            proto.write(UidObserverRegistrationProto.CUT_POINT, mCutpoint);
+            if (mLastProcStates != null) {
+                final int size = mLastProcStates.size();
+                for (int i = 0; i < size; i++) {
                     final long pToken = proto.start(UidObserverRegistrationProto.LAST_PROC_STATES);
                     proto.write(UidObserverRegistrationProto.ProcState.UID,
-                            lastProcStates.keyAt(i));
+                            mLastProcStates.keyAt(i));
                     proto.write(UidObserverRegistrationProto.ProcState.STATE,
-                            lastProcStates.valueAt(i));
+                            mLastProcStates.valueAt(i));
                     proto.end(pToken);
                 }
             }

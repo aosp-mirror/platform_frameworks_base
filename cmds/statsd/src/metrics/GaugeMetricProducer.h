@@ -170,14 +170,14 @@ private:
     // for each slice with the latest value.
     void updateCurrentSlicedBucketForAnomaly();
 
-    // Whitelist of fields to report. Empty means all are reported.
+    // Allowlist of fields to report. Empty means all are reported.
     std::vector<Matcher> mFieldMatchers;
 
     GaugeMetric::SamplingType mSamplingType;
 
     const int64_t mMaxPullDelayNs;
 
-    // apply a whitelist on the original input
+    // apply an allowlist on the original input
     std::shared_ptr<vector<FieldValue>> getGaugeFields(const LogEvent& event);
 
     // Util function to check whether the specified dimension hits the guardrail.

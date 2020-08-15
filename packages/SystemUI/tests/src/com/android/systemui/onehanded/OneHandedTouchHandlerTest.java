@@ -77,8 +77,7 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOneHandedManager_registerForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer, times(1))
-                .registerTransitionCallback(mTouchHandler);
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mTouchHandler);
     }
 
     @Test

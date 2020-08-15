@@ -125,10 +125,11 @@ public class AppStateTrackerImpl implements AppStateTracker {
     private int[] mTempExemptAppIds = mPowerExemptAllAppIds;
 
     /**
-     * Per-user packages that are in the EXEMPT bucket.
+     * Per-user packages that are in the EXEMPTED bucket.
      */
     @GuardedBy("mLock")
-    private final SparseSetArray<String> mExemptBucketPackages = new SparseSetArray<>();
+    @VisibleForTesting
+    final SparseSetArray<String> mExemptedBucketPackages = new SparseSetArray<>();
 
     @GuardedBy("mLock")
     final ArraySet<Listener> mListeners = new ArraySet<>();
@@ -180,7 +181,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         int ALL_UNEXEMPTED = 3;
         int ALL_EXEMPTION_LIST_CHANGED = 4;
         int TEMP_EXEMPTION_LIST_CHANGED = 5;
-        int EXEMPT_BUCKET_CHANGED = 6;
+        int EXEMPTED_BUCKET_CHANGED = 6;
         int FORCE_ALL_CHANGED = 7;
         int FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 8;
 
@@ -195,7 +196,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             "ALL_UNEXEMPTED",
             "ALL_EXEMPTION_LIST_CHANGED",
             "TEMP_EXEMPTION_LIST_CHANGED",
-            "EXEMPT_BUCKET_CHANGED",
+            "EXEMPTED_BUCKET_CHANGED",
             "FORCE_ALL_CHANGED",
             "FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED",
 
@@ -338,9 +339,9 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         /**
-         * This is called when the EXEMPT bucket is updated.
+         * This is called when the EXEMPTED bucket is updated.
          */
-        private void onExemptBucketChanged(AppStateTrackerImpl sender) {
+        private void onExemptedBucketChanged(AppStateTrackerImpl sender) {
             // This doesn't happen very often, so just re-evaluate all jobs / alarms.
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
@@ -424,6 +425,38 @@ public class AppStateTrackerImpl implements AppStateTracker {
         mHandler = new MyHandler(looper);
     }
 
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            switch (intent.getAction()) {
+                case Intent.ACTION_USER_REMOVED:
+                    if (userId > 0) {
+                        mHandler.doUserRemoved(userId);
+                    }
+                    break;
+                case Intent.ACTION_BATTERY_CHANGED:
+                    synchronized (mLock) {
+                        mIsPluggedIn = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
+                    }
+                    updateForceAllAppStandbyState();
+                    break;
+                case Intent.ACTION_PACKAGE_REMOVED:
+                    if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        final String pkgName = intent.getData().getSchemeSpecificPart();
+                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        // No need to notify for state change as all the alarms and jobs should be
+                        // removed too.
+                        mExemptedBucketPackages.remove(userId, pkgName);
+                        mRunAnyRestrictedPackages.remove(Pair.create(uid, pkgName));
+                        mActiveUids.delete(uid);
+                        mForegroundUids.delete(uid);
+                    }
+                    break;
+            }
+        }
+    };
+
     /**
      * Call it when the system is ready.
      */
@@ -465,8 +498,11 @@ public class AppStateTrackerImpl implements AppStateTracker {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_USER_REMOVED);
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-            mContext.registerReceiver(new MyReceiver(), filter);
+            mContext.registerReceiver(mReceiver, filter);
+
+            filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
+            mContext.registerReceiver(mReceiver, filter);
 
             refreshForcedAppStandbyUidPackagesLocked();
 
@@ -693,30 +729,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
     }
 
-    private final class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
-                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                if (userId > 0) {
-                    mHandler.doUserRemoved(userId);
-                }
-            } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-                synchronized (mLock) {
-                    mIsPluggedIn = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
-                }
-                updateForceAllAppStandbyState();
-            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
-                    && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                final String pkgName = intent.getData().getSchemeSpecificPart();
-                if (mExemptBucketPackages.remove(userId, pkgName)) {
-                    mHandler.notifyExemptBucketChanged();
-                }
-            }
-        }
-    }
-
     final class StandbyTracker extends AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
@@ -728,12 +740,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
             synchronized (mLock) {
                 final boolean changed;
                 if (bucket == UsageStatsManager.STANDBY_BUCKET_EXEMPTED) {
-                    changed = mExemptBucketPackages.add(userId, packageName);
+                    changed = mExemptedBucketPackages.add(userId, packageName);
                 } else {
-                    changed = mExemptBucketPackages.remove(userId, packageName);
+                    changed = mExemptedBucketPackages.remove(userId, packageName);
                 }
                 if (changed) {
-                    mHandler.notifyExemptBucketChanged();
+                    mHandler.notifyExemptedBucketChanged();
                 }
             }
         }
@@ -755,7 +767,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private static final int MSG_FORCE_ALL_CHANGED = 7;
         private static final int MSG_USER_REMOVED = 8;
         private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 9;
-        private static final int MSG_EXEMPT_BUCKET_CHANGED = 10;
+        private static final int MSG_EXEMPTED_BUCKET_CHANGED = 10;
 
         private static final int MSG_ON_UID_STATE_CHANGED = 11;
         private static final int MSG_ON_UID_ACTIVE = 12;
@@ -803,9 +815,9 @@ public class AppStateTrackerImpl implements AppStateTracker {
             obtainMessage(MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED).sendToTarget();
         }
 
-        public void notifyExemptBucketChanged() {
-            removeMessages(MSG_EXEMPT_BUCKET_CHANGED);
-            obtainMessage(MSG_EXEMPT_BUCKET_CHANGED).sendToTarget();
+        public void notifyExemptedBucketChanged() {
+            removeMessages(MSG_EXEMPTED_BUCKET_CHANGED);
+            obtainMessage(MSG_EXEMPTED_BUCKET_CHANGED).sendToTarget();
         }
 
         public void doUserRemoved(int userId) {
@@ -888,11 +900,11 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     mStatLogger.logDurationStat(Stats.TEMP_EXEMPTION_LIST_CHANGED, start);
                     return;
 
-                case MSG_EXEMPT_BUCKET_CHANGED:
+                case MSG_EXEMPTED_BUCKET_CHANGED:
                     for (Listener l : cloneListeners()) {
-                        l.onExemptBucketChanged(sender);
+                        l.onExemptedBucketChanged(sender);
                     }
-                    mStatLogger.logDurationStat(Stats.EXEMPT_BUCKET_CHANGED, start);
+                    mStatLogger.logDurationStat(Stats.EXEMPTED_BUCKET_CHANGED, start);
                     return;
 
                 case MSG_FORCE_ALL_CHANGED:
@@ -1005,7 +1017,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             }
             cleanUpArrayForUser(mActiveUids, removedUserId);
             cleanUpArrayForUser(mForegroundUids, removedUserId);
-            mExemptBucketPackages.remove(removedUserId);
+            mExemptedBucketPackages.remove(removedUserId);
         }
     }
 
@@ -1148,7 +1160,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             }
             final int userId = UserHandle.getUserId(uid);
             if (mAppStandbyInternal.isAppIdleEnabled() && !mAppStandbyInternal.isInParole()
-                    && mExemptBucketPackages.contains(userId, packageName)) {
+                    && mExemptedBucketPackages.contains(userId, packageName)) {
                 return false;
             }
             return mForceAllAppsStandby;
@@ -1301,14 +1313,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
             pw.println("Exempted bucket packages:");
             pw.increaseIndent();
-            for (int i = 0; i < mExemptBucketPackages.size(); i++) {
+            for (int i = 0; i < mExemptedBucketPackages.size(); i++) {
                 pw.print("User ");
-                pw.print(mExemptBucketPackages.keyAt(i));
+                pw.print(mExemptedBucketPackages.keyAt(i));
                 pw.println();
 
                 pw.increaseIndent();
-                for (int j = 0; j < mExemptBucketPackages.sizeAt(i); j++) {
-                    pw.print(mExemptBucketPackages.valueAt(i, j));
+                for (int j = 0; j < mExemptedBucketPackages.sizeAt(i); j++) {
+                    pw.print(mExemptedBucketPackages.valueAt(i, j));
                     pw.println();
                 }
                 pw.decreaseIndent();
@@ -1384,12 +1396,13 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 proto.write(AppStateTrackerProto.TEMP_POWER_SAVE_EXEMPT_APP_IDS, appId);
             }
 
-            for (int i = 0; i < mExemptBucketPackages.size(); i++) {
-                for (int j = 0; j < mExemptBucketPackages.sizeAt(i); j++) {
+            for (int i = 0; i < mExemptedBucketPackages.size(); i++) {
+                for (int j = 0; j < mExemptedBucketPackages.sizeAt(i); j++) {
                     final long token2 = proto.start(AppStateTrackerProto.EXEMPTED_BUCKET_PACKAGES);
 
-                    proto.write(ExemptedPackage.USER_ID, mExemptBucketPackages.keyAt(i));
-                    proto.write(ExemptedPackage.PACKAGE_NAME, mExemptBucketPackages.valueAt(i, j));
+                    proto.write(ExemptedPackage.USER_ID, mExemptedBucketPackages.keyAt(i));
+                    proto.write(ExemptedPackage.PACKAGE_NAME,
+                            mExemptedBucketPackages.valueAt(i, j));
 
                     proto.end(token2);
                 }

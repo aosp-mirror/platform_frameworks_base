@@ -63,7 +63,6 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private final CommandQueue mCommandQueue;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final IOverlayManager mOverlayManager;
-    private final OneHandedSettingsUtil mSettingUtil;
     private final OneHandedTimeoutHandler mTimeoutHandler;
     private final ScreenLifecycle mScreenLifecycle;
 
@@ -154,7 +153,6 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     public OneHandedUI(Context context,
             CommandQueue commandQueue,
             OneHandedManagerImpl oneHandedManager,
-            OneHandedSettingsUtil settingsUtil,
             ScreenLifecycle screenLifecycle) {
         super(context);
 
@@ -163,7 +161,6 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             mCommandQueue = null;
             mOneHandedManager = null;
             mOverlayManager = null;
-            mSettingUtil = null;
             mTimeoutHandler = null;
             mScreenLifecycle = null;
             return;
@@ -171,7 +168,6 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
 
         mCommandQueue = commandQueue;
         mOneHandedManager = oneHandedManager;
-        mSettingUtil = settingsUtil;
         mTimeoutHandler = OneHandedTimeoutHandler.get();
         mScreenLifecycle = screenLifecycle;
         mOverlayManager = IOverlayManager.Stub.asInterface(
@@ -252,26 +248,26 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     }
 
     private void setupSettingObservers() {
-        mSettingUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_ENABLED,
+        OneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_ENABLED,
                 mContext.getContentResolver(), mEnabledObserver);
-        mSettingUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
+        OneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
                 mContext.getContentResolver(), mTimeoutObserver);
-        mSettingUtil.registerSettingsKeyObserver(Settings.Secure.TAPS_APP_TO_EXIT,
+        OneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.TAPS_APP_TO_EXIT,
                 mContext.getContentResolver(), mTaskChangeExitObserver);
-        mSettingUtil.registerSettingsKeyObserver(
+        OneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 mContext.getContentResolver(), mSwipeToNotificationEnabledObserver);
     }
 
     private void updateSettings() {
-        mOneHandedManager.setOneHandedEnabled(
-                mSettingUtil.getSettingsOneHandedModeEnabled(mContext.getContentResolver()));
-        mTimeoutHandler.setTimeout(
-                mSettingUtil.getSettingsOneHandedModeTimeout(mContext.getContentResolver()));
-        mOneHandedManager.setTaskChangeToExit(
-                mSettingUtil.getSettingsTapsAppToExit(mContext.getContentResolver()));
-        mOneHandedManager.setSwipeToNotificationEnabled(
-                mSettingUtil.getSettingsSwipeToNotificationEnabled(mContext.getContentResolver()));
+        mOneHandedManager.setOneHandedEnabled(OneHandedSettingsUtil
+                .getSettingsOneHandedModeEnabled(mContext.getContentResolver()));
+        mTimeoutHandler.setTimeout(OneHandedSettingsUtil
+                .getSettingsOneHandedModeTimeout(mContext.getContentResolver()));
+        mOneHandedManager.setTaskChangeToExit(OneHandedSettingsUtil
+                .getSettingsTapsAppToExit(mContext.getContentResolver()));
+        mOneHandedManager.setSwipeToNotificationEnabled(OneHandedSettingsUtil
+                .getSettingsSwipeToNotificationEnabled(mContext.getContentResolver()));
     }
 
     @Override
@@ -326,9 +322,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             mTimeoutHandler.dump(fd, pw, args);
         }
 
-        if (mSettingUtil != null) {
-            mSettingUtil.dump(pw, innerPrefix, mContext.getContentResolver());
-        }
+        OneHandedSettingsUtil.dump(pw, innerPrefix, mContext.getContentResolver());
 
         if (mOverlayManager != null) {
             OverlayInfo info = null;

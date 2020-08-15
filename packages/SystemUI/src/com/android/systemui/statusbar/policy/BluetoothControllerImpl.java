@@ -29,6 +29,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -150,13 +152,13 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     @Override
-    public void addCallback(Callback cb) {
+    public void addCallback(@NonNull Callback cb) {
         mHandler.obtainMessage(H.MSG_ADD_CALLBACK, cb).sendToTarget();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
     @Override
-    public void removeCallback(Callback cb) {
+    public void removeCallback(@NonNull Callback cb) {
         mHandler.obtainMessage(H.MSG_REMOVE_CALLBACK, cb).sendToTarget();
     }
 

@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.annotations.GuardedBy;
@@ -95,7 +96,7 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public void addCallback(Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
         synchronized (mCallbacks) {
             mCallbacks.add(callback);
         }
@@ -106,7 +107,7 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public void removeCallback(Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
         }

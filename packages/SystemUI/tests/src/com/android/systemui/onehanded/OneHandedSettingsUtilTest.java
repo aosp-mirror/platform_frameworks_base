@@ -40,14 +40,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class OneHandedSettingsUtilTest extends OneHandedTestCase {
-    OneHandedSettingsUtil mOneHandedSettingsUtil;
     ContentResolver mContentResolver;
     ContentObserver mContentObserver;
     boolean mOnChanged;
 
     @Before
     public void setUp() {
-        mOneHandedSettingsUtil = new OneHandedSettingsUtil();
         mContentResolver = mContext.getContentResolver();
         mContentObserver = new ContentObserver(mContext.getMainThreadHandler()) {
             @Override
@@ -60,20 +58,20 @@ public class OneHandedSettingsUtilTest extends OneHandedTestCase {
 
     @Test
     public void testRegisterSecureKeyObserver() {
-        final Uri result = mOneHandedSettingsUtil.registerSettingsKeyObserver(
+        final Uri result = OneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, mContentResolver, mContentObserver);
 
         assertThat(result).isNotNull();
 
-        mOneHandedSettingsUtil.registerSettingsKeyObserver(
+        OneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, mContentResolver, mContentObserver);
     }
 
     @Test
     public void testUnregisterSecureKeyObserver() {
-        mOneHandedSettingsUtil.registerSettingsKeyObserver(
+        OneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, mContentResolver, mContentObserver);
-        mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContentResolver, mContentObserver);
+        OneHandedSettingsUtil.unregisterSettingsKeyObserver(mContentResolver, mContentObserver);
 
         assertThat(mOnChanged).isFalse();
 
@@ -85,19 +83,19 @@ public class OneHandedSettingsUtilTest extends OneHandedTestCase {
 
     @Test
     public void testGetSettingsIsOneHandedModeEnabled() {
-        assertThat(mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+        assertThat(OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 mContentResolver)).isAnyOf(true, false);
     }
 
     @Test
     public void testGetSettingsTapsAppToExit() {
-        assertThat(mOneHandedSettingsUtil.getSettingsTapsAppToExit(
+        assertThat(OneHandedSettingsUtil.getSettingsTapsAppToExit(
                 mContentResolver)).isAnyOf(true, false);
     }
 
     @Test
     public void testGetSettingsOneHandedModeTimeout() {
-        assertThat(mOneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
+        assertThat(OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
                 mContentResolver)).isAnyOf(
                 ONE_HANDED_TIMEOUT_NEVER,
                 ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS,
@@ -107,7 +105,7 @@ public class OneHandedSettingsUtilTest extends OneHandedTestCase {
 
     @Test
     public void testGetSettingsSwipeToNotificationEnabled() {
-        assertThat(mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+        assertThat(OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                 mContentResolver)).isAnyOf(true, false);
     }
 }

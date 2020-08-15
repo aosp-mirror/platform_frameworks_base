@@ -4367,7 +4367,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // Flip state because app was explicitly added or removed to denylist.
                 setMeteredNetworkDenylist(uid, (isDenylisted || isRestrictedByAdmin));
                 if (hasRule(oldRule, RULE_REJECT_METERED) && isAllowlisted) {
-                    // Since dneylist prevails over allowlist, we need to handle the special case
+                    // Since denylist prevails over allowlist, we need to handle the special case
                     // where app is allowlisted and denylisted at the same time (although such
                     // scenario should be blocked by the UI), then denylist is removed.
                     setMeteredNetworkAllowlist(uid, isAllowlisted);

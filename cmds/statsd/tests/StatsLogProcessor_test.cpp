@@ -68,7 +68,7 @@ TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> periodicAlarmMonitor;
-    // Construct the processor with a dummy sendBroadcast function that does nothing.
+    // Construct the processor with a no-op sendBroadcast function that does nothing.
     StatsLogProcessor p(m, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor, 0,
                         [](const ConfigKey& key) { return true; },
                         [](const int&, const vector<int64_t>&) {return true;});

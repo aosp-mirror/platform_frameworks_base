@@ -23,6 +23,8 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
@@ -276,7 +278,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public void addCallback(StateListener listener) {
+    public void addCallback(@NonNull StateListener listener) {
         synchronized (mListeners) {
             addListenerInternalLocked(listener, Integer.MAX_VALUE);
         }
@@ -316,7 +318,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
 
     @Override
-    public void removeCallback(StateListener listener) {
+    public void removeCallback(@NonNull StateListener listener) {
         synchronized (mListeners) {
             mListeners.removeIf((it) -> it.mListener.equals(listener));
         }
