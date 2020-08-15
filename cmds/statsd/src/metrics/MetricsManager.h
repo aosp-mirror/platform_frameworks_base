@@ -25,7 +25,7 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"
 #include "logd/LogEvent.h"
-#include "matchers/LogMatchingTracker.h"
+#include "matchers/AtomMatchingTracker.h"
 #include "metrics/MetricProducer.h"
 #include "packages/UidMap.h"
 
@@ -217,7 +217,7 @@ private:
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
 
-    // We only store the sp of LogMatchingTracker, MetricProducer, and ConditionTracker in
+    // We only store the sp of AtomMatchingTracker, MetricProducer, and ConditionTracker in
     // MetricsManager. There are relationships between them, and the relationships are denoted by
     // index instead of pointers. The reasons for this are: (1) the relationship between them are
     // complicated, so storing index instead of pointers reduces the risk that A holds B's sp, and B
@@ -225,7 +225,7 @@ private:
     // the related results from a cache using the index.
 
     // Hold all the atom matchers from the config.
-    std::vector<sp<LogMatchingTracker>> mAllAtomMatchers;
+    std::vector<sp<AtomMatchingTracker>> mAllAtomMatchingTrackers;
 
     // Hold all the conditions from the config.
     std::vector<sp<ConditionTracker>> mAllConditionTrackers;
@@ -239,29 +239,29 @@ private:
     // Hold all periodic alarm trackers.
     std::vector<sp<AlarmTracker>> mAllPeriodicAlarmTrackers;
 
-    // To make updating configs faster, we map the id of a LogMatchingTracker, MetricProducer, and
+    // To make updating configs faster, we map the id of a AtomMatchingTracker, MetricProducer, and
     // ConditionTracker to its index in the corresponding vector.
 
-    // Maps the id of an atom matcher to its index in mAllAtomMatchers.
-    std::unordered_map<int64_t, int> mLogTrackerMap;
+    // Maps the id of an atom matcher to its index in mAllAtomMatchingTrackers.
+    std::unordered_map<int64_t, int> mAtomMatchingTrackerMap;
 
     // To make the log processing more efficient, we want to do as much filtering as possible
     // before we go into individual trackers and conditions to match.
 
     // 1st filter: check if the event tag id is in mTagIds.
     // 2nd filter: if it is, we parse the event because there is at least one member is interested.
-    //             then pass to all LogMatchingTrackers (itself also filter events by ids).
-    // 3nd filter: for LogMatchingTrackers that matched this event, we pass this event to the
+    //             then pass to all AtomMatchingTrackers (itself also filter events by ids).
+    // 3nd filter: for AtomMatchingTrackers that matched this event, we pass this event to the
     //             ConditionTrackers and MetricProducers that use this matcher.
     // 4th filter: for ConditionTrackers that changed value due to this event, we pass
     //             new conditions to  metrics that use this condition.
 
     // The following map is initialized from the statsd_config.
 
-    // Maps from the index of the LogMatchingTracker to index of MetricProducer.
+    // Maps from the index of the AtomMatchingTracker to index of MetricProducer.
     std::unordered_map<int, std::vector<int>> mTrackerToMetricMap;
 
-    // Maps from LogMatchingTracker to ConditionTracker
+    // Maps from AtomMatchingTracker to ConditionTracker
     std::unordered_map<int, std::vector<int>> mTrackerToConditionMap;
 
     // Maps from ConditionTracker to MetricProducer

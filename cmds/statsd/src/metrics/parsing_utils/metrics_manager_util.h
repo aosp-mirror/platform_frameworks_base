@@ -23,7 +23,7 @@
 #include "anomaly/AlarmTracker.h"
 #include "condition/ConditionTracker.h"
 #include "external/StatsPullerManager.h"
-#include "matchers/LogMatchingTracker.h"
+#include "matchers/AtomMatchingTracker.h"
 #include "metrics/MetricProducer.h"
 
 namespace android {
@@ -33,14 +33,14 @@ namespace statsd {
 // Helper functions for creating individual config components from StatsdConfig.
 // Should only be called from metrics_manager_util and config_update_utils.
 
-// Create a LogMatchingTracker.
+// Create a AtomMatchingTracker.
 // input:
 // [logMatcher]: the input AtomMatcher from the StatsdConfig
 // [index]: the index of the matcher
 // output:
-// new LogMatchingTracker, or null if the tracker is unable to be created
-sp<LogMatchingTracker> createLogTracker(const AtomMatcher& logMatcher, const int index,
-                                        const sp<UidMap>& uidMap);
+// new AtomMatchingTracker, or null if the tracker is unable to be created
+sp<AtomMatchingTracker> createAtomMatchingTracker(const AtomMatcher& logMatcher, const int index,
+                                                  const sp<UidMap>& uidMap);
 
 // Helper functions for MetricsManager to initialize from StatsdConfig.
 // *Note*: only initStatsdConfig() should be called from outside.
@@ -48,24 +48,24 @@ sp<LogMatchingTracker> createLogTracker(const AtomMatcher& logMatcher, const int
 // steps, created to make unit tests easier. And most of the parameters in these
 // functions are temporary objects in the initialization phase.
 
-// Initialize the LogMatchingTrackers.
+// Initialize the AtomMatchingTrackers.
 // input:
 // [key]: the config key that this config belongs to
 // [config]: the input StatsdConfig
 // output:
-// [logTrackerMap]: this map should contain matcher name to index mapping
-// [allAtomMatchers]: should store the sp to all the LogMatchingTracker
+// [atomMatchingTrackerMap]: this map should contain matcher name to index mapping
+// [allAtomMatchingTrackers]: should store the sp to all the AtomMatchingTracker
 // [allTagIds]: contains the set of all interesting tag ids to this config.
-bool initLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
-                     std::unordered_map<int64_t, int>& logTrackerMap,
-                     std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
-                     std::set<int>& allTagIds);
+bool initAtomMatchingTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
+                              std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
+                              std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+                              std::set<int>& allTagIds);
 
 // Initialize ConditionTrackers
 // input:
 // [key]: the config key that this config belongs to
 // [config]: the input config
-// [logTrackerMap]: LogMatchingTracker name to index mapping from previous step.
+// [atomMatchingTrackerMap]: AtomMatchingTracker name to index mapping from previous step.
 // output:
 // [conditionTrackerMap]: this map should contain condition name to index mapping
 // [allConditionTrackers]: stores the sp to all the ConditionTrackers
@@ -73,7 +73,7 @@ bool initLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
 //                        log tracker to condition trackers that use the log tracker
 // [initialConditionCache]: stores the initial conditions for each ConditionTracker
 bool initConditions(const ConfigKey& key, const StatsdConfig& config,
-                    const std::unordered_map<int64_t, int>& logTrackerMap,
+                    const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
                     std::unordered_map<int64_t, int>& conditionTrackerMap,
                     std::vector<sp<ConditionTracker>>& allConditionTrackers,
                     std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
@@ -96,7 +96,7 @@ bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAt
 // [key]: the config key that this config belongs to
 // [config]: the input config
 // [timeBaseSec]: start time base for all metrics
-// [logTrackerMap]: LogMatchingTracker name to index mapping from previous step.
+// [atomMatchingTrackerMap]: AtomMatchingTracker name to index mapping from previous step.
 // [conditionTrackerMap]: condition name to index mapping
 // [stateAtomIdMap]: contains the mapping from state ids to atom ids
 // [allStateGroupMaps]: contains the mapping from atom ids and state values to
@@ -109,10 +109,10 @@ bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAt
 bool initMetrics(
         const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
         const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
-        const std::unordered_map<int64_t, int>& logTrackerMap,
+        const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
         const std::unordered_map<int64_t, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
-        const vector<sp<LogMatchingTracker>>& allAtomMatchers,
+        const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
         const unordered_map<int64_t, int>& stateAtomIdMap,
         const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
         vector<sp<ConditionTracker>>& allConditionTrackers,
@@ -132,8 +132,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& periodicAlarmMonitor, const int64_t timeBaseNs,
                       const int64_t currentTimeNs, std::set<int>& allTagIds,
-                      std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
-                      std::unordered_map<int64_t, int>& logTrackerMap,
+                      std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+                      std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,

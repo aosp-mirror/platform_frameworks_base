@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef LOG_MATCHING_TRACKER_H
-#define LOG_MATCHING_TRACKER_H
+#ifndef ATOM_MATCHING_TRACKER_H
+#define ATOM_MATCHING_TRACKER_H
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "logd/LogEvent.h"
@@ -31,35 +31,36 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class LogMatchingTracker : public virtual RefBase {
+class AtomMatchingTracker : public virtual RefBase {
 public:
-    LogMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash)
+    AtomMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash)
         : mId(id), mIndex(index), mInitialized(false), mProtoHash(protoHash){};
 
-    virtual ~LogMatchingTracker(){};
+    virtual ~AtomMatchingTracker(){};
 
-    // Initialize this LogMatchingTracker.
-    // allLogMatchers: the list of the AtomMatcher proto config. This is needed because we don't
-    //                 store the proto object in memory. We only need it during initilization.
-    // allTrackers: the list of the LogMatchingTracker objects. It's a one-to-one mapping with
-    //              allLogMatchers. This is needed because the initialization is done recursively
-    //              for CombinationLogMatchingTrackers using DFS.
+    // Initialize this AtomMatchingTracker.
+    // allAtomMatchers: the list of the AtomMatcher proto config. This is needed because we don't
+    //                  store the proto object in memory. We only need it during initilization.
+    // allAtomMatchingTrackers: the list of the AtomMatchingTracker objects. It's a one-to-one
+    //                          mapping with allAtomMatchers. This is needed because the
+    //                          initialization is done recursively for
+    //                          CombinationAtomMatchingTrackers using DFS.
     // stack: a bit map to record which matcher has been visited on the stack. This is for detecting
     //        circle dependency.
-    virtual bool init(const std::vector<AtomMatcher>& allLogMatchers,
-                      const std::vector<sp<LogMatchingTracker>>& allTrackers,
+    virtual bool init(const std::vector<AtomMatcher>& allAtomMatchers,
+                      const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
                       const std::unordered_map<int64_t, int>& matcherMap,
                       std::vector<bool>& stack) = 0;
 
     // Called when a log event comes.
     // event: the log event.
-    // allTrackers: the list of all LogMatchingTrackers. This is needed because the log processing
-    //              is done recursively.
+    // allAtomMatchingTrackers: the list of all AtomMatchingTrackers. This is needed because the log
+    //                          processing is done recursively.
     // matcherResults: The cached results for all matchers for this event. Parent matchers can
     //                 directly access the children's matching results if they have been evaluated.
     //                 Otherwise, call children matchers' onLogEvent.
     virtual void onLogEvent(const LogEvent& event,
-                            const std::vector<sp<LogMatchingTracker>>& allTrackers,
+                            const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
                             std::vector<MatchingState>& matcherResults) = 0;
 
     // Get the tagIds that this matcher cares about. The combined collection is stored
@@ -81,23 +82,23 @@ protected:
     // Name of this matching. We don't really need the name, but it makes log message easy to debug.
     const int64_t mId;
 
-    // Index of this LogMatchingTracker in MetricsManager's container.
+    // Index of this AtomMatchingTracker in MetricsManager's container.
     const int mIndex;
 
-    // Whether this LogMatchingTracker has been properly initialized.
+    // Whether this AtomMatchingTracker has been properly initialized.
     bool mInitialized;
 
-    // The collection of the event tag ids that this LogMatchingTracker cares. So we can quickly
+    // The collection of the event tag ids that this AtomMatchingTracker cares. So we can quickly
     // return kNotMatched when we receive an event with an id not in the list. This is especially
-    // useful when we have a complex CombinationLogMatcherTracker.
+    // useful when we have a complex CombinationAtomMatchingTracker.
     std::set<int> mAtomIds;
 
     // Hash of the AtomMatcher's proto bytes from StatsdConfig.
     // Used to determine if the definition of this matcher has changed across a config update.
     const uint64_t mProtoHash;
 
-    FRIEND_TEST(MetricsManagerTest, TestCreateLogTrackerSimple);
-    FRIEND_TEST(MetricsManagerTest, TestCreateLogTrackerCombination);
+    FRIEND_TEST(MetricsManagerTest, TestCreateAtomMatchingTrackerSimple);
+    FRIEND_TEST(MetricsManagerTest, TestCreateAtomMatchingTrackerCombination);
     FRIEND_TEST(ConfigUpdateTest, TestUpdateMatchers);
 };
 
@@ -105,4 +106,4 @@ protected:
 }  // namespace os
 }  // namespace android
 
-#endif  // LOG_MATCHING_TRACKER_H
+#endif  // ATOM_MATCHING_TRACKER_H

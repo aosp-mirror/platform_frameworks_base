@@ -896,8 +896,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_TRUE(metricProducer2->isActive());
 
     int i = 0;
-    for (; i < metricsManager1->mAllAtomMatchers.size(); i++) {
-        if (metricsManager1->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManager1->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManager1->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger1->atom_matcher_id()) {
             break;
         }
@@ -908,8 +908,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_EQ(kNotActive, activation1->state);
 
     i = 0;
-    for (; i < metricsManager1->mAllAtomMatchers.size(); i++) {
-        if (metricsManager1->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManager1->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManager1->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger2->atom_matcher_id()) {
             break;
         }
@@ -981,8 +981,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_TRUE(metricProducer1002->isActive());
 
     i = 0;
-    for (; i < metricsManager1001->mAllAtomMatchers.size(); i++) {
-        if (metricsManager1001->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManager1001->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManager1001->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger1->atom_matcher_id()) {
             break;
         }
@@ -993,8 +993,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_EQ(kNotActive, activation1001_1->state);
 
     i = 0;
-    for (; i < metricsManager1001->mAllAtomMatchers.size(); i++) {
-        if (metricsManager1001->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManager1001->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManager1001->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger2->atom_matcher_id()) {
             break;
         }
@@ -1082,8 +1082,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_TRUE(metricProducerTimeBase3_2->isActive());
 
     i = 0;
-    for (; i < metricsManagerTimeBase3->mAllAtomMatchers.size(); i++) {
-        if (metricsManagerTimeBase3->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManagerTimeBase3->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManagerTimeBase3->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger1->atom_matcher_id()) {
             break;
         }
@@ -1094,8 +1094,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_EQ(kNotActive, activationTimeBase3_1->state);
 
     i = 0;
-    for (; i < metricsManagerTimeBase3->mAllAtomMatchers.size(); i++) {
-        if (metricsManagerTimeBase3->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManagerTimeBase3->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManagerTimeBase3->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger2->atom_matcher_id()) {
             break;
         }
@@ -1184,8 +1184,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_TRUE(metricProducerTimeBase4_2->isActive());
 
     i = 0;
-    for (; i < metricsManagerTimeBase4->mAllAtomMatchers.size(); i++) {
-        if (metricsManagerTimeBase4->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManagerTimeBase4->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManagerTimeBase4->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger1->atom_matcher_id()) {
             break;
         }
@@ -1196,8 +1196,8 @@ TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations) {
     EXPECT_EQ(kNotActive, activationTimeBase4_1->state);
 
     i = 0;
-    for (; i < metricsManagerTimeBase4->mAllAtomMatchers.size(); i++) {
-        if (metricsManagerTimeBase4->mAllAtomMatchers[i]->getId() ==
+    for (; i < metricsManagerTimeBase4->mAllAtomMatchingTrackers.size(); i++) {
+        if (metricsManagerTimeBase4->mAllAtomMatchingTrackers[i]->getId() ==
             metric1ActivationTrigger2->atom_matcher_id()) {
             break;
         }
@@ -1585,8 +1585,8 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_TRUE(metricProducer3->isActive());
 
     // Check event activations.
-    ASSERT_EQ(metricsManager1->mAllAtomMatchers.size(), 4);
-    EXPECT_EQ(metricsManager1->mAllAtomMatchers[0]->getId(),
+    ASSERT_EQ(metricsManager1->mAllAtomMatchingTrackers.size(), 4);
+    EXPECT_EQ(metricsManager1->mAllAtomMatchingTrackers[0]->getId(),
               metric1ActivationTrigger1->atom_matcher_id());
     const auto& activation1 = metricProducer1->mEventActivationMap.at(0);
     EXPECT_EQ(100 * NS_PER_SEC, activation1->ttl_ns);
@@ -1594,7 +1594,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kNotActive, activation1->state);
     EXPECT_EQ(ACTIVATE_ON_BOOT, activation1->activationType);
 
-    EXPECT_EQ(metricsManager1->mAllAtomMatchers[1]->getId(),
+    EXPECT_EQ(metricsManager1->mAllAtomMatchingTrackers[1]->getId(),
               metric1ActivationTrigger2->atom_matcher_id());
     const auto& activation2 = metricProducer1->mEventActivationMap.at(1);
     EXPECT_EQ(200 * NS_PER_SEC, activation2->ttl_ns);
@@ -1602,7 +1602,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kNotActive, activation2->state);
     EXPECT_EQ(ACTIVATE_IMMEDIATELY, activation2->activationType);
 
-    EXPECT_EQ(metricsManager1->mAllAtomMatchers[2]->getId(),
+    EXPECT_EQ(metricsManager1->mAllAtomMatchingTrackers[2]->getId(),
               metric2ActivationTrigger1->atom_matcher_id());
     const auto& activation3 = metricProducer2->mEventActivationMap.at(2);
     EXPECT_EQ(100 * NS_PER_SEC, activation3->ttl_ns);
@@ -1610,7 +1610,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kNotActive, activation3->state);
     EXPECT_EQ(ACTIVATE_ON_BOOT, activation3->activationType);
 
-    EXPECT_EQ(metricsManager1->mAllAtomMatchers[3]->getId(),
+    EXPECT_EQ(metricsManager1->mAllAtomMatchingTrackers[3]->getId(),
               metric2ActivationTrigger2->atom_matcher_id());
     const auto& activation4 = metricProducer2->mEventActivationMap.at(3);
     EXPECT_EQ(200 * NS_PER_SEC, activation4->ttl_ns);
@@ -1685,8 +1685,8 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     // Activation 1 is kActiveOnBoot.
     // Activation 2 and 3 are not active.
     // Activation 4 is active.
-    ASSERT_EQ(metricsManager2->mAllAtomMatchers.size(), 4);
-    EXPECT_EQ(metricsManager2->mAllAtomMatchers[0]->getId(),
+    ASSERT_EQ(metricsManager2->mAllAtomMatchingTrackers.size(), 4);
+    EXPECT_EQ(metricsManager2->mAllAtomMatchingTrackers[0]->getId(),
               metric1ActivationTrigger1->atom_matcher_id());
     const auto& activation1001 = metricProducer1001->mEventActivationMap.at(0);
     EXPECT_EQ(100 * NS_PER_SEC, activation1001->ttl_ns);
@@ -1694,7 +1694,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kActiveOnBoot, activation1001->state);
     EXPECT_EQ(ACTIVATE_ON_BOOT, activation1001->activationType);
 
-    EXPECT_EQ(metricsManager2->mAllAtomMatchers[1]->getId(),
+    EXPECT_EQ(metricsManager2->mAllAtomMatchingTrackers[1]->getId(),
               metric1ActivationTrigger2->atom_matcher_id());
     const auto& activation1002 = metricProducer1001->mEventActivationMap.at(1);
     EXPECT_EQ(200 * NS_PER_SEC, activation1002->ttl_ns);
@@ -1702,7 +1702,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kNotActive, activation1002->state);
     EXPECT_EQ(ACTIVATE_IMMEDIATELY, activation1002->activationType);
 
-    EXPECT_EQ(metricsManager2->mAllAtomMatchers[2]->getId(),
+    EXPECT_EQ(metricsManager2->mAllAtomMatchingTrackers[2]->getId(),
               metric2ActivationTrigger1->atom_matcher_id());
     const auto& activation1003 = metricProducer1002->mEventActivationMap.at(2);
     EXPECT_EQ(100 * NS_PER_SEC, activation1003->ttl_ns);
@@ -1710,7 +1710,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kNotActive, activation1003->state);
     EXPECT_EQ(ACTIVATE_ON_BOOT, activation1003->activationType);
 
-    EXPECT_EQ(metricsManager2->mAllAtomMatchers[3]->getId(),
+    EXPECT_EQ(metricsManager2->mAllAtomMatchingTrackers[3]->getId(),
               metric2ActivationTrigger2->atom_matcher_id());
     const auto& activation1004 = metricProducer1002->mEventActivationMap.at(3);
     EXPECT_EQ(200 * NS_PER_SEC, activation1004->ttl_ns);

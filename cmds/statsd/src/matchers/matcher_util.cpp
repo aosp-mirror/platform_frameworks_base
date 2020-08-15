@@ -17,7 +17,7 @@
 #include "Log.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "matchers/LogMatchingTracker.h"
+#include "matchers/AtomMatchingTracker.h"
 #include "matchers/matcher_util.h"
 #include "stats_util.h"
 
