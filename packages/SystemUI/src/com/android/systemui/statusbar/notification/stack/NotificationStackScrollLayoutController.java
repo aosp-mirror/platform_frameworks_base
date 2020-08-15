@@ -95,16 +95,11 @@ public class NotificationStackScrollLayoutController {
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 
-        mTunerService.addTunable(
-                (key, newValue) -> {
-                    if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
-                        mView.updateDismissRtlSetting("1".equals(newValue));
-                    } else if (key.equals(Settings.Secure.NOTIFICATION_HISTORY_ENABLED)) {
-                        updateFooter();
-                    }
-                },
-                Settings.Secure.NOTIFICATION_DISMISS_RTL,
-                Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
+        mTunerService.addTunable((key, newValue) -> {
+            if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
+                mView.updateDismissRtlSetting("1".equals(newValue));
+            }
+        }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
