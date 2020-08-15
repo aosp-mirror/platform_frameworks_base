@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMBINATION_LOG_MATCHING_TRACKER_H
-#define COMBINATION_LOG_MATCHING_TRACKER_H
+#ifndef COMBINATION_ATOM_MATCHING_TRACKER_H
+#define COMBINATION_ATOM_MATCHING_TRACKER_H
 
 #include <unordered_map>
 #include <vector>
-#include "LogMatchingTracker.h"
+
+#include "AtomMatchingTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
@@ -26,19 +27,18 @@ namespace os {
 namespace statsd {
 
 // Represents a AtomMatcher_Combination in the StatsdConfig.
-class CombinationLogMatchingTracker : public virtual LogMatchingTracker {
+class CombinationAtomMatchingTracker : public virtual AtomMatchingTracker {
 public:
-    CombinationLogMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash);
+    CombinationAtomMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash);
 
-    bool init(const std::vector<AtomMatcher>& allLogMatchers,
-              const std::vector<sp<LogMatchingTracker>>& allTrackers,
-              const std::unordered_map<int64_t, int>& matcherMap,
-              std::vector<bool>& stack);
+    bool init(const std::vector<AtomMatcher>& allAtomMatchers,
+              const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+              const std::unordered_map<int64_t, int>& matcherMap, std::vector<bool>& stack);
 
-    ~CombinationLogMatchingTracker();
+    ~CombinationAtomMatchingTracker();
 
     void onLogEvent(const LogEvent& event,
-                    const std::vector<sp<LogMatchingTracker>>& allTrackers,
+                    const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
                     std::vector<MatchingState>& matcherResults) override;
 
 private:
@@ -50,4 +50,4 @@ private:
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-#endif  // COMBINATION_LOG_MATCHING_TRACKER_H
+#endif  // COMBINATION_ATOM_MATCHING_TRACKER_H

@@ -20,7 +20,7 @@
 
 #include "anomaly/AlarmMonitor.h"
 #include "external/StatsPullerManager.h"
-#include "matchers/LogMatchingTracker.h"
+#include "matchers/AtomMatchingTracker.h"
 
 namespace android {
 namespace os {
@@ -42,34 +42,34 @@ enum UpdateStatus {
 // input:
 // [config]: the input StatsdConfig
 // [matcherIdx]: the index of the current matcher to be updated
-// [newLogTrackerMap]: matcher id to index mapping in the input StatsdConfig
-// [oldLogTrackerMap]: matcher id to index mapping in the existing MetricsManager
-// [oldAtomMatchers]: stores the existing LogMatchingTrackers
+// [newAtomMatchingTrackerMap]: matcher id to index mapping in the input StatsdConfig
+// [oldAtomMatchingTrackerMap]: matcher id to index mapping in the existing MetricsManager
+// [oldAtomMatchingTrackers]: stores the existing AtomMatchingTrackers
 // output:
 // [matchersToUpdate]: vector of the update status of each matcher. The matcherIdx index will
 //                     be updated from UPDATE_UNKNOWN after this call.
 // [cycleTracker]: intermediate param used during recursion.
 bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherIdx,
-                                  const unordered_map<int64_t, int>& oldLogTrackerMap,
-                                  const vector<sp<LogMatchingTracker>>& oldAtomMatchers,
-                                  const unordered_map<int64_t, int>& newLogTrackerMap,
+                                  const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                                  const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                                  const unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
                                   vector<UpdateStatus>& matchersToUpdate,
                                   vector<bool>& cycleTracker);
 
-// Updates the LogMatchingTrackers.
+// Updates the AtomMatchingTrackers.
 // input:
 // [config]: the input StatsdConfig
-// [oldLogTrackerMap]: existing matcher id to index mapping
-// [oldAtomMatchers]: stores the existing LogMatchingTrackers
+// [oldAtomMatchingTrackerMap]: existing matcher id to index mapping
+// [oldAtomMatchingTrackers]: stores the existing AtomMatchingTrackers
 // output:
 // [allTagIds]: contains the set of all interesting tag ids to this config.
-// [newLogTrackerMap]: new matcher id to index mapping
-// [newAtomMatchers]: stores the new LogMatchingTrackers
-bool updateLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
-                       const unordered_map<int64_t, int>& oldLogTrackerMap,
-                       const vector<sp<LogMatchingTracker>>& oldAtomMatchers, set<int>& allTagIds,
-                       unordered_map<int64_t, int>& newLogTrackerMap,
-                       vector<sp<LogMatchingTracker>>& newAtomMatchers);
+// [newAtomMatchingTrackerMap]: new matcher id to index mapping
+// [newAtomMatchers]: stores the new AtomMatchingTrackers
+bool updateAtomTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
+                        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                        const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                        set<int>& allTagIds, unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+                        vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers);
 
 // Updates the existing MetricsManager from a new StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
@@ -78,11 +78,11 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         const sp<AlarmMonitor>& anomalyAlarmMonitor,
                         const sp<AlarmMonitor>& periodicAlarmMonitor, const int64_t timeBaseNs,
                         const int64_t currentTimeNs,
-                        const std::vector<sp<LogMatchingTracker>>& oldAtomMatchers,
-                        const unordered_map<int64_t, int>& oldLogTrackerMap,
+                        const std::vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
                         std::set<int>& allTagIds,
-                        std::vector<sp<LogMatchingTracker>>& newAtomMatchers,
-                        unordered_map<int64_t, int>& newLogTrackerMap);
+                        std::vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
+                        unordered_map<int64_t, int>& newAtomMatchingTrackerMap);
 
 }  // namespace statsd
 }  // namespace os

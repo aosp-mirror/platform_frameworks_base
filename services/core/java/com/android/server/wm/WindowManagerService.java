@@ -4740,7 +4740,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final class H extends android.os.Handler {
         public static final int REPORT_FOCUS_CHANGE = 2;
-        public static final int REPORT_LOSING_FOCUS = 3;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
         public static final int PERSIST_ANIMATION_SCALE = 14;
@@ -4815,11 +4814,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Focus moving from %s"
                                         + " to %s displayId=%d", lastFocus, newFocus,
                                 displayContent.getDisplayId());
-                        if (newFocus != null && lastFocus != null && !newFocus.isDisplayedLw()) {
-                            ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Delaying loss of focus...");
-                            displayContent.mLosingFocus.add(lastFocus);
-                            lastFocus = null;
-                        }
                     }
 
                     // First notify the accessibility manager for the change so it has
@@ -4838,24 +4832,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (lastFocus != null) {
                         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Losing focus: %s", lastFocus);
                         lastFocus.reportFocusChangedSerialized(false);
-                    }
-                    break;
-                }
-
-                case REPORT_LOSING_FOCUS: {
-                    final DisplayContent displayContent = (DisplayContent) msg.obj;
-                    ArrayList<WindowState> losers;
-
-                    synchronized (mGlobalLock) {
-                        losers = displayContent.mLosingFocus;
-                        displayContent.mLosingFocus = new ArrayList<>();
-                    }
-
-                    final int N = losers.size();
-                    for (int i = 0; i < N; i++) {
-                        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Losing delayed focus: %s",
-                                losers.get(i));
-                        losers.get(i).reportFocusChangedSerialized(false);
                     }
                     break;
                 }

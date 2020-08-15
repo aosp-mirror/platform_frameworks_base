@@ -18,5 +18,4 @@
 <resources>
     <!-- Values used for finding elements on the system ui nav bars -->
     <item type="id" name="lock_screen_nav_buttons"/>
-    <item type="id" name="nav_buttons"/>
 </resources>
