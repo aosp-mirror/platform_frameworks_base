@@ -253,5 +253,6 @@ public class SecureSettingsValidators {
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
+        VALIDATORS.put(Secure.ADAPTIVE_CONNECTIVITY_ENABLED, BOOLEAN_VALIDATOR);
     }
 }
