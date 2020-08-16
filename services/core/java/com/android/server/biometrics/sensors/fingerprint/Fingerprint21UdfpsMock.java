@@ -406,8 +406,10 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         mScheduler = scheduler;
         mScheduler.init(this);
         mHandler = handler;
+        // resetLockout is controlled by the framework, so hardwareAuthToken is not required
+        final boolean resetLockoutRequiresHardwareAuthToken = false;
         mSensorProperties = new FingerprintSensorProperties(sensorId,
-                FingerprintSensorProperties.TYPE_UDFPS);
+                FingerprintSensorProperties.TYPE_UDFPS, resetLockoutRequiresHardwareAuthToken);
         mMockHalResultController = controller;
         mUserHasTrust = new SparseBooleanArray();
         mTrustManager = context.getSystemService(TrustManager.class);

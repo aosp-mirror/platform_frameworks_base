@@ -75,11 +75,6 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
-        mFaceService.resetLockout(userId, hardwareAuthToken);
-    }
-
-    @Override
     public long getAuthenticatorId(int callingUserId) throws RemoteException {
         return mFaceService.getAuthenticatorId(callingUserId);
     }
