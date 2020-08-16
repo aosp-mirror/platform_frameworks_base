@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -23,25 +25,33 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 /**
  * A full screen view with a configurable illumination dot and scrim.
  */
-public class UdfpsView extends View {
+public class UdfpsView extends View implements DozeReceiver,
+        StatusBarStateController.StateListener {
     private static final String TAG = "UdfpsView";
 
     // Values in pixels.
-    private static final float SENSOR_SHADOW_OFFSET = 2.0f;
+    private static final float SENSOR_SHADOW_RADIUS = 2.0f;
     private static final float SENSOR_OUTLINE_WIDTH = 2.0f;
+
+    private static final int DEBUG_TEXT_SIZE_PX = 32;
 
     private final Rect mScrimRect;
     private final Paint mScrimPaint;
+    private final Paint mDebugTextPaint;
 
     private float mSensorX;
     private float mSensorY;
@@ -50,11 +60,20 @@ public class UdfpsView extends View {
     private final float mSensorRadius;
     private final float mSensorMarginBottom;
     private final float mSensorTouchAreaCoefficient;
+    private final int mMaxBurnInOffsetX;
+    private final int mMaxBurnInOffsetY;
 
     private final Rect mTouchableRegion;
     private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
 
+    // AOD anti-burn-in offsets
+    private float mInterpolatedDarkAmount;
+    private float mBurnInOffsetX;
+    private float mBurnInOffsetY;
+
     private boolean mIsScrimShowing;
+    private boolean mHbmSupported;
+    private String mDebugMessage;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -80,17 +99,28 @@ public class UdfpsView extends View {
             a.recycle();
         }
 
+        mMaxBurnInOffsetX = getResources()
+                .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
+        mMaxBurnInOffsetY = getResources()
+                .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
+
         mScrimRect = new Rect();
         mScrimPaint = new Paint(0 /* flags */);
         mScrimPaint.setColor(Color.BLACK);
 
         mSensorRect = new RectF();
         mSensorPaint = new Paint(0 /* flags */);
+        mSensorPaint.setAntiAlias(true);
         mSensorPaint.setColor(Color.WHITE);
         mSensorPaint.setStyle(Paint.Style.STROKE);
         mSensorPaint.setStrokeWidth(SENSOR_OUTLINE_WIDTH);
-        mSensorPaint.setShadowLayer(SENSOR_OUTLINE_WIDTH, 0, 0, Color.BLACK);
+        mSensorPaint.setShadowLayer(SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
         mSensorPaint.setAntiAlias(true);
+
+        mDebugTextPaint = new Paint();
+        mDebugTextPaint.setAntiAlias(true);
+        mDebugTextPaint.setColor(Color.BLUE);
+        mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
         mTouchableRegion = new Rect();
         mInsetsListener = internalInsetsInfo -> {
@@ -100,6 +130,29 @@ public class UdfpsView extends View {
         };
 
         mIsScrimShowing = false;
+    }
+
+    @Override
+    public void dozeTimeTick() {
+        updateAodPosition();
+    }
+
+    @Override
+    public void onDozeAmountChanged(float linear, float eased) {
+        mInterpolatedDarkAmount = eased;
+        updateAodPosition();
+    }
+
+    private void updateAodPosition() {
+        mBurnInOffsetX = MathUtils.lerp(0f,
+                getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
+                        - mMaxBurnInOffsetX,
+                mInterpolatedDarkAmount);
+        mBurnInOffsetY = MathUtils.lerp(0f,
+                getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
+                        - 0.5f * mMaxBurnInOffsetY,
+                mInterpolatedDarkAmount);
+        postInvalidate();
     }
 
     @Override
@@ -131,10 +184,29 @@ public class UdfpsView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mIsScrimShowing) {
+
+        if (mIsScrimShowing && mHbmSupported) {
+            // Only draw the scrim if HBM is supported.
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
+
+        // Translation should affect everything but the scrim.
+        canvas.save();
+        canvas.translate(mBurnInOffsetX, mBurnInOffsetY);
+        if (!TextUtils.isEmpty(mDebugMessage)) {
+            canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
+        }
         canvas.drawOval(mSensorRect, mSensorPaint);
+        canvas.restore();
+    }
+
+    void setHbmSupported(boolean hbmSupported) {
+        mHbmSupported = hbmSupported;
+    }
+
+    void setDebugMessage(String message) {
+        mDebugMessage = message;
+        postInvalidate();
     }
 
     boolean isValidTouch(float x, float y, float pressure) {

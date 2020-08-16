@@ -175,7 +175,7 @@ public class BiometricScheduler {
     @Nullable private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @NonNull private final IBiometricService mBiometricService;
     @NonNull private final Handler mHandler = new Handler(Looper.getMainLooper());
-    @NonNull protected final InternalCallback mInternalCallback;
+    @NonNull private final InternalCallback mInternalCallback;
     @NonNull private final Queue<Operation> mPendingOperations;
     @Nullable private Operation mCurrentOperation;
     @NonNull private final ArrayDeque<CrashState> mCrashStates;
@@ -185,7 +185,15 @@ public class BiometricScheduler {
     // starting the next client).
     public class InternalCallback implements ClientMonitor.Callback {
         @Override
-        public void onClientFinished(ClientMonitor<?> clientMonitor, boolean success) {
+        public void onClientStarted(@NonNull ClientMonitor<?> clientMonitor) {
+            Slog.d(getTag(), "[Started] " + clientMonitor);
+            if (mCurrentOperation.mClientCallback != null) {
+                mCurrentOperation.mClientCallback.onClientStarted(clientMonitor);
+            }
+        }
+
+        @Override
+        public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
             mHandler.post(() -> {
                 if (mCurrentOperation == null) {
                     Slog.e(getTag(), "[Finishing] " + clientMonitor
@@ -235,6 +243,14 @@ public class BiometricScheduler {
         mCrashStates = new ArrayDeque<>();
     }
 
+    /**
+     * @return A reference to the internal callback that should be invoked whenever the scheduler
+     *         needs to (e.g. client started, client finished).
+     */
+    @NonNull protected InternalCallback getInternalCallback() {
+        return mInternalCallback;
+    }
+
     private String getTag() {
         return BASE_TAG + "/" + mBiometricTag;
     }
@@ -262,7 +278,7 @@ public class BiometricScheduler {
             }
 
             final Interruptable interruptable = (Interruptable) currentClient;
-            interruptable.cancelWithoutStarting(mInternalCallback);
+            interruptable.cancelWithoutStarting(getInternalCallback());
             // Now we wait for the client to send its FinishCallback, which kicks off the next
             // operation.
             return;
@@ -280,10 +296,7 @@ public class BiometricScheduler {
         final boolean shouldStartNow = currentClient.getCookie() == 0;
         if (shouldStartNow) {
             Slog.d(getTag(), "[Starting] " + mCurrentOperation);
-            if (mCurrentOperation.mClientCallback != null) {
-                mCurrentOperation.mClientCallback.onClientStarted(currentClient);
-            }
-            currentClient.start(mInternalCallback);
+            currentClient.start(getInternalCallback());
             mCurrentOperation.state = Operation.STATE_STARTED;
         } else {
             try {
@@ -326,11 +339,8 @@ public class BiometricScheduler {
         }
 
         Slog.d(getTag(), "[Starting] Prepared client: " + mCurrentOperation);
-        if (mCurrentOperation.mClientCallback != null) {
-            mCurrentOperation.mClientCallback.onClientStarted(mCurrentOperation.clientMonitor);
-        }
         mCurrentOperation.state = Operation.STATE_STARTED;
-        mCurrentOperation.clientMonitor.start(mInternalCallback);
+        mCurrentOperation.clientMonitor.start(getInternalCallback());
     }
 
     /**

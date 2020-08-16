@@ -31,6 +31,7 @@ import android.view.View;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
@@ -88,6 +89,7 @@ public final class DozeServiceHost implements DozeHost {
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final LockscreenLockIconController mLockscreenLockIconController;
+    private final AuthController mAuthController;
     private NotificationIconAreaController mNotificationIconAreaController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private NotificationPanelViewController mNotificationPanel;
@@ -110,7 +112,8 @@ public final class DozeServiceHost implements DozeHost {
             PulseExpansionHandler pulseExpansionHandler,
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
-            LockscreenLockIconController lockscreenLockIconController) {
+            LockscreenLockIconController lockscreenLockIconController,
+            AuthController authController) {
         super();
         mDozeLog = dozeLog;
         mPowerManager = powerManager;
@@ -130,6 +133,7 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mLockscreenLockIconController = lockscreenLockIconController;
+        mAuthController = authController;
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -297,6 +301,7 @@ public final class DozeServiceHost implements DozeHost {
     @Override
     public void dozeTimeTick() {
         mNotificationPanel.dozeTimeTick();
+        mAuthController.dozeTimeTick();
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
         }

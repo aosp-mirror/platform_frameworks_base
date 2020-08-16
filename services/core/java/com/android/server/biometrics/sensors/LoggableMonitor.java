@@ -58,6 +58,10 @@ public abstract class LoggableMonitor {
         mStatsClient = statsClient;
     }
 
+    public int getStatsClient() {
+        return mStatsClient;
+    }
+
     private boolean isAnyFieldUnknown() {
         return mStatsModality == BiometricsProtoEnums.MODALITY_UNKNOWN
                 || mStatsAction == BiometricsProtoEnums.ACTION_UNKNOWN

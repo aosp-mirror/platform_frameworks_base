@@ -45,7 +45,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
     private final PowerManager mPowerManager;
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
-    private boolean mShouldSendErrorToClient;
+    private boolean mShouldSendErrorToClient = true;
     private boolean mAlreadyCancelled;
 
     /**
@@ -85,11 +85,11 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
         // case (success, failure, or error) is received from the HAL (e.g. versions of fingerprint
         // that do not handle lockout under the HAL. In these cases, ensure that the framework only
         // sends errors once per ClientMonitor.
-        if (!mShouldSendErrorToClient) {
+        if (mShouldSendErrorToClient) {
             logOnError(getContext(), errorCode, vendorCode, getTargetUserId());
             try {
                 if (getListener() != null) {
-                    mShouldSendErrorToClient = true;
+                    mShouldSendErrorToClient = false;
                     getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
                 }
             } catch (RemoteException e) {

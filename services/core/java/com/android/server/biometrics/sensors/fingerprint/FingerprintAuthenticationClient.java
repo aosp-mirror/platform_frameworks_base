@@ -29,7 +29,6 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.Surface;
 
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -47,6 +46,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     private static final String TAG = "Biometrics/FingerprintAuthClient";
 
+    private final boolean mIsKeyguard;
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
 
@@ -54,16 +54,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
-            int sensorId, boolean isStrongBiometric, @Nullable Surface surface, int statsClient,
+            int sensorId, boolean isStrongBiometric, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutFrameworkImpl lockoutTracker,
-            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isKeyguard) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutTracker);
         mLockoutFrameworkImpl = lockoutTracker;
         mUdfpsOverlayController = udfpsOverlayController;
+        mIsKeyguard = isKeyguard;
     }
 
     @Override
@@ -144,5 +145,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onFingerUp() {
         UdfpsHelper.onFingerUp(getFreshDaemon());
+    }
+
+    public boolean isKeyguard() {
+        return mIsKeyguard;
     }
 }
