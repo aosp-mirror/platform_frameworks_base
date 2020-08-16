@@ -84,7 +84,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     private static final String TAG = "Fingerprint21";
     private static final int ENROLL_TIMEOUT_SEC = 60;
 
-    private final Context mContext;
+    final Context mContext;
     private final IActivityTaskManager mActivityTaskManager;
     private final FingerprintSensorProperties mSensorProperties;
     private final BiometricScheduler mScheduler;
@@ -96,6 +96,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
     private final Map<Integer, Long> mAuthenticatorIds;
 
     @Nullable private IBiometricsFingerprint mDaemon;
+    @NonNull private final HalResultController mHalResultController;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
 
@@ -146,21 +147,48 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         }
     };
 
-    private final IBiometricsFingerprintClientCallback mDaemonCallback =
-            new IBiometricsFingerprintClientCallback.Stub() {
+    public static class HalResultController extends IBiometricsFingerprintClientCallback.Stub {
+
+        /**
+         * Interface to sends results to the HalResultController's owner.
+         */
+        public interface Callback {
+            /**
+             * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
+             */
+            void onHardwareUnavailable();
+        }
+
+        @NonNull private final Context mContext;
+        @NonNull final Handler mHandler;
+        @NonNull final BiometricScheduler mScheduler;
+        @Nullable private Callback mCallback;
+
+        HalResultController(@NonNull Context context, @NonNull Handler handler,
+                @NonNull BiometricScheduler scheduler) {
+            mContext = context;
+            mHandler = handler;
+            mScheduler = scheduler;
+        }
+
+        public void setCallback(@Nullable Callback callback) {
+            mCallback = callback;
+        }
+
         @Override
         public void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
             mHandler.post(() -> {
-                final CharSequence name = FingerprintUtils.getInstance()
-                        .getUniqueName(mContext, mCurrentUserId);
-                final Fingerprint fingerprint = new Fingerprint(name, groupId, fingerId, deviceId);
-
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FingerprintEnrollClient)) {
                     Slog.e(TAG, "onEnrollResult for non-enroll client: "
                             + Utils.getClientName(client));
                     return;
                 }
+
+                final int currentUserId = client.getTargetUserId();
+                final CharSequence name = FingerprintUtils.getInstance()
+                        .getUniqueName(mContext, currentUserId);
+                final Fingerprint fingerprint = new Fingerprint(name, groupId, fingerId, deviceId);
 
                 final FingerprintEnrollClient enrollClient = (FingerprintEnrollClient) client;
                 enrollClient.onEnrollResult(fingerprint, remaining);
@@ -224,8 +252,9 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
 
                 if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
                     Slog.e(TAG, "Got ERROR_HW_UNAVAILABLE");
-                    mDaemon = null;
-                    mCurrentUserId = UserHandle.USER_NULL;
+                    if (mCallback != null) {
+                        mCallback.onHardwareUnavailable();
+                    }
                 }
             });
         }
@@ -262,20 +291,27 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 enumerateConsumer.onEnumerationResult(fp, remaining);
             });
         }
-    };
+    }
 
-    Fingerprint21(@NonNull Context context, int sensorId,
+    Fingerprint21(@NonNull Context context, @NonNull BiometricScheduler scheduler,
+            @NonNull Handler handler, int sensorId,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
+            @NonNull HalResultController controller) {
         mContext = context;
+        mScheduler = scheduler;
+        mHandler = handler;
         mActivityTaskManager = ActivityTaskManager.getService();
-        mHandler = new Handler(Looper.getMainLooper());
+
         mTaskStackListener = new BiometricTaskStackListener();
         mAuthenticatorIds = Collections.synchronizedMap(new HashMap<>());
         mLazyDaemon = Fingerprint21.this::getDaemon;
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mLockoutTracker = new LockoutFrameworkImpl(context, mLockoutResetCallback);
-        mScheduler = new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
+        mHalResultController = controller;
+        mHalResultController.setCallback(() -> {
+            mDaemon = null;
+            mCurrentUserId = UserHandle.USER_NULL;
+        });
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
@@ -301,6 +337,17 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                 isUdfps ? FingerprintSensorProperties.TYPE_UDFPS
                         : FingerprintSensorProperties.TYPE_REAR;
         mSensorProperties = new FingerprintSensorProperties(sensorId, sensorType);
+    }
+
+    static Fingerprint21 newInstance(@NonNull Context context, int sensorId,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final BiometricScheduler scheduler =
+                new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
+        final HalResultController controller = new HalResultController(context, handler, scheduler);
+        return new Fingerprint21(context, scheduler, handler, sensorId, lockoutResetDispatcher,
+                controller);
     }
 
     @Override
@@ -355,7 +402,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         // successfully set.
         long halId = 0;
         try {
-            halId = mDaemon.setNotify(mDaemonCallback);
+            halId = mDaemon.setNotify(mHalResultController);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to set callback for fingerprint HAL", e);
             mDaemon = null;
@@ -373,6 +420,9 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         return mDaemon;
     }
 
+    @Nullable IUdfpsOverlayController getUdfpsOverlayController() {
+        return mUdfpsOverlayController;
+    }
     @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId) {
         return mLockoutTracker.getLockoutModeForUser(userId);
     }
@@ -492,7 +542,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
 
     void scheduleAuthenticate(@NonNull IBinder token, long operationId, int userId, int cookie,
             @NonNull ClientMonitorCallbackConverter listener, @NonNull String opPackageName,
-            @Nullable Surface surface, boolean restricted, int statsClient) {
+            boolean restricted, int statsClient, boolean isKeyguard) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -500,8 +550,8 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
             final FingerprintAuthenticationClient client = new FingerprintAuthenticationClient(
                     mContext, mLazyDaemon, token, listener, userId, operationId, restricted,
                     opPackageName, cookie, false /* requireConfirmation */,
-                    mSensorProperties.sensorId, isStrongBiometric, surface, statsClient,
-                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController);
+                    mSensorProperties.sensorId, isStrongBiometric, statsClient,
+                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController, isKeyguard);
             mScheduler.scheduleClientMonitor(client);
         });
     }

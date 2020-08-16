@@ -49,6 +49,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
+import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.List;
@@ -62,12 +64,13 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
-        AuthDialogCallback {
+        AuthDialogCallback, DozeReceiver {
 
-    private static final String TAG = "BiometricPrompt/AuthController";
+    private static final String TAG = "AuthController";
     private static final boolean DEBUG = true;
 
     private final CommandQueue mCommandQueue;
+    private final StatusBarStateController mStatusBarStateController;
     private final Injector mInjector;
 
     // TODO: These should just be saved from onSaveState
@@ -77,6 +80,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private WindowManager mWindowManager;
+    @Nullable
     private UdfpsController mUdfpsController;
     @VisibleForTesting
     IActivityTaskManager mActivityTaskManager;
@@ -141,6 +145,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             }
         }
     };
+
+    @Override
+    public void dozeTimeTick() {
+        if (mUdfpsController != null) {
+            mUdfpsController.dozeTimeTick();
+        }
+    }
 
     @Override
     public void onTryAgainPressed() {
@@ -251,14 +262,17 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Inject
-    public AuthController(Context context, CommandQueue commandQueue) {
-        this(context, commandQueue, new Injector());
+    public AuthController(Context context, CommandQueue commandQueue,
+            StatusBarStateController statusBarStateController) {
+        this(context, commandQueue, statusBarStateController, new Injector());
     }
 
     @VisibleForTesting
-    AuthController(Context context, CommandQueue commandQueue, Injector injector) {
+    AuthController(Context context, CommandQueue commandQueue,
+            StatusBarStateController statusBarStateController, Injector injector) {
         super(context);
         mCommandQueue = commandQueue;
+        mStatusBarStateController = statusBarStateController;
         mInjector = injector;
 
         IntentFilter filter = new IntentFilter();
@@ -280,7 +294,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     fpm.getSensorProperties();
             for (FingerprintSensorProperties props : fingerprintSensorProperties) {
                 if (props.sensorType == FingerprintSensorProperties.TYPE_UDFPS) {
-                    mUdfpsController = new UdfpsController(mContext);
+                    mUdfpsController = new UdfpsController(mContext, mStatusBarStateController);
                     break;
                 }
             }

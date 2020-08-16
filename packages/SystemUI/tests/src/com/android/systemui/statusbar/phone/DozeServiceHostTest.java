@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -90,6 +91,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private LockscreenLockIconController mLockscreenLockIconController;
+    @Mock private AuthController mAuthController;
 
     @Before
     public void setup() {
@@ -100,7 +102,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mVisualStabilityManager, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mLockscreenLockIconController);
+                mLockscreenLockIconController, mAuthController);
 
         mDozeServiceHost.initialize(mStatusBar, mNotificationIconAreaController,
                 mStatusBarKeyguardViewManager, mNotificationShadeWindowViewController,

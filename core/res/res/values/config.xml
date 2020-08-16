@@ -4189,6 +4189,8 @@
     <string-array name="config_biometric_sensors" translatable="false" >
         <!-- <item>0:2:15</item>  ID0:Fingerprint:Strong -->
     </string-array>
+    <!--If true, allows the device to load udfps components on older HIDL implementations -->
+    <bool name="allow_test_udfps" translatable="false" >false</bool>
 
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
          used to hide messages that may be too chatty or messages that the user can't do much about.
