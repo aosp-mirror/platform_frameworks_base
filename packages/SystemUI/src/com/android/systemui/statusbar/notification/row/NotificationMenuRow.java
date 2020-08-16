@@ -76,7 +76,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private Context mContext;
     private FrameLayout mMenuContainer;
     private NotificationMenuItem mInfoItem;
-    private MenuItem mAppOpsItem;
     private MenuItem mFeedbackItem;
     private MenuItem mSnoozeItem;
     private ArrayList<MenuItem> mLeftMenuItems;
@@ -135,11 +134,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public MenuItem getLongpressMenuItem(Context context) {
         return mInfoItem;
-    }
-
-    @Override
-    public MenuItem getAppOpsMenuItem(Context context) {
-        return mAppOpsItem;
     }
 
     @Override
@@ -264,7 +258,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             // Only show snooze for non-foreground notifications, and if the setting is on
             mSnoozeItem = createSnoozeItem(mContext);
         }
-        mAppOpsItem = createAppOpsItem(mContext);
         mFeedbackItem = createFeedbackItem(mContext);
         NotificationEntry entry = mParent.getEntry();
         int personNotifType = mPeopleNotificationIdentifier
@@ -281,7 +274,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mRightMenuItems.add(mSnoozeItem);
         }
         mRightMenuItems.add(mInfoItem);
-        mRightMenuItems.add(mAppOpsItem);
         mRightMenuItems.add(mFeedbackItem);
         mLeftMenuItems.addAll(mRightMenuItems);
 
@@ -688,14 +680,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 R.layout.notification_info, null, false);
         return new NotificationMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings);
-    }
-
-    static MenuItem createAppOpsItem(Context context) {
-        AppOpsInfo appOpsContent = (AppOpsInfo) LayoutInflater.from(context).inflate(
-                R.layout.app_ops_info, null, false);
-        MenuItem info = new NotificationMenuItem(context, null, appOpsContent,
-                -1 /*don't show in slow swipe menu */);
-        return info;
     }
 
     static MenuItem createFeedbackItem(Context context) {

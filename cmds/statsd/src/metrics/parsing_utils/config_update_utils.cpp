@@ -29,9 +29,9 @@ namespace statsd {
 // Recursive function to determine if a matcher needs to be updated. Populates matcherToUpdate.
 // Returns whether the function was successful or not.
 bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherIdx,
-                                  const unordered_map<int64_t, int>& oldLogTrackerMap,
-                                  const vector<sp<LogMatchingTracker>>& oldAtomMatchers,
-                                  const unordered_map<int64_t, int>& newLogTrackerMap,
+                                  const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                                  const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                                  const unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
                                   vector<UpdateStatus>& matchersToUpdate,
                                   vector<bool>& cycleTracker) {
     // Have already examined this matcher.
@@ -42,8 +42,8 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
     const AtomMatcher& matcher = config.atom_matcher(matcherIdx);
     int64_t id = matcher.id();
     // Check if new matcher.
-    const auto& oldLogTrackerIt = oldLogTrackerMap.find(id);
-    if (oldLogTrackerIt == oldLogTrackerMap.end()) {
+    const auto& oldAtomMatchingTrackerIt = oldAtomMatchingTrackerMap.find(id);
+    if (oldAtomMatchingTrackerIt == oldAtomMatchingTrackerMap.end()) {
         matchersToUpdate[matcherIdx] = UPDATE_REPLACE;
         return true;
     }
@@ -55,7 +55,7 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
         return false;
     }
     uint64_t newProtoHash = Hash64(serializedMatcher);
-    if (newProtoHash != oldAtomMatchers[oldLogTrackerIt->second]->getProtoHash()) {
+    if (newProtoHash != oldAtomMatchingTrackers[oldAtomMatchingTrackerIt->second]->getProtoHash()) {
         matchersToUpdate[matcherIdx] = UPDATE_REPLACE;
         return true;
     }
@@ -70,8 +70,8 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
             cycleTracker[matcherIdx] = true;
             UpdateStatus status = UPDATE_PRESERVE;
             for (const int64_t childMatcherId : matcher.combination().matcher()) {
-                const auto& childIt = newLogTrackerMap.find(childMatcherId);
-                if (childIt == newLogTrackerMap.end()) {
+                const auto& childIt = newAtomMatchingTrackerMap.find(childMatcherId);
+                if (childIt == newAtomMatchingTrackerMap.end()) {
                     ALOGW("Matcher %lld not found in the config", (long long)childMatcherId);
                     return false;
                 }
@@ -80,9 +80,9 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
                     ALOGE("Cycle detected in matcher config");
                     return false;
                 }
-                if (!determineMatcherUpdateStatus(config, childIdx, oldLogTrackerMap,
-                                                  oldAtomMatchers, newLogTrackerMap,
-                                                  matchersToUpdate, cycleTracker)) {
+                if (!determineMatcherUpdateStatus(
+                            config, childIdx, oldAtomMatchingTrackerMap, oldAtomMatchingTrackers,
+                            newAtomMatchingTrackerMap, matchersToUpdate, cycleTracker)) {
                     return false;
                 }
 
@@ -103,25 +103,25 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
     return true;
 }
 
-bool updateLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
-                       const unordered_map<int64_t, int>& oldLogTrackerMap,
-                       const vector<sp<LogMatchingTracker>>& oldAtomMatchers, set<int>& allTagIds,
-                       unordered_map<int64_t, int>& newLogTrackerMap,
-                       vector<sp<LogMatchingTracker>>& newAtomMatchers) {
+bool updateAtomTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
+                        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                        const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                        set<int>& allTagIds, unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+                        vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers) {
     const int atomMatcherCount = config.atom_matcher_size();
 
     vector<AtomMatcher> matcherProtos;
     matcherProtos.reserve(atomMatcherCount);
-    newAtomMatchers.reserve(atomMatcherCount);
+    newAtomMatchingTrackers.reserve(atomMatcherCount);
 
     // Maps matcher id to their position in the config. For fast lookup of dependencies.
     for (int i = 0; i < atomMatcherCount; i++) {
         const AtomMatcher& matcher = config.atom_matcher(i);
-        if (newLogTrackerMap.find(matcher.id()) != newLogTrackerMap.end()) {
+        if (newAtomMatchingTrackerMap.find(matcher.id()) != newAtomMatchingTrackerMap.end()) {
             ALOGE("Duplicate atom matcher found for id %lld", (long long)matcher.id());
             return false;
         }
-        newLogTrackerMap[matcher.id()] = i;
+        newAtomMatchingTrackerMap[matcher.id()] = i;
         matcherProtos.push_back(matcher);
     }
 
@@ -129,8 +129,9 @@ bool updateLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
     vector<UpdateStatus> matchersToUpdate(atomMatcherCount, UPDATE_UNKNOWN);
     vector<bool> cycleTracker(atomMatcherCount, false);
     for (int i = 0; i < atomMatcherCount; i++) {
-        if (!determineMatcherUpdateStatus(config, i, oldLogTrackerMap, oldAtomMatchers,
-                                          newLogTrackerMap, matchersToUpdate, cycleTracker)) {
+        if (!determineMatcherUpdateStatus(config, i, oldAtomMatchingTrackerMap,
+                                          oldAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                          matchersToUpdate, cycleTracker)) {
             return false;
         }
     }
@@ -140,23 +141,23 @@ bool updateLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
         const int64_t id = matcher.id();
         switch (matchersToUpdate[i]) {
             case UPDATE_PRESERVE: {
-                const auto& oldLogTrackerIt = oldLogTrackerMap.find(id);
-                if (oldLogTrackerIt == oldLogTrackerMap.end()) {
+                const auto& oldAtomMatchingTrackerIt = oldAtomMatchingTrackerMap.find(id);
+                if (oldAtomMatchingTrackerIt == oldAtomMatchingTrackerMap.end()) {
                     ALOGE("Could not find AtomMatcher %lld in the previous config, but expected it "
                           "to be there",
                           (long long)id);
                     return false;
                 }
-                const int oldIndex = oldLogTrackerIt->second;
-                newAtomMatchers.push_back(oldAtomMatchers[oldIndex]);
+                const int oldIndex = oldAtomMatchingTrackerIt->second;
+                newAtomMatchingTrackers.push_back(oldAtomMatchingTrackers[oldIndex]);
                 break;
             }
             case UPDATE_REPLACE: {
-                sp<LogMatchingTracker> tracker = createLogTracker(matcher, i, uidMap);
+                sp<AtomMatchingTracker> tracker = createAtomMatchingTracker(matcher, i, uidMap);
                 if (tracker == nullptr) {
                     return false;
                 }
-                newAtomMatchers.push_back(tracker);
+                newAtomMatchingTrackers.push_back(tracker);
                 break;
             }
             default: {
@@ -168,8 +169,9 @@ bool updateLogTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
     }
 
     std::fill(cycleTracker.begin(), cycleTracker.end(), false);
-    for (auto& matcher : newAtomMatchers) {
-        if (!matcher->init(matcherProtos, newAtomMatchers, newLogTrackerMap, cycleTracker)) {
+    for (auto& matcher : newAtomMatchingTrackers) {
+        if (!matcher->init(matcherProtos, newAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                           cycleTracker)) {
             return false;
         }
         // Collect all the tag ids that are interesting. TagIds exist in leaf nodes only.
@@ -185,13 +187,14 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         const sp<AlarmMonitor>& anomalyAlarmMonitor,
                         const sp<AlarmMonitor>& periodicAlarmMonitor, const int64_t timeBaseNs,
                         const int64_t currentTimeNs,
-                        const vector<sp<LogMatchingTracker>>& oldAtomMatchers,
-                        const unordered_map<int64_t, int>& oldLogTrackerMap, set<int>& allTagIds,
-                        vector<sp<LogMatchingTracker>>& newAtomMatchers,
-                        unordered_map<int64_t, int>& newLogTrackerMap) {
-    if (!updateLogTrackers(config, uidMap, oldLogTrackerMap, oldAtomMatchers, allTagIds,
-                           newLogTrackerMap, newAtomMatchers)) {
-        ALOGE("updateLogMatchingTrackers failed");
+                        const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                        set<int>& allTagIds,
+                        vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
+                        unordered_map<int64_t, int>& newAtomMatchingTrackerMap) {
+    if (!updateAtomTrackers(config, uidMap, oldAtomMatchingTrackerMap, oldAtomMatchingTrackers,
+                            allTagIds, newAtomMatchingTrackerMap, newAtomMatchingTrackers)) {
+        ALOGE("updateAtomMatchingTrackers failed");
         return false;
     }
 

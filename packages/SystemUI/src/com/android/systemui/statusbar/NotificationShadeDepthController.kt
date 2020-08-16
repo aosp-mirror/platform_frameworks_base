@@ -38,7 +38,6 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.KeyguardStateController

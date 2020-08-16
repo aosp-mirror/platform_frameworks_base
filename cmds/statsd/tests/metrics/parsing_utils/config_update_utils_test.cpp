@@ -49,8 +49,8 @@ sp<StatsPullerManager> pullerManager = new StatsPullerManager();
 sp<AlarmMonitor> anomalyAlarmMonitor;
 sp<AlarmMonitor> periodicAlarmMonitor;
 set<int> allTagIds;
-vector<sp<LogMatchingTracker>> oldAtomMatchers;
-unordered_map<int64_t, int> oldLogTrackerMap;
+vector<sp<AtomMatchingTracker>> oldAtomMatchingTrackers;
+unordered_map<int64_t, int> oldAtomMatchingTrackerMap;
 vector<sp<ConditionTracker>> oldConditionTrackers;
 vector<sp<MetricProducer>> oldMetricProducers;
 std::vector<sp<AnomalyTracker>> oldAnomalyTrackers;
@@ -71,8 +71,8 @@ public:
 
     void SetUp() override {
         allTagIds.clear();
-        oldAtomMatchers.clear();
-        oldLogTrackerMap.clear();
+        oldAtomMatchingTrackers.clear();
+        oldAtomMatchingTrackerMap.clear();
         oldConditionTrackers.clear();
         oldMetricProducers.clear();
         oldAnomalyTrackers.clear();
@@ -89,13 +89,13 @@ public:
 };
 
 bool initConfig(const StatsdConfig& config) {
-    return initStatsdConfig(key, config, uidMap, pullerManager, anomalyAlarmMonitor,
-                            periodicAlarmMonitor, timeBaseNs, timeBaseNs, allTagIds,
-                            oldAtomMatchers, oldLogTrackerMap, oldConditionTrackers,
-                            oldMetricProducers, oldAnomalyTrackers, oldAlarmTrackers,
-                            conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
-                            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                            alertTrackerMap, metricsWithActivation, noReportMetricIds);
+    return initStatsdConfig(
+            key, config, uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
+            timeBaseNs, timeBaseNs, allTagIds, oldAtomMatchingTrackers, oldAtomMatchingTrackerMap,
+            oldConditionTrackers, oldMetricProducers, oldAnomalyTrackers, oldAlarmTrackers,
+            conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap, alertTrackerMap,
+            metricsWithActivation, noReportMetricIds);
 }
 
 }  // anonymous namespace
@@ -111,10 +111,11 @@ TEST_F(ConfigUpdateTest, TestSimpleMatcherPreserve) {
 
     vector<UpdateStatus> matchersToUpdate(1, UPDATE_UNKNOWN);
     vector<bool> cycleTracker(1, false);
-    unordered_map<int64_t, int> newLogTrackerMap;
-    newLogTrackerMap[matcherId] = 0;
-    EXPECT_TRUE(determineMatcherUpdateStatus(config, 0, oldLogTrackerMap, oldAtomMatchers,
-                                             newLogTrackerMap, matchersToUpdate, cycleTracker));
+    unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    newAtomMatchingTrackerMap[matcherId] = 0;
+    EXPECT_TRUE(determineMatcherUpdateStatus(config, 0, oldAtomMatchingTrackerMap,
+                                             oldAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                             matchersToUpdate, cycleTracker));
     EXPECT_EQ(matchersToUpdate[0], UPDATE_PRESERVE);
 }
 
@@ -134,10 +135,11 @@ TEST_F(ConfigUpdateTest, TestSimpleMatcherReplace) {
 
     vector<UpdateStatus> matchersToUpdate(1, UPDATE_UNKNOWN);
     vector<bool> cycleTracker(1, false);
-    unordered_map<int64_t, int> newLogTrackerMap;
-    newLogTrackerMap[matcherId] = 0;
-    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 0, oldLogTrackerMap, oldAtomMatchers,
-                                             newLogTrackerMap, matchersToUpdate, cycleTracker));
+    unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    newAtomMatchingTrackerMap[matcherId] = 0;
+    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 0, oldAtomMatchingTrackerMap,
+                                             oldAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                             matchersToUpdate, cycleTracker));
     EXPECT_EQ(matchersToUpdate[0], UPDATE_REPLACE);
 }
 
@@ -163,20 +165,21 @@ TEST_F(ConfigUpdateTest, TestCombinationMatcherPreserve) {
     EXPECT_TRUE(initConfig(config));
 
     StatsdConfig newConfig;
-    unordered_map<int64_t, int> newLogTrackerMap;
+    unordered_map<int64_t, int> newAtomMatchingTrackerMap;
     // Same matchers, different order, all should be preserved.
     *newConfig.add_atom_matcher() = matcher2;
-    newLogTrackerMap[matcher2Id] = 0;
+    newAtomMatchingTrackerMap[matcher2Id] = 0;
     *newConfig.add_atom_matcher() = matcher3;
-    newLogTrackerMap[matcher3Id] = 1;
+    newAtomMatchingTrackerMap[matcher3Id] = 1;
     *newConfig.add_atom_matcher() = matcher1;
-    newLogTrackerMap[matcher1Id] = 2;
+    newAtomMatchingTrackerMap[matcher1Id] = 2;
 
     vector<UpdateStatus> matchersToUpdate(3, UPDATE_UNKNOWN);
     vector<bool> cycleTracker(3, false);
     // Only update the combination. It should recurse the two child matchers and preserve all 3.
-    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 1, oldLogTrackerMap, oldAtomMatchers,
-                                             newLogTrackerMap, matchersToUpdate, cycleTracker));
+    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 1, oldAtomMatchingTrackerMap,
+                                             oldAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                             matchersToUpdate, cycleTracker));
     EXPECT_EQ(matchersToUpdate[0], UPDATE_PRESERVE);
     EXPECT_EQ(matchersToUpdate[1], UPDATE_PRESERVE);
     EXPECT_EQ(matchersToUpdate[2], UPDATE_PRESERVE);
@@ -207,19 +210,20 @@ TEST_F(ConfigUpdateTest, TestCombinationMatcherReplace) {
     matcher3.mutable_combination()->set_operation(LogicalOperation::AND);
 
     StatsdConfig newConfig;
-    unordered_map<int64_t, int> newLogTrackerMap;
+    unordered_map<int64_t, int> newAtomMatchingTrackerMap;
     *newConfig.add_atom_matcher() = matcher2;
-    newLogTrackerMap[matcher2Id] = 0;
+    newAtomMatchingTrackerMap[matcher2Id] = 0;
     *newConfig.add_atom_matcher() = matcher3;
-    newLogTrackerMap[matcher3Id] = 1;
+    newAtomMatchingTrackerMap[matcher3Id] = 1;
     *newConfig.add_atom_matcher() = matcher1;
-    newLogTrackerMap[matcher1Id] = 2;
+    newAtomMatchingTrackerMap[matcher1Id] = 2;
 
     vector<UpdateStatus> matchersToUpdate(3, UPDATE_UNKNOWN);
     vector<bool> cycleTracker(3, false);
     // Only update the combination. The simple matchers should not be evaluated.
-    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 1, oldLogTrackerMap, oldAtomMatchers,
-                                             newLogTrackerMap, matchersToUpdate, cycleTracker));
+    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 1, oldAtomMatchingTrackerMap,
+                                             oldAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                             matchersToUpdate, cycleTracker));
     EXPECT_EQ(matchersToUpdate[0], UPDATE_UNKNOWN);
     EXPECT_EQ(matchersToUpdate[1], UPDATE_REPLACE);
     EXPECT_EQ(matchersToUpdate[2], UPDATE_UNKNOWN);
@@ -250,19 +254,20 @@ TEST_F(ConfigUpdateTest, TestCombinationMatcherDepsChange) {
     matcher2.mutable_simple_atom_matcher()->set_atom_id(12);
 
     StatsdConfig newConfig;
-    unordered_map<int64_t, int> newLogTrackerMap;
+    unordered_map<int64_t, int> newAtomMatchingTrackerMap;
     *newConfig.add_atom_matcher() = matcher2;
-    newLogTrackerMap[matcher2Id] = 0;
+    newAtomMatchingTrackerMap[matcher2Id] = 0;
     *newConfig.add_atom_matcher() = matcher3;
-    newLogTrackerMap[matcher3Id] = 1;
+    newAtomMatchingTrackerMap[matcher3Id] = 1;
     *newConfig.add_atom_matcher() = matcher1;
-    newLogTrackerMap[matcher1Id] = 2;
+    newAtomMatchingTrackerMap[matcher1Id] = 2;
 
     vector<UpdateStatus> matchersToUpdate(3, UPDATE_UNKNOWN);
     vector<bool> cycleTracker(3, false);
     // Only update the combination.
-    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 1, oldLogTrackerMap, oldAtomMatchers,
-                                             newLogTrackerMap, matchersToUpdate, cycleTracker));
+    EXPECT_TRUE(determineMatcherUpdateStatus(newConfig, 1, oldAtomMatchingTrackerMap,
+                                             oldAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                             matchersToUpdate, cycleTracker));
     // Matcher 2 and matcher3 must be reevaluated. Matcher 1 might, but does not need to be.
     EXPECT_EQ(matchersToUpdate[0], UPDATE_REPLACE);
     EXPECT_EQ(matchersToUpdate[1], UPDATE_REPLACE);
@@ -330,47 +335,48 @@ TEST_F(ConfigUpdateTest, TestUpdateMatchers) {
     *newConfig.add_atom_matcher() = combination1;
 
     set<int> newTagIds;
-    unordered_map<int64_t, int> newLogTrackerMap;
-    vector<sp<LogMatchingTracker>> newAtomMatchers;
-    EXPECT_TRUE(updateLogTrackers(newConfig, uidMap, oldLogTrackerMap, oldAtomMatchers, newTagIds,
-                                  newLogTrackerMap, newAtomMatchers));
+    unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers;
+    EXPECT_TRUE(updateAtomTrackers(newConfig, uidMap, oldAtomMatchingTrackerMap,
+                                   oldAtomMatchingTrackers, newTagIds, newAtomMatchingTrackerMap,
+                                   newAtomMatchingTrackers));
 
     ASSERT_EQ(newTagIds.size(), 3);
     EXPECT_EQ(newTagIds.count(10), 1);
     EXPECT_EQ(newTagIds.count(111), 1);
     EXPECT_EQ(newTagIds.count(13), 1);
 
-    ASSERT_EQ(newLogTrackerMap.size(), 6);
-    EXPECT_EQ(newLogTrackerMap.at(combination3Id), 0);
-    EXPECT_EQ(newLogTrackerMap.at(simple2Id), 1);
-    EXPECT_EQ(newLogTrackerMap.at(combination2Id), 2);
-    EXPECT_EQ(newLogTrackerMap.at(simple1Id), 3);
-    EXPECT_EQ(newLogTrackerMap.at(simple4Id), 4);
-    EXPECT_EQ(newLogTrackerMap.at(combination1Id), 5);
+    ASSERT_EQ(newAtomMatchingTrackerMap.size(), 6);
+    EXPECT_EQ(newAtomMatchingTrackerMap.at(combination3Id), 0);
+    EXPECT_EQ(newAtomMatchingTrackerMap.at(simple2Id), 1);
+    EXPECT_EQ(newAtomMatchingTrackerMap.at(combination2Id), 2);
+    EXPECT_EQ(newAtomMatchingTrackerMap.at(simple1Id), 3);
+    EXPECT_EQ(newAtomMatchingTrackerMap.at(simple4Id), 4);
+    EXPECT_EQ(newAtomMatchingTrackerMap.at(combination1Id), 5);
 
-    ASSERT_EQ(newAtomMatchers.size(), 6);
+    ASSERT_EQ(newAtomMatchingTrackers.size(), 6);
     // Make sure all atom matchers are initialized:
-    for (const sp<LogMatchingTracker>& tracker : newAtomMatchers) {
+    for (const sp<AtomMatchingTracker>& tracker : newAtomMatchingTrackers) {
         EXPECT_TRUE(tracker->mInitialized);
     }
     // Make sure preserved atom matchers are the same.
-    EXPECT_EQ(oldAtomMatchers[oldLogTrackerMap.at(simple1Id)],
-              newAtomMatchers[newLogTrackerMap.at(simple1Id)]);
-    EXPECT_EQ(oldAtomMatchers[oldLogTrackerMap.at(combination1Id)],
-              newAtomMatchers[newLogTrackerMap.at(combination1Id)]);
+    EXPECT_EQ(oldAtomMatchingTrackers[oldAtomMatchingTrackerMap.at(simple1Id)],
+              newAtomMatchingTrackers[newAtomMatchingTrackerMap.at(simple1Id)]);
+    EXPECT_EQ(oldAtomMatchingTrackers[oldAtomMatchingTrackerMap.at(combination1Id)],
+              newAtomMatchingTrackers[newAtomMatchingTrackerMap.at(combination1Id)]);
     // Make sure replaced matchers are different.
-    EXPECT_NE(oldAtomMatchers[oldLogTrackerMap.at(simple2Id)],
-              newAtomMatchers[newLogTrackerMap.at(simple2Id)]);
-    EXPECT_NE(oldAtomMatchers[oldLogTrackerMap.at(combination2Id)],
-              newAtomMatchers[newLogTrackerMap.at(combination2Id)]);
+    EXPECT_NE(oldAtomMatchingTrackers[oldAtomMatchingTrackerMap.at(simple2Id)],
+              newAtomMatchingTrackers[newAtomMatchingTrackerMap.at(simple2Id)]);
+    EXPECT_NE(oldAtomMatchingTrackers[oldAtomMatchingTrackerMap.at(combination2Id)],
+              newAtomMatchingTrackers[newAtomMatchingTrackerMap.at(combination2Id)]);
 
     // Validation, make sure the matchers have the proper ids. Could do more checks here.
-    EXPECT_EQ(newAtomMatchers[0]->getId(), combination3Id);
-    EXPECT_EQ(newAtomMatchers[1]->getId(), simple2Id);
-    EXPECT_EQ(newAtomMatchers[2]->getId(), combination2Id);
-    EXPECT_EQ(newAtomMatchers[3]->getId(), simple1Id);
-    EXPECT_EQ(newAtomMatchers[4]->getId(), simple4Id);
-    EXPECT_EQ(newAtomMatchers[5]->getId(), combination1Id);
+    EXPECT_EQ(newAtomMatchingTrackers[0]->getId(), combination3Id);
+    EXPECT_EQ(newAtomMatchingTrackers[1]->getId(), simple2Id);
+    EXPECT_EQ(newAtomMatchingTrackers[2]->getId(), combination2Id);
+    EXPECT_EQ(newAtomMatchingTrackers[3]->getId(), simple1Id);
+    EXPECT_EQ(newAtomMatchingTrackers[4]->getId(), simple4Id);
+    EXPECT_EQ(newAtomMatchingTrackers[5]->getId(), combination1Id);
 }
 
 }  // namespace statsd

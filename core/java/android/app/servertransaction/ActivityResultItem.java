@@ -18,10 +18,11 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.annotation.NonNull;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
@@ -33,7 +34,7 @@ import java.util.Objects;
  * Activity result delivery callback.
  * @hide
  */
-public class ActivityResultItem extends ClientTransactionItem {
+public class ActivityResultItem extends ActivityTransactionItem {
 
     @UnsupportedAppUsage
     private List<ResultInfo> mResultInfoList;
@@ -45,10 +46,10 @@ public class ActivityResultItem extends ClientTransactionItem {
     }*/
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
-        client.handleSendResult(token, mResultInfoList, "ACTIVITY_RESULT");
+        client.handleSendResult(r, mResultInfoList, "ACTIVITY_RESULT");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -88,7 +89,7 @@ public class ActivityResultItem extends ClientTransactionItem {
         mResultInfoList = in.createTypedArrayList(ResultInfo.CREATOR);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<ActivityResultItem> CREATOR =
+    public static final @NonNull Parcelable.Creator<ActivityResultItem> CREATOR =
             new Parcelable.Creator<ActivityResultItem>() {
         public ActivityResultItem createFromParcel(Parcel in) {
             return new ActivityResultItem(in);

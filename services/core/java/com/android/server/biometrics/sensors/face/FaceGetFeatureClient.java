@@ -61,8 +61,8 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
         startHalOperation();
     }
 
@@ -71,10 +71,10 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
         try {
             final OptionalBool result = getFreshDaemon().getFeature(mFeature, mFaceId);
             getListener().onFeatureGet(result.status == Status.OK, mFeature, result.value);
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to getFeature", e);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

@@ -29,7 +29,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.eq
 import org.junit.Before

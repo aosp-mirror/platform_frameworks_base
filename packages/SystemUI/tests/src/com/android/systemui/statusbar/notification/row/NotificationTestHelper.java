@@ -52,6 +52,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -68,7 +69,6 @@ import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
 import org.mockito.ArgumentCaptor;
@@ -421,7 +421,6 @@ public class NotificationTestHelper {
                 mBindStage,
                 mock(OnExpandClickListener.class),
                 mock(NotificationMediaManager.class),
-                mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 mock(FalsingManager.class),
                 mStatusBarStateController,

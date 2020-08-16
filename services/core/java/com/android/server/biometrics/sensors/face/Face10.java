@@ -98,6 +98,11 @@ class Face10 implements IHwBinder.DeathRecipient {
 
     @Nullable private IBiometricsFace mDaemon;
     private int mCurrentUserId = UserHandle.USER_NULL;
+    // If a challenge is generated, keep track of its owner. Since IBiometricsFace@1.0 only
+    // supports a single in-flight challenge, we must notify the interrupted owner that its
+    // challenge is no longer valid. The interrupted owner will be notified when the interrupter
+    // has finished.
+    @Nullable private FaceGenerateChallengeClient mCurrentChallengeOwner;
 
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
@@ -394,9 +399,12 @@ class Face10 implements IHwBinder.DeathRecipient {
         final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
                 mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId, mCurrentUserId,
                 hasEnrolled, mAuthenticatorIds);
-        mScheduler.scheduleClientMonitor(client, (clientMonitor, success) -> {
-            if (success) {
-                mCurrentUserId = targetUserId;
+        mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+            @Override
+            public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+                if (success) {
+                    mCurrentUserId = targetUserId;
+                }
             }
         });
     }
@@ -459,18 +467,68 @@ class Face10 implements IHwBinder.DeathRecipient {
     void scheduleGenerateChallenge(@NonNull IBinder token, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName) {
         mHandler.post(() -> {
+            if (mCurrentChallengeOwner != null) {
+                Slog.w(TAG, "Current challenge owner: " + mCurrentChallengeOwner
+                        + ", interrupted by: " + opPackageName);
+                try {
+                    mCurrentChallengeOwner.getListener().onChallengeInterrupted(mSensorId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify challenge interrupted", e);
+                }
+            }
+
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), opPackageName,
-                    mSensorId);
-            mScheduler.scheduleClientMonitor(client);
+                    mSensorId, mCurrentChallengeOwner);
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientStarted(@NonNull ClientMonitor<?> clientMonitor) {
+                    if (client != clientMonitor) {
+                        Slog.e(TAG, "scheduleGenerateChallenge, mismatched client."
+                                + " Expecting: " + client + ", received: " + clientMonitor);
+                        return;
+                    }
+                    Slog.d(TAG, "Current challenge owner: " + client);
+                    mCurrentChallengeOwner = client;
+                }
+            });
         });
     }
 
     void scheduleRevokeChallenge(@NonNull IBinder token, @NonNull String owner) {
         mHandler.post(() -> {
+            if (!mCurrentChallengeOwner.getOwnerString().contentEquals(owner)) {
+                Slog.e(TAG, "Package: " + owner + " attempting to revoke challenge owned by: "
+                        + mCurrentChallengeOwner.getOwnerString());
+                return;
+            }
+
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
                     mLazyDaemon, token, owner, mSensorId);
-            mScheduler.scheduleClientMonitor(client);
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
+                        boolean success) {
+                    if (client != clientMonitor) {
+                        Slog.e(TAG, "scheduleRevokeChallenge, mismatched client."
+                                + "Expecting: " + client + ", received: " + clientMonitor);
+                        return;
+                    }
+
+                    final FaceGenerateChallengeClient previousChallengeOwner =
+                            mCurrentChallengeOwner.getInterruptedClient();
+                    mCurrentChallengeOwner = null;
+                    Slog.d(TAG, "Previous challenge owner: " + previousChallengeOwner);
+                    if (previousChallengeOwner != null) {
+                        try {
+                            previousChallengeOwner.getListener()
+                                    .onChallengeInterruptFinished(mSensorId);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Unable to notify interrupt finished", e);
+                        }
+                    }
+                }
+            });
         });
     }
 
@@ -488,12 +546,16 @@ class Face10 implements IHwBinder.DeathRecipient {
                     opPackageName, FaceUtils.getInstance(), disabledFeatures, ENROLL_TIMEOUT_SEC,
                     surfaceHandle, mSensorId);
 
-            mScheduler.scheduleClientMonitor(client, ((clientMonitor, success) -> {
-                if (success) {
-                    // Update authenticatorIds
-                    scheduleUpdateActiveUserWithoutHandler(client.getTargetUserId());
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
+                        boolean success) {
+                    if (success) {
+                        // Update authenticatorIds
+                        scheduleUpdateActiveUserWithoutHandler(client.getTargetUserId());
+                    }
                 }
-            }));
+            });
         });
     }
 

@@ -25,7 +25,7 @@
     <!--The 20dp padding is the difference between the background selected icon size and the ripple
         that was chosen, thus it's a hack to make it look pretty and not an official margin value-->
     <LinearLayout
-        android:id="@id/nav_buttons"
+        android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"

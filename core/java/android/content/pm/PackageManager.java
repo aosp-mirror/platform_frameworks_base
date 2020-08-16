@@ -3373,6 +3373,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
 
     /**

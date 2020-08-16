@@ -988,6 +988,8 @@ class UserController implements Handler.Callback {
         final ArrayList<IStopUserCallback> stopCallbacks;
         final ArrayList<KeyEvictedCallback> keyEvictedCallbacks;
         int userIdToLock = userId;
+        // Must get a reference to UserInfo before it's removed
+        final UserInfo userInfo = getUserInfo(userId);
         synchronized (mLock) {
             stopCallbacks = new ArrayList<>(uss.mStopCallbacks);
             keyEvictedCallbacks = new ArrayList<>(uss.mKeyEvictedCallbacks);
@@ -1030,8 +1032,8 @@ class UserController implements Handler.Callback {
         if (stopped) {
             mInjector.systemServiceManagerCleanupUser(userId);
             mInjector.stackSupervisorRemoveUser(userId);
+
             // Remove the user if it is ephemeral.
-            UserInfo userInfo = getUserInfo(userId);
             if (userInfo.isEphemeral() && !userInfo.preCreated) {
                 mInjector.getUserManager().removeUserEvenWhenDisallowed(userId);
             }

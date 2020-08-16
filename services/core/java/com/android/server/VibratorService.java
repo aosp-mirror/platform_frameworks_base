@@ -127,6 +127,7 @@ public class VibratorService extends IVibratorService.Stub
     private final int mPreviousVibrationsLimit;
     private final boolean mAllowPriorityVibrationsInLowPowerMode;
     private final List<Integer> mSupportedEffects;
+    private final List<Integer> mSupportedPrimitives;
     private final long mCapabilities;
     private final int mDefaultVibrationAmplitude;
     private final SparseArray<VibrationEffect> mFallbackEffects;
@@ -183,6 +184,8 @@ public class VibratorService extends IVibratorService.Stub
     static native void vibratorSetAmplitude(long controllerPtr, int amplitude);
 
     static native int[] vibratorGetSupportedEffects(long controllerPtr);
+
+    static native int[] vibratorGetSupportedPrimitives(long controllerPtr);
 
     static native long vibratorPerformEffect(
             long controllerPtr, long effect, long strength, Vibration vibration);
@@ -397,6 +400,7 @@ public class VibratorService extends IVibratorService.Stub
         mNativeWrapper.vibratorOff();
 
         mSupportedEffects = asList(mNativeWrapper.vibratorGetSupportedEffects());
+        mSupportedPrimitives = asList(mNativeWrapper.vibratorGetSupportedPrimitives());
         mCapabilities = mNativeWrapper.vibratorGetCapabilities();
 
         mContext = context;
@@ -647,8 +651,11 @@ public class VibratorService extends IVibratorService.Stub
     @Override // Binder call
     public boolean[] arePrimitivesSupported(int[] primitiveIds) {
         boolean[] supported = new boolean[primitiveIds.length];
-        if (hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-            Arrays.fill(supported, true);
+        if (!hasCapability(IVibrator.CAP_COMPOSE_EFFECTS) || mSupportedPrimitives == null) {
+            return supported;
+        }
+        for (int i = 0; i < primitiveIds.length; i++) {
+            supported[i] = mSupportedPrimitives.contains(primitiveIds[i]);
         }
         return supported;
     }
@@ -1501,6 +1508,7 @@ public class VibratorService extends IVibratorService.Stub
             pw.println("  mNotificationIntensity=" + mNotificationIntensity);
             pw.println("  mRingIntensity=" + mRingIntensity);
             pw.println("  mSupportedEffects=" + mSupportedEffects);
+            pw.println("  mSupportedPrimitives=" + mSupportedPrimitives);
             pw.println();
             pw.println("  Previous ring vibrations:");
             for (VibrationInfo info : mPreviousRingVibrations) {
@@ -1757,6 +1765,11 @@ public class VibratorService extends IVibratorService.Stub
         /** Returns all predefined effects supported by the device vibrator. */
         public int[] vibratorGetSupportedEffects() {
             return VibratorService.vibratorGetSupportedEffects(mNativeControllerPtr);
+        }
+
+        /** Returns all compose primitives supported by the device vibrator. */
+        public int[] vibratorGetSupportedPrimitives() {
+            return VibratorService.vibratorGetSupportedPrimitives(mNativeControllerPtr);
         }
 
         /** Turns vibrator on to perform one of the supported effects. */

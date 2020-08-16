@@ -79,7 +79,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         if (authenticated) {
             resetFailedAttempts(getTargetUserId());
             UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         } else {
             final @LockoutTracker.LockoutMode int lockoutMode =
                     mLockoutFrameworkImpl.getLockoutModeForUser(getTargetUserId());
@@ -119,7 +119,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
             UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -132,7 +132,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             Slog.e(TAG, "Remote exception when requesting cancel", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 

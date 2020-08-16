@@ -18,7 +18,7 @@
 
 #include "condition/condition_util.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "matchers/LogMatchingTracker.h"
+#include "matchers/AtomMatchingTracker.h"
 #include "matchers/matcher_util.h"
 
 #include <utils/RefBase.h>
@@ -60,9 +60,9 @@ public:
 
     // evaluate current condition given the new event.
     // event: the new log event
-    // eventMatcherValues: the results of the LogMatcherTrackers. LogMatcherTrackers always process
-    //                     event before ConditionTrackers, because ConditionTracker depends on
-    //                     LogMatchingTrackers.
+    // eventMatcherValues: the results of the AtomMatchingTrackers. AtomMatchingTrackers always
+    //                     process event before ConditionTrackers, because ConditionTracker depends
+    //                     on AtomMatchingTrackers.
     // mAllConditions: the list of all ConditionTracker
     // conditionCache: the cached non-sliced condition of the ConditionTrackers for this new event.
     // conditionChanged: the bit map to record whether the condition has changed.
@@ -88,8 +88,8 @@ public:
             const bool isPartialLink,
             std::vector<ConditionState>& conditionCache) const = 0;
 
-    // return the list of LogMatchingTracker index that this ConditionTracker uses.
-    virtual const std::set<int>& getLogTrackerIndex() const {
+    // return the list of AtomMatchingTracker index that this ConditionTracker uses.
+    virtual const std::set<int>& getAtomMatchingTrackerIndex() const {
         return mTrackerIndex;
     }
 
@@ -136,7 +136,7 @@ protected:
     // if it's properly initialized.
     bool mInitialized;
 
-    // the list of LogMatchingTracker index that this ConditionTracker uses.
+    // the list of AtomMatchingTracker index that this ConditionTracker uses.
     std::set<int> mTrackerIndex;
 
     // This variable is only used for CombinationConditionTrackers.

@@ -98,7 +98,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
         }
 
         if (finish) {
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 
@@ -114,7 +114,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
     }
 
     @Override
-    public void cancelWithoutStarting(@NonNull FinishCallback finishCallback) {
+    public void cancelWithoutStarting(@NonNull Callback callback) {
         final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
         try {
             if (getListener() != null) {
@@ -123,7 +123,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
-        finishCallback.onClientFinished(this, true /* success */);
+        callback.onClientFinished(this, true /* success */);
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendAcquired", e);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 

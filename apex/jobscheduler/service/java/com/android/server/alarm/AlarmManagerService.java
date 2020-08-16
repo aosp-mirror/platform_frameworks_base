@@ -4310,7 +4310,7 @@ public class AlarmManagerService extends SystemService {
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-            filter.addDataScheme("package");
+            filter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
             getContext().registerReceiver(this, filter);
              // Register for events related to sdcard installation.
             IntentFilter sdFilter = new IntentFilter();

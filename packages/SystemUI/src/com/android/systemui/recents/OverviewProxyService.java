@@ -87,7 +87,7 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;

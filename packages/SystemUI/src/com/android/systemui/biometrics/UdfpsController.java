@@ -35,7 +35,6 @@ import android.util.Spline;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import com.android.internal.BrightnessSynchronizer;
 import com.android.systemui.R;
@@ -56,8 +55,8 @@ class UdfpsController {
     private final WindowManager mWindowManager;
     private final ContentResolver mContentResolver;
     private final Handler mHandler;
-    private final UdfpsView mView;
     private final WindowManager.LayoutParams mLayoutParams;
+    private final UdfpsView mView;
     // Debugfs path to control the high-brightness mode.
     private final String mHbmPath;
     private final String mHbmEnableCommand;
@@ -91,22 +90,23 @@ class UdfpsController {
     @SuppressLint("ClickableViewAccessibility")
     private final UdfpsView.OnTouchListener mOnTouchListener = (v, event) -> {
         UdfpsView view = (UdfpsView) v;
+        final boolean isFingerDown = view.isScrimShowing();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                boolean isValidTouch = view.isValidTouch(event.getX(), event.getY(),
+                final boolean isValidTouch = view.isValidTouch(event.getX(), event.getY(),
                         event.getPressure());
-                if (!view.isFingerDown() && isValidTouch) {
+                if (!isFingerDown && isValidTouch) {
                     onFingerDown((int) event.getX(), (int) event.getY(), event.getTouchMinor(),
                             event.getTouchMajor());
-                } else if (view.isFingerDown() && !isValidTouch) {
+                } else if (isFingerDown && !isValidTouch) {
                     onFingerUp();
                 }
                 return true;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (view.isFingerDown()) {
+                if (isFingerDown) {
                     onFingerUp();
                 }
                 return true;
@@ -121,13 +121,9 @@ class UdfpsController {
         mWindowManager = context.getSystemService(WindowManager.class);
         mContentResolver = context.getContentResolver();
         mHandler = new Handler(Looper.getMainLooper());
-
         mLayoutParams = createLayoutParams(context);
-        LinearLayout layout = new LinearLayout(context);
-        layout.setLayoutParams(mLayoutParams);
-        mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, layout,
-                false);
-        mView.setOnTouchListener(mOnTouchListener);
+
+        mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, null, false);
 
         mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
         mHbmEnableCommand = context.getResources().getString(R.string.udfps_hbm_enable_command);
@@ -168,25 +164,32 @@ class UdfpsController {
 
     private void showUdfpsOverlay() {
         mHandler.post(() -> {
-            Log.v(TAG, "showUdfpsOverlay | adding window");
             if (!mIsOverlayShowing) {
                 try {
+                    Log.v(TAG, "showUdfpsOverlay | adding window");
                     mWindowManager.addView(mView, mLayoutParams);
                     mIsOverlayShowing = true;
+                    mView.setOnTouchListener(mOnTouchListener);
                 } catch (RuntimeException e) {
                     Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
                 }
+            } else {
+                Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
             }
         });
     }
 
     private void hideUdfpsOverlay() {
-        onFingerUp();
         mHandler.post(() -> {
-            Log.v(TAG, "hideUdfpsOverlay | removing window");
             if (mIsOverlayShowing) {
+                Log.v(TAG, "hideUdfpsOverlay | removing window");
+                mView.setOnTouchListener(null);
+                // Reset the controller back to its starting state.
+                onFingerUp();
                 mWindowManager.removeView(mView);
                 mIsOverlayShowing = false;
+            } else {
+                Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
             }
         });
     }
@@ -219,25 +222,28 @@ class UdfpsController {
 
     private void onFingerDown(int x, int y, float minor, float major) {
         mView.setScrimAlpha(computeScrimOpacity());
+        mView.showScrimAndDot();
         try {
             FileWriter fw = new FileWriter(mHbmPath);
             fw.write(mHbmEnableCommand);
             fw.close();
+            mFingerprintManager.onFingerDown(x, y, minor, major);
         } catch (IOException e) {
+            mView.hideScrimAndDot();
             Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
         }
-        mView.onFingerDown();
-        mFingerprintManager.onFingerDown(x, y, minor, major);
     }
 
     private void onFingerUp() {
         mFingerprintManager.onFingerUp();
-        mView.onFingerUp();
+        // Hiding the scrim before disabling HBM results in less noticeable flicker.
+        mView.hideScrimAndDot();
         try {
             FileWriter fw = new FileWriter(mHbmPath);
             fw.write(mHbmDisableCommand);
             fw.close();
         } catch (IOException e) {
+            mView.showScrimAndDot();
             Log.e(TAG, "onFingerUp | failed to disable HBM: " + e.getMessage());
         }
     }
@@ -254,11 +260,12 @@ class UdfpsController {
                 // TODO(b/152419866): Use the UDFPS window type when it becomes available.
                 WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
         lp.setTitle(TAG);
-        lp.windowAnimations = 0;
+        lp.setFitInsetsTypes(0);
         return lp;
     }
 

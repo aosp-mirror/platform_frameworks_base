@@ -39,21 +39,15 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ForegroundServiceController {
-    public static final int[] APP_OPS = new int[] {AppOpsManager.OP_CAMERA,
-            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-            AppOpsManager.OP_RECORD_AUDIO,
-            AppOpsManager.OP_COARSE_LOCATION,
-            AppOpsManager.OP_FINE_LOCATION};
+    public static final int[] APP_OPS = new int[] {AppOpsManager.OP_SYSTEM_ALERT_WINDOW};
 
     private final SparseArray<ForegroundServicesUserState> mUserServices = new SparseArray<>();
     private final Object mMutex = new Object();
-    private final NotificationEntryManager mEntryManager;
     private final Handler mMainHandler;
 
     @Inject
-    public ForegroundServiceController(NotificationEntryManager entryManager,
-            AppOpsController appOpsController, @Main Handler mainHandler) {
-        mEntryManager = entryManager;
+    public ForegroundServiceController(AppOpsController appOpsController,
+            @Main Handler mainHandler) {
         mMainHandler = mainHandler;
         appOpsController.addCallback(APP_OPS, (code, uid, packageName, active) -> {
             mMainHandler.post(() -> {
@@ -83,19 +77,6 @@ public class ForegroundServiceController {
             final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) return false;
             return services.getStandardLayoutKeys(pkg) == null;
-        }
-    }
-
-    /**
-     * Returns the keys for notifications from this package using the standard template,
-     * if they exist.
-     */
-    @Nullable
-    public ArraySet<String> getStandardLayoutKeys(int userId, String pkg) {
-        synchronized (mMutex) {
-            final ForegroundServicesUserState services = mUserServices.get(userId);
-            if (services == null) return null;
-            return services.getStandardLayoutKeys(pkg);
         }
     }
 
@@ -138,31 +119,6 @@ public class ForegroundServiceController {
                 userServices.addOp(packageName, appOpCode);
             } else {
                 userServices.removeOp(packageName, appOpCode);
-            }
-        }
-
-        // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
-        //  AppOpsCoordinator
-        // Update appOps if there are associated pending or visible notifications
-        final Set<String> notificationKeys = getStandardLayoutKeys(userId, packageName);
-        if (notificationKeys != null) {
-            boolean changed = false;
-            for (String key : notificationKeys) {
-                final NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(key);
-                if (entry != null
-                        && uid == entry.getSbn().getUid()
-                        && packageName.equals(entry.getSbn().getPackageName())) {
-                    synchronized (entry.mActiveAppOps) {
-                        if (active) {
-                            changed |= entry.mActiveAppOps.add(appOpCode);
-                        } else {
-                            changed |= entry.mActiveAppOps.remove(appOpCode);
-                        }
-                    }
-                }
-            }
-            if (changed) {
-                mEntryManager.updateNotifications("appOpChanged pkg=" + packageName);
             }
         }
     }

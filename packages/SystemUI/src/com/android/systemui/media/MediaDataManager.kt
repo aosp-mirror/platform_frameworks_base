@@ -101,12 +101,23 @@ class MediaDataManager(
     dumpManager: DumpManager,
     mediaTimeoutListener: MediaTimeoutListener,
     mediaResumeListener: MediaResumeListener,
+    mediaSessionBasedFilter: MediaSessionBasedFilter,
+    mediaDeviceManager: MediaDeviceManager,
+    mediaDataCombineLatest: MediaDataCombineLatest,
+    private val mediaDataFilter: MediaDataFilter,
     private val activityStarter: ActivityStarter,
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean
 ) : Dumpable {
 
-    private val listeners: MutableSet<Listener> = mutableSetOf()
+    // Internal listeners are part of the internal pipeline. External listeners (those registered
+    // with [MediaDeviceManager.addListener]) receive events after they have propagated through
+    // the internal pipeline.
+    // Another way to think of the distinction between internal and external listeners is the
+    // following. Internal listeners are listeners that MediaDataManager depends on, and external
+    // listeners are listeners that depend on MediaDataManager.
+    // TODO(b/159539991#comment5): Move internal listeners to separate package.
+    private val internalListeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     internal var appsBlockedFromResume: MutableSet<String> = Utils.getBlockedMediaApps(context)
         set(value) {
@@ -130,9 +141,14 @@ class MediaDataManager(
         broadcastDispatcher: BroadcastDispatcher,
         mediaTimeoutListener: MediaTimeoutListener,
         mediaResumeListener: MediaResumeListener,
+        mediaSessionBasedFilter: MediaSessionBasedFilter,
+        mediaDeviceManager: MediaDeviceManager,
+        mediaDataCombineLatest: MediaDataCombineLatest,
+        mediaDataFilter: MediaDataFilter,
         activityStarter: ActivityStarter
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
+            mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
             activityStarter, Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
 
     private val appChangeReceiver = object : BroadcastReceiver() {
@@ -155,12 +171,26 @@ class MediaDataManager(
 
     init {
         dumpManager.registerDumpable(TAG, this)
+
+        // Initialize the internal processing pipeline. The listeners at the front of the pipeline
+        // are set as internal listeners so that they receive events. From there, events are
+        // propagated through the pipeline. The end of the pipeline is currently mediaDataFilter,
+        // so it is responsible for dispatching events to external listeners. To achieve this,
+        // external listeners that are registered with [MediaDataManager.addListener] are actually
+        // registered as listeners to mediaDataFilter.
+        addInternalListener(mediaTimeoutListener)
+        addInternalListener(mediaResumeListener)
+        addInternalListener(mediaSessionBasedFilter)
+        mediaSessionBasedFilter.addListener(mediaDeviceManager)
+        mediaSessionBasedFilter.addListener(mediaDataCombineLatest)
+        mediaDeviceManager.addListener(mediaDataCombineLatest)
+        mediaDataCombineLatest.addListener(mediaDataFilter)
+
+        // Set up links back into the pipeline for listeners that need to send events upstream.
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
             setTimedOut(token, timedOut) }
-        addListener(mediaTimeoutListener)
-
         mediaResumeListener.setManager(this)
-        addListener(mediaResumeListener)
+        mediaDataFilter.mediaDataManager = this
 
         val suspendFilter = IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED)
         broadcastDispatcher.registerReceiver(appChangeReceiver, suspendFilter, null, UserHandle.ALL)
@@ -198,10 +228,9 @@ class MediaDataManager(
 
     private fun removeAllForPackage(packageName: String) {
         Assert.isMainThread()
-        val listenersCopy = listeners.toSet()
         val toRemove = mediaEntries.filter { it.value.packageName == packageName }
         toRemove.forEach {
-            removeEntry(it.key, listenersCopy)
+            removeEntry(it.key)
         }
     }
 
@@ -261,12 +290,45 @@ class MediaDataManager(
     /**
      * Add a listener for changes in this class
      */
-    fun addListener(listener: Listener) = listeners.add(listener)
+    fun addListener(listener: Listener) {
+        // mediaDataFilter is the current end of the internal pipeline. Register external
+        // listeners as listeners to it.
+        mediaDataFilter.addListener(listener)
+    }
 
     /**
      * Remove a listener for changes in this class
      */
-    fun removeListener(listener: Listener) = listeners.remove(listener)
+    fun removeListener(listener: Listener) {
+        // Since mediaDataFilter is the current end of the internal pipelie, external listeners
+        // have been registered to it. So, they need to be removed from it too.
+        mediaDataFilter.removeListener(listener)
+    }
+
+    /**
+     * Add a listener for internal events.
+     */
+    private fun addInternalListener(listener: Listener) = internalListeners.add(listener)
+
+    /**
+     * Notify internal listeners of loaded event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifyMediaDataLoaded(key: String, oldKey: String?, info: MediaData) {
+        internalListeners.forEach { it.onMediaDataLoaded(key, oldKey, info) }
+    }
+
+    /**
+     * Notify internal listeners of removed event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifyMediaDataRemoved(key: String) {
+        internalListeners.forEach { it.onMediaDataRemoved(key) }
+    }
 
     /**
      * Called whenever the player has been paused or stopped for a while, or swiped from QQS.
@@ -284,16 +346,13 @@ class MediaDataManager(
         }
     }
 
-    private fun removeEntry(key: String, listenersCopy: Set<Listener>) {
+    private fun removeEntry(key: String) {
         mediaEntries.remove(key)
-        listenersCopy.forEach {
-            it.onMediaDataRemoved(key)
-        }
+        notifyMediaDataRemoved(key)
     }
 
     fun dismissMediaData(key: String, delay: Long) {
-        val listenersCopy = listeners.toSet()
-        foregroundExecutor.executeDelayed({ removeEntry(key, listenersCopy) }, delay)
+        foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
     }
 
     private fun loadMediaDataInBgForResumption(
@@ -422,7 +481,7 @@ class MediaDataManager(
                 val runnable = if (action.actionIntent != null) {
                     Runnable {
                         if (action.isAuthenticationRequired()) {
-                            activityStarter.dismissKeyguardThenExecute ({
+                            activityStarter.dismissKeyguardThenExecute({
                                 var result = sendPendingIntent(action.actionIntent)
                                 result
                             }, {}, true)
@@ -550,10 +609,7 @@ class MediaDataManager(
         if (mediaEntries.containsKey(key)) {
             // Otherwise this was removed already
             mediaEntries.put(key, data)
-            val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataLoaded(key, oldKey, data)
-            }
+            notifyMediaDataLoaded(key, oldKey, data)
         }
     }
 
@@ -570,31 +626,21 @@ class MediaDataManager(
             val pkg = removed?.packageName
             val migrate = mediaEntries.put(pkg, updated) == null
             // Notify listeners of "new" controls when migrating or removed and update when not
-            val listenersCopy = listeners.toSet()
             if (migrate) {
-                listenersCopy.forEach {
-                    it.onMediaDataLoaded(pkg, key, updated)
-                }
+                notifyMediaDataLoaded(pkg, key, updated)
             } else {
                 // Since packageName is used for the key of the resumption controls, it is
                 // possible that another notification has already been reused for the resumption
                 // controls of this package. In this case, rather than renaming this player as
                 // packageName, just remove it and then send a update to the existing resumption
                 // controls.
-                listenersCopy.forEach {
-                    it.onMediaDataRemoved(key)
-                }
-                listenersCopy.forEach {
-                    it.onMediaDataLoaded(pkg, pkg, updated)
-                }
+                notifyMediaDataRemoved(key)
+                notifyMediaDataLoaded(pkg, pkg, updated)
             }
             return
         }
         if (removed != null) {
-            val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataRemoved(key)
-            }
+            notifyMediaDataRemoved(key)
         }
     }
 
@@ -614,16 +660,30 @@ class MediaDataManager(
 
         if (!useMediaResumption) {
             // Remove any existing resume controls
-            val listenersCopy = listeners.toSet()
             val filtered = mediaEntries.filter { !it.value.active }
             filtered.forEach {
                 mediaEntries.remove(it.key)
-                listenersCopy.forEach { listener ->
-                    listener.onMediaDataRemoved(it.key)
-                }
+                notifyMediaDataRemoved(it.key)
             }
         }
     }
+
+    /**
+     * Invoked when the user has dismissed the media carousel
+     */
+    fun onSwipeToDismiss() = mediaDataFilter.onSwipeToDismiss()
+
+    /**
+     * Are there any media notifications active?
+     */
+    fun hasActiveMedia() = mediaDataFilter.hasActiveMedia()
+
+    /**
+     * Are there any media entries we should display?
+     * If resumption is enabled, this will include inactive players
+     * If resumption is disabled, we only want to show active players
+     */
+    fun hasAnyMedia() = mediaDataFilter.hasAnyMedia()
 
     interface Listener {
 
@@ -644,7 +704,8 @@ class MediaDataManager(
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.apply {
-            println("listeners: $listeners")
+            println("internalListeners: $internalListeners")
+            println("externalListeners: ${mediaDataFilter.listeners}")
             println("mediaEntries: $mediaEntries")
             println("useMediaResumption: $useMediaResumption")
             println("appsBlockedFromResume: $appsBlockedFromResume")

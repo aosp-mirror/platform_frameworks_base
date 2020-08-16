@@ -17,7 +17,6 @@
 package com.android.server.biometrics.sensors;
 
 import android.content.Context;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -56,8 +55,8 @@ public class BiometricSchedulerTest {
         mScheduler.scheduleClientMonitor(client1);
         mScheduler.scheduleClientMonitor(client2);
 
-        client1.mFinishCallback.onClientFinished(client1, true /* success */);
-        client1.mFinishCallback.onClientFinished(client1, true /* success */);
+        client1.mCallback.onClientFinished(client1, true /* success */);
+        client1.mCallback.onClientFinished(client1, true /* success */);
     }
 
     private static class TestClientMonitor extends ClientMonitor<Object> {

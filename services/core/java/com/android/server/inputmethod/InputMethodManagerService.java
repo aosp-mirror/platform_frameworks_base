@@ -3450,9 +3450,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.USER_SWITCHING;
         }
 
-        // Master feature flag that overrides other conditions and forces IME preRendering.
+        // Main feature flag that overrides other conditions and forces IME preRendering.
         if (DEBUG) {
-            Slog.v(TAG, "IME PreRendering MASTER flag: "
+            Slog.v(TAG, "IME PreRendering main flag: "
                     + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() + ", LowRam: " + mIsLowRam);
         }
         // pre-rendering not supported on low-ram devices.

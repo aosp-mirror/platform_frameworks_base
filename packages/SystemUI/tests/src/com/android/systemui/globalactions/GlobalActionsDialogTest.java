@@ -71,7 +71,7 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.RingerModeLiveData;

@@ -86,7 +86,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture(
                         "", Uri.parse("content://authority/data"), bitmap, smartActionsProvider,
-                        true, UserHandle.getUserHandleForUid(UserHandle.myUserId()));
+                        true, UserHandle.of(UserHandle.myUserId()));
         assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
         assertEquals(Collections.emptyList(), smartActions);
@@ -126,7 +126,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture(
                         "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider,
-                        true, UserHandle.getUserHandleForUid(UserHandle.myUserId()));
+                        true, UserHandle.of(UserHandle.myUserId()));
         verify(mSmartActionsProvider, never()).getActions(any(), any(), any(), any(), any());
         assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
@@ -140,7 +140,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
         mScreenshotSmartActions.getSmartActionsFuture(
                 "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider, true,
-                UserHandle.getUserHandleForUid(UserHandle.myUserId()));
+                UserHandle.of(UserHandle.myUserId()));
         verify(mSmartActionsProvider, times(1)).getActions(any(), any(), any(), any(), any());
     }
 
@@ -156,7 +156,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture("", null, bitmap,
                         actionsProvider,
-                        true, UserHandle.getUserHandleForUid(UserHandle.myUserId()));
+                        true, UserHandle.of(UserHandle.myUserId()));
         assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
         assertEquals(smartActions.size(), 0);

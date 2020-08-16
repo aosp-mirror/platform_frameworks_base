@@ -33,6 +33,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;

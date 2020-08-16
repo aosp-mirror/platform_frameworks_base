@@ -22,7 +22,6 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.Build;
 import android.os.Environment;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.util.Slog;
@@ -58,8 +57,8 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
     }
 
     @Override
-    public void start(@NonNull FinishCallback finishCallback) {
-        super.start(finishCallback);
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
 
         if (mCurrentUserId == getTargetUserId()) {
             Slog.d(TAG, "Already user: " + mCurrentUserId + ", refreshing authenticatorId");
@@ -69,7 +68,7 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to refresh authenticatorId", e);
             }
-            finishCallback.onClientFinished(this, true /* success */);
+            callback.onClientFinished(this, true /* success */);
             return;
         }
 
@@ -89,7 +88,7 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
         if (!mDirectory.exists()) {
             if (!mDirectory.mkdir()) {
                 Slog.e(TAG, "Cannot make directory: " + mDirectory.getAbsolutePath());
-                finishCallback.onClientFinished(this, false /* success */);
+                callback.onClientFinished(this, false /* success */);
                 return;
             }
             // Calling mkdir() from this process will create a directory with our
@@ -97,7 +96,7 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
             // the label.
             if (!SELinux.restorecon(mDirectory)) {
                 Slog.e(TAG, "Restorecons failed. Directory will have wrong label.");
-                finishCallback.onClientFinished(this, false /* success */);
+                callback.onClientFinished(this, false /* success */);
                 return;
             }
         }
@@ -116,10 +115,10 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
             getFreshDaemon().setActiveGroup(getTargetUserId(), mDirectory.getAbsolutePath());
             mAuthenticatorIds.put(getTargetUserId(), mHasEnrolledBiometrics
                     ? getFreshDaemon().getAuthenticatorId() : 0L);
-            mFinishCallback.onClientFinished(this, true /* success */);
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to setActiveGroup: " + e);
-            mFinishCallback.onClientFinished(this, false /* success */);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }
