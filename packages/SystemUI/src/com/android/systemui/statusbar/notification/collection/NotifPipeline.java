@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -158,6 +159,14 @@ public class NotifPipeline implements CommonNotifCollection {
      */
     public void setSections(List<NotifSection> sections) {
         mShadeListBuilder.setSections(sections);
+    }
+
+    /**
+     * StabilityManager that is used to determine whether to suppress group and section changes.
+     * This should only be set once.
+     */
+    public void setVisualStabilityManager(NotifStabilityManager notifStabilityManager) {
+        mShadeListBuilder.setNotifStabilityManager(notifStabilityManager);
     }
 
     /**

@@ -167,6 +167,23 @@ public class ListDumper {
                         .append(" ");
             }
 
+            if (notifEntry.getAttachState().getSuppressedChanges().getParent() != null) {
+                rksb.append("suppressedParent=")
+                        .append(notifEntry.getAttachState().getSuppressedChanges()
+                                .getParent().getKey())
+                        .append(" ");
+            }
+
+            if (notifEntry.getAttachState().getSuppressedChanges().getSection() != null) {
+                rksb.append("suppressedSectionIndex=")
+                        .append(notifEntry.getAttachState().getSuppressedChanges()
+                                .getSectionIndex())
+                        .append(" sectionName=")
+                        .append(notifEntry.getAttachState().getSuppressedChanges()
+                                .getSection().getName())
+                        .append(" ");
+            }
+
             if (hasBeenInteractedWith) {
                 rksb.append("interacted=yes ");
             }

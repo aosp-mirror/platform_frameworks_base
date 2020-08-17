@@ -84,8 +84,8 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -323,7 +323,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private View mGroupParentWhenDismissed;
     private boolean mShelfIconVisible;
     private boolean mAboveShelf;
-    private OnDismissCallback mOnDismissCallback;
+    private OnUserInteractionCallback mOnUserInteractionCallback;
     private boolean mIsLowPriority;
     private boolean mIsColorized;
     private boolean mUseIncreasedCollapsedHeight;
@@ -1445,8 +1445,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         dismiss(fromAccessibility);
         if (mEntry.isClearable()) {
-            if (mOnDismissCallback != null) {
-                mOnDismissCallback.onDismiss(mEntry, REASON_CANCEL);
+            if (mOnUserInteractionCallback != null) {
+                mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL);
             }
         }
     }
@@ -1461,10 +1461,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public boolean isBlockingHelperShowingAndTranslationFinished() {
         return mIsBlockingHelperShowing && mNotificationTranslationFinished;
-    }
-
-    void setOnDismissCallback(OnDismissCallback onDismissCallback) {
-        mOnDismissCallback = onDismissCallback;
     }
 
     @Override
@@ -1600,7 +1596,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             CoordinateOnClickListener onFeedbackClickListener,
             FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
-            PeopleNotificationIdentifier peopleNotificationIdentifier) {
+            PeopleNotificationIdentifier peopleNotificationIdentifier,
+            OnUserInteractionCallback onUserInteractionCallback) {
         mAppName = appName;
         if (mMenuRow == null) {
             mMenuRow = new NotificationMenuRow(mContext, peopleNotificationIdentifier);
@@ -1624,6 +1621,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         for (NotificationContentView l : mLayouts) {
             l.setPeopleNotificationIdentifier(mPeopleNotificationIdentifier);
         }
+        mOnUserInteractionCallback = onUserInteractionCallback;
     }
 
     private void initDimens() {
