@@ -773,29 +773,29 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS_GLES,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS_GLES);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_ALL_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_ALL_APPS);
+                Settings.Global.UPDATABLE_DRIVER_ALL_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_ALL_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_OPT_IN_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_PRERELEASE_OPT_IN_APPS);
+                Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_DENYLIST,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_DENYLIST);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_DENYLIST);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_ALLOWLIST,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_ALLOWLIST);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_DENYLISTS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_DENYLISTS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_SPHAL_LIBRARIES);
+                Settings.Global.UPDATABLE_DRIVER_SPHAL_LIBRARIES,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_SPHAL_LIBRARIES);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
