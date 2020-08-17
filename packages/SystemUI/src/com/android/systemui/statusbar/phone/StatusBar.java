@@ -2029,7 +2029,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 }
                 mNotificationPanelViewController.expand(true /* animate */);
-                ((NotificationListContainer) mStackScroller).setWillExpand(true);
+                mStackScroller.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
             } else if (!mNotificationPanelViewController.isInSettings()
