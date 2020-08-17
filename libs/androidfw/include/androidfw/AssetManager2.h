@@ -131,8 +131,8 @@ class AssetManager2 {
   bool GetOverlayablesToString(const android::StringPiece& package_name,
                                std::string* out) const;
 
-  const std::unordered_map<std::string, std::string>*
-    GetOverlayableMapForPackage(uint32_t package_id) const;
+  const std::unordered_map<std::string, std::string>* GetOverlayableMapForPackage(
+      uint32_t package_id) const;
 
   // Returns whether the resources.arsc of any loaded apk assets is allocated in RAM (not mmapped).
   bool ContainsAllocatedTable() const;
@@ -145,14 +145,16 @@ class AssetManager2 {
     return configuration_;
   }
 
-  // Returns all configurations for which there are resources defined. This includes resource
-  // configurations in all the ApkAssets set for this AssetManager.
+  // Returns all configurations for which there are resources defined, or an I/O error if reading
+  // resource data failed.
+  //
+  // This includes resource configurations in all the ApkAssets set for this AssetManager.
   // If `exclude_system` is set to true, resource configurations from system APKs
   // ('android' package, other libraries) will be excluded from the list.
   // If `exclude_mipmap` is set to true, resource configurations defined for resource type 'mipmap'
   // will be excluded from the list.
-  std::set<ResTable_config> GetResourceConfigurations(bool exclude_system = false,
-                                                      bool exclude_mipmap = false) const;
+  base::expected<std::set<ResTable_config>, IOError> GetResourceConfigurations(
+      bool exclude_system = false, bool exclude_mipmap = false) const;
 
   // Returns all the locales for which there are resources defined. This includes resource
   // locales in all the ApkAssets set for this AssetManager.
@@ -194,53 +196,106 @@ class AssetManager2 {
   std::unique_ptr<Asset> OpenNonAsset(const std::string& filename, ApkAssetsCookie cookie,
                                       Asset::AccessMode mode) const;
 
-  // Populates the `out_name` parameter with resource name information.
-  // Utf8 strings are preferred, and only if they are unavailable are
-  // the Utf16 variants populated.
-  // Returns false if the resource was not found or the name was missing/corrupt.
-  bool GetResourceName(uint32_t resid, ResourceName* out_name) const;
-
-  // Populates `out_flags` with the bitmask of configuration axis that this resource varies with.
-  // See ResTable_config for the list of configuration axis.
-  // Returns false if the resource was not found.
-  bool GetResourceFlags(uint32_t resid, uint32_t* out_flags) const;
+  // Returns the resource name of the specified resource ID.
+  //
+  // Utf8 strings are preferred, and only if they are unavailable are the Utf16 variants populated.
+  //
+  // Returns a null error if the name is missing/corrupt, or an I/O error if reading resource data
+  // failed.
+  base::expected<ResourceName, NullOrIOError> GetResourceName(uint32_t resid) const;
 
   // Finds the resource ID assigned to `resource_name`.
+  //
   // `resource_name` must be of the form '[package:][type/]entry'.
   // If no package is specified in `resource_name`, then `fallback_package` is used as the package.
   // If no type is specified in `resource_name`, then `fallback_type` is used as the type.
-  // Returns 0x0 if no resource by that name was found.
-  uint32_t GetResourceId(const std::string& resource_name, const std::string& fallback_type = {},
-                         const std::string& fallback_package = {}) const;
-
-  // Retrieves the best matching resource with ID `resid`. The resource value is filled into
-  // `out_value` and the configuration for the selected value is populated in `out_selected_config`.
-  // `out_flags` holds the same flags as retrieved with GetResourceFlags().
-  // If `density_override` is non-zero, the configuration to match against is overridden with that
-  // density.
   //
-  // Returns a valid cookie if the resource was found. If the resource was not found, or if the
-  // resource was a map/bag type, then kInvalidCookie is returned. If `may_be_bag` is false,
-  // this function logs if the resource was a map/bag type before returning kInvalidCookie.
-  ApkAssetsCookie GetResource(uint32_t resid, bool may_be_bag, uint16_t density_override,
-                              Res_value* out_value, ResTable_config* out_selected_config,
-                              uint32_t* out_flags) const;
+  // Returns a null error if no resource by that name was found, or an I/O error if reading resource
+  // data failed.
+  base::expected<uint32_t, NullOrIOError> GetResourceId(
+      const std::string& resource_name, const std::string& fallback_type = {},
+      const std::string& fallback_package = {}) const;
 
-  // Resolves the resource reference in `in_out_value` if the data type is
-  // Res_value::TYPE_REFERENCE.
-  // `cookie` is the ApkAssetsCookie of the reference in `in_out_value`.
-  // `in_out_value` is the reference to resolve. The result is placed back into this object.
-  // `in_out_flags` is the type spec flags returned from calls to GetResource() or
-  // GetResourceFlags(). Configuration flags of the values pointed to by the reference
-  // are OR'd together with `in_out_flags`.
-  // `in_out_config` is populated with the configuration for which the resolved value was defined.
-  // `out_last_reference` is populated with the last reference ID before resolving to an actual
-  // value. This is only initialized if the passed in `in_out_value` is a reference.
-  // Returns the cookie of the APK the resolved resource was defined in, or kInvalidCookie if
-  // it was not found.
-  ApkAssetsCookie ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,
-                                   ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
-                                   uint32_t* out_last_reference) const;
+  struct SelectedValue {
+    friend AssetManager2;
+    friend Theme;
+    SelectedValue() = default;
+    SelectedValue(const ResolvedBag* bag, const ResolvedBag::Entry& entry) :
+        cookie(entry.cookie), data(entry.value.data), type(entry.value.dataType),
+        flags(bag->type_spec_flags), resid(0U), config({}) {};
+
+    // The cookie representing the ApkAssets in which the value resides.
+    ApkAssetsCookie cookie = kInvalidCookie;
+
+    // The data for this value, as interpreted according to `type`.
+    Res_value::data_type data;
+
+    // Type of the data value.
+    uint8_t type;
+
+    // The bitmask of configuration axis that this resource varies with.
+    // See ResTable_config::CONFIG_*.
+    uint32_t flags;
+
+    // The resource ID from which this value was resolved.
+    uint32_t resid;
+
+    // The configuration for which the resolved value was defined.
+    ResTable_config config;
+
+   private:
+    SelectedValue(uint8_t value_type, Res_value::data_type value_data, ApkAssetsCookie cookie,
+                  uint32_t type_flags, uint32_t resid, const ResTable_config& config) :
+                  cookie(cookie), data(value_data), type(value_type), flags(type_flags),
+                  resid(resid), config(config) {};
+  };
+
+  // Retrieves the best matching resource value with ID `resid`.
+  //
+  // If `may_be_bag` is false, this function logs if the resource was a map/bag type and returns a
+  // null result. If `density_override` is non-zero, the configuration to match against is
+  // overridden with that density.
+  //
+  // Returns a null error if a best match could not be found, or an I/O error if reading resource
+  // data failed.
+  base::expected<SelectedValue, NullOrIOError> GetResource(uint32_t resid, bool may_be_bag = false,
+                                                           uint16_t density_override = 0U) const;
+
+  // Resolves the resource referenced in `value` if the type is Res_value::TYPE_REFERENCE.
+  //
+  // If the data type is not Res_value::TYPE_REFERENCE, no work is done. Configuration flags of the
+  // values pointed to by the reference are OR'd into `value.flags`.
+  //
+  // Returns a null error if the resource could not be resolved, or an I/O error if reading
+  // resource data failed.
+  base::expected<std::monostate, NullOrIOError> ResolveReference(SelectedValue& value) const;
+
+  // Retrieves the best matching bag/map resource with ID `resid`.
+  //
+  // This method will resolve all parent references for this bag and merge keys with the child.
+  // To iterate over the keys, use the following idiom:
+  //
+  //  base::expected<const ResolvedBag*, NullOrIOError> bag = asset_manager->GetBag(id);
+  //  if (bag.has_value()) {
+  //    for (auto iter = begin(*bag); iter != end(*bag); ++iter) {
+  //      ...
+  //    }
+  //  }
+  //
+  // Returns a null error if a best match could not be found, or an I/O error if reading resource
+  // data failed.
+  base::expected<const ResolvedBag*, NullOrIOError> GetBag(uint32_t resid) const;
+
+  // Retrieves the best matching bag/map resource of the resource referenced in `value`.
+  //
+  // If `value.type` is not Res_value::TYPE_REFERENCE, a null result is returned.
+  // Configuration flags of the bag pointed to by the reference are OR'd into `value.flags`.
+  //
+  // Returns a null error if a best match could not be found, or an I/O error if reading resource
+  // data failed.
+  base::expected<const ResolvedBag*, NullOrIOError> ResolveBag(SelectedValue& value) const;
+
+  const std::vector<uint32_t> GetBagResIdStack(uint32_t resid) const;
 
   // Resets the resource resolution structures in preparation for the next resource retrieval.
   void ResetResourceResolution() const;
@@ -251,20 +306,6 @@ class AssetManager2 {
   // Returns formatted log of last resource resolution path, or empty if no resource has been
   // resolved yet.
   std::string GetLastResourceResolution() const;
-
-  const std::vector<uint32_t> GetBagResIdStack(uint32_t resid);
-
-  // Retrieves the best matching bag/map resource with ID `resid`.
-  // This method will resolve all parent references for this bag and merge keys with the child.
-  // To iterate over the keys, use the following idiom:
-  //
-  //  const AssetManager2::ResolvedBag* bag = asset_manager->GetBag(id);
-  //  if (bag != nullptr) {
-  //    for (auto iter = begin(bag); iter != end(bag); ++iter) {
-  //      ...
-  //    }
-  //  }
-  const ResolvedBag* GetBag(uint32_t resid);
 
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
@@ -286,11 +327,15 @@ class AssetManager2 {
  private:
   DISALLOW_COPY_AND_ASSIGN(AssetManager2);
 
+  struct TypeConfig {
+    incfs::verified_map_ptr<ResTable_type> type;
+    ResTable_config config;
+  };
+
   // A collection of configurations and their associated ResTable_type that match the current
   // AssetManager configuration.
   struct FilteredConfigGroup {
-      std::vector<ResTable_config> configurations;
-      std::vector<const ResTable_type*> types;
+      std::vector<TypeConfig> type_configs;
   };
 
   // Represents an single package.
@@ -331,9 +376,7 @@ class AssetManager2 {
   };
 
   // Finds the best entry for `resid` from the set of ApkAssets. The entry can be a simple
-  // Res_value, or a complex map/bag type. If successful, it is available in `out_entry`.
-  // Returns kInvalidCookie on failure. Otherwise, the return value is the cookie associated with
-  // the ApkAssets in which the entry was found.
+  // Res_value, or a complex map/bag type. Returns a null result if a best entry cannot be found.
   //
   // `density_override` overrides the density of the current configuration when doing a search.
   //
@@ -347,13 +390,15 @@ class AssetManager2 {
   //
   // NOTE: FindEntry takes care of ensuring that structs within FindEntryResult have been properly
   // bounds-checked. Callers of FindEntry are free to trust the data if this method succeeds.
-  ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            bool ignore_configuration, FindEntryResult* out_entry) const;
+  base::expected<FindEntryResult, NullOrIOError> FindEntry(uint32_t resid,
+                                                           uint16_t density_override,
+                                                           bool stop_at_first_match,
+                                                           bool ignore_configuration) const;
 
-  ApkAssetsCookie FindEntryInternal(const PackageGroup& package_group, uint8_t type_idx,
-                                    uint16_t entry_idx, const ResTable_config& desired_config,
-                                    bool /*stop_at_first_match*/,
-                                    bool ignore_configuration, FindEntryResult* out_entry) const;
+  base::expected<FindEntryResult, NullOrIOError> FindEntryInternal(
+      const PackageGroup& package_group, uint8_t type_idx, uint16_t entry_idx,
+      const ResTable_config& desired_config, bool stop_at_first_match,
+      bool ignore_configuration) const;
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
@@ -372,7 +417,8 @@ class AssetManager2 {
 
   // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
   // been seen while traversing bag parents.
-  const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
+  base::expected<const ResolvedBag*, NullOrIOError> GetBag(
+      uint32_t resid, std::vector<uint32_t>& child_resids) const;
 
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
@@ -394,11 +440,11 @@ class AssetManager2 {
 
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.
-  std::unordered_map<uint32_t, util::unique_cptr<ResolvedBag>> cached_bags_;
+  mutable std::unordered_map<uint32_t, util::unique_cptr<ResolvedBag>> cached_bags_;
 
   // Cached set of bag resid stacks for each bag. These are cached because they might be requested
   // a number of times for each view during View inspection.
-  std::unordered_map<uint32_t, std::vector<uint32_t>> cached_bag_resid_stacks_;
+  mutable std::unordered_map<uint32_t, std::vector<uint32_t>> cached_bag_resid_stacks_;
 
   // Whether or not to save resource resolution steps
   bool resource_resolution_logging_enabled_ = false;
@@ -455,55 +501,53 @@ class Theme {
  public:
   ~Theme();
 
-  // Applies the style identified by `resid` to this theme. This can be called
-  // multiple times with different styles. By default, any theme attributes that
-  // are already defined before this call are not overridden. If `force` is set
-  // to true, this behavior is changed and all theme attributes from the style at
-  // `resid` are applied.
-  // Returns false if the style failed to apply.
-  bool ApplyStyle(uint32_t resid, bool force = false);
+  // Applies the style identified by `resid` to this theme.
+  //
+  // This can be called multiple times with different styles. By default, any theme attributes that
+  // are already defined before this call are not overridden. If `force` is set to true, this
+  // behavior is changed and all theme attributes from the style at `resid` are applied.
+  //
+  // Returns a null error if the style could not be applied, or an I/O error if reading resource
+  // data failed.
+  base::expected<std::monostate, NullOrIOError> ApplyStyle(uint32_t resid, bool force = false);
 
-  // Sets this Theme to be a copy of `o` if `o` has the same AssetManager as this Theme.
-  // If `o` does not have the same AssetManager as this theme, only attributes from ApkAssets loaded
-  // into both AssetManagers will be copied to this theme.
-  void SetTo(const Theme& o);
+  // Sets this Theme to be a copy of `other` if `other` has the same AssetManager as this Theme.
+  //
+  // If `other` does not have the same AssetManager as this theme, only attributes from ApkAssets
+  // loaded into both AssetManagers will be copied to this theme.
+  //
+  // Returns an I/O error if reading resource data failed.
+  base::expected<std::monostate, IOError> SetTo(const Theme& other);
 
   void Clear();
 
-  void Dump() const;
+  // Retrieves the value of attribute ID `resid` in the theme.
+  //
+  // NOTE: This function does not do reference traversal. If you want to follow references to other
+  // resources to get the "real" value to use, you need to call ResolveReference() after this
+  // function.
+  std::optional<AssetManager2::SelectedValue> GetAttribute(uint32_t resid) const;
 
-  inline const AssetManager2* GetAssetManager() const {
+  // This is like AssetManager2::ResolveReference(), but also takes care of resolving attribute
+  // references to the theme.
+  base::expected<std::monostate, NullOrIOError> ResolveAttributeReference(
+      AssetManager2::SelectedValue& value) const;
+
+  AssetManager2* GetAssetManager() {
     return asset_manager_;
   }
 
-  inline AssetManager2* GetAssetManager() {
+  const AssetManager2* GetAssetManager() const {
     return asset_manager_;
   }
 
   // Returns a bit mask of configuration changes that will impact this
   // theme (and thus require completely reloading it).
-  inline uint32_t GetChangingConfigurations() const {
+  uint32_t GetChangingConfigurations() const {
     return type_spec_flags_;
   }
 
-  // Retrieve a value in the theme. If the theme defines this value, returns an asset cookie
-  // indicating which ApkAssets it came from and populates `out_value` with the value.
-  // `out_flags` is populated with a bitmask of the configuration axis with which the resource
-  // varies.
-  //
-  // If the attribute is not found, returns kInvalidCookie.
-  //
-  // NOTE: This function does not do reference traversal. If you want to follow references to other
-  // resources to get the "real" value to use, you need to call ResolveReference() after this
-  // function.
-  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value, uint32_t* out_flags) const;
-
-  // This is like AssetManager2::ResolveReference(), but also takes
-  // care of resolving attribute references to the theme.
-  ApkAssetsCookie ResolveAttributeReference(ApkAssetsCookie cookie, Res_value* in_out_value,
-                                            ResTable_config* in_out_selected_config = nullptr,
-                                            uint32_t* in_out_type_spec_flags = nullptr,
-                                            uint32_t* out_last_ref = nullptr) const;
+  void Dump() const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Theme);

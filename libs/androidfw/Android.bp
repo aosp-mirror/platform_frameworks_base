@@ -61,6 +61,9 @@ cc_library {
     ],
     export_include_dirs: ["include"],
     export_shared_lib_headers: ["libz"],
+    static_libs: ["libincfs-utils"],
+    whole_static_libs: ["libincfs-utils"],
+    export_static_lib_headers: ["libincfs-utils"],
     target: {
         android: {
             srcs: [
@@ -69,13 +72,14 @@ cc_library {
                 "CursorWindow.cpp",
             ],
             shared_libs: [
-                "libziparchive",
                 "libbase",
                 "libbinder",
                 "liblog",
                 "libcutils",
+                "libincfs",
                 "libutils",
                 "libz",
+                "libziparchive",
             ],
             static: {
                 enabled: false,
@@ -86,11 +90,11 @@ cc_library {
                 enabled: false,
             },
             static_libs: [
-                "libziparchive",
                 "libbase",
-                "liblog",
                 "libcutils",
+                "liblog",
                 "libutils",
+                "libziparchive",
             ],
             shared_libs: [
                 "libz",
