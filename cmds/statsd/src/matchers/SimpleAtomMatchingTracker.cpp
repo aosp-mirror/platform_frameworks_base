@@ -65,7 +65,7 @@ void SimpleAtomMatchingTracker::onLogEvent(
 
     bool matched = matchesSimple(mUidMap, mMatcher, event);
     matcherResults[mIndex] = matched ? MatchingState::kMatched : MatchingState::kNotMatched;
-    VLOG("Stats SimpleLogMatcher %lld matched? %d", (long long)mId, matched);
+    VLOG("Stats SimpleAtomMatcher %lld matched? %d", (long long)mId, matched);
 }
 
 }  // namespace statsd
