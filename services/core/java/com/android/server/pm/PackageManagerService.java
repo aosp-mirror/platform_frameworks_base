@@ -7804,7 +7804,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // low 'int'-sized word: relative priority among 'always' results.
     private long getDomainVerificationStatusLPr(PackageSetting ps, int userId) {
         long result = ps.getDomainVerificationStatusForUser(userId);
-        // if none available, get the master status
+        // if none available, get the status
         if (result >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
             if (ps.getIntentFilterVerificationInfo() != null) {
                 result = ((long)ps.getIntentFilterVerificationInfo().getStatus()) << 32;
@@ -17190,7 +17190,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
 
-        // Sanity check
+        // Validity check
         if (instantApp && onExternal) {
             Slog.i(TAG, "Incompatible ephemeral install; external=" + onExternal);
             throw new PrepareFailure(PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
@@ -17334,7 +17334,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
-                // Quick sanity check that we're signed correctly if updating;
+                // Quick validity check that we're signed correctly if updating;
                 // we'll check this again later when scanning, but we want to
                 // bail early here before tripping over redefined permissions.
                 final KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -21439,7 +21439,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // had been set as a preferred activity.  We try to clean this up
             // the next time we encounter that preferred activity, but it is
             // possible for the user flow to never be able to return to that
-            // situation so here we do a sanity check to make sure we haven't
+            // situation so here we do a validity check to make sure we haven't
             // left any junk around.
             ArrayList<PreferredActivity> removed = new ArrayList<>();
             for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
