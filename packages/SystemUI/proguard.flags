@@ -45,3 +45,4 @@
 
 -keep class com.android.systemui.dagger.GlobalRootComponent { *; }
 -keep class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { *; }
+-keep class com.android.systemui.dagger.Dagger** { *; }
