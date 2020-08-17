@@ -804,7 +804,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         mRebootEscrowManager.loadRebootEscrowDataIfAvailable();
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
-        mBiometricDeferredQueue.systemReady();
+        mBiometricDeferredQueue.systemReady(mInjector.getFingerprintManager(),
+                mInjector.getFaceManager());
     }
 
     private void getAuthSecretHal() {

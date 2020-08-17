@@ -164,9 +164,10 @@ public class BiometricDeferredQueue {
         mPendingResetLockouts = new ArrayList<>();
     }
 
-    public void systemReady() {
-        mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
-        mFaceManager = mContext.getSystemService(FaceManager.class);
+    public void systemReady(@Nullable FingerprintManager fingerprintManager,
+            @Nullable FaceManager faceManager) {
+        mFingerprintManager = fingerprintManager;
+        mFaceManager = faceManager;
     }
 
     /**
