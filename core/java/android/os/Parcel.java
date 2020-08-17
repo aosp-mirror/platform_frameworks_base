@@ -33,6 +33,8 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
@@ -222,9 +224,31 @@ public final class Parcel {
      */
     private static boolean sParcelExceptionStackTrace;
 
-    private static final int POOL_SIZE = 6;
-    private static final Parcel[] sOwnedPool = new Parcel[POOL_SIZE];
-    private static final Parcel[] sHolderPool = new Parcel[POOL_SIZE];
+    private static final Object sPoolSync = new Object();
+
+    /** Next item in the linked list pool, if any */
+    @GuardedBy("sPoolSync")
+    private Parcel mPoolNext;
+
+    /** Head of a linked list pool of {@link Parcel} objects */
+    @GuardedBy("sPoolSync")
+    private static Parcel sOwnedPool;
+    /** Head of a linked list pool of {@link Parcel} objects */
+    @GuardedBy("sPoolSync")
+    private static Parcel sHolderPool;
+
+    /** Total size of pool with head at {@link #sOwnedPool} */
+    @GuardedBy("sPoolSync")
+    private static int sOwnedPoolSize = 0;
+    /** Total size of pool with head at {@link #sHolderPool} */
+    @GuardedBy("sPoolSync")
+    private static int sHolderPoolSize = 0;
+
+    /**
+     * We're willing to pool up to 32 objects, which is sized to accommodate
+     * both a data and reply Parcel for the maximum of 16 Binder threads.
+     */
+    private static final int POOL_SIZE = 32;
 
     // Keep in sync with frameworks/native/include/private/binder/ParcelValTypes.h.
     private static final int VAL_NULL = -1;
@@ -420,22 +444,27 @@ public final class Parcel {
      */
     @NonNull
     public static Parcel obtain() {
-        final Parcel[] pool = sOwnedPool;
-        synchronized (pool) {
-            Parcel p;
-            for (int i=0; i<POOL_SIZE; i++) {
-                p = pool[i];
-                if (p != null) {
-                    pool[i] = null;
-                    if (DEBUG_RECYCLE) {
-                        p.mStack = new RuntimeException();
-                    }
-                    p.mReadWriteHelper = ReadWriteHelper.DEFAULT;
-                    return p;
-                }
+        Parcel res = null;
+        synchronized (sPoolSync) {
+            if (sOwnedPool != null) {
+                res = sOwnedPool;
+                sOwnedPool = res.mPoolNext;
+                res.mPoolNext = null;
+                sOwnedPoolSize--;
             }
         }
-        return new Parcel(0);
+
+        // When no cache found above, create from scratch; otherwise prepare the
+        // cached object to be used
+        if (res == null) {
+            res = new Parcel(0);
+        } else {
+            if (DEBUG_RECYCLE) {
+                res.mStack = new RuntimeException();
+            }
+            res.mReadWriteHelper = ReadWriteHelper.DEFAULT;
+        }
+        return res;
     }
 
     /**
@@ -446,19 +475,21 @@ public final class Parcel {
         if (DEBUG_RECYCLE) mStack = null;
         freeBuffer();
 
-        final Parcel[] pool;
         if (mOwnsNativeParcelObject) {
-            pool = sOwnedPool;
+            synchronized (sPoolSync) {
+                if (sOwnedPoolSize < POOL_SIZE) {
+                    mPoolNext = sOwnedPool;
+                    sOwnedPool = this;
+                    sOwnedPoolSize++;
+                }
+            }
         } else {
             mNativePtr = 0;
-            pool = sHolderPool;
-        }
-
-        synchronized (pool) {
-            for (int i=0; i<POOL_SIZE; i++) {
-                if (pool[i] == null) {
-                    pool[i] = this;
-                    return;
+            synchronized (sPoolSync) {
+                if (sHolderPoolSize < POOL_SIZE) {
+                    mPoolNext = sHolderPool;
+                    sHolderPool = this;
+                    sHolderPoolSize++;
                 }
             }
         }
@@ -3496,22 +3527,27 @@ public final class Parcel {
 
     /** @hide */
     static protected final Parcel obtain(long obj) {
-        final Parcel[] pool = sHolderPool;
-        synchronized (pool) {
-            Parcel p;
-            for (int i=0; i<POOL_SIZE; i++) {
-                p = pool[i];
-                if (p != null) {
-                    pool[i] = null;
-                    if (DEBUG_RECYCLE) {
-                        p.mStack = new RuntimeException();
-                    }
-                    p.init(obj);
-                    return p;
-                }
+        Parcel res = null;
+        synchronized (sPoolSync) {
+            if (sHolderPool != null) {
+                res = sHolderPool;
+                sHolderPool = res.mPoolNext;
+                res.mPoolNext = null;
+                sHolderPoolSize--;
             }
         }
-        return new Parcel(obj);
+
+        // When no cache found above, create from scratch; otherwise prepare the
+        // cached object to be used
+        if (res == null) {
+            res = new Parcel(obj);
+        } else {
+            if (DEBUG_RECYCLE) {
+                res.mStack = new RuntimeException();
+            }
+            res.init(obj);
+        }
+        return res;
     }
 
     private Parcel(long nativePtr) {
