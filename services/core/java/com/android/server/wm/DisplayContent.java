@@ -165,6 +165,7 @@ import android.graphics.Region.Op;
 import android.hardware.display.DisplayManagerInternal;
 import android.metrics.LogMaker;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -4775,7 +4776,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return getWindowContainers().getSurfaceControl();
     }
 
-    @VisibleForTesting
     DisplayArea.Tokens getImeContainer() {
         return mImeWindowsContainers;
     }
@@ -5730,5 +5730,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     MagnificationSpec getMagnificationSpec() {
         return mMagnificationSpec;
+    }
+
+    DisplayArea getAreaForWindowToken(int windowType, Bundle options,
+            boolean ownerCanManageAppToken, boolean roundedCornerOverlay) {
+        // TODO(b/159767464): figure out how to find an appropriate TDA.
+        if (windowType >= FIRST_APPLICATION_WINDOW && windowType <= LAST_APPLICATION_WINDOW) {
+            return getDefaultTaskDisplayArea();
+        }
+        // Return IME container here because it could be in one of sub RootDisplayAreas depending on
+        // the focused edit text. Also, the RootDisplayArea choosing strategy is implemented by
+        // the server side, but not mSelectRootForWindowFunc customized by OEM.
+        if (windowType == TYPE_INPUT_METHOD || windowType == TYPE_INPUT_METHOD_DIALOG) {
+            return getImeContainer();
+        }
+        return mDisplayAreaPolicy.getDisplayAreaForWindowToken(windowType, options,
+                ownerCanManageAppToken, roundedCornerOverlay);
     }
 }
