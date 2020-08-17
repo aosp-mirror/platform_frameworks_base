@@ -54,8 +54,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTutorialHandler = new OneHandedTutorialHandler(mContext);
-        mOneHandedAnimationController = new OneHandedAnimationController(
-                new OneHandedSurfaceTransactionHelper(mContext));
+        mOneHandedAnimationController = new OneHandedAnimationController(mContext);
     }
 
     @Test

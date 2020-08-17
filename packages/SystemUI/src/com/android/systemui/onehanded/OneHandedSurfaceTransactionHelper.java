@@ -23,8 +23,6 @@ import android.view.SurfaceControl;
 
 import com.android.systemui.R;
 
-import javax.inject.Inject;
-
 /**
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for OneHanded transition.
  */
@@ -32,7 +30,6 @@ public class OneHandedSurfaceTransactionHelper {
     private final boolean mEnableCornerRadius;
     private final float mCornerRadius;
 
-    @Inject
     public OneHandedSurfaceTransactionHelper(Context context) {
         final Resources res = context.getResources();
         mCornerRadius = res.getDimension(com.android.internal.R.dimen.rounded_corner_radius);
