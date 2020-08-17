@@ -1212,14 +1212,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task;
     }
 
-    /**
-     * Sets the Task on this activity for the purposes of re-use during launch where we will
-     * re-use another activity instead of this one for the launch.
-     */
-    void setTaskForReuse(Task task) {
-        this.task = task;
-    }
-
     Task getStack() {
         return task != null ? task.getRootTask() : null;
     }
