@@ -1339,7 +1339,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // Check if device to be updated is routed for the given audio stream
-        List<AudioDeviceAttributes> devicesForAttributes = getDevicesForAttributesInt(
+        List<AudioDeviceAttributes> devicesForAttributes = getDevicesForAttributes(
                 new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
         for (AudioDeviceAttributes deviceAttributes : devicesForAttributes) {
             if (deviceAttributes.getType() == AudioDeviceInfo.convertInternalDeviceToDeviceType(
@@ -1899,13 +1899,8 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
-        enforceModifyAudioRoutingPermission();
-        return getDevicesForAttributesInt(attributes);
-    }
-
-    protected @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesInt(
-            @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
+        enforceModifyAudioRoutingPermission();
         return AudioSystem.getDevicesForAttributes(attributes);
     }
 
