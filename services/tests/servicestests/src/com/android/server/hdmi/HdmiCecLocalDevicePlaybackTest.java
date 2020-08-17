@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IThermalService;
@@ -125,7 +126,12 @@ public class HdmiCecLocalDevicePlaybackTest {
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
-        mHdmiControlService.initPortInfo();
+        HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
+        hdmiPortInfos[0] =
+                new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+        mNativeWrapper.setPortInfo(hdmiPortInfos);
+        mNativeWrapper.setPortConnectionStatus(1, true);
+        mHdmiControlService.initService();
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPlaybackPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
@@ -892,6 +898,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     public void handleSetStreamPath_afterHotplug_broadcastsActiveSource() {
         mNativeWrapper.onHotplugEvent(1, false);
         mNativeWrapper.onHotplugEvent(1, true);
+        mTestLooper.dispatchAll();
 
         HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
                 mPlaybackPhysicalAddress);

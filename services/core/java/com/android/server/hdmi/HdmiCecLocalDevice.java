@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -471,8 +472,27 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
+    @CallSuper
     protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
-        return false;
+        // <Report Physical Address>  is also handled in HdmiCecNetwork to update the local network
+        // state
+
+        int address = message.getSource();
+
+        // Ignore if [Device Discovery Action] is going on.
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Ignored while Device Discovery Action is in progress: " + message);
+            return true;
+        }
+
+        HdmiDeviceInfo cecDeviceInfo = mService.getHdmiCecNetwork().getCecDeviceInfo(address);
+        // If no non-default display name is available for the device, request the devices OSD name.
+        if (cecDeviceInfo.getDisplayName().equals(HdmiUtils.getDefaultDeviceName(address))) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildGiveOsdNameCommand(mAddress, address));
+        }
+
+        return true;
     }
 
     protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
@@ -708,7 +728,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleSetOsdName(HdmiCecMessage message) {
-        // The default behavior of <Set Osd Name> is doing nothing.
+        // <Set OSD name> is also handled in HdmiCecNetwork to update the local network state
         return true;
     }
 
@@ -724,7 +744,8 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleReportPowerStatus(HdmiCecMessage message) {
-        return false;
+        // <Report Power Status> is also handled in HdmiCecNetwork to update the local network state
+        return true;
     }
 
     protected boolean handleTimerStatus(HdmiCecMessage message) {

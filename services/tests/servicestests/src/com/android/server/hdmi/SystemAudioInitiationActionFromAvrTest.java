@@ -90,8 +90,6 @@ public class SystemAudioInitiationActionFromAvrTest {
                                 break;
                             case Constants.MESSAGE_INITIATE_ARC:
                                 break;
-                            default:
-                                throw new IllegalArgumentException("Unexpected message");
                         }
                     }
 
@@ -159,6 +157,14 @@ public class SystemAudioInitiationActionFromAvrTest {
                         return -1;
                     }
                 };
+
+        Looper looper = mTestLooper.getLooper();
+        hdmiControlService.setIoLooper(looper);
+        HdmiCecController.NativeWrapper nativeWrapper = new FakeNativeWrapper();
+        HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
+                hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());
+        hdmiControlService.setCecController(hdmiCecController);
+        hdmiControlService.initService();
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
                     @Override
@@ -181,8 +187,6 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
                 };
         mHdmiCecLocalDeviceAudioSystem.init();
-        Looper looper = mTestLooper.getLooper();
-        hdmiControlService.setIoLooper(looper);
     }
 
     @Test
