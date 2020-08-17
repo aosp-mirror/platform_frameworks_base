@@ -240,6 +240,8 @@
     <!-- Listen app op changes -->
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
     <uses-permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS" />
+    <!-- For handling silent audio recordings -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
 
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
@@ -266,6 +268,7 @@
 
     <!-- Permission to make accessibility service access Bubbles -->
     <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
+
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
