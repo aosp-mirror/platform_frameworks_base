@@ -3355,8 +3355,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void onViewAddedInternal(ExpandableView child) {
-        child.setOnHeightChangedListener(mOnChildHeightChangedListener);
         updateHideSensitiveForChild(child);
+        child.setOnHeightChangedListener(mOnChildHeightChangedListener);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
