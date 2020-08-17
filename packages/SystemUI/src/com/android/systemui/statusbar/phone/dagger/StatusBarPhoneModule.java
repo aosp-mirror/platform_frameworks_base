@@ -41,7 +41,6 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.recents.Recents;
@@ -82,6 +81,7 @@ import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -189,7 +189,6 @@ public interface StatusBarPhoneModule {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
-            DarkIconDispatcher darkIconDispatcher,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
             KeyguardDismissUtil keyguardDismissUtil,
@@ -200,7 +199,8 @@ public interface StatusBarPhoneModule {
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             DismissCallbackRegistry dismissCallbackRegistry,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            NotificationIconAreaController notificationIconAreaController) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -268,7 +268,6 @@ public interface StatusBarPhoneModule {
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
                 initController,
-                darkIconDispatcher,
                 timeTickHandler,
                 pluginDependencyProvider,
                 keyguardDismissUtil,
@@ -279,6 +278,7 @@ public interface StatusBarPhoneModule {
                 dismissCallbackRegistry,
                 demoModeController,
                 notificationShadeDepthController,
-                statusBarTouchableRegionManager);
+                statusBarTouchableRegionManager,
+                notificationIconAreaController);
     }
 }

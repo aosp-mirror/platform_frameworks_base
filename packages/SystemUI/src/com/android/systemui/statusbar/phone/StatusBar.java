@@ -144,7 +144,6 @@ import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
@@ -396,7 +395,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final LightsOutNotifController mLightsOutNotifController;
     private final InitController mInitController;
-    private final DarkIconDispatcher mDarkIconDispatcher;
+
     private final PluginDependencyProvider mPluginDependencyProvider;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ExtensionController mExtensionController;
@@ -609,7 +608,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private UiModeManager mUiModeManager;
     protected boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
-    protected NotificationIconAreaController mNotificationIconAreaController;
+    protected final NotificationIconAreaController mNotificationIconAreaController;
     @Nullable private View mAmbientIndicationContainer;
     private final SysuiColorExtractor mColorExtractor;
     private final ScreenLifecycle mScreenLifecycle;
@@ -731,7 +730,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
-            DarkIconDispatcher darkIconDispatcher,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
             KeyguardDismissUtil keyguardDismissUtil,
@@ -742,7 +740,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             DismissCallbackRegistry dismissCallbackRegistry,
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            NotificationIconAreaController notificationIconAreaController) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -812,7 +811,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
-        mDarkIconDispatcher = darkIconDispatcher;
         mPluginDependencyProvider = pluginDependencyProvider;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mExtensionController = extensionController;
@@ -820,6 +818,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIconPolicy = phoneStatusBarPolicy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mDemoModeController = demoModeController;
+        mNotificationIconAreaController = notificationIconAreaController;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -953,9 +952,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         startKeyguard();
 
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
-        mDozeServiceHost.initialize(this, mNotificationIconAreaController,
-                mStatusBarKeyguardViewManager, mNotificationShadeWindowViewController,
-                mNotificationPanelViewController, mAmbientIndicationContainer);
+        mDozeServiceHost.initialize(
+                this,
+                mStatusBarKeyguardViewManager,
+                mNotificationShadeWindowViewController,
+                mNotificationPanelViewController,
+                mAmbientIndicationContainer);
 
         mConfigurationController.addCallback(this);
 
@@ -1037,20 +1039,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStackScrollerController.getNotificationListContainer();
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
-        // TODO: make this injectable. Currently that would create a circular dependency between
-        // NotificationIconAreaController and StatusBar.
-        mNotificationIconAreaController = SystemUIFactory.getInstance()
-                .createNotificationIconAreaController(context, this,
-                        mWakeUpCoordinator, mKeyguardBypassController,
-                        mStatusBarStateController, mDemoModeController);
-        mWakeUpCoordinator.setIconAreaController(mNotificationIconAreaController);
+        updateAodIconArea();
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        mNotificationPanelViewController.setOnReinflationListener(
-                mNotificationIconAreaController::initAodIcons);
+        mNotificationPanelViewController.setOnReinflationListener(this::updateAodIconArea);
         mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
 
-        mDarkIconDispatcher.addDarkReceiver(mNotificationIconAreaController);
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
         mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
@@ -1163,9 +1157,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         });
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
-        mNotificationPanelViewController.initDependencies(this, mGroupManager,
+        mNotificationPanelViewController.initDependencies(
+                this,
+                mGroupManager,
                 mNotificationShelfController,
-                mNotificationIconAreaController, mScrimController);
+                mScrimController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
@@ -1277,6 +1273,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+    }
+
+    private void updateAodIconArea() {
+        mNotificationIconAreaController.setupAodIcons(
+                getNotificationShadeWindowView()
+                        .findViewById(R.id.clock_notification_icon_container));
     }
 
     @NonNull

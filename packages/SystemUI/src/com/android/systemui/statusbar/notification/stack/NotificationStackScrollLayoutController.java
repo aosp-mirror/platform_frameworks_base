@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -479,10 +478,6 @@ public class NotificationStackScrollLayoutController {
         mView.updateFooter();
     }
 
-    public void updateIconAreaViews() {
-        mView.updateIconAreaViews();
-    }
-
     public void onUpdateRowStates() {
         mView.onUpdateRowStates();
     }
@@ -502,10 +497,6 @@ public class NotificationStackScrollLayoutController {
     public void setNotificationPanelController(
             NotificationPanelViewController notificationPanelViewController) {
         mView.setNotificationPanelController(notificationPanelViewController);
-    }
-
-    public void setIconAreaController(NotificationIconAreaController controller) {
-        mView.setIconAreaController(controller);
     }
 
     public void setStatusBar(StatusBar statusBar) {
