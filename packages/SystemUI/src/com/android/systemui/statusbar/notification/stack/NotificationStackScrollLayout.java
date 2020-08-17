@@ -178,8 +178,7 @@ import javax.inject.Named;
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
-public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter,
-        ConfigurationListener, Dumpable {
+public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter, Dumpable {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -729,34 +728,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return 0f;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onDensityOrFontScaleChanged() {
-        reinflateViews();
-    }
-
-    private void reinflateViews() {
+    void reinflateViews() {
         inflateFooterView();
         inflateEmptyShadeView();
         updateFooter();
         mSectionsManager.reinflateViews(LayoutInflater.from(mContext));
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onThemeChanged() {
-        updateFooter();
-    }
-
-    @Override
-    public void onOverlayChanged() {
-        int newRadius = mContext.getResources().getDimensionPixelSize(
-                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
-        if (mCornerRadius != newRadius) {
-            mCornerRadius = newRadius;
-            invalidate();
-        }
-        reinflateViews();
     }
 
     @VisibleForTesting
@@ -824,7 +800,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         super.onAttachedToWindow();
         ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
                 .addCallback(mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
-        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
@@ -832,7 +807,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
-        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -840,9 +814,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return mSwipeHelper;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onUiModeChanged() {
+    void updateBgColor() {
         mBgColor = mContext.getColor(R.color.notification_shade_background_color);
         updateBackgroundDimming();
         mShelf.onUiModeChanged();
@@ -1073,6 +1045,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+    }
+
+    void updateCornerRadius() {
+        int newRadius = getResources().getDimensionPixelSize(
+                Utils.getThemeAttr(getContext(), android.R.attr.dialogCornerRadius));
+        if (mCornerRadius != newRadius) {
+            mCornerRadius = newRadius;
+            invalidate();
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -4851,7 +4832,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * @param lightTheme True if light theme should be used.
      */
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
-    private void updateDecorViews(boolean lightTheme) {
+    void updateDecorViews(boolean lightTheme) {
         if (lightTheme == mUsingLightTheme) {
             return;
         }

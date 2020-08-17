@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -46,6 +47,8 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 
 import java.util.function.BiConsumer;
@@ -64,9 +67,24 @@ public class NotificationStackScrollLayoutController {
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
     private final DynamicPrivacyController mDynamicPrivacyController;
+    private final ConfigurationController mConfigurationController;
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
     private NotificationStackScrollLayout mView;
+
+    @VisibleForTesting
+    final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
+            new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    mConfigurationController.addCallback(mConfigurationListener);
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    mConfigurationController.removeCallback(mConfigurationListener);
+                }
+            };
 
     private final DynamicPrivacyController.Listener mDynamicPrivacyControllerListener = () -> {
         if (mView.isExpanded()) {
@@ -80,6 +98,30 @@ public class NotificationStackScrollLayoutController {
         });
     };
 
+    @VisibleForTesting
+    final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            mView.reinflateViews();
+        }
+
+        @Override
+        public void onOverlayChanged() {
+            mView.updateCornerRadius();
+            mView.reinflateViews();
+        }
+
+        @Override
+        public void onUiModeChanged() {
+            mView.updateBgColor();
+        }
+
+        @Override
+        public void onThemeChanged() {
+            updateFooter();
+        }
+    };
+
     @Inject
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
@@ -87,13 +129,15 @@ public class NotificationStackScrollLayoutController {
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
-            DynamicPrivacyController dynamicPrivacyController) {
+            DynamicPrivacyController dynamicPrivacyController,
+            ConfigurationController configurationController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
         mDynamicPrivacyController = dynamicPrivacyController;
+        mConfigurationController = configurationController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -105,7 +149,6 @@ public class NotificationStackScrollLayoutController {
         }
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
-
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
@@ -121,6 +164,11 @@ public class NotificationStackScrollLayoutController {
                 },
                 Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
+
+        if (mView.isAttachedToWindow()) {
+            mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
+        }
+        mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {

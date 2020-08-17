@@ -436,9 +436,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
+    public void testReInflatesFooterViews() {
         clearInvocations(mStackScroller);
-        mStackScroller.onDensityOrFontScaleChanged();
+        mStackScroller.reinflateViews();
         verify(mStackScroller).setFooterView(any());
         verify(mStackScroller).setEmptyShadeView(any());
     }
