@@ -31,39 +31,44 @@
         android:layoutDirection="ltr">
 
         <FrameLayout
-            android:id="@+id/left_hvac_container"
+            android:id="@+id/user_name_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/clock_container"
         >
 
             <com.android.systemui.car.navigationbar.CarNavigationButton
-                android:id="@+id/hvacleft"
+                android:id="@+id/user_name"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@null"
-                systemui:broadcast="true"
-                systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
-            />
-
-            <com.android.systemui.car.hvac.AnimatedTemperatureView
-                android:id="@+id/lefttext"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingStart="@*android:dimen/car_padding_4"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical|start"
-                android:minEms="4"
-                android:textAppearance="@style/TextAppearance.CarStatus"
-                systemui:hvacAreaId="49"
-                systemui:hvacMaxText="@string/hvac_max_text"
-                systemui:hvacMaxValue="@dimen/hvac_max_value"
-                systemui:hvacMinText="@string/hvac_min_text"
-                systemui:hvacMinValue="@dimen/hvac_min_value"
-                systemui:hvacPivotOffset="60dp"
-                systemui:hvacPropertyId="358614275"
-                systemui:hvacTempFormat="%.0f\u00B0"
-            />
+                systemui:icon="@null"
+                systemui:intent="intent:#Intent;component=com.android.car.settings/.users.UserSwitcherActivity;launchFlags=0x24000000;end"
+            >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                >
+                    <ImageView
+                        android:id="@+id/user_avatar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/car_ic_user_icon"
+                        android:paddingLeft="@dimen/system_bar_user_icon_padding"
+                        android:paddingRight="@dimen/system_bar_user_icon_padding"
+                    />
+                    <TextView
+                        android:id="@+id/user_name_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:textAppearance="@style/TextAppearance.SystemBar.Username"
+                        android:maxLines="1"
+                    />
+                </LinearLayout>
+            </com.android.systemui.car.navigationbar.CarNavigationButton>
         </FrameLayout>
 
         <FrameLayout
@@ -86,7 +91,8 @@
                 android:layout_gravity="center"
                 android:elevation="5dp"
                 android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                android:textAppearance="@style/TextAppearance.SystemBar.Clock"
+                systemui:amPmStyle="normal"
             />
         </FrameLayout>
 
@@ -94,10 +100,9 @@
             android:id="@+id/system_icon_area"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/clock_container"
-            android:paddingStart="@*android:dimen/car_padding_1"
+            android:paddingEnd="@*android:dimen/car_padding_1"
             android:gravity="center_vertical"
             android:orientation="horizontal"
         >
@@ -107,46 +112,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="4dp"
                 android:gravity="center_vertical"
             />
         </LinearLayout>
-
-        <FrameLayout
-            android:id="@+id/right_hvac_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-        >
-
-            <com.android.systemui.car.navigationbar.CarNavigationButton
-                android:id="@+id/hvacright"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@null"
-                systemui:broadcast="true"
-                systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
-            />
-
-            <com.android.systemui.car.hvac.AnimatedTemperatureView
-                android:id="@+id/righttext"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingStart="16dp"
-                android:paddingEnd="@*android:dimen/car_padding_4"
-                android:gravity="center_vertical|end"
-                android:minEms="4"
-                android:textAppearance="@style/TextAppearance.CarStatus"
-                systemui:hvacAreaId="68"
-                systemui:hvacMaxText="@string/hvac_max_text"
-                systemui:hvacMaxValue="@dimen/hvac_max_value"
-                systemui:hvacMinText="@string/hvac_min_text"
-                systemui:hvacMinValue="@dimen/hvac_min_value"
-                systemui:hvacPivotOffset="60dp"
-                systemui:hvacPropertyId="358614275"
-                systemui:hvacTempFormat="%.0f\u00B0"
-            />
-        </FrameLayout>
     </RelativeLayout>
 
 </com.android.systemui.car.navigationbar.CarNavigationBarView>
