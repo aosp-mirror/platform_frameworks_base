@@ -35,9 +35,6 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
-import android.os.Handler;
-import android.os.HandlerExecutor;
-import android.os.HandlerThread;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -353,13 +350,9 @@ public class AppsFilter {
                         injector.getUserManagerInternal().getUserInfos());
             }
         };
-        HandlerThread appsFilterThread = new HandlerThread("appsFilter");
-        appsFilterThread.start();
-        Handler appsFilterHandler = new Handler(appsFilterThread.getLooper());
-        Executor executor = new HandlerExecutor(appsFilterHandler);
-
         AppsFilter appsFilter = new AppsFilter(stateProvider, featureConfig,
-                forcedQueryablePackageNames, forceSystemAppsQueryable, null, executor);
+                forcedQueryablePackageNames, forceSystemAppsQueryable, null,
+                injector.getBackgroundExecutor());
         featureConfig.setAppsFilter(appsFilter);
         return appsFilter;
     }

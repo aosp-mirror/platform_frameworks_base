@@ -248,6 +248,8 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -420,6 +422,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -924,6 +927,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Object mLock;
         private final Installer mInstaller;
         private final Object mInstallLock;
+        private final Executor mBackgroundExecutor;
 
         // ----- producers -----
         private final Singleton<ComponentResolver> mComponentResolverProducer;
@@ -945,6 +949,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Injector(Context context, Object lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
+                Executor backgroundExecutor,
                 Producer<ComponentResolver> componentResolverProducer,
                 Producer<PermissionManagerServiceInternal> permissionManagerProducer,
                 Producer<UserManagerService> userManagerProducer,
@@ -966,6 +971,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mInstaller = installer;
             mAbiHelper = abiHelper;
             mInstallLock = installLock;
+            mBackgroundExecutor = backgroundExecutor;
             mComponentResolverProducer = new Singleton<>(componentResolverProducer);
             mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
             mUserManagerProducer = new Singleton<>(userManagerProducer);
@@ -1078,6 +1084,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public PlatformCompat getCompatibility() {
             return mPlatformCompatProducer.get(this, mPackageManager);
+        }
+
+        public Executor getBackgroundExecutor() {
+            return mBackgroundExecutor;
         }
     }
 
@@ -2581,17 +2591,21 @@ public class PackageManagerService extends IPackageManager.Stub
         t.traceBegin("create package manager");
         final Object lock = new Object();
         final Object installLock = new Object();
+        HandlerThread backgroundThread = new HandlerThread("PackageManagerBg");
+        backgroundThread.start();
+        Handler backgroundHandler = new Handler(backgroundThread.getLooper());
 
         Injector injector = new Injector(
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
+                new HandlerExecutor(backgroundHandler),
                 (i, pm) ->
                         new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
                 (i, pm) ->
-                        PermissionManagerService.create(context, lock),
+                PermissionManagerService.create(context, lock),
                 (i, pm) ->
-                        new UserManagerService(context, pm,
-                                new UserDataPreparer(installer, installLock, context, onlyCore),
-                                lock),
+                new UserManagerService(context, pm,
+                        new UserDataPreparer(installer, installLock, context, onlyCore),
+                        lock),
                 (i, pm) ->
                         new Settings(Environment.getDataDirectory(),
                                 i.getPermissionManagerServiceInternal().getPermissionSettings(),
