@@ -20,7 +20,6 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
-import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -33,24 +32,23 @@ import java.util.Objects;
  * Activity configuration changed callback.
  * @hide
  */
-public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
+public class ActivityConfigurationChangeItem extends ClientTransactionItem {
 
     private Configuration mConfiguration;
 
     @Override
     public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
-        final ActivityClientRecord r = getActivityClientRecord(client, token);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
-        client.updatePendingActivityConfiguration(r, mConfiguration);
+        client.updatePendingActivityConfiguration(token, mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
-        client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY);
+        client.handleActivityConfigurationChanged(token, mConfiguration, INVALID_DISPLAY);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -95,7 +93,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final @NonNull Creator<ActivityConfigurationChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<ActivityConfigurationChangeItem> CREATOR =
             new Creator<ActivityConfigurationChangeItem>() {
         public ActivityConfigurationChangeItem createFromParcel(Parcel in) {
             return new ActivityConfigurationChangeItem(in);
