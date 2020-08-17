@@ -20,6 +20,7 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.content.ComponentName.createRelative;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
@@ -176,7 +177,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     public void testOnActivityLaunchCancelled_hasDrawn() {
         onActivityLaunched(mTopActivity);
 
-        mTopActivity.mVisibleRequested = mTopActivity.mDrawn = true;
+        mTopActivity.mVisibleRequested = true;
+        doReturn(true).when(mTopActivity).isReportedDrawn();
 
         // Cannot time already-visible activities.
         notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);
@@ -187,16 +189,14 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityLaunchCancelled_finishedBeforeDrawn() {
-        mTopActivity.mVisibleRequested = mTopActivity.mDrawn = true;
+        mTopActivity.mVisibleRequested = true;
+        doReturn(true).when(mTopActivity).isReportedDrawn();
 
-        // Suppress resume when creating the record because we want to notify logger manually.
-        mSupervisor.beginDeferResume();
         // Create an activity with different process that meets process switch.
         final ActivityRecord noDrawnActivity = new ActivityBuilder(mAtm)
                 .setTask(mTopActivity.getTask())
                 .setProcessName("other")
                 .build();
-        mSupervisor.readyToResume();
 
         notifyActivityLaunching(noDrawnActivity.intent);
         notifyActivityLaunched(START_SUCCESS, noDrawnActivity);
@@ -294,7 +294,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     public void testOnActivityLaunchCancelledTrampoline() {
         onActivityLaunchedTrampoline();
 
-        mTopActivity.mDrawn = true;
+        doReturn(true).when(mTopActivity).isReportedDrawn();
 
         // Cannot time already-visible activities.
         notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);

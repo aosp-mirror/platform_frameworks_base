@@ -499,7 +499,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                                            // and reporting to the client that it is hidden.
     private boolean mSetToSleep; // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
-    boolean mDrawn;          // is this activity's window drawn?
     boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
@@ -564,8 +563,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mClientVisible;
 
     boolean firstWindowDrawn;
-    // Last drawn state we reported to the app token.
-    private boolean reportedDrawn;
+    /** Whether the visible window(s) of this activity is drawn. */
+    private boolean mReportedDrawn;
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
@@ -927,7 +926,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.println(prefix + "mVisibleRequested=" + mVisibleRequested
                 + " mVisible=" + mVisible + " mClientVisible=" + mClientVisible
                 + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
-                + " reportedDrawn=" + reportedDrawn + " reportedVisible=" + reportedVisible);
+                + " reportedDrawn=" + mReportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
             pw.print(prefix); pw.print("paused="); pw.println(paused);
         }
@@ -1591,7 +1590,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         keysPaused = false;
         inHistory = false;
         nowVisible = false;
-        mDrawn = false;
         mClientVisible = true;
         idle = false;
         hasBeenLaunched = false;
@@ -5404,11 +5402,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** Called when the windows associated app window container are drawn. */
-    void onWindowsDrawn(boolean drawn, long timestampNs) {
-        mDrawn = drawn;
-        if (!drawn) {
-            return;
-        }
+    private void onWindowsDrawn(long timestampNs) {
         final TransitionInfoSnapshot info = mStackSupervisor
                 .getActivityMetricsLogger().notifyWindowsDrawn(this, timestampNs);
         final boolean validInfo = info != null;
@@ -5514,7 +5508,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!nowGone) {
             // If the app is not yet gone, then it can only become visible/drawn.
             if (!nowDrawn) {
-                nowDrawn = reportedDrawn;
+                nowDrawn = mReportedDrawn;
             }
             if (!nowVisible) {
                 nowVisible = reportedVisible;
@@ -5522,9 +5516,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
-        if (nowDrawn != reportedDrawn) {
-            onWindowsDrawn(nowDrawn, SystemClock.elapsedRealtimeNanos());
-            reportedDrawn = nowDrawn;
+        if (nowDrawn != mReportedDrawn) {
+            if (nowDrawn) {
+                onWindowsDrawn(SystemClock.elapsedRealtimeNanos());
+            }
+            mReportedDrawn = nowDrawn;
         }
         if (nowVisible != reportedVisible) {
             if (DEBUG_VISIBILITY) Slog.v(TAG,
@@ -5536,6 +5532,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 onWindowsGone();
             }
         }
+    }
+
+    boolean isReportedDrawn() {
+        return mReportedDrawn;
     }
 
     boolean isClientVisible() {
@@ -7677,7 +7677,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(VISIBLE_REQUESTED, mVisibleRequested);
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
-        proto.write(REPORTED_DRAWN, reportedDrawn);
+        proto.write(REPORTED_DRAWN, mReportedDrawn);
         proto.write(REPORTED_VISIBLE, reportedVisible);
         proto.write(NUM_INTERESTING_WINDOWS, mNumInterestingWindows);
         proto.write(NUM_DRAWN_WINDOWS, mNumDrawnWindows);
