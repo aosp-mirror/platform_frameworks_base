@@ -154,10 +154,6 @@ public final class ProcessList {
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
 
-    // The minimum time we allow between crashes, for us to consider this
-    // application to be bad and stop and its services and reject broadcasts.
-    static final int MIN_CRASH_INTERVAL = 60 * 1000;
-
     // OOM adjustments for processes in various states:
 
     // Uninitialized value for any major or minor adj fields
@@ -4068,7 +4064,8 @@ public final class ProcessList {
         boolean enqueueLocked(ProcessRecord app, String reason, int requester) {
             // Throttle the killing request for potential bad app to avoid cpu thrashing
             Long last = app.isolated ? null : mLastProcessKillTimes.get(app.processName, app.uid);
-            if (last != null && SystemClock.uptimeMillis() < last + MIN_CRASH_INTERVAL) {
+            if ((last != null) && (SystemClock.uptimeMillis()
+                    < (last + ActivityManagerConstants.MIN_CRASH_INTERVAL))) {
                 return false;
             }
 
