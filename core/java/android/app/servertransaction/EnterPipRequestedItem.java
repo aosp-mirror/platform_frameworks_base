@@ -16,20 +16,20 @@
 
 package android.app.servertransaction;
 
-import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.os.IBinder;
 import android.os.Parcel;
 
 /**
  * Request an activity to enter picture-in-picture mode.
  * @hide
  */
-public final class EnterPipRequestedItem extends ActivityTransactionItem {
+public final class EnterPipRequestedItem extends ClientTransactionItem {
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        client.handlePictureInPictureRequested(r);
+        client.handlePictureInPictureRequested(token);
     }
 
     // ObjectPoolItem implementation

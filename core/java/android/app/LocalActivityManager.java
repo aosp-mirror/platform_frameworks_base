@@ -49,7 +49,6 @@ public class LocalActivityManager {
     private static final String TAG = "LocalActivityManager";
     private static final boolean localLOGV = false;
 
-    // TODO(b/127877792): try to remove this and use {@code ActivityClientRecord} instead.
     // Internal token for an Activity being managed by LocalActivityManager.
     private static class LocalActivityRecord extends Binder {
         LocalActivityRecord(String _id, Intent _intent) {
@@ -137,7 +136,7 @@ public class LocalActivityManager {
             // startActivity() has not yet been called, so nothing to do.
             return;
         }
-
+        
         if (r.curState == INITIALIZING) {
             // Get the lastNonConfigurationInstance for the activity
             HashMap<String, Object> lastNonConfigurationInstances =
@@ -178,13 +177,12 @@ public class LocalActivityManager {
                 pendingActions = null;
             }
 
-            mActivityThread.handleStartActivity(clientRecord, pendingActions);
+            mActivityThread.handleStartActivity(r, pendingActions);
             r.curState = STARTED;
             
             if (desiredState == RESUMED) {
                 if (localLOGV) Log.v(TAG, r.id + ": resuming");
-                mActivityThread.performResumeActivity(clientRecord, true,
-                        "moveToState-INITIALIZING");
+                mActivityThread.performResumeActivity(r, true, "moveToState-INITIALIZING");
                 r.curState = RESUMED;
             }
             
@@ -196,21 +194,18 @@ public class LocalActivityManager {
             // group's state catches up.
             return;
         }
-
-        final ActivityClientRecord clientRecord = mActivityThread.getActivityClient(r);
-
+        
         switch (r.curState) {
             case CREATED:
                 if (desiredState == STARTED) {
                     if (localLOGV) Log.v(TAG, r.id + ": restarting");
-                    mActivityThread.performRestartActivity(clientRecord, true /* start */);
+                    mActivityThread.performRestartActivity(r, true /* start */);
                     r.curState = STARTED;
                 }
                 if (desiredState == RESUMED) {
                     if (localLOGV) Log.v(TAG, r.id + ": restarting and resuming");
-                    mActivityThread.performRestartActivity(clientRecord, true /* start */);
-                    mActivityThread.performResumeActivity(clientRecord, true,
-                            "moveToState-CREATED");
+                    mActivityThread.performRestartActivity(r, true /* start */);
+                    mActivityThread.performResumeActivity(r, true, "moveToState-CREATED");
                     r.curState = RESUMED;
                 }
                 return;
@@ -219,8 +214,7 @@ public class LocalActivityManager {
                 if (desiredState == RESUMED) {
                     // Need to resume it...
                     if (localLOGV) Log.v(TAG, r.id + ": resuming");
-                    mActivityThread.performResumeActivity(clientRecord, true,
-                            "moveToState-STARTED");
+                    mActivityThread.performResumeActivity(r, true, "moveToState-STARTED");
                     r.instanceState = null;
                     r.curState = RESUMED;
                 }
@@ -358,8 +352,7 @@ public class LocalActivityManager {
                     ArrayList<ReferrerIntent> intents = new ArrayList<>(1);
                     intents.add(new ReferrerIntent(intent, mParent.getPackageName()));
                     if (localLOGV) Log.v(TAG, r.id + ": new intent");
-                    final ActivityClientRecord clientRecord = mActivityThread.getActivityClient(r);
-                    mActivityThread.handleNewIntent(clientRecord, intents);
+                    mActivityThread.handleNewIntent(r, intents);
                     r.intent = intent;
                     moveToState(r, mCurState);
                     if (mSingleMode) {
@@ -406,8 +399,7 @@ public class LocalActivityManager {
             performPause(r, finish);
         }
         if (localLOGV) Log.v(TAG, r.id + ": destroying");
-        final ActivityClientRecord clientRecord = mActivityThread.getActivityClient(r);
-        mActivityThread.performDestroyActivity(clientRecord, finish, 0 /* configChanges */,
+        mActivityThread.performDestroyActivity(r, finish, 0 /* configChanges */,
                 false /* getNonConfigInstance */, "LocalActivityManager::performDestroy");
         r.activity = null;
         r.window = null;
@@ -672,8 +664,7 @@ public class LocalActivityManager {
         for (int i=0; i<N; i++) {
             LocalActivityRecord r = mActivityArray.get(i);
             if (localLOGV) Log.v(TAG, r.id + ": destroying");
-            final ActivityClientRecord clientRecord = mActivityThread.getActivityClient(r);
-            mActivityThread.performDestroyActivity(clientRecord, finishing, 0 /* configChanges */,
+            mActivityThread.performDestroyActivity(r, finishing, 0 /* configChanges */,
                     false /* getNonConfigInstance */, "LocalActivityManager::dispatchDestroy");
         }
         mActivities.clear();

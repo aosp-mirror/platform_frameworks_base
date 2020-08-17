@@ -19,7 +19,6 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
-import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -32,24 +31,23 @@ import java.util.Objects;
  * Activity move to a different display message.
  * @hide
  */
-public class MoveToDisplayItem extends ActivityTransactionItem {
+public class MoveToDisplayItem extends ClientTransactionItem {
 
     private int mTargetDisplayId;
     private Configuration mConfiguration;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
-        final ActivityClientRecord r = getActivityClientRecord(client, token);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
-        client.updatePendingActivityConfiguration(r, mConfiguration);
+        client.updatePendingActivityConfiguration(token, mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
-        client.handleActivityConfigurationChanged(r, mConfiguration, mTargetDisplayId);
+        client.handleActivityConfigurationChanged(token, mConfiguration, mTargetDisplayId);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -98,8 +96,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final @NonNull Creator<MoveToDisplayItem> CREATOR =
-            new Creator<MoveToDisplayItem>() {
+    public static final @android.annotation.NonNull Creator<MoveToDisplayItem> CREATOR = new Creator<MoveToDisplayItem>() {
         public MoveToDisplayItem createFromParcel(Parcel in) {
             return new MoveToDisplayItem(in);
         }

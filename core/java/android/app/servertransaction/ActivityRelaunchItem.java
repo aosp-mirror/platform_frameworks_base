@@ -18,8 +18,7 @@ package android.app.servertransaction;
 
 import static android.app.ActivityThread.DEBUG_ORDER;
 
-import android.annotation.NonNull;
-import android.app.ActivityThread.ActivityClientRecord;
+import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
 import android.os.IBinder;
@@ -37,7 +36,7 @@ import java.util.Objects;
  * Activity relaunch callback.
  * @hide
  */
-public class ActivityRelaunchItem extends ActivityTransactionItem {
+public class ActivityRelaunchItem extends ClientTransactionItem {
 
     private static final String TAG = "ActivityRelaunchItem";
 
@@ -51,7 +50,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
      * A record that was properly configured for relaunch. Execution will be cancelled if not
      * initialized after {@link #preExecute(ClientTransactionHandler, IBinder)}.
      */
-    private ActivityClientRecord mActivityClientRecord;
+    private ActivityThread.ActivityClientRecord mActivityClientRecord;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
@@ -60,7 +59,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         if (mActivityClientRecord == null) {
             if (DEBUG_ORDER) Slog.d(TAG, "Activity relaunch cancelled");
@@ -74,8 +73,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     @Override
     public void postExecute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        final ActivityClientRecord r = getActivityClientRecord(client, token);
-        client.reportRelaunch(r, pendingActions);
+        client.reportRelaunch(token, pendingActions);
     }
 
     // ObjectPoolItem implementation
@@ -132,16 +130,16 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         mPreserveWindow = in.readBoolean();
     }
 
-    public static final @NonNull Creator<ActivityRelaunchItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<ActivityRelaunchItem> CREATOR =
             new Creator<ActivityRelaunchItem>() {
-        public ActivityRelaunchItem createFromParcel(Parcel in) {
-            return new ActivityRelaunchItem(in);
-        }
+                public ActivityRelaunchItem createFromParcel(Parcel in) {
+                    return new ActivityRelaunchItem(in);
+                }
 
-        public ActivityRelaunchItem[] newArray(int size) {
-            return new ActivityRelaunchItem[size];
-        }
-    };
+                public ActivityRelaunchItem[] newArray(int size) {
+                    return new ActivityRelaunchItem[size];
+                }
+            };
 
     @Override
     public boolean equals(Object o) {
