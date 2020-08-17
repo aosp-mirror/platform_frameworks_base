@@ -251,6 +251,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;

@@ -25,14 +25,14 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
-import android.app.ActivityThread.ActivityClientRecord;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.ResourcesManager;
@@ -114,12 +114,11 @@ public class ActivityThreadTest {
         final ActivityThread activityThread = activity.getActivityThread();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             activityThread.executeTransaction(newResumeTransaction(activity));
-            final ActivityClientRecord r = getActivityClientRecord(activity);
-            assertFalse(activityThread.performResumeActivity(r, true /* finalStateRequest */,
-                    "test"));
+            assertNull(activityThread.performResumeActivity(activity.getActivityToken(),
+                    true /* finalStateRequest */, "test"));
 
-            assertFalse(activityThread.performResumeActivity(r, false /* finalStateRequest */,
-                    "test"));
+            assertNull(activityThread.performResumeActivity(activity.getActivityToken(),
+                    false /* finalStateRequest */, "test"));
         });
     }
 
@@ -245,18 +244,20 @@ public class ActivityThreadTest {
             newerConfig.orientation = orientation == ORIENTATION_LANDSCAPE
                     ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
             newerConfig.seq = seq + 2;
-            final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.updatePendingActivityConfiguration(r, newerConfig);
+            activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
+                    newerConfig);
 
             final Configuration olderConfig = new Configuration();
             olderConfig.orientation = orientation;
             olderConfig.seq = seq + 1;
 
-            activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(activity.getActivityToken(),
+                    olderConfig, INVALID_DISPLAY);
             assertEquals(numOfConfig, activity.mNumOfConfigChanges);
             assertEquals(olderConfig.orientation, activity.mConfig.orientation);
 
-            activityThread.handleActivityConfigurationChanged(r, newerConfig, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(activity.getActivityToken(),
+                    newerConfig, INVALID_DISPLAY);
             assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
             assertEquals(newerConfig.orientation, activity.mConfig.orientation);
         });
@@ -273,7 +274,7 @@ public class ActivityThreadTest {
             config.seq = BASE_SEQ;
             config.orientation = ORIENTATION_PORTRAIT;
 
-            activityThread.handleActivityConfigurationChanged(getActivityClientRecord(activity),
+            activityThread.handleActivityConfigurationChanged(activity.getActivityToken(),
                     config, INVALID_DISPLAY);
         });
 
@@ -334,8 +335,8 @@ public class ActivityThreadTest {
             config.seq = BASE_SEQ;
             config.orientation = ORIENTATION_PORTRAIT;
 
-            final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(activity.getActivityToken(),
+                    config, INVALID_DISPLAY);
         });
 
         final int numOfConfig = activity.mNumOfConfigChanges;
@@ -512,10 +513,9 @@ public class ActivityThreadTest {
         startIntent.putExtra(TestActivity.PIP_REQUESTED_OVERRIDE_ENTER, true);
         final TestActivity activity = mActivityTestRule.launchActivity(startIntent);
         final ActivityThread activityThread = activity.getActivityThread();
-        final ActivityClientRecord r = getActivityClientRecord(activity);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            activityThread.handlePictureInPictureRequested(r);
+            activityThread.handlePictureInPictureRequested(activity.getActivityToken());
         });
 
         assertTrue(activity.pipRequested());
@@ -528,10 +528,9 @@ public class ActivityThreadTest {
         startIntent.putExtra(TestActivity.PIP_REQUESTED_OVERRIDE_SKIP, true);
         final TestActivity activity = mActivityTestRule.launchActivity(startIntent);
         final ActivityThread activityThread = activity.getActivityThread();
-        final ActivityClientRecord r = getActivityClientRecord(activity);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            activityThread.handlePictureInPictureRequested(r);
+            activityThread.handlePictureInPictureRequested(activity.getActivityToken());
         });
 
         assertTrue(activity.pipRequested());
@@ -542,10 +541,9 @@ public class ActivityThreadTest {
     public void testHandlePictureInPictureRequested_notOverridden() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
         final ActivityThread activityThread = activity.getActivityThread();
-        final ActivityClientRecord r = getActivityClientRecord(activity);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            activityThread.handlePictureInPictureRequested(r);
+            activityThread.handlePictureInPictureRequested(activity.getActivityToken());
         });
 
         assertTrue(activity.pipRequested());
@@ -554,9 +552,8 @@ public class ActivityThreadTest {
     }
 
     /**
-     * Calls {@link ActivityThread#handleActivityConfigurationChanged(ActivityClientRecord,
-     * Configuration, int)} to try to push activity configuration to the activity for the given
-     * sequence number.
+     * Calls {@link ActivityThread#handleActivityConfigurationChanged(IBinder, Configuration, int)}
+     * to try to push activity configuration to the activity for the given sequence number.
      * <p>
      * It uses orientation to push the configuration and it tries a different orientation if the
      * first attempt doesn't make through, to rule out the possibility that the previous
@@ -569,13 +566,13 @@ public class ActivityThreadTest {
      */
     private int applyConfigurationChange(TestActivity activity, int seq) {
         final ActivityThread activityThread = activity.getActivityThread();
-        final ActivityClientRecord r = getActivityClientRecord(activity);
 
         final int numOfConfig = activity.mNumOfConfigChanges;
         Configuration config = new Configuration();
         config.orientation = ORIENTATION_PORTRAIT;
         config.seq = seq;
-        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+        activityThread.handleActivityConfigurationChanged(activity.getActivityToken(), config,
+                INVALID_DISPLAY);
 
         if (activity.mNumOfConfigChanges > numOfConfig) {
             return config.seq;
@@ -584,15 +581,10 @@ public class ActivityThreadTest {
         config = new Configuration();
         config.orientation = ORIENTATION_LANDSCAPE;
         config.seq = seq + 1;
-        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+        activityThread.handleActivityConfigurationChanged(activity.getActivityToken(), config,
+                INVALID_DISPLAY);
 
         return config.seq;
-    }
-
-    private static ActivityClientRecord getActivityClientRecord(Activity activity) {
-        final ActivityThread thread = activity.getActivityThread();
-        final IBinder token = activity.getActivityToken();
-        return thread.getActivityClient(token);
     }
 
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
