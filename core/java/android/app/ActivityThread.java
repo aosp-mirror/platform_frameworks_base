@@ -2242,9 +2242,9 @@ public final class ActivityThread extends ClientTransactionHandler {
      * Resources if one has already been created.
      */
     Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
-            String[] libDirs, int displayId, LoadedApk pkgInfo) {
+            String[] libDirs, LoadedApk pkgInfo) {
         return mResourcesManager.getResources(null, resDir, splitResDirs, overlayDirs, libDirs,
-                displayId, null, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader(), null);
+                null, null, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader(), null);
     }
 
     @UnsupportedAppUsage
@@ -5692,8 +5692,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // many places.
         final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
                 amOverrideConfig, contextThemeWrapperOverrideConfig);
-        mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig,
-                displayId, movedToDifferentDisplay);
+        mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig, displayId);
 
         activity.mConfigChangeFlags = 0;
         activity.mCurrentConfig = new Configuration(newConfig);
@@ -6014,6 +6013,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.mPendingOverrideConfig = null;
         }
 
+        if (displayId == INVALID_DISPLAY) {
+            // If INVALID_DISPLAY is passed assume that the activity should keep its current
+            // display.
+            displayId = r.activity.getDisplayId();
+        }
         final boolean movedToDifferentDisplay = isDifferentDisplay(r.activity, displayId);
         if (r.overrideConfig != null && !r.overrideConfig.isOtherSeqNewer(overrideConfig)
                 && !movedToDifferentDisplay) {

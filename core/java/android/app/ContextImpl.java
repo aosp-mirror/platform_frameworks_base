@@ -227,6 +227,15 @@ class ContextImpl extends Context {
     private @NonNull Resources mResources;
     private @Nullable Display mDisplay; // may be null if invalid display or not initialized yet.
 
+    /**
+     * If set to {@code true} the resources for this context will be configured for mDisplay which
+     * will override the display configuration inherited from {@link #mToken} (or the global
+     * configuration if mToken is null). Typically set for display contexts and contexts derived
+     * from display contexts where changes to the activity display and the global configuration
+     * display should not impact their resources.
+     */
+    private boolean mForceDisplayOverrideInResources;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mFlags;
 
@@ -2246,8 +2255,8 @@ class ContextImpl extends Context {
     }
 
     private static Resources createResources(IBinder activityToken, LoadedApk pi, String splitName,
-            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo,
-            List<ResourcesLoader> resourcesLoader) {
+            @Nullable Integer overrideDisplayId, Configuration overrideConfig,
+            CompatibilityInfo compatInfo, List<ResourcesLoader> resourcesLoader) {
         final String[] splitResDirs;
         final ClassLoader classLoader;
         try {
@@ -2261,7 +2270,7 @@ class ContextImpl extends Context {
                 splitResDirs,
                 pi.getOverlayDirs(),
                 pi.getApplicationInfo().sharedLibraryFiles,
-                displayId,
+                overrideDisplayId,
                 overrideConfig,
                 compatInfo,
                 classLoader,
@@ -2278,8 +2287,10 @@ class ContextImpl extends Context {
                     new UserHandle(UserHandle.getUserId(application.uid)), flags, null, null);
 
             final int displayId = getDisplayId();
+            final Integer overrideDisplayId = mForceDisplayOverrideInResources
+                    ? displayId : null;
 
-            c.setResources(createResources(mToken, pi, null, displayId, null,
+            c.setResources(createResources(mToken, pi, null, overrideDisplayId, null,
                     getDisplayAdjustments(displayId).getCompatibilityInfo(), null));
             if (c.mResources != null) {
                 return c;
@@ -2313,8 +2324,10 @@ class ContextImpl extends Context {
                     mToken, user, flags, null, null);
 
             final int displayId = getDisplayId();
+            final Integer overrideDisplayId = mForceDisplayOverrideInResources
+                    ? displayId : null;
 
-            c.setResources(createResources(mToken, pi, null, displayId, null,
+            c.setResources(createResources(mToken, pi, null, overrideDisplayId, null,
                     getDisplayAdjustments(displayId).getCompatibilityInfo(), null));
             if (c.mResources != null) {
                 return c;
@@ -2348,15 +2361,13 @@ class ContextImpl extends Context {
         final ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo,
                 mAttributionTag, splitName, mToken, mUser, mFlags, classLoader, null);
 
-        final int displayId = getDisplayId();
-
         context.setResources(ResourcesManager.getInstance().getResources(
                 mToken,
                 mPackageInfo.getResDir(),
                 paths,
                 mPackageInfo.getOverlayDirs(),
                 mPackageInfo.getApplicationInfo().sharedLibraryFiles,
-                displayId,
+                mForceDisplayOverrideInResources ? getDisplayId() : null,
                 null,
                 mPackageInfo.getCompatibilityInfo(),
                 classLoader,
@@ -2370,12 +2381,23 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("overrideConfiguration must not be null");
         }
 
+        if (mForceDisplayOverrideInResources) {
+            // Ensure the resources display metrics are adjusted to match the display this context
+            // is based on.
+            Configuration displayAdjustedConfig = new Configuration();
+            displayAdjustedConfig.setTo(mDisplay.getDisplayAdjustments().getConfiguration(),
+                    ActivityInfo.CONFIG_WINDOW_CONFIGURATION, 1);
+            displayAdjustedConfig.updateFrom(overrideConfiguration);
+            overrideConfiguration = displayAdjustedConfig;
+        }
+
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
 
         final int displayId = getDisplayId();
-
-        context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
+        final Integer overrideDisplayId = mForceDisplayOverrideInResources
+                ? displayId : null;
+        context.setResources(createResources(mToken, mPackageInfo, mSplitName, overrideDisplayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
                 mResources.getLoaders()));
         context.mIsUiContext = isUiContext() || isOuterUiContext();
@@ -2393,11 +2415,20 @@ class ContextImpl extends Context {
 
         final int displayId = display.getDisplayId();
 
+        // Ensure the resources display metrics are adjusted to match the provided display.
+        Configuration overrideConfig = new Configuration();
+        overrideConfig.setTo(display.getDisplayAdjustments().getConfiguration(),
+                ActivityInfo.CONFIG_WINDOW_CONFIGURATION, 1);
+
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
-                null, getDisplayAdjustments(displayId).getCompatibilityInfo(),
+                overrideConfig, display.getDisplayAdjustments().getCompatibilityInfo(),
                 mResources.getLoaders()));
         context.mDisplay = display;
         context.mIsAssociatedWithDisplay = true;
+        // Display contexts and any context derived from a display context should always override
+        // the display that would otherwise be inherited from mToken (or the global configuration if
+        // mToken is null).
+        context.mForceDisplayOverrideInResources = true;
         return context;
     }
 
@@ -2415,8 +2446,10 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
                 mSplitName, token, mUser, mFlags, mClassLoader, null);
         context.mIsUiContext = true;
-
         context.mIsAssociatedWithDisplay = true;
+        // Window contexts receive configurations directly from the server and as such do not
+        // need to override their display in ResourcesManager.
+        context.mForceDisplayOverrideInResources = false;
         return context;
     }
 
@@ -2759,6 +2792,7 @@ class ContextImpl extends Context {
             mDisplay = container.mDisplay;
             mIsAssociatedWithDisplay = container.mIsAssociatedWithDisplay;
             mIsSystemOrSystemUiContext = container.mIsSystemOrSystemUiContext;
+            mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();

@@ -56,7 +56,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import com.android.internal.util.ArrayUtils;
@@ -367,7 +366,7 @@ public final class LoadedApk {
 
                 mResources = ResourcesManager.getInstance().getResources(null, mResDir,
                         splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
-                        Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
+                        null, null, getCompatibilityInfo(),
                         getClassLoader(), mApplication == null ? null
                                 : mApplication.getResources().getLoaders());
             }
@@ -1231,7 +1230,7 @@ public final class LoadedApk {
 
             mResources = ResourcesManager.getInstance().getResources(null, mResDir,
                     splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
-                    Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
+                    null, null, getCompatibilityInfo(),
                     getClassLoader(), null);
         }
         return mResources;
