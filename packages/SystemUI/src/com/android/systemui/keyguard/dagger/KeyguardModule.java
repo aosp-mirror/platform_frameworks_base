@@ -24,19 +24,18 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.util.concurrent.Executor;
-
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 import dagger.Module;
@@ -51,7 +50,7 @@ public class KeyguardModule {
      * Provides our instance of KeyguardViewMediator which is considered optional.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     public static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
             FalsingManager falsingManager,

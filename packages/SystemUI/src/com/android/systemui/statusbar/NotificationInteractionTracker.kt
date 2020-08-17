@@ -1,16 +1,16 @@
 package com.android.systemui.statusbar
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Class to track user interaction with notifications. It's a glorified map of key : bool that can
  * merge multiple "user interacted with notification" signals into a single place.
  */
-@Singleton
+@SysUISingleton
 class NotificationInteractionTracker @Inject constructor(
     private val clicker: NotificationClickNotifier,
     private val entryManager: NotificationEntryManager

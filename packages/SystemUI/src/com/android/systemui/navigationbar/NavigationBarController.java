@@ -48,6 +48,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -70,13 +71,12 @@ import java.io.PrintWriter;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 
 /** A controller to handle navigation bars. */
-@Singleton
+@SysUISingleton
 public class NavigationBarController implements Callbacks,
         ConfigurationController.ConfigurationListener,
         NavigationModeController.ModeChangedListener, Dumpable {

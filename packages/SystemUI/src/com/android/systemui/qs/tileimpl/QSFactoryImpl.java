@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
@@ -49,11 +50,10 @@ import com.android.systemui.util.leak.GarbageMonitor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
-@Singleton
+@SysUISingleton
 public class QSFactoryImpl implements QSFactory {
 
     private static final String TAG = "QSFactory";

@@ -33,11 +33,11 @@ import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.CommandQueue;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Class to handle the interaction with
@@ -45,7 +45,7 @@ import javax.inject.Singleton;
  * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
-@Singleton
+@SysUISingleton
 public class WindowMagnification extends SystemUI implements WindowMagnifierCallback,
         CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";

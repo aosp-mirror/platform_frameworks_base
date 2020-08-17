@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -40,14 +41,13 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * A class to handle notifications and their corresponding groups.
  */
-@Singleton
+@SysUISingleton
 public class NotificationGroupManager implements OnHeadsUpChangedListener, StateListener {
 
     private static final String TAG = "NotificationGroupManager";

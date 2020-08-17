@@ -24,9 +24,10 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
+import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import java.io.FileDescriptor
 import java.io.PrintWriter

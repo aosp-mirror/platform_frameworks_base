@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.phone.PipMenuActivity;
 import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
@@ -27,8 +28,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -39,27 +38,27 @@ import dagger.Provides;
 @Module
 // TODO(b/161116823) Clean up dependencies after wm shell migration finished.
 public class WindowManagerShellModule {
-    @Singleton
+    @SysUISingleton
     @Provides
     static TransactionPool provideTransactionPool() {
         return new TransactionPool();
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static DisplayController provideDisplayController(Context context, @Main Handler handler,
             IWindowManager wmService) {
         return new DisplayController(context, handler, wmService);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
         return new SystemWindows(displayController, wmService);
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
             DisplayController displayController, @Main Handler mainHandler,
@@ -69,7 +68,7 @@ public class WindowManagerShellModule {
     }
 
     /** TODO(b/150319024): PipMenuActivity will move to a Window */
-    @Singleton
+    @SysUISingleton
     @PipMenuActivityClass
     @Provides
     static Class<?> providePipMenuActivityClass() {

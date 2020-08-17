@@ -36,6 +36,7 @@ import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 
 import com.google.android.collect.Sets;
@@ -48,7 +49,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls the application of theme overlays across the system for all users.
@@ -59,7 +59,7 @@ import javax.inject.Singleton;
  * - Observing work profile changes and applying overlays from the primary user to their
  * associated work profiles
  */
-@Singleton
+@SysUISingleton
 public class ThemeOverlayController extends SystemUI {
     private static final String TAG = "ThemeOverlayController";
     private static final boolean DEBUG = false;

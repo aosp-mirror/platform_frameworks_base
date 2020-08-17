@@ -201,7 +201,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
         mSuperStatusBarViewFactory = new SuperStatusBarViewFactory(mContext,
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()
+                new InjectionInflationController(SystemUIFactory.getInstance().getSysUIComponent()
                         .createViewInstanceCreatorFactory()),
                 new NotificationShelfComponent.Builder() {
                     @Override

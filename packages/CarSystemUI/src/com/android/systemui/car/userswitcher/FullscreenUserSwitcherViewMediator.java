@@ -18,16 +18,16 @@ package com.android.systemui.car.userswitcher;
 
 import com.android.systemui.car.keyguard.CarKeyguardViewController;
 import com.android.systemui.car.window.OverlayViewMediator;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages the fullscreen user switcher and it's interactions with the keyguard.
  */
-@Singleton
+@SysUISingleton
 public class FullscreenUserSwitcherViewMediator implements OverlayViewMediator {
     private static final String TAG = FullscreenUserSwitcherViewMediator.class.getSimpleName();
 

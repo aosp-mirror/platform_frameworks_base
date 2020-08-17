@@ -51,6 +51,7 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -62,7 +63,6 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
@@ -79,7 +79,6 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 import dagger.Module;
@@ -96,8 +95,9 @@ import dagger.Provides;
 @Module(includes = {NightDisplayListenerModule.class})
 public class DependencyProvider {
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     @Named(TIME_TICK_HANDLER_NAME)
     public Handler provideTimeTickHandler() {
         HandlerThread thread = new HandlerThread("TimeTick");
@@ -124,14 +124,16 @@ public class DependencyProvider {
         return new Handler();
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public DataSaverController provideDataSaverController(NetworkController networkController) {
         return networkController.getDataSaverController();
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public DisplayMetrics provideDisplayMetrics(Context context, WindowManager windowManager) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         context.getDisplay().getMetrics(displayMetrics);
@@ -139,41 +141,45 @@ public class DependencyProvider {
     }
 
     /** */
-    @Singleton
     @Provides
+    @SysUISingleton
     public INotificationManager provideINotificationManager() {
         return INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }
 
     /** */
-    @Singleton
     @Provides
+    @SysUISingleton
     public LayoutInflater providerLayoutInflater(Context context) {
         return LayoutInflater.from(context);
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public LeakDetector provideLeakDetector() {
         return LeakDetector.create();
 
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public MetricsLogger provideMetricsLogger() {
         return new MetricsLogger();
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public PluginManager providePluginManager(Context context) {
         return new PluginManagerImpl(context, new PluginInitializerImpl());
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public NavigationBarController provideNavigationBarController(Context context,
             WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
@@ -220,29 +226,31 @@ public class DependencyProvider {
                 configurationController);
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public ConfigurationController provideConfigurationController(Context context) {
         return new ConfigurationControllerImpl(context);
     }
 
     /** */
-    @Singleton
+    @SysUISingleton
     @Provides
     public AutoHideController provideAutoHideController(Context context,
             @Main Handler mainHandler, IWindowManager iWindowManager) {
         return new AutoHideController(context, mainHandler, iWindowManager);
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public ActivityManagerWrapper provideActivityManagerWrapper() {
         return ActivityManagerWrapper.getInstance();
     }
 
     /** Provides and initializes the {#link BroadcastDispatcher} for SystemUI */
-    @Singleton
     @Provides
+    @SysUISingleton
     public BroadcastDispatcher providesBroadcastDispatcher(
             Context context,
             @Background Looper backgroundLooper,
@@ -256,8 +264,9 @@ public class DependencyProvider {
         return bD;
     }
 
-    @Singleton
+    /** */
     @Provides
+    @SysUISingleton
     public DevicePolicyManagerWrapper provideDevicePolicyManagerWrapper() {
         return DevicePolicyManagerWrapper.getInstance();
     }
@@ -293,22 +302,22 @@ public class DependencyProvider {
     }
 
     /** */
-    @Singleton
     @Provides
+    @SysUISingleton
     public Choreographer providesChoreographer() {
         return Choreographer.getInstance();
     }
 
     /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
-    @Singleton
     @Provides
+    @SysUISingleton
     static UiEventLogger provideUiEventLogger() {
         return new UiEventLoggerImpl();
     }
 
     /** */
-    @Singleton
     @Provides
+    @SysUISingleton
     public ModeSwitchesController providesModeSwitchesController(Context context) {
         return new ModeSwitchesController(context);
     }

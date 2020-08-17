@@ -29,13 +29,13 @@ import android.view.animation.AccelerateInterpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Apps can request a low profile mode {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}
@@ -45,7 +45,7 @@ import javax.inject.Singleton;
  * This controller shows and hides the notification dot in the status bar to indicate
  * whether there are notifications when the device is in {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}.
  */
-@Singleton
+@SysUISingleton
 public class LightsOutNotifController {
     private final CommandQueue mCommandQueue;
     private final NotificationEntryManager mEntryManager;

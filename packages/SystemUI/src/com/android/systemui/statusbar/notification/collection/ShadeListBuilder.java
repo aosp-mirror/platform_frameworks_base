@@ -35,6 +35,7 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
@@ -63,7 +64,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * The second half of {@link NotifPipeline}. Sits downstream of the NotifCollection and transforms
@@ -71,7 +71,7 @@ import javax.inject.Singleton;
  * notifications that are currently present in the notification shade.
  */
 @MainThread
-@Singleton
+@SysUISingleton
 public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;

@@ -34,6 +34,7 @@ import androidx.lifecycle.Observer;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
 import com.android.systemui.plugins.ClockPlugin;
@@ -50,12 +51,11 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages custom clock faces for AOD and lock screen.
  */
-@Singleton
+@SysUISingleton
 public final class ClockManager {
 
     private static final String TAG = "ClockOptsProvider";

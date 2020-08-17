@@ -27,13 +27,13 @@ import android.util.Log;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
+@SysUISingleton
 public final class SmartReplyConstants {
 
     private static final String TAG = "SmartReplyConstants";

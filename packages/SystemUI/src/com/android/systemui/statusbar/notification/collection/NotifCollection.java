@@ -59,6 +59,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -98,7 +99,6 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Keeps a record of all of the "active" notifications, i.e. the notifications that are currently
@@ -123,7 +123,7 @@ import javax.inject.Singleton;
  * events occur.
  */
 @MainThread
-@Singleton
+@SysUISingleton
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
     private final SystemClock mClock;

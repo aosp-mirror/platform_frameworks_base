@@ -18,6 +18,7 @@ package com.android.systemui.dump
 
 import android.content.Context
 import android.util.Log
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.util.io.Files
 import com.android.systemui.util.time.SystemClock
@@ -33,7 +34,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Dumps all [LogBuffer]s to a file
@@ -41,7 +41,7 @@ import javax.inject.Singleton
  * Intended for emergencies, i.e. we're about to crash. This file can then be read at a later date
  * (usually in a bug report).
  */
-@Singleton
+@SysUISingleton
 class LogBufferEulogizer(
     private val dumpManager: DumpManager,
     private val systemClock: SystemClock,

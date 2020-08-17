@@ -22,14 +22,14 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller responsible for detecting unsafe apps.
  */
-@Singleton
+@SysUISingleton
 public class SideLoadedAppController extends SystemUI {
     private static final String TAG = SideLoadedAppController.class.getSimpleName();
 

@@ -28,14 +28,14 @@ import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlAction
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 @VisibleForTesting
 open class ControlsBindingControllerImpl @Inject constructor(
     private val context: Context,

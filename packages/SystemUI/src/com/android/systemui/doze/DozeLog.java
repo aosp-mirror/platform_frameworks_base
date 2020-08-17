@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
@@ -32,14 +33,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Logs doze events for debugging and triaging purposes. Logs are dumped in bugreports or on demand:
  *      adb shell dumpsys activity service com.android.systemui/.SystemUIService \
  *      dependency DumpController DozeLog,DozeStats
  */
-@Singleton
+@SysUISingleton
 public class DozeLog implements Dumpable {
     private final DozeLogger mLogger;
 

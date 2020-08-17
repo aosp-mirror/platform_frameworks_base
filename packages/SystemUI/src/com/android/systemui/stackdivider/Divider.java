@@ -23,6 +23,7 @@ import android.content.Context;
 import android.window.WindowContainerToken;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -31,12 +32,10 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
-import javax.inject.Singleton;
-
 /**
  * Controls the docked stack divider.
  */
-@Singleton
+@SysUISingleton
 public class Divider extends SystemUI {
     private final KeyguardStateController mKeyguardStateController;
     private final DividerController mDividerController;

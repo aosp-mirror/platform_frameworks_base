@@ -18,15 +18,15 @@ package com.android.systemui.car.keyguard;
 
 import com.android.systemui.car.userswitcher.FullScreenUserSwitcherViewController;
 import com.android.systemui.car.window.OverlayViewMediator;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages events originating from the Keyguard service that cause Keyguard or other OverlayWindow
  * Components to appear or disappear.
  */
-@Singleton
+@SysUISingleton
 public class CarKeyguardViewMediator implements OverlayViewMediator {
 
     private final CarKeyguardViewController mCarKeyguardViewController;

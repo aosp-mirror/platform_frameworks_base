@@ -83,6 +83,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.tuner.TunerService;
@@ -92,13 +93,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
  * for antialiasing and emulation purposes.
  */
-@Singleton
+@SysUISingleton
 public class ScreenDecorations extends SystemUI implements Tunable {
     private static final boolean DEBUG = false;
     private static final String TAG = "ScreenDecorations";

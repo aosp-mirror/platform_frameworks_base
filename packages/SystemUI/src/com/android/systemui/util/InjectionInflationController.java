@@ -25,6 +25,7 @@ import android.view.View;
 
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSliceView;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
@@ -38,7 +39,6 @@ import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -47,7 +47,7 @@ import dagger.Subcomponent;
  * Manages inflation that requires dagger injection.
  * See docs/dagger.md for details.
  */
-@Singleton
+@SysUISingleton
 public class InjectionInflationController {
 
     public static final String VIEW_CONTEXT = "view_context";

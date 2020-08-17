@@ -24,6 +24,7 @@ import android.os.Build;
 import android.view.ViewGroup;
 
 import com.android.internal.util.NotificationMessagingUtil;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -44,10 +45,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /** Handles inflating and updating views for notifications. */
-@Singleton
+@SysUISingleton
 public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     private static final String TAG = "NotificationViewManager";

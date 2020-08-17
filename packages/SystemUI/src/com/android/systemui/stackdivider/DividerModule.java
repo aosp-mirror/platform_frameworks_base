@@ -19,14 +19,13 @@ package com.android.systemui.stackdivider;
 import android.content.Context;
 import android.os.Handler;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -36,7 +35,7 @@ import dagger.Provides;
  */
 @Module
 public class DividerModule {
-    @Singleton
+    @SysUISingleton
     @Provides
     static Divider provideDivider(Context context, DisplayController displayController,
             SystemWindows systemWindows, DisplayImeController imeController, @Main Handler handler,

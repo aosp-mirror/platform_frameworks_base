@@ -100,7 +100,7 @@ public class SystemUIFactory {
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
-        Dependency dependency = mRootComponent.createDependency();
+        Dependency dependency = mSysUIComponent.createDependency();
         dependency.start();
     }
 
@@ -112,6 +112,10 @@ public class SystemUIFactory {
 
     public GlobalRootComponent getRootComponent() {
         return mRootComponent;
+    }
+
+    public SysUIComponent getSysUIComponent() {
+        return mSysUIComponent;
     }
 
     /** Returns the list of system UI components that should be started. */

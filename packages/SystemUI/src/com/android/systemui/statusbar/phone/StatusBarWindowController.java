@@ -29,16 +29,16 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Encapsulates all logic for the status bar window state management.
  */
-@Singleton
+@SysUISingleton
 public class StatusBarWindowController {
     private static final String TAG = "StatusBarWindowController";
     private static final boolean DEBUG = false;

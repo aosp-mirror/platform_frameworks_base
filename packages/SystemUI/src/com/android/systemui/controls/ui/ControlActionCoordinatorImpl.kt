@@ -16,30 +16,29 @@
 
 package com.android.systemui.controls.ui
 
+import android.annotation.MainThread
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.annotation.MainThread
-import android.os.Vibrator
 import android.os.VibrationEffect
+import android.os.Vibrator
 import android.service.controls.Control
 import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
 import android.service.controls.actions.FloatAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class ControlActionCoordinatorImpl @Inject constructor(
     private val context: Context,
     private val bgExecutor: DelayableExecutor,

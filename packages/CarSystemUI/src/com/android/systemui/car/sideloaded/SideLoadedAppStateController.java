@@ -19,13 +19,14 @@ package com.android.systemui.car.sideloaded;
 import android.util.Log;
 import android.view.Display;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manager responsible for displaying proper UI when an unsafe app is detected.
  */
-@Singleton
+@SysUISingleton
 public class SideLoadedAppStateController {
     private static final String TAG = SideLoadedAppStateController.class.getSimpleName();
 

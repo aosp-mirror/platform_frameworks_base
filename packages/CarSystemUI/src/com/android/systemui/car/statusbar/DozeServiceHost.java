@@ -16,13 +16,13 @@
 
 package com.android.systemui.car.statusbar;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeHost;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** No-op implementation of {@link DozeHost} for use by car sysui, which does not support dozing. */
-@Singleton
+@SysUISingleton
 public class DozeServiceHost implements DozeHost {
 
     @Inject

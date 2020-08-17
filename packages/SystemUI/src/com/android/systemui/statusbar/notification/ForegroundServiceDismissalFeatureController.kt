@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.notification
 import android.content.Context
 import android.provider.DeviceConfig
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_ALLOW_FGS_DISMISSAL
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.DeviceConfigProxy
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private var sIsEnabled: Boolean? = null
 
@@ -29,7 +29,7 @@ private var sIsEnabled: Boolean? = null
  * Feature controller for NOTIFICATIONS_ALLOW_FGS_DISMISSAL config.
  */
 // TODO: this is really boilerplatey, make a base class that just wraps the device config
-@Singleton
+@SysUISingleton
 class ForegroundServiceDismissalFeatureController @Inject constructor(
     val proxy: DeviceConfigProxy,
     val context: Context

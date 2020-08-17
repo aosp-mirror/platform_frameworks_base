@@ -29,6 +29,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import java.lang.annotation.ElementType;
@@ -40,13 +41,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Reads configs for system bars for each side (TOP, BOTTOM, LEFT, and RIGHT) and returns the
  * corresponding {@link android.view.WindowManager.LayoutParams} per the configuration.
  */
-@Singleton
+@SysUISingleton
 public class SystemBarConfigs {
 
     private static final String TAG = SystemBarConfigs.class.getSimpleName();

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -25,7 +26,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
-import javax.inject.Singleton
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
@@ -34,7 +34,7 @@ private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
  * Class that is responsible for keeping the view carousel up to date.
  * This also handles changes in state and applies them to the media carousel like the expansion.
  */
-@Singleton
+@SysUISingleton
 class MediaCarouselController @Inject constructor(
     private val context: Context,
     private val mediaControlPanelFactory: Provider<MediaControlPanel>,

@@ -24,19 +24,19 @@ import com.android.car.notification.AlertEntry;
 import com.android.car.notification.NotificationDataManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles notification logging, in particular, logging which notifications are visible and which
  * are not.
  */
-@Singleton
+@SysUISingleton
 public class NotificationVisibilityLogger {
 
     private static final String TAG = "NotificationVisibilityLogger";

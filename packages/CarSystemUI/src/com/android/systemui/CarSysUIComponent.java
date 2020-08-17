@@ -16,8 +16,14 @@
 
 package com.android.systemui;
 
+import com.android.systemui.dagger.DependencyBinder;
+import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.SystemServicesModule;
+import com.android.systemui.dagger.SystemUIModule;
+import com.android.systemui.onehanded.dagger.OneHandedModule;
+import com.android.systemui.pip.phone.dagger.PipModule;
 
 import dagger.Subcomponent;
 
@@ -25,7 +31,16 @@ import dagger.Subcomponent;
  * Dagger Subcomponent for Core SysUI.
  */
 @SysUISingleton
-@Subcomponent(modules = {})
+@Subcomponent(modules = {
+        CarComponentBinder.class,
+        DependencyProvider.class,
+        DependencyBinder.class,
+        PipModule.class,
+        OneHandedModule.class,
+        SystemServicesModule.class,
+        SystemUIModule.class,
+        CarSystemUIModule.class,
+        CarSystemUIBinder.class})
 public interface CarSysUIComponent extends SysUIComponent {
 
     /**

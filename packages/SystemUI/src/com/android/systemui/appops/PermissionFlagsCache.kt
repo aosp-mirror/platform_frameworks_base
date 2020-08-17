@@ -19,11 +19,11 @@ package com.android.systemui.appops
 import android.content.pm.PackageManager
 import android.os.UserHandle
 import androidx.annotation.WorkerThread
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.Assert
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private data class PermissionFlagKey(
     val permission: String,
@@ -37,7 +37,7 @@ private data class PermissionFlagKey(
  * After a specific `{permission, package, uid}` has been requested, updates to it will be tracked,
  * and changes to the uid will trigger new requests (in the background).
  */
-@Singleton
+@SysUISingleton
 class PermissionFlagsCache @Inject constructor(
     private val packageManager: PackageManager,
     @Background private val executor: Executor

@@ -27,6 +27,8 @@ import android.view.WindowInsetsController;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +37,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * This controller is responsible for the following:
@@ -46,7 +47,7 @@ import javax.inject.Singleton;
  * global state of SystemUIOverlayWindow.
  * </ul>
  */
-@Singleton
+@SysUISingleton
 public class OverlayViewGlobalStateController {
     private static final boolean DEBUG = false;
     private static final String TAG = OverlayViewGlobalStateController.class.getSimpleName();

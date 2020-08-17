@@ -62,6 +62,7 @@ import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -76,12 +77,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Keeps a list of all users on the device for user switching.
  */
-@Singleton
+@SysUISingleton
 public class UserSwitcherController implements Dumpable {
 
     public static final float USER_SWITCH_ENABLED_ALPHA = 1.0f;
