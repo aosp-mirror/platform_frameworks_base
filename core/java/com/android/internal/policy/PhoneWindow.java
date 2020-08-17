@@ -335,7 +335,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 0) != 0;
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     /**
