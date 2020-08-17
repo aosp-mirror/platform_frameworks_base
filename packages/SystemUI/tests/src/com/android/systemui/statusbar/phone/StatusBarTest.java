@@ -405,7 +405,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
                 mInitController,
-                mDarkIconDispatcher,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mPluginDependencyProvider,
                 mKeyguardDismissUtil,
@@ -416,7 +415,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDismissCallbackRegistry,
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
-                mStatusBarTouchableRegionManager);
+                mStatusBarTouchableRegionManager,
+                mNotificationIconAreaController);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
@@ -434,7 +434,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
         mStatusBar.mDozeScrimController = mDozeScrimController;
-        mStatusBar.mNotificationIconAreaController = mNotificationIconAreaController;
         mStatusBar.mPresenter = mNotificationPresenter;
         mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;
         mStatusBar.mBarService = mBarService;

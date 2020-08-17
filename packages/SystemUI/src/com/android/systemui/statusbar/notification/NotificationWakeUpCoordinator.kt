@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
@@ -98,7 +97,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
 
     private var collapsedEnoughToHide: Boolean = false
-    lateinit var iconAreaController: NotificationIconAreaController
 
     var pulsing: Boolean = false
         set(value) {

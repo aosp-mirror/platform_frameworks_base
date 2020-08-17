@@ -239,7 +239,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setScrimController(mock(ScrimController.class));
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
-        mStackScroller.setIconAreaController(mNotificationIconAreaController);
 
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)

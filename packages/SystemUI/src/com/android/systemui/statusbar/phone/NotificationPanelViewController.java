@@ -100,6 +100,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -177,6 +178,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ConfigurationController mConfigurationController;
     private final FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
+    private final NotificationIconAreaController mNotificationIconAreaController;
 
     // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
     // changed.
@@ -502,7 +504,8 @@ public class NotificationPanelViewController extends PanelViewController {
             BiometricUnlockController biometricUnlockController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             Provider<KeyguardClockSwitchController> keyguardClockSwitchControllerProvider,
-            NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController,
+            NotificationIconAreaController notificationIconAreaController) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -516,6 +519,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardClockSwitchControllerProvider = keyguardClockSwitchControllerProvider;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
+        mNotificationIconAreaController = notificationIconAreaController;
         mView.setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
@@ -3066,7 +3070,19 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.updateSpeedBumpIndex();
         mNotificationStackScrollLayoutController.updateFooter();
         updateShowEmptyShadeView();
-        mNotificationStackScrollLayoutController.updateIconAreaViews();
+        mNotificationIconAreaController.updateNotificationIcons(createVisibleEntriesList());
+    }
+
+    private List<ListEntry> createVisibleEntriesList() {
+        List<ListEntry> entries = new ArrayList<>(
+                mNotificationStackScrollLayoutController.getChildCount());
+        for (int i = 0; i < mNotificationStackScrollLayoutController.getChildCount(); i++) {
+            View view = mNotificationStackScrollLayoutController.getChildAt(i);
+            if (view instanceof ExpandableNotificationRow) {
+                entries.add(((ExpandableNotificationRow) view).getEntry());
+            }
+        }
+        return entries;
     }
 
     public void onUpdateRowStates() {
@@ -3094,15 +3110,17 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setScrollingEnabled(b);
     }
 
-    public void initDependencies(StatusBar statusBar, NotificationGroupManager groupManager,
+    /**
+     * Initialize objects instead of injecting to avoid circular dependencies.
+     */
+    public void initDependencies(
+            StatusBar statusBar,
+            NotificationGroupManager groupManager,
             NotificationShelfController notificationShelfController,
-            NotificationIconAreaController notificationIconAreaController,
             ScrimController scrimController) {
         setStatusBar(statusBar);
         setGroupManager(mGroupManager);
         mNotificationStackScrollLayoutController.setNotificationPanelController(this);
-        mNotificationStackScrollLayoutController
-                .setIconAreaController(notificationIconAreaController);
         mNotificationStackScrollLayoutController.setStatusBar(statusBar);
         mNotificationStackScrollLayoutController.setGroupManager(groupManager);
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);

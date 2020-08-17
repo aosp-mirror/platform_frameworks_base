@@ -150,7 +150,6 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -500,7 +499,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
-    private NotificationIconAreaController mIconAreaController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final Rect mTmpRect = new Rect();
     private final FeatureFlags mFeatureFlags;
@@ -5596,11 +5594,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setIconAreaController(NotificationIconAreaController controller) {
-        mIconAreaController = controller;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
     void clearNotifications(
             @SelectedRows int selection,
@@ -5788,10 +5781,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public void setNotificationPanelController(
             NotificationPanelViewController notificationPanelViewController) {
         mNotificationPanelController = notificationPanelViewController;
-    }
-
-    public void updateIconAreaViews() {
-        mIconAreaController.updateNotificationIcons();
     }
 
     /**
