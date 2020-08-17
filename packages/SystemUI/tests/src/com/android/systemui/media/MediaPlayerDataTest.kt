@@ -44,11 +44,11 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     fun addPlayingThenRemote() {
         val playerIsPlaying = mock(MediaControlPanel::class.java)
         whenever(playerIsPlaying.isPlaying).thenReturn(true)
-        val dataIsPlaying = createMediaData(LOCAL, !RESUMPTION)
+        val dataIsPlaying = createMediaData("app1", LOCAL, !RESUMPTION)
 
         val playerIsRemote = mock(MediaControlPanel::class.java)
         whenever(playerIsRemote.isPlaying).thenReturn(false)
-        val dataIsRemote = createMediaData(!LOCAL, !RESUMPTION)
+        val dataIsRemote = createMediaData("app2", !LOCAL, !RESUMPTION)
 
         MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying)
         MediaPlayerData.addMediaPlayer("2", dataIsRemote, playerIsRemote)
@@ -62,11 +62,11 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     fun switchPlayersPlaying() {
         val playerIsPlaying1 = mock(MediaControlPanel::class.java)
         whenever(playerIsPlaying1.isPlaying).thenReturn(true)
-        val dataIsPlaying1 = createMediaData(LOCAL, !RESUMPTION)
+        val dataIsPlaying1 = createMediaData("app1", LOCAL, !RESUMPTION)
 
         val playerIsPlaying2 = mock(MediaControlPanel::class.java)
         whenever(playerIsPlaying2.isPlaying).thenReturn(false)
-        val dataIsPlaying2 = createMediaData(LOCAL, !RESUMPTION)
+        val dataIsPlaying2 = createMediaData("app2", LOCAL, !RESUMPTION)
 
         MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1)
         MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2)
@@ -86,23 +86,23 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     fun fullOrderTest() {
         val playerIsPlaying = mock(MediaControlPanel::class.java)
         whenever(playerIsPlaying.isPlaying).thenReturn(true)
-        val dataIsPlaying = createMediaData(LOCAL, !RESUMPTION)
+        val dataIsPlaying = createMediaData("app1", LOCAL, !RESUMPTION)
 
         val playerIsPlayingAndRemote = mock(MediaControlPanel::class.java)
         whenever(playerIsPlayingAndRemote.isPlaying).thenReturn(true)
-        val dataIsPlayingAndRemote = createMediaData(!LOCAL, !RESUMPTION)
+        val dataIsPlayingAndRemote = createMediaData("app2", !LOCAL, !RESUMPTION)
 
         val playerIsStoppedAndLocal = mock(MediaControlPanel::class.java)
         whenever(playerIsStoppedAndLocal.isPlaying).thenReturn(false)
-        val dataIsStoppedAndLocal = createMediaData(LOCAL, !RESUMPTION)
+        val dataIsStoppedAndLocal = createMediaData("app3", LOCAL, !RESUMPTION)
 
         val playerIsStoppedAndRemote = mock(MediaControlPanel::class.java)
         whenever(playerIsStoppedAndLocal.isPlaying).thenReturn(false)
-        val dataIsStoppedAndRemote = createMediaData(!LOCAL, !RESUMPTION)
+        val dataIsStoppedAndRemote = createMediaData("app4", !LOCAL, !RESUMPTION)
 
         val playerCanResume = mock(MediaControlPanel::class.java)
         whenever(playerCanResume.isPlaying).thenReturn(false)
-        val dataCanResume = createMediaData(LOCAL, RESUMPTION)
+        val dataCanResume = createMediaData("app5", LOCAL, RESUMPTION)
 
         MediaPlayerData.addMediaPlayer("3", dataIsStoppedAndLocal, playerIsStoppedAndLocal)
         MediaPlayerData.addMediaPlayer("5", dataIsStoppedAndRemote, playerIsStoppedAndRemote)
@@ -116,7 +116,7 @@ public class MediaPlayerDataTest : SysuiTestCase() {
             playerIsStoppedAndLocal, playerCanResume, playerIsStoppedAndRemote).inOrder()
     }
 
-    private fun createMediaData(isLocalSession: Boolean, resumption: Boolean) =
-        MediaData(0, false, 0, null, null, null, null, null, emptyList(), emptyList<Int>(), "",
+    private fun createMediaData(app: String, isLocalSession: Boolean, resumption: Boolean) =
+        MediaData(0, false, 0, app, null, null, null, null, emptyList(), emptyList<Int>(), "",
             null, null, null, true, null, isLocalSession, resumption, null, false)
 }
