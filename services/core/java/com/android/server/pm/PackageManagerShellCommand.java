@@ -2981,7 +2981,7 @@ class PackageManagerShellCommand extends ShellCommand {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
             if (!session.isMultiPackage() && !session.isStaged()) {
-                // Sanity check that all .dm files match an apk.
+                // Validity check that all .dm files match an apk.
                 // (The installer does not support standalone .dm files and will not process them.)
                 try {
                     DexMetadataHelper.validateDexPaths(session.getNames());
