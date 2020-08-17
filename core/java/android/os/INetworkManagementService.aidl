@@ -282,8 +282,8 @@ interface INetworkManagementService
     /**
      * Control network activity of a UID over interfaces with a quota limit.
      */
-    void setUidMeteredNetworkDenylist(int uid, boolean enable);
-    void setUidMeteredNetworkAllowlist(int uid, boolean enable);
+    void setUidOnMeteredNetworkDenylist(int uid, boolean enable);
+    void setUidOnMeteredNetworkAllowlist(int uid, boolean enable);
     boolean setDataSaverModeEnabled(boolean enable);
 
     void setUidCleartextNetworkPolicy(int uid, int policy);
