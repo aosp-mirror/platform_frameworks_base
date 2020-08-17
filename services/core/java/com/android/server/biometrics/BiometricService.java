@@ -638,19 +638,6 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void resetLockout(int userId, byte[] hardwareAuthToken) {
-            checkInternalPermission();
-
-            try {
-                for (BiometricSensor sensor : mSensors) {
-                    sensor.impl.resetLockout(userId, hardwareAuthToken);
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
-        }
-
-        @Override // Binder call
         public long[] getAuthenticatorIds(int callingUserId) {
             checkInternalPermission();
 

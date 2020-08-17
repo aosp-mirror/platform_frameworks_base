@@ -259,17 +259,6 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
-            checkInternalPermission();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mBiometricService.resetLockout(userId, hardwareAuthToken);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
         public long[] getAuthenticatorIds() throws RemoteException {
             // In this method, we're not checking whether the caller is permitted to use face
             // API because current authenticator ID is leaked (in a more contrived way) via Android

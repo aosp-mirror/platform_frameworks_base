@@ -46,9 +46,6 @@ interface IAuthService {
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
 
-    // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(int userId, in byte [] hardwareAuthToken);
-
     // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
     // land as SIDs, and are used during key generation.

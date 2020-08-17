@@ -88,7 +88,7 @@ interface IFingerprintService {
     boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
-    void generateChallenge(IBinder token, IFingerprintServiceReceiver receiver, String opPackageName);
+    void generateChallenge(IBinder token, int sensorId, IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
     void revokeChallenge(IBinder token, String opPackageName);
@@ -103,7 +103,7 @@ interface IFingerprintService {
     long getAuthenticatorId(int callingUserId);
 
     // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(int userId, in byte [] hardwareAuthToken);
+    void resetLockout(IBinder token, int sensorId, int userId, in byte[] hardwareAuthToken, String opPackageNAame);
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback, String opPackageName);

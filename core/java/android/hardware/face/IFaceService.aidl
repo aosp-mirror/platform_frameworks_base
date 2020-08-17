@@ -83,10 +83,10 @@ interface IFaceService {
     boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
-    void generateChallenge(IBinder token, IFaceServiceReceiver receiver, String opPackageName);
+    void generateChallenge(IBinder token, int sensorId, IFaceServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    void revokeChallenge(IBinder token, String opPackageName);
+    void revokeChallenge(IBinder token, int sensorId, String opPackageName);
 
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
@@ -98,7 +98,7 @@ interface IFaceService {
     long getAuthenticatorId(int callingUserId);
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(int userId, in byte [] hardwareAuthToken);
+    void resetLockout(IBinder token, int sensorId, int userId, in byte [] hardwareAuthToken, String opPackageName);
 
     // Add a callback which gets notified when the face lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback, String opPackageName);

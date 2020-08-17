@@ -40,7 +40,7 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
     @Override
     public void unableToStart() {
         try {
-            getListener().onChallengeGenerated(0L);
+            getListener().onChallengeGenerated(getSensorId(), 0L);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send error", e);
         }
@@ -52,7 +52,7 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
 
         startHalOperation();
         try {
-            getListener().onChallengeGenerated(mChallenge);
+            getListener().onChallengeGenerated(getSensorId(), mChallenge);
             mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
