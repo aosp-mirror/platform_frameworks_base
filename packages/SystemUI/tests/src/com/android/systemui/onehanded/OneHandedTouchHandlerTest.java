@@ -28,8 +28,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -46,7 +46,7 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
     OneHandedTouchHandler mTouchHandler;
     OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
-    OneHandedManagerImpl mOneHandedManagerImpl;
+    OneHandedController mOneHandedController;
     @Mock
     CommandQueue mCommandQueue;
     @Mock
@@ -64,7 +64,7 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
         mTouchHandler = Mockito.spy(new OneHandedTouchHandler());
         mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
                 mMockNavigationModeController);
-        mOneHandedManagerImpl = new OneHandedManagerImpl(
+        mOneHandedController = new OneHandedController(
                 getContext(),
                 mCommandQueue,
                 mMockDisplayController,
@@ -88,14 +88,14 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOneHandedDisabled_shouldDisposeInputChannel() {
-        mOneHandedManagerImpl.setOneHandedEnabled(false);
+        mOneHandedController.setOneHandedEnabled(false);
         assertThat(mTouchHandler.mInputMonitor).isNull();
         assertThat(mTouchHandler.mInputEventReceiver).isNull();
     }
 
     @Test
     public void testOneHandedEnabled_monitorInputChannel() {
-        mOneHandedManagerImpl.setOneHandedEnabled(true);
+        mOneHandedController.setOneHandedEnabled(true);
         assertThat(mTouchHandler.mInputMonitor).isNotNull();
         assertThat(mTouchHandler.mInputEventReceiver).isNotNull();
     }
@@ -104,7 +104,7 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
     public void testReceiveNewConfig_whenSetOneHandedEnabled() {
         // 1st called at init
         verify(mTouchHandler).onOneHandedEnabled(true);
-        mOneHandedManagerImpl.setOneHandedEnabled(true);
+        mOneHandedController.setOneHandedEnabled(true);
         // 2nd called by setOneHandedEnabled()
         verify(mTouchHandler, times(2)).onOneHandedEnabled(true);
     }

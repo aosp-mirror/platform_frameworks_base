@@ -24,8 +24,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -42,7 +42,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     OneHandedTouchHandler mTouchHandler;
     OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
-    OneHandedManagerImpl mOneHandedManagerImpl;
+    OneHandedController mOneHandedController;
     @Mock
     CommandQueue mCommandQueue;
     @Mock
@@ -61,7 +61,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         mTutorialHandler = Mockito.spy(new OneHandedTutorialHandler(mContext));
         mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
                 mMockNavigationModeController);
-        mOneHandedManagerImpl = new OneHandedManagerImpl(
+        mOneHandedController = new OneHandedController(
                 getContext(),
                 mCommandQueue,
                 mMockDisplayController,
