@@ -19,10 +19,10 @@ package com.android.systemui.controls.dagger
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.dagger.SysUISingleton
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Pseudo-component to inject into classes outside `com.android.systemui.controls`.
@@ -30,7 +30,7 @@ import javax.inject.Singleton
  * If `featureEnabled` is false, all the optionals should be empty. The controllers will only be
  * instantiated if `featureEnabled` is true.
  */
-@Singleton
+@SysUISingleton
 class ControlsComponent @Inject constructor(
     @ControlsFeatureEnabled private val featureEnabled: Boolean,
     private val lazyControlsController: Lazy<ControlsController>,

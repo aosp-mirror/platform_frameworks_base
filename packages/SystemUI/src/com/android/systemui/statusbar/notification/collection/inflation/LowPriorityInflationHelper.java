@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -25,13 +26,12 @@ import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Helper class that provide methods to help check when we need to inflate a low priority version
  * ot notification content.
  */
-@Singleton
+@SysUISingleton
 public class LowPriorityInflationHelper {
     private final FeatureFlags mFeatureFlags;
     private final NotificationGroupManager mGroupManager;

@@ -182,7 +182,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // IBiometricsFace@1.0 does not support detection, only authentication.
         when(mFaceSensorProperties.isEmpty()).thenReturn(false);
         when(mFaceSensorProperties.get(anyInt())).thenReturn(new FaceSensorProperties(0 /* id */,
-                false /* supportsFaceDetection */));
+                false /* supportsFaceDetection */, true /* supportsSelfIllumination */));
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);

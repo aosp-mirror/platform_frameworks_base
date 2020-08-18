@@ -18,25 +18,24 @@ package com.android.systemui.bubbles
 import android.annotation.SuppressLint
 import android.annotation.UserIdInt
 import android.content.pm.LauncherApps
+import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
-import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED
 import android.os.UserHandle
 import android.util.Log
 import com.android.systemui.bubbles.storage.BubbleEntity
 import com.android.systemui.bubbles.storage.BubblePersistentRepository
 import com.android.systemui.bubbles.storage.BubbleVolatileRepository
+import com.android.systemui.dagger.SysUISingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
-
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 internal class BubbleDataRepository @Inject constructor(
     private val volatileRepository: BubbleVolatileRepository,
     private val persistentRepository: BubblePersistentRepository,

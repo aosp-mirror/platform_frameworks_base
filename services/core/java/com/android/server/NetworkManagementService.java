@@ -20,14 +20,14 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.SHUTDOWN;
-import static android.net.INetd.FIREWALL_BLACKLIST;
+import static android.net.INetd.FIREWALL_ALLOWLIST;
 import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
 import static android.net.INetd.FIREWALL_CHAIN_NONE;
 import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
+import static android.net.INetd.FIREWALL_DENYLIST;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
-import static android.net.INetd.FIREWALL_WHITELIST;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
@@ -1575,7 +1575,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         enforceSystemUid();
         try {
             mNetdService.firewallSetFirewallType(
-                    enabled ? INetd.FIREWALL_WHITELIST : INetd.FIREWALL_BLACKLIST);
+                    enabled ? INetd.FIREWALL_ALLOWLIST : INetd.FIREWALL_DENYLIST);
             mFirewallEnabled = enabled;
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
@@ -1608,7 +1608,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
         int numUids = 0;
         if (DBG) Slog.d(TAG, "Closing sockets after enabling chain " + chainName);
-        if (getFirewallType(chain) == FIREWALL_WHITELIST) {
+        if (getFirewallType(chain) == FIREWALL_ALLOWLIST) {
             // Close all sockets on all non-system UIDs...
             ranges = new UidRangeParcel[] {
                 // TODO: is there a better way of finding all existing users? If so, we could
@@ -1714,13 +1714,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private int getFirewallType(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:
-                return FIREWALL_BLACKLIST;
+                return FIREWALL_DENYLIST;
             case FIREWALL_CHAIN_DOZABLE:
-                return FIREWALL_WHITELIST;
+                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_POWERSAVE:
-                return FIREWALL_WHITELIST;
+                return FIREWALL_ALLOWLIST;
             default:
-                return isFirewallEnabled() ? FIREWALL_WHITELIST : FIREWALL_BLACKLIST;
+                return isFirewallEnabled() ? FIREWALL_ALLOWLIST : FIREWALL_DENYLIST;
         }
     }
 
@@ -1822,7 +1822,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private @NonNull String getFirewallRuleName(int chain, int rule) {
         String ruleName;
-        if (getFirewallType(chain) == FIREWALL_WHITELIST) {
+        if (getFirewallType(chain) == FIREWALL_ALLOWLIST) {
             if (rule == FIREWALL_RULE_ALLOW) {
                 ruleName = "allow";
             } else {
@@ -1856,7 +1856,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private int getFirewallRuleType(int chain, int rule) {
         if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
-            return getFirewallType(chain) == FIREWALL_WHITELIST
+            return getFirewallType(chain) == FIREWALL_ALLOWLIST
                     ? INetd.FIREWALL_RULE_DENY : INetd.FIREWALL_RULE_ALLOW;
         }
         return rule;

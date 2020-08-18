@@ -63,6 +63,7 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -79,10 +80,9 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Platform implementation of the network controller. **/
-@Singleton
+@SysUISingleton
 public class NetworkControllerImpl extends BroadcastReceiver
         implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider, Dumpable {
     // debug

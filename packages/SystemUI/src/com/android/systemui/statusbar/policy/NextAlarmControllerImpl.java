@@ -25,17 +25,18 @@ import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Implementation of {@link NextAlarmController}
  */
-@Singleton
+@SysUISingleton
 public class NextAlarmControllerImpl extends BroadcastReceiver
         implements NextAlarmController {
 

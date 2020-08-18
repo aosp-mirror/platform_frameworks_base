@@ -62,10 +62,9 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.wmshell.WindowManagerShellModule;
+import com.android.systemui.wmshell.WMShellModule;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Module;
@@ -78,14 +77,11 @@ import dagger.Provides;
 @Module(includes = {
             DividerModule.class,
             QSModule.class,
-            WindowManagerShellModule.class
-        },
-        subcomponents = {
-            SysUIComponent.class
+            WMShellModule.class
         })
 public abstract class SystemUIDefaultModule {
 
-    @Singleton
+    @SysUISingleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
     @Nullable
@@ -101,7 +97,7 @@ public abstract class SystemUIDefaultModule {
             NotificationLockscreenUserManagerImpl notificationLockscreenUserManager);
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static BatteryController provideBatteryController(
             Context context,
             EnhancedEstimates enhancedEstimates,
@@ -123,7 +119,7 @@ public abstract class SystemUIDefaultModule {
     }
 
     @Binds
-    @Singleton
+    @SysUISingleton
     public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds
@@ -136,14 +132,14 @@ public abstract class SystemUIDefaultModule {
     @Binds
     abstract ShadeController provideShadeController(ShadeControllerImpl shadeController);
 
-    @Singleton
+    @SysUISingleton
     @Provides
     @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
     static boolean provideAllowNotificationLongPress() {
         return true;
     }
 
-    @Singleton
+    @SysUISingleton
     @Provides
     static HeadsUpManagerPhone provideHeadsUpManagerPhone(
             Context context,
@@ -159,7 +155,7 @@ public abstract class SystemUIDefaultModule {
     abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static Recents provideRecents(Context context, RecentsImplementation recentsImplementation,
             CommandQueue commandQueue) {
         return new Recents(context, recentsImplementation, commandQueue);

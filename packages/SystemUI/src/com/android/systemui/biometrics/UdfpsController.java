@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Spline;
@@ -38,6 +40,8 @@ import android.view.WindowManager;
 
 import com.android.internal.BrightnessSynchronizer;
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,7 +50,7 @@ import java.io.IOException;
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
  * and coordinates triggering of the high-brightness mode (HBM).
  */
-class UdfpsController {
+class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     // Gamma approximation for the sRGB color space.
     private static final float DISPLAY_GAMMA = 2.2f;
@@ -61,6 +65,7 @@ class UdfpsController {
     private final String mHbmPath;
     private final String mHbmEnableCommand;
     private final String mHbmDisableCommand;
+    private final boolean mHbmSupported;
     // Brightness in nits in the high-brightness mode.
     private final float mHbmNits;
     // A spline mapping from the device's backlight value, normalized to the range [0, 1.0], to a
@@ -84,6 +89,11 @@ class UdfpsController {
         @Override
         public void hideUdfpsOverlay() {
             UdfpsController.this.hideUdfpsOverlay();
+        }
+
+        @Override
+        public void setDebugMessage(String message) {
+            mView.setDebugMessage(message);
         }
     }
 
@@ -116,7 +126,8 @@ class UdfpsController {
         }
     };
 
-    UdfpsController(Context context) {
+    UdfpsController(@NonNull Context context,
+            @NonNull StatusBarStateController statusBarStateController) {
         mFingerprintManager = context.getSystemService(FingerprintManager.class);
         mWindowManager = context.getSystemService(WindowManager.class);
         mContentResolver = context.getContentResolver();
@@ -128,6 +139,10 @@ class UdfpsController {
         mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
         mHbmEnableCommand = context.getResources().getString(R.string.udfps_hbm_enable_command);
         mHbmDisableCommand = context.getResources().getString(R.string.udfps_hbm_disable_command);
+
+        mHbmSupported = !TextUtils.isEmpty(mHbmPath);
+        mView.setHbmSupported(mHbmSupported);
+        statusBarStateController.addCallback(mView);
 
         // This range only consists of the minimum and maximum values, which only cover
         // non-high-brightness mode.
@@ -160,6 +175,11 @@ class UdfpsController {
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
         mIsOverlayShowing = false;
+    }
+
+    @Override
+    public void dozeTimeTick() {
+        mView.dozeTimeTick();
     }
 
     private void showUdfpsOverlay() {
@@ -224,9 +244,11 @@ class UdfpsController {
         mView.setScrimAlpha(computeScrimOpacity());
         mView.showScrimAndDot();
         try {
-            FileWriter fw = new FileWriter(mHbmPath);
-            fw.write(mHbmEnableCommand);
-            fw.close();
+            if (mHbmSupported) {
+                FileWriter fw = new FileWriter(mHbmPath);
+                fw.write(mHbmEnableCommand);
+                fw.close();
+            }
             mFingerprintManager.onFingerDown(x, y, minor, major);
         } catch (IOException e) {
             mView.hideScrimAndDot();
@@ -238,13 +260,15 @@ class UdfpsController {
         mFingerprintManager.onFingerUp();
         // Hiding the scrim before disabling HBM results in less noticeable flicker.
         mView.hideScrimAndDot();
-        try {
-            FileWriter fw = new FileWriter(mHbmPath);
-            fw.write(mHbmDisableCommand);
-            fw.close();
-        } catch (IOException e) {
-            mView.showScrimAndDot();
-            Log.e(TAG, "onFingerUp | failed to disable HBM: " + e.getMessage());
+        if (mHbmSupported) {
+            try {
+                FileWriter fw = new FileWriter(mHbmPath);
+                fw.write(mHbmDisableCommand);
+                fw.close();
+            } catch (IOException e) {
+                mView.showScrimAndDot();
+                Log.e(TAG, "onFingerUp | failed to disable HBM: " + e.getMessage());
+            }
         }
     }
 

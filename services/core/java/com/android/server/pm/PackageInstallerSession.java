@@ -2734,23 +2734,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    @Override
-    public void abandon() {
-        if (hasParentSessionId()) {
-            throw new IllegalStateException(
-                    "Session " + sessionId + " is a child of multi-package session "
-                            + getParentSessionId() +  " and may not be abandoned directly.");
-        }
-
+    private void abandonNonStaged() {
         synchronized (mLock) {
-            if (params.isStaged && mDestroyed) {
+            assertCallerIsOwnerOrRootLocked();
+            if (mRelinquished) {
+                if (LOGD) Slog.d(TAG, "Ignoring abandon after commit relinquished control");
+                return;
+            }
+            destroyInternal();
+        }
+        dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+    }
+
+    private void abandonStaged() {
+        synchronized (mLock) {
+            if (mDestroyed) {
                 // If a user abandons staged session in an unsafe state, then system will try to
                 // abandon the destroyed staged session when it is safe on behalf of the user.
                 assertCallerIsOwnerOrRootOrSystemLocked();
             } else {
                 assertCallerIsOwnerOrRootLocked();
             }
-
             if (isStagedAndInTerminalState()) {
                 // We keep the session in the database if it's in a finalized state. It will be
                 // removed by PackageInstallerService when the last update time is old enough.
@@ -2758,23 +2762,32 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // do it now.
                 return;
             }
-            if (mCommitted && params.isStaged) {
-                mDestroyed = true;
+            mDestroyed = true;
+            if (mCommitted) {
                 if (!mStagingManager.abortCommittedSessionLocked(this)) {
                     // Do not clean up the staged session from system. It is not safe yet.
                     mCallback.onStagedSessionChanged(this);
                     return;
                 }
-                cleanStageDir(getChildSessionsLocked());
             }
-
-            if (mRelinquished) {
-                Slog.d(TAG, "Ignoring abandon after commit relinquished control");
-                return;
-            }
+            cleanStageDir(getChildSessionsLocked());
             destroyInternal();
         }
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+    }
+
+    @Override
+    public void abandon() {
+        if (hasParentSessionId()) {
+            throw new IllegalStateException(
+                    "Session " + sessionId + " is a child of multi-package session "
+                            + getParentSessionId() +  " and may not be abandoned directly.");
+        }
+        if (params.isStaged) {
+            abandonStaged();
+        } else {
+            abandonNonStaged();
+        }
     }
 
     @Override

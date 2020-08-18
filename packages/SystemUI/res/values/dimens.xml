@@ -1036,6 +1036,11 @@
     <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
+    <!-- The maximum offset for the under-display fingerprint sensor (UDFPS) icon in either
+         direction that elements aer moved to prevent burn-in on AOD-->
+    <dimen name="udfps_burn_in_offset_x">8dp</dimen>
+    <dimen name="udfps_burn_in_offset_y">8dp</dimen>
+
     <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>

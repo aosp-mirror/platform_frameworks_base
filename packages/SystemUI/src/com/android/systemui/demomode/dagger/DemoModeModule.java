@@ -18,11 +18,10 @@ package com.android.systemui.demomode.dagger;
 
 import android.content.Context;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.settings.GlobalSettings;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -34,7 +33,7 @@ import dagger.Provides;
 public abstract class DemoModeModule {
     /** Provides DemoModeController */
     @Provides
-    @Singleton
+    @SysUISingleton
     static DemoModeController provideDemoModeController(
             Context context,
             DumpManager dumpManager,

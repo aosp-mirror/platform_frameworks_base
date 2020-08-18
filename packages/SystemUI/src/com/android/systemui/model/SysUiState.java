@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.util.Log;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.FileDescriptor;
@@ -29,13 +30,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Singleton;
-
 /**
  * Contains sysUi state flags and notifies registered
  * listeners whenever changes happen.
  */
-@Singleton
+@SysUISingleton
 public class SysUiState implements Dumpable {
 
     private static final String TAG = SysUiState.class.getSimpleName();

@@ -44,14 +44,10 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * The class manage swipe up and down gesture for 3-Button mode navigation,
  * others(e.g, 2-button, full gesture mode) are handled by Launcher quick steps.
  */
-@Singleton
 public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         NavigationModeController.ModeChangedListener,
         DisplayChangeController.OnDisplayChangingListener {
@@ -91,7 +87,6 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      * @param displayController        {@link DisplayController}
      * @param navigationModeController {@link NavigationModeController}
      */
-    @Inject
     public OneHandedGestureHandler(Context context, DisplayController displayController,
             NavigationModeController navigationModeController) {
         mDisplayController = displayController;

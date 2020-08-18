@@ -16,8 +16,15 @@
 
 package com.android.systemui.tv;
 
+import com.android.systemui.dagger.DefaultComponentBinder;
+import com.android.systemui.dagger.DependencyBinder;
+import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.SystemServicesModule;
+import com.android.systemui.dagger.SystemUIBinder;
+import com.android.systemui.dagger.SystemUIModule;
+import com.android.systemui.onehanded.dagger.OneHandedModule;
 
 import dagger.Subcomponent;
 
@@ -25,7 +32,16 @@ import dagger.Subcomponent;
  * Dagger Subcomponent for Core SysUI.
  */
 @SysUISingleton
-@Subcomponent(modules = {})
+@Subcomponent(modules = {
+        DefaultComponentBinder.class,
+        DependencyProvider.class,
+        DependencyBinder.class,
+        OneHandedModule.class,
+        SystemServicesModule.class,
+        SystemUIBinder.class,
+        SystemUIModule.class,
+        TvSystemUIModule.class,
+        TvSystemUIBinder.class})
 public interface TvSysUIComponent extends SysUIComponent {
 
     /**

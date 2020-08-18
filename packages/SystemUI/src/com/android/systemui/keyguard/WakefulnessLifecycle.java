@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.os.Trace;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -27,12 +28,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Tracks the wakefulness lifecycle.
  */
-@Singleton
+@SysUISingleton
 public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observer> implements
         Dumpable {
 

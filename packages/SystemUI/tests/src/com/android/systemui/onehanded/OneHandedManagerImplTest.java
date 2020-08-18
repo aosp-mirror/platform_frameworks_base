@@ -87,10 +87,8 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
 
     @Test
     public void testDefaultShouldNotInOneHanded() {
-        final OneHandedSurfaceTransactionHelper transactionHelper =
-                new OneHandedSurfaceTransactionHelper(mContext);
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
-                transactionHelper);
+                mContext);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
                 mContext, mMockDisplayController, animationController, mMockTutorialHandler);
 

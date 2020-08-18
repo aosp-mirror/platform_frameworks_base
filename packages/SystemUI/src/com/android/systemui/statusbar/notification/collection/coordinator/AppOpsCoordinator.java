@@ -19,28 +19,24 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
 import android.app.Notification;
-import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
-import com.android.systemui.util.Assert;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles ForegroundService and AppOp interactions with notifications.
@@ -55,7 +51,7 @@ import javax.inject.Singleton;
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceNotificationListener
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceLifetimeExtender
  */
-@Singleton
+@SysUISingleton
 public class AppOpsCoordinator implements Coordinator {
     private static final String TAG = "AppOpsCoordinator";
 

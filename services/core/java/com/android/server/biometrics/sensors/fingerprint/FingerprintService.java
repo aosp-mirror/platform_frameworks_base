@@ -25,6 +25,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -38,14 +39,17 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.Process;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.Surface;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -94,10 +98,16 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void generateChallenge(IBinder token, IFingerprintServiceReceiver receiver,
-                String opPackageName) {
+        public void generateChallenge(IBinder token, int sensorId,
+                IFingerprintServiceReceiver receiver, String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
-            mFingerprint21.scheduleGenerateChallenge(token, receiver, opPackageName);
+
+            if (sensorId == mFingerprint21.getFingerprintSensorProperties().sensorId) {
+                mFingerprint21.scheduleGenerateChallenge(token, receiver, opPackageName);
+                return;
+            }
+
+            Slog.w(TAG, "No matching sensor for generateChallenge, sensorId: " + sensorId);
         }
 
         @Override // Binder call
@@ -158,8 +168,8 @@ public class FingerprintService extends SystemService {
             final int statsClient = isKeyguard ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
             mFingerprint21.scheduleAuthenticate(token, operationId, userId, 0 /* cookie */,
-                    new ClientMonitorCallbackConverter(receiver), opPackageName, surface,
-                    restricted, statsClient);
+                    new ClientMonitorCallbackConverter(receiver), opPackageName,
+                    restricted, statsClient, isKeyguard);
         }
 
         @Override
@@ -193,8 +203,8 @@ public class FingerprintService extends SystemService {
 
             final boolean restricted = true; // BiometricPrompt is always restricted
             mFingerprint21.scheduleAuthenticate(token, operationId, userId, cookie,
-                    new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, surface,
-                    restricted, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT);
+                    new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, false /* isKeyguard */);
         }
 
         @Override // Binder call
@@ -343,9 +353,16 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void resetLockout(int userId, byte [] hardwareAuthToken) {
+        public void resetLockout(IBinder token, int sensorId, int userId,
+                @Nullable byte [] hardwareAuthToken, String opPackageName) {
             Utils.checkPermission(getContext(), RESET_FINGERPRINT_LOCKOUT);
-            mFingerprint21.scheduleResetLockout(userId, hardwareAuthToken);
+
+            if (sensorId == mFingerprint21.getFingerprintSensorProperties().sensorId) {
+                mFingerprint21.scheduleResetLockout(userId);
+                return;
+            }
+
+            Slog.w(TAG, "No matching sensor for resetLockout, sensorId: " + sensorId);
         }
 
         @Override
@@ -369,8 +386,18 @@ public class FingerprintService extends SystemService {
         @Override // Binder call
         public void initializeConfiguration(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mFingerprint21 = new Fingerprint21(getContext(), sensorId, mLockoutResetDispatcher,
-                    mGestureAvailabilityDispatcher);
+
+            if ((Build.IS_USERDEBUG || Build.IS_ENG)
+                    && getContext().getResources().getBoolean(R.bool.allow_test_udfps)
+                    && Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                    Fingerprint21UdfpsMock.CONFIG_ENABLE_TEST_UDFPS, 0 /* default */,
+                    UserHandle.USER_CURRENT) != 0) {
+                mFingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(), sensorId,
+                        mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+            } else {
+                mFingerprint21 = Fingerprint21.newInstance(getContext(), sensorId,
+                        mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+            }
         }
 
         @Override

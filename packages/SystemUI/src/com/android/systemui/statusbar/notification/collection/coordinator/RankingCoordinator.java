@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -25,7 +26,6 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Filters out NotificationEntries based on its Ranking and dozing state.
@@ -34,7 +34,7 @@ import javax.inject.Singleton;
  *  - whether the notification's app is suspended or hiding its notifications
  *  - whether DND settings are hiding notifications from ambient display or the notification list
  */
-@Singleton
+@SysUISingleton
 public class RankingCoordinator implements Coordinator {
     private static final String TAG = "RankingNotificationCoordinator";
 

@@ -74,13 +74,13 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -239,7 +239,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setScrimController(mock(ScrimController.class));
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
-        mStackScroller.setIconAreaController(mNotificationIconAreaController);
 
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)
@@ -437,9 +436,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
+    public void testReInflatesFooterViews() {
         clearInvocations(mStackScroller);
-        mStackScroller.onDensityOrFontScaleChanged();
+        mStackScroller.reinflateViews();
         verify(mStackScroller).setFooterView(any());
         verify(mStackScroller).setEmptyShadeView(any());
     }

@@ -21,10 +21,10 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -33,10 +33,9 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.util.time.SystemClock;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Updates foreground service notification state in response to notification data events. */
-@Singleton
+@SysUISingleton
 public class ForegroundServiceNotificationListener {
 
     private static final String TAG = "FgServiceController";

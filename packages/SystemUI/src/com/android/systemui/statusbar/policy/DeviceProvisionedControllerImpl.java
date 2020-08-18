@@ -27,17 +27,17 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class DeviceProvisionedControllerImpl extends CurrentUserTracker implements
         DeviceProvisionedController {
 

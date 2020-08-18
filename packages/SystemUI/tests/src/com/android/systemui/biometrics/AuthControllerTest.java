@@ -54,6 +54,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -103,8 +104,8 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
         when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
 
-        mAuthController = new TestableAuthController(
-                context, mock(CommandQueue.class), new MockInjector());
+        mAuthController = new TestableAuthController(context, mock(CommandQueue.class),
+                mock(StatusBarStateController.class), new MockInjector());
 
         mAuthController.start();
     }
@@ -502,8 +503,9 @@ public class AuthControllerTest extends SysuiTestCase {
         private int mBuildCount = 0;
         private PromptInfo mLastBiometricPromptInfo;
 
-        TestableAuthController(Context context, CommandQueue commandQueue, Injector injector) {
-            super(context, commandQueue, injector);
+        TestableAuthController(Context context, CommandQueue commandQueue,
+                StatusBarStateController statusBarStateController, Injector injector) {
+            super(context, commandQueue, statusBarStateController, injector);
         }
 
         @Override

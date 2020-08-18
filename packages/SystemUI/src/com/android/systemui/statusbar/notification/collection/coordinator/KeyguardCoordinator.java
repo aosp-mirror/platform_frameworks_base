@@ -34,6 +34,7 @@ import androidx.annotation.MainThread;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -46,12 +47,11 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Filters low priority and privacy-sensitive notifications from the lockscreen.
  */
-@Singleton
+@SysUISingleton
 public class KeyguardCoordinator implements Coordinator {
     private static final String TAG = "KeyguardCoordinator";
 

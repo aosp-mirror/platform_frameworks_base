@@ -18,13 +18,13 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.view.View;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -33,7 +33,7 @@ import dagger.Lazy;
  * delegates to an actual implementation (StatusBar).
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-@Singleton
+@SysUISingleton
 public class ActivityStarterDelegate implements ActivityStarter {
 
     private Optional<Lazy<StatusBar>> mActualStarter;

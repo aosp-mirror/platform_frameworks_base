@@ -33,6 +33,7 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.Assert;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller to keep track of applications that have requested access to given App Ops
@@ -52,7 +52,7 @@ import javax.inject.Singleton;
  * It can be subscribed to with callbacks. Additionally, it passes on the information to
  * NotificationPresenter to be displayed to the user.
  */
-@Singleton
+@SysUISingleton
 public class AppOpsControllerImpl implements AppOpsController,
         AppOpsManager.OnOpActiveChangedInternalListener,
         AppOpsManager.OnOpNotedListener, Dumpable {

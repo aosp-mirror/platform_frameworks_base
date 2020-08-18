@@ -99,6 +99,14 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         return getCookie() != 0;
     }
 
+    public long getOperationId() {
+        return mOperationId;
+    }
+
+    public boolean isRestricted() {
+        return mIsRestricted;
+    }
+
     @Override
     protected boolean isCryptoOperation() {
         return mOperationId != 0;

@@ -25,8 +25,7 @@ import com.android.car.notification.NotificationClickHandlerFactory;
 import com.android.car.notification.NotificationDataManager;
 import com.android.car.notification.headsup.CarHeadsUpNotificationContainer;
 import com.android.internal.statusbar.IStatusBarService;
-
-import javax.inject.Singleton;
+import com.android.systemui.dagger.SysUISingleton;
 
 import dagger.Binds;
 import dagger.Module;
@@ -38,26 +37,26 @@ import dagger.Provides;
 @Module
 public abstract class CarNotificationModule {
     @Provides
-    @Singleton
+    @SysUISingleton
     static NotificationClickHandlerFactory provideNotificationClickHandlerFactory(
             IStatusBarService barService) {
         return new NotificationClickHandlerFactory(barService);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static NotificationDataManager provideNotificationDataManager() {
         return new NotificationDataManager();
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static CarUxRestrictionManagerWrapper provideCarUxRestrictionManagerWrapper() {
         return new CarUxRestrictionManagerWrapper();
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static CarNotificationListener provideCarNotificationListener(Context context,
             CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper,
             CarHeadsUpNotificationManager carHeadsUpNotificationManager,
@@ -69,7 +68,7 @@ public abstract class CarNotificationModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static CarHeadsUpNotificationManager provideCarHeadsUpNotificationManager(Context context,
             NotificationClickHandlerFactory notificationClickHandlerFactory,
             NotificationDataManager notificationDataManager,

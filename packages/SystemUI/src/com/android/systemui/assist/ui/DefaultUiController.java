@@ -41,18 +41,18 @@ import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistLogger;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.assist.AssistantSessionEvent;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.navigationbar.NavigationBarController;
 
 import java.util.Locale;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Default UiController implementation. Shows white edge lights along the bottom of the phone,
  * expanding from the corners to meet in the center.
  */
-@Singleton
+@SysUISingleton
 public class DefaultUiController implements AssistManager.UiController {
 
     private static final String TAG = "DefaultUiController";

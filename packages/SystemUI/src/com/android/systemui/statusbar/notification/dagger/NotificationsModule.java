@@ -28,9 +28,11 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -40,14 +42,16 @@ import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
+import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
-import com.android.systemui.statusbar.notification.collection.inflation.OnDismissCallbackImpl;
+import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
+import com.android.systemui.statusbar.notification.collection.legacy.OnUserInteractionCallbackImplLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -61,7 +65,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationPanelLogg
 import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.OnDismissCallback;
+import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -71,7 +75,6 @@ import com.android.systemui.util.leak.LeakDetector;
 import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -84,7 +87,7 @@ import dagger.Provides;
 @Module
 public interface NotificationsModule {
     /** Provides an instance of {@link NotificationEntryManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationEntryManager provideNotificationEntryManager(
             NotificationEntryManagerLogger logger,
@@ -111,11 +114,10 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationGutsManager provideNotificationGutsManager(
             Context context,
-            VisualStabilityManager visualStabilityManager,
             Lazy<StatusBar> statusBarLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
@@ -129,10 +131,10 @@ public interface NotificationsModule {
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
             BubbleController bubbleController,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            OnUserInteractionCallback onUserInteractionCallback) {
         return new NotificationGutsManager(
                 context,
-                visualStabilityManager,
                 statusBarLazy,
                 mainHandler,
                 bgHandler,
@@ -146,19 +148,28 @@ public interface NotificationsModule {
                 builderProvider,
                 assistantFeedbackController,
                 bubbleController,
-                uiEventLogger);
+                uiEventLogger,
+                onUserInteractionCallback);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static VisualStabilityManager provideVisualStabilityManager(
-            NotificationEntryManager notificationEntryManager, Handler handler) {
-        return new VisualStabilityManager(notificationEntryManager, handler);
+            FeatureFlags featureFlags,
+            NotificationEntryManager notificationEntryManager,
+            Handler handler,
+            StatusBarStateController statusBarStateController,
+            WakefulnessLifecycle wakefulnessLifecycle) {
+        return new VisualStabilityManager(
+                notificationEntryManager,
+                handler,
+                statusBarStateController,
+                wakefulnessLifecycle);
     }
 
     /** Provides an instance of {@link NotificationLogger} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationLogger provideNotificationLogger(
             NotificationListener notificationListener,
@@ -177,14 +188,14 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link NotificationPanelLogger} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationPanelLogger provideNotificationPanelLogger() {
         return new NotificationPanelLoggerImpl();
     }
 
     /** Provides an instance of {@link NotificationBlockingHelperManager} */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationBlockingHelperManager provideNotificationBlockingHelperManager(
             Context context,
@@ -196,7 +207,7 @@ public interface NotificationsModule {
     }
 
     /** Initializes the notification data pipeline (can be disabled via config). */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationsController provideNotificationsController(
             Context context,
@@ -213,7 +224,7 @@ public interface NotificationsModule {
      * Provide the active notification collection managing the notifications to render.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     static CommonNotifCollection provideCommonNotifCollection(
             FeatureFlags featureFlags,
             Lazy<NotifPipeline> pipeline,
@@ -226,21 +237,28 @@ public interface NotificationsModule {
      * from the notification shade or it gets auto-cancelled by click.
      */
     @Provides
-    @Singleton
-    static OnDismissCallback provideOnDismissCallback(
+    @SysUISingleton
+    static OnUserInteractionCallback provideOnUserInteractionCallback(
             FeatureFlags featureFlags,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
             Lazy<NotifPipeline> pipeline,
             Lazy<NotifCollection> notifCollection,
-            NotificationEntryManager entryManager) {
+            Lazy<VisualStabilityCoordinator> visualStabilityCoordinator,
+            NotificationEntryManager entryManager,
+            VisualStabilityManager visualStabilityManager) {
         return featureFlags.isNewNotifPipelineRenderingEnabled()
-                ? new OnDismissCallbackImpl(
-                        pipeline.get(), notifCollection.get(), headsUpManager,
-                        statusBarStateController)
-                : new com.android.systemui.statusbar.notification.collection
-                        .legacy.OnDismissCallbackImpl(
-                                entryManager, headsUpManager, statusBarStateController);
+                ? new OnUserInteractionCallbackImpl(
+                        pipeline.get(),
+                        notifCollection.get(),
+                        headsUpManager,
+                        statusBarStateController,
+                        visualStabilityCoordinator.get())
+                : new OnUserInteractionCallbackImplLegacy(
+                        entryManager,
+                        headsUpManager,
+                        statusBarStateController,
+                        visualStabilityManager);
     }
 
     /** */

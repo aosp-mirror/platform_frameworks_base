@@ -29,20 +29,20 @@ import android.provider.Settings
 import android.service.media.MediaBrowserService
 import android.util.Log
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val TAG = "MediaResumeListener"
 
 private const val MEDIA_PREFERENCES = "media_control_prefs"
 private const val MEDIA_PREFERENCE_KEY = "browser_components_"
 
-@Singleton
+@SysUISingleton
 class MediaResumeListener @Inject constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,

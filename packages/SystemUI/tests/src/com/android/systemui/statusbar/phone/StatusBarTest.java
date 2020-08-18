@@ -117,9 +117,9 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
@@ -405,7 +405,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
                 mInitController,
-                mDarkIconDispatcher,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mPluginDependencyProvider,
                 mKeyguardDismissUtil,
@@ -416,7 +415,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDismissCallbackRegistry,
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
-                mStatusBarTouchableRegionManager);
+                mStatusBarTouchableRegionManager,
+                mNotificationIconAreaController);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
@@ -434,7 +434,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
         mStatusBar.mDozeScrimController = mDozeScrimController;
-        mStatusBar.mNotificationIconAreaController = mNotificationIconAreaController;
         mStatusBar.mPresenter = mNotificationPresenter;
         mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;
         mStatusBar.mBarService = mBarService;

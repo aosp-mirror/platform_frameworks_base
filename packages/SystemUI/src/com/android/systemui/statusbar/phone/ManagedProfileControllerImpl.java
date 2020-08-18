@@ -27,17 +27,17 @@ import android.os.UserManager;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class ManagedProfileControllerImpl implements ManagedProfileController {
 
     private final List<Callback> mCallbacks = new ArrayList<>();

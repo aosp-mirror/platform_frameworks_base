@@ -22,8 +22,7 @@ import android.hardware.display.DisplayManager;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-
-import javax.inject.Singleton;
+import com.android.systemui.dagger.SysUISingleton;
 
 /**
  * A class to control {@link MagnificationModeSwitch}. It should show the button UI with following
@@ -33,7 +32,7 @@ import javax.inject.Singleton;
  *   <li> The magnification scale is changed by a user.</li>
  * <ol>
  */
-@Singleton
+@SysUISingleton
 public class ModeSwitchesController {
 
     private final DisplayIdIndexSupplier<MagnificationModeSwitch> mSwitchSupplier;

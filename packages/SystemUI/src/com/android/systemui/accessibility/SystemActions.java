@@ -51,18 +51,18 @@ import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActiv
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Locale;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Class to register system actions with accessibility framework.
  */
-@Singleton
+@SysUISingleton
 public class SystemActions extends SystemUI {
     private static final String TAG = "SystemActions";
 

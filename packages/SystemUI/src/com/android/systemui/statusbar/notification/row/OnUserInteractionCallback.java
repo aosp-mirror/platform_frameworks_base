@@ -21,15 +21,21 @@ import android.service.notification.NotificationListenerService;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
- * Callback when a user clicks on an auto-cancelled notification or manually swipes to dismiss the
- * notification.
+ * Callbacks for when a user interacts with an {@link ExpandableNotificationRow}.
  */
-public interface OnDismissCallback {
+public interface OnUserInteractionCallback {
 
     /**
-     * Handle a user interaction that triggers a notification dismissal.
+     * Handle a user interaction that triggers a notification dismissal. Called when a user clicks
+     * on an auto-cancelled notification or manually swipes to dismiss the notification.
      */
     void onDismiss(
             NotificationEntry entry,
             @NotificationListenerService.NotificationCancelReason int cancellationReason);
+
+    /**
+     * Triggered after a user has changed the importance of the notification via its
+     * {@link NotificationGuts}.
+     */
+    void onImportanceChanged(NotificationEntry entry);
 }

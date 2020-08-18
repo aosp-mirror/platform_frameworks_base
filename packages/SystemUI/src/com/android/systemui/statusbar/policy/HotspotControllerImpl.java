@@ -33,6 +33,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.internal.util.ConcurrentUtils;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -42,12 +43,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller used to retrieve information related to a hotspot.
  */
-@Singleton
+@SysUISingleton
 public class HotspotControllerImpl implements HotspotController, WifiManager.SoftApCallback {
 
     private static final String TAG = "HotspotController";

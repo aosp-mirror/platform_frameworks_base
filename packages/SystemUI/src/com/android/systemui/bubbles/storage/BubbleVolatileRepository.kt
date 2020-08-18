@@ -19,8 +19,8 @@ import android.content.pm.LauncherApps
 import android.os.UserHandle
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.bubbles.ShortcutKey
+import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val CAPACITY = 16
 
@@ -28,7 +28,7 @@ private const val CAPACITY = 16
  * BubbleVolatileRepository holds the most updated snapshot of list of bubbles for in-memory
  * manipulation.
  */
-@Singleton
+@SysUISingleton
 class BubbleVolatileRepository @Inject constructor(
     private val launcherApps: LauncherApps
 ) {

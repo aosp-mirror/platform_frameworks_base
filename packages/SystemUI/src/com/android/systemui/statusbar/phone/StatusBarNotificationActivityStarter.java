@@ -49,6 +49,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
@@ -72,14 +73,13 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.OnDismissCallback;
+import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -124,7 +124,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationPresenter mPresenter;
     private final NotificationPanelViewController mNotificationPanel;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    private final OnDismissCallback mOnDismissCallback;
+    private final OnUserInteractionCallback mOnUserInteractionCallback;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
@@ -158,7 +158,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             FeatureFlags featureFlags,
             MetricsLogger metricsLogger,
             StatusBarNotificationActivityStarterLogger logger,
-            OnDismissCallback onDismissCallback,
+            OnUserInteractionCallback onUserInteractionCallback,
 
             StatusBar statusBar,
             NotificationPresenter presenter,
@@ -193,7 +193,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mFeatureFlags = featureFlags;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
-        mOnDismissCallback = onDismissCallback;
+        mOnUserInteractionCallback = onUserInteractionCallback;
 
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBar = statusBar;
@@ -575,10 +575,10 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 // To avoid lags we're only performing the remove
                 // after the shade was collapsed
                 mShadeController.addPostCollapseAction(
-                        () -> mOnDismissCallback.onDismiss(entry, REASON_CLICK)
+                        () -> mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK)
                 );
             } else {
-                mOnDismissCallback.onDismiss(entry, REASON_CLICK);
+                mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK);
             }
         });
     }
@@ -596,7 +596,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     /**
      * Public builder for {@link StatusBarNotificationActivityStarter}.
      */
-    @Singleton
+    @SysUISingleton
     public static class Builder {
         private final Context mContext;
         private final CommandQueue mCommandQueue;
@@ -628,7 +628,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final FeatureFlags mFeatureFlags;
         private final MetricsLogger mMetricsLogger;
         private final StatusBarNotificationActivityStarterLogger mLogger;
-        private final OnDismissCallback mOnDismissCallback;
+        private final OnUserInteractionCallback mOnUserInteractionCallback;
 
         private StatusBar mStatusBar;
         private NotificationPresenter mNotificationPresenter;
@@ -666,7 +666,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 FeatureFlags featureFlags,
                 MetricsLogger metricsLogger,
                 StatusBarNotificationActivityStarterLogger logger,
-                OnDismissCallback onDismissCallback) {
+                OnUserInteractionCallback onUserInteractionCallback) {
 
             mContext = context;
             mCommandQueue = commandQueue;
@@ -697,7 +697,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mFeatureFlags = featureFlags;
             mMetricsLogger = metricsLogger;
             mLogger = logger;
-            mOnDismissCallback = onDismissCallback;
+            mOnUserInteractionCallback = onUserInteractionCallback;
         }
 
         /** Sets the status bar to use as {@link StatusBar}. */
@@ -754,7 +754,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mFeatureFlags,
                     mMetricsLogger,
                     mLogger,
-                    mOnDismissCallback,
+                    mOnUserInteractionCallback,
 
                     mStatusBar,
                     mNotificationPresenter,

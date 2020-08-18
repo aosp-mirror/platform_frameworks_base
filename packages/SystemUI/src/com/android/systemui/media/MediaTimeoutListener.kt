@@ -20,12 +20,12 @@ import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemProperties
 import android.util.Log
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val DEBUG = true
 private const val TAG = "MediaTimeout"
@@ -35,7 +35,7 @@ private val PAUSED_MEDIA_TIMEOUT = SystemProperties
 /**
  * Controller responsible for keeping track of playback states and expiring inactive streams.
  */
-@Singleton
+@SysUISingleton
 class MediaTimeoutListener @Inject constructor(
     private val mediaControllerFactory: MediaControllerFactory,
     @Main private val mainExecutor: DelayableExecutor

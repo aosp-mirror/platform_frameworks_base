@@ -102,7 +102,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         mController = new NotificationShadeWindowViewController(
                 new InjectionInflationController(
                         SystemUIFactory.getInstance()
-                                .getRootComponent()
+                                .getSysUIComponent()
                                 .createViewInstanceCreatorFactory()),
                 mCoordinator,
                 mPulseExpansionHandler,

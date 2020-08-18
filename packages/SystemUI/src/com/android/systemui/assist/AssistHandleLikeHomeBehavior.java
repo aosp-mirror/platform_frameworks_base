@@ -21,6 +21,7 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -29,7 +30,6 @@ import com.android.systemui.shared.system.QuickStepContract;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -37,7 +37,7 @@ import dagger.Lazy;
  * Assistant Handle behavior that makes Assistant handles show/hide when the home handle is
  * shown/hidden, respectively.
  */
-@Singleton
+@SysUISingleton
 final class AssistHandleLikeHomeBehavior implements BehaviorController {
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =

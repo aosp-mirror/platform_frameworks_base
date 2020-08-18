@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import android.util.MathUtils;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -28,12 +29,11 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.util.HashSet;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A class that manages the roundness for notification views
  */
-@Singleton
+@SysUISingleton
 public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     private final ExpandableView[] mFirstInSectionViews;

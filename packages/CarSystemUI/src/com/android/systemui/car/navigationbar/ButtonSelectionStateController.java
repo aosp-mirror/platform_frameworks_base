@@ -26,13 +26,14 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * CarNavigationButtons can optionally have selection state that toggles certain visual indications
@@ -42,7 +43,7 @@ import javax.inject.Singleton;
  * This class controls the selection state of CarNavigationButtons that have opted in to have such
  * selection state-dependent visual indications.
  */
-@Singleton
+@SysUISingleton
 public class ButtonSelectionStateController {
 
     private final Set<CarNavigationButton> mRegisteredViews = new HashSet<>();

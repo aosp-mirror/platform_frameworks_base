@@ -24,11 +24,11 @@ import android.telephony.TelephonyManager;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
+@SysUISingleton
 public class KeyguardSecurityModel {
 
     /**

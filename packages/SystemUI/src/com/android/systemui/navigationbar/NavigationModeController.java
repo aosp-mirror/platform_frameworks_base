@@ -37,6 +37,7 @@ import android.provider.Settings.Secure;
 import android.util.Log;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -48,12 +49,11 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller for tracking the current navigation bar mode.
  */
-@Singleton
+@SysUISingleton
 public class NavigationModeController implements Dumpable {
 
     private static final String TAG = NavigationModeController.class.getSimpleName();

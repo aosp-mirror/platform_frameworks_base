@@ -33,9 +33,10 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -45,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -55,7 +55,7 @@ import dagger.Lazy;
  * Controls when visual handles for Assistant gesture affordance should be shown or hidden using an
  * {@link AssistHandleBehavior}.
  */
-@Singleton
+@SysUISingleton
 public final class AssistHandleBehaviorController implements AssistHandleCallbacks, Dumpable {
 
     private static final String TAG = "AssistHandleBehavior";

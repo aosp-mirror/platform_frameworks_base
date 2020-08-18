@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
@@ -30,13 +31,12 @@ import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Creates a single instance of super_status_bar and super_notification_shade that can be shared
  * across various system ui objects.
  */
-@Singleton
+@SysUISingleton
 public class SuperStatusBarViewFactory {
 
     private final Context mContext;

@@ -23,14 +23,14 @@ import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
 import android.util.Log;
 
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Helper class for connecting to the {@link CarPowerManager} and listening for power state changes.
  */
-@Singleton
+@SysUISingleton
 public class PowerManagerHelper {
     public static final String TAG = "PowerManagerHelper";
 

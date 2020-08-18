@@ -41,6 +41,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedInstallInternalTest extends BaseHostJUnit4Test {
@@ -198,6 +201,28 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         sessionIds = getDevice().executeShellCommand(
                 "pm get-stagedsessions --only-ready --only-sessionid").split("\n");
         assertThat(sessionIds.length).isEqualTo(3);
+    }
+
+    @Test
+    public void testAbandonStagedSessionShouldCleanUp() throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testAbandonStagedSessionShouldCleanUp");
+        List<String> after = getStagingDirectories();
+        // The staging directories generated during the test should be deleted
+        assertThat(after).isEqualTo(before);
+    }
+
+    private List<String> getStagingDirectories() {
+        String baseDir = "/data/app-staging";
+        try {
+            return getDevice().getFileEntry(baseDir).getChildren(false)
+                    .stream().filter(entry -> entry.getName().matches("session_\\d+"))
+                    .map(entry -> entry.getName())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Return an empty list if any error
+            return Collections.EMPTY_LIST;
+        }
     }
 
     private void restartSystemServer() throws Exception {

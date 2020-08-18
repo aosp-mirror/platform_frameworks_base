@@ -413,7 +413,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public final void disableLocal() {
         synchronized (mLock) {
             mDisabled = true;
-            mCache.clear();
+            clear();
         }
     }
 
@@ -463,7 +463,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                             cacheName(), mCache.size(),
                             mLastSeenNonce, currentNonce));
                     }
-                    mCache.clear();
+                    clear();
                     mLastSeenNonce = currentNonce;
                     cachedResult = null;
                 }
@@ -728,9 +728,13 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * It's better to use explicit cork and uncork pairs that tighly surround big batches of
      * invalidations, but it's not always practical to tell where these invalidation batches
      * might occur. AutoCorker's time-based corking is a decent alternative.
+     *
+     * The auto-cork delay is configurable but it should not be too long.  The purpose of
+     * the delay is to minimize the number of times a server writes to the system property
+     * when invalidating the cache.  One write every 50ms does not hurt system performance.
      */
     public static final class AutoCorker {
-        public static final int DEFAULT_AUTO_CORK_DELAY_MS = 2000;
+        public static final int DEFAULT_AUTO_CORK_DELAY_MS = 50;
 
         private final String mPropertyName;
         private final int mAutoCorkDelayMs;

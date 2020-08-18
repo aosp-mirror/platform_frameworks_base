@@ -100,15 +100,20 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYERS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYERS_GLES, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYER_APP, String.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_ALL_APPS, int.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_OPT_IN_APPS, String.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.UPDATABLE_DRIVER_ALL_APPS, int.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS, String.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_OPT_OUT_APPS, String.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_DENYLIST, String.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_ALLOWLIST, String.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_DENYLISTS, String.class);
-        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES, String.class);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS, String.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.UPDATABLE_DRIVER_SPHAL_LIBRARIES, String.class);
         // add other global settings here...
 
         sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(

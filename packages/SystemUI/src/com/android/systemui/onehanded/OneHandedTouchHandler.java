@@ -35,15 +35,11 @@ import com.android.systemui.Dumpable;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Manages all the touch handling for One Handed on the Phone, including user tap outside region
  * to exit, reset timer when user is in one-handed mode.
  * Refer {@link OneHandedGestureHandler} to see start and stop one handed gesture
  */
-@Singleton
 public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpable {
     private static final String TAG = "OneHandedTouchHandler";
     private final Rect mLastUpdatedBounds = new Rect();
@@ -61,7 +57,6 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
     private boolean mIsOnStopTransitioning;
     private boolean mIsInOutsideRegion;
 
-    @Inject
     public OneHandedTouchHandler() {
         mTimeoutHandler = OneHandedTimeoutHandler.get();
         updateIsEnabled();

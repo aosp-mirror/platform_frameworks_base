@@ -31,7 +31,9 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.CommandQueue;
@@ -42,12 +44,11 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
-@Singleton
+@SysUISingleton
 public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private static final String TAG = "OneHandedManager";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -94,7 +95,6 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     /**
      * Handle rotation based on OnDisplayChangingListener callback
      */
-    @VisibleForTesting
     private final DisplayChangeController.OnDisplayChangingListener mRotationController =
             (display, fromRotation, toRotation, wct) -> {
                 if (mDisplayAreaOrganizer != null) {
@@ -107,6 +107,37 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     @Inject
     public OneHandedManagerImpl(Context context,
+            CommandQueue commandQueue,
+            DisplayController displayController,
+            NavigationModeController navigationModeController,
+            SysUiState sysUiState) {
+        mCommandQueue = commandQueue;
+        mDisplayController = displayController;
+        mDisplayController.addDisplayChangingController(mRotationController);
+        mSysUiFlagContainer = sysUiState;
+        mOffSetFraction = SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50) / 100.0f;
+
+        mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                context.getContentResolver());
+        mIsSwipeToNotificationEnabled = OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                context.getContentResolver());
+        mTimeoutHandler = OneHandedTimeoutHandler.get();
+        mTouchHandler = new OneHandedTouchHandler();
+        mTutorialHandler = new OneHandedTutorialHandler(context);
+        mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(context, displayController,
+                new OneHandedAnimationController(context), mTutorialHandler);
+        mGestureHandler = new OneHandedGestureHandler(
+                context, displayController, navigationModeController);
+        updateOneHandedEnabled();
+        setupGestures();
+    }
+
+    /**
+     * Constructor of OneHandedManager for testing
+     */
+    // TODO(b/161980408): Should remove extra constructor.
+    @VisibleForTesting
+    OneHandedManagerImpl(Context context,
             CommandQueue commandQueue,
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,

@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
+import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Build;
@@ -44,6 +45,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
@@ -274,7 +276,10 @@ class Face10 implements IHwBinder.DeathRecipient {
 
     Face10(@NonNull Context context, int sensorId,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */);
+        final boolean supportsSelfIllumination = context.getResources()
+                .getBoolean(R.bool.config_faceAuthSupportsSelfIllumination);
+        mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */,
+                supportsSelfIllumination);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
@@ -464,6 +469,21 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
+    /**
+     * {@link IBiometricsFace} only supports a single in-flight challenge. In cases where two
+     * callers both need challenges (e.g. resetLockout right before enrollment), we need to ensure
+     * that either:
+     * 1) generateChallenge/operation/revokeChallenge is complete before the next generateChallenge
+     *    is processed by the scheduler, or
+     * 2) the generateChallenge callback provides a mechanism for notifying the caller that its
+     *    challenge has been invalidated by a subsequent caller, as well as a mechanism for
+     *    notifying the previous caller that the interrupting operation is complete (e.g. the
+     *    interrupting client's challenge has been revoked, so that the interrupted client can
+     *    start retry logic if necessary). See
+     *    {@link FaceManager.GenerateChallengeCallback#onChallengeInterruptFinished(int)}
+     * The only case of conflicting challenges is currently resetLockout --> enroll. So, the second
+     * option seems better as it prioritizes the new operation, which is user-facing.
+     */
     void scheduleGenerateChallenge(@NonNull IBinder token, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName) {
         mHandler.post(() -> {
@@ -498,7 +518,8 @@ class Face10 implements IHwBinder.DeathRecipient {
     void scheduleRevokeChallenge(@NonNull IBinder token, @NonNull String owner) {
         mHandler.post(() -> {
             if (!mCurrentChallengeOwner.getOwnerString().contentEquals(owner)) {
-                Slog.e(TAG, "Package: " + owner + " attempting to revoke challenge owned by: "
+                Slog.e(TAG, "scheduleRevokeChallenge, package: " + owner
+                        + " attempting to revoke challenge owned by: "
                         + mCurrentChallengeOwner.getOwnerString());
                 return;
             }

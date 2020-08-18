@@ -30,16 +30,16 @@ import android.os.SystemClock;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Class that only runs on debuggable builds that listens to broadcasts that simulate actions in the
  * system that are used for testing the latency.
  */
-@Singleton
+@SysUISingleton
 public class LatencyTester extends SystemUI {
 
     private static final String

@@ -17,13 +17,13 @@
 package com.android.systemui.car.notification;
 
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** The automotive version of the notification shade window controller. */
-@Singleton
+@SysUISingleton
 public class NotificationShadeWindowControllerImpl implements
         NotificationShadeWindowController {
 

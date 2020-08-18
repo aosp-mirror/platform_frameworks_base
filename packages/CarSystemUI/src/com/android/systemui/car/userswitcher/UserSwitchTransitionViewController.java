@@ -38,15 +38,15 @@ import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
 import com.android.systemui.car.window.OverlayViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles showing and hiding UserSwitchTransitionView that is mounted to SystemUiOverlayWindow.
  */
-@Singleton
+@SysUISingleton
 public class UserSwitchTransitionViewController extends OverlayViewController {
     private static final String TAG = "UserSwitchTransition";
     private static final String ENABLE_DEVELOPER_MESSAGE_TRUE = "true";

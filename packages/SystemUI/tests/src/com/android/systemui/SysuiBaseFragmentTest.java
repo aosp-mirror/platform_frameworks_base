@@ -55,7 +55,7 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
     public void SysuiSetup() {
         SystemUIFactory.createFromConfig(mContext);
         mDependency = new TestableDependency(
-                SystemUIFactory.getInstance().getRootComponent().createDependency());
+                SystemUIFactory.getInstance().getSysUIComponent().createDependency());
         Dependency.setInstance(mDependency);
 
         // TODO: Figure out another way to give reference to a SysuiTestableContext.

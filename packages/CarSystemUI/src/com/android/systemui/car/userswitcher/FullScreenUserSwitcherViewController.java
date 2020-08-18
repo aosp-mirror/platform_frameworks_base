@@ -30,15 +30,15 @@ import com.android.systemui.R;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.window.OverlayViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller for {@link R.layout#car_fullscreen_user_switcher}.
  */
-@Singleton
+@SysUISingleton
 public class FullScreenUserSwitcherViewController extends OverlayViewController {
     private final Context mContext;
     private final Resources mResources;

@@ -21,6 +21,7 @@ import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -30,9 +31,8 @@ import com.android.systemui.tuner.TunerService
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 open class KeyguardBypassController : Dumpable {
 
     private val mKeyguardStateController: KeyguardStateController

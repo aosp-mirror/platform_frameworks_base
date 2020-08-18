@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.people
 import android.annotation.IntDef
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.StatusBarNotification
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.PeopleNotificationType
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_FULL_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
@@ -26,7 +27,6 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.max
 
 interface PeopleNotificationIdentifier {
@@ -59,7 +59,7 @@ interface PeopleNotificationIdentifier {
     }
 }
 
-@Singleton
+@SysUISingleton
 class PeopleNotificationIdentifierImpl @Inject constructor(
     private val personExtractor: NotificationPersonExtractor,
     private val groupManager: NotificationGroupManager

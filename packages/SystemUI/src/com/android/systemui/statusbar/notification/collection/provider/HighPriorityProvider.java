@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.provider;
 import android.app.Notification;
 import android.app.NotificationManager;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -28,7 +29,6 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Determines whether a notification is considered 'high priority'.
@@ -36,7 +36,7 @@ import javax.inject.Singleton;
  * Notifications that are high priority are visible on the lock screen/status bar and in the top
  * section in the shade.
  */
-@Singleton
+@SysUISingleton
 public class HighPriorityProvider {
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private final NotificationGroupManager mGroupManager;

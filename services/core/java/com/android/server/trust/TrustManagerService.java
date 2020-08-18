@@ -1156,7 +1156,7 @@ public class TrustManagerService extends SystemService {
         }
 
         private void enforceListenerPermission() {
-            mContext.enforceCallingPermission(Manifest.permission.TRUST_LISTENER,
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.TRUST_LISTENER,
                     "register trust listener");
         }
 

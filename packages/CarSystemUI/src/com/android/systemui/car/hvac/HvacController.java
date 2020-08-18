@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,13 +41,12 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages the connection to the Car service and delegates value changes to the registered
  * {@link TemperatureView}s
  */
-@Singleton
+@SysUISingleton
 public class HvacController {
     public static final String TAG = "HvacController";
     private static final boolean DEBUG = true;

@@ -29,15 +29,15 @@ import com.android.car.notification.R;
 import com.android.car.notification.headsup.CarHeadsUpNotificationContainer;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A controller for SysUI's HUN display.
  */
-@Singleton
+@SysUISingleton
 public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotificationContainer {
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final OverlayViewGlobalStateController mOverlayViewGlobalStateController;

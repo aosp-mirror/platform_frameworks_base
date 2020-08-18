@@ -17,16 +17,16 @@
 package com.android.systemui.statusbar.notification.collection.render
 
 import android.view.textclassifier.Log
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * The ViewBarn is just a map from [ListEntry] to an instance of an
  * [ExpandableNotificationRowController].
  */
-@Singleton
+@SysUISingleton
 class NotifViewBarn @Inject constructor() {
     private val rowMap = mutableMapOf<String, ExpandableNotificationRowController>()
 
