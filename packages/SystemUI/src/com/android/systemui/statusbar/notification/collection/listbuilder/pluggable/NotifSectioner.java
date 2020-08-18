@@ -22,8 +22,8 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 /**
  * Pluggable for participating in notif sectioning. See {@link ShadeListBuilder#setSections}.
  */
-public abstract class NotifSection extends Pluggable<NotifSection> {
-    protected NotifSection(String name) {
+public abstract class NotifSectioner extends Pluggable<NotifSectioner> {
+    protected NotifSectioner(String name) {
         super(name);
     }
 

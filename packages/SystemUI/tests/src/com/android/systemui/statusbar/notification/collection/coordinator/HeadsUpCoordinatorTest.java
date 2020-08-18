@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
@@ -64,7 +64,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
     private NotifPromoter mNotifPromoter;
     private NotifLifetimeExtender mNotifLifetimeExtender;
     private OnHeadsUpChangedListener mOnHeadsUpChangedListener;
-    private NotifSection mNotifSection;
+    private NotifSectioner mNotifSectioner;
 
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private HeadsUpManager mHeadsUpManager;
@@ -111,7 +111,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         mNotifLifetimeExtender = notifLifetimeExtenderCaptor.getValue();
         mOnHeadsUpChangedListener = headsUpChangedListenerCaptor.getValue();
 
-        mNotifSection = mCoordinator.getSection();
+        mNotifSectioner = mCoordinator.getSectioner();
         mNotifLifetimeExtender.setCallback(mEndLifetimeExtension);
         mEntry = new NotificationEntryBuilder().build();
     }
@@ -132,8 +132,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         setCurrentHUN(mEntry);
 
         // THEN only section the current HUN, mEntry
-        assertTrue(mNotifSection.isInSection(mEntry));
-        assertFalse(mNotifSection.isInSection(new NotificationEntryBuilder().build()));
+        assertTrue(mNotifSectioner.isInSection(mEntry));
+        assertFalse(mNotifSectioner.isInSection(new NotificationEntryBuilder().build()));
     }
 
     @Test
