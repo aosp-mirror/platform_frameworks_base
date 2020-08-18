@@ -179,7 +179,7 @@ import javax.inject.Named;
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
 public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter,
-        ConfigurationListener, Dumpable, DynamicPrivacyController.Listener {
+        ConfigurationListener, Dumpable {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -667,7 +667,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             });
         }
 
-        dynamicPrivacyController.addListener(this);
         mDynamicPrivacyController = dynamicPrivacyController;
         mStatusbarStateController = statusBarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
@@ -5841,17 +5840,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mDimmedNeedsAnimation = true;
     }
 
-    @Override
-    public void onDynamicPrivacyChanged() {
-        if (mIsExpanded) {
-            // The bottom might change because we're using the final actual height of the view
-            mAnimateBottomOnLayout = true;
-        }
-        // Let's update the footer once the notifications have been updated (in the next frame)
-        post(() -> {
-            updateFooter();
-            updateSectionBoundaries("dynamic privacy changed");
-        });
+    void setAnimateBottomOnLayout(boolean animateBottomOnLayout) {
+        mAnimateBottomOnLayout = animateBottomOnLayout;
     }
 
     public void setOnPulseHeightChangedListener(Runnable listener) {

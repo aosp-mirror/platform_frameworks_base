@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 
 import android.graphics.PointF;
 import android.provider.Settings;
@@ -31,6 +30,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -63,9 +63,22 @@ public class NotificationStackScrollLayoutController {
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
+    private final DynamicPrivacyController mDynamicPrivacyController;
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
     private NotificationStackScrollLayout mView;
+
+    private final DynamicPrivacyController.Listener mDynamicPrivacyControllerListener = () -> {
+        if (mView.isExpanded()) {
+            // The bottom might change because we're using the final actual height of the view
+            mView.setAnimateBottomOnLayout(true);
+        }
+        // Let's update the footer once the notifications have been updated (in the next frame)
+        mView.post(() -> {
+            updateFooter();
+            updateSectionBoundaries("dynamic privacy changed");
+        });
+    };
 
     @Inject
     public NotificationStackScrollLayoutController(
@@ -73,12 +86,14 @@ public class NotificationStackScrollLayoutController {
             NotificationGutsManager notificationGutsManager,
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
-            TunerService tunerService) {
+            TunerService tunerService,
+            DynamicPrivacyController dynamicPrivacyController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
+        mDynamicPrivacyController = dynamicPrivacyController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -90,6 +105,8 @@ public class NotificationStackScrollLayoutController {
         }
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
+
+        mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
