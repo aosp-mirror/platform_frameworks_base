@@ -41,7 +41,8 @@ interface ISession {
     // These commands are for the TransportPerformer
     void setMetadata(in MediaMetadata metadata, long duration, String metadataDescription);
     void setPlaybackState(in PlaybackState state);
-    void setQueue(in ParceledListSlice queue);
+    void resetQueue();
+    IBinder getBinderForSetQueue();
     void setQueueTitle(CharSequence title);
     void setExtras(in Bundle extras);
     void setRatingType(int type);

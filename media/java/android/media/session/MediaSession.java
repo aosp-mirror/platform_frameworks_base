@@ -25,7 +25,6 @@ import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -36,6 +35,7 @@ import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -491,7 +491,12 @@ public final class MediaSession {
      */
     public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(queue == null ? null : new ParceledListSlice(queue));
+            if (queue == null) {
+                mBinder.resetQueue();
+            } else {
+                IBinder binder = mBinder.getBinderForSetQueue();
+                ParcelableListBinder.send(binder, queue);
+            }
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
