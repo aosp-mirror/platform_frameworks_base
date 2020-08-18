@@ -87,9 +87,9 @@ class OpenAppToSplitScreenTest(
                 }
 
                 layersTrace {
-                    navBarLayerIsAlwaysVisible()
+                    navBarLayerIsAlwaysVisible(bugId = 140855415)
                     statusBarLayerIsAlwaysVisible()
-                    noUncoveredRegions(rotation)
+                    noUncoveredRegions(rotation, enabled = false)
                     navBarLayerRotatesAndScales(rotation, bugId = 140855415)
                     statusBarLayerRotatesScales(rotation)
 
