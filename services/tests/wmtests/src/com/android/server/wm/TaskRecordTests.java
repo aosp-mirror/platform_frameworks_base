@@ -50,6 +50,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -245,17 +246,17 @@ public class TaskRecordTests extends WindowTestsBase {
         final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
         final DisplayContent display = new TestDisplayContent.Builder(mAtm,
                 fullScreenBounds.width(), fullScreenBounds.height()).setCanRotate(false).build();
-        assertTrue(mRootWindowContainer.getDisplayContent(display.mDisplayId) != null);
+        assertNotNull(mRootWindowContainer.getDisplayContent(display.mDisplayId));
         // Fix the display orientation to landscape which is the natural rotation (0) for the test
         // display.
         final DisplayRotation dr = display.mDisplayContent.getDisplayRotation();
         dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
         dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
 
-        Task stack = new StackBuilder(mRootWindowContainer)
+        final Task stack = new StackBuilder(mRootWindowContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
-        Task task = stack.getBottomMostTask();
-        ActivityRecord root = task.getTopNonFinishingActivity();
+        final Task task = stack.getBottomMostTask();
+        final ActivityRecord root = task.getTopNonFinishingActivity();
 
         assertEquals(fullScreenBounds, task.getBounds());
 
@@ -267,7 +268,7 @@ public class TaskRecordTests extends WindowTestsBase {
         assertEquals(fullScreenBounds.height(), task.getBounds().height());
 
         // Top activity gets used
-        ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).setStack(stack).build();
+        final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).setStack(stack).build();
         assertEquals(top, task.getTopNonFinishingActivity());
         top.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
@@ -301,6 +302,33 @@ public class TaskRecordTests extends WindowTestsBase {
         // FREEFORM restores bounds as before
         stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertEquals(freeformBounds, task.getBounds());
+    }
+
+    @Test
+    public void testReportsOrientationRequestInLetterboxForOrientation() {
+        final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
+        final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm,
+                fullScreenBounds.width(), fullScreenBounds.height()).setCanRotate(false).build();
+        assertNotNull(mRootWindowContainer.getDisplayContent(display.mDisplayId));
+        // Fix the display orientation to landscape which is the natural rotation (0) for the test
+        // display.
+        final DisplayRotation dr = display.mDisplayContent.getDisplayRotation();
+        dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
+        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
+
+        final Task stack = new StackBuilder(mRootWindowContainer)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
+        final Task task = stack.getBottomMostTask();
+        ActivityRecord root = task.getTopNonFinishingActivity();
+
+        assertEquals(fullScreenBounds, task.getBounds());
+
+        // Setting app to fixed portrait fits within parent
+        root.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        assertThat(task.getBounds().width()).isLessThan(task.getBounds().height());
+
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getOrientation());
     }
 
     @Test
