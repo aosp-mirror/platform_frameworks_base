@@ -20,7 +20,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageParser
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companion.Param.Companion.appInfo
 import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companion.Param.Companion.pkgInfo
 import com.android.server.pm.parsing.pkg.AndroidPackage
@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
  * This test has to be updated manually whenever the info generation behavior changes, since
  * there's no single place where flag -> field is defined besides this test.
  */
-@Presubmit
+@Postsubmit
 @RunWith(Parameterized::class)
 class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
 
