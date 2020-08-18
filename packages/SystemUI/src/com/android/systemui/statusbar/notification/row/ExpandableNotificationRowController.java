@@ -71,7 +71,7 @@ public class ExpandableNotificationRowController implements NodeController {
             this::logNotificationExpansion;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
-    private final OnDismissCallback mOnDismissCallback;
+    private final OnUserInteractionCallback mOnUserInteractionCallback;
     private final FalsingManager mFalsingManager;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
@@ -90,7 +90,7 @@ public class ExpandableNotificationRowController implements NodeController {
             StatusBarStateController statusBarStateController,
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            OnDismissCallback onDismissCallback, FalsingManager falsingManager,
+            OnUserInteractionCallback onUserInteractionCallback, FalsingManager falsingManager,
             PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mView = view;
         mListContainer = listContainer;
@@ -108,7 +108,7 @@ public class ExpandableNotificationRowController implements NodeController {
         mOnExpandClickListener = onExpandClickListener;
         mStatusBarStateController = statusBarStateController;
         mNotificationGutsManager = notificationGutsManager;
-        mOnDismissCallback = onDismissCallback;
+        mOnUserInteractionCallback = onUserInteractionCallback;
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
         mFalsingManager = falsingManager;
@@ -133,9 +133,9 @@ public class ExpandableNotificationRowController implements NodeController {
                 mOnFeedbackClickListener,
                 mFalsingManager,
                 mStatusBarStateController,
-                mPeopleNotificationIdentifier
+                mPeopleNotificationIdentifier,
+                mOnUserInteractionCallback
         );
-        mView.setOnDismissCallback(mOnDismissCallback);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
             mView.setLongPressListener((v, x, y, item) -> {

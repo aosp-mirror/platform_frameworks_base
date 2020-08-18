@@ -424,7 +424,8 @@ public class NotificationTestHelper {
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 mock(FalsingManager.class),
                 mStatusBarStateController,
-                mPeopleNotificationIdentifier);
+                mPeopleNotificationIdentifier,
+                mock(OnUserInteractionCallback.class));
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
         inflateAndWait(entry);

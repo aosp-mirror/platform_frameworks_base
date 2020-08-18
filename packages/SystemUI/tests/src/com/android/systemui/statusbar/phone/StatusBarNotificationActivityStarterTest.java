@@ -73,7 +73,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.row.OnDismissCallback;
+import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -132,7 +132,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private Intent mContentIntentInner;
     @Mock
-    private OnDismissCallback mOnDismissCallback;
+    private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
     private NotificationActivityStarter mNotificationActivityStarter;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -210,7 +210,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mFeatureFlags,
                         mock(MetricsLogger.class),
                         mock(StatusBarNotificationActivityStarterLogger.class),
-                        mOnDismissCallback)
+                        mOnUserInteractionCallback)
                 .setStatusBar(mStatusBar)
                 .setNotificationPresenter(mock(NotificationPresenter.class))
                 .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
@@ -267,7 +267,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
         // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
-        verify(mOnDismissCallback).onDismiss(mNotificationRow.getEntry(), REASON_CLICK);
+        verify(mOnUserInteractionCallback).onDismiss(mNotificationRow.getEntry(), REASON_CLICK);
     }
 
     @Test
@@ -296,7 +296,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyZeroInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mOnDismissCallback, never()).onDismiss(eq(mNotificationRow.getEntry()), anyInt());
+        verify(mOnUserInteractionCallback, never()).onDismiss(eq(mNotificationRow.getEntry()),
+                anyInt());
     }
 
     @Test

@@ -66,7 +66,6 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
@@ -114,7 +113,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     @Mock
     private PackageManager mMockPackageManager;
     @Mock
-    private VisualStabilityManager mVisualStabilityManager;
+    private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
     private ChannelEditorDialogController mChannelEditorDialogController;
 
@@ -181,7 +180,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -207,7 +206,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -229,7 +228,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -260,7 +259,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -283,7 +282,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -311,7 +310,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -334,7 +333,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -356,7 +355,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mDefaultNotificationChannel,
@@ -382,7 +381,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mDefaultNotificationChannel,
@@ -404,7 +403,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -427,7 +426,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -455,7 +454,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -478,7 +477,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -502,7 +501,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -518,7 +517,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -541,7 +540,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME, mNotificationChannel,
                 createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
@@ -569,7 +568,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -593,7 +592,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -617,7 +616,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -643,7 +642,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -665,7 +664,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -688,7 +687,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -709,7 +708,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -730,7 +729,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -751,7 +750,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -774,7 +773,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -798,7 +797,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -825,7 +824,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -852,7 +851,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -879,7 +878,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -914,7 +913,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -942,7 +941,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -982,7 +981,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1017,7 +1016,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1047,7 +1046,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1082,7 +1081,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1120,7 +1119,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1157,7 +1156,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1175,7 +1174,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.findViewById(R.id.done).performClick();
         mNotificationInfo.handleCloseControls(true, false);
 
-        verify(mVisualStabilityManager).temporarilyAllowReordering();
+        verify(mOnUserInteractionCallback).onImportanceChanged(mEntry);
     }
 
     @Test
@@ -1185,7 +1184,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1216,7 +1215,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1250,7 +1249,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1283,7 +1282,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1316,7 +1315,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
@@ -1342,7 +1341,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
-                mVisualStabilityManager,
+                mOnUserInteractionCallback,
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
