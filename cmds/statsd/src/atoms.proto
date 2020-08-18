@@ -485,6 +485,9 @@ message Atom {
         NetworkTetheringReported  network_tethering_reported =
             303 [(module) = "network_tethering"];
         ImeTouchReported ime_touch_reported = 304 [(module) = "sysui"];
+        UIInteractionFrameInfoReported ui_interaction_frame_info_reported =
+            305 [(module) = "framework"];
+        UIActionLatencyReported ui_action_latency_reported = 306 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -5052,6 +5055,54 @@ message BlobOpened{
         ACCESS_NOT_ALLOWED = 3;
     }
     optional Result result = 4;
+}
+
+/**
+ * Event to track Jank for various system interactions.
+ *
+ * Logged from:
+ *  frameworks/base/core/java/android/os/aot/FrameTracker.java
+ */
+message UIInteractionFrameInfoReported {
+    enum InteractionType {
+        UNKNOWN = 0;
+        NOTIFICATION_SHADE_SWIPE = 1;
+    }
+
+    optional InteractionType interaction_type = 1;
+
+    // Number of frames rendered during the interaction.
+    optional int64 total_frames = 2;
+
+    // Number of frames that were skipped in rendering during the interaction.
+    optional int64 missed_frames = 3;
+
+    // Maximum time it took to render a single frame during the interaction.
+    optional int64 max_frame_time_nanos = 4;
+}
+
+/**
+ * Event to track various latencies in SystemUI.
+ *
+ * Logged from:
+ *  frameworks/base/core/java/com/android/internal/util/LatencyTracker.java
+ */
+message UIActionLatencyReported {
+    enum ActionType {
+        UNKNOWN = 0;
+        ACTION_EXPAND_PANEL = 1;
+        ACTION_TOGGLE_RECENTS = 2;
+        ACTION_FINGERPRINT_WAKE_AND_UNLOCK = 3;
+        ACTION_CHECK_CREDENTIAL = 4;
+        ACTION_CHECK_CREDENTIAL_UNLOCKED = 5;
+        ACTION_TURN_ON_SCREEN = 6;
+        ACTION_ROTATE_SCREEN = 7;
+        ACTION_FACE_WAKE_AND_UNLOCK = 8;
+    }
+
+    optional ActionType action = 1;
+
+    optional int64 latency_millis = 2;
 }
 
 //////////////////////////////////////////////////////////////////////
