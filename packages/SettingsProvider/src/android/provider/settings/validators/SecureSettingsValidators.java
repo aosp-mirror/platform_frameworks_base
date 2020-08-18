@@ -244,6 +244,8 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.TAP_GESTURE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.PEOPLE_STRIP, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.MEDIA_CONTROLS_RESUME, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.MEDIA_CONTROLS_RESUME_BLOCKED,
+                COLON_SEPARATED_PACKAGE_LIST_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
                 new InclusiveIntegerRangeValidator(
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
