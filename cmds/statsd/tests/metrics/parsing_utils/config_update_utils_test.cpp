@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "src/matchers/CombinationAtomMatchingTracker.h"
 #include "src/metrics/parsing_utils/metrics_manager_util.h"
 #include "tests/statsd_test_util.h"
 
@@ -370,13 +371,40 @@ TEST_F(ConfigUpdateTest, TestUpdateMatchers) {
     EXPECT_NE(oldAtomMatchingTrackers[oldAtomMatchingTrackerMap.at(combination2Id)],
               newAtomMatchingTrackers[newAtomMatchingTrackerMap.at(combination2Id)]);
 
-    // Validation, make sure the matchers have the proper ids. Could do more checks here.
+    // Validation, make sure the matchers have the proper ids/indices. Could do more checks here.
     EXPECT_EQ(newAtomMatchingTrackers[0]->getId(), combination3Id);
+    EXPECT_EQ(newAtomMatchingTrackers[0]->mIndex, 0);
     EXPECT_EQ(newAtomMatchingTrackers[1]->getId(), simple2Id);
+    EXPECT_EQ(newAtomMatchingTrackers[1]->mIndex, 1);
     EXPECT_EQ(newAtomMatchingTrackers[2]->getId(), combination2Id);
+    EXPECT_EQ(newAtomMatchingTrackers[2]->mIndex, 2);
     EXPECT_EQ(newAtomMatchingTrackers[3]->getId(), simple1Id);
+    EXPECT_EQ(newAtomMatchingTrackers[3]->mIndex, 3);
     EXPECT_EQ(newAtomMatchingTrackers[4]->getId(), simple4Id);
+    EXPECT_EQ(newAtomMatchingTrackers[4]->mIndex, 4);
     EXPECT_EQ(newAtomMatchingTrackers[5]->getId(), combination1Id);
+    EXPECT_EQ(newAtomMatchingTrackers[5]->mIndex, 5);
+
+    // Verify child indices of Combination Matchers are correct.
+    CombinationAtomMatchingTracker* combinationTracker1 =
+            static_cast<CombinationAtomMatchingTracker*>(newAtomMatchingTrackers[5].get());
+    vector<int>* childMatchers = &combinationTracker1->mChildren;
+    EXPECT_EQ(childMatchers->size(), 1);
+    EXPECT_NE(std::find(childMatchers->begin(), childMatchers->end(), 3), childMatchers->end());
+
+    CombinationAtomMatchingTracker* combinationTracker2 =
+            static_cast<CombinationAtomMatchingTracker*>(newAtomMatchingTrackers[2].get());
+    childMatchers = &combinationTracker2->mChildren;
+    EXPECT_EQ(childMatchers->size(), 2);
+    EXPECT_NE(std::find(childMatchers->begin(), childMatchers->end(), 1), childMatchers->end());
+    EXPECT_NE(std::find(childMatchers->begin(), childMatchers->end(), 3), childMatchers->end());
+
+    CombinationAtomMatchingTracker* combinationTracker3 =
+            static_cast<CombinationAtomMatchingTracker*>(newAtomMatchingTrackers[0].get());
+    childMatchers = &combinationTracker3->mChildren;
+    EXPECT_EQ(childMatchers->size(), 2);
+    EXPECT_NE(std::find(childMatchers->begin(), childMatchers->end(), 1), childMatchers->end());
+    EXPECT_NE(std::find(childMatchers->begin(), childMatchers->end(), 4), childMatchers->end());
 }
 
 }  // namespace statsd

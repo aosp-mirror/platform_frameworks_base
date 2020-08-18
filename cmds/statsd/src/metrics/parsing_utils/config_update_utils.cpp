@@ -148,8 +148,13 @@ bool updateAtomTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
                           (long long)id);
                     return false;
                 }
-                const int oldIndex = oldAtomMatchingTrackerIt->second;
-                newAtomMatchingTrackers.push_back(oldAtomMatchingTrackers[oldIndex]);
+                const sp<AtomMatchingTracker>& tracker =
+                        oldAtomMatchingTrackers[oldAtomMatchingTrackerIt->second];
+                if (!tracker->onConfigUpdated(matcherProtos[i], i, newAtomMatchingTrackerMap)) {
+                    ALOGW("Config update failed for matcher %lld", (long long)id);
+                    return false;
+                }
+                newAtomMatchingTrackers.push_back(tracker);
                 break;
             }
             case UPDATE_REPLACE: {

@@ -50,6 +50,14 @@ bool SimpleAtomMatchingTracker::init(const vector<AtomMatcher>& allAtomMatchers,
     return mInitialized;
 }
 
+bool SimpleAtomMatchingTracker::onConfigUpdated(
+        const AtomMatcher& matcher, const int index,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap) {
+    mIndex = index;
+    // Do not need to update mMatcher since the matcher must be identical across the update.
+    return mInitialized;
+}
+
 void SimpleAtomMatchingTracker::onLogEvent(
         const LogEvent& event, const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
         vector<MatchingState>& matcherResults) {

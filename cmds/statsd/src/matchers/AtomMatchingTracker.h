@@ -52,6 +52,15 @@ public:
                       const std::unordered_map<int64_t, int>& matcherMap,
                       std::vector<bool>& stack) = 0;
 
+    // Update appropriate state on config updates. Primarily, all indices need to be updated.
+    // This matcher and all of its children are guaranteed to be preserved across the update.
+    // matcher: the AtomMatcher proto from the config.
+    // index: the index of this matcher in mAllAtomMatchingTrackers.
+    // atomMatchingTrackerMap: map from matcher id to index in mAllAtomMatchingTrackers
+    virtual bool onConfigUpdated(
+            const AtomMatcher& matcher, const int index,
+            const std::unordered_map<int64_t, int>& atomMatchingTrackerMap) = 0;
+
     // Called when a log event comes.
     // event: the log event.
     // allAtomMatchingTrackers: the list of all AtomMatchingTrackers. This is needed because the log
@@ -83,7 +92,7 @@ protected:
     const int64_t mId;
 
     // Index of this AtomMatchingTracker in MetricsManager's container.
-    const int mIndex;
+    int mIndex;
 
     // Whether this AtomMatchingTracker has been properly initialized.
     bool mInitialized;
