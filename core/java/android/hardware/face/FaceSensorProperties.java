@@ -25,20 +25,36 @@ import android.os.Parcelable;
  */
 public class FaceSensorProperties implements Parcelable {
 
+    /**
+     * A statically configured ID representing this sensor. Sensor IDs must be unique across all
+     * biometrics across the device, starting at 0, and in increments of 1.
+     */
     public final int sensorId;
+    /**
+     * True if the sensor is able to perform generic face detection, without running the
+     * matching algorithm, and without affecting the lockout counter.
+     */
     public final boolean supportsFaceDetection;
+    /**
+     * True if the sensor is able to provide self illumination in dark scenarios, without support
+     * from above the HAL.
+     */
+    public final boolean supportsSelfIllumination;
 
     /**
      * Initializes SensorProperties with specified values
      */
-    public FaceSensorProperties(int sensorId, boolean supportsFaceDetection) {
+    public FaceSensorProperties(int sensorId, boolean supportsFaceDetection,
+            boolean supportsSelfIllumination) {
         this.sensorId = sensorId;
         this.supportsFaceDetection = supportsFaceDetection;
+        this.supportsSelfIllumination = supportsSelfIllumination;
     }
 
     protected FaceSensorProperties(Parcel in) {
         sensorId = in.readInt();
         supportsFaceDetection = in.readBoolean();
+        supportsSelfIllumination = in.readBoolean();
     }
 
     public static final Creator<FaceSensorProperties> CREATOR =
@@ -63,5 +79,6 @@ public class FaceSensorProperties implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(sensorId);
         dest.writeBoolean(supportsFaceDetection);
+        dest.writeBoolean(supportsSelfIllumination);
     }
 }
