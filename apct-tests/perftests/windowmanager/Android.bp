@@ -23,6 +23,7 @@ android_test {
         "platform-test-annotations",
     ],
     test_suites: ["device-tests"],
+    data: [":perfetto_artifacts"],
     platform_apis: true,
     certificate: "platform",
 }
