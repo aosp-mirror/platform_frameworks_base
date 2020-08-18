@@ -259,7 +259,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
-        final int packageUid = pm.getPackageUidInternal(packageName,
+        final int packageUid = pm.getPackageUid(packageName,
                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, callingUserId);
         if (packageUid != callingUid) {
             throw new SecurityException(
@@ -337,7 +337,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (toPackage != null) {
             mAmInternal.enforceCallingPermission(FORCE_PERSISTABLE_URI_PERMISSIONS,
                     "takePersistableUriPermission");
-            uid = mPmInternal.getPackageUidInternal(toPackage, 0, userId);
+            uid = mPmInternal.getPackageUid(toPackage, 0 /* flags */, userId);
         } else {
             enforceNotIsolatedCaller("takePersistableUriPermission");
             uid = Binder.getCallingUid();
@@ -402,7 +402,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (toPackage != null) {
             mAmInternal.enforceCallingPermission(FORCE_PERSISTABLE_URI_PERMISSIONS,
                     "releasePersistableUriPermission");
-            uid = mPmInternal.getPackageUidInternal(toPackage, 0, userId);
+            uid = mPmInternal.getPackageUid(toPackage, 0 /* flags */ , userId);
         } else {
             enforceNotIsolatedCaller("releasePersistableUriPermission");
             uid = Binder.getCallingUid();
@@ -601,7 +601,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (needed != null) {
             targetUid = needed.targetUid;
         } else {
-            targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+            targetUid = mPmInternal.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
                     targetUserId);
             if (targetUid < 0) {
                 if (DEBUG) Slog.v(TAG, "Can't grant URI permission no uid for: " + targetPkg
@@ -691,7 +691,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                         final ProviderInfo pi = getProviderInfo(uri.getAuthority(), sourceUserId,
                                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
                         if (pi != null && sourcePkg.equals(pi.packageName)) {
-                            int targetUid = mPmInternal.getPackageUidInternal(
+                            int targetUid = mPmInternal.getPackageUid(
                                         targetPkg, MATCH_UNINSTALLED_PACKAGES, targetUserId);
                             if (targetUid != -1) {
                                 final GrantUri grantUri = new GrantUri(sourceUserId, uri,
@@ -788,7 +788,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (targetPkg == null) {
             throw new NullPointerException("targetPkg");
         }
-        int targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+        int targetUid = mPmInternal.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
                 targetUserId);
 
         targetUid = checkGrantUriPermissionUnlocked(callingUid, targetPkg, grantUri, modeFlags,
@@ -1109,7 +1109,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         int targetUid = lastTargetUid;
         if (targetUid < 0 && targetPkg != null) {
-            targetUid = mPmInternal.getPackageUidInternal(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+            targetUid = mPmInternal.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
                     UserHandle.getUserId(callingUid));
             if (targetUid < 0) {
                 if (DEBUG) Slog.v(TAG, "Can't grant URI permission no uid for: " + targetPkg);
@@ -1461,7 +1461,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                     boolean printed = false;
                     int dumpUid = -2;
                     if (dumpPackage != null) {
-                        dumpUid = mPmInternal.getPackageUidInternal(dumpPackage, MATCH_ANY_USER, 0);
+                        dumpUid = mPmInternal.getPackageUid(dumpPackage,
+                                MATCH_ANY_USER, 0 /* userId */);
                     }
                     for (int i = 0; i < mGrantedUriPermissions.size(); i++) {
                         int uid = mGrantedUriPermissions.keyAt(i);

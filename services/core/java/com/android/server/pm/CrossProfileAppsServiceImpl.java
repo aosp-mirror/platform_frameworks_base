@@ -605,7 +605,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private boolean isPlatformSignedAppWithAutomaticProfilesPermission(
             String packageName, int[] profileIds) {
         for (int userId : profileIds) {
-            final int uid = mInjector.getPackageManagerInternal().getPackageUidInternal(
+            final int uid = mInjector.getPackageManagerInternal().getPackageUid(
                     packageName, /* flags= */ 0, userId);
             if (uid == -1) {
                 continue;

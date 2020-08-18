@@ -3305,7 +3305,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    int packageUid = mPackageManagerInternal.getPackageUidInternal(packageName,
+                    int packageUid = mPackageManagerInternal.getPackageUid(packageName,
                             PackageManager.MATCH_DIRECT_BOOT_AUTO, userId);
                     // Grant read uri permission to the caller on behalf of the shortcut owner. All
                     // granted permissions are revoked when the default launcher changes, or when
