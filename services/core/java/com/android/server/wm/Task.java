@@ -61,7 +61,6 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
@@ -197,7 +196,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
@@ -600,6 +598,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
+    private ActivityRecord mTopTurnScreenOnActivity;
 
     private static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
 
@@ -5663,19 +5662,27 @@ class Task extends WindowContainer<WindowContainer> {
             boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
+        mTopTurnScreenOnActivity = null;
         mStackSupervisor.beginActivityVisibilityUpdate();
         try {
-            mEnsureActivitiesVisibleHelper.process(
-                    starting, configChanges, preserveWindows, notifyClients);
+            mEnsureActivitiesVisibleHelper.processUpdate(starting);
 
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
-                // Nothing is getting drawn or everything was already visible, don't wait for timeout.
+                // Nothing is getting drawn or everything was already visible, don't wait for
+                // timeout.
                 notifyActivityDrawnLocked(null);
             }
         } finally {
-            mStackSupervisor.endActivityVisibilityUpdate();
+            mStackSupervisor.endActivityVisibilityUpdate(starting, configChanges, preserveWindows,
+                    notifyClients);
         }
+    }
+
+    void commitActivitiesVisible(ActivityRecord starting, int configChanges,
+            boolean preserveWindows, boolean notifyClients) {
+        mEnsureActivitiesVisibleHelper.processCommit(starting, configChanges, preserveWindows,
+                notifyClients);
     }
 
     /**
@@ -5711,64 +5718,34 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * Checks whether {@param r} should be visible depending on Keyguard state and updates
-     * {@link #mTopActivityOccludesKeyguard} and {@link #mTopDismissingKeyguardActivity} if
-     * necessary.
-     *
-     * @return true if {@param r} is visible taken Keyguard state into account, false otherwise
+     * @return the top most visible activity that wants to turn screen on
      */
-    boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible, boolean isTop) {
-        int displayId = getDisplayId();
-        if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
-
-        final boolean keyguardOrAodShowing = mStackSupervisor.getKeyguardController()
-                .isKeyguardOrAodShowing(displayId);
-        final boolean keyguardLocked = mStackSupervisor.getKeyguardController().isKeyguardLocked();
-        final boolean showWhenLocked = r.canShowWhenLocked();
-        final boolean dismissKeyguard = r.containsDismissKeyguardWindow();
-        if (shouldBeVisible) {
-            if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
-                mTopDismissingKeyguardActivity = r;
-            }
-
-            // Only the top activity may control occluded, as we can't occlude the Keyguard if the
-            // top app doesn't want to occlude it.
-            if (isTop) {
-                mTopActivityOccludesKeyguard |= showWhenLocked;
-            }
-
-            final boolean canShowWithKeyguard = canShowWithInsecureKeyguard()
-                    && mStackSupervisor.getKeyguardController().canDismissKeyguard();
-            if (canShowWithKeyguard) {
-                return true;
-            }
-        }
-        if (keyguardOrAodShowing) {
-            // If keyguard is showing, nothing is visible, except if we are able to dismiss Keyguard
-            // right away and AOD isn't visible.
-            return shouldBeVisible && mStackSupervisor.getKeyguardController()
-                    .canShowActivityWhileKeyguardShowing(r, dismissKeyguard);
-        } else if (keyguardLocked) {
-            return shouldBeVisible && mStackSupervisor.getKeyguardController().canShowWhileOccluded(
-                    dismissKeyguard, showWhenLocked);
-        } else {
-            return shouldBeVisible;
-        }
+    ActivityRecord getTopTurnScreenOnActivity() {
+        return mTopTurnScreenOnActivity;
     }
 
     /**
-     * Check if the display to which this stack is attached has
-     * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
+     * Updates {@link #mTopActivityOccludesKeyguard}, {@link #mTopTurnScreenOnActivity} and
+     * {@link #mTopDismissingKeyguardActivity} if this task could be visible.
+     *
      */
-    boolean canShowWithInsecureKeyguard() {
-        final DisplayContent displayContent = mDisplayContent;
-        if (displayContent == null) {
-            throw new IllegalStateException("Stack is not attached to any display, stackId="
-                    + getRootTaskId());
+    void updateKeyguardVisibility(ActivityRecord r, boolean isTop) {
+        final boolean showWhenLocked = r.canShowWhenLocked();
+        final boolean dismissKeyguard = r.containsDismissKeyguardWindow();
+        final boolean turnScreenOn = r.canTurnScreenOn();
+        if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
+            mTopDismissingKeyguardActivity = r;
         }
 
-        final int flags = displayContent.mDisplay.getFlags();
-        return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
+        if (turnScreenOn && mTopTurnScreenOnActivity == null) {
+            mTopTurnScreenOnActivity = r;
+        }
+
+        // Only the top activity may control occluded, as we can't occlude the Keyguard if the
+        // top app doesn't want to occlude it.
+        if (isTop) {
+            mTopActivityOccludesKeyguard |= showWhenLocked;
+        }
     }
 
     void checkTranslucentActivityWaiting(ActivityRecord top) {

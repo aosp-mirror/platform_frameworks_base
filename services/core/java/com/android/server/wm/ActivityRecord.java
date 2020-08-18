@@ -4628,18 +4628,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(this);
     }
 
-    /** @return {@code true} if this activity should be made visible. */
-    boolean shouldBeVisible(boolean behindFullscreenActivity, boolean ignoringKeyguard) {
+    private void updateVisibleIgnoringKeyguard(boolean behindFullscreenActivity) {
         // Check whether activity should be visible without Keyguard influence
         visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
                 && okToShowLocked();
+    }
+
+    /** @return {@code true} if this activity should be made visible. */
+    private boolean shouldBeVisible(boolean behindFullscreenActivity, boolean ignoringKeyguard) {
+        updateVisibleIgnoringKeyguard(behindFullscreenActivity);
 
         if (ignoringKeyguard) {
             return visibleIgnoringKeyguard;
         }
 
+        return shouldBeVisibleUnchecked();
+    }
+
+    boolean shouldBeVisibleUnchecked() {
         final Task stack = getRootTask();
-        if (stack == null) {
+        if (stack == null || !visibleIgnoringKeyguard) {
             return false;
         }
 
@@ -4652,26 +4660,30 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if the activity is on a sleeping display, and if it can turn it ON.
-        if (mDisplayContent.isSleeping()) {
-            final boolean canTurnScreenOn = !mSetToSleep || canTurnScreenOn()
-                    || canShowWhenLocked() || containsDismissKeyguardWindow();
-            if (!canTurnScreenOn) {
-                return false;
-            }
+        // Check if the activity is on a sleeping display
+        // TODO b/163993448 mSetToSleep is required when restarting an existing activity, try to
+        // remove it if possible.
+        if (mSetToSleep && mDisplayContent.isSleeping()) {
+            return false;
         }
 
+        return mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
+    }
+
+    void updateVisibility(boolean behindFullscreenActivity) {
+        updateVisibleIgnoringKeyguard(behindFullscreenActivity);
+        final Task task = getRootTask();
+        if (task == null || !visibleIgnoringKeyguard) {
+            return;
+        }
         // Now check whether it's really visible depending on Keyguard state, and update
         // {@link ActivityStack} internal states.
         // Inform the method if this activity is the top activity of this stack, but exclude the
         // case where this is the top activity in a pinned stack.
-        final boolean isTop = this == stack.getTopNonFinishingActivity();
-        final boolean isTopNotPinnedStack = stack.isAttached()
-                && stack.getDisplayArea().isTopNotFinishNotPinnedStack(stack);
-        final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
-                visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
-
-        return visibleIgnoringDisplayStatus;
+        final boolean isTop = this == task.getTopNonFinishingActivity();
+        final boolean isTopNotPinnedStack = task.isAttached()
+                && task.getDisplayArea().isTopNotFinishNotPinnedStack(task);
+        task.updateKeyguardVisibility(this, isTop && isTopNotPinnedStack);
     }
 
     boolean shouldBeVisible() {
@@ -7538,10 +7550,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         final Task stack = getRootTask();
-        return stack != null
-                && !stack.inMultiWindowMode()
-                && stack.checkKeyguardVisibility(this, true /* shouldBeVisible */,
-                        stack.topRunningActivity() == this /* isTop */);
+        return stack != null && !stack.inMultiWindowMode()
+                && mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 
     void setTurnScreenOn(boolean turnScreenOn) {

@@ -36,6 +36,7 @@ import static android.os.Build.VERSION_CODES.N;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.view.Display.INVALID_DISPLAY;
@@ -5291,6 +5292,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         mSingleTaskInstance = true;
+    }
+
+    /**
+     * Check if the display has {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
+     */
+    boolean canShowWithInsecureKeyguard() {
+        final int flags = mDisplay.getFlags();
+        return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
     }
 
     /** Returns true if the display can only contain one task */
