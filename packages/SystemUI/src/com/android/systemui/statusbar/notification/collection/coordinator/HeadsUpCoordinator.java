@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
@@ -88,8 +88,8 @@ public class HeadsUpCoordinator implements Coordinator {
         pipeline.addNotificationLifetimeExtender(mLifetimeExtender);
     }
 
-    public NotifSection getSection() {
-        return mNotifSection;
+    public NotifSectioner getSectioner() {
+        return mNotifSectioner;
     }
 
     private void onHeadsUpViewBound(NotificationEntry entry) {
@@ -191,7 +191,7 @@ public class HeadsUpCoordinator implements Coordinator {
         }
     };
 
-    private final NotifSection mNotifSection = new NotifSection("HeadsUp") {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("HeadsUp") {
         @Override
         public boolean isInSection(ListEntry entry) {
             return isCurrentlyShowingHun(entry);
@@ -207,7 +207,7 @@ public class HeadsUpCoordinator implements Coordinator {
                 endNotifLifetimeExtension();
                 mCurrentHun = newHUN;
                 mNotifPromoter.invalidateList();
-                mNotifSection.invalidateList();
+                mNotifSectioner.invalidateList();
             }
             if (!isHeadsUp) {
                 mHeadsUpViewBinder.unbindHeadsUpView(entry);

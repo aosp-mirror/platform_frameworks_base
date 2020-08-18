@@ -112,11 +112,9 @@ public class ListDumper {
                     .append(")");
         }
 
-        if (entry.getNotifSection() != null) {
-            sb.append(" sectionIndex=")
-                    .append(entry.getSection())
-                    .append(" sectionName=")
-                    .append(entry.getNotifSection().getName());
+        if (entry.getSection() != null) {
+            sb.append(" section=")
+                    .append(entry.getSection().getLabel());
         }
 
         if (includeRecordKeeping) {
@@ -175,12 +173,9 @@ public class ListDumper {
             }
 
             if (notifEntry.getAttachState().getSuppressedChanges().getSection() != null) {
-                rksb.append("suppressedSectionIndex=")
+                rksb.append("suppressedSection=")
                         .append(notifEntry.getAttachState().getSuppressedChanges()
-                                .getSectionIndex())
-                        .append(" sectionName=")
-                        .append(notifEntry.getAttachState().getSuppressedChanges()
-                                .getSection().getName())
+                                .getSection())
                         .append(" ");
             }
 

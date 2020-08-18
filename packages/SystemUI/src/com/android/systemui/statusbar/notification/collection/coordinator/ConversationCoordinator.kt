@@ -21,7 +21,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import javax.inject.Inject
@@ -42,7 +42,7 @@ class ConversationCoordinator @Inject constructor(
         }
     }
 
-    private val mNotifSection: NotifSection = object : NotifSection("People") {
+    val sectioner = object : NotifSectioner("People") {
         override fun isInSection(entry: ListEntry): Boolean {
             return isConversation(entry.representativeEntry!!)
         }
@@ -50,10 +50,6 @@ class ConversationCoordinator @Inject constructor(
 
     override fun attach(pipeline: NotifPipeline) {
         pipeline.addPromoter(notificationPromoter)
-    }
-
-    fun getSection(): NotifSection {
-        return mNotifSection
     }
 
     private fun isConversation(entry: NotificationEntry): Boolean =

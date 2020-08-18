@@ -21,7 +21,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -41,7 +41,7 @@ import javax.inject.Inject;
 public class NotifCoordinators implements Dumpable {
     private static final String TAG = "NotifCoordinators";
     private final List<Coordinator> mCoordinators = new ArrayList<>();
-    private final List<NotifSection> mOrderedSections = new ArrayList<>();
+    private final List<NotifSectioner> mOrderedSections = new ArrayList<>();
 
     /**
      * Creates all the coordinators.
@@ -81,12 +81,12 @@ public class NotifCoordinators implements Dumpable {
         // Manually add Ordered Sections
         // HeadsUp > FGS > People > Alerting > Silent > Unknown/Default
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mOrderedSections.add(headsUpCoordinator.getSection()); // HeadsUp
+            mOrderedSections.add(headsUpCoordinator.getSectioner()); // HeadsUp
         }
-        mOrderedSections.add(appOpsCoordinator.getSection()); // ForegroundService
-        mOrderedSections.add(conversationCoordinator.getSection()); // People
-        mOrderedSections.add(rankingCoordinator.getAlertingSection()); // Alerting
-        mOrderedSections.add(rankingCoordinator.getSilentSection()); // Silent
+        mOrderedSections.add(appOpsCoordinator.getSectioner()); // ForegroundService
+        mOrderedSections.add(conversationCoordinator.getSectioner()); // People
+        mOrderedSections.add(rankingCoordinator.getAlertingSectioner()); // Alerting
+        mOrderedSections.add(rankingCoordinator.getSilentSectioner()); // Silent
     }
 
     /**
@@ -109,7 +109,7 @@ public class NotifCoordinators implements Dumpable {
             pw.println("\t" + c.getClass());
         }
 
-        for (NotifSection s : mOrderedSections) {
+        for (NotifSectioner s : mOrderedSections) {
             pw.println("\t" + s.getName());
         }
     }

@@ -21,11 +21,9 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +35,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
@@ -48,8 +45,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -60,8 +56,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -78,7 +72,7 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
     private AppOpsCoordinator mAppOpsCoordinator;
     private NotifFilter mForegroundFilter;
     private NotifLifetimeExtender mForegroundNotifLifetimeExtender;
-    private NotifSection mFgsSection;
+    private NotifSectioner mFgsSection;
 
     private FakeSystemClock mClock = new FakeSystemClock();
     private FakeExecutor mExecutor = new FakeExecutor(mClock);
@@ -111,7 +105,7 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
                 lifetimeExtenderCaptor.capture());
         mForegroundNotifLifetimeExtender = lifetimeExtenderCaptor.getValue();
 
-        mFgsSection = mAppOpsCoordinator.getSection();
+        mFgsSection = mAppOpsCoordinator.getSectioner();
     }
 
     @Test

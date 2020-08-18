@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
@@ -211,21 +210,17 @@ class ShadeListBuilderLogger @Inject constructor(
     fun logSectionChanged(
         buildId: Int,
         prevSection: NotifSection?,
-        prevIndex: Int,
-        newSection: NotifSection?,
-        newIndex: Int
+        newSection: NotifSection?
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = prevSection?.name
-            int1 = prevIndex
-            str2 = newSection?.name
-            int2 = newIndex
+            str1 = prevSection?.label
+            str2 = newSection?.label
         }, {
             if (str1 == null) {
-                "(Build $long1)     Section assigned: '$str2' (#$int2)"
+                "(Build $long1)     Section assigned: $str2"
             } else {
-                "(Build $long1)     Section changed: '$str1' (#$int1) -> '$str2' (#$int2)"
+                "(Build $long1)     Section changed: $str1 -> $str2"
             }
         })
     }
@@ -233,17 +228,14 @@ class ShadeListBuilderLogger @Inject constructor(
     fun logSectionChangeSuppressed(
         buildId: Int,
         suppressedSection: NotifSection?,
-        suppressedSectionIndex: Int,
         assignedSection: NotifSection?
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = suppressedSection?.name
-            int1 = suppressedSectionIndex
-            str2 = assignedSection?.name
+            str1 = suppressedSection?.label
+            str2 = assignedSection?.label
         }, {
-            "(Build $long1)     Section change suppressed: '$str1' (#$int1). " +
-                "Keeping section: '$str2'"
+            "(Build $long1)     Suppressing section change to $str1 (staying at $str2)"
         })
     }
 
