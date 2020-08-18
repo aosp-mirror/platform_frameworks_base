@@ -87,15 +87,15 @@ public class TwoFingersDownTest {
         secondPointerCoords.x = DEFAULT_X + 10;
         secondPointerCoords.y = DEFAULT_Y + 10;
 
-        final MotionEvent pointerDownEvent = TouchEventGenerator.pointerDownEvent(
+        final MotionEvent twoPointersDownEvent = TouchEventGenerator.twoPointersDownEvent(
                 Display.DEFAULT_DISPLAY, defPointerCoords, secondPointerCoords);
 
         mGesturesObserver.onMotionEvent(downEvent, downEvent, 0);
-        mGesturesObserver.onMotionEvent(pointerDownEvent, pointerDownEvent, 0);
+        mGesturesObserver.onMotionEvent(twoPointersDownEvent, twoPointersDownEvent, 0);
 
         verify(mListener, timeout(sTimeoutMillis)).onGestureCompleted(
-                MagnificationGestureMatcher.GESTURE_TWO_FINGER_DOWN, pointerDownEvent,
-                pointerDownEvent, 0);
+                MagnificationGestureMatcher.GESTURE_TWO_FINGER_DOWN, twoPointersDownEvent,
+                twoPointersDownEvent, 0);
     }
 
     @Test
